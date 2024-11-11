@@ -2,7 +2,7 @@ Note su newLISP
 © copyright 2019-2024 Massimo Corinaldesi aka cameyo  
 MIT-0 License  
 
-Appunti sul linguaggio newLISP e sulla risoluzione dei problemi  
+Problem Solving e Matematica ricreativa con newLISP
 (un lavoro continuamente in corso...)  
 
 00) Indice
