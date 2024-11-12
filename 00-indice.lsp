@@ -2713,6 +2713,7 @@ NOTE LIBERE 27
   Numeri k-trasponibili e k-trasponibili-inversi
   Numero intero come somma di quattro quadrati - Teorema di Lagrange
   Numeri somma di quadrati distinti
+  Celle della matrice in ordine di distanza
 
 PROBLEMI SUI DADI
 =================

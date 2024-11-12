@@ -1451,18 +1451,33 @@ Numbers which are not the sum of distinct squares.
 ;-> (2 3 6 7 8 11 12 15 18 19 22 23 24 27 28 31 32 33 43
 ;->  44 47 48 60 67 72 76 92 96 108 112 128)
 
----------------
 
----------------
+-----------------------------------------
+Celle della matrice in ordine di distanza
+-----------------------------------------
 
-  Problem
-  x1 + x2 + x3 + x4 = x1 * x2 * x3 * x4 = 1
-  Solution
-  x1 = n^2/(n^2-1), x2 = 1/(1-n^2), x3 = (n^2-1)/n, x4 = (1-n^2)/n
+Data una matrice righe x colonne e le coordinate di una cella della matrice r0,c0, restituire le coordinate di tutte le celle nella matrice, ordinate in modo crescente in base alla loro distanza da (r0, c0)
+La distanza tra due celle (r1, c1) e (r2, c2) vale |r1 - r2| + |c1 - c2|.
 
-  Problem
-  x1 + x2 + x3 + x4 + x5 = x1 * x2 * x3 * x4 * x5 = 1
-  Solution
-  x1 = n, x2 = -1/n, x3 = -n, x4 = 1/n, x5 = 1
+(define (dist-cell righe colonne r0 c0)
+  (setq dist '())
+  (for (r 0 (- righe 1))
+    (for (c 0 (- colonne 1))
+      (setq d (+ (abs (- r0 r)) (abs (- c0 c))))
+      (println d)
+      (push (list d (list r c)) dist)
+    )
+  )
+  (sort dist))
+
+Proviamo:
+
+(dist-cell 2 2 0 1)
+;-> ((0 (0 1)) (1 (0 0)) (1 (1 1)) (2 (1 0)))
+
+(dist-cell 3 3 1 1)
+;-> ((0 (1 1)) (1 (0 1)) (1 (1 0)) (1 (1 2)) (1 (2 1)) (2 (0 0))
+;->  (2 (0 2)) (2 (2 0)) (2 (2 2)))
+
 ============================================================================
 
