@@ -2714,6 +2714,7 @@ NOTE LIBERE 27
   Numero intero come somma di quattro quadrati - Teorema di Lagrange
   Numeri somma di quadrati distinti
   Celle della matrice in ordine di distanza
+  Numero pari e dispari di cifre
 
 PROBLEMI SUI DADI
 =================

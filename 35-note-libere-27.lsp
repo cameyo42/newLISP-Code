@@ -1479,5 +1479,25 @@ Proviamo:
 ;-> ((0 (1 1)) (1 (0 1)) (1 (1 0)) (1 (1 2)) (1 (2 1)) (2 (0 0))
 ;->  (2 (0 2)) (2 (2 0)) (2 (2 2)))
 
+
+------------------------------
+Numero pari e dispari di cifre
+------------------------------
+
+Data una lista di numeri interi restituire quanti numeri hanno un numero pari di cifre e quanti numeri hanno un numero dispari di cifre.
+
+(define (cifre lst)
+  (let ( (len (length lst)) (pari 0) )
+    (setq pari (length (filter (fn(x) (even? (length x))) lst)))
+    (list pari (- len pari))))
+
+Proviamo:
+
+(cifre '(-1 1 22 -22 333 -333))
+;-> 2 4
+
+(cifre '(234 67213 982347 66 5 0 2346 -132 -34834 87234 -2 -237 ))
+;-> (3 9)
+
 ============================================================================
 
