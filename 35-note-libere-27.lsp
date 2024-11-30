@@ -1499,5 +1499,70 @@ Proviamo:
 (cifre '(234 67213 982347 66 5 0 2346 -132 -34834 87234 -2 -237 ))
 ;-> (3 9)
 
+
+-----------------------------------------------
+Compito di Wason (Problema delle quattro carte)
+-----------------------------------------------
+
+Il compito di selezione di Wason (o problema delle quattro carte) è un problema logico ideato da Peter Cathcart Wason nel 1966.
+Si tratta di uno dei più famosi rompicapo nello studio del ragionamento deduttivo.
+Un esempio del compito è il seguente:
+
+Le seguenti quattro carte con una lettera su un lato e un numero sull'altro vengono poste sul tavolo di fronte a te:
+
+  +---+   +---+   +---+   +---+
+  |   |   |   |   |   |   |   |
+  | A |   | K |   | 2 |   | 7 |
+  |   |   |   |   |   |   |   |
+  +---+   +---+   +---+   +---+
+
+Domanda:
+Quale carta o carte devi girare per verificare l'affermazione, "Se c'è una vocale su un lato della carta, allora c'è un numero pari sull'altro lato" ?
+
+Una risposta che identifica una carta che non deve essere girata, o che non riesce a identificare una carta che deve essere girata, non è corretta.
+
+Vediamo cosa significa girare ogni carta:
+
+Carta "A"
+La prima carta è una vocale, quindi girandola verifichiamo se l'affermazione è valida o meno (se troviamo un numeri pari allora è vera, altrimenti è falsa).
+
+Carta "K"
+La seconda carta è una consonante, quindi girandola non otteniamo alcuna informazione per verificare l'affermazione.
+
+Carta "2"
+La terza carta è un numero pari. Girando la carta possiamo ottenere quattro risultati:
+1) numero pari, nessuna informazione sull'affermazione
+2) numero dispari, nessuna informazione sull'affermazione
+3) consonante, nessuna informazione sull'affermazione
+4) vocale, , nessuna informazione sull'affermazione
+Questo perchè l'affermazione data NON implica che se un lato è pari, allora dall'altro c'è una vocale.
+
+Carta "7"
+La quarta carta è un numero dispari. Girando la carta possiamo ottenere quattro risultati:
+1) numero pari, nessuna informazione sull'affermazione
+2) numero dispari, nessuna informazione sull'affermazione
+3) consonante, nessuna informazione sull'affermazione
+4) vocale, l'affermazione data non è valida (perchè da un lato abbiamo una vocale e dall'altro non abbiamo un numero pari)
+
+Quindi la risposta corretta è quella di girare le carte A e 7.
+
+Nota: nello studio di Wason, meno del 10% dei soggetti ha trovato la soluzione corretta.
+
+Rappresentiamo l'affermazione con una funzione:
+
+(define (rule vocale pari)
+  (cond ((and vocale pari) true)
+        ((and vocale (not pari)) nil)
+        (true 'undefined)))
+
+(rule true true)
+;-> true
+(rule true nil)
+;-> nil
+(rule nil true)
+;-> undefined
+(rule nil nil)
+;-> undefined
+
 ============================================================================
 

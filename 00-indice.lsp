@@ -2715,6 +2715,7 @@ NOTE LIBERE 27
   Numeri somma di quadrati distinti
   Celle della matrice in ordine di distanza
   Numero pari e dispari di cifre
+  Compito di Wason (Problema delle quattro carte)
 
 PROBLEMI SUI DADI
 =================
