@@ -1564,5 +1564,116 @@ Rappresentiamo l'affermazione con una funzione:
 (rule nil nil)
 ;-> undefined
 
+
+------------------------------------
+Numeri interi univoci con somma zero
+------------------------------------
+
+Dato un numero intero N, restituire una lista con N numeri interi univoci tali che la loro somma sia pari a 0.
+
+somma = sequenza(1 N-1) - somma(sequenza(1 N-1))
+
+(define (sommazero1 N)
+  (cond ((= N 0) '())
+        ((= N 1) '(0))
+        (true
+          (let (s (sequence 1 (- N 1)))
+            (push (- (apply + s)) s)))))
+
+(sommazero1 0)
+;-> ()
+(sommazero1 1)
+;-> (0)
+(sommazero1 2)
+;-> (-1 1)
+(sommazero1 5)
+;-> (-10 1 2 3 4)
+
+somma = sequenza(1 (N/2)) + sequenza(-1 -(N/2))
+
+(define (sommazero2 N)
+  (cond ((= N 0) '())
+        ((= N 1) '(0))
+        (true
+          (if (odd? N)
+            (append '(0) (sequence 1 (/ N 2)) (sequence -1 (/ N -2)))
+            (append (sequence 1 (/ N 2)) (sequence -1 (/ N -2)))))))
+
+(sommazero2 0)
+;-> ()
+(sommazero2 1)
+;-> (0)
+(sommazero2 2)
+;-> (-1 1)
+(sommazero2 5)
+;-> (0 1 2 -1 -2)
+
+somma = ciclo(i=1..(N - 1)) [i * 2 - N + 1];
+
+(define (sommazero3 N)
+  (cond ((= N 0) '())
+        ((= N 1) '(0))
+        (true
+          (let (out '())
+            (for (i 0 (- N 1))
+              (push (add (* i 2) (- N) 1) out))
+            out))))
+
+(sommazero3 0)
+;-> ()
+(sommazero3 1)
+;-> (0)
+(sommazero3 2)
+;-> (1 -1)
+(sommazero3 5)
+;-> (4 2 0 -2 -4)
+
+Se i numeri della lista possono essere non univoci:
+
+somma = rand(N - 1) - somma(rand(N - 1))
+
+(define (sommazero4 N)
+  (cond ((= N 0) '())
+        ((= N 1) '(0))
+        (true
+          (letn ( (r (rand (* N 10) (- N 1))) (sum (- (apply + r))) )
+            (push sum r)))))
+
+(sommazero4 0)
+;-> ()
+(sommazero4 1)
+;-> (0)
+(sommazero4 2)
+;-> (-3 3)
+(sommazero4 5)
+;-> (-113 29 23 17 44)
+
+somma = ciclo(i=1..(N - 1))[+rand -rand] + differenza
+
+(define (sommazero5 N)
+  (cond ((= N 0) '())
+        ((= N 1) '(0))
+        (true
+          (let ( (a 0) (b 0) (out '()) (val 0) )
+            (for (i 1 (- N 1))
+              (cond ((odd? i)
+                      (setq val (rand (* N 10)))
+                      (push val out)
+                      (++ a val))
+                    (true
+                      (setq val (rand (* N -10)))
+                      (push val out)
+                      (++ b val))))
+            (push (- (+ a b)) out)))))
+
+(sommazero5 0)
+;-> ()
+(sommazero5 1)
+;-> (0)
+(sommazero5 2)
+;-> (-12 12)
+(sommazero5 5)
+;-> (-6 -11 7 -18 28)
+
 ============================================================================
 

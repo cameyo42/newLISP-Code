@@ -2716,6 +2716,7 @@ NOTE LIBERE 27
   Celle della matrice in ordine di distanza
   Numero pari e dispari di cifre
   Compito di Wason (Problema delle quattro carte)
+  Numeri interi univoci con somma zero
 
 PROBLEMI SUI DADI
 =================
