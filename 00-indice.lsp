@@ -2717,6 +2717,7 @@ NOTE LIBERE 27
   Numero pari e dispari di cifre
   Compito di Wason (Problema delle quattro carte)
   Numeri interi univoci con somma zero
+  Matrici di Hessenberg
 
 PROBLEMI SUI DADI
 =================

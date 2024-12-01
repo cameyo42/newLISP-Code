@@ -1675,5 +1675,107 @@ somma = ciclo(i=1..(N - 1))[+rand -rand] + differenza
 (sommazero5 5)
 ;-> (-6 -11 7 -18 28)
 
+
+---------------------
+Matrici di Hessenberg
+---------------------
+
+Una matrice di Hessenberg è una matrice quadrata in cui tutti gli elementi al di sotto della prima diagonale sotto la diagonale principale sono nulli.
+
+Vediamo un esempio di implementazione che utilizza trasformazioni elementari per trasformare una matrice quadrata in una matrice di Hessenberg:
+
+(define (hessenberg1 matrice)
+  (let ((len (length matrice)))
+    (for (k 0 (- len 2))
+      (for (i (+ k 1) (- len 1))
+        (let ((fattore (div (matrice i k) (matrice k k))))
+          (for (j k (- len 1))
+            (setf (matrice i j)
+                  (sub (matrice i j) (mul fattore (matrice k j)))))))))
+    matrice)
+
+(setq A '((4 1 -2 2)
+          (1 2 0 1)
+          (-2 0 3 -2)
+          (2 1 -2 -1)))
+
+(hessenberg1 A)
+;-> ((4 1 -2 2)
+;->  (0 1.75 0.5 0.5)
+;->  (0 0 1.857142857142857 -1.142857142857143)
+;->  (0 0 0 -2.846153846153846))
+
+(setq B '((1 2 3 4 5)
+          (6 7 8 9 6)
+          (1 3 2 5 4)
+          (3 5 8 7 4)
+          (5 2 3 7 9)))
+
+(hessenberg1 B)
+;-> ((1 2 3 4 5)
+;-> (0 -5 -10 -15 -24)
+;-> (0 0 -3 -2 -5.8)
+;-> (0 0 0 -2.666666666666667 -8.133333333333333)
+;-> (0 0 0 0 -10.75))
+
+Possiamo utilizzare la tecnica del pivot per garantire che l'elemento diagonale (o un altro scelto come pivot) sia il più adatto per l'eliminazione, migliorando la stabilità numerica.
+
+Algoritmo:
+1) Trova il pivot massimo
+Per ogni colonna k, cerca la riga con il valore massimo (in valore assoluto) nella posizione k.
+2) Scambia le righe
+Se la riga del pivot massimo non è k, scambia la riga k con la riga del pivot massimo.
+3) Eliminazione
+Riduce a zero gli elementi sotto la diagonale nella colonna k, utilizzando il pivot come divisore.
+
+Implementazione con il pivot:
+
+(define (hessenberg2 matrice)
+  (let ((n (length matrice)))
+    (for (k 0 (- n 2))
+      ; Trova il pivot massimo in valore assoluto
+      (let ((max-row k))
+        (for (i (+ k 1) (- n 1))
+          (if (> (abs (matrice i k)) (abs (matrice max-row k)))
+              (setq max-row i)))
+        ; Scambia le righe se necessario
+        (if (!= max-row k)
+            (let ((temp-row (matrice k)))
+              (setf (matrice k) (matrice max-row))
+              (setf (matrice max-row) temp-row))))
+      ; Elimina gli elementi sotto la diagonale
+      (for (i (+ k 1) (- n 1))
+        (let ((fac (div (matrice i k) (matrice k k))))
+          (for (j k (- n 1))
+            (setf (matrice i j)
+                  (sub (matrice i j) (mul fac (matrice k j)))))))))
+    matrice)
+
+(setq A '((4 1 -2 2)
+          (1 2 0 1)
+          (-2 0 3 -2)
+          (2 1 -2 -1)))
+
+(hessenberg2 A)
+;-> ((4 1 -2 2)
+;->  (0 1.75 0.5 0.5)
+;->  (0 0 1.857142857142857 -1.142857142857143)
+;->  (0 0 0 -2.846153846153846))
+
+(setq B '((1 2 3 4 5)
+          (6 7 8 9 6)
+          (1 3 2 5 4)
+          (3 5 8 7 4)
+          (5 2 3 7 9)))
+
+(hessenberg2 B)
+;-> ((6 7 8 9 6)
+;->  (0 -3.833333333333334 -3.666666666666667 -0.5 4)
+;->  (0 0 2.565217391304348 2.304347826086957 2.565217391304348)
+;->  (0 0 0 4.23728813559322 6)
+;->  (0 0 0 0 1.72))
+
+Nota: la precisione del calcolo dipende dalla rappresentazione dei numeri (es. frazioni o floating-point).
+
 ============================================================================
 
