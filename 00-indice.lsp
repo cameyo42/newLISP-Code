@@ -2718,6 +2718,7 @@ NOTE LIBERE 27
   Compito di Wason (Problema delle quattro carte)
   Numeri interi univoci con somma zero
   Matrici di Hessenberg
+  Divisione massima di numeri
 
 PROBLEMI SUI DADI
 =================

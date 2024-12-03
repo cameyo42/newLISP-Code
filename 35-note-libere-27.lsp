@@ -1334,7 +1334,7 @@ Calcoliamo alcune scomposizioni di numeri:
 ;->  (19 ((0 1 9 9) (1 1 1 16)))
 ;->  (20 ((0 0 4 16) (1 1 9 9))))
 
-Alcuni numeri hanno più di una scomposizione (es. 4, 12), mntre altri hanno una scomposizione unica (es. 5, 14, 15)
+Alcuni numeri hanno più di una scomposizione (es. 4, 12), mentre altri hanno una scomposizione unica (es. 5, 14, 15)
 
 Scriviamo una funzione che genera la sequenza dei numeri che hanno una scomposizione unica.
 
@@ -1776,6 +1776,135 @@ Implementazione con il pivot:
 ;->  (0 0 0 0 1.72))
 
 Nota: la precisione del calcolo dipende dalla rappresentazione dei numeri (es. frazioni o floating-point).
+
+
+---------------------------
+Divisione massima di numeri
+---------------------------
+
+Abbiamo una lista di N numeri interi (N <= 10).
+Gli interi adiacenti nella lista vengono divisi (float) in sequenza per ottenere un valore.
+Ad esempio, per lista (20 5 2) valutiamo l'espressione "20/5/2" e otteniamo il valore 2 (20/5=4 --> 4/2=2).
+(div 20 5 2)
+;-> 2
+Per modificare il valore finale possiamo effettuare due operazioni:
+1) aggiungere un numero qualsiasi di parentesi in qualsiasi posizione per modificare la priorità delle operazioni.
+2) cambiare l'ordine dei numeri nella lista.
+
+Scrivere una funzione che restituisce l'espressione che produce il valore massimo.
+Per esempio la lista (20 5 2) ha valore massimo 50 con l'espressione (div 20 (div 2 5)) = 50 oppure con
+(div 5 (div 2 20)) = 50.
+
+Per massimizzare il risultato di una divisione occorre dividere per il numero più piccolo possibile.
+In altre parole dobbiamo minimizzare il denominatore il più possibile per massimizzare il risultato dell'intera espressione.
+a) Quando la lista ha un solo numero restituiamo il singolo numero.
+b) Quando la lista ha esattamente due numeri (a e b), allora restituiamo l'espressione a/b, (div a b).
+c) Quando la lista ha tre o più numeri, il risultato massimo si ottiene quando dividiamo il primo numero per il risultato della divisione di tutti i numeri rimanenti.
+Pertanto, con la lista (a b c ... n), la divisione ottimale è a/(b/c/.../n), (div a (div b c ... n).
+Il primo numero "a" viene diviso per il valore più piccolo possibile ottenuto dalla divisione del resto dei numeri.
+
+Scriviamo una funzione che data una lista di interi calcola l'espressione che produce la divisione con valore massimo (senza modificare l'ordine dei numeri della lista):
+
+(define (divide-max nums)
+  ;(sort nums)
+  (let ( (len (length nums)) (out (string (nums 0))) )
+    (cond ((= len 1) out)
+          ((= len 2) (string "(div " out " " (nums 1) ")"))
+          (true
+            (setq out (string "(div " out " (div "
+                  (join (map string (slice nums 1)) " ") "))"))))))
+
+Proviamo:
+
+(divide-max '(20 5 2))
+;-> "(div 20 (div 5 2))"
+(eval-string (divide-max '(20 5 2)))
+;-> 8
+
+Adesso dobbiamo considerare la possibilità di modificare l'ordine dei numeri della lista.
+Per fare questo generiamo tutte le permutazioni dei numeri, per ogni permutazione calcoliamo il valore della divisione massima e teniamo traccia del massimo di questi valori (con la relativa espressione).
+
+(define (perm lst)
+"Generates all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i))))
+    out))
+
+Funzione che genera l'espressione con il valore massimo della divisione tra i numeri di una lista:
+
+(define (solve lst prt)
+  (local (expr-max val-max permute expr val)
+    (setq expr-max "")
+    (setq val-max 0)
+    (setq permute (perm lst))
+    (dolist (p permute)
+      (setq expr (divide-max p))
+      (setq val (eval-string expr))
+      (when (> val val-max)
+        (setq val-max val)
+        (setq expr-max expr))
+      (if prt (println expr { = } val))
+    )
+    (println "Solution: " expr-max { = } val-max) '>))
+
+Proviamo:
+
+(solve '(20 5 2) true)
+;-> (div 20 (div 5 2)) = 8
+;-> (div 5 (div 20 2)) = 0.5
+;-> (div 2 (div 20 5)) = 0.5
+;-> (div 20 (div 2 5)) = 50
+;-> (div 5 (div 2 20)) = 50
+;-> (div 2 (div 5 20)) = 8
+;-> Solution: (div 20 (div 2 5)) = 50
+
+(solve '(1000 100 2 10) true)
+;-> (div 1000 (div 100 2 10)) = 200
+;-> (div 100 (div 1000 2 10)) = 2
+;-> (div 2 (div 1000 100 10)) = 2
+;-> (div 1000 (div 2 100 10)) = 500000
+;-> (div 100 (div 2 1000 10)) = 500000
+;-> (div 2 (div 100 1000 10)) = 200
+;-> (div 10 (div 100 1000 2)) = 200
+;-> (div 100 (div 10 1000 2)) = 20000
+;-> (div 1000 (div 10 100 2)) = 20000
+;-> (div 10 (div 1000 100 2)) = 2
+;-> (div 100 (div 1000 10 2)) = 2
+;-> (div 1000 (div 100 10 2)) = 200
+;-> (div 1000 (div 2 10 100)) = 500000
+;-> (div 2 (div 1000 10 100)) = 2
+;-> (div 10 (div 1000 2 100)) = 2
+;-> (div 1000 (div 10 2 100)) = 20000
+;-> (div 2 (div 10 1000 100)) = 20000
+;-> (div 10 (div 2 1000 100)) = 499999.9999999999
+;-> (div 10 (div 2 100 1000)) = 499999.9999999999
+;-> (div 2 (div 10 100 1000)) = 20000
+;-> (div 100 (div 10 2 1000)) = 20000
+;-> (div 10 (div 100 2 1000)) = 200
+;-> (div 2 (div 100 10 1000)) = 200
+;-> (div 100 (div 2 10 1000)) = 500000
+;-> Solution: (div 1000 (div 2 100 10)) = 500000
+
+(solve '(1 2 3 4 5 6 7 8 9))
+;-> Solution: (div 3 (div 1 2 4 5 6 7 8 9)) = 362880.0000000001
 
 ============================================================================
 

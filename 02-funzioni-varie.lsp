@@ -6003,8 +6003,11 @@ Versione iterativa:
 ;-> 2
 
 Nota: Il gcd non cambia in caso di cambio di segno dei numeri:
-
 gcd (a,b) = gcd (a,-b)= gcd (-a,b) = gcd (-a,-b)
+
+Nota:
+Nell'eseguire l'algoritmo euclideo per trovare il massimo comune divisore di due interi positivi a, b, il numero di passaggi necessari non supererà mai 5 volte il numero di cifre in base 10 nel più piccolo dei due interi a, b.
+"Elementary Number Theory", Uspensky-Heaslet, McGraw-Hill, 1939, pp. 43-45.
 
 
 ----------------------------------
