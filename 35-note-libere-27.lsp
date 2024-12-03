@@ -1778,6 +1778,235 @@ Implementazione con il pivot:
 Nota: la precisione del calcolo dipende dalla rappresentazione dei numeri (es. frazioni o floating-point).
 
 
+----------------------------------
+Frequenza caratteri di una stringa
+----------------------------------
+
+Scrivere una funzione che prende una stringa e restituisce una lista dei caratteri della stringa con la relativa frequenza.
+
+(define (count-chars str)
+  (letn ( (lst (explode str))
+          (unici (unique lst)) )
+    (map list unici (count unici lst))))
+
+Proviamo:
+
+(count-chars "supercalifragilistichespiradiloso")
+;-> (("s" 4) ("u" 1) ("p" 2) ("e" 2) ("r" 3) ("c" 2) ("a" 3) ("l" 3)
+;->  ("i" 6) ("f" 1) ("g" 1) ("t" 1) ("h" 1) ("d" 1) ("o" 2))
+
+(sort (count-chars "supercalifragilistichespiradiloso")
+      (fn (x y) (>= (last x) (last y))))
+;-> (("i" 6) ("s" 4) ("r" 3) ("a" 3) ("l" 3) ("p" 2) ("e" 2) ("c" 2)
+;->  ("o" 2) ("u" 1) ("f" 1) ("g" 1) ("t" 1) ("h" 1) ("d" 1))
+
+(count-chars (string count-chars))
+;-> (("(" 10) ("l" 7) ("a" 3) ("m" 2) ("b" 1) ("d" 2) (" " 14) ("s" 6)
+;->  ("t" 8) ("r" 2) (")" 10) ("e" 4) ("n" 6) ("x" 1) ("p" 2) ("o" 2)
+;->  ("u" 6) ("i" 8) ("c" 4) ("q" 1))
+
+
+-------------------------------------------
+Stampa di stringhe con indice dei caratteri
+-------------------------------------------
+
+Data una stringa, stamparla in modo tale che ogni lettera sia in una nuova riga e ripetuta tante volte quanto vale la sua posizione nell'alfabeto inglese ("A" posizione 1, "Z" posizione 26).
+Per esempio la stringa "BACIO" dovrebbe essere stampata nel modo seguente:
+
+  BB
+  A
+  CCC
+  IIIIIIIII
+  OOOOOOOOOOOOOOO
+
+(define (pridx str)
+  (map (fn(x) (println (dup x (- (char x) 64)))) (explode (upper-case str))) '>)
+
+Proviamo:
+
+(pridx "BACIO")
+;-> BB
+;-> A
+;-> CCC
+;-> IIIIIIIII
+;-> OOOOOOOOOOOOOOO
+
+(pridx "newLISP")
+;-> NNNNNNNNNNNNNN
+;-> EEEEE
+;-> WWWWWWWWWWWWWWWWWWWWWWW
+;-> LLLLLLLLLLLL
+;-> IIIIIIIII
+;-> SSSSSSSSSSSSSSSSSSS
+;-> PPPPPPPPPPPPPPPP
+
+
+----------
+Alfabeto-L
+----------
+
+Scrivere una funzione che stampa l'alfabeto-L:
+
+  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  BBCDEFGHIJKLMNOPQRSTUVWXYZ
+  CCCDEFGHIJKLMNOPQRSTUVWXYZ
+  DDDDEFGHIJKLMNOPQRSTUVWXYZ
+  EEEEEFGHIJKLMNOPQRSTUVWXYZ
+  FFFFFFGHIJKLMNOPQRSTUVWXYZ
+  GGGGGGGHIJKLMNOPQRSTUVWXYZ
+  HHHHHHHHIJKLMNOPQRSTUVWXYZ
+  IIIIIIIIIJKLMNOPQRSTUVWXYZ
+  JJJJJJJJJJKLMNOPQRSTUVWXYZ
+  KKKKKKKKKKKLMNOPQRSTUVWXYZ
+  LLLLLLLLLLLLMNOPQRSTUVWXYZ
+  MMMMMMMMMMMMMNOPQRSTUVWXYZ
+  NNNNNNNNNNNNNNOPQRSTUVWXYZ
+  OOOOOOOOOOOOOOOPQRSTUVWXYZ
+  PPPPPPPPPPPPPPPPQRSTUVWXYZ
+  QQQQQQQQQQQQQQQQQRSTUVWXYZ
+  RRRRRRRRRRRRRRRRRRSTUVWXYZ
+  SSSSSSSSSSSSSSSSSSSTUVWXYZ
+  TTTTTTTTTTTTTTTTTTTTUVWXYZ
+  UUUUUUUUUUUUUUUUUUUUUVWXYZ
+  VVVVVVVVVVVVVVVVVVVVVVWXYZ
+  WWWWWWWWWWWWWWWWWWWWWWWXYZ
+  XXXXXXXXXXXXXXXXXXXXXXXXYZ
+  YYYYYYYYYYYYYYYYYYYYYYYYYZ
+  ZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+(define (print-L)
+  (let (base "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    ;(println base)
+    (for (i 0 25)
+      (println (dup (char (+ 65 i)) i) (slice base i))) '>))
+
+(print-L)
+;-> ABCDEFGHIJKLMNOPQRSTUVWXYZ
+;-> BBCDEFGHIJKLMNOPQRSTUVWXYZ
+;-> CCCDEFGHIJKLMNOPQRSTUVWXYZ
+;-> DDDDEFGHIJKLMNOPQRSTUVWXYZ
+;-> EEEEEFGHIJKLMNOPQRSTUVWXYZ
+;-> FFFFFFGHIJKLMNOPQRSTUVWXYZ
+;-> GGGGGGGHIJKLMNOPQRSTUVWXYZ
+;-> HHHHHHHHIJKLMNOPQRSTUVWXYZ
+;-> IIIIIIIIIJKLMNOPQRSTUVWXYZ
+;-> JJJJJJJJJJKLMNOPQRSTUVWXYZ
+;-> KKKKKKKKKKKLMNOPQRSTUVWXYZ
+;-> LLLLLLLLLLLLMNOPQRSTUVWXYZ
+;-> MMMMMMMMMMMMMNOPQRSTUVWXYZ
+;-> NNNNNNNNNNNNNNOPQRSTUVWXYZ
+;-> OOOOOOOOOOOOOOOPQRSTUVWXYZ
+;-> PPPPPPPPPPPPPPPPQRSTUVWXYZ
+;-> QQQQQQQQQQQQQQQQQRSTUVWXYZ
+;-> RRRRRRRRRRRRRRRRRRSTUVWXYZ
+;-> SSSSSSSSSSSSSSSSSSSTUVWXYZ
+;-> TTTTTTTTTTTTTTTTTTTTUVWXYZ
+;-> UUUUUUUUUUUUUUUUUUUUUVWXYZ
+;-> VVVVVVVVVVVVVVVVVVVVVVWXYZ
+;-> WWWWWWWWWWWWWWWWWWWWWWWXYZ
+;-> XXXXXXXXXXXXXXXXXXXXXXXXYZ
+;-> YYYYYYYYYYYYYYYYYYYYYYYYYZ
+;-> ZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+
+---------------
+Triangoli retti
+---------------
+
+Date le coordinate di tre punti in un piano cartesiano 2D, determinare se il triangolo formato dai punti è retto.
+
+Un triangolo è retto quando ha un angolo retto (90 gradi).
+In un triangolo retto vale il teorema di Pitagora: a^2 + b^2 = c^2, dove a e b sono i cateti e c è l'ipotenusa del triangolo.
+
+(define (dist2d p1 p2)
+"Calculates 2D Cartesian distance of two points P1 = (x1 y1) and P2 = (x2 y2)"
+  (let ( (x1 (p1 0)) (y1 (p1 1))
+         (x2 (p2 0)) (y2 (p2 1)) )
+    (sqrt (add (mul (sub x1 x2) (sub x1 x2))
+               (mul (sub y1 y2) (sub y1 y2))))))
+
+(define (retto-lati a b c)
+  (or (= (add (mul a a) (mul b b)) (mul c c))
+      (= (add (mul a a) (mul c c)) (mul b b))
+      (= (add (mul b b) (mul c c)) (mul a a))))
+
+(retto-lati 5 3 4)
+;-> true
+(retto-lati 3 5 4)
+;-> true
+(retto-lati 12 37 35)
+;-> true
+(retto-lati 21 42 50)
+;-> nil
+(retto-lati 121 130 238)
+;-> nil
+
+Esempio con risultato errato:
+
+(retto-lati 1 1 (sqrt 2))
+;-> nil ;??
+
+(define (retto-punti p1 p2 p3)
+  (let ( (a (dist2d p1 p2))
+         (b (dist2d p1 p3))
+         (c (dist2d p2 p3)) )
+    ;(println a { } b { } c)
+    (retto-lati a b c)))
+
+(retto-punti '(0 0) '(0 5) '(3 0))
+;-> true
+(retto-punti '(0 0) '(0 10) '(0 20))
+;-> nil
+(retto-punti '(1 1) '(1 5) '(4 1))
+;-> true
+(retto-punti '(1 1) '(1 5) '(6 1))
+;-> true
+
+Esempi con risultato errato:
+
+(retto-punti '(1 0) '(0 0) '(0 1))
+;-> nil ;??
+(retto-punti '(1 1) '(-1 3) '(4 4))
+;-> nil ;??
+
+Riscriviamo la funzione "retto-lati" introducendo un valore di soglia per il confronto (eps):
+
+(define (retto-lati a b c eps)
+  (let (eps (or eps 1e-6))
+    (or (> eps (abs (sub (add (mul a a) (mul b b)) (mul c c))))
+        (> eps (abs (sub (add (mul a a) (mul c c)) (mul b b))))
+        (> eps (abs (sub (add (mul b b) (mul c c)) (mul a a)))))))
+
+Proviamo:
+
+(retto-lati 5 3 4)
+;-> true
+(retto-lati 3 5 4)
+;-> true
+(retto-lati 12 37 35)
+;-> true
+(retto-lati 21 42 50)
+;-> nil
+(retto-lati 121 130 238)
+;-> nil
+(retto-lati 1 1 (sqrt 2))
+;-> true
+
+(retto-punti '(0 0) '(0 5) '(3 0))
+;-> true
+(retto-punti '(0 0) '(0 10) '(0 20))
+;-> nil
+(retto-punti '(1 1) '(1 5) '(4 1))
+;-> true
+(retto-punti '(1 1) '(1 5) '(6 1))
+;-> true
+
+(retto-punti '(1 0) '(0 0) '(0 1))
+;-> true
+(retto-punti '(1 1) '(-1 3) '(4 4))
+;-> true
+
+
 ---------------------------
 Divisione massima di numeri
 ---------------------------

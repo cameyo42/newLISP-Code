@@ -2718,6 +2718,10 @@ NOTE LIBERE 27
   Compito di Wason (Problema delle quattro carte)
   Numeri interi univoci con somma zero
   Matrici di Hessenberg
+  Frequenza caratteri di una stringa
+  Stampa di stringhe con indice dei caratteri
+  Alfabeto-L
+  Triangoli retti
   Divisione massima di numeri
 
 PROBLEMI SUI DADI
