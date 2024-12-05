@@ -2723,6 +2723,7 @@ NOTE LIBERE 27
   Alfabeto-L
   Triangoli retti
   Divisione massima di numeri
+  Passeggiata casuale su una circonferenza (Random walk on a circle)
 
 PROBLEMI SUI DADI
 =================

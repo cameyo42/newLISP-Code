@@ -2135,5 +2135,76 @@ Proviamo:
 (solve '(1 2 3 4 5 6 7 8 9))
 ;-> Solution: (div 3 (div 1 2 4 5 6 7 8 9)) = 362880.0000000001
 
+
+------------------------------------------------------------------
+Passeggiata casuale su una circonferenza (Random walk on a circle)
+------------------------------------------------------------------
+
+Un punto si muove lungo una circonferenza in modo casuale.
+Ad ogni passo il punto si sposta di un grado a sinistra o a destra in modo casuale.
+Il punto parte dalla posizione 0.
+
+In media, quanti passi occorrono affinchè il punto effettui un giro completo (orario oppure antiorario) ?
+
+Possiamo simulare il processo facendo muovere il punto lungo una linea di interi da -360 a 360.
+
+(define (simula iter)
+  (local (numero-giri numero-passi step moves continua)
+    (setq numero-giri 0)
+    (setq numero-passi 0)
+    (setq step 1)
+    (setq moves (list (- step) step))
+    (for (i 1 iter)
+      (setq pos 0)
+      (setq passi 0)
+      (setq continua true)
+      (while continua
+        (++ pos (moves (rand 2)))
+        (++ passi)
+        ;(print pos) (read-line)
+        (when (and (!= pos 0) (= (% pos 360) 0))
+            ;(println "pos: " pos)
+            (++ numero-giri)
+            (++ numero-passi passi)
+            (setq continua nil))
+      )
+    )
+    (println "numero giri: " numero-giri)
+    (println "numero passi: " numero-passi)
+    (div numero-passi numero-giri))
+
+(time (println (simula 1000)))
+;-> numero giri: 1000
+;-> numero passi: 128194206
+;-> 128194.206
+;-> 23549.289
+
+(time (println (simula 1000)))
+;-> numero giri: 1000
+;-> numero passi: 124057900
+;-> 124057.9
+;-> 22783.12
+
+(time (println (simula 10000)))
+;-> numero giri: 10000
+;-> numero passi: 1289216520
+;-> 128921.652
+;-> 236756.372
+
+(time (println (simula 100000)))
+;-> numero giri: 100000
+;-> numero passi: 12948339304
+;-> 129483.39304
+;-> 2372966.967
+
+Nota: dal punto di vista matematico il numero medio di passi, noto anche come tempo di assorbimento T, vale:
+  
+  T(N) = N^2
+
+cioè il tempo medio per raggiungere +N o -N partendo da 0 è il quadrato di N.
+
+(* 360 360)
+;-> 129600
+
 ============================================================================
 

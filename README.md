@@ -2,8 +2,8 @@ Note su newLISP
 © copyright 2019-2024 Massimo Corinaldesi aka cameyo  
 MIT-0 License  
 
-Problem Solving e Matematica ricreativa con newLISP
-(un lavoro continuamente in corso...)  
+Problem Solving e Matematica ricreativa con newLISP  
+(...lavori in corso...)  
 
 00) Indice
 01) newLISP in generale (65)
@@ -40,7 +40,7 @@ Problem Solving e Matematica ricreativa con newLISP
 32) Note libere 24 (80)
 33) Note libere 25 (80)
 34) Note libere 26 (80)
-35) Note libere 27 (24)
+35) Note libere 27 (25)
 96) Problemi sui dadi (76)
 97) Appendici (32)
 98) Bibliografia
