@@ -2173,17 +2173,13 @@ Possiamo simulare il processo facendo muovere il punto lungo una linea di interi
     (println "numero passi: " numero-passi)
     (div numero-passi numero-giri))
 
+Proviamo:
+
 (time (println (simula 1000)))
 ;-> numero giri: 1000
 ;-> numero passi: 128194206
 ;-> 128194.206
 ;-> 23549.289
-
-(time (println (simula 1000)))
-;-> numero giri: 1000
-;-> numero passi: 124057900
-;-> 124057.9
-;-> 22783.12
 
 (time (println (simula 10000)))
 ;-> numero giri: 10000
@@ -2205,6 +2201,107 @@ cioè il tempo medio per raggiungere +N o -N partendo da 0 è il quadrato di N.
 
 (* 360 360)
 ;-> 129600
+
+
+----------------------------------------------------------
+Capacità d'acqua di un numero (water-capacity of a number)
+----------------------------------------------------------
+
+Define the water-capacity of a number as follows:
+If n has the prime factorization p1^e1*p2^e2*...*pk^ek let ci be a column of height pi^ei and width 1.
+Juxtaposing the ci leads to a bar graph which figuratively can be filled by water from the top.
+The water-capacity of a number is the maximum number of cells which can be filled with water.
+
+For example 48300 has the prime factorization 2^2*3*5^2*7*23.
+The bar graph below has to be rotated counterclockwise for 90 degree:
+
+  2^2   ****
+  3     ***W
+  5^2   *************************
+  7     *******WWWWWWWWWWWWWWWW
+  23    ***********************
+  48300 is the smallest number which has a water-capacity of 17.
+
+Sequenza OEIS A275339:
+a(n) is the smallest number which has a water-capacity of n.
+  60, 120, 440, 168, 264, 840, 2448, 528, 1904, 624, 1360, 2295, 816, 1632, 
+  20128, 1824, 48300, 3105, 15392, 2208, 13024, 2400, 10656, 4080, 8288,
+  2784, 5920, 2976, 3552, 9120, ...
+
+Funzione che calcola la quantità massima d'acqua che può contenere un instogramma (lista):
+(Vedi "Quantità d'acqua in un bacino (Facebook)" in "Domande programmatori".)
+
+(define (bacino lst)
+  (if (< (length lst) 2) 0
+  ;else
+  (local (lun sx dx acqua)
+      (setq lun (length lst))
+      (setq sx (array lun))
+      (setq dx (array lun))
+      (setq acqua 0)
+      ; riempimento sx
+      (setf (sx 0) (lst 0))
+      (for (i 1 (- lun 1))
+        (setf (sx i) (max (sx (- i 1)) (lst i)))
+      )
+      ; riempimento dx
+      (setf (dx (- lun 1)) (lst (- lun 1)))
+      (for (i (- lun 2) 0 -1)
+        (setf (dx i) (max (dx (+ i 1)) (lst i)))
+      )
+      ; bar vale min(sx[i], dx[i]) - arr[i]
+      (for (i 0 (- lun 1))
+        (setq bar-acqua (- (min (sx i) (dx i)) (lst i)))
+        ;(print bar-acqua { })
+        (setq acqua (+ acqua bar-acqua))
+      )
+      acqua)))
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+Funzione che calcola la sequenza:
+
+(define (sequenza limite)
+  (local (out acqua idx)
+    (setq out '())
+    (setq acqua '(0))
+    ; Calcola le capacità d'acqua di tutti i numeri da 1 fino a limite
+    (for (i 1 limite)
+      (push (bacino (map (fn(x) (* (pow (x 0) (x 1))))
+                        (factor-group i))) acqua -1))
+    ; Trova le capacità minime per la sequenza 1, 2, ..., N
+    ; (fino a che N si trova su acqua)
+    (setq idx 1)
+    (while (setq value (ref idx acqua))
+      (push value out -1)
+      (++ idx))
+    (flat out)))
+
+Proviamo:
+
+(sequenza 1e5)
+;-> (60 120 440 168 264 840 2448 528 1904 624 1360 2295 816 1632
+;->  20128 1824 48300 3105 15392 2208 13024 2400 10656 4080 8288
+;->  2784 5920 2976 3552 9120)
+
+(time (println (sequenza 1e6)))
+;-> (60 120 440 168 264 840 2448 528 1904 624 1360 2295 816 1632 20128 1824
+;->  48300 3105 15392 2208 13024 2400 10656 4080 8288 2784 5920 2976 3552 9120
+;->  243600 11840 28560 7104 124352 13120 115776 7872 107200 8256 98624 15040
+;->  685608 9024 81472 9408 72896 16960 973500 10176 55744 20832 47168 14880
+;->  38592 11328 30016 11712 21440 37989 12864 27135 571872 25728 408480 28755
+;->  472416 27264 337440 28032 301920 44793 323232 31995 230880 30336 195360 
+;->  41280 821632 31872 124320 77875 934500 56960 721024 34176 687488 111744)
+;-> 5156.227
+
+(time (println (length (sequenza 1e7))))
+;-> 178
+;-> 63874.246
 
 ============================================================================
 

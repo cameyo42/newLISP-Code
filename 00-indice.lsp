@@ -2724,6 +2724,7 @@ NOTE LIBERE 27
   Triangoli retti
   Divisione massima di numeri
   Passeggiata casuale su una circonferenza (Random walk on a circle)
+  Capacità d'acqua di un numero (water-capacity of a number)
 
 PROBLEMI SUI DADI
 =================
@@ -2760,6 +2761,7 @@ APPENDICI
   Codici nazionali (ISO 3166)
   Codici ASCII
   ASCII Punctuation marks
+  C/C++ Datatype
   Solarized Color Scheme
   Regole di Internet
   Considerazioni lungo il tragitto
