@@ -2303,5 +2303,43 @@ Proviamo:
 ;-> 178
 ;-> 63874.246
 
+
+---------------------------------------
+Intersezione di segmenti lungo l'asse X
+---------------------------------------
+
+Data una lista di N segmenti lungo l'asse X (xi1 xf1) (xi2 xf2)...(xiN xfN), determinare, se esistono, quali sono i valori di X interi che sono comuni a tutti i segmenti.
+
+Trovare gli interi X che sono comuni a tutti i segmenti significa che un intero X deve appartenere all'intervallo di ciascun segmento.
+In termini matematici, X deve soddisfare:  xi <= X <= xf
+
+Algoritmo
+1. Calcoliamo il massimo dei valori xi (limite inferiore comune).
+2. Calcoliamo il minimo dei valori xf (limite superiore comune).
+3. Se il massimo dei valori xi è minore o uguale al minimo dei valori xf, gli interi compresi in questo intervallo sono i numeri comuni a tutti i segmenti, altrimenti non ci sono interi in comune tra i segmenti.
+
+(define (segmenti-comuni segmenti)
+  (let ((xi-max (apply max (map first segmenti)))
+        (xf-min (apply min (map last segmenti))))
+    (if (<= xi-max xf-min)
+        (sequence xi-max xf-min) ; Valori in comune
+        nil))) ; Nessun valore comune
+
+Proviamo:
+
+(segmenti-comuni '((10 13) (9 18) (5 11)))
+;-> (10 11)
+
+(segmenti-comuni '((1 5) (2 6) (4 8)))
+;-> (4 5)
+(segmenti-comuni '((1 3) (4 6)))
+;-> nil
+
+Questo approccio ha complessità lineare O(N).
+
+Nota: i segmenti potrebbero rappresentare degli intervalli orari (ora iniziale, ora finale).
+
+Vedi anche "Segmenti sovrapposti" su "Note libere 10".
+
 ============================================================================
 

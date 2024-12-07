@@ -2725,6 +2725,7 @@ NOTE LIBERE 27
   Divisione massima di numeri
   Passeggiata casuale su una circonferenza (Random walk on a circle)
   Capacità d'acqua di un numero (water-capacity of a number)
+  Intersezione di segmenti lungo l'asse X
 
 PROBLEMI SUI DADI
 =================

@@ -4801,6 +4801,8 @@ Facciamo alcune prove:
 
 Nota: i segmenti potrebbero rappresentare degli appuntamenti (ora iniziale, ora finale).
 
+Vedi anche "Intersezione di segmenti lungo l'asse X" su "Note libere 27" per una implementazione più efficiente.
+
 
 --------------------------
 Media di numeri "nascosti"
