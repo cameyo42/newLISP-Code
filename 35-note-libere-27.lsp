@@ -2341,5 +2341,313 @@ Nota: i segmenti potrebbero rappresentare degli intervalli orari (ora iniziale, 
 
 Vedi anche "Segmenti sovrapposti" su "Note libere 10".
 
+
+-----------------------------
+Sequenza di Golomb (memoized)
+-----------------------------
+
+Sequenza OEIS A001462:
+Golomb's sequence: a(n) is the number of times n occurs, starting with a(1) = 1.
+  1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9,
+  9, 9, 9, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12,
+  13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15,
+  16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18,
+  18, 18, 18, 19, ...
+
+La sequenza è definita ricorsivamente nel modo seguente:
+
+  a(1) = 1; 
+  a(n+1) = 1 + a(n+1 - a(a(n)))
+
+(define (a n)
+  (if (= n 1)
+      1 ; valore iniziale a(1) = 1
+      (+ 1 (a (- n (a (a (- n 1)))))))) ; valore ricorsivo
+
+Proviamo:
+
+(map a (sequence 1 10))
+;-> (1 2 2 3 3 4 4 4 5 5)
+(map a (sequence 1 25))
+;-> (1 2 2 3 3 4 4 4 5 5 5 6 6 6 6 7 7 7 7 8 8 8 8 9 9)
+
+La funzione è molto lenta:
+(time (println (map a (sequence 1 50))))
+;-> (1 2 2 3 3 4 4 4 5 5 5 6 6 6 6 7 7 7 7 8 8 8 8 9 9 9 9 9 10 10 10 10 10
+;->  11 11 11 11 11 12 12 12 12 12 12 13 13 13 13 13 13)
+;-> 34237.734
+
+Usiamo la tecnica della memoization:
+
+(define-macro (memoize mem-func func)
+"Memoize a function"
+  (set (sym mem-func mem-func)
+    (letex (f func c mem-func)
+      (lambda ()
+        (or (context c (string (args)))
+        (context c (string (args)) (apply f (args))))))))
+
+(memoize a-memo
+  (lambda (n)
+  (if (= n 1)
+    1
+    (+ 1 (a-memo (- n (a-memo (a-memo (- n 1)))))))))
+
+(time (println (map a-memo (sequence 1 50))))
+;-> (1 2 2 3 3 4 4 4 5 5 5 6 6 6 6 7 7 7 7 8 8 8 8 9 9 9 9 9 10 10 10 10 10
+;->  11 11 11 11 11 12 12 12 12 12 12 13 13 13 13 13 13)
+;-> 0
+
+(map a-memo (sequence 1 100))
+;-> (1 2 2 3 3 4 4 4 5 5 5 6 6 6 6 7 7 7 7 8 8 8 8 9 9 9 9 9 10 10 10 10 10
+;->  11 11 11 11 11 12 12 12 12 12 12 13 13 13 13 13 13 14 14 14 14 14 14
+;->  15 15 15 15 15 15 16 16 16 16 16 16 16 17 17 17 17 17 17 17
+;->  18 18 18 18 18 18 18 19 19 19 19 19 19 19 20 20 20 20 20 20 20 20
+;->  21 21)
+
+Vedi anche "Sequenza di Golomb" su "Note libere 5".
+
+
+---------------------
+Raggiungere un numero
+---------------------
+
+Un canguro si trova nella posizione 0 su una retta numerica infinita.
+Il canguro deve raggiungere una certa posizione (bersaglio)
+Il canguro si muove nel modo seguente:
+A ogni mossa, può andare a sinistra o a destra.
+Alla i-esima mossa si sposta di "i" passi a destra o a sinistra.
+Dato un numero intero come bersaglio, trovare il numero minimo di mosse affinchè il canguro raggiunga il bersaglio.
+
+Esempio 1:
+Bersaglio = 2
+Mosse: 3
+Spiegazione:
+Alla prima mossa, passiamo da 0 a 1 (1 passo).
+Alla seconda mossa, passiamo da 1 a -1 (2 passi).
+Alla terza mossa, passiamo da -1 a 2 (3 passi).
+
+Esempio 2:
+Bersaglio = 3
+Passi: 2
+Spiegazione:
+Nella prima mossa, passiamo da 0 a 1 (1 passo).
+Nella seconda mossa, passiamo da 1 a 3 (2 passi).
+
+Poiché la linea è infinita e gli spostamenti possono essere in entrambe le direzioni, raggiungere una posizione con un numero minimo di spostamenti implica una combinazione di passaggi che sommati danno come risultato il bersaglio stesso o un numero in cui se cambiassimo la direzione di uno spostamento, potremmo finire al bersaglio.
+Ad esempio, se la somma supera il bersaglio di un numero pari, possiamo invertire la direzione di uno spostamento che corrisponde alla metà di quel numero in eccesso, poiché muovendoci nella direzione opposta ridurremo la somma del doppio del numero di quello spostamento.
+
+Notiamo che muoversi a sinistra o a destra può essere pensato in termini di somme e differenze.
+L'obiettivo è il numero minimo di spostamenti (k), tale che quando sommiamo i numeri da 1 a k, il risultato sia uguale o maggiore del bersaglio.
+Tuttavia, questo non è sufficiente.
+Poiché dobbiamo essere in grado di raggiungere il bersaglio esatto, l'eccesso (la differenza tra la somma e il bersaglio) deve essere un numero pari.
+Questo perché qualsiasi eccesso dispari non può essere compensato invertendo la direzione di una singola mossa.
+Una volta raggiunto o superato l'obiettivo, se l'eccesso è pari, possiamo immaginare di poter invertire la direzione di una o più mosse per adattare la somma esattamente all'obiettivo.
+
+Algoritmo
+1) Iniziamo con "s" e "m" a 0, dove "s" rappresenta la somma delle mosse e "m" rappresenta il conteggio delle mosse.
+2) Ciclo che incrementa "m" a ogni iterazione, simula ogni passo, e aggiunge "m" a "s".
+   Ad ogni passaggio, controlliamo se "s" ha raggiunto o superato il bersaglio e se (s - bersaglio) è un numero pari.
+   Se entrambe le condizioni sono soddisfatte, "m" è il numero minimo di mosse richieste e il ciclo termina.
+
+(define (step-min bersaglio)
+  (local (somma mosse stop)
+        ; Valore assoluto del bersaglio (simmetrico rispetto a 0)
+        (setq bersaglio (abs bersaglio))
+        ; somma totale
+        (setq somma 0)
+        ; mosse
+        (setq mosse 0)
+        ; ciclo fino al raggiugimento della soluzione...
+        (setq stop nil)
+        (until stop
+          ; Controlla se somma raggiunge o supera il bersaglio e
+          ; la differenza tra somma e bersaglio è pari
+          ; (consentendo di raggiungere bersaglio invertendo alcuni passaggi)
+          (if (and (>= somma bersaglio) and (even? (- somma bersaglio)))
+              ; se la condizione è raggiunta, abbiamo trovato la soluzione e
+              ; fermiamo il loop
+              (setq stop true)
+              ;else
+              (begin
+                ; incremnta le mosse
+                (++ mosse)
+                # aggiorna somma aggiungendo le mosse correnti
+                (++ somma mosse))))
+        mosse))
+
+Proviamo:
+
+(step-min 3)
+;-> 2
+(step-min 3)
+;-> 2
+(step-min 4)
+;-> 3
+(step-min 5)
+;-> 5
+(step-min 21)
+;-> 6
+
+Funzione che sfrutta lo stesso criterio di soluzione con una diversa implementazione:
+
+(define (step-min2 target)
+  (local (ans pos)
+    (setq ans 0)
+    (setq pos 0)
+    (setq target (abs target))
+    (while (< pos target)
+      (++ ans)
+      (++ pos ans))
+    (while (odd? (- pos target))
+      (++ ans)
+      (++ pos ans))
+    ans))
+
+Proviamo:
+
+(step-min2 2)
+;-> 3
+(step-min2 3)
+;-> 2
+(step-min2 4)
+;-> 3
+(step-min2 5)
+;-> 5
+(step-min2 21)
+;-> 6
+
+
+---------
+Lista + 1
+---------
+
+Data una lista di interi positivi (che rappresenta un numero X), restituire una lista che rappresenta il numero X + 1.
+Per esempio:
+
+  lista = (1 2 3) --> X = 123 --> X + 1 = 124 --> (1 2 4)
+
+  lista = (2 9) --> X = 29 --> X + 1 = 30 --> (30)
+
+(define (plus-one lst)
+  (let (stop nil)
+    ; ciclo dall'ultima cifra della lista
+    (for (i (- (length lst) 1) 0 -1 stop)
+      (cond
+        ; se la cifra è minore di 9...
+        ((< (lst i) 9)
+          (++ (lst i))      ;... aggiungiamo 1 alla cifra e
+          (setq stop true)) ; fermiamo il ciclo
+        ; altrimenti la cifra corrente vale 0
+        (true (setq (lst i) 0)))
+    )
+    ; se tutte le cifre valgono 0, allora aggiungiamo 1 all'inizio della lista
+    (if (for-all zero? lst) (push 1 lst))
+    lst))
+
+Proviamo:
+
+(plus-one '(1 2 3))
+;-> (1 2 4)
+
+(plus-one '(2 9))
+;-> (3 0)
+
+(plus-one '(8 9 9 9))
+;-> ' (9 0 0 0)
+
+(plus-one '(9))
+;-> (1 0)
+
+(plus-one '(9 9 9 9))
+;-> (1 0 0 0 0)
+
+
+----------------------------------------------------------
+Generare un equazione di secondo grado dalle sue soluzioni
+----------------------------------------------------------
+
+Dati due numeri x1 e x2, generare l'equazione di secondo grado che ha x1 e x2 come soluzioni.
+
+Si tratta di determinare a,b e c della seguente espressione:
+
+  ax^2 + bx + c = 0  (1)
+
+che può essere scritta come:
+
+  a*x^2 - a*(x1 + x2)*x + a*(x1 * x2) = 0
+
+Infatti, le soluzioni di (1) valgono:
+
+          - b + sqrt(b^2 - 4ac)
+  x1 = - -----------------------
+                  2a
+  
+          - b - sqrt(b^2 - 4ac)
+  x2 = - -----------------------
+                  2a
+
+Svolgendo le operazioni otteniamo:
+
+               b   
+  x1 + x2 = - ---
+               a
+
+             c  
+  x1 * x2 = ---
+             a
+
+Se a=1 (coefficiente normalizzato), queste formule diventano:
+
+  x1 + x2 = b
+  
+  x1 * x2 = c
+
+Quindi risulta:
+
+1) "a" è un coefficiente arbitrario diverso da zero (spesso scelto come a = 1)
+2) b = -a*(x1 + x2)
+3) c = a*(x1 * x2)
+
+Funzione che genera "a", "b" e "c" dati "x1", "x2" e "a" (opzionale):
+
+(define (eq2 x1 x2 a)
+  (letn ( (a (or a 1))
+        (b (- (* a (+ x1 x2))))
+        (c (* a x1 x2)) )
+    (list a b c)))
+
+Proviamo:
+
+(eq2 1 1)
+;-> (1 -2 1)
+(eq2 -2 3)
+;-> (1 -1 -6)
+(eq2 -2 3 -2)
+;-> (-2 2 12)
+
+Funzione che stampa l'equazione quadratica dati "x1", "x2" e "a" (opzionale):
+
+(define (print-eq2 x1 x2 a)
+  (let (abc (eq2 x1 x2 a))
+    (if (>= (abc 1) 0)
+      (setf (abc 1) (string "+ " (abc 1)))
+      (setf (abc 1) (string "- " (abs (abc 1)))))
+    (if (>= (abc 2) 0)
+      (setf (abc 2) (string "+ " (abc 2)))
+      (setf (abc 2) (string "- " (abs (abc 2)))))
+    (if (> a 1)
+      (println (abc 0) "x^2 " (abc 1) "x " (abc 2) " = 0")
+      (println "x^2 " (abc 1) "x " (abc 2) " = 0")) '>))
+
+Proviamo:
+
+(print-eq2 1 1)
+;-> x^2 - 2x + 1 = 0
+(print-eq2 -2 3)
+;-> x^2 - 1x - 6 = 0
+(print-eq2 -2 3 -2)
+;-> x^2 + 2x + 12 = 0
+
 ============================================================================
 

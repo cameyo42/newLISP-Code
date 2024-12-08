@@ -2726,10 +2726,14 @@ NOTE LIBERE 27
   Passeggiata casuale su una circonferenza (Random walk on a circle)
   Capacità d'acqua di un numero (water-capacity of a number)
   Intersezione di segmenti lungo l'asse X
+  Sequenza di Golomb (memoized)
+  Raggiungere un numero
+  Lista + 1
+  Generare un equazione di secondo grado dalle sue soluzioni
 
 PROBLEMI SUI DADI
 =================
-  Problemi 1..76
+  Problemi 1..77
 
 APPENDICI
 =========

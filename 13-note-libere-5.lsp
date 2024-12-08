@@ -4612,6 +4612,8 @@ Vediamo un'altra funzione che calcola la sequenza di Golomb fino a che a(k) è u
 ;->  21 22 22 22 22 22 22 22 22 23 23 23 23 23 23 23 23 24 24 24 24 24 24 24
 ;->  24 24 25 25 25 25 25 25 25 25 25)
 
+Vedi anche "Sequenza di Golomb (memoized)" su "Note libere 27".
+
 
 ---------------------------
 Acquistare e vendere azioni

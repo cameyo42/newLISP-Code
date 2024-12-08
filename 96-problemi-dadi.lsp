@@ -6,6 +6,7 @@
            with solutions and useful appendices
              (a work continually in progress)
             version July 3, 2022 (76 problems)
+            version July 7, 2024 (79 problems)
 
                      Matthew M. Conroy
             doctormatt "at" madandmoonly dot com
@@ -37,8 +38,8 @@ Here, I try solve the problems (and/or verify the results) with simulations (if 
 +  +  +  +  +  +  +  +  +  +
 
 4. Game with Dice (56..76)
-56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76
-+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
+56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
++  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  -  -
 
 Note: Number of iterations (minimum) = 1e6 (if possible)
 
@@ -4972,6 +4973,132 @@ If the second roll is 4, 5, or 6, place it in the largest available digit.
 (time (println (p76-2 1e7)))
 ;-> 504.0006572
 ;-> 8746.623
+
+
+----------
+Problem 77
+----------
+Suppose we roll a single die, repeatedly if we like, and sum. 
+We can stop at any point, and the sum becomes our score, however, if we exceed 10, our score is zero.
+What should our strategy be to maximize the expected value of our score?
+What is the expected score with this optimal strategy?
+What about limits besides 10?
+
+Solution =
+
+The optimal strategy is: roll again if the score is 5 or less, and stick otherwise.
+
+Per k = 10:
+
+       40817
+  E = ------- = 6.99879972565157
+        5832
+
+  k  s E(0)                       E(0) approx.
+  1  1 1/6                        0.166666
+  2  1 1/2                        0.5
+  3  1 1                          1
+  4  2 7/4                        1.75
+  5  2 49/18                      2.722222
+  6  3 49/12                      4.083333
+  7  4 3017/648                   4.655864
+  8  5 20629/3888                 5.305813
+  9  5 46991/7776                 6.043081
+ 10  6 40817/5832                 6.998800
+ 11  7 84035/10368                8.105228
+ 12  8 7695859/839808             9.163831
+ 13  9 101039827/10077696         10.026084
+ 14 10 55084715/5038848           10.932006
+ 15 11 4307852885/362797056       11.874002
+ 16 12 13976066993/1088391168     12.841033
+ 17 13 60156375517/4353564672     13.817729
+ 18 14 1131329591/76527504        14.783307
+ 19 15 7388908661401/470184984576 15.714897
+ 20 15 2611098542647/156728328192 16.660029
+ 50 45 .../...                    46.666667
+100 95 .../...                    96.666667
+
+The calculations suggest that the expected score approaches k − 10/3 as k goes to infinity.
+
+k --> top
+s+1 --> base
+
+(define (p77-aux top base iter)
+  (setq total 0)
+  (for (i 1 iter)
+    (setq score 0)
+    (setq stop nil)
+    (until stop
+      (++ score (die6))
+      ;(println "score: " score)
+      (if (> score base) (setq stop true))
+    )
+    ;(print "score out: " score) (read-line)
+    (if (<= score top) (++ total score))
+  )
+  (div total iter))
+
+(p77-aux 10 5 1e5)
+;-> 7.00943
+
+(define (p77 iter top)
+  (setq max-value 0)
+  (for (b 0 top)
+    (setq val (p77-aux top b iter))
+    ;(print b { } val) (read-line)
+    (when (> val max-value)
+      (setq max-value val)
+      (setq base b)))
+  (list top base max-value))
+
+(time (println (map (curry p77 1e5) (sequence 1 20))))
+;-> ((1 0 0.16534)
+;->  (2 0 0.49952)
+;->  (3 0 0.99974)
+;->  (4 1 1.75285)
+;->  (5 2 2.72391)
+;->  (6 2 4.08863)
+;->  (7 3 4.67012)
+;->  (8 4 5.29413)
+;->  (9 5 6.04536)
+;->  (10 5 6.99632)
+;->  (11 6 8.101509999999999)
+;->  (12 7 9.17095)
+;->  (13 8 10.01804)
+;->  (14 9 10.92527)
+;->  (15 10 11.88542)
+;->  (16 11 12.8383)
+;->  (17 12 13.8043)
+;->  (18 13 14.79318)
+;->  (19 14 15.68907)
+;->  (20 14 16.65286))
+;-> 12800.259
+
+(time (println (p77 1e5 50)))
+;-> (50 44 46.66873)
+;-> 6626.716
+
+(time (println (p77 1e5 100)))
+;-> (100 94 96.66309)
+;-> 23363.554
+
+  
+----------
+Problem 78
+----------
+Suppose we play a game with a die where we roll and sum our rolls. We can stop any time, and the sum is our score.
+However, if our sum is ever a multiple of 10, our score is zero, and our game is over.
+What strategy will yield the greatest expected score? What about the same game played with values other than 10?
+
+----------
+Problem 79
+----------
+Suppose we play a game with a die in which we use two rolls of the die to create a two-digit number.
+The player rolls the die once and decides which of the two digits they want that roll to represent.
+Then, the player rolls a second time and this determines the other digit.
+For instance, the player might roll a 5, and decide this should be the "tens" digit, and then roll a 6, so their resulting number is 56.
+What strategy should be used to create the largest number on average?
+What about the three digit version of the game?
 
 =============================================================================
 
