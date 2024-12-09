@@ -505,7 +505,7 @@ Numeri di Bernoulli e somma di potenze di interi successivi
 La somma delle potenze di numeri successivi è definita nel modo seguente:
 
   Sum[k=1,n]k^m = 1^m + 2^m + 3^m + ...+ n^m
-  
+
 dove m e n sono numeri interi positivi.
 
 Per m = 1: Sum[k=1,n]k = n*(n+1)/2
@@ -537,13 +537,13 @@ I numeri di Bernoulli sono definiti come:
          x->0
 
 dove f(n)(x) rappresenta la derivata n-esima di f(x)
-  
+
   B(0) = lim f(x) = 1
          x->0
-  
+
   B(1) = lim f'(x) = -1/2
          x->0
-  
+
   B(2) = lim f''(x) = 1/6
          x->0
 
@@ -632,13 +632,13 @@ I primi valori dei numeri di Bernoulli sono i seguenti:
                     )
                     (push (list n (semplifica-frazione (list num den))) bernoulli-memo -1)
                     (semplifica-frazione (list num den))))))))
-  (bernoulli-aux num)                  
+  (bernoulli-aux num)
   bernoulli-memo)
 
 Proviamo:
 
 (bernoulli 22)
-;-> ((0 (1 1)) (1 (-1 2)) (2 (1 6)) (3 (0 1)) (4 (-1 30)) (5 (0 1)) 
+;-> ((0 (1 1)) (1 (-1 2)) (2 (1 6)) (3 (0 1)) (4 (-1 30)) (5 (0 1))
 ;->  (6 (1 42)) (7 (0 1)) (8 (-1 30)) (9 (0 1)) (10 (5 66)) (11 (0 1))
 ;->  (12 (-691 2730)) (13 (0 1)) (14 (7 6)) (15 (0 1)) (16 (-3617 510))
 ;->  (17 (0 1)) (18 (43867 798)) (19 (0 1)) (20 (-174611 330)) (21 (0 1))
@@ -1090,7 +1090,7 @@ La legge di Zipf è una legge empirica che descrive la frequenza di un evento P(
 
              c
   f(P(i)) = ---
-             i  
+             i
 
 dove: i indica il rango,
       P(i) indica l'evento che occupa l'i-esimo rango (ovvero l'i-esimo evento più frequente)
@@ -1240,7 +1240,7 @@ Funzione 1 (lista):
     (unique (map sort out))))
 
 (sum4 123)
-;-> ((0 1 1 121) (0 25 49 49) (1 9 49 64) 
+;-> ((0 1 1 121) (0 25 49 49) (1 9 49 64)
 ;->  (1 16 25 81) (9 16 49 49) (9 25 25 64))
 
 Funzione 2 (vettori):
@@ -1264,7 +1264,7 @@ Funzione 2 (vettori):
     (unique (map sort out))))
 
 (somma4 123)
-;-> ((0 1 1 121) (0 25 49 49) (1 9 49 64) 
+;-> ((0 1 1 121) (0 25 49 49) (1 9 49 64)
 ;->  (1 16 25 81) (9 16 49 49) (9 25 25 64))
 (= (sum4 123) (somma4 123))
 ;-> true
@@ -1312,7 +1312,7 @@ Calcoliamo alcune scomposizioni di numeri:
 (apply + quadrati)
 ;-> 385
 (map (fn(x) (list $idx (somma4 x))) (sequence 0 20))
-;-> ((0 ((0 0 0 0))) 
+;-> ((0 ((0 0 0 0)))
 ;->  (1 ((0 0 0 1)))
 ;->  (2 ((0 0 1 1)))
 ;->  (3 ((0 1 1 1)))
@@ -1391,7 +1391,7 @@ Numeri somma di quadrati distinti
 
 Determinare i numeri che sono rappresentabili come somma di un qualunque numero di quadrati distinti.
 
-  n = a^2 + b^2 + c^2 + d^2 
+  n = a^2 + b^2 + c^2 + d^2
   dove 0 <= a < b < c < d
 
 Sequenza OEIS A003995:
@@ -2194,7 +2194,7 @@ Proviamo:
 ;-> 2372966.967
 
 Nota: dal punto di vista matematico il numero medio di passi, noto anche come tempo di assorbimento T, vale:
-  
+
   T(N) = N^2
 
 cioè il tempo medio per raggiungere +N o -N partendo da 0 è il quadrato di N.
@@ -2224,7 +2224,7 @@ The bar graph below has to be rotated counterclockwise for 90 degree:
 
 Sequenza OEIS A275339:
 a(n) is the smallest number which has a water-capacity of n.
-  60, 120, 440, 168, 264, 840, 2448, 528, 1904, 624, 1360, 2295, 816, 1632, 
+  60, 120, 440, 168, 264, 840, 2448, 528, 1904, 624, 1360, 2295, 816, 1632,
   20128, 1824, 48300, 3105, 15392, 2208, 13024, 2400, 10656, 4080, 8288,
   2784, 5920, 2976, 3552, 9120, ...
 
@@ -2295,7 +2295,7 @@ Proviamo:
 ;->  243600 11840 28560 7104 124352 13120 115776 7872 107200 8256 98624 15040
 ;->  685608 9024 81472 9408 72896 16960 973500 10176 55744 20832 47168 14880
 ;->  38592 11328 30016 11712 21440 37989 12864 27135 571872 25728 408480 28755
-;->  472416 27264 337440 28032 301920 44793 323232 31995 230880 30336 195360 
+;->  472416 27264 337440 28032 301920 44793 323232 31995 230880 30336 195360
 ;->  41280 821632 31872 124320 77875 934500 56960 721024 34176 687488 111744)
 ;-> 5156.227
 
@@ -2356,7 +2356,7 @@ Golomb's sequence: a(n) is the number of times n occurs, starting with a(1) = 1.
 
 La sequenza è definita ricorsivamente nel modo seguente:
 
-  a(1) = 1; 
+  a(1) = 1;
   a(n+1) = 1 + a(n+1 - a(a(n)))
 
 (define (a n)
@@ -2582,25 +2582,25 @@ Infatti, le soluzioni di (1) valgono:
           - b + sqrt(b^2 - 4ac)
   x1 = - -----------------------
                   2a
-  
+
           - b - sqrt(b^2 - 4ac)
   x2 = - -----------------------
                   2a
 
 Svolgendo le operazioni otteniamo:
 
-               b   
+               b
   x1 + x2 = - ---
                a
 
-             c  
+             c
   x1 * x2 = ---
              a
 
 Se a=1 (coefficiente normalizzato), queste formule diventano:
 
   x1 + x2 = b
-  
+
   x1 * x2 = c
 
 Quindi risulta:
@@ -2636,7 +2636,7 @@ Funzione che stampa l'equazione quadratica dati "x1", "x2" e "a" (opzionale):
     (if (>= (abc 2) 0)
       (setf (abc 2) (string "+ " (abc 2)))
       (setf (abc 2) (string "- " (abs (abc 2)))))
-    (if (> a 1)
+    (if (!= a 1)
       (println (abc 0) "x^2 " (abc 1) "x " (abc 2) " = 0")
       (println "x^2 " (abc 1) "x " (abc 2) " = 0")) '>))
 
@@ -2647,7 +2647,65 @@ Proviamo:
 (print-eq2 -2 3)
 ;-> x^2 - 1x - 6 = 0
 (print-eq2 -2 3 -2)
-;-> x^2 + 2x + 12 = 0
+;-> -2x^2 + 2x + 12 = 0
+
+
+---------
+Boomerang
+---------
+
+Data una lista di tre punti sul piano X-Y, determinare se questi punti sono un boomerang.
+Un boomerang è un insieme di tre punti che sono tutti distinti e non allineati.
+
+Algoritmo
+Calcolare area del triangolo formato dai 3 punti.
+Se (area > 0), allora i punti sono un boomerang
+
+Nota: se tre punti sono allineati, l'area del triangolo vale 0
+
+Per calcolare l'area di un triangolo dato da tre punti usiamo la formula:
+
+  Area = (1/2)*abs(x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))
+
+(define (area p1 p2 p3)
+  (let ((x1 (p1 0)) (y1 (p1 1))
+        (x2 (p2 0)) (y2 (p2 1))
+        (x3 (p3 0)) (y3 (p3 1)))
+    (div (abs (add (mul x1 (- y2 y3))
+                   (mul x2 (- y3 y1))
+                   (mul x3 (- y1 y2)))) 2)))
+
+(define (boomerang? p1 p2 p3) (> (area p1 p2 p3) 0))
+
+(boomerang? '(1 1) '(2 3) '(3 2))
+;-> true
+(boomerang? '(1 1) '(2 2) '(3 3))
+;-> nil
+
+Vedi anche "Punti allineati" su "Note libere 26".
+
+
+------------------------------
+Somma dei fattori di un numero
+------------------------------
+
+Sequenza OEIS A036288:
+a(n) = 1 + integer log of n: if the prime factorization of n is n = Product (p_j^k_j) then a(n) = 1 + Sum (p_j * k_j).
+  1, 3, 4, 5, 6, 6, 8, 7, 7, 8, 12, 8, 14, 10, 9, 9, 18, 9, 20, 10, 11, 14,
+  24, 10, 11, 16, 10, 12, 30, 11, 32, 11, 15, 20, 13, 11, 38, 22, 17, 12,
+  42, 13, 44, 16, 12, 26, 48, 12, 15, 13, 21, 18, 54, 12, 17, 14, 23, 32,
+  60, 13, 62, 34, 14, 13, 19, 17, 68, 22, ...
+
+(define (a n)
+  (+ 1 (apply + (factor n))))
+
+(map a (sequence 1 100))
+;-> (1 3 4 5 6 6 8 7 7 8 12 8 14 10 9 9 18 9 20 10 11 14
+;->  24 10 11 16 10 12 30 11 32 11 15 20 13 11 38 22 17 12
+;->  42 13 44 16 12 26 48 12 15 13 21 18 54 12 17 14 23 32
+;->  60 13 62 34 14 13 19 17 68 22 27 15 72 13 74 40 14 24
+;->  19 19 80 14 13 44 84 15 23 46 33 18 90 14 21 28 35 50
+;->  25 14 98 17 18 15)
 
 ============================================================================
 

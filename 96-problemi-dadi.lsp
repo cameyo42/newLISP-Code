@@ -39,7 +39,7 @@ Here, I try solve the problems (and/or verify the results) with simulations (if 
 
 4. Game with Dice (56..76)
 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
-+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  -  -
++  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  -  +
 
 Note: Number of iterations (minimum) = 1e6 (if possible)
 
@@ -4449,7 +4449,7 @@ Implement the following simple strategy (different from the optimal (complex) st
                 (setq cur-sum (+ cur-sum (apply min roll)))
                 (setq dice (- dice 1))
               )
-            )            
+            )
           )
           ; take value
           ((= turn 5)
@@ -4978,7 +4978,7 @@ If the second roll is 4, 5, or 6, place it in the largest available digit.
 ----------
 Problem 77
 ----------
-Suppose we roll a single die, repeatedly if we like, and sum. 
+Suppose we roll a single die, repeatedly if we like, and sum.
 We can stop at any point, and the sum becomes our score, however, if we exceed 10, our score is zero.
 What should our strategy be to maximize the expected value of our score?
 What is the expected score with this optimal strategy?
@@ -5082,13 +5082,15 @@ s+1 --> base
 ;-> (100 94 96.66309)
 ;-> 23363.554
 
-  
+
 ----------
 Problem 78
 ----------
-Suppose we play a game with a die where we roll and sum our rolls. We can stop any time, and the sum is our score.
+Suppose we play a game with a die where we roll and sum our rolls.
+We can stop any time, and the sum is our score.
 However, if our sum is ever a multiple of 10, our score is zero, and our game is over.
-What strategy will yield the greatest expected score? What about the same game played with values other than 10?
+What strategy will yield the greatest expected score?
+What about the same game played with values other than 10?
 
 ----------
 Problem 79
@@ -5099,6 +5101,98 @@ Then, the player rolls a second time and this determines the other digit.
 For instance, the player might roll a 5, and decide this should be the "tens" digit, and then roll a 6, so their resulting number is 56.
 What strategy should be used to create the largest number on average?
 What about the three digit version of the game?
+
+Solution =
+
+a = first digit rolled
+b = second digit rolled
+
+Best strategy
+  If (a < 4) then a is "units" digit
+  If (a >= 4) then a is "tens" digit
+
+Expected value = 45.25
+
+Three digit version:
+
+Best strategy
+
+  First roll:
+  If it is 5 or 6, put it in the "hundreds" digit;
+  If it is 3 or 4, put it in the "tens" digit;
+  otherwise, put it in the "units" digit.
+
+  Second roll:
+  If the second roll is 4, 5, or 6, place it in the largest available digit.
+
+Expected value = 504
+
+Quindi la strategia per il primo tiro è questa:
+se è almeno 5, mettilo nella cifra delle "centinaia";
+se è 3 o 4, mettilo nella cifra delle "decine";
+altrimenti, mettilo nella cifra delle "unità".
+Se il secondo tiro è 4, 5 o 6, mettilo nella cifra più grande disponibile.
+
+(define (p79-2 iter)
+  (local (sum a b c a1 b1 c1)
+    (setq sum 0)
+    (for (i 1 iter)
+      (setq a1 nil)
+      (setq b1 nil)
+      (setq c1 nil)
+      (setq a (die6))
+      (setq b (die6))
+      (setq c (die6))
+      ; set a1 (hundreds digit)
+      (cond ((or (= a 5) (= a 6)) (setq a1 a))
+            ((or (= a 3) (= a 4)) (setq b1 a))
+            (true (setq c1 a)))
+      ; set b1 (tens digit)
+      (if (>= b 4)
+        (cond ((= a1 nil) (setq a1 b))
+              ((= b1 nil) (setq b1 b))
+              (true (setq c1 b)))
+        ;else
+        (cond ((= c1 nil) (setq c1 b))
+              ((= b1 nil) (setq b1 b))
+              (true (setq a1 b))))
+      ; set c1 (units digit)
+      (cond ((= a1 nil) (setq a1 c))
+            ((= b1 nil) (setq b1 c))
+            (true (setq c1 c)))
+      ;(println a { } b { } c)
+      ;(print a1 { } b1 { } c1) (read-line)
+      (++ sum (+ (* 100 a1) (* 10 b1) c1))
+    )
+    (div sum iter)))
+
+(time (println (p79-2 1e7)))
+;-> 504.063245
+;-> 7306.012
+
+(time (println (p79-2 1e8)))
+
+(define (p79-2 iter)
+  (local (atteso-max soglia-max)
+    (setq atteso-max 0)
+    (for (s 1 6)
+      (setq atteso (p79-aux s iter))
+      (when (> atteso atteso-max)
+        (setq atteso-max atteso)
+        (setq soglia-max s))
+    )
+    (list soglia-max atteso-max)))
+
+(p79 1e6)
+;-> (4 45.249379)
+
+(time (println (p79 1e6)))
+;-> (4 45.2520554)
+;-> 18395.023
+
+(time (println (p79 1e7)))
+;-> 503.98820523
+;-> 73292.034
 
 =============================================================================
 

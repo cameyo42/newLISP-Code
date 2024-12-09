@@ -2730,10 +2730,12 @@ NOTE LIBERE 27
   Raggiungere un numero
   Lista + 1
   Generare un equazione di secondo grado dalle sue soluzioni
+  Boomerang
+  Somma dei fattori di un numero
 
 PROBLEMI SUI DADI
 =================
-  Problemi 1..77
+  Problemi 1,...,77,79
 
 APPENDICI
 =========
