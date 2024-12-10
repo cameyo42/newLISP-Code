@@ -2735,7 +2735,7 @@ NOTE LIBERE 27
 
 PROBLEMI SUI DADI
 =================
-  Problemi 1,...,77,79
+  Problemi 1,...,79
 
 APPENDICI
 =========

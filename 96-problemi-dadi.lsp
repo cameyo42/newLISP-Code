@@ -39,7 +39,7 @@ Here, I try solve the problems (and/or verify the results) with simulations (if 
 
 4. Game with Dice (56..76)
 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
-+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  -  +
++  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
 Note: Number of iterations (minimum) = 1e6 (if possible)
 
@@ -5092,6 +5092,81 @@ However, if our sum is ever a multiple of 10, our score is zero, and our game is
 What strategy will yield the greatest expected score?
 What about the same game played with values other than 10?
 
+Solution = 
+
+  Multiple  Stop if                                        Expected value
+   6        n >= 19                                        7.221451623108286812
+   7        n >= 15                                        8.585032818442838864
+   8        n = 18 or n >= 26                              10.12982919499704393
+   9        n = 21, 22 or n >= 30                          11.67916132417996147
+  10        n = 24, 25, or n >= 34                         13.21711859042473150
+  11        n = 27, 28 or n >= 38                          14.72823564563309959
+  12        n = 30, 31 or n >= 42                          16.27534383168068736
+  13        n = 33, 35, 35 or n >= 46                      17.90549414976900364
+  14        n = 36, 37, 38 or n >= 50                      19.43362157318550401
+  15        n = 39, 40, 41 or n >= 54                      20.97094434047380285
+  16        n = 42, 43, 44, 58, 59, 60, 61, 62 or n >= 74  22.51571524339529867
+  17        n = 45, 46, 47, 62, 63, 64, 65, 66 or n >= 79  24.07230800164414883
+  18        n = 48, 49, 50, 66, 67, 68, 69, 70 or n >= 84  25.64211352850069779
+  19        n = 51, 52, 53, 70, 71, 72, 73, 74 or n >= 89  27.21360753502956739
+  20        n = 54, 55, 56, 74, 75, 76, 77, 78 or n >= 94  28.75912955252540060
+For 2 ≤ m ≤ 5, it is probably best to attack each one separately, which perhaps I will do some other
+time.
+
+(define (p78-aux multiple iter)
+  (local (out total-sum sum)
+    (setq out '())
+    (for (threshold 1 (* multiple 5))
+      (setq total-sum 0)
+      (for (i 1 iter)
+        (setq sum 0)
+        (setq stop nil)
+        (until stop
+          (++ sum (die6))
+          (cond ((zero? (% sum multiple))
+                  (setq sum 0) (setq stop true))
+                ((>= sum threshold)
+                  (setq stop true)))
+        )
+        (++ total-sum sum)
+      )
+      (push (list (div total-sum iter) threshold multiple) out -1)
+    )
+    (slice (sort out >) 0 5)))
+
+(time (println (p78-aux 10 1e5)))
+;-> ((13.07064 24 10) (13.00089 34 10) (12.81273 25 10)
+;->  (12.66506 35 10) (12.6185 33 10))
+;-> 5775.614
+
+(define (p78 iter)
+  (let (all '())
+    (for (m 2 20) (push (p78-aux m iter) all -1))
+    all))
+
+(time (println (p78 1e5)))
+;-> (((1.84292 4 2) (1.84069 5 2) (1.75314 2 2) (1.74801 6 2) (1.74427 3 2))
+;->  ((3.22765 6 3) (3.22516 7 3) (3.22291 8 3) (3.22208 9 3)  (3.19883 10 3))
+;->  ((4.84863 10 4) (4.64453 11 4) (4.62431 8 4) (4.60458 9 4) (4.56584 7 4))
+;->  ((6.09159 14 5) (6.0139 13 5) (5.87152 19 5) (5.81888 12 5) (5.79181 9 5))
+;->  ((7.26643 19 6) (7.20874 18 6) (7.16395 17 6) (7.14499 20 6) (7.09515 16 6))
+;->  ((8.63397 15 7) (8.62815 21 7) (8.60365 17 7) (8.57667 20 7) (8.56742 14 7))
+;->  ((10.11247 18 8) (10.07894 26 8) (9.99337 20 8) (9.954359 19 8) (9.8894 27 8))
+;->  ((11.65506 21 9) (11.53859 30 9) (11.43899 22 9) (11.27933 31 9) (11.26477 23 9))
+;->  ((13.07495 24 10) (13.03332 34 10) (12.83548 25 10) (12.63882 35 10) (12.63565 26 10))
+;->  ((14.57754 27 11) (14.46419 38 11) (14.19757 39 11) (14.16201 28 11) (14.1185 26 11))
+;->  ((16.10793 30 12) (15.96609 42 12) (15.76574 31 12) (15.57844 29 12) (15.53497 41 12))
+;->  ((17.81304 33 13) (17.31731 46 13) (17.2768 34 13) (17.27075 32 13) (17.09088 45 13))
+;->  ((19.2301 36 14) (18.87064 50 14) (18.66517 37 14) (18.63103 35 14) (18.48454 49 14))
+;->  ((20.73613 39 15) (20.34628 38 15) (20.31207 54 15) (20.17826 40 15) (19.92924 53 15))
+;->  ((22.22996 42 16) (21.94507 58 16) (21.81567 41 16) (21.55064 43 16) (21.38942 57 16))
+;->  ((23.78885 45 17) (23.29691 44 17) (23.21664 46 17) (23.19335 62 17) (22.97474 61 17))
+;->  ((25.28714 48 18) (24.9625 47 18) (24.72711 66 18) (24.61202 49 18) (24.29813 46 18))
+;->  ((26.89535 51 19) (26.37129 50 19) (25.97682 70 19) (25.9735 52 19) (25.75297 69 19))
+;->  ((28.33066 54 20) (28.02455 53 20) (27.70042 74 20) (27.55503 52 20) (27.50127 55 20)))
+;-> 156308.517
+
+
 ----------
 Problem 79
 ----------
@@ -5104,6 +5179,8 @@ What about the three digit version of the game?
 
 Solution =
 
+Two digit version:
+
 a = first digit rolled
 b = second digit rolled
 
@@ -5112,6 +5189,43 @@ Best strategy
   If (a >= 4) then a is "tens" digit
 
 Expected value = 45.25
+
+(define (p79-aux soglia iter)
+  (local (a b sum)
+    (setq sum 0)
+    (for (i 1 iter)
+      (setq a (die6))
+      (setq b (die6))
+      (if (< a soglia) 
+        (++ sum (+ (* 10 b) a))
+        (++ sum (+ (* 10 a) b)))
+    )
+    (div sum iter)))
+
+(p79-aux 4 1e6)
+;-> 45.26546
+
+(define (p79 iter)
+  (local (atteso-max soglia-max)
+    (setq atteso-max 0)
+    (for (s 1 6)
+      (setq atteso (p79-aux s iter))
+      (when (> atteso atteso-max)
+        (setq atteso-max atteso)
+        (setq soglia-max s))
+    )
+    (list soglia-max atteso-max)))
+
+(p79 1e6)
+;-> (4 45.249379)
+
+(time (println (p79 1e6)))
+;-> (4 45.2520554)
+;-> 1868.528
+
+(time (println (p79 1e7)))
+;-> (4 45.2449624)
+;-> 18617.625
 
 Three digit version:
 
@@ -5171,28 +5285,7 @@ Se il secondo tiro è 4, 5 o 6, mettilo nella cifra più grande disponibile.
 ;-> 7306.012
 
 (time (println (p79-2 1e8)))
-
-(define (p79-2 iter)
-  (local (atteso-max soglia-max)
-    (setq atteso-max 0)
-    (for (s 1 6)
-      (setq atteso (p79-aux s iter))
-      (when (> atteso atteso-max)
-        (setq atteso-max atteso)
-        (setq soglia-max s))
-    )
-    (list soglia-max atteso-max)))
-
-(p79 1e6)
-;-> (4 45.249379)
-
-(time (println (p79 1e6)))
-;-> (4 45.2520554)
-;-> 18395.023
-
-(time (println (p79 1e7)))
-;-> 503.98820523
-;-> 73292.034
-
+;-> 504.0430185
+;-> 72580.145
 =============================================================================
 
