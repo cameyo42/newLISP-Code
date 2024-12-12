@@ -2806,5 +2806,235 @@ d(n) (also called tau(n) or sigma_0(n)), the number of divisors of n.
 
 Vedi anche "Numeri somma di numeri consecutivi" su "Note libere 14".
 
+
+---------------------------
+Cifre nelle proprie colonne
+---------------------------
+
+Data una lista di numeri interi, stampare ogni numero in colonna nell'ordine -0123456789, ignorando eventuali cifre duplicate.
+
+Esempio:
+Lista: (41 1729 1 57869 -45613839 3483425877823495 -10984 -984938744 0 22)
+Output:
+;-> -0123456789  <- Aggiunto solo a scopo chiarificatore, non fa parte dell'output.
+;->   1  4
+;->   12    7 9
+;->   1
+;->       56789
+;-> - 1 3456 89
+;->    2345 789
+;-> -01  4   89
+;-> -   34  789
+;->  0
+;->    2
+
+Funzione che allinea le cifre di un numero nel formato "-0123456789":
+
+(define (line-up num)
+  (let (str (dup " " 11)) ; " ", "-" e "0"..."9"
+    (if (< num 0) (begin (setf (str 0) "-") (setq num (abs num))))
+    (if (zero? num) (setf (str 1) "0"))
+    (while (!= num 0)
+      (setf (str (+ (% num 10) 1)) (string (% num 10)))
+      (setq num (/ num 10)))
+    str))
+
+(line-up -13728553)
+;-> "- 123 5 78 "
+
+Funzione che allinea le cifre dei numeri di una lista nel formato "-0123456789":
+
+(define (align-digits lst)
+  (dolist (el lst)
+    (println (line-up el))) '>)
+
+Proviamo:
+
+(align-digits '(1 729 4728510 -3832 748129321 89842 -938744 0 11111))
+;->   1
+;->    2    7 9
+;->  012 45 78
+;-> -  23    8
+;->   1234  789
+;->    2 4   89
+;-> -   34  789
+;->  0
+;->   1
+
+(align-digits '(4 534 4 4 53 26 71 835044))
+;->      4
+;->     345
+;->      4
+;->      4
+;->     3 5
+;->    2   6
+;->   1     7
+;->  0  345  8
+
+(align-digits '(99 88 77 66 55 44 33 22 11 0))
+;->           9
+;->          8
+;->         7
+;->        6
+;->       5
+;->      4
+;->     3
+;->    2
+;->   1
+;->  0
+
+Nota: Progetto codice segreto
+Per il seguente alfabeto vedi "Caratteri con matrice 5x5" su "Note libere 22".
+
+   █   ████   ████ ████  █████ █████  ████ █   █ █████
+  █ █  █   █ █     █   █ █     █     █     █   █   █
+ █   █ ████  █     █   █ ███   ███   █  ██ █████   █
+ █████ █   █ █     █   █ █     █     █   █ █   █   █
+ █   █ ████   ████ ████  █████ █      ████ █   █ █████
+
+
+ █████ █   █ █     █   █ █   █  ███  ████   ███  ████
+    █  █  █  █     ██ ██ ██  █ █   █ █   █ █   █ █   █
+    █  ███   █     █ █ █ █ █ █ █   █ ████  █ █ █ ████
+ █  █  █  █  █     █   █ █  ██ █   █ █     █  █  █   █
+  ██   █   █ █████ █   █ █   █  ███  █      ██ █ █   █
+
+  ████ █████ █   █ █   █ █   █ █   █ █   █ █████
+ █       █   █   █ █   █ █   █  █ █   █ █     █
+  ███    █   █   █ █ █ █ █   █   █     █     █
+     █   █   █   █ ██ ██  █ █   █ █    █    █
+ ████    █    ███  █   █   █   █   █   █   █████
+
+Modi di indicizzare la lettera "A" con il formato "-0123456789":
+
+ -0123456789 -0123456789 -0123456789 -0123456789 -0123456789 -0123456789
+   █            █            █            █            █            █
+  █ █          █ █          █ █          █ █          █ █          █ █
+ █   █        █   █        █   █        █   █        █   █        █   █
+ █████        █████        █████        █████        █████        █████
+ █   █        █   █        █   █        █   █        █   █        █   █
+   1            2          ...
+  0 2          1 3         ...
+ -3           0   4        ...
+ -0123        01234        ...
+ -3           0   4        ...
+
+Nel codice segreto la lista (1 20 -3 -1230 -3) rappresenta il carattere "A".
+
+(align-digits '(1 20 -3 -1230 -3))
+;->   1
+;->  0 2
+;-> -   3
+;-> -0123
+;-> -   3
+
+Oppure anche (usando la seconda codifica della "A"):
+
+(align-digits '(2 13 40 12340 40))
+;->    2
+;->   1 3
+;->  0   4
+;->  01234
+;->  0   4
+
+Possiamo "offuscare" i numeri della lista inserendo ad ogni numero alcune cifre che appartengono al numero stesso.
+Per esempio:
+  (1 20 -3 -1230 -3) --> (11 2020 -33 -132003 -3)
+
+(align-digits '(11 2020 -33 -132003 -3))
+;->   1
+;->  0 2
+;-> -   3
+;-> -0123
+;-> -   3
+
+
+-------------
+Leetcode 1227
+-------------
+
+Vediamo un problema dal sito Leetcode:
+
+https://leetcode.com/problems/airplane-seat-assignment-probability/description/
+
+1227. Airplane Seat Assignment Probability
+------------------------------------------
+n passengers board an airplane with exactly n seats.
+The first passenger has lost the ticket and picks a seat randomly.
+But after that, the rest of the passengers will:
+
+a) Take their own seat if it is still available, or
+
+b) Pick other seats randomly when they find their seat occupied.
+
+Return the probability that the nth person gets his own seat.
+
+Example 1:
+Input: n = 1
+Output: 1.00000
+Explanation: The first person can only get the first seat.
+
+Example 2:
+Input: n = 2
+Output: 0.50000
+Explanation: The second person has a probability of 0.5 to get the second seat (when first person gets the first seat).
+
+Constraints:
+
+1 <= n <= 105
+
+Soluzione
+
+(define (own-seat? n) (if (= n 1) 1 0.5))
+
+(map own-seat? (sequence 1 10))
+;-> (1 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5)
+
+Per la spiegazione vedi "Volo completo (Programming Praxis)" su "Domande programmatori".
+
+
+-----------------------
+Generazione di frazioni
+-----------------------
+
+Dato un numero intero N, restituire una lista di tutte le frazioni semplificate comprese tra 0 e 1 (esclusi) tali che il denominatore sia minore o uguale a N.
+
+Esempio: 
+N = 3 
+Frazioni: 1/2, 1/3 , 2/3
+
+Esempio:
+N = 4
+Frazioni: 1/2, 1/3, 1/4, 2/3, 3/4
+In questo caso 2/4 = 1/2.
+
+(define (fractions n)
+  (let (out '())
+    (for (den 2 n)
+      (for (num 1 den)
+        ;(print num { } den) (read-line)
+        (if (= (gcd num den) 1) (push (list num den) out -1))))
+    out))
+
+Proviamo:
+
+(fractions 3)
+;-> ((1 2) (1 3) (2 3))
+
+(fractions 4)
+;-> ((1 2) (1 3) (2 3) (1 4) (3 4))
+
+(fractions 10)
+;-> ((1 2) (1 3) (2 3) (1 4) (3 4) (1 5) (2 5) (3 5) (4 5) (1 6) (5 6) (1 7)
+;->  (2 7) (3 7) (4 7) (5 7) (6 7) (1 8) (3 8) (5 8) (7 8) (1 9) (2 9) (4 9)
+;->  (5 9) (7 9) (8 9) (1 10) (3 10) (7 10) (9 10))
+
+(length (fractions 10))
+;-> 31
+(length (fractions 100))
+;-> 3043
+(length (fractions 1000))
+;-> 304191
+
 ============================================================================
 

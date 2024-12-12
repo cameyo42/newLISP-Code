@@ -2733,6 +2733,9 @@ NOTE LIBERE 27
   Boomerang
   Somma dei fattori di un numero
   Somma di numeri consecutivi
+  Cifre nelle proprie colonne
+  Leetcode 1227
+  Generazione di frazioni
 
 PROBLEMI SUI DADI
 =================

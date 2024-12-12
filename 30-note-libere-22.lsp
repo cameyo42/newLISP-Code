@@ -6662,12 +6662,16 @@ Proviamo:
 ;-> ■  ■■  ■      ■■ ■■  ■        ■        ■  ■
 ;-> ■   ■  ■■■■■  ■   ■  ■■■■■  ■■■■■  ■■■■   ■
 
-(print-matrix (string-matrix "newlisp" 2) "█")
-;-> █   █  █████  █   █  █      █████   ████  ████
-;-> ██  █  █      █   █  █        █    █      █   █
-;-> █ █ █  ███    █ █ █  █        █     ███   ████
-;-> █  ██  █      ██ ██  █        █        █  █
-;-> █   █  █████  █   █  █████  █████  ████   █
+(print-matrix (string-matrix "abcXYZ" 2) "█")
+;->   █    ████    ████  █   █  █   █  █████
+;->  █ █   █   █  █       █ █    █ █      █
+;-> █   █  ████   █        █      █      █
+;-> █████  █   █  █       █ █     █     █
+;-> █   █  ████    ████  █   █    █    █████
+
+(print-matrix (string-matrix "abcdefghi" 1) "█")
+(print-matrix (string-matrix "jklmnopqr" 1) "█")
+(print-matrix (string-matrix "stuwvxyz" 1) "█")
 
 
 ------------------------------------------------

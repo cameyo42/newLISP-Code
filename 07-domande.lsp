@@ -5781,6 +5781,8 @@ Funzione che calcola le probabilità:
 
 La teoria conferma che il valore di probabilità vale 1/2.
 
+Vedi anche "Leetcode 1227" su "Note libere 27".
+
 
 -------------------------
 Benzina e stazioni (Uber)
