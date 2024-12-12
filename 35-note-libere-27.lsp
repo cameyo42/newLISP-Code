@@ -2659,9 +2659,9 @@ Un boomerang è un insieme di tre punti che sono tutti distinti e non allineati.
 
 Algoritmo
 Calcolare area del triangolo formato dai 3 punti.
-Se (area > 0), allora i punti sono un boomerang
+Se (area > 0), allora i punti sono un boomerang.
 
-Nota: se tre punti sono allineati, l'area del triangolo vale 0
+Nota: se tre punti sono allineati, l'area del triangolo vale 0.
 
 Per calcolare l'area di un triangolo dato da tre punti usiamo la formula:
 
@@ -2706,6 +2706,105 @@ a(n) = 1 + integer log of n: if the prime factorization of n is n = Product (p_j
 ;->  60 13 62 34 14 13 19 17 68 22 27 15 72 13 74 40 14 24
 ;->  19 19 80 14 13 44 84 15 23 46 33 18 90 14 21 28 35 50
 ;->  25 14 98 17 18 15)
+
+
+---------------------------
+Somma di numeri consecutivi
+---------------------------
+
+Dato un numero intero N, restituire il numero di modi in cui è possibile scrivere N come somma di numeri interi positivi consecutivi.
+
+Esempio:
+N = 5
+2 + 3, 5 --> 2
+
+Esempio:
+N = 9
+4 + 5, 2 + 3 + 4, 9 --> 3
+
+Esempio:
+N = 15
+8 + 7, 4 + 5 + 6, 1 + 2 + 3 + 4 + 5, 15 --> 4
+
+(define (somma-numeri-consecutivi n)
+  (let ( (out 0) (i 1) (triangolare 1) )
+    ;(while (< triangolare n) ; non conta N come somma
+    (while (<= triangolare n)
+      (if (zero? (% (- n triangolare) i)) (++ out))
+      (++ i)
+      (++ triangolare))
+    out))
+
+Ecco come funziona:
+1. Inizializzazione
+   "out": conta il numero di modi validi in cui può essere espresso n.
+   "i": rappresenta il numero di termini consecutivi nella somma.
+   "triangolare": la somma dei primi i numeri naturali (1 + 2 + ... + i = i*(i+1)/2).
+2. Ciclo While
+   Continua mentre "triangolare" i*(i+1)/2 è minore o uguale a n.
+   Questo assicura che stiamo controllando solo somme che potrebbero essere valide.
+3. Verifica validità
+   Se n - "triangolare" è divisibile per i, allora n può essere espresso come la somma di i numeri interi consecutivi.
+   Questo funziona perché la somma di i numeri interi consecutivi può essere scritta come:
+   i*inizio + triangolare = n.
+4. Aggiorna valori
+   Incrementa "i" (numero di termini).
+   Aggiorna "triangolare" alla somma dei primi i numeri naturali.
+5. Restitusce il risultato
+   Dopo aver controllato tutti i valori possibili, restituisce "out".
+Complessità temporale: O(sqrt(n)), poiché il ciclo viene eseguito finché triangolare <= N
+Complessità spaziale: O(1), non viene utilizzato spazio aggiuntivo.
+
+Proviamo:
+
+(somma-numeri-consecutivi 4)
+;-> 3
+(somma-numeri-consecutivi 5)
+;-> 2
+(somma-numeri-consecutivi 9)
+;-> 3
+(somma-numeri-consecutivi 15)
+;-> 4
+
+(map somma-numeri-consecutivi (sequence 1 100))
+;-> (1 2 2 3 2 4 2 4 3 4 2 6 2 4 4 5 2 6 2 6 4 4 2 8 3 4 4 6 2 8 2 6 4 4 4
+;->  9 2 4 4 8 2 8 2 6 6 4 2 10 3 6 4 6 2 8 4 8 4 4 2 12 2 4 6 7 4 8 2 6 4
+;->  8 2 12 2 4 6 6 4 8 2 10 5 4 2 12 4 4 4 8 2 12 4 6 4 4 4 12 2 6 6 9)
+
+Curiosamente questa sequenza rappresenta anche il numero di divisori di N.
+
+Sequenza OEIS A000005:
+d(n) (also called tau(n) or sigma_0(n)), the number of divisors of n.
+  1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, 4, 4, 2, 8,
+  3, 4, 4, 6, 2, 8, 2, 6, 4, 4, 4, 9, 2, 4, 4, 8, 2, 8, 2, 6, 6, 4, 2, 10,
+  3, 6, 4, 6, 2, 8, 4, 8, 4, 4, 2, 12, 2, 4, 6, 7, 4, 8, 2, 6, 4, 8, 2, 12,
+  2, 4, 6, 6, 4, 8, 2, 10, 5, 4, 2, 12, 4, 4, 4, 8, 2, 12, 4, 6, 4, 4, 4,
+  12, 2, 6, 6, 9, 2, 8, 2, 8, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors-count num)
+"Count the divisors of an integer number"
+  (if (= num 1)
+      1
+      (let (lst (factor-group num))
+        (apply * (map (fn(x) (+ 1 (last x))) lst)))))
+
+(map divisors-count (sequence 1 100))
+;-> (1 2 2 3 2 4 2 4 3 4 2 6 2 4 4 5 2 6 2 6 4 4 2 8 3 4 4 6 2 8 2 6 4 4 4
+;->  9 2 4 4 8 2 8 2 6 6 4 2 10 3 6 4 6 2 8 4 8 4 4 2 12 2 4 6 7 4 8 2 6 4
+;->  8 2 12 2 4 6 6 4 8 2 10 5 4 2 12 4 4 4 8 2 12 4 6 4 4 4 12 2 6 6 9)
+
+(= (map somma-numeri-consecutivi (sequence 1 100))
+   (map divisors-count (sequence 1 100)))
+;-> true
+
+Vedi anche "Numeri somma di numeri consecutivi" su "Note libere 14".
 
 ============================================================================
 

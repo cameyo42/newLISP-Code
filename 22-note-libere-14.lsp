@@ -2828,6 +2828,8 @@ Se supponiamo che S è della forma 2^p, allora sia k che (2n+k−1) devono esser
 Notiamo che quando k è pari, l'espressione (2*n − 1 + k) genera un numero dispari. Questa è una contraddizione.
 Quindi S non può essere della forma 2^p.
 
+Vedi anche "Somma di numeri consecutivi" su "Note libere 27".
+
 
 -------------------------------
 Best time to Buy and Sell Stock

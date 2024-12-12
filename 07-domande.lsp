@@ -3544,7 +3544,7 @@ Insiemi con la stessa somma (Wolfram)
 
 Verificare la seguente affermazione:
 
-" Ogni insieme di 10 numeri distinti nell'intervallo [1..100] ha due sottoinsiemi disgiunti non vuoti cha hanno la stessa somma."
+"Ogni insieme di 10 numeri distinti nell'intervallo [1..100] ha due sottoinsiemi disgiunti non vuoti che hanno la stessa somma."
 
 Per esempio, l'insieme (1 3 7 76 34 36 4 55 71 88) ha due sottoinsiemi non vuoti (a1 a2...) e (b1 b2...) che hanno la stessa somma.
 
@@ -3627,7 +3627,8 @@ Adesso proviamo 10000 volte per vedere se la funzione restituisce sempre un valo
 Sembra che l'affermazione sia vera.
 Adesso dovremmo verificare che gli insiemi che hanno la stessa somma siano disgiunti (cioè non abbiamo elementi in comune). Ma non è necessario scrivere codice, perchè anche se gli insiemi avessero degli elementi in comune, possiamo sempre eliminare questi elementi da entrambi gli insiemi mantenendo uguali le somme dei numeri di entrambi gli insiemi (e rendendo in questo modo gli insiemi disgiunti).
 
-La funzione che abbiamo scritto non prova che l'affermazione sia vera. Possiamo provarla con il seguente ragionamento:
+La funzione che abbiamo scritto non prova che l'affermazione sia vera.
+Possiamo provarla con il seguente ragionamento:
 
 - il numero di somme possibili vale il numero di elementi del powerset (meno l'insieme vuoto), cioè (2^10 - 1) = 1023
 

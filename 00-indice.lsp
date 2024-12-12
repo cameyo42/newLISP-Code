@@ -2732,6 +2732,7 @@ NOTE LIBERE 27
   Generare un equazione di secondo grado dalle sue soluzioni
   Boomerang
   Somma dei fattori di un numero
+  Somma di numeri consecutivi
 
 PROBLEMI SUI DADI
 =================
