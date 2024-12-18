@@ -4696,6 +4696,8 @@ Se vogliamo eliminare le terne simmetriche possiamo ordinare tutte le terne e po
 (unique (map (fn(x) (sort x)) (filter coprimi? (terne 20))))
 ;-> ((3 4 5) (5 12 13) (7 24 25) (8 15 17) (9 40 41) (11 60 61) (12 35 37))
 
+Vedi anche "Terne pitagoriche primitive" su "Note libere 27".
+
 
 ---------------------------------
 Calcolo di e con il metodo spigot
@@ -5573,6 +5575,8 @@ Test del risultato:
 (dolist (el pq)
   (if (= (test (el 0) (el 1) (el 2) (el 3)) true)
     (println el)))
+
+Vedi anche "Quadruple pitagoriche (scatole pitagoriche)" in "Note libere 8".
 
 
 -------------------------

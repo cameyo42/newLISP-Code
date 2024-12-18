@@ -1127,7 +1127,7 @@ NOTE LIBERE 8
   Mini-puzzle
   Minimo, massimo e indici
   Wordle
-  Quadruple pitagoriche
+  Quadruple pitagoriche (scatole pitagoriche)
   Formula di Haversine
   Formula di Lamberts
   Metodo di bisezione
@@ -2736,6 +2736,8 @@ NOTE LIBERE 27
   Cifre nelle proprie colonne
   Leetcode 1227
   Generazione di frazioni
+  Quanto conta veloce newLISP?
+  Terne pitagoriche primitive
 
 PROBLEMI SUI DADI
 =================

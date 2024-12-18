@@ -2981,7 +2981,7 @@ Explanation: The second person has a probability of 0.5 to get the second seat (
 
 Constraints:
 
-1 <= n <= 105
+1 <= n <= 10^5
 
 Soluzione
 
@@ -3035,6 +3035,156 @@ Proviamo:
 ;-> 3043
 (length (fractions 1000))
 ;-> 304191
+
+
+----------------------------
+Quanto conta veloce newLISP?
+----------------------------
+
+Vediamo la velocità di newLISP nel contare da 1 a N.
+
+Contatore con ciclo "while":
+
+(define (speed N)
+  (local (contatore start elapsed)
+    (setq contatore 0) 
+    (setq elapsed 0)
+    (setq start (time-of-day))
+    (while (< contatore N) (++ contatore))
+    (setq elapsed (- (time-of-day) start))
+    (println "Conteggio: " contatore)
+    (println "Tempo: " elapsed " millisec")
+    (println "Velocità: " (int (div contatore (div elapsed 1000))) " numeri/sec") '>))
+
+(speed 1e8)
+;-> Conteggio: 100000000
+;-> Tempo: 4835 millisec
+;-> Velocità: 20682523 numeri/sec
+
+Tempo necessario per arrivare a MAX-INT:
+
+(setq MAX-INT 9223372036854775807)
+
+(define (period msec show)
+"Print a millisec number in hours, minutes, seconds, millisec"
+  (local (conv unit expr val out)
+    (setq conv '(("d" 86400000) ("h" 3600000) ("m" 60000) ("s" 1000) ("ms" 1)))
+    (setq out '())
+    (setq msec (int msec))
+    (dolist (el conv)
+      (setq unit (el 0))
+      (setq expr (el 1))
+      (setq val (/ msec expr))
+      ; numero di millisecondi rimasti
+      ; (resto della divisione)
+      (setq msec (% msec expr))
+      (push val out -1)
+      (if (and (> val 0) show)
+        (print val unit " ")
+      )
+    )
+    (if show (println))
+    out))
+
+(period (div MAX-INT 20682523) true)
+;-> 5161d 11h 43s 756ms
+
+Contatore con ciclo "dotimes":
+
+(define (speed1 N)
+  (local (contatore start elapsed)
+    (setq elapsed 0)
+    (setq start (time-of-day))
+    ;(setq contatore (dotimes (i N) i))
+    (setq contatore 0)
+    (dotimes (i N) (++ contatore))
+    (setq elapsed (- (time-of-day) start))
+    (println "Conteggio: " contatore)
+    (println "Tempo: " elapsed " millisec")
+    (println "Velocità: " (int (div contatore (div elapsed 1000))) " numeri/sec") '>))
+
+(speed1 1e8)
+;-> Conteggio: 100000000
+;-> Tempo: 2855 millisec
+;-> Velocità: 35026269 numeri/sec
+
+Tempo necessario per arrivare a MAX-INT:
+
+(period (div MAX-INT 35026269) true)
+;-> 3047d 18h 27m 56s 931ms
+
+Contatore del ciclo "dotimes":
+
+(define (speed2 N)
+  (local (contatore start elapsed)
+    (setq elapsed 0)
+    (setq start (time-of-day))
+    ;(setq contatore 0)
+    ;(dotimes (i N) (++ contatore))
+    (setq contatore (dotimes (i N) i))
+    (setq elapsed (- (time-of-day) start))
+    (println "Conteggio: " (+ 1 contatore))
+    (println "Tempo: " elapsed " millisec")
+    (println "Velocità: " (int (div contatore (div elapsed 1000))) " numeri/sec") '>))
+
+(speed2 1e8)
+;-> Conteggio: 100000000
+;-> Tempo: 971 millisec
+;-> Velocità: 102986610 numeri/sec
+
+Tempo necessario per arrivare a MAX-INT:
+
+(period (div MAX-INT 102986610) true)
+;-> 1036d 13h 29m 3s 991ms
+
+
+---------------------------
+Terne pitagoriche primitive
+---------------------------
+
+Una terna pitagorica è costituita da tre numeri interi positivi a, b e c con a < b < c tale che a^2 + b^2 = c^2.
+Ad esempio, i tre numeri 3, 4 e 5 formano una tripla pitagorica perché 3^2 + 4^2 = 9 + 16 = 25 = 5^2.
+Le espressioni matematiche utilizzate per generare le terne pitagoriche primitive sono quelle del metodo di Euclide:
+
+1. Calcolo dei numeri della terna
+   - a = m^2 - n^2
+   - b = 2*m*n
+   - c = m^2 + n^2
+
+Dove m e n sono numeri interi positivi con m > n > 0 .
+
+Queste formule permettono di generare una terna pitagorica (a, b, c) che soddisfa l'equazione:
+ a^2 + b^2 = c^2 
+
+2. Condizione di primitività:
+   - Una terna è considerata primitiva se il massimo comune divisore (gcd) di a, b e c è 1.
+   - Utilizzando la funzione gcd: gcd(a, b) = gcd(gcd(a, b), c) = 1
+
+Il programma seguente genera tutte le terne pitagoriche primitive con "c" minore del parametro "limite".
+
+(define (terna-primitiva? a b c)
+  (= 1 (gcd (gcd a b) c)))
+
+(define (terne-primitive limite)
+  (let (out '())
+    (for (m 2 (sqrt limite))
+      (for (n 1 (- m 1))
+        (let ((a (- (* m m) (* n n)))
+              (b (* 2 m n))
+              (c (+ (* m m) (* n n))))
+          (when (and (< c limite) (terna-primitiva? a b c))
+            (push (list a b c) out -1)))))
+    out))
+
+(terne-primitive 200)
+;-> ((3 4 5) (5 12 13) (15 8 17) (7 24 25) (21 20 29) (9 40 41) (35 12 37)
+;->  (11 60 61) (45 28 53) (33 56 65) (13 84 85) (63 16 65) (55 48 73)
+;->  (39 80 89) (15 112 113) (77 36 85) (65 72 97) (17 144 145) (99 20 101)
+;->  (91 60 109) (51 140 149) (19 180 181) (117 44 125) (105 88 137)
+;->  (85 132 157) (57 176 185) (143 24 145) (119 120 169) (95 168 193)
+;->  (165 52 173) (153 104 185) (195 28 197))
+
+Vedi anche "Terne pitagoriche" su "Funzioni varie".
 
 ============================================================================
 

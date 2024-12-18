@@ -442,9 +442,9 @@ Facciamo una partita:
 (wordle)
 
 
----------------------
-Quadruple pitagoriche
----------------------
+-------------------------------------------
+Quadruple pitagoriche (scatole pitagoriche)
+-------------------------------------------
 
 Una quadrupla pitagorica è una tupla di interi a, b, c e d, tale che a^2 + b^2 + c^2 = d^2. Sono soluzioni di un'equazione diofantiea e in genere vengono considerati solo valori interi positivi.
 Una quadrupla pitagorica (a, b, c, d) definisce un cuboide con lati interi |a|, |b| e |c|, la cui diagonale ha lunghezza intera d (le quadruple pitagoriche sono quindi anche dette scatole pitagoriche (pythagorean boxes).
@@ -558,10 +558,12 @@ Vediamo se le funzioni producono gli stessi risultati:
 (= q q1)
 ;-> true
 
-L'ultima funzione "quadruple2" è molto più veloce ed ha una complessità temporale pari a O(n^2.x) e comunque mostra presto i suoi limiti:
+L'ultima funzione "quadruple2" è molto più veloce ed ha una complessità temporale pari a O(n^2) e comunque mostra presto i suoi limiti:
 
 (time (setq qq (quadruple2 5000)))
 ;-> 64124.424
+
+Vedi anche "Quadruple pitagoriche" in "Funzioni varie".
 
 
 --------------------
