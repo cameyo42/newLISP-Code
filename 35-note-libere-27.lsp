@@ -3186,5 +3186,35 @@ Il programma seguente genera tutte le terne pitagoriche primitive con "c" minore
 
 Vedi anche "Terne pitagoriche" su "Funzioni varie".
 
+
+--------------------------------------------
+Coppie di una lista divisibili per un numero
+--------------------------------------------
+
+Data una lista di numeri interi e un intero k, trovare il numero di coppie (i,j) tali che il prodotto di lista[i] e lista[j] sia divisibile per k.
+
+Algoritmo:
+Calcolare il massimo comune divisore (MCD) di ogni numero della lista con k.
+Quindi, per ogni coppia (nums[i], nums[j]), controllare se i relativi valori MCD moltiplicati tra loro sono divisibili per k.
+In caso affermativo, aggiungerli al conteggio.
+
+(define (coppie-divisibili lst k)
+  (let ( (out '()) (mcds (map (fn(x) (gcd x k)) lst)) )
+    (for (i 0 (- (length mcds) 2))
+      (for (j (+ i 1) (- (length mcds) 1))
+        (if (zero? (% (* (mcds i) (mcds j)) k))
+            (push (list i j) out -1))))
+    out))
+
+Proviamo:
+
+(setq lst '(1 2 3 4 5))
+(setq coppie (coppie-divisibili lst 2))
+;-> ((0 1) (0 3) (1 2) (1 3) (1 4) (2 3) (3 4))
+(length coppie)
+;-> 7
+(map (fn(x) (* (lst (x 0)) (lst (x 1)))) coppie)
+;-> (2 4 6 8 10 12 20)
+
 ============================================================================
 

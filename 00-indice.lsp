@@ -2738,6 +2738,7 @@ NOTE LIBERE 27
   Generazione di frazioni
   Quanto conta veloce newLISP?
   Terne pitagoriche primitive
+  Coppie di una lista divisibili per un numero
 
 PROBLEMI SUI DADI
 =================
