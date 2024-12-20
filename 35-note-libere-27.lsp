@@ -3216,5 +3216,252 @@ Proviamo:
 (map (fn(x) (* (lst (x 0)) (lst (x 1)))) coppie)
 ;-> (2 4 6 8 10 12 20)
 
+
+--------------------------------------
+Sequenze contigue lanciando una moneta
+--------------------------------------
+
+Lanciando una moneta N volte, qual'è la lunghezza media della sequenza tutte Teste o tutte Croci?
+La lunghezza di una sequenza (tutte Teste o Croci) è data dal massimo numero di volte consecutive che compare Testa o Croce.
+Per esempio, nella sequenza "C C T T C C T T T T T C C T C T T T C C T" la lunghezza massima vale 5 ed è data dalla sottosequenza "T T T T T".
+
+0 = T
+1 = C
+
+Metodo 1
+--------
+Generiamo un elemento casuale alla volta e teniamo traccia della lunghezza massima delle sottosequenze create.
+
+Funzione che genera una sequenza di 1 e 0 lunga N e restituisce la lunghezza massima delle sottosequenze di 0 o 1 consecutivi:
+
+(define (subseq-base N)
+  (local (out max-len cur-len cur old num)
+    (setq out '())
+    (setq max-len 0)
+    (setq cur (rand 2))
+    (push cur out -1)
+    (setq cur-len 1)
+    (setq old cur)
+    (for (i 2 N)
+      (setq cur (rand 2))
+      (push cur out -1)
+      (cond ((= cur old) (++ cur-len))
+            (true ; (!= cur old)
+              (when (> cur-len max-len) (setq max-len cur-len) (setq num old))
+              (setq old cur)
+              (setq cur-len 1)))
+      (when (> cur-len max-len) (setq max-len cur-len) (setq num old)))
+    (println out)
+    (list max-len num)))
+
+Proviamo:
+
+(subseq-base 10)
+;-> (0 0 1 0 0 0 1 0 1 1)
+;-> (3 0)
+
+(subseq-base 20)
+;-> (1 0 1 0 0 1 0 0 1 1 1 1 1 0 0 0 1 0 0 0)
+;-> (5 1)
+
+Funzione che genera una sequenza di 1 e 0 lunga N e restituisce la lunghezza massima delle sottosequenze di 0 o 1 consecutivi (ottimizzata per la simulazione):
+
+(define (subseq N)
+  (local (max-len cur-len cur old)
+    (setq max-len 0)
+    (setq cur (rand 2))
+    (setq cur-len 1)
+    (setq old cur)
+    (for (i 2 N)
+      (setq cur (rand 2))
+      (cond ((= cur old) (++ cur-len))
+            (true ; (!= cur old)
+              (setq max-len (max max-len cur-len))
+              (setq old cur)
+              (setq cur-len 1)))
+      (setq max-len (max max-len cur-len)))
+    max-len))
+
+Proviamo:
+
+(subseq 10)
+;-> 4
+
+(subseq 20)
+;-> 5
+
+Funzione che simula il lancio di N monete per determinato numero di volte:
+
+(define (simula N iter)
+  (local (totale massima media current)
+    (setq totale 0)
+    (setq massima 0)
+    (for (i 1 iter)
+      (setq current (subseq N))
+      (setq massima (max current massima))
+      (++ totale current))
+    (println "N = " N)
+    (println "Massima = " massima)
+    (println "Media = " (div totale iter)) '>))
+
+Proviamo:
+
+(simula 10 1e5)
+;-> N = 10
+;-> Massima = 10
+;-> Media = 3.66759
+
+(simula 100 1e5)
+;-> N = 100
+;-> Massima = 23
+;-> Media = 6.97662
+
+(time (simula 1000 1e5))
+;-> N = 1000
+;-> Massima = 26
+;-> Media = 10.29992
+;-> 16836.908
+
+Metodo 2
+--------
+Costruiamo la lista casuale con "(rand 2 N)" e poi cerchiamo la sottosequenza di elementi uguali più lunga.
+
+Funzione che prende una lista di 0 e 1 e restituisce la lunghezza massima delle sottosequenze di 0 o 1 consecutivi:
+
+(define (subseq2 lst)
+  (local (max-len current-len prev current)
+    (setq max-len 1)
+    (setq current-len 1)
+    (setq prev (lst 0))
+    (dolist (current (rest lst))
+      (if (= current prev)
+          (++ current-len)
+          (begin
+            (setq max-len (max max-len current-len))
+            (setq current-len 1)
+            (setq prev current))))
+    (max max-len current-len)))
+
+Proviamo:
+
+(subseq2 '(1 1 1 0 0 1 0 1 0 0 0 0))
+;-> 4
+(subseq2 '(1 1 1 1 1 0 0 1 0 1 0 0 0 0))
+;-> 5
+(subseq2 '(0 1 1 1 1 0))
+;-> 4
+
+Funzione che simula il lancio di N monete per determinato numero di volte:
+
+(define (simula2 N iter)
+  (local (totale massima media current)
+    (setq totale 0)
+    (setq massima 0)
+    (for (i 1 iter)
+      (setq current (subseq2 (rand 2 N)))
+      (setq massima (max current massima))
+      (++ totale current))
+    (println "N = " N)
+    (println "Massima = " massima)
+    (println "Media = " (div totale iter)) '>))
+
+Proviamo:
+
+(simula2 10 1e5)
+;-> N = 10
+;-> Massima = 10
+;-> Media = 3.66759
+
+(simula2 100 1e5)
+;-> N = 100
+;-> Massima = 23
+;-> Media = 6.97662
+
+(time (simula2 1000 1e5))
+;-> N = 1000
+;-> Massima = 26
+;-> Media = 10.29992
+;-> 11580.025
+
+(time (simula2 10000 1e5))
+;-> N = 10000
+;-> Massima = 28
+;-> Media = 13.61738
+;-> 115152.254
+
+Altra funzione che prende una lista di 0 e 1 e restituisce la lunghezza massima delle sottosequenze di 0 o 1 consecutivi:
+
+(define (subseq3 lst)
+  (local (longest long0 long1)
+    (setq longest 0)
+    (dolist (el lst)
+      (if (zero? el)
+          (begin (++ long0) (setq long1 0))
+          (begin (++ long1) (setq long0 0)))
+      (setq longest (max longest long0 long1))
+    )
+    longest))
+
+Proviamo:
+
+(subseq3 '(1 1 1 0 0 1 0 1 0 0 0 0))
+;-> 4
+(subseq3 '(1 1 1 1 1 0 0 1 0 1 0 0 0 0))
+;-> 5
+(subseq3 '(0 1 1 1 1 0))
+;-> 4
+
+Funzione che simula il lancio di N monete per determinato numero di volte:
+
+(define (simula3 N iter)
+  (local (totale massima media current)
+    (setq totale 0)
+    (setq massima 0)
+    (for (i 1 iter)
+      (setq current (subseq3 (rand 2 N)))
+      (setq massima (max current massima))
+      (++ totale current))
+    (println "N = " N)
+    (println "Massima = " massima)
+    (println "Media = " (div totale iter)) '>))
+
+Proviamo:
+
+(simula3 10 1e5)
+;-> N = 10
+;-> Massima = 10
+;-> Media = 3.66759
+
+(simula3 100 1e5)
+;-> N = 100
+;-> Massima = 23
+;-> Media = 6.97662
+
+(time (simula3 1000 1e5))
+;-> N = 1000
+;-> Massima = 25
+;-> Media = 10.29318
+;-> 14871.415
+
+(time (simula3 10000 1e5))
+;-> N = 10000
+;-> Massima = 28
+;-> Media = 13.6133
+;-> 147778.812
+
+La funzione più veloce è "simula2".
+
+(time (simula2 100000 1e3))
+;-> N = 100000
+;-> Massima = 26
+;-> Media = 16.812
+;-> 11376.299
+
+(time (simula2 1000000 1e3))
+;-> N = 1000000
+;-> Massima = 28
+;-> Media = 20.227
+;-> 121220.188
+
 ============================================================================
 

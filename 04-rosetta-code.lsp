@@ -9333,6 +9333,10 @@ Adesso possiamo scrivere la funzione che utilizza le variabili globali:
 (eval-rpn '(a b + 5 - sqrt))
 ;-> 5
 
+Per una calcolatrice RPN scientifica per Windows/Mac/Linux vedi:
+
+https://github.com/cameyo42/ForthCalc
+
 
 ---------------
 IL GIOCO DEL 24

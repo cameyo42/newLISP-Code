@@ -2739,6 +2739,7 @@ NOTE LIBERE 27
   Quanto conta veloce newLISP?
   Terne pitagoriche primitive
   Coppie di una lista divisibili per un numero
+  Sequenze contigue lanciando una moneta
 
 PROBLEMI SUI DADI
 =================
