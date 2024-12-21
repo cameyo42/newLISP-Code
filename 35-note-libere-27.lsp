@@ -3463,5 +3463,146 @@ La funzione più veloce è "simula2".
 ;-> Media = 20.227
 ;-> 121220.188
 
+
+--------------------------------------------------
+Numero più piccolo con N cifre divisibile K interi
+--------------------------------------------------
+
+Data una lista di K interi positivi e un numero intero N, determinare il numero più piccolo con N cifre che è divisibile per ognuno dei K interi della lista.
+
+Esempio 1
+---------
+Trovare il più piccolo numero a due cifre divisibile per 2, 3 e 4.
+
+Calcoliamo il minimo comune multiplo di tutti i numeri:
+
+  mcm(2 3 4) = 12
+
+Adesso dobbiamo trovare il più piccolo multiplo del mcm che sia maggiore o uguale al più piccolo numero a due cifre.
+
+Il più piccolo numero a due cifre vale 10.
+
+Calcoliamo il rapporto tra il numero più piccolo con due cifre (10) e il minimo comune multiplo (12):
+
+  base = 10/12 = 0.8333...
+
+Poichè il rapporto deve essere intero, prendiamo l'intero successivo (ceil):
+
+  base = ceil(10/12) = 1
+
+Quindi il primo numero con due cifre da provare vale:
+
+  numero = base * mcm = 1 * 12 = 12
+
+Se il numero ha due cifre, allora è la soluzione (come in questo caso 12).
+Altrimenti provare con il prossimo multiplo del numero (2*12=24).
+
+Esempio 2
+---------
+Trovare il più piccolo numero a quattro cifre divisibile per 3, 4, 5 e 6.
+
+  mcm(3 4 5 6) = 60
+  Numero più piccolo a 4 cifre = 1000
+  base = ceil(1000/60) = 17
+  numero = base * mcm = 17 * 60 = 1020
+Il numero ha quattro cifre ed è la soluzione.
+
+Esempio 3
+---------
+Trovare il più piccolo numero a sei cifre divisibile per 4, 8, 12 e 16.
+
+  mcm(4 8 12 16) = 48
+  Numero più piccolo a 6 cifre = 100000
+  base = ceil(100000/48) = 2084
+  numero = 2084*48 = 99912
+Il numero 99912 ha solo cinque cifre, quindi proviamo con il prossimo multiplo:
+  numero = 2085*48 = 100032
+Il numero 100032 ha sei cifre ed è la soluzione.
+
+
+Esempio 4
+---------
+Trovare il più piccolo numero a due cifre divisibile per 3, 4, 5, 6 e 7.
+
+  mcm(3 4 5 6 7) = 420
+  Numero più piccolo a 2 cifre = 10
+  base = ceil(10/420) = 1
+  numero = base * mcm = 1 * 420 = 420
+Il primo multiplo vale 420 ed è maggiore di 99 (che è il più grande numero a due cifre), quindi non esiste nessun numero a due cifre divisibile per 3, 4, 5, 6 e 7.
+
+(define (lcm_ a b) (/ (* a b) (gcd a b)))
+(define-macro (lcm)
+"Calculates the lcm of two or more number"
+  (apply lcm_ (map eval (args)) 2))
+
+(apply lcm '(2 3 4))
+;-> 12
+
+1) Soluzione (brute-force)
+
+(define (brute digit divisors)
+  (local (numero found impossible)
+    (setq numero (pow 10 (- digit 1)))
+    (setq found nil)
+    (setq impossible nil)
+    (until (or found impossible)
+      (cond ((> (length numero) digit) ; soluzione impossibile
+              (setq impossible true))
+            ((for-all (fn(x) (zero? (% numero x))) divisors) ; soluzione
+            (setq found true))
+            (true (++ numero))) ; proviamo il prossimo numero
+    (cond (impossible nil)
+          (found numero))))
+
+Proviamo:
+
+(brute 2 '(2 3 4))
+;-> 12
+(brute 4 '(3 4 5 6))
+;-> 1020
+(brute 6 '(4 8 12 16))
+;-> 100032
+(brute 2 '(3 4 5 6 7))
+;-> nil
+(brute 6 '(5 7 11 13))
+;-> 100100
+(brute 4 '(1 2 3 4 5 6 7 8 9 10))
+;-> 2520
+
+2) Soluzione (minimo comune multiplo)
+
+(define (lowest-number digit divisors)
+  (local (mcm minimo base found impossible numero)
+    (setq mcm (apply lcm divisors))
+    (setq minimo (pow 10 (- digit 1)))
+    (setq base (ceil (div minimo mcm)))
+    (setq found nil)
+    (setq impossible nil)
+    (until (or found impossible)
+      (setq numero (* base mcm))
+      (cond ((and (= (length numero) digit) (>= numero minimo)) ; soluzione
+            (setq found true))
+            ((> (length numero) digit) ; soluzione impossibile
+              (setq impossible true))
+            ((< numero minimo) ; proviamo il prossimo multiplo
+              (++ base))))
+    (cond (impossible nil)
+          (found numero))))
+
+Proviamo:
+
+(lowest-number 2 '(2 3 4))
+;-> 12
+(lowest-number 4 '(3 4 5 6))
+;-> 1020
+(lowest-number 6 '(4 8 12 16))
+;-> 100032
+(lowest-number 2 '(3 4 5 6 7))
+;-> nil
+(lowest-number 6 '(5 7 11 13))
+;-> 100100
+(lowest-number 4 '(1 2 3 4 5 6 7 8 9 10))
+;-> 2520
+
 ============================================================================
 
