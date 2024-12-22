@@ -3604,5 +3604,158 @@ Proviamo:
 (lowest-number 4 '(1 2 3 4 5 6 7 8 9 10))
 ;-> 2520
 
+
+----------------------------------------
+Prodotto delle cifre minimo e divisibile
+----------------------------------------
+
+Dati due numeri interi positivi k e t:
+
+1) determinare il più piccolo numero maggiore o uguale a k tale che il prodotto delle sue cifre sia divisibile per t. Se tale numero non esiste, restituire "nil".
+
+2) determinare il più piccolo numero zero-free maggiore o uguale a k tale che il prodotto delle sue cifre sia divisibile per t. Se tale numero non esiste, restituire "nil".
+
+Un numero si dice "zero-free" se nessuna delle sue cifre è 0.
+
+Problema 1
+----------
+(define (digit-prod num)
+"Calculates the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10))
+        )
+    out)))
+
+(define (p1 k t)
+  (let ( (out nil) (stop nil) (num k) )
+    (until stop
+      (if (zero? (% (digit-prod num) t)) (set 'out num 'stop true))
+      (++ num))
+    out))
+
+Proviamo:
+
+(p1 10 2)
+;-> 10
+
+(p1 1234 256)
+;-> 1240
+
+(p1 12355 50)
+;-> 12355
+
+(p1 11111 26)
+;-> 11120
+
+(p2 12355 26)
+
+Problema 2
+----------
+
+(define (p2 k t)
+  (let ( (out nil) (stop nil) (num k))
+    (until stop
+      (setq product (digit-prod num))
+      (if (and (!= product 0) (zero? (% product t))) (set 'out num 'stop true))
+      (++ num))
+    out))
+
+Proviamo:
+
+(p2 1234 256)
+;-> 1488
+
+(p2 12355 50)
+;-> 12355
+
+Sembra che funzioni... purtroppo il seguente esempio non termina:
+
+(p2 11111 26)
+
+Per risolvere il problema dobbiamo utilizzare un pò di matematica.
+
+Consideriamo un numero N.
+Se tutte le cifre di N non contengono zeri, il prodotto delle cifre di N è costituito dai fattori primi di queste cifre.
+Le cifre di un numero (da 1 a 9) hanno i seguenti fattori primi:
+
+  - 1: Nessun fattore primo
+  - 2: 2
+  - 3: 3
+  - 4: 2^2
+  - 5: 5
+  - 6: 2*3
+  - 7: 7
+  - 8: 2^3
+  - 9: 3^2
+
+Prendendo solo i fattori unici otteniamo: 2, 3, 5 e 7.
+Quindi gli unici fattori primi del prodotto delle cifre di qualunque numero N sono 2, 3, 5, e 7.
+Affinché il prodotto delle cifre di un numero sia divisibile per t, t deve essere scomponibile nei fattori primi disponibili dalle cifre (da 1 a 9), cioè 2, 3, 5 e 7.
+Se t contiene fattori primi che non possono essere formati dal prodotto delle cifre 1-9, allora esiste un numero zero-free il cui prodotto delle cifre è divisibile per t.
+
+In altre parole, se i fattori di t sono diversi da (2 3 5 7), allora non esiste soluzione.
+Questo perchè (2 3 5 7) sono gli unici fattori del prodotto delle cifre di qualunque numero N.
+
+(map factor (sequence 1 9))
+;-> (nil (2) (3) (2 2) (5) (2 3) (7) (2 2 2) (3 3))
+(unique (flat (map factor (sequence 1 9))))
+;-> (nil 2 3 5 7)
+(unique (flat (map factor (sequence 2 9))))
+;-> (2 3 5 7)
+
+(define (digit-prod num)
+"Calculates the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10))
+        )
+    out)))
+
+(define (p21 k t)
+  (let ( (divisors '(2 3 5 7))
+         (t-factors (unique (factor t))) )
+    ; controlla se i fattori di t sono un sottoinsieme di (2 3 5 7)
+    (if (null? (difference t-factors divisors))
+        (let ( (out nil) (stop nil) (num k) )
+          (until stop
+            (setq product (digit-prod num))
+            (if (and (!= product 0) (zero? (% product t))) (set 'out num 'stop true))
+            (++ num))
+          out)
+        ;else
+        nil)))
+
+Proviamo:
+
+(p21 1234 256)
+;-> 1488
+(p21 12355 50)
+;-> 12355
+(p21 11111 26)
+;-> nil
+
+Verifichiamo che il prodotto delle cifre dei numeri da 1 ad un dato limite contiene solo i fattori 2, 3, 5 e 7.
+
+(define (test limite)
+  (let ( (divisors '(2 3 5 7))
+         (prodotti (map digit-prod (sequence 1 limite))) )
+    (dolist (el prodotti)
+      (if (> el 1) ; non considera 0 e 1
+        (begin
+          (setq fattori (unique (factor el)))
+          ; esiste qualche fattore di t diverso da 2 o 3 o 5 o 7?
+          (if (!= (difference fattori '(2 3 5 7)) '())
+            (println el { } fattori)))))))
+
+(test 1e7)
+;-> nil
+
 ============================================================================
 

@@ -2741,6 +2741,7 @@ NOTE LIBERE 27
   Coppie di una lista divisibili per un numero
   Sequenze contigue lanciando una moneta
   Numero più piccolo con N cifre divisibile K interi
+  Prodotto delle cifre minimo e divisibile
 
 PROBLEMI SUI DADI
 =================
