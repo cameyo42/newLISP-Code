@@ -17,6 +17,84 @@ Un informatico dovrebbe sempre avere un interesse profondo per i fondamenti teor
 Notazione Big-O
 ---------------
 
+Nello studio di algoritmi e strutture dati, ci si imbatte spesso nel termine "complessità temporale".
+Questo concetto è fondamentale nell'informatica e consiste nella valutazione asintotica del tempo impiegato da un algoritmo per essere completato in funzione della dimensione di input.
+La complessità temporale fornisce un limite superiore al tempo di esecuzione, definendo lo scenario peggiore in termini di prestazioni.
+La complessità temporale ci permette di prevedere quale sia l'algoritmo migliore (in termini di tempo di esecuzione) senza dover eseguire gli algoritmi con input effettivamente grandi.
+La cosa importante della complessità temporale è che di solito non consideriamo le costanti quando analizziamo la complessità temporale.
+Di solito vogliamo trovare la "famiglia" di funzioni che corrisponde più da vicino alla crescita del tempo di elaborazione. Ad esempio, si può dire che O(2n) e O(5n) appartengono alla famiglia di funzioni O(n).
+
+Questa è la notazione standard per descrivere la complessità temporale di un algoritmo.
+Quando diciamo che un algoritmo ha una complessità temporale di O(n), intendiamo che nel caso peggiore, il tempo di esecuzione dell'algoritmo cresce linearmente con la dimensione dell'input.
+
+Prendiamo un singolo ciclo for da 1 a n.
+La complessità temporale del programma sarebbe O(n).
+Anche se il ciclo va da 1 a 1e20 la complessità temporale non cambierebbe perché il tempo di esecuzione cresce comunque linearmente con n.
+
+Vediamo una lista delle complessità temporali più comuni:
+
+O(1)
+Complessità temporale costante.
+Ricerca hashmap
+Accesso e aggiornamento array
+Pushing e pop di elementi da uno stack
+Trovare e applicare formule matematiche
+In genere per n > 10^9
+
+O(log(N))
+log(N) cresce molto lentamente. log(1.000.000) è solo circa 20.
+La ricerca per chiave primaria in un database relazionale è log(N) (molti database relazionali tradizionali come postgres usano B-tree per l'indicizzazione di default e la ricerca in un B-tree è log(N)).
+log(N) in genere significa:
+  - Ricerca binaria o variante
+  - Ricerca ad albero di ricerca binaria bilanciata
+  - Elaborazione delle cifre di un numero
+In genere per n > 10^8
+Nota: a meno che non sia specificato, assumiamo che log(N) si riferisca a log2(N) o "log base 2 di N".
+
+O(N)
+Il tempo lineare in genere significa eseguire un ciclo attraverso una struttura dati lineare un numero costante di volte. Comunemente, ciò significa:
+ - Attraversare array/lista concatenata
+ - Due puntatori
+ - Alcuni tipi di greedy
+ - Attraversamento alberi/grafi
+ - Stack/Queue (Pile/Code)
+In genere per n <= 10^6
+
+O(K log(N))
+Push/pop heap K volte.
+Problemi che cercano i "top K elementi":
+K punti più vicini, unire K elenchi ordinati.
+Ricerca binaria K volte.
+In genere per n <= 10^6
+
+O(N log(N))
+Ordinamento. 
+Il runtime previsto dell'algoritmo di ordinamento predefinito in tutti i linguaggi principali è N log(N).
+Dividi et impera con un'operazione di merge in tempo lineare.
+La divisione è normalmente log(N) e se merge è O(N) il runtime complessivo è O(N log(N)).
+In genere per n <= 10^6
+
+O(N^2)
+Chiamato anche tempo quadratico.
+Cicli annidati, ad esempio, attraversando gli elementi di una matrice
+Molte soluzioni di forza bruta
+In genere per n ≤ 3000
+Per piccoli N < 1000, questo è quasi sempre sufficiente.
+
+O(2^N)
+Cresce molto rapidamente. Spesso richiede la memoizzazione per evitare calcoli ripetuti e ridurre la complessità.
+Problemi combinatori, backtracking.
+Spesso comporta ricorsione ed è più difficile analizzare la complessità temporale.
+In genere per n <= 20
+
+O(N!)
+Cresce in maniera folle.
+Risolvibile dai computer solo per N piccolo.
+Spesso richiede la memoizzazione per evitare calcoli ripetuti e ridurre la complessità.
+Problemi combinatori (permutazioni), backtracking. 
+Spesso comporta ricorsione ed è più difficile analizzare la complessità temporale.
+In genere per n <= 12
+
 Il seguente elenco mostra (in maniera essenzialmente pratica) le varie complessità temporali degli algoritmi:
 
 O(1)

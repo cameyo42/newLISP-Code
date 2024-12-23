@@ -3464,9 +3464,68 @@ La funzione più veloce è "simula2".
 ;-> 121220.188
 
 
---------------------------------------------------
-Numero più piccolo con N cifre divisibile K interi
---------------------------------------------------
+-----------------------------------------------
+Numero più piccolo con N cifre divisibile per N
+-----------------------------------------------
+
+Dato un numero intero positivo N, determinare il più piccolo numero di N cifre divisibile per N.
+
+Sequenza OEIS A053041:
+Smallest n-digit number divisible by n.
+  1, 10, 102, 1000, 10000, 100002, 1000006, 10000000, 100000008, 1000000000,
+  10000000010, 100000000008, 1000000000012, 10000000000004, 100000000000005,
+  1000000000000000, 10000000000000016, 100000000000000008, 1000000000000000018,
+  10000000000000000000, ...
+
+Metodo brute-force:
+
+(define (smallest N)
+  (let ( (massimo (- (pow 10 N) 1)) ; valore massimo di N cifre
+         (minimo (pow 10 (- N 1)))  ; valore minimo di N cifre
+         (out nil) (stop nil) )
+    (for (num minimo massimo 1 stop) ; ciclo da minimo a massimo
+      (when (zero? (% num N))
+        (setq out num) (setq stop true)))
+    out))
+
+Proviamo:
+
+(smallest 2)
+;-> 10
+
+(smallest 3)
+;-> 102
+
+(smallest 4)
+;-> 1000
+
+(map smallest (sequence 1 10))
+;-> (1 10 102 1000 10000 100002 1000006 10000000 100000008 1000000000)
+
+Metodo matematico:
+Se il numero è divisibile per N, allora il numero sarà della forma N * X per un numero intero positivo X.
+Poiché deve essere il più piccolo numero di N cifre, allora X sarà dato da:
+
+   10^(N-1)
+  ----------
+      N
+
+Pertanto, il più piccolo numero di N cifre è dato da:
+
+          10^(N-1)
+  N*ceil(----------)
+             N
+
+(define (smallest2 N)
+    (* N (ceil (div (pow 10 (- N 1)) N))))
+
+(map smallest2 (sequence 1 10))
+;-> (1 10 102 1000 10000 100002 1000006 10000000 100000008 1000000000)
+
+
+------------------------------------------------------
+Numero più piccolo con N cifre divisibile per K interi
+------------------------------------------------------
 
 Data una lista di K interi positivi e un numero intero N, determinare il numero più piccolo con N cifre che è divisibile per ognuno dei K interi della lista.
 
