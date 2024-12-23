@@ -503,7 +503,7 @@ DOMANDE PROGRAMMATORI (CODING INTERVIEW QUESTIONS)
   Lista strettamente crescente (Visa)
   Pile di monete (LinkedIn)
   Numero più grande formato da una lista (Amazon)
-  Rettagoli e quadrati in una scacchiera (Google)
+  Rettangoli e quadrati in una scacchiera (Google)
   Rettangolo perfetto (Google)
   Addizione per intervalli (Range addition) (Google)
   Ordinamento Wiggle (Google)
@@ -2743,6 +2743,7 @@ NOTE LIBERE 27
   Numero più piccolo con N cifre divisibile per N
   Numero più piccolo con N cifre divisibile per K interi
   Prodotto delle cifre minimo e divisibile
+  Intersezione di rettangoli
 
 PROBLEMI SUI DADI
 =================

@@ -3816,5 +3816,107 @@ Verifichiamo che il prodotto delle cifre dei numeri da 1 ad un dato limite conti
 (test 1e7)
 ;-> nil
 
+
+------------------------------
+Fattori in comune tra N numeri
+------------------------------
+
+Dati N numeri interi positivi maggiori di 1, determinare i fattori che sono in comune a tutti gli interi.
+
+(define (take-common lst1 lst2)
+"Take common element of two lists (take 1:1)"
+  (local (a b f out)
+    (setq out '())
+    ; copy of lst1
+    (setq a lst1)
+    ; copy of lst2
+    (setq b lst2)
+    ; loop
+    (dolist (el lst1)
+      ; if currente element of lst1 exists in lst2...
+      (if (setq f (ref el b))
+        (begin
+          ; then insert current element of lst1 in list 'out'
+          (push el out -1)
+          ; and delete current element from both lists
+          (pop a (ref el a)) (pop b f))
+      )
+    )
+    ;(println a) (println b)
+    out))
+
+(define-macro (take-commons)
+"Take common element of n lists (take 1:1)"
+  (apply take-common (map eval (args)) 2))
+
+Funzione che trova i fattori comuni di N liste:
+
+(define (common-factors lst) (apply take-commons (map factor lst)))
+
+Proviamo:
+
+(common-factors '(3 5 24 56 128 78))
+;-> ()
+(common-factors '(2 1246 24 56 128 78))
+;-> (2)
+
+
+--------------------------
+Intersezione di rettangoli
+--------------------------
+
+Dati due rettangoli, determinare il rettangolo che rappresenta la loro intersezione (overlay).
+1) ogni rettangolo è rappresentato da una lista con i punti lower-left e upper-right: (x0,y0) e (x1,y1).
+2) non sono ruotati, sono tutti rettangoli con i lati a due a due paralleli all'asse X e all'asse Y.
+3) sono posizionati in modo casuale: possono toccarsi ai bordi, sovrapporsi o non avere alcun contatto.
+
+Calcolo dell'intersezione di due rettangoli:
+
+Rettangolo A: ((x0A y0A) (x1A y1A))
+(x0A y0A) (angolo inferiore sinistro)
+(x1A y1A) (angolo superiore destro)
+
+Rettangolo B: ((x0B y0B) (x1B y1B))
+(x0B y0B) (angolo inferiore sinistro)
+(x1B y1B) (angolo superiore destro)
+
+La coordinata x-minima dell'intersezione sarà il massimo tra x0A e x0B.
+La coordinata x-massima dell'intersezione sarà il minimo tra x1A e x1B.
+La coordinata y-minima dell'intersezione sarà il massimo tra y0A e y0B.
+La coordinata y-massima dell'intersezione sarà il minimo tra y1A e y1B.
+
+L'intersezione esiste solo se:
+1) Il valore massimo della coordinata x-minima è minore del valore minimo della coordinata x-massima e
+2) Il valore massimo della coordinata y-minima è minore del valore minimo della coordinata y-massima.
+
+(define (overlay A B)
+  (local (x0A y0A x1A y1A x0B y0B x1B y1B
+          xmin ymin xmax ymax)
+    (setq x0A (A 0 0)) (setq y0A (A 0 1))
+    (setq x1A (A 1 0)) (setq y1A (A 1 1))
+    (setq x0B (B 0 0)) (setq y0B (B 0 1))
+    (setq x1B (B 1 0)) (setq y1B (B 1 1))
+    (setq xmin (max x0A x0B))
+    (setq ymin (max y0A y0B))
+    (setq xmax (min x1A x1B))
+    (setq ymax (min y1A y1B))
+    # verifica dell'intersezione
+    (if (and (< xmin xmax) (< ymin ymax))
+        (list (list xmin ymin)
+              (list xmax ymax))
+        ; else (nessuna intersezione)
+        '())))
+
+Proviamo:
+
+(overlay '((1 1) (4 4)) '((2 2) (5 5)))
+;-> ((2 2) (4 4))
+
+(overlay '((2 2) (4 4)) '((3 3) (4 5)))
+;-> ((3 3) (4 4))
+
+(overlay '((1 1) (4 4)) '((4 1) (6 4)))
+;-> ()
+
 ============================================================================
 

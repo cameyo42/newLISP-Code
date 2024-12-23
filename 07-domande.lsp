@@ -7068,9 +7068,9 @@ Dobbiamo cambiare il metodo di comparazione nell'ordinamento:
 ;-> "42423420"
 
 
------------------------------------------------
-Rettagoli e quadrati in una scacchiera (Google)
------------------------------------------------
+------------------------------------------------
+Rettangoli e quadrati in una scacchiera (Google)
+------------------------------------------------
 
 A) Quanti rettangoli ci sono in una scacchiera?
 

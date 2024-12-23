@@ -7793,7 +7793,6 @@ Per N liste:
 Nota: (find-differents a b c) != (find-different (find-different a b) c)
 
 (define (find-differents)
-"Remove common element of n lists (take 1:1)"
   ; calcola gli elementi in comune tra tutte le liste date
   (let (comuni (apply find-equals (args)))
     ; unisce le liste ed elimina le liste vuote
