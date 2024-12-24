@@ -3918,5 +3918,135 @@ Proviamo:
 (overlay '((1 1) (4 4)) '((4 1) (6 4)))
 ;-> ()
 
+
+------------------------------------------------------------------------
+Posizione migliore per un centro di servizi (Gradient descent algorithm)
+------------------------------------------------------------------------
+
+Un'azienda vuole costruire un nuovo centro di servizi in città. 
+L'azienda conosce le posizioni di tutti i clienti della città (coordinate 2D) e vuole costruire il nuovo centro in una posizione tale che la somma delle distanze euclidee da tutti i clienti sia minima.
+
+Data una lista di posizioni in cui lista[i] = (xi, yi) è la posizione dell'i-esimo cliente, restituire la posizione del nuovo centro per cui è minima la somma delle distanze euclidee da tutti i clienti.
+
+In altre parole, bisogna determinare la posizione del centro di servizi (xc, yc) tale che la seguente formula sia minimizzata:
+
+  Distanza = Sum[i=1,n](sqrt((xi - xc)^2) + (yi - yc)^2)
+
+Per risolvere il problema usiamo la tecnica della "discesa del gradiente" (gradient descent).
+Si tratta di un algoritmo di ottimizzazione iterativo per trovare il minimo di una funzione.
+In questo caso la funzione che vogliamo minimizzare è la somma delle distanze.
+Partendo da una posizione iniziale e muovendoci iterativamente nella direzione opposta al gradiente (la direzione dell'aumento più ripido), possiamo trovare il minimo locale della funzione.
+Possiamo usare questo metodo perchè in questo problema, il minimo locale è anche il minimo globale.
+Come posizione iniziale possiamo scegliere il centroide dei punti, che rappresenta la media aritmetica di tutti i punti dati. 
+Mentre il centroide riduce al minimo la somma delle distanze euclidee al quadrato, non minimizza necessariamente la somma delle distanze euclidee, ma fornisce un buon punto di partenza.
+
+La soluzione inizia con il centroide dei punti dati e poi ne regola ripetutamente la posizione calcolando il gradiente (la direzione e la velocità dell'aumento più rapido della somma delle distanze) e spostandosi di un piccolo passo nella direzione opposta.
+Questo processo viene ripetuto finché il cambiamento nella posizione del punto non diventa inferiore ad una data soglia, indicando che la somma minima delle distanze è stata raggiunta (approssimativamente).
+Durante l'avvicinamento al minimo i passi di spostamento diminuiscono per rendere la soluzione più precisa.
+
+(define (centroide points)
+  (local (sum-x sum-y num-points out)
+    (setq num-points (length points))
+    (setq sum-x 0)
+    (setq sum-y 0)
+    (dolist (p points)
+      (setq sum-x (add sum-x (p 0)))
+      (setq sum-y (add sum-y (p 1)))
+    )
+    (list (div sum-x num-points)
+          (div sum-y num-points))))
+
+(setq pts '((1 2) (3 4) (5 6)))
+(centroide pts)
+;-> (3 4)
+
+(define (solve pts)
+  (local (centroid point-x point-y decay eps shift-rate
+          continua grad-x grad-y total-dist diff-x diff-y
+          dist delta-x delta-y)
+    ; calcola il centroide dei punti (punto iniziale)
+    (setq centroid (centroide pts))
+    (setq point-x (centroid 0))
+    (setq point-y (centroid 1))
+    ; Parametri dell'algoritmo "Discesa del gradiente"
+    (setq eps 1e-6)
+    (setq shift-rate 0.5)
+    (setq decay 0.999)
+    ; Algoritmo "Discesa del gradiente" per minimizzare la somma delle distanze
+    (setq continua true)
+    (while continua
+      ; inizializza gradienti e la distanza totale
+      (setq grad-x 0.0)
+      (setq grad-y 0.0)
+      (setq total-dist 0.0)
+      ; calcola i gradienti e la somma delle distanze di tutti i punti
+      (dolist (p pts)
+        (setq diff-x (sub point-x (p 0)))
+        (setq diff-y (sub point-y (p 1)))
+        (setq dist (sqrt (add (mul diff-x diff-x) (mul diff-y diff-y))))
+        ;(setq dist (add (mul diff-x diff-x) (mul diff-y diff-y)))
+        ; evita la divisione per 0
+        (if (< dist 1e-8) (setq dist 1e-8))
+        (setq grad-x (add grad-x (div diff-x dist)))
+        (setq grad-y (add grad-y (div diff-y dist)))
+        (setq total-dist (add total-dist dist))
+      )
+      ; calcola la lunghezza dello spostamento corrente
+      (setq delta-x (mul grad-x shift-rate))
+      (setq delta-y (mul grad-y shift-rate))
+      ; aggiorna le coordinate del punto con il gradiente (direzione opposta)
+      (setq point-x (sub point-x delta-x))
+      (setq point-y (sub point-y delta-y))
+      ; diminuisce il tasso di spostamento ad ogni iterazione
+      (setq shift-rate (mul shift-rate decay))
+      # controllo della convergenza (soluzione)
+      (when (and (<= (abs delta-x) eps) (<= (abs delta-y) eps))
+        (setq continua nil))
+    )
+    (list total-dist point-x point-y)))
+
+Proviamo:
+
+(setq pts '((1 2) (3 4) (5 6)))
+(solve pts)
+;-> (5.656854259492381 3 4)
+
+(setq pts '((0 0) (4 0) (0 4) (4 4)))
+(solve pts)
+;-> (11.31370849898476 2 2)
+
+(setq pts '((1 2) (3 4) (5 6) (7 4) (5 2)))
+(solve pts)
+;-> (11.98303134343762 4.091519582026579 3.657006989118677)
+
+Vediamo la velocità della funzione:
+
+Diecimila punti (1e4)
+(silent 
+  (setq px (rand 10000 1e4))
+  (setq py (rand 10000 1e4))
+  (setq pts (map list px py)))
+(time (println (solve pts)))
+;-> (38002963.16131432 4944.260552594469 4983.856553035509)
+;-> 38.914
+
+Centomila punti (1e5)
+(silent 
+  (setq px (rand 10000 1e5))
+  (setq py (rand 10000 1e5))
+  (setq pts (map list px py)))
+(time (println (solve pts)))
+;-> (383231163.9428849 5002.541041950339 4992.217882055365)
+;-> 69744.413
+
+Un milione di punti (1e6)
+(silent 
+  (setq px (rand 10000 1e6))
+  (setq py (rand 10000 1e6))
+  (setq pts (map list px py)))
+(time (println (solve pts)))
+;-> (3824815946.535104 4998.716331585972 5006.518203239871)
+;-> 1750068.13
+
 ============================================================================
 

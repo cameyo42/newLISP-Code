@@ -2744,6 +2744,7 @@ NOTE LIBERE 27
   Numero più piccolo con N cifre divisibile per K interi
   Prodotto delle cifre minimo e divisibile
   Intersezione di rettangoli
+  Posizione migliore per un centro di servizi (Gradient descent algorithm)
 
 PROBLEMI SUI DADI
 =================
