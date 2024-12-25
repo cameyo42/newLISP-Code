@@ -2745,6 +2745,7 @@ NOTE LIBERE 27
   Prodotto delle cifre minimo e divisibile
   Intersezione di rettangoli
   Posizione migliore per un centro di servizi (Gradient descent algorithm)
+  Il coniglio e la carota (punto raggiungibile)
 
 PROBLEMI SUI DADI
 =================

@@ -4048,5 +4048,53 @@ Un milione di punti (1e6)
 ;-> (3824815946.535104 4998.716331585972 5006.518203239871)
 ;-> 1750068.13
 
+
+---------------------------------------------
+Il coniglio e la carota (punto raggiungibile)
+---------------------------------------------
+
+Un coniglio si trova nella cella (1, 1) di una griglia infinita. 
+Nella cella (xc, yc) della griglia si trova una carota.
+Ad ogni passo, dalla posizione corrente (x, y) il coniglio può muoversi in uno dei modi seguenti:
+
+1) (x, y - x)
+2) (x - y, y)
+3) (2*x, y)
+4) (x, 2*y)
+
+Date le coordinate intere (xc, yc) della carota, determinare se il coniglio (partendo da (1, 1)), può raggiungere la carota in un numero finito di passi.
+
+Nota: la griglia non ammette valori negativi, (0 <= x <= Infinito) e (0 <= y <= Infinito).
+
+Per risolvere il problema bisogna notare che:
+
+a) muoversi da (1, 1) a (xc, xc) è equivalente a muoversi da (xc, yc) a (1, 1), cioè possiamo risolvere il problema anche immaginando che la carota si muove verso il coniglio.
+
+b) poichè la griglia non ha numeri negativi i movimenti 1) e 2) potrebbero determinare degli spostamenti impossibili (celle con coordinate negative).
+
+Quindi, sulla base di a) e b), possiamo dedurre che affinchè il coniglio raggiunga la carota (o viceversa), occorre che xc e yc abbiano un fattore in comune che è potenza di 2 (questo perchè usiamo solo le regole 3) e 4) per spostarsi).
+
+ALlora la soluzione è calcolare il massimo comune divisore (MCD) di xc e yc.
+Se questo MCD è una potenza di 2, signfica che possiamo ridimensionare entrambe le coordinate dividendo per il MCD e alla fine raggiungere (1, 1) senza incontrare problemi con i numeri negativi.
+
+(define (power-of-2? num)
+"Checks if an integer is a power of 2"
+  (zero? (& num (- num 1))))
+
+(define (coniglio xc yc) (power-of-2? (gcd xc yc)))
+
+Proviamo:
+
+(coniglio 7 14)
+;-> nil
+(coniglio 3 5)
+;-> true
+(coniglio 1 1)
+;-> true
+(coniglio 1001 1001)
+;-> nil
+(coniglio 1024 1024)
+;-> true
+
 ============================================================================
 

@@ -4772,6 +4772,31 @@ Per distinguere le figure calcoliamo tutte le distanze tra tutti i punti e verif
     (add (mul (sub x1 x2) (sub x1 x2))
         (mul (sub y1 y2) (sub y1 y2)))))
 
+Per verificare se due segmenti A = ((x1, y1), (x2, y2)) e B = ((x3, y3), (x4, y4)) sono ortogonali, dobbiamo calcolare il prodotto scalare dei vettori che rappresentano i segmenti.
+Se il prodotto scalare è pari a zero, i segmenti sono ortogonali.
+
+Il vettore per un segmento può essere calcolato come:
+
+  vettoreA = (x2 - x1, y2 - y1)
+  vettoreB = (x4 - x3, y4 - y3)
+
+Il prodotto scalare è:
+  
+  prodotto scalare = (x2 - x1)*(x4 - x3) + (y2 - y1)*(y4 - y3)
+
+Se il prodotto scalare vale 0, allora i due segmenti sono ortogonali.
+
+(define (prodotto-scalare v1 v2)
+  (+ (* (v1 0) (v2 0)) (* (v1 1) (v2 1))))
+
+(define (vettore p1 p2)
+  (list (- (p2 0) (p1 0)) (- (p2 1) (p1 1))))
+
+(define (ortho? p1 p2 p3 p4)
+  (let ((vA (vettore p1 p2))
+        (vB (vettore p3 p4)))
+    (= 0 (prodotto-scalare vA vB))))
+
 (define (cosa? p1 p2 p3 p4)
   (local (dist d1 d2 d3 d4 d5 d6 uniq timbro out)
     (setq out "")
