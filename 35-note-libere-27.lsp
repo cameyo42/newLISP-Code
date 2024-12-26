@@ -4096,5 +4096,180 @@ Proviamo:
 (coniglio 1024 1024)
 ;-> true
 
+
+---------------------
+AlgoMonster FlowChart
+---------------------
+
+Il diagramma di flusso AlgoMonster, sviluppato da ex-Googler e programmatori competitivi, si basa sulla risoluzione di migliaia di problemi e sull'identificazione di pattern comuni.
+Il suo scopo è quello di fornire un metodo strutturato per risolvere problemi di programmazione.
+
+https://algo.monster/flowchart
+https://youtu.be/s5gWz9Fa1yo
+Vedi immagine "flow-chart" nella cartella "data".
+
+
+------------------------
+Propagazione di un virus
+------------------------
+
+In una griglia MxN ogni cella ha uno dei seguenti valori:
+
+  0 rappresenta una cella vuota.
+  1 rappresenta una cella che contiene una cellula sana.
+  2 rappresenta una cella che contiene una cellula contaminata.
+
+Ad ogni minuto ogni cellula contaminata trasmette il virus alle celle adiacenti nelle 4-direzioni (Nord, Est, Sud, Ovest).
+
+Determinare la situazione della griglia al termine della propagazione del virus.
+
+
+Esempio 1:
+ minuto:    0         1         2         3         4
+          2 1 1     2 2 1     2 2 2     2 2 2     2 2 2
+griglia:  1 1 0 --> 2 1 0 --> 2 2 0 --> 2 2 0 --> 2 2 0
+          0 1 1     0 1 1     0 1 1     0 2 1     0 2 2
+
+Esempio 2:
+ minuto:    0         1         2         3         4
+          2 1 1     2 2 1     2 2 2     2 2 2     2 2 2
+griglia:  1 1 0 --> 2 1 0 --> 2 2 0 --> 2 2 0 --> 2 2 0
+          0 0 1     0 0 1     0 0 1     0 0 1     0 0 1
+
+Funzione che stampa la griglia:
+
+(define (print-matrix matrix ch0 ch1)
+  (local (row col)
+    (setq row (length matrix))
+    (setq col (length (matrix 0)))
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        (print (format "%3d" (matrix i j)))
+      )
+      (println)) '>))
+
+Funzione che prende le coordinate di una cella della griglia e restituisce la lista delle celle contaminate dalla cella data:
+
+(define (contamina i j)
+  (local (virus Ni Nj Ei Ej Si Sj Oi Oj)
+    (setq virus '())
+    (setq Ni (- i 1)) (setq Nj j)
+    (setq Ei i)      (setq Ej (+ j 1))
+    (setq Si (+ i 1)) (setq Sj j)
+    (setq Oi i)      (setq Oj (- j 1))
+    (when (= (grid i j) 2) ; se la cella corrente è contaminata
+            (if (and (>= Ni 0) (< Ni rows) (>= Nj 0) (< Nj cols))
+              (if (= (grid Ni Nj) 1) (push (list Ni Nj) virus)))
+            (if (and (>= Ei 0) (< Ei rows) (>= Ej 0) (< Ej cols))
+              (if (= (grid Ei Ej) 1) (push (list Ei Ej) virus)))
+            (if (and (>= Si 0) (< Si rows) (>= Sj 0) (< Sj cols))
+              (if (= (grid Si Sj) 1) (push (list Si Sj) virus)))
+            (if (and (>= Oi 0) (< Oi rows) (>= Oj 0) (< Oj virus))
+              (if (= (grid Oi Oj) 1) (push (list Oi Oj) virus))))
+    virus))
+
+Funzione che simula la propagazione del virus:
+
+(define (virus-spread grid verbose)
+  (local (rows cols minuti contaminazioni total-virus conta)
+    (setq rows (length grid))
+    (setq cols (length (grid 0)))
+    (setq minuti 0)
+    (setq contaminazioni true)
+    ; ciclo affinchè esistono contaminazioni
+    (while contaminazioni
+      ; lista delle celle contaminate ad ogni ciclo
+      (setq total-virus '())
+      (for (r 0 (- rows 1))
+        (for (c 0 (- cols 1))
+          ; aggiorna la lista delle celle contaminate per il ciclo corrente
+          (extend total-virus (contamina r c))))
+      (cond ((= total-virus '())
+               ; nessuna cella contaminata nel ciclo corrente
+               ; stop ciclo
+              (setq contaminazioni nil))
+            (true
+              ; aggiorna la griglia con le nuove celle contaminate
+              (dolist (v total-virus) (setf (grid (v 0) (v 1)) 2))
+              (++ minuti)))
+      (when verbose (print-matrix grid) (read-line))
+    )
+    ; conta la frequenza delle tipologie delle celle (0, 1 e 2)
+    (setq conta (count '(0 1 2) (flat grid)))
+    (println "Tempo: " minuti " minuti")
+    (println "Celle vuote: " (conta 0))
+    (println "Celle sane: " (conta 1))
+    (println "Celle contaminate: " (conta 2))
+    (print-matrix grid)))
+
+Proviamo:
+
+(setq g '((2 1 1) (1 1 0) (0 1 1)))
+;-> Tempo: 4 minuti
+;-> Celle vuote: 2
+;-> Celle sane: 0
+;-> Celle contaminate: 7
+;->   2  2  2
+;->   2  2  0
+;->   0  2  2
+
+(setq g '((2 1 1) (1 1 0) (0 0 1)))
+(virus-spread g)
+;-> Tempo: 2 minuti
+;-> Celle vuote: 3
+;-> Celle sane: 1
+;-> Celle contaminate: 5
+;->   2  2  2
+;->   2  2  0
+;->   0  0  1
+
+(setq g (array 3 3 '(2 1 1 1 1 0 0 0 1)))
+(virus-spread g true)
+;-> Tempo: 2 minuti
+;-> Celle vuote: 3
+;-> Celle sane: 1
+;-> Celle contaminate: 5
+;->   2  2  2
+;->   2  2  0
+;->   0  0  1
+;-> (3 1 5)
+
+Vediamo la velocità della funzione O(M*N*minuti):
+
+(setq righe 10)
+(setq colonne 10)
+(setq test (array righe colonne (rand 3 (* righe colonne))))
+(time (println (virus-spread test)))
+;-> (28 0 72)
+;-> 0
+
+(setq righe 100)
+(setq colonne 100)
+(setq test (array righe colonne (rand 3 (* righe colonne))))
+(time (println (virus-spread test)))
+;-> (3319 49 6632)
+;-> 124.934
+
+(setq righe 200)
+(setq colonne 200)
+(silent (setq test (array righe colonne (rand 3 (* righe colonne)))))
+(time (println (virus-spread test)))
+;-> (13419 197 26384)
+;-> 1436.707
+
+(setq righe 400)
+(setq colonne 400)
+(silent (setq test (array righe colonne (rand 3 (* righe colonne)))))
+(time (println (virus-spread test)))
+;-> (53104 770 106126)
+;-> 22720.052
+
+(setq righe 1000)
+(setq colonne 1000)
+(silent (setq test (array righe colonne (rand 3 (* righe colonne)))))
+(time (println (virus-spread test)))
+;-> (333013 5112 661875)
+;-> 2257352.978
+
 ============================================================================
 
