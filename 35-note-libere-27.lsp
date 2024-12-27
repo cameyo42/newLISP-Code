@@ -4113,11 +4113,15 @@ Vedi immagine "flow-chart" nella cartella "data".
 Propagazione di un virus
 ------------------------
 
+------------------------
+Propagazione di un virus
+------------------------
+
 In una griglia MxN ogni cella ha uno dei seguenti valori:
 
-  0 rappresenta una cella vuota.
-  1 rappresenta una cella che contiene una cellula sana.
-  2 rappresenta una cella che contiene una cellula contaminata.
+  0: rappresenta una cella vuota.
+  1: rappresenta una cella che contiene una cellula sana.
+  2: rappresenta una cella che contiene una cellula contaminata.
 
 Ad ogni minuto ogni cellula contaminata trasmette il virus alle celle adiacenti nelle 4-direzioni (Nord, Est, Sud, Ovest).
 
@@ -4153,19 +4157,19 @@ Funzione che prende le coordinate di una cella della griglia e restituisce la li
 (define (contamina i j)
   (local (virus Ni Nj Ei Ej Si Sj Oi Oj)
     (setq virus '())
-    (setq Ni (- i 1)) (setq Nj j)
-    (setq Ei i)      (setq Ej (+ j 1))
-    (setq Si (+ i 1)) (setq Sj j)
-    (setq Oi i)      (setq Oj (- j 1))
     (when (= (grid i j) 2) ; se la cella corrente è contaminata
-            (if (and (>= Ni 0) (< Ni rows) (>= Nj 0) (< Nj cols))
-              (if (= (grid Ni Nj) 1) (push (list Ni Nj) virus)))
-            (if (and (>= Ei 0) (< Ei rows) (>= Ej 0) (< Ej cols))
-              (if (= (grid Ei Ej) 1) (push (list Ei Ej) virus)))
-            (if (and (>= Si 0) (< Si rows) (>= Sj 0) (< Sj cols))
-              (if (= (grid Si Sj) 1) (push (list Si Sj) virus)))
-            (if (and (>= Oi 0) (< Oi rows) (>= Oj 0) (< Oj virus))
-              (if (= (grid Oi Oj) 1) (push (list Oi Oj) virus))))
+      (setq Ni (- i 1)) (setq Nj j)
+      (setq Ei i)      (setq Ej (+ j 1))
+      (setq Si (+ i 1)) (setq Sj j)
+      (setq Oi i)      (setq Oj (- j 1))
+      (if (and (>= Ni 0) (< Ni rows) (>= Nj 0) (< Nj cols))
+        (if (= (grid Ni Nj) 1) (push (list Ni Nj) virus)))
+      (if (and (>= Ei 0) (< Ei rows) (>= Ej 0) (< Ej cols))
+        (if (= (grid Ei Ej) 1) (push (list Ei Ej) virus)))
+      (if (and (>= Si 0) (< Si rows) (>= Sj 0) (< Sj cols))
+        (if (= (grid Si Sj) 1) (push (list Si Sj) virus)))
+      (if (and (>= Oi 0) (< Oi rows) (>= Oj 0) (< Oj virus))
+        (if (= (grid Oi Oj) 1) (push (list Oi Oj) virus))))
     virus))
 
 Funzione che simula la propagazione del virus:
@@ -4192,19 +4196,23 @@ Funzione che simula la propagazione del virus:
               ; aggiorna la griglia con le nuove celle contaminate
               (dolist (v total-virus) (setf (grid (v 0) (v 1)) 2))
               (++ minuti)))
-      (when verbose (print-matrix grid) (read-line))
+      ; (print-matrix grid) (read-line)
     )
     ; conta la frequenza delle tipologie delle celle (0, 1 e 2)
-    (setq conta (count '(0 1 2) (flat grid)))
-    (println "Tempo: " minuti " minuti")
-    (println "Celle vuote: " (conta 0))
-    (println "Celle sane: " (conta 1))
-    (println "Celle contaminate: " (conta 2))
-    (print-matrix grid)))
+    (setq conta (count '(0 1 2) (flat (array-list grid))))
+    ; stampa risultati (verbose = true)
+    (when verbose
+      (println "Tempo: " minuti " minuti")
+      (println "Celle vuote: " (conta 0))
+      (println "Celle sane: " (conta 1))
+      (println "Celle contaminate: " (conta 2))
+      (print-matrix grid))
+    conta))
 
 Proviamo:
 
-(setq g '((2 1 1) (1 1 0) (0 1 1)))
+(setq g (array 3 3 '(2 1 1 1 1 0 0 1 1)))
+(virus-spread g true)
 ;-> Tempo: 4 minuti
 ;-> Celle vuote: 2
 ;-> Celle sane: 0
@@ -4212,16 +4220,7 @@ Proviamo:
 ;->   2  2  2
 ;->   2  2  0
 ;->   0  2  2
-
-(setq g '((2 1 1) (1 1 0) (0 0 1)))
-(virus-spread g)
-;-> Tempo: 2 minuti
-;-> Celle vuote: 3
-;-> Celle sane: 1
-;-> Celle contaminate: 5
-;->   2  2  2
-;->   2  2  0
-;->   0  0  1
+;-> (2 0 7)
 
 (setq g (array 3 3 '(2 1 1 1 1 0 0 0 1)))
 (virus-spread g true)
@@ -4270,6 +4269,98 @@ Vediamo la velocità della funzione O(M*N*minuti):
 (time (println (virus-spread test)))
 ;-> (333013 5112 661875)
 ;-> 2257352.978
+
+
+----------------------------
+Somma 0 di tre numeri (3Sum)
+----------------------------
+
+Data una lista di interi, restituire tutte le terne lista[i], lista[j], lista[k] tali che i!=j, i!=k, e j!=k, e lista[i] + lista[j] + lista[k] = 0.
+La soluzione non deve contenere terne duplicate.
+
+Algoritmo
+1) Ordinamento della lista in modo crescente
+2) Ciclo sulla lista ordinata e utilizzo della tecnica dei due puntatori per cercare le terne per ogni numero
+
+(define (somma0 lst)
+  (local (len terne stop sx dx somma)
+    ; Lunghezza della lista (numeri della lista)
+    (setq len (length lst))
+    ; Ordina la lista
+    (sort lst)
+    ; Lista delle terne
+    (setq terne '())
+    ; Condizione di fermata del ciclo
+    (setq stop nil)
+    ; Ciclo per ogni numero della lista...
+    (for (i 0 (- len 3) 1 stop)
+      (cond
+        ; Se il numero corrente è maggiore di 0,
+        ; allora nessuna terna ha somma 0
+        ; (questo perchè la lista è ordinata in modo crescente)
+        ((> (lst i) 0) (setq stop true))
+        ; Salta gli elementi uguali (per evitare terne duplicate)
+        ((and (> i 0) (= (lst i) (lst (- i 1)))) nil)
+        (true ; Tecnica dei due puntatori
+          ; Imposta i due puntatori:
+          ; sx (sinistra) dopo l'elemento corrente
+          ; dx (destra) alla fine della lista
+          (setq sx (+ i 1))
+          (setq dx (- len 1))
+          ; Affinchè sinistra è minore di destra...
+          (while (< sx dx)
+            ; Calcola la somma dei tre elementi correnti
+            (setq somma (+ (lst i) (lst sx) (lst dx)))
+            (cond
+              ; Se la somma è minore di 0, allora sposta sx verso destra
+              ((< somma 0) (++ sx))
+              ; Se la somma è maggiore di 0, allora sposta dx verso sinistra
+              ((> somma 0) (-- dx))
+              ; Se la somma vale 0, allora abbiamo trovato una terna valida
+              (true
+                ; Aggiunge la terna corrente al risultato
+                (push (list (lst i) (lst sx) (lst dx)) terne -1)
+                ; Sposta i puntatori sx verso destra e dx verso sinistra
+                (++ sx)
+                (-- dx)
+                ; Salta gli elementi duplicati spostando sx a destra
+                (while (and (< sx dx) (= (lst sx) (lst (- sx 1))))
+                  (++ sx))
+                ; Salta gli elementi duplicati spostando dx a sinistra
+                (while (and (< sx dx) (= (lst dx) (lst (+ dx 1))))
+                  (-- dx))
+              );true
+            );cond
+          );while
+        );true
+      );cond
+    );for
+    terne))
+
+Proviamo:
+
+(somma0 '(-1 0 1 2 -1 -4))
+;-> ((-1 -1 2) (-1 0 1))
+(somma0 '(0 1 1))
+;-> ()
+(somma0 '(0 0 0))
+;-> ((0 0 0))
+(setq nums '(5 -7 -9 -9 -3 -9 4 -2 -8 -5 0 1 7 2 -2 8 4 1 -8 4 -7 -4 -9 -7
+             7 0 0 -2 -3 2 -6 -9 8 -3 0 -3 6 -5 0 -4 1 -5 4 -6 4 3 4 8 8
+             -9 -6 0 -4 2 -8 4 9 0 3 2 3 9 8 9 8 4 7 -4 -4 8 5 3 5 -6 -1
+             0 -9 -2 5 5 8 9 9 4 0 9 5 9 -8 -7 6 -3 -7 5 4 -7 -1 0 8 -9 -7
+             -8 -5 -8 6 -2 5 3 -8 2 -5 -8 -7 7 5 -2 5 9 5 -1 -1 -6 4 4 0
+             7 -2 -6 -4 8 2 7 2 2 -8 8 1 -1 -3 2 -9 -9 4 9 6 -6 2 0 -8 -3
+             6 -6 0 6 0 3 4 3 0 -5 -1 5 -2 -2 0 -1 -8 -5 -7 9 8 3 -5 -6 -1
+             3 -2 -5 -3 -8 -7 0 -1 -8 2 -9 2 0 -8 -7 3 0 0 9 2 6 -8 -7 -6 9))
+(somma0 nums)
+;-> ((-9 0 9) (-9 1 8) (-9 2 7) (-9 3 6) (-9 4 5) (-8 -1 9) (-8 0 8) (-8 1 7)
+;->  (-8 2 6) (-8 3 5) (-8 4 4) (-7 -2 9) (-7 -1 8) (-7 0 7) (-7 1 6) (-7 2 5)
+;->  (-7 3 4) (-6 -3 9) (-6 -2 8) (-6 -1 7) (-6 0 6) (-6 1 5) (-6 2 4) (-6 3 3)
+;->  (-5 -4 9) (-5 -3 8) (-5 -2 7) (-5 -1 6) (-5 0 5) (-5 1 4) (-5 2 3) 
+;->  (-4 -4 8) (-4 -3 7) (-4 -2 6) (-4 -1 5) (-4 0 4) (-4 1 3) (-4 2 2) 
+;->  (-3 -3 6) (-3 -2 5) (-3 -1 4) (-3 0 3) (-3 1 2) (-2 -2 4) (-2 -1 3)
+;->  (-2 0 2) (-2 1 1) (-1 -1 2) (-1 0 1) (0 0 0))
 
 ============================================================================
 
