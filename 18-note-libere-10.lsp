@@ -1504,6 +1504,8 @@ Facciamo alcune prove:
 (cerchio3p 1 -6 2 1 5 2)
 ;-> (5 -3 5)
 
+Vedi anche "Circonferenza per tre punti" su "Note libere 25".
+Vedi anche "Circonferenze di raggio R passanti per 2 punti" su "Note libere 27".
 
 ---------------------------
 Determinante di una matrice

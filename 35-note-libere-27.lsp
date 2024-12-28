@@ -4113,10 +4113,6 @@ Vedi immagine "flow-chart" nella cartella "data".
 Propagazione di un virus
 ------------------------
 
-------------------------
-Propagazione di un virus
-------------------------
-
 In una griglia MxN ogni cella ha uno dei seguenti valori:
 
   0: rappresenta una cella vuota.
@@ -4126,7 +4122,6 @@ In una griglia MxN ogni cella ha uno dei seguenti valori:
 Ad ogni minuto ogni cellula contaminata trasmette il virus alle celle adiacenti nelle 4-direzioni (Nord, Est, Sud, Ovest).
 
 Determinare la situazione della griglia al termine della propagazione del virus.
-
 
 Esempio 1:
  minuto:    0         1         2         3         4
@@ -4361,6 +4356,244 @@ Proviamo:
 ;->  (-4 -4 8) (-4 -3 7) (-4 -2 6) (-4 -1 5) (-4 0 4) (-4 1 3) (-4 2 2) 
 ;->  (-3 -3 6) (-3 -2 5) (-3 -1 4) (-3 0 3) (-3 1 2) (-2 -2 4) (-2 -1 3)
 ;->  (-2 0 2) (-2 1 1) (-1 -1 2) (-1 0 1) (0 0 0))
+
+
+--------------------------------
+Rettangoli da una lista di punti
+--------------------------------
+
+Data una lista di punti 2D (xi, yi), determinare tutti i rettangoli che possono essere formati con i punti (come vertici).
+Ogni punto può essere utilizzato per formare più di un rettangolo.
+I rettangoli hanno i lati paralleli all'asse X o all'asse Y.
+
+Algoritmo brute-force O(N^4)
+----------------------------
+Quattro cicli che verificano tutte le combinazioni di punti O(N^4)
+
+(define (rettangoli1 punti)
+  (let (rectangle '())
+    (dolist (p1 punti)
+      (dolist (p2 punti)
+        (when (and (not (= p1 p2)) ; I punti devono essere diversi
+                   (= (p1 0) (p2 0))) ; Stessa X
+          (dolist (p3 punti)
+            (when (and (not (= p3 p1))
+                       (not (= p3 p2))
+                       (= (p3 1) (p1 1))) ; Stessa Y del primo punto
+              (dolist (p4 punti)
+                (when (and (not (= p4 p1))
+                           (not (= p4 p2))
+                           (not (= p4 p3))
+                           (= (p4 0) (p3 0)) ; Stessa X del terzo punto
+                           (= (p4 1) (p2 1))) ; Stessa Y del secondo punto
+                  (push (list p1 p2 p3 p4) rectangle))))))))
+    ; Elimina i rettangoli duplicati
+    (unique (map sort rectangle))))
+
+(setq punti '((1 1) (1 3) (3 1) (3 3) (2 2) (4 2)))
+(rettangoli1 punti)
+;-> (((1 1) (1 3) (3 1) (3 3)))
+
+Algoritmo brute-force O(<N^4)
+-----------------------------
+Due cicli p1 e p2 O(N^2)
+  Ricerca di p3 e p4 nella lista dei punti O(<N^2)
+
+  p1                  p3
+    +----------------+
+    |                |
+    |                |
+    |                |
+    +----------------+
+  p4                  p2
+
+  p1 = (x1 y1)
+  p2 = (x2 y2)
+  p3 = (x2 y1)
+  p4 = (x1 y2)
+
+(define (rettangoli2 punti)
+  (local (rectangle x1 x2)
+    (setq rectangle '())
+    (dolist (p1 punti)
+      (dolist (p2 punti)
+        (setq x1 (p1 0)) (setq y1 (p1 1))
+        (setq x2 (p2 0)) (setq y2 (p2 1))
+        (when (and (> x1 x2) (> y1 y2)) ; evita di considerare lo stesso punto
+          ; ricerca di p3 e p4 nella lista di punti
+          (if (and (ref (list x1 y2) punti) (ref (list x2 y1) punti))
+              (push (list p1 p2 (list x1 y2) (list x2 y1)) rectangle)))))
+  ; Elimina i rettangoli duplicati
+  (unique (map sort rectangle))))
+
+(setq punti '((1 1) (1 3) (3 1) (3 3) (2 2) (4 2)))
+(rettangoli2 punti)
+;-> (((1 1) (1 3) (3 1) (3 3)))
+
+In Lisp, l'accesso a un elemento di una lista ha una complessità temporale di O(n) nel caso peggiore.
+Questo perché le liste in Lisp sono implementate come liste concatenate (linked list), dove ogni elemento contiene un riferimento al successivo.
+Per accedere a un elemento specifico, bisogna attraversare la lista a partire dall'inizio fino a raggiungere la posizione desiderata. Di conseguenza:
+- Se vogliamo accedere al primo elemento (head), l'operazione è O(1).
+- Se vogliamo accedere a un elemento in posizione k, l'operazione richiede il passaggio attraverso i k elementi precedenti, risultando in O(k).
+Per un accesso più veloce possiamo considerare l'uso di altre strutture dati come:
+1. Array: In Lisp, un array (o vettore) consente l'accesso in O(1) per qualsiasi posizione.
+2. Hash Table: Se dobbiamo accedere ai dati usando chiavi specifiche, le tabelle hash offrono una complessità media di O(1) per lettura e scrittura.
+
+Algoritmo hash-map O(N^2)
+-------------------------
+a) hash-map di tutti i punti
+b) doppio ciclo p1 e p2 O(N^4)
+      cerchiamo p3 e p4 nella hash-map O(1)
+
+(define (rettangoli3 punti)
+  (new Tree 'pts)
+  (local (rectangles x1 x2)
+    (setq rectangle '())
+    (dolist (p punti) (pts (string p) p))
+    (dolist (p1 punti)
+      (dolist (p2 punti)
+        (setq x1 (p1 0)) (setq y1 (p1 1))
+        (setq x2 (p2 0)) (setq y2 (p2 1))
+        (when (and (> x1 x2) (> y1 y2)) ; evita di considerare lo stesso punto
+          ; ricerca di p3 e p4 nella hash-map
+          (if (and (pts (string (list x1 y2))) (pts (string (list x2 y1))))
+              (push (list p1 p2 (list x1 y2) (list x2 y1)) rectangle)))))
+    (delete 'pts) ; elimina la hash-map
+    ; Elimina i rettangoli duplicati
+    (unique (map sort rectangle))))
+
+(setq punti '((1 1) (1 3) (3 1) (3 3) (2 2) (4 2)))
+(rettangoli3 punti)
+;-> (((1 1) (1 3) (3 1) (3 3)))
+
+(setq test '((1 1) (1 3) (3 1) (3 3) (2 2) (4 2) (2 4) (4 4) (1 5) (5 1) (5 5)))
+(rettangoli1 test)
+;-> (((1 1) (1 5) (5 1) (5 5))
+;->  ((2 2) (2 4) (4 2) (4 4))
+;->  ((1 1) (1 3) (3 1) (3 3)))
+
+(rettangoli2 test)
+;-> (((1 1) (1 5) (5 1) (5 5))
+;->  ((2 2) (2 4) (4 2) (4 4))
+;->  ((1 1) (1 3) (3 1) (3 3)))
+
+(rettangoli3 test)
+;-> (((1 1) (1 5) (5 1) (5 5))
+;->  ((2 2) (2 4) (4 2) (4 4))
+;->  ((1 1) (1 3) (3 1) (3 3)))
+
+Vediamo la velocità delle funzioni:
+
+(setq points (map list (rand 10 100) (rand 10 100)))
+
+(= (length (rettangoli1 points))
+   (length (rettangoli2 points))
+   (length (rettangoli3 points)))
+;-> true
+
+(time (rettangoli1 points))
+;-> 225.078
+(time (rettangoli2 points))
+;-> 10.047
+(time (rettangoli3 points))
+;-> 24.55
+
+(setq points (map list (rand 10 250) (rand 10 250)))
+
+(time (rettangoli1 points))
+;-> 8355.163
+(time (rettangoli2 points))
+;-> 114.938
+(time (rettangoli3 points))
+;-> 89.921
+
+(setq points (map list (rand 10 1000) (rand 10 1000)))
+;(time (rettangoli1 points))
+(time (rettangoli2 points))
+;-> 2322.849
+(time (rettangoli3 points))
+;-> 1352.475
+
+
+----------------------------------------------
+Circonferenze di raggio R passanti per 2 punti
+----------------------------------------------
+
+Dati due punti 2D e un raggio R, determinare le equazioni delle circonferenze che passano per i punti dati.
+
+Equazione circonferenza
+
+  Xc^2 + Yc^2 = R^2
+
+dove: Xc, Yc sono le coordinate del centro del cerchio
+      R è il raggio del cerchio
+
+Dati un raggio R e due punti P1(x1,y1), P2(x2,y), esistono due circonferenze passanti per i due punti.
+La differenza tra i due cerchi è che hanno centri simmetrici rispetto al segmento che unisce i due punti.
+Calcoliamo i centri e i raggi di entrambi i cerchi:
+
+1. Corda del cerchio
+Il segmento che unisce i due punti è la corda del cerchio.
+I centri dei cerchi si trovano sulla perpendicolare della bisettrice di questo segmento.
+
+2. Distanza tra i punti
+La distanza tra P1 e P2 vale:
+
+  d = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+
+3. Controllo esistenza delle circonferenze
+Se R < d/2, allora i cerchi non esistono (non possono esistere cerchi con raggio R che contengono i due punti).
+Se R = d/2, allora esiste un solo cerchio (la corda è il diametro del cerchio).
+Se R > d/2, allora esistono due cerchi.
+
+4. Centri dei due cerchi
+Il punto medio del segmento tra i due punti è:
+
+  Mx = (x1 + x2)/2, My = (y1 + y2)/2
+
+La distanza h tra il punto medio e ciascun centro è data da Pitagora:
+
+  h = sqrt(R^2 - (d/2)^2)
+
+La direzione perpendicolare è data ruotando 90 gradi il vettore  (x2 - x1, y2 - y1), ottenendo:
+
+  dx = - (y2 - y1), dy = (x2 - x1)
+
+Per calcolare i due centri, ci spostiamo dal punto medio nella direzione perpendicolare di una quantità uguale al raggio del cerchio:
+
+  C(1,2) = (Mx +- (h*dx)/d), (My +- (h*dy)/d)
+
+(define (cerchi-passanti p1 p2 r)
+  (let ((x1 (p1 0))
+        (y1 (p1 1))
+        (x2 (p2 0))
+        (y2 (p2 1)))
+    (let ((d (sqrt (add (mul (sub x2 x1) (sub x2 x1))
+                      (mul (sub y2 y1) (sub y2 y1))))))
+      (if (< r (div d 2))
+          nil ; Non esiste un cerchio
+          (let ((mx (div (add x1 x2) 2))
+                (my (div (add y1 y2) 2))
+                (h (sqrt (sub (mul r r) (mul (div d 2) (div d 2))))))
+            (let ((dx (div (sub y2 y1) d))
+                  (dy (div (sub x1 x2) d)))
+              (let ((c1 (list (add mx (mul h dx)) (add my (mul h dy)) r))
+                    (c2 (list (sub mx (mul h dx)) (sub my (mul h dy)) r)))
+                (list c1 c2))))))))
+
+Proviamo:
+
+(cerchi-passanti '(1 1) '(4 1) 4)
+;-> ((2.5 -2.708099243547832 4) (2.5 4.708099243547832 4))
+
+(cerchi-passanti '(-2 0) '(2 0) 2)
+;-> ((0 0 2) (0 0 2))
+
+(cerchi-passanti '(-2 0) '(2 0) 1)
+;-> nil
+
+Vedi anche "Circonferenza passante per tre punti" su "Note libere 10".
+Vedi anche "Circonferenza per tre punti" su "Note libere 25".
 
 ============================================================================
 

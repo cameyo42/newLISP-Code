@@ -3015,9 +3015,9 @@ Proviamo:
 ;-> (10 9 8 7 6 5 4 3 2 1)
 
 
-------------------------------------
-Circonferenza passante per tre punti
-------------------------------------
+---------------------------
+Circonferenza per tre punti 
+---------------------------
 
 Dati tre punti sul piano 2D determinare l'equazione della circonferenza che passa per i punti dati.
 
@@ -3193,6 +3193,8 @@ Cerchio normale:
 (circle3points x1 y1 x2 y2 x3 y3)
 ;-> (4 2 2)
 
+Vedi anche "Circonferenza passante per tre punti" su "Note libere 10".
+Vedi anche "Circonferenze di raggio R passanti per 2 punti" su "Note libere 27".
 
 -----------------------------------------
 Numero, doppio, triplo con tutte le cifre

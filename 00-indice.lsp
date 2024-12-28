@@ -2561,7 +2561,7 @@ NOTE LIBERE 25
   Numeri pari e dispari in una lista
   I gatti di Matilde
   Creazione di un algoritmo di ordinamento
-  Circonferenza passante per tre punti
+  Circonferenza per tre punti
   Numero, doppio, triplo con tutte le cifre
   Combattimento tra due creature fantastiche (ChatGPT)
   Numero minimo con N divisori
@@ -2749,6 +2749,8 @@ NOTE LIBERE 27
   AlgoMonster FlowChart
   Propagazione di un virus
   Somma 0 di tre numeri (3Sum)
+  Rettangoli da una lista di punti
+  Circonferenze di raggio R passanti per 2 punti
 
 PROBLEMI SUI DADI
 =================
