@@ -2935,6 +2935,9 @@ Complessità temporale: O(N^4)
 Un'altro metodo di soluzione del problema utilizza l'algoritmo convex-hull.
 Calcoliamo il convex-hull dei punti dati e poi utilizziamo la funzione "find-mec" per trovare il MEC con i punti che formano il convex-hull. Se il numero di vertici del convex-hull è considerevolmente inferiore a N, la complessità sarebbe O(H^4 + N*Log(N)) dove H rappresenta il numero di vertici del convex-hull e il fattore NLog(N) è la complessità temporale dell'algoritmo di convex-hull (Graham Scan). Infine, se il numero di vertici, H, del convex-hull è molto piccolo, allora può essere considerato come un fattore costante e quindi la complessità temporale diventa O(NLog(N)).
 
+Vedi anche "Circonferenza con copertura massima di una lista di punti interi" su "Note libere 15"
+Vedi anche "Cerchio di massima inclusione di punti" su "Note libere 27"
+
 
 ---------------------
 Prodotto di Kronecker

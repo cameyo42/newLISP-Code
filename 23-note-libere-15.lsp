@@ -3433,7 +3433,7 @@ Nota: la funzione "xlate" si trova nel file "yo.lsp".
 Circonferenza con copertura massima di una lista di punti interi
 ----------------------------------------------------------------
 
-Dato una lista di punti interi, trovare il centro di un cerchio di dimensioni predeterminate che contiene il maggior numero di punti.
+Data una lista di punti interi, trovare il centro di un cerchio di dimensioni predeterminate che contiene il maggior numero di punti.
 Esempio: 1000 punti, in un reticolo 500x500 e un cerchio di 50 di diametro.
 
 Per un'area rettangolare MxN, numero di punti P e raggio R:
@@ -3505,6 +3505,9 @@ Per un'area rettangolare MxN, numero di punti P e raggio R:
 ;-> 70624.953
 
 Nota: questo algoritmo è molto lento. Questo problema può essere risolto in modo efficiente con l'algoritmo Angular Sweep.
+
+Vedi anche "Cerchio minimo di inclusione (Minimum Enclosing Circle)" su "Note libere 10".
+Vedi anche "Cerchio di massima inclusione di punti" su "Note libere 27"
 
 
 -------------------------------

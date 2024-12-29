@@ -2750,7 +2750,11 @@ NOTE LIBERE 27
   Propagazione di un virus
   Somma 0 di tre numeri (3Sum)
   Rettangoli da una lista di punti
+  Triangoli da una lista di punti
   Circonferenze di raggio R passanti per 2 punti
+  Punto interno ad un cerchio
+  Cerchio di massima inclusione di punti
+  
 
 PROBLEMI SUI DADI
 =================

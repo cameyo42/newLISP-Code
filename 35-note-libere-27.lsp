@@ -2671,9 +2671,9 @@ Per calcolare l'area di un triangolo dato da tre punti usiamo la formula:
   (let ((x1 (p1 0)) (y1 (p1 1))
         (x2 (p2 0)) (y2 (p2 1))
         (x3 (p3 0)) (y3 (p3 1)))
-    (div (abs (add (mul x1 (- y2 y3))
-                   (mul x2 (- y3 y1))
-                   (mul x3 (- y1 y2)))) 2)))
+    (div (abs (add (mul x1 (sub y2 y3))
+                   (mul x2 (sub y3 y1))
+                   (mul x3 (sub y1 y2)))) 2)))
 
 (define (boomerang? p1 p2 p3) (> (area p1 p2 p3) 0))
 
@@ -2999,8 +2999,8 @@ Generazione di frazioni
 
 Dato un numero intero N, restituire una lista di tutte le frazioni semplificate comprese tra 0 e 1 (esclusi) tali che il denominatore sia minore o uguale a N.
 
-Esempio: 
-N = 3 
+Esempio:
+N = 3
 Frazioni: 1/2, 1/3 , 2/3
 
 Esempio:
@@ -3047,7 +3047,7 @@ Contatore con ciclo "while":
 
 (define (speed N)
   (local (contatore start elapsed)
-    (setq contatore 0) 
+    (setq contatore 0)
     (setq elapsed 0)
     (setq start (time-of-day))
     (while (< contatore N) (++ contatore))
@@ -3154,7 +3154,7 @@ Le espressioni matematiche utilizzate per generare le terne pitagoriche primitiv
 Dove m e n sono numeri interi positivi con m > n > 0 .
 
 Queste formule permettono di generare una terna pitagorica (a, b, c) che soddisfa l'equazione:
- a^2 + b^2 = c^2 
+ a^2 + b^2 = c^2
 
 2. Condizione di primitività:
    - Una terna è considerata primitiva se il massimo comune divisore (gcd) di a, b e c è 1.
@@ -3923,7 +3923,7 @@ Proviamo:
 Posizione migliore per un centro di servizi (Gradient descent algorithm)
 ------------------------------------------------------------------------
 
-Un'azienda vuole costruire un nuovo centro di servizi in città. 
+Un'azienda vuole costruire un nuovo centro di servizi in città.
 L'azienda conosce le posizioni di tutti i clienti della città (coordinate 2D) e vuole costruire il nuovo centro in una posizione tale che la somma delle distanze euclidee da tutti i clienti sia minima.
 
 Data una lista di posizioni in cui lista[i] = (xi, yi) è la posizione dell'i-esimo cliente, restituire la posizione del nuovo centro per cui è minima la somma delle distanze euclidee da tutti i clienti.
@@ -3937,7 +3937,7 @@ Si tratta di un algoritmo di ottimizzazione iterativo per trovare il minimo di u
 In questo caso la funzione che vogliamo minimizzare è la somma delle distanze.
 Partendo da una posizione iniziale e muovendoci iterativamente nella direzione opposta al gradiente (la direzione dell'aumento più ripido), possiamo trovare il minimo locale della funzione.
 Possiamo usare questo metodo perchè in questo problema, il minimo locale è anche il minimo globale.
-Come posizione iniziale possiamo scegliere il centroide dei punti, che rappresenta la media aritmetica di tutti i punti dati. 
+Come posizione iniziale possiamo scegliere il centroide dei punti, che rappresenta la media aritmetica di tutti i punti dati.
 Mentre il centroide riduce al minimo la somma delle distanze euclidee al quadrato, non minimizza necessariamente la somma delle distanze euclidee, ma fornisce un buon punto di partenza.
 
 La soluzione inizia con il centroide dei punti dati e poi ne regola ripetutamente la posizione calcolando il gradiente (la direzione e la velocità dell'aumento più rapido della somma delle distanze) e spostandosi di un piccolo passo nella direzione opposta.
@@ -4022,7 +4022,7 @@ Proviamo:
 Vediamo la velocità della funzione:
 
 Diecimila punti (1e4)
-(silent 
+(silent
   (setq px (rand 10000 1e4))
   (setq py (rand 10000 1e4))
   (setq pts (map list px py)))
@@ -4031,7 +4031,7 @@ Diecimila punti (1e4)
 ;-> 38.914
 
 Centomila punti (1e5)
-(silent 
+(silent
   (setq px (rand 10000 1e5))
   (setq py (rand 10000 1e5))
   (setq pts (map list px py)))
@@ -4040,7 +4040,7 @@ Centomila punti (1e5)
 ;-> 69744.413
 
 Un milione di punti (1e6)
-(silent 
+(silent
   (setq px (rand 10000 1e6))
   (setq py (rand 10000 1e6))
   (setq pts (map list px py)))
@@ -4053,7 +4053,7 @@ Un milione di punti (1e6)
 Il coniglio e la carota (punto raggiungibile)
 ---------------------------------------------
 
-Un coniglio si trova nella cella (1, 1) di una griglia infinita. 
+Un coniglio si trova nella cella (1, 1) di una griglia infinita.
 Nella cella (xc, yc) della griglia si trova una carota.
 Ad ogni passo, dalla posizione corrente (x, y) il coniglio può muoversi in uno dei modi seguenti:
 
@@ -4352,8 +4352,8 @@ Proviamo:
 ;-> ((-9 0 9) (-9 1 8) (-9 2 7) (-9 3 6) (-9 4 5) (-8 -1 9) (-8 0 8) (-8 1 7)
 ;->  (-8 2 6) (-8 3 5) (-8 4 4) (-7 -2 9) (-7 -1 8) (-7 0 7) (-7 1 6) (-7 2 5)
 ;->  (-7 3 4) (-6 -3 9) (-6 -2 8) (-6 -1 7) (-6 0 6) (-6 1 5) (-6 2 4) (-6 3 3)
-;->  (-5 -4 9) (-5 -3 8) (-5 -2 7) (-5 -1 6) (-5 0 5) (-5 1 4) (-5 2 3) 
-;->  (-4 -4 8) (-4 -3 7) (-4 -2 6) (-4 -1 5) (-4 0 4) (-4 1 3) (-4 2 2) 
+;->  (-5 -4 9) (-5 -3 8) (-5 -2 7) (-5 -1 6) (-5 0 5) (-5 1 4) (-5 2 3)
+;->  (-4 -4 8) (-4 -3 7) (-4 -2 6) (-4 -1 5) (-4 0 4) (-4 1 3) (-4 2 2)
 ;->  (-3 -3 6) (-3 -2 5) (-3 -1 4) (-3 0 3) (-3 1 2) (-2 -2 4) (-2 -1 3)
 ;->  (-2 0 2) (-2 1 1) (-1 -1 2) (-1 0 1) (0 0 0))
 
@@ -4515,6 +4515,151 @@ Vediamo la velocità delle funzioni:
 ;-> 1352.475
 
 
+-------------------------------
+Triangoli da una lista di punti
+-------------------------------
+
+Data una lista di punti 2D (xi, yi), determinare tutti i triangoli che possono essere formati con i punti (come vertici).
+Ogni punto può essere utilizzato per formare più di un triangolo.
+
+Metodo 1
+--------
+
+Funzione che genera tutti i triangoli da una lista di punti:
+
+(define (triangoli1 punti)
+  (let ((triangle '()))
+    (dolist (p1 punti)
+      (dolist (p2 punti)
+        (when (not (= p1 p2)) ; I punti devono essere diversi
+          (dolist (p3 punti)
+            (when (and (not (= p3 p1))
+                       (not (= p3 p2)) ; Tutti i punti devono essere distinti
+                       ; Calcolo determinante per il controllo di collinearità
+                       ; I punti devono essere  non allineati
+                       (not (= (* (- (p2 0) (p1 0)) (- (p3 1) (p1 1)))
+                               (* (- (p3 0) (p1 0)) (- (p2 1) (p1 1))))))
+              (push (list p1 p2 p3) triangle))))))
+    (unique (map sort triangle))))
+
+(setq punti '((1 1) (1 3) (3 1) (3 3) (2 2)))
+(triangoli1 punti)
+;-> (((2 2) (3 1) (3 3)) ((1 3) (2 2) (3 3)) ((1 1) (2 2) (3 1))
+;->  ((1 1) (1 3) (2 2)) ((1 3) (3 1) (3 3)) ((1 1) (3 1) (3 3))
+;->  ((1 1) (1 3) (3 3)) ((1 1) (1 3) (3 1)))
+
+Metodo 2
+--------
+
+(define (comb k lst (r '()))
+"Generates all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+Con 100 punti abbiamo 161700 rettangoli:
+
+(length (comb 3 (sequence 1 100)))
+;-> 161700
+
+Per calcolare l'area di un triangolo dato da tre punti usiamo la formula:
+
+  Area = (1/2)*abs(x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))
+
+(define (area p1 p2 p3)
+  (div (abs (add (mul (p1 0) (sub (p2 1) (p3 1)))
+                 (mul (p2 0) (sub (p3 1) (p1 1)))
+                 (mul (p3 0) (sub (p1 1) (p2 1))))) 2))
+
+Funzione che genera tutti i triangoli da una lista di punti:
+
+(define (triangoli2 punti)
+  (local (triangle pts aree)
+    (setq tri '())
+    ; genera tutte le combinazioni di tre punti (triangoli)
+    (setq pts3 (comb 3 punti))
+    ; calcola l'area di tutti i triangoli
+    (setq aree (map (fn(p) (area (p 0) (p 1) (p 2))) pts3))
+    ; seleziona da pts3 tutti i triangoli che hanno area maggiore di 0
+    (setq triangle (select pts3 (index > aree)))
+    ; elimina i triangoli duplicati
+    (unique (map sort triangle))))
+
+(setq punti '((0 0) (0 1) (1 0) (0 2) (2 0)))
+(triangoli2 punti)
+;-> (((1 1) (1 3) (3 1)) ((1 1) (1 3) (3 3)) ((1 1) (1 3) (2 2))
+;->  ((1 1) (3 1) (3 3)) ((1 1) (2 2) (3 1)) ((1 3) (3 1) (3 3))
+;->  ((1 3) (2 2) (3 3)) ((2 2) (3 1) (3 3)))
+
+Metodo 3
+--------
+
+Funzione che genera tutti i triangoli da una lista di punti:
+
+(define (triangoli3 punti)
+  (setq triangle '())
+  (setq len (length punti))
+  (setq pts (array len punti))
+  (for (i 0 (- len 3))
+    (for (j (+ i 1) (- len 2))
+      (for (k (+ j 1) (- len 1))
+        (if (> (area (pts i) (pts j) (pts k)) 0)
+          (push (list (pts i) (pts j) (pts k)) triangle)))))
+  (unique (map sort triangle)))
+
+(setq punti '((0 0) (0 1) (1 0) (0 2) (2 0)))
+(triangoli3 punti)
+;-> (((2 2) (3 1) (3 3)) ((1 3) (2 2) (3 3)) ((1 3) (3 1) (3 3))
+;->  ((1 1) (2 2) (3 1)) ((1 1) (3 1) (3 3)) ((1 1) (1 3) (2 2))
+;->  ((1 1) (1 3) (3 3)) ((1 1) (1 3) (3 1)))
+
+Vediamo se le tre funzioni generano gli stessi risultati:
+
+(setq test (map list (rand 100 10) (rand 100 10)))
+;-> ((16 60) (6 75) (31 40) (78 34) (21 84)
+;->  (32 94) (48 62) (0 99) (43 5) (50 56))
+(length (triangoli1 test))
+;-> 120
+(length (triangoli2 test))
+;-> 120
+(length (triangoli3 test))
+;-> 120
+(setq t1 (triangoli1 test))
+(setq t2 (triangoli2 test))
+(setq t3 (triangoli3 test))
+(difference t1 t2)
+;-> ()
+(difference t2 t1)
+;-> ()
+(difference t1 t3)
+;-> ()
+(difference t3 t1)
+;-> ()
+(difference t2 t3)
+;-> ()
+(difference t3 t2)
+;-> ()
+
+Vediamo la velocità delle tre funzioni:
+
+(silent (setq test (map list (rand 100 100) (rand 100 100))))
+(time (triangoli1 test))
+;-> 3300.171
+(time (triangoli2 test))
+;-> 958.783
+(time (triangoli3 test))
+;-> 642.622
+
+(silent (setq test (map list (rand 100 200) (rand 100 200))))
+(time (triangoli2 test))
+;-> 9412.194
+(time (triangoli3 test))
+;-> 6621.569
+
+
 ----------------------------------------------
 Circonferenze di raggio R passanti per 2 punti
 ----------------------------------------------
@@ -4563,6 +4708,113 @@ Per calcolare i due centri, ci spostiamo dal punto medio nella direzione perpend
 
   C(1,2) = (Mx +- (h*dx)/d), (My +- (h*dy)/d)
 
+Funzione che calcola i cerchi (xc, yc, r) passanti per due punti P1(x1,y1) e P2(x2,y2):
+
+(define (cerchi-passanti p1 p2 r)
+  (let ((x1 (p1 0))
+        (y1 (p1 1))
+        (x2 (p2 0))
+        (y2 (p2 1)))
+    (let ((d (sqrt (add (mul (sub x2 x1) (sub x2 x1))
+                      (mul (sub y2 y1) (sub y2 y1))))))
+      (if (< r (div d 2))
+          nil ; Non esiste un cerchio
+          (let ((mx (div (add x1 x2) 2))
+                (my (div (add y1 y2) 2))
+                (h (sqrt (sub (mul r r) (mul (div d 2) (div d 2))))))
+            (let ((dx (div (sub y2 y1) d))
+                  (dy (div (sub x1 x2) d)))
+              ; cerchio (cx cy raggio)
+              (let ((c1 (list (add mx (mul h dx)) (add my (mul h dy)) r))
+                    (c2 (list (sub mx (mul h dx)) (sub my (mul h dy)) r)))
+                (list c1 c2))))))))
+
+Proviamo:
+
+(cerchi-passanti '(1 1) '(4 1) 4)
+;-> ((2.5 -2.708099243547832 4) (2.5 4.708099243547832 4))
+
+(cerchi-passanti '(-2 0) '(2 0) 2)
+;-> ((0 0 2) (0 0 2))
+
+(cerchi-passanti '(-2 0) '(2 0) 1)
+;-> nil
+
+Vedi anche "Circonferenza passante per tre punti" su "Note libere 10".
+Vedi anche "Circonferenza per tre punti" su "Note libere 25".
+
+
+---------------------------
+Punto interno ad un cerchio
+---------------------------
+
+Dato un punto P(x,y) nel piano cartesiano e un cerchio di centro C(cx,cy) e raggio R, determinare se il punto è interno al cerchio (anche sulla circonferenza).
+
+La distanza tra il punto P e il centro C vale:
+
+  d = sqrt((x - cx)^2 + (y - cy)^2)
+
+Se la distanza d è minore o uguale al raggio, il punto P è interno al cerchio:
+  se d <= R, allora P interno al cerchio
+
+Se la distanza d è minore del raggio, il punto P è interno al cerchio:
+  se d > R, allora P asterno al cerchio
+
+Nella funzione usiamo d^2 e R^2 per velocizzare i calcoli.
+
+Funzione con numeri come parametri:
+
+(define (interno? x y cx cy r)
+  (<= (add (mul (sub x cx) (sub x cx)) (mul (sub y cy) (sub y cy))) (mul r r)))
+
+Funzione con liste come parametri:
+
+(define (within? p c)
+  (<= (add (mul (sub (p 0) (c 0)) (sub (p 0) (c 0)))
+         (mul (sub (p 1) (c 1)) (sub (p 1) (c 1)))) (mul (c 2) (c 2))))
+
+Proviamo:
+
+(setq p1 '(2 2))
+(setq c1 '(0 0 5))
+(within? p1 c1)
+;-> true
+(interno? 2 2 0 0 5)
+;-> true
+
+(setq p2 '(0 5))
+(within? p2 c1)
+;-> true
+(interno? 0 5 0 0 5)
+;-> true
+
+(setq p3 '(4 5))
+(within? p3 c1)
+;-> nil
+(interno? 4 5 0 0 5)
+;-> nil
+
+
+--------------------------------------
+Cerchio di massima inclusione di punti
+--------------------------------------
+
+Data una lista di N punti 2D non duplicati e un cerchio di raggio R, determinare la posizione del cerchio (centro) che contiene il maggior numero di punti.
+
+Algoritmo
+Per ogni coppia di punti:
+  a) calcolare i due cerchi di raggio R che passano per la coppia di punti
+  b) calcolare i punti che sono contenuti da questo cerchio
+  c) tenere traccia del cerchio che contiene il maggior numero di punti
+
+Funzione che verifica se un punto (x y) è interno ad un cerchio (xc yx r):
+
+(define (within? p c)
+  (<= (add (mul (sub (p 0) (c 0)) (sub (p 0) (c 0)))
+           (mul (sub (p 1) (c 1)) (sub (p 1) (c 1)))) (mul (c 2) (c 2))))
+
+Funzione che calcola i cerchi (xc, yc, r) passanti per due punti P1(x1,y1) e P2(x2,y2):
+
 (define (cerchi-passanti p1 p2 r)
   (let ((x1 (p1 0))
         (y1 (p1 1))
@@ -4581,8 +4833,6 @@ Per calcolare i due centri, ci spostiamo dal punto medio nella direzione perpend
                     (c2 (list (sub mx (mul h dx)) (sub my (mul h dy)) r)))
                 (list c1 c2))))))))
 
-Proviamo:
-
 (cerchi-passanti '(1 1) '(4 1) 4)
 ;-> ((2.5 -2.708099243547832 4) (2.5 4.708099243547832 4))
 
@@ -4592,8 +4842,118 @@ Proviamo:
 (cerchi-passanti '(-2 0) '(2 0) 1)
 ;-> nil
 
-Vedi anche "Circonferenza passante per tre punti" su "Note libere 10".
-Vedi anche "Circonferenza per tre punti" su "Note libere 25".
+Funzione che restituisce una lista con tutte le possibili coppie tra gli elementi di una lista data:
+
+(define (pair-list lst)
+  (let (out '())
+    (for (i 0 (- (length lst) 2))
+      (for (j (+ i 1) (- (length lst) 1))
+          (push (list (lst i) (lst j)) out -1)))))
+
+Funzione che calcola il cerchio di raggio R che contiene il maggior numero di punti :
+
+(define (cerchio-max punti r)
+  (local (max-punti max-cerchio coppie cerchi curr1 curr2)
+    ; Numero massimo di punti contenuti
+    (setq max-punti 0)
+    ; Cerchio che contiene il numero massimo di punti
+    (setq max-cerchio '())
+    ; Creazione di tutte le coppie di punti
+    (setq coppie (pair-list punti))
+    ; Ciclo per tutte le coppi di punti...
+    (dolist (el coppie)
+      ; Calcolo dei cerchi passanti per la coppia di punti corrente
+      (setq cerchi (cerchi-passanti (el 0) (el 1) r))
+      ; Se esistono i cerchi...
+      (when cerchi
+        ; punti contenuti nel cerchio 1
+        (setq curr1 0)
+        ; punti contenuti nel cerchio 2
+        (setq curr2 0)
+        ; Calcola i punti contenuti da ogni cerchio
+        (dolist (p punti)
+          (when (within? p (cerchi 0)) (++ curr1))
+          (when (within? p (cerchi 1)) (++ curr2))
+        )
+        ; Aggiorna il valore massimo dei punti e il cerchio che li contiene
+        (when (> curr1 max-punti)
+          (setq max-punti curr1)
+          (setq max-cerchio (cerchi 0)))
+        (when (> curr2 max-punti)
+          (setq max-punti curr2)
+          (setq max-cerchio (cerchi 1)))
+      )
+    )
+    (list max-punti max-cerchio)))
+
+Proviamo:
+
+(cerchio-max '((-2 0) (2 0) (0 2) (0 -2)) 2)
+;-> (4 (0 0 2))
+
+(cerchio-max '((-3 0) (3 0) (2 6) (5 4) (0 9) (7 8)) 5)
+;-> (5 (0 4 5))
+
+Vediamo la velocità dell'algoritmo:
+
+(length (setq pts (unique (map list (rand 100 100) (rand 100 100)))))
+;-> 99
+(time (println (cerchio-max pts 20)))
+;-> (20 (17.81892663155036 16.23771057941913 20))
+;-> 160.622
+
+(length (setq pts (unique (map list (rand 200 200) (rand 200 200)))))
+;-> 200
+(time (println (cerchio-max pts 20)))
+;-> (33 (16.29097248200296 78.89132113301923 20))
+;-> 414.049
+
+(length (setq pts (unique (map list (rand 400 400) (rand 400 400)))))
+;-> 400
+(time (println (cerchio-max pts 20)))
+;-> 996.741
+
+Se i punti sono molto densi, allora la funzione ci mette più tempo (questo perchè esistono molti cerchi da verificare):
+
+(length (setq pts (unique (map list (rand 100 400) (rand 100 400)))))
+;-> 393
+(time (println (cerchio-max pts 20)))
+;-> (71 (60.12740473541479 60.8431488161463 20))
+;-> 10302.174
+
+Se il raggio è grande, allora la funzione ci mette più tempo (questo perchè esistono molti cerchi da verificare):
+
+(length (setq pts (unique (map list (rand 400 400) (rand 400 400)))))
+;-> 400
+(time (println (cerchio-max pts 75)))
+;-> (61 (291.8472970881422 241.2417370039397 75))
+;-> 9642.548000000001
+
+Con punti densi e raggio grande la funzione rallenta molto:
+
+(length (setq pts (unique (map list (rand 100 400) (rand 100 400)))))
+;-> 389
+(time (println (cerchio-max pts 75)))
+;-> (389 (40.37188186310436 50 75))
+;-> 29441.91
+
+Altro esempio:
+
+  Punti: 100
+  Intervallo: 0 <= xi,yi <= 10^4
+  Raggio: 1 <= R <= 5000
+
+(length (setq pts (unique (map list (rand 10000 100) (rand 10000 100)))))
+;-> 100
+(time (println (cerchio-max pts 5000)))
+;-> (82 (5492.421418386987 5340.867601591941 5000))
+;-> 488.995
+(time (println (cerchio-max pts 1)))
+;-> (0 ())
+;-> 5.965
+
+Vedi anche "Cerchio minimo di inclusione (Minimum Enclosing Circle)" su "Note libere 10".
+Vedi anche "Circonferenza con copertura massima di una lista di punti interi" su "Note libere 15"
 
 ============================================================================
 
