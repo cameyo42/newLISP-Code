@@ -4955,5 +4955,140 @@ Altro esempio:
 Vedi anche "Cerchio minimo di inclusione (Minimum Enclosing Circle)" su "Note libere 10".
 Vedi anche "Circonferenza con copertura massima di una lista di punti interi" su "Note libere 15"
 
+
+-----------------------------------------------------------
+K punti più vicini all'origine (K closest points to origin)
+-----------------------------------------------------------
+
+Dato una lista di N punti 2D (xi, yi) e un intero k, restituere i k punti più vicini all'origine (0, 0).
+La distanza tra due punti è la distanza euclidea.
+
+Distanza euclidea di un punto dall'origine (0, 0):
+
+  d = sqrt((x1 - x2)*(x1 - x2) + (x1 - x2)*(x1 - x2)) = sqrt(x1^2 + y1^2)
+
+Poichè non ci interessano i valori delle distanze possiamo fare a meno di calcolare la radice quadrata.
+
+Algoritmo
+1) Ordinamento crescente dei punti in base alla loro distanza dal punto (0, 0)
+2) Selezione dei primi K punti ordinati
+
+Funzione di comparazione per l'ordinamento:
+
+(define (compare p1 p2)
+  (setq dist1 (add (mul (p1 0) (p1 0)) (mul (p1 1) (p1 1))))
+  (setq dist2 (add (mul (p2 0) (p2 0)) (mul (p2 1) (p2 1))))
+  (< dist1 dist2))
+
+Funzione che trova i k punti più vicini all'origine:
+
+(define (k-vicini punti k) (slice (sort punti compare) 0 k))
+
+Proviamo:
+
+(k-vicini '((1 3) (-2 2)) 1)
+((-2 2))
+
+(k-vicini '((3 3) (5 -1) (-2 4)) 2)
+((3 3) (-2 4))
+
+Vediamo la velocità della funzione:
+
+1000 punti:
+(silent (setq pts (map list (rand 100 1000) (rand 100 1000))))
+(time (println (k-vicini pts 10)))
+;-> ((0 0) (0 1) (2 3) (4 0) (5 4) (2 7) (8 0) (1 8) (7 5) (1 9))
+;-> 7.979
+
+10000 punti:
+(silent (setq pts (map list (rand 100 10000) (rand 100 10000))))
+(time (println (k-vicini pts 10)))
+;-> ((1 0) (1 1) (1 1) (1 1) (2 1) (1 2) (2 2) (2 2) (3 0) (3 0))
+;-> 101.67
+
+100000 punti:
+(silent (setq pts (map list (rand 100 100000) (rand 100 100000))))
+(time (println (k-vicini pts 10)))
+;-> ((0 0) (0 0) (0 0) (0 1) (1 0) (1 0) (0 1) (0 1) (1 0) (1 0))
+;-> 1272.128
+
+1000000 punti:
+(silent (setq pts (map list (rand 100 1000000) (rand 100 1000000))))
+(time (println (k-vicini pts 10)))
+;-> ((0 0) (0 0) (0 0) (0 0) (0 0) (0 0) (0 0) (0 0) (0 0) (0 0))
+;-> 15514.087
+
+Vedi anche "K punti più vicini - K Nearest points (LinkedIn)" su "Domande".
+
+
+-----------------------------------------------------
+Lato più grande di un quadrato interno a N rettangoli
+-----------------------------------------------------
+
+Abbiamo N rettangoli in un piano 2D con lati paralleli agli assi x e y.
+Trovare l'area massima di un quadrato che può essere inserita nella regione di intersezione di almeno due rettangoli.
+Un rettangolo viene rappresentato dalla seguente lista: ((xb yb) (xt xt))
+dove: (xb,yb) è la coordinata in basso a sinistra del rettangolo (bottom),
+      (xt,yt) è la coordinata in alto a destra del rettangolo (top)
+      
+                     (xt,yt)
+   +--------------------+
+   |                    |
+   |                    |
+   |                    |
+   |                    |
+   +--------------------+
+(xb,yb)
+
+Algoritmo
+Per ogni coppia di rettangoli...
+  Calcolare il quadrato di sovrapposizione tra i due rettangoli
+  Aggiornare il quadrato massimo
+
+Funzione che calcola il lato più grande di un quadrato interno a N rettangoli
+
+(define (quadrato-max lst)
+  ; Numero di rettangoli
+  (setq len (length lst))
+  ; Valore massimo del lato del quadrato
+  (setq max-side 0)
+  ; Lista dei punti basso-sx dei rettangoli
+  (setq basso-sx (map (fn(p) (p 0)) lst))
+  ; Lista dei punti alto-dx dei rettangoli
+  (setq alto-dx (map (fn(p) (p 1)) lst))
+  ;(println basso-sx)
+  ;(println alto-dx)
+  (for (i 0 (- len 2))
+    ; Coordinate basso-sx e alto-dx del primo rettangolo
+    (setq ax1 (basso-sx i 0)) (setq ay1 (basso-sx i 1))
+    (setq ax2 (alto-dx i 0))  (setq ay2 (alto-dx i 1))
+    (for (j (+ i 1) (- len 1))
+      ; Coordinate basso-sx e alto-dx del secondo rettangolo
+      (setq bx1 (basso-sx j 0)) (setq by1 (basso-sx j 1))
+      (setq bx2 (alto-dx j 0))  (setq by2 (alto-dx j 1))
+      ; Calcola la larghezza e l'altezza del rettangolo di sovrapposizione
+      (setq overlapX (sub (min ax2 bx2) (max ax1 bx1)))
+      (setq overlapY (sub (min ay2 by2) (max ay1 by1)))
+      ; Calcola il lato del quadrato 
+      ; valore minimo tra larghezza e altezza del rettangolo di sovrapposizione
+      (setq min-side (min overlapX overlapY))
+      ; Aggiorna il valore massimo del lato del quadrato
+      (setq max-side (max max-side min-side))
+      (println i { } j)
+      (print overlapX { } overlapY { } max-side)
+      (read-line)
+    )
+  )
+  max-side)
+
+Proviamo:
+
+(quadrato-max '(((1 1) (3 3)) ((2 2) (4 4)) ((3 1) (6 6))))
+;-> 1
+(quadrato-max '(((1 1) (5 5)) ((1 3) (5 7)) ((1 5) (5 9))))
+;-> 4
+(quadrato-max '(((1 1) (2 2)) ((3 3) (4 4)) ((3 1) (4 2))))
+;-> 0 ; nessuna sovrapposizione tra tutti i rettangoli
+
 ============================================================================
 

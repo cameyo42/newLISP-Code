@@ -2421,7 +2421,7 @@ La seguente funzione controlla la correttezza delle parentesi:
 
 
 ------------------------------------------------
-K punti più vicini (K Nearest points) (LinkedIn)
+K punti più vicini - K Nearest points (LinkedIn)
 ------------------------------------------------
 
 Data una lista di N punti (xi, yi) sul piano cartesiano 2D, trova i K punti più vicini ad un punto centrale C (xc, yc). La distanza tra due punti su un piano è la distanza euclidea.
@@ -2483,9 +2483,9 @@ Elementi da selezionare: k
       (push (list (qdist (punti i) C) (punti i)) distlst -1)
     )
     (sort distlst) ; sort usa il primo elemento di ogni sottolista
-    ;k deve essere minore o uguale a n
+    ; k deve essere minore o uguale a n
     (if (> k n) (setq k n))
-    ;trova i k punti con distanza minore dal punto centrale
+    ; trova i k punti con distanza minore dal punto centrale
     (for (i 0 (- k 1))
       (push (distlst i) out -1)
     )
@@ -2595,6 +2595,8 @@ Dopo, abbiamo due parti [oi, i] e [i + 1, oj], dove (oi, oj) sono i valori origi
 
 Complessità temporale: in media O(N), dove N è il numero di punti.
 Complessità spaziale: O(N)
+
+Vedi anche "K punti più vicini all'origine (K closest points to origin)" su "Note libere 27".
 
 
 -----------------------------

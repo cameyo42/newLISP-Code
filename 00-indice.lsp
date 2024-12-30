@@ -2754,6 +2754,8 @@ NOTE LIBERE 27
   Circonferenze di raggio R passanti per 2 punti
   Punto interno ad un cerchio
   Cerchio di massima inclusione di punti
+  K punti più vicini all'origine (K closest points to origin)
+  Lato più grande di un quadrato interno a N rettangoli
   
 
 PROBLEMI SUI DADI
