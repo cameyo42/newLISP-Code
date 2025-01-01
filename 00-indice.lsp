@@ -2,7 +2,7 @@
 ============================================================================
  Note su newLISP
  Problem Solving e Matematica ricreativa con newLISP
- © copyright 2019-2024 Massimo Corinaldesi aka cameyo
+ © copyright 2019-2025 Massimo Corinaldesi aka cameyo
  MIT-0 License
 ============================================================================
 
@@ -2756,6 +2756,7 @@ NOTE LIBERE 27
   Cerchio di massima inclusione di punti
   K punti più vicini all'origine (K closest points to origin)
   Lato più grande di un quadrato interno a N rettangoli
+  Numero di linee continue per rappresentare un grafico a linee (Line Chart)
   
 
 PROBLEMI SUI DADI

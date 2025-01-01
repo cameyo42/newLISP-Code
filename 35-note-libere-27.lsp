@@ -5090,5 +5090,100 @@ Proviamo:
 (quadrato-max '(((1 1) (2 2)) ((3 3) (4 4)) ((3 1) (4 2))))
 ;-> 0 ; nessuna sovrapposizione tra tutti i rettangoli
 
+
+--------------------------------------------------------------------------
+Numero di linee continue per rappresentare un grafico a linee (Line Chart)
+--------------------------------------------------------------------------
+
+Abbiamo una lista di coppie di interi che rappresenta l'andamento della Temperatura per N giorni.
+Un grafico a linee viene creato dalla lista tracciando i punti su un piano XY con l'asse X che rappresenta il giorno e l'asse Y che rappresenta la temperatura e collegando i punti adiacenti.
+Restituisce il numero minimo di linee necessarie per rappresentare il grafico a linee.
+Vediamo un paio di esempi:
+  N = 6
+  lista = ((1 6) (2 8) (3 4) (4 2) (5 7))
+  Grafico a Linee
+  
+  8  |   *
+  7  |   2
+  6  | *
+  5  | 1           *
+  4  |     *       5
+  3  |     3
+  2  |       *       
+  1  |       4
+  0 -+---------------------------     
+     0 1 2 3 4 5 6 7
+
+In questo caso occorrono 4 linee: 1-2, 2-3, 3-4 e 4-5.
+  N = 6
+  lista = ((1 6) (2 6) (3 4) (4 2) (5 7))
+  Grafico a Linee
+
+  8  |    
+  7  |         *
+  6  | * *     5 
+  5  | 1 2      
+  4  |     *    
+  3  |     3
+  2  |       *       
+  1  |       4
+  0 -+---------------------------     
+     0 1 2 3 4 5 6 7
+
+In questo caso occorrono 3 linee: 1-2, 2-4, e 4-5 (perchè i punti 2, 3 e 4 sono allineati).
+
+Algoritmo
+Ordinamento crescente della lista in base al giorno.
+Per ogni coppia di punti adiacenti...
+  Calcolare la pendenza della coppia di punti corrente per decidere se il segmento corrente può essere collegato a quello precedente o se occorre iniziare una nuova linea.
+  Tenere traccia del numero di linee utilizzate.
+
+Il numero di linee viene incrementato quando viene rilevato un cambiamento di pendenza tra i segmenti (in qual caso occorre aggiornare la pendenza corrente per la coppia di punti successiva).
+
+Funzione che calcola la pendenza tra due punti:
+
+(define (pendenza p1 p2)
+  (setq dx (sub (p1 0) (p2 0)))
+  (setq dy (sub (p1 1) (p2 1)))
+  (cond ((zero? dx) (list 0 (p1 0)))
+        ((zero? dy) (list (p1 1) 0))
+        (true 
+          (setq mcd (gcd dx dy))
+          (list (div dx mcd) (div dy mcd)))))
+
+(pendenza '(2 6) '(3 4))
+(pendenza '(3 4) '(4 2))
+
+Funzione che calcola il numero di linee del Line Chart:
+
+(define (linee punti)
+  (local (len num-linee pend1 pend2)
+    (setq len (length punti))
+    (cond ((zero? len) 0)
+          ((= len 1) 0)
+          ((= len 2) 1)
+          (true
+            (setq num-linee 0)
+            (sort punti)
+            (for (i 2 (- len 1))
+              (setq pend1 (pendenza (punti (- i 2)) (punti (- i 1))))
+              (setq pend2 (pendenza (punti (- i 1)) (punti i)))
+              (if (!= pend1 pend2) (++ num-linee))
+            )
+            (++ num-linee)))))
+
+Proviamo:
+
+(linee '((1 6) (2 8) (3 4) (4 2) (5 7)))
+;-> 4
+(linee '((1 6) (2 6) (3 4) (4 2) (5 7)))
+;-> 3
+(linee '((1 1) (2 2)))
+;-> 1
+(linee '((1 1) (2 2) (4 4)))
+;-> 1
+(linee '((1 1) (2 2) (4 4) (5 4) (6 4)))
+;-> 2
+
 ============================================================================
 
