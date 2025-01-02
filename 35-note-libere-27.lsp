@@ -5185,5 +5185,324 @@ Proviamo:
 (linee '((1 1) (2 2) (4 4) (5 4) (6 4)))
 ;-> 2
 
+
+--------------------
+Simulare N cicli for
+--------------------
+
+Scrivere una funzione che prende due interi N e M restituisce una lista di elementi che rappresentano il valore degli indici di N cicli 'for' innestati i cui indici vanno da 0 a M.
+In altre parole, partendo da un vettore lungo N con tutti 0, dobbiamo modificare gli elementi del vettore in modo che ad ogni passo rappresentino gli indici di N cicli for innestati.
+
+Per esempio con N = 3, M = 2
+indici =   i j k
+vettore =  0 0 0  (passo 0)
+           0 0 1  (passo 1)
+           0 0 2  (passo 2)
+           0 1 0  (passo 3)
+           0 1 1  (passo 4)
+           0 1 2  (passo 5)
+           .....  (passo ...)
+           2 2 1  (passo (M+1)^N - 2)
+           2 2 2  (passo (M+1)^N - 1)
+
+Il numero totale di passi (partendo da 0) vale (M+1)^N.
+
+Metodo 1
+--------
+
+(define (for-indexes N M)
+  (let ( (indici (dup 0 N)) (out '()) (continua true) )
+    (while (and (<= (indici 0) M) continua)
+      ; 'indici' contiene gli N indici correnti
+      ;(println indici)
+      (push indici out -1)
+      (setf indici (aggiorna-indici indici N M))
+      ; condizione di terminazione
+      (if (for-all zero? indici) (setq continua nil)))
+    out))
+
+(define (aggiorna-indici indici N M)
+  (let ( (i (- N 1)) (riporto true) )
+    ; aggiorna gli indici utilizzando un riporto
+    (while (and (>= i 0) riporto)
+      (if (< (indici i) M)
+          (begin
+            (++ (indici i))
+            (setf riporto nil))
+          (setf (indici i) 0))
+      (-- i))
+    indici))
+
+Proviamo:
+
+(for-indexes 2 2)
+;-> ((0 0) (0 1) (0 2) (1 0) (1 1) (1 2) (2 0) (2 1) (2 2))
+
+(for-indexes 3 2)
+;-> ((0 0 0) (0 0 1) (0 0 2) (0 1 0) (0 1 1) (0 1 2) (0 2 0) (0 2 1) (0 2 2)
+;->  (1 0 0) (1 0 1) (1 0 2) (1 1 0) (1 1 1) (1 1 2) (1 2 0) (1 2 1) (1 2 2)
+;->  (2 0 0) (2 0 1) (2 0 2) (2 1 0) (2 1 1) (2 1 2) (2 2 0) (2 2 1) (2 2 2))
+
+(for-indexes 4 2)
+;-> ((0 0 0 0) (0 0 0 1) (0 0 0 2) (0 0 1 0) (0 0 1 1) (0 0 1 2) (0 0 2 0)
+;->  (0 0 2 1) (0 0 2 2) (0 1 0 0) (0 1 0 1) (0 1 0 2) (0 1 1 0) (0 1 1 1)
+;->  (0 1 1 2) (0 1 2 0) (0 1 2 1) (0 1 2 2) (0 2 0 0) (0 2 0 1) (0 2 0 2)
+;->  (0 2 1 0) (0 2 1 1) (0 2 1 2) (0 2 2 0) (0 2 2 1) (0 2 2 2) (1 0 0 0)
+;->  (1 0 0 1) (1 0 0 2) (1 0 1 0) (1 0 1 1) (1 0 1 2) (1 0 2 0) (1 0 2 1)
+;->  (1 0 2 2) (1 1 0 0) (1 1 0 1) (1 1 0 2) (1 1 1 0) (1 1 1 1) (1 1 1 2)
+;->  (1 1 2 0) (1 1 2 1) (1 1 2 2) (1 2 0 0) (1 2 0 1) (1 2 0 2) (1 2 1 0)
+;->  (1 2 1 1) (1 2 1 2) (1 2 2 0) (1 2 2 1) (1 2 2 2) (2 0 0 0) (2 0 0 1)
+;->  (2 0 0 2) (2 0 1 0) (2 0 1 1) (2 0 1 2) (2 0 2 0) (2 0 2 1) (2 0 2 2)
+;->  (2 1 0 0) (2 1 0 1) (2 1 0 2) (2 1 1 0) (2 1 1 1) (2 1 1 2) (2 1 2 0)
+;->  (2 1 2 1) (2 1 2 2) (2 2 0 0) (2 2 0 1) (2 2 0 2) (2 2 1 0) (2 2 1 1)
+;->  (2 2 1 2) (2 2 2 0) (2 2 2 1) (2 2 2 2))
+
+(length (for-indexes 4 3))
+;-> 256
+
+Metodo 2
+--------
+
+(transpose (for-indexes 3 2))
+;-> ((0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2)
+;->  (0 0 0 1 1 1 2 2 2 0 0 0 1 1 1 2 2 2 0 0 0 1 1 1 2 2 2)
+;->  (0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2))
+
+Il metodo è quello di costruire la lista intera della trasposta.
+Per esempio, nel caso sopra, la funzione si comporta nel modo seguente:
+  Prima riga
+    base = 9 (numeri di zeri)
+    pattern = (0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2)
+    riga = (0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2)
+  Seconda riga
+    base = 3 (numeri di zeri)
+    pattern = (0 0 0 1 1 1 2 2 2)
+    riga = (0 0 0 1 1 1 2 2 2 0 0 0 1 1 1 2 2 2 0 0 0 1 1 1 2 2 2)
+  Terza riga
+    base = 1 (numeri di zeri)
+    pattern = (0 1 2)
+    riga = (0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2)
+
+(define (genera-indici N M)
+  (local (out elementi base pattern riga)
+    (setq out '())
+    ; numero di elementi
+    (setq elementi (/ (pow (+ M 1) N)))
+    ; lunghezza della prima ripetizione della prima riga
+    ; (numero di zeri della prima riga)
+    (setq base (/ elementi (+ M 1)))
+    (while (> base 0)
+      ; creazione del pattern da ripetere
+      (setq pattern (flat (map (fn(x) (dup x base)) (sequence 0 M))))
+      ; creazione della riga
+      (setq riga (flat (dup pattern (/ elementi (length pattern)))))
+      ; inserimento della riga nella soluzione
+      (push riga out -1)
+      ; aggiorna 'base' per la prossima riga
+      (setq base (/ base (+ M 1)))
+    )
+    ; trasposta della soluzione
+    (transpose out)))
+
+(genera-indici 2 2)
+;-> ((0 0) (0 1) (0 2) (1 0) (1 1) (1 2) (2 0) (2 1) (2 2))
+
+(genera-indici 3 2)
+;-> ((0 0 0) (0 0 1) (0 0 2) (0 1 0) (0 1 1) (0 1 2) (0 2 0) (0 2 1) (0 2 2)
+;->  (1 0 0) (1 0 1) (1 0 2) (1 1 0) (1 1 1) (1 1 2) (1 2 0) (1 2 1) (1 2 2)
+;->  (2 0 0) (2 0 1) (2 0 2) (2 1 0) (2 1 1) (2 1 2) (2 2 0) (2 2 1) (2 2 2))
+
+Vediamo se le due funzioni generano gli stessi risultati:
+
+(= (genera-indici 4 2) (for-indexes 4 2))
+;-> true
+
+Vediamo la velocità delle funzioni:
+
+(time (for-indexes 5 20))
+;-> 3564.437
+(time (genera-indici 5 20))
+;-> 880.671
+
+(time (for-indexes 3 100))
+;-> 683.199
+(time (genera-indici 3 100))
+;-> 226.394
+
+La seconda funzione è più veloce (anche se entrambe sono piuttosto lente).
+
+Possiamo generalizzare il primo metodo in modo che ogni ciclo for abbia un proprio indice di inizio e di fine.
+
+(define (for-indexes limiti)
+  (letn ((N (length limiti))
+         (indici (map (fn (lim) (lim 0)) limiti)) ; Inizializza con i valori di partenza
+         (out '())
+         (continua true))
+    (setq base indici)
+    (while continua
+      (push indici out -1)
+      (setq indici (aggiorna-indici indici limiti N))
+      (if (= indici base) (setq continua nil))
+    )
+    out))
+
+(define (aggiorna-indici indici limiti N)
+  (let ((i (- N 1))
+        (riporto true))
+    (while (and (>= i 0) riporto)
+      (if (< (indici i) ((limiti i) 1))
+          (begin
+            (++ (indici i))
+            (setq riporto nil))
+          (setq (indici i) ((limiti i) 0)))
+      (-- i)
+    )
+    indici))
+
+Proviamo:
+
+(for-indexes '((2 4) (2 6)))
+;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (3 2) (3 3) (3 4) 
+;->  (3 5) (3 6) (4 2) (4 3) (4 4) (4 5) (4 6))
+
+(= (for-indexes '((0 3) (0 3))) (genera-indici 2 3))
+;-> true
+
+(= (for-indexes '((0 3) (0 3) (0 3))) (genera-indici 3 3))
+;-> true
+
+
+--------------------------
+Somma X di N numeri (NSum)
+--------------------------
+
+Data una lista di interi e un intero N, restituire tutte le N-ple (lista[a], lista[b], ..., lista[N]) tali che gli elementi hanno tutti indici diversi tra loro e (lista[a] + lista[b] + ... + lista[N]) = X.
+
+Se N = 4, possiamo scrivere:
+
+Quadrupla: (lista[a], lista[b], lista[c], lista[d])
+Somma: lista[a] + lista[b] + lista[c] + lista[d] = X
+
+(define (quadruple lista target)
+  (let ((len (length lista))
+        (out '()))
+    (for (a 0 (- len 4))
+      (for (b (+ a 1) (- len 3))
+        (for (c (+ b 1) (- len 2))
+          (for (d (+ c 1) (- len 1))
+            (when (= (+ (lista a) (lista b) (lista c) (lista d)) target)
+                (push (list (lista a) (lista b) (lista c) (lista d)) out))))))
+    out))
+
+Proviamo:
+
+(setq lista '(1 -1 2 -2 0 1))
+(quadruple lista 3)
+;-> ((1 -1 2 1))
+(setq lista '(1 5 -2 0 7 -4 2))
+(quadruple lista 3)
+;-> ((-2 7 -4 2) (5 0 -4 2))
+
+Se N = 5, possiamo scrivere:
+
+Quintupla: (lista[a], lista[b], lista[c], lista[d], lista[e])
+lista[a] + lista[b] + lista[c] + lista[d] + lista[e] = X
+
+(define (quintuple lista target)
+  (let ((len (length lista))
+        (out '()))
+    (for (a 0 (- len 5))
+      (for (b (+ a 1) (- len 4))
+        (for (c (+ b 1) (- len 3))
+          (for (d (+ c 1) (- len 2))
+            (for (e (+ d 1) (- len 1))
+              (when (= (+ (lista a) (lista b) (lista c) (lista d) (lista e)) target)
+                (push (list (lista a) (lista b) (lista c) (lista d) (lista e)) out)))))))
+    out))
+
+Proviamo:
+
+(setq lista '(1 -1 2 -2 0 1))
+(quintuple lista 3)
+;-> ((1 -1 2 0 1))
+
+(setq lista '(1 5 -2 0 7 -4 2))
+(quintuple lista 3)
+;-> ((-2 0 7 -4 2))
+
+Comunque non possiamo scrivere una funzione diversa per ogni valore di N.
+Un metodo potrebbe essere quello di generare gli indici dei cicli 'for' con una funzione.
+
+(define (genera-indici N M)
+  (local (out elementi base pattern riga)
+    (setq out '())
+    ; numero di elementi
+    (setq elementi (/ (pow (+ M 1) N)))
+    ; lunghezza della prima ripetizione della prima riga
+    ; (numero di zeri della prima riga)
+    (setq base (/ elementi (+ M 1)))
+    (while (> base 0)
+      ; creazione del pattern da ripetere
+      (setq pattern (flat (map (fn(x) (dup x base)) (sequence 0 M))))
+      ; creazione della riga
+      (setq riga (flat (dup pattern (/ elementi (length pattern)))))
+      ; inserimento della riga nella soluzione
+      (push riga out -1)
+      ; aggiorna 'base' per la prossima riga
+      (setq base (/ base (+ M 1)))
+    )
+    ; trasposta della soluzione
+    (transpose out)))
+
+(genera-indici 2 3)
+;-> ((0 0) (0 1) (0 2) (0 3)
+;->  (1 0) (1 1) (1 2) (1 3)
+;->  (2 0) (2 1) (2 2) (2 3)
+;->  (3 0) (3 1) (3 2) (3 3))
+
+Adesso possiamo usare questi indici per i nostri calcoli.
+Nota: in questo caso la funzione troverà delle liste che sommano al nostro target, ma potrebbero usare gli stessi elementi (cioè non tutti gli indici sono diversi).
+Questo perchè tutti i nostri cicli vanno da 0 al numero di elementi della lista data, mentre le funzioni "quadrple" e "quintuple" hanno per i cicli dei valori diversi che permettono di evitare gli elementi multipli.
+
+(define (somma lista num target)
+  (local (out len indici lista-val somma)
+    (setq out '())
+    (setq len (length lista))
+    (setq indici '())
+    ; genera gli indici
+    (setq indici (genera-indici num (- len 1)))
+    ; calcola i gruppi di 'num' elementi che sommano a 'target'
+    (dolist (idx indici)
+      (setq lista-val (map (fn(x) (lista x)) idx))
+      (setq somma (apply + lista-val))
+      (if (= somma target) (push lista-val out -1))
+      ;(if (= val target) (println lista-val))
+    )
+    ; elimina le liste duplicate
+    (unique (map sort out))))
+
+Proviamo:
+
+(setq lista '(1 -1 2 -2 0 1))
+(somma lista 4 3)
+;-> ((0 1 1 1) (-1 1 1 2) (-2 1 2 2) (0 0 1 2) (-1 0 2 2))
+
+(setq lista '(1 5 -2 0 7 -4 2))
+(somma lista 4 3)
+;-> ((0 1 1 1) (-4 1 1 5) (-2 1 2 2) (0 0 1 2) (-2 -2 2 5) (-2 0 0 5)
+;->  (-4 0 2 5) (-2 -2 0 7) (-4 -2 2 7) (-4 0 0 7))
+ 
+(setq lista '(1 -1 2 -2 0 1))
+(somma lista 5 3)
+;-> ((-1 1 1 1 1) (-2 1 1 1 2) (0 0 1 1 1) (-1 0 1 1 2) (-1 -1 1 2 2)
+;->  (-2 0 1 2 2) (0 0 0 1 2) (-2 -1 2 2 2) (-1 0 0 2 2))
+
+(setq lista '(1 5 -2 0 7 -4 2))
+(somma lista 5 3)
+;-> ((-2 1 1 1 2) (0 0 1 1 1) (-2 -2 1 1 5) (-4 0 1 1 5) (-4 -2 1 1 7)
+;->  (-4 -4 1 5 5) (-2 0 1 2 2) (0 0 0 1 2) (-4 1 2 2 2) (-2 -2 0 2 5)
+;->  (-2 0 0 0 5) (-4 -2 2 2 5) (-4 0 0 2 5) (-2 -2 -2 2 7) (-2 -2 0 0 7)
+;->  (-4 -2 0 2 7) (-4 0 0 0 7) (-4 -4 2 2 7))
+
 ============================================================================
 

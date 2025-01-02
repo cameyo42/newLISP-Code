@@ -11,8 +11,9 @@
                      Matthew M. Conroy
             doctormatt "at" madandmoonly dot com
 
-https://www.madandmoonly.com/doctormatt/mathematics/dice1.pdf
 http://www.matthewconroy.com/
+https://www.madandmoonly.com/doctormatt/mathematics/dice1.pdf
+A copy of the PDF file is located in the "data" folder.
 
 Conroy solves the problems mathematically (very informative and interesting).
 Here, I try solve the problems (and/or verify the results) with simulations (if I am able...).

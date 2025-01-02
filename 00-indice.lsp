@@ -2757,6 +2757,8 @@ NOTE LIBERE 27
   K punti più vicini all'origine (K closest points to origin)
   Lato più grande di un quadrato interno a N rettangoli
   Numero di linee continue per rappresentare un grafico a linee (Line Chart)
+  Simulare N cicli for
+  Somma X di N numeri (NSum)
   
 
 PROBLEMI SUI DADI
