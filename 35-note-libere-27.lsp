@@ -5504,5 +5504,96 @@ Proviamo:
 ;->  (-2 0 0 0 5) (-4 -2 2 2 5) (-4 0 0 2 5) (-2 -2 -2 2 7) (-2 -2 0 0 7)
 ;->  (-4 -2 0 2 7) (-4 0 0 0 7) (-4 -4 2 2 7))
 
+
+---------------------------------------------------------
+Segmenti paralelli e segmenti perpendicolari (ortogonali)
+---------------------------------------------------------
+
+Segmenti paralelli
+------------------
+Per verificare se due segmenti s1(p1, p2) e s2(p3, p4) sono paralleli, possiamo confrontare i loro vettori direzionali.
+Due segmenti sono paralleli se i loro vettori direzionali sono proporzionali.
+
+Vettori direzionali dei segmenti:
+  vec1 = (x2 - x1, y2 - y1) per s1
+  vec2 = (x4 - x3, y4 - y3) per s2
+
+Verifica della proporzionalità dei vettori direzionali:
+Due vettori vec1 = (v1x, v1y) e vec2 = (v2x, v2y) sono paralleli se il rapporto dei componenti è lo stesso:
+
+  Se v1x/v2x = v1y/v2y, allora i segmenti sono paralleli.
+
+Oppure, evitando divisioni (per gestire i casi con componenti zero), quando risulta:
+
+  v1x * v2y = v1y * v2x
+
+(define (parallel-segments? p1 p2 p3 p4 eps)
+  (let ( (v1x (sub (p2 0) (p1 0)))
+         (v1y (sub (p2 1) (p1 1)))
+         (v2x (sub (p4 0) (p3 0)))
+         (v2y (sub (p4 1) (p3 1)))
+         (eps (or eps 0)) )
+    ; due segmenti sono paralleli se risulta (v1x * v2y) = (v1y  * v2x)
+    ; eps: soglia di accettazione
+    (<= (abs (sub (mul v1x v2y) (mul v1y v2x))) eps)))
+
+Proviamo:
+
+(parallel-segments? '(1 1) '(3 3) '(2 2) '(4 4))
+;-> true
+(parallel-segments? '(1 1) '(3 3) '(2 2) '(4 4.0001))
+;-> nil
+(parallel-segments? '(1 1) '(3 3) '(2 2) '(4 4.0001) 0.01)
+;-> true
+(parallel-segments? '(1 1) '(3 3) '(1 2) '(3 5))
+;-> nil
+
+Nota: i segmenti non devono essere punti (cioè ogni segmento deve avere da due punti diversi).
+
+Segmenti perpendicolari (ortogonali)
+------------------------------------
+Per verificare se due segmenti s1(p1, p2) e s2(p3, p4) sono perpendicolari, utilizziamo il prodotto scalare dei loro vettori direzionali. 
+Due segmenti sono perpendicolari se il prodotto scalare dei loro vettori direzionali è uguale a zero.
+
+Vettori direzionali dei segmenti:
+  vec1 = (x2 - x1, y2 - y1) per s1
+  vec2 = (x4 - x3, y4 - y3) per s2
+
+Prodotto scalare dei due vettori:
+
+   vec1 * vec2 = (v1x * v2x) + (v1y * v2y)
+
+Verifica se il prodotto scalare è uguale a zero:
+
+   Se (v1x * v2x) + (v1y * v2y) = 0, allora i segmenti sono perpendicolari.
+
+
+(define (orthogonal-segments? p1 p2 p3 p4 eps)
+  (let ( (v1x (sub (p2 0) (p1 0)))
+         (v1y (sub (p2 1) (p1 1)))
+         (v2x (sub (p4 0) (p3 0)))
+         (v2y (sub (p4 1) (p3 1)))
+         (eps (or eps 0)) )
+    ; due segmenti sono perpendicolari se il loro prodotto scalare vale 0
+    ; eps: soglia di accettazione
+    (<= (abs (add (mul v1x v2x) (mul v1y v2y))) eps)))
+
+Proviamo:
+
+(orthogonal-segments? '(0 0) '(2 0) '(0 1) '(0 4))
+;-> true
+(orthogonal-segments? '(0 0) '(2 0) '(0 1) '(0.1 4))
+;-> nil
+(orthogonal-segments? '(0 0) '(2 0) '(0 1) '(0.001 4) 1e-6)
+;-> nil
+(orthogonal-segments? '(0 0) '(2 0) '(0 1) '(0.0000001 4) 1e-6)
+;-> true
+(orthogonal-segments? '(0 0) '(1 1) '(0 0) '(1 -1))
+;-> true
+(orthogonal-segments? '(0 0) '(1 1) '(0 0) '(2 2))
+;-> nil
+
+Nota: i segmenti non devono essere punti (cioè ogni segmento deve avere da due punti diversi).
+
 ============================================================================
 

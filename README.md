@@ -44,7 +44,7 @@ Problem Solving e Matematica ricreativa con newLISP
 96) Problemi sui dadi (79)
 97) Appendici (33)
 98) Bibliografia
-99) yo library (yo.zip) (305)
+99) yo library (yo.zip) (307)
 
 Documentazione Extra:  
 A) Introduction to newLISP (by Cormullion)  

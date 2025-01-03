@@ -2759,6 +2759,7 @@ NOTE LIBERE 27
   Numero di linee continue per rappresentare un grafico a linee (Line Chart)
   Simulare N cicli for
   Somma X di N numeri (NSum)
+  Segmenti paralelli e segmenti perpendicolari (ortogonali)
   
 
 PROBLEMI SUI DADI
@@ -2806,7 +2807,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (305 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (307 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
