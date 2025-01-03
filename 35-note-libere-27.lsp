@@ -5030,7 +5030,7 @@ Trovare l'area massima di un quadrato che può essere inserita nella regione di 
 Un rettangolo viene rappresentato dalla seguente lista: ((xb yb) (xt xt))
 dove: (xb,yb) è la coordinata in basso a sinistra del rettangolo (bottom),
       (xt,yt) è la coordinata in alto a destra del rettangolo (top)
-      
+
                      (xt,yt)
    +--------------------+
    |                    |
@@ -5069,7 +5069,7 @@ Funzione che calcola il lato più grande di un quadrato interno a N rettangoli
       ; Calcola la larghezza e l'altezza del rettangolo di sovrapposizione
       (setq overlapX (sub (min ax2 bx2) (max ax1 bx1)))
       (setq overlapY (sub (min ay2 by2) (max ay1 by1)))
-      ; Calcola il lato del quadrato 
+      ; Calcola il lato del quadrato
       ; valore minimo tra larghezza e altezza del rettangolo di sovrapposizione
       (setq min-side (min overlapX overlapY))
       ; Aggiorna il valore massimo del lato del quadrato
@@ -5102,16 +5102,16 @@ Vediamo un paio di esempi:
   N = 6
   lista = ((1 6) (2 8) (3 4) (4 2) (5 7))
   Grafico a Linee
-  
+
   8  |   *
   7  |   2
   6  | *
   5  | 1           *
   4  |     *       5
   3  |     3
-  2  |       *       
+  2  |       *
   1  |       4
-  0 -+---------------------------     
+  0 -+---------------------------
      0 1 2 3 4 5 6 7
 
 In questo caso occorrono 4 linee: 1-2, 2-3, 3-4 e 4-5.
@@ -5119,15 +5119,15 @@ In questo caso occorrono 4 linee: 1-2, 2-3, 3-4 e 4-5.
   lista = ((1 6) (2 6) (3 4) (4 2) (5 7))
   Grafico a Linee
 
-  8  |    
+  8  |
   7  |         *
-  6  | * *     5 
-  5  | 1 2      
-  4  |     *    
+  6  | * *     5
+  5  | 1 2
+  4  |     *
   3  |     3
-  2  |       *       
+  2  |       *
   1  |       4
-  0 -+---------------------------     
+  0 -+---------------------------
      0 1 2 3 4 5 6 7
 
 In questo caso occorrono 3 linee: 1-2, 2-4, e 4-5 (perchè i punti 2, 3 e 4 sono allineati).
@@ -5147,7 +5147,7 @@ Funzione che calcola la pendenza tra due punti:
   (setq dy (sub (p1 1) (p2 1)))
   (cond ((zero? dx) (list 0 (p1 0)))
         ((zero? dy) (list (p1 1) 0))
-        (true 
+        (true
           (setq mcd (gcd dx dy))
           (list (div dx mcd) (div dy mcd)))))
 
@@ -5362,7 +5362,7 @@ Possiamo generalizzare il primo metodo in modo che ogni ciclo for abbia un propr
 Proviamo:
 
 (for-indexes '((2 4) (2 6)))
-;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (3 2) (3 3) (3 4) 
+;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (3 2) (3 3) (3 4)
 ;->  (3 5) (3 6) (4 2) (4 3) (4 4) (4 5) (4 6))
 
 (= (for-indexes '((0 3) (0 3))) (genera-indici 2 3))
@@ -5370,6 +5370,39 @@ Proviamo:
 
 (= (for-indexes '((0 3) (0 3) (0 3))) (genera-indici 3 3))
 ;-> true
+
+Vediamo la differenza di velocità con i cicli "for":
+
+(define (for3 i1 i2 j1 j2 k1 k2)
+  (let (out '())
+    (for (i i1 i2)
+      (for (j j1 j2)
+        (for (k k1 k2)
+          (push (list i j k) out -1))))))
+
+(= (for3 1 2 3 4 5 6) (for-indexes '((1 2) (3 4) (5 6))))
+;-> true
+
+(time (for3 1 100 1 100 1 100))
+;-> 171.828
+(time (for-indexes '((1 100) (1 100) (1 100))))
+;-> 640.905
+(div 640.905 171.828)
+;-> 3.729921782247363
+
+(time (for3 1 200 1 200 1 200))
+;-> 890.903
+(time (for-indexes '((1 200) (1 200) (1 200))))
+;-> 5063.102
+(div 5063.102 890.903)
+;-> 5.683112527401973
+
+(time (for3 1 400 1 400 1 400))
+;-> 10157.162
+(time (for-indexes '((1 400) (1 400) (1 400))))
+;-> 41050.7
+(div 41050.7 10157.162)
+;-> 4.041552157974835
 
 
 --------------------------
@@ -5491,7 +5524,7 @@ Proviamo:
 (somma lista 4 3)
 ;-> ((0 1 1 1) (-4 1 1 5) (-2 1 2 2) (0 0 1 2) (-2 -2 2 5) (-2 0 0 5)
 ;->  (-4 0 2 5) (-2 -2 0 7) (-4 -2 2 7) (-4 0 0 7))
- 
+
 (setq lista '(1 -1 2 -2 0 1))
 (somma lista 5 3)
 ;-> ((-1 1 1 1 1) (-2 1 1 1 2) (0 0 1 1 1) (-1 0 1 1 2) (-1 -1 1 2 2)
@@ -5552,7 +5585,7 @@ Nota: i segmenti non devono essere punti (cioè ogni segmento deve avere da due 
 
 Segmenti perpendicolari (ortogonali)
 ------------------------------------
-Per verificare se due segmenti s1(p1, p2) e s2(p3, p4) sono perpendicolari, utilizziamo il prodotto scalare dei loro vettori direzionali. 
+Per verificare se due segmenti s1(p1, p2) e s2(p3, p4) sono perpendicolari, utilizziamo il prodotto scalare dei loro vettori direzionali.
 Due segmenti sono perpendicolari se il prodotto scalare dei loro vettori direzionali è uguale a zero.
 
 Vettori direzionali dei segmenti:
@@ -5566,7 +5599,6 @@ Prodotto scalare dei due vettori:
 Verifica se il prodotto scalare è uguale a zero:
 
    Se (v1x * v2x) + (v1y * v2y) = 0, allora i segmenti sono perpendicolari.
-
 
 (define (orthogonal-segments? p1 p2 p3 p4 eps)
   (let ( (v1x (sub (p2 0) (p1 0)))
@@ -5594,6 +5626,184 @@ Proviamo:
 ;-> nil
 
 Nota: i segmenti non devono essere punti (cioè ogni segmento deve avere da due punti diversi).
+
+
+---------------------------
+Piccoli numeri di Schroeder
+---------------------------
+
+A001003
+Schroeder's second problem (generalized parentheses), also called super-Catalan numbers or little Schroeder numbers.
+  1, 1, 3, 11, 45, 197, 903, 4279, 20793, 103049, 518859, 2646723, 13648869,
+  71039373, 372693519, 1968801519, 10463578353, 55909013009, 300159426963,
+  1618362158587, 8759309660445, 47574827600981, 259215937709463,
+  1416461675464871, ...
+
+Una formula per generare la sequenza è la seguente:
+
+  a(n) = (1/n)*Sum[k=1..n] C(n, k)*C(n+k, k-1)
+
+(define (binom num k)
+"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0)
+        ((zero? k) 1)
+        ((< k 0) 0)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (a n)
+  (cond
+    ((zero? n) 1L)
+    (true
+      (let (sum 0L)
+        (for (k 1 n)
+          (setq sum (+ sum (* (binom n k) (binom (+ n k) (- k 1))))))
+        (/ sum n)))))
+
+(map a (sequence 0 23))
+;-> (1L 1L 3L 11L 45L 197L 903L 4279L 20793L 103049L 518859L 2646723L 13648869L
+;->  71039373L 372693519L 1968801519L 10463578353L 55909013009L 300159426963L
+;->  1618362158587L 8759309660445L 47574827600981L 259215937709463L
+;->  1416461675464871L)
+
+
+--------------------------
+Grandi numeri di Schroeder
+--------------------------
+
+Sequenza OEIS A006318:
+Large Schröder numbers (or large Schroeder numbers, or big Schroeder numbers).
+  1, 2, 6, 22, 90, 394, 1806, 8558, 41586, 206098, 1037718, 5293446, 27297738,
+  142078746, 745387038, 3937603038, 20927156706, 111818026018, 600318853926,
+  3236724317174, 17518619320890, 95149655201962, 518431875418926,
+  2832923350929742, 15521467648875090, ...
+
+Una formula per generare la sequenza è la seguente:
+
+  a(n) = (1/n)*Sum[k = 0..n] 2^k*C(n, k)*C(n, k-1), per n > 0.
+
+(define (binom num k)
+"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0)
+        ((zero? k) 1)
+        ((< k 0) 0)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (a n)
+  (cond
+    ((zero? n) 1L)
+    (true
+      (let (sum 0L)
+        (for (k 0 n)
+          (setq sum (+ sum (* (** 2 k) (binom n k) (binom n (- k 1))))))
+        (/ sum n)))))
+
+(map a (sequence 0 22))
+;-> (1L 2L 6L 22L 90L 394L 1806L 8558L 41586L 206098L 1037718L 5293446L 27297738L
+;->  142078746L 745387038L 3937603038L 20927156706L 111818026018L 600318853926L
+;->  3236724317174L 17518619320890L 95149655201962L 518431875418926L)
+
+-------------------------------
+Trasformazione dei numeri primi
+-------------------------------
+
+Sequenza OEIS A159006:
+Transformation of prime(n): flip digits in the binary representation, revert the sequence of digits, and convert back to decimal.
+  2, 0, 2, 0, 2, 4, 14, 6, 2, 8, 0, 22, 26, 10, 2, 20, 8, 16, 30, 14, 54,
+  6, 26, 50, 60, 44, 12, 20, 36, 56, 0, 62, 110, 46, 86, 22, 70, 58, 26,
+  74, 50, 82, 2, 124, 92, 28, 52, 4, 56, 88, 104, 8, 112, 32, 254, 62,
+  158, 30, 174, 206, 78, 182, 102, 38, 198, 134, 90, 234, 74, 138, 242, ...
+
+37->100101->change digits 011010->read from right to left 010110->22 281->100011001->change digits 011100110->read from right to left 011001110->206
+
+Esempi:
+
+n = 37
+binario: 100101 --> flip: 011010 --> revert: 010110 --> decimale: 22
+
+n = 281
+binario: 100011001 --> flip: 011100110 --> revert: 011001110 --> decimale: 206
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (a n)
+  (if (prime? n)
+      (let (out (bits n)) ; binario
+        ; flip
+        (for (i 0 (- (length out) 1))
+          (if (= "0" (out i))
+              (setf (out i) "1")
+              (setf (out i) "0")))
+        (reverse out)
+        ; reverse and convert to decimal
+        (int out 0 2))
+      ;else
+      nil))
+
+Proviamo:
+
+(a 37)
+;-> 22
+(a 281)
+;-> 206
+(a 4)
+;-> nil
+
+(clean nil? (map a (sequence 0 200)))
+;-> (2 0 2 0 2 4 14 6 2 8 0 22 26 10 2 20 8 16 30 14 54
+;->  6 26 50 60 44 12 20 36 56 0 62 110 46 86 22 70 58 26
+;->  74 50 82 2 124 92 28)
+
+Se al posto dei soli numeri primi calcoliamo la trasformazione per tutti i numeri otteniamo:
+
+Sequenza OEIS A036044:
+BCR(n): write in binary, complement, reverse.
+  1, 0, 2, 0, 6, 2, 4, 0, 14, 6, 10, 2, 12, 4, 8, 0, 30, 14, 22, 6, 26, 10,
+  18, 2, 28, 12, 20, 4, 24, 8, 16, 0, 62, 30, 46, 14, 54, 22, 38, 6, 58,
+  26, 42, 10, 50, 18, 34, 2, 60, 28, 44, 12, 52, 20, 36, 4, 56, 24, 40, 8,
+  48, 16, 32, 0, 126, 62, 94, 30, 110, 46, 78, 14, 118, 54, 86, ...
+
+(define (a n)
+  (let (out (bits n)) ; binario
+    ; flip
+    (for (i 0 (- (length out) 1))
+      (if (= "0" (out i))
+          (setf (out i) "1")
+          (setf (out i) "0")))
+    (reverse out)
+    ; reverse and convert to decimal
+    (int out 0 2)))
+
+(map a (sequence 1 59))
+;-> (0 2 0 6 2 4 0 14 6 10 2 12 4 8 0 30 14 22 6 26 10
+;->  18 2 28 12 20 4 24 8 16 0 62 30 46 14 54 22 38 6 58
+;->  26 42 10 50 18 34 2 60 28 44 12 52 20 36 4 56 24 40 8)
 
 ============================================================================
 

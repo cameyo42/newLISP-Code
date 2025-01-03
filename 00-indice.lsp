@@ -2760,6 +2760,9 @@ NOTE LIBERE 27
   Simulare N cicli for
   Somma X di N numeri (NSum)
   Segmenti paralelli e segmenti perpendicolari (ortogonali)
+  Piccoli numeri di Schroeder
+  Grandi numeri di Schroeder
+  Trasformazione dei numeri primi
   
 
 PROBLEMI SUI DADI

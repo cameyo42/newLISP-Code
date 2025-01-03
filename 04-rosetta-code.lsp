@@ -2365,7 +2365,7 @@ Per finire vediamo come calcolare la riga n-esima del triangolo di Pascal (valid
 ;-> (1L 20L 190L 1140L 4845L 15504L 38760L 77520L 125970L 167960L 184756L 167960L 125970L
 ;->  77520L 38760L 15504L 4845L 1140L 190L 20L 1L)
 
-Questa funzione sfrutta la seguente identità matemetica sulle combinazioni:
+Questa funzione sfrutta la seguente identità matematica sulle combinazioni:
 
 C(n, k+1) = C(n,k) * (n-k) / (k+1)
 
