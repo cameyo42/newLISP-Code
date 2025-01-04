@@ -5628,7 +5628,10 @@ Proviamo:
 Nota: i segmenti non devono essere punti (cioè ogni segmento deve avere da due punti diversi).
 
 
----------------------------
+--------------------------------------
+Numeri di Schroeder (Piccoli e Grandi)
+--------------------------------------
+
 Piccoli numeri di Schroeder
 ---------------------------
 
@@ -5677,8 +5680,6 @@ Una formula per generare la sequenza è la seguente:
 ;->  1618362158587L 8759309660445L 47574827600981L 259215937709463L
 ;->  1416461675464871L)
 
-
---------------------------
 Grandi numeri di Schroeder
 --------------------------
 
@@ -5725,6 +5726,7 @@ Una formula per generare la sequenza è la seguente:
 ;-> (1L 2L 6L 22L 90L 394L 1806L 8558L 41586L 206098L 1037718L 5293446L 27297738L
 ;->  142078746L 745387038L 3937603038L 20927156706L 111818026018L 600318853926L
 ;->  3236724317174L 17518619320890L 95149655201962L 518431875418926L)
+
 
 -------------------------------
 Trasformazione dei numeri primi
@@ -5804,6 +5806,267 @@ BCR(n): write in binary, complement, reverse.
 ;-> (0 2 0 6 2 4 0 14 6 10 2 12 4 8 0 30 14 22 6 26 10
 ;->  18 2 28 12 20 4 24 8 16 0 62 30 46 14 54 22 38 6 58
 ;->  26 42 10 50 18 34 2 60 28 44 12 52 20 36 4 56 24 40 8)
+
+
+-------------------------------
+La funzione Tally (Mathematica)
+-------------------------------
+
+In Wolfram Mathematica la funzione "Tally" prende una lista ed elenca tutti gli elementi distinti insieme alle loro molteplicità.
+Per esempio:
+lista  = (a a b a c b a)
+output = ((a 4) (b 2) (c 1))
+
+Scriviamo la funzione:
+
+(define (tally lst)
+  (map list (unique lst) (count (unique lst) lst)))
+
+Proviamo:
+
+(setq a '(a a b a c b a))
+(tally a)
+;-> ((a 4) (b 2) (c 1))
+
+(tally (rand 6 100))
+;-> ((1 18) (4 15) (5 16) (2 13) (3 22) (0 16))
+
+
+-----------------------------------
+La funzione "Entropy" (Mathematica)
+-----------------------------------
+
+La funzione Entropy in Mathematica calcola l'entropia di un dataset o di una distribuzione di probabilità.
+La formula utilizzata dipende dal tipo di input fornito.
+Di seguito sono descritte le principali modalità di calcolo:
+
+1. Per una distribuzione discreta o una lista di probabilità
+------------------------------------------------------------
+Se l'input è una lista di probabilità (p1, p2, p3, ..., pn), l'entropia è calcolata come:
+
+  H = - Sum[i=1,..,n] p(i)*log2(i)
+
+dove: p(i) sono le probabilità associate agli eventi e il logaritmo è in base 2.
+
+2. Per un dataset (frequenze di eventi)
+---------------------------------------
+Se l'input è una lista di frequenze (f, f2, f3, ..., fn), mathematica normalizza le frequenze per ottenere le probabilità:
+
+                f(i)
+  p(i) = -------------------
+          Sum[j=1,..,n] f(j)
+
+Poi calcola l'entropia con la formula vista sopra.
+
+Esempi in Mathematica:
+Con una lista di probabilità:
+Entropy[{0.5, 0.5}]
+Risultato: 1 (bit)
+
+Con una lista di frequenze:
+Entropy[{2, 2, 1}]
+Qui le probabilità saranno calcolate come {0.4,0.4,0.2}.
+
+3. Per una distribuzione simbolica o continua
+---------------------------------------------
+Se l'input è una distribuzione simbolica (ad esempio, una distribuzione normale), Mathematica utilizza la formula analitica appropriata per l'entropia differenziale.
+Per una distribuzione continua P(x) l'entropia è definita come:
+
+  H = - Integrale[P(x)*log2(P(x))dx]
+
+4. Per una lista di numeri o simboli/caratteri
+----------------------------------------------
+Se passiamo a Mathematica una lista di numeri (o simboli), la funzione Entropy tratterà i numeri come dati grezzi e calcolerà l'entropia in base alle frequenze dei valori nella lista.
+Il processo consiste nei seguenti passi:
+
+a. Normalizzazione delle frequenze:
+Mathematica costruisce un istogramma implicito dei dati e calcola la frequenza relativa di ciascun valore (o intervallo).
+Le frequenze sono poi normalizzate per ottenere le probabilità associate ai valori (o agli intervalli).
+
+          conteggio delle occorrenze di i
+  p(i) = ---------------------------------
+            conteggio di tutti i dati
+
+b. Calcolo dell'entropia:
+L'entropia viene quindi calcolata utilizzando la formula:
+
+  H = - Sum[i=1,..,n] p(i)*log(i)
+
+dove p(i) rappresenta la probabilità di ciascun valore discreto (o intervallo).
+
+Esempio:
+
+Entropy[{1.2, 2.3, 1.2, 3.4, 3.4, 3.4, 2.3}]
+
+Frequenze:
+  1.2: 2 occorrenze
+  2.3: 2 occorrenze
+  3.4: 3 occorrenze
+
+Probabilità:
+  p(1.2) = 2/7
+  p(2.3) = 2/7
+  p(3.4) = 3/7
+
+Entropia:
+
+  H = - (2/7*log2(2/7) + 2/7*log2(2/7) + 3/7*log2(3/7)) = 1.5566567
+
+Scriviamo una funzione che calcola l'entropia di una lista di numeri o simboli.
+
+(define (entropy lst)
+  (local (freqs probs sum-freqs))
+    ; calcolo delle frequenze degli elementi distinti della lista
+    (setq freqs (count (unique lst) lst))
+    ; somma delle frequenze
+    (setq sum-freqs (apply + freqs))
+    ; calcolo delle probabilità associate ad ogni frequenza
+    (setq probs (map (fn(x) (div x sum-freqs)) freqs))
+    ; calcolo dell'entropia
+    (sub (apply add (map (fn(x) (mul x (log x 2))) probs))))
+
+Proviamo
+
+(entropy '(1.2 2.3 1.2 3.4 3.4 3.4 2.3))
+;-> 1.556656707462823
+
+(entropy (explode "entropia di una stringa"))
+;-> 3.522711955680758
+
+Vedi anche "Entropia di Shannon" su "Note libere 10".
+
+
+---------------------------------
+Taglio di una torta (Numeri Cake)
+---------------------------------
+
+Dato un cubo (o una torta) determinare il numero massimo di pezzi risultanti da n tagli planari attraverso il cubo (o la torta).
+Partendo da un cubo, il primo piano che taglia il cubo lo divide in due parti,
+il secondo taglio divide il cubo in quattro parti,
+il terzo taglio divide il cubo in otto parti,
+ecc.
+
+Sequenza OEIS A000125:
+Cake numbers: maximal number of pieces resulting from n planar cuts through a cube (or cake): C(n+1,3) + n + 1.
+  1, 2, 4, 8, 15, 26, 42, 64, 93, 130, 176, 232, 299, 378, 470, 576, 697,
+  834, 988, 1160, 1351, 1562, 1794, 2048, 2325, 2626, 2952, 3304, 3683, 4090,
+  4526, 4992, 5489, 6018, 6580, 7176, 7807, 8474, 9178, 9920, 10701, 11522,
+  12384, 13288, 14235, 15226, ...
+
+La formula per calcolare la sequenza è la seguente:
+
+  pezzi-max = C(n+1, 3) + n + 1
+
+(define (binom num k)
+"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+(define (cake n) (+ (binom (+ n 1) 3) n 1))
+
+(map cake (sequence 0 30))
+;-> (1L 2L 4L 8L 15L 26L 42L 64L 93L 130L 176L 232L 299L 378L 470L 576L 697L
+;->  834L 988L 1160L 1351L 1562L 1794L 2048L 2325L 2626L 2952L 3304L 3683L
+;->  4090L 4526L)
+
+Vedi anche "Taglio di una torta" su "Note linere 10".
+
+
+------------------------------------------------------------
+Parte intera della radice quadrata dell'n-esimo numero primo
+------------------------------------------------------------
+
+Sequenza OEIS A000006:
+Integer part of square root of n-th prime.
+  1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9,
+  10, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13,
+  14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 17, 17,
+  17, 17, 17, 18, 18, 18, 18, 18, ...
+
+Conjecture:
+No two successive terms in the sequence differ by more than 1.
+Proof of this would prove the converse of the theorem that every prime is surrounded by two consecutive squares, namely |sqrt(p)|^2 and (|sqrt(p)|+1)^2. - Cino Hilliard, Jan 22 2003
+
+Funzione che calcola un dato numero di numeri primi:
+
+(define (primes num-primes)
+  (let ( (k 2) (tot 0) (out '()) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k))
+    out))
+
+(primes 10)
+;-> (2 3 5 7 11 13 17 19 23 29)
+
+(time (primes 1000))
+;-> 0
+(time (primes 100000))
+;-> 1028.681
+(time (primes 1000000))
+;-> 29542.694
+
+(define (seq num-items)
+  (let (primi (primes num-items))
+    (map (fn(x) (int (sqrt x))) primi)))
+
+(seq 100)
+;-> (1 1 2 2 3 3 4 4 4 5 5 6 6 6 6 7 7 7 8 8 8 8 9 9 9
+;->  10 10 10 10 10 11 11 11 11 12 12 12 12 12 13 13 13 13 13
+;->  14 14 14 14 15 15 15 15 15 15 16 16 16 16 16 16 16 17 17
+;->  17 17 17 18 18 18 18 18 18 19 19 19 19 19 19 20 20 20 20
+;->  20 20 20 21 21 21 21 21 21 21 22 22 22 22 22 22 22 23)
+
+
+-------------------------------------
+Sommare a N con i numeri 1, 2, 5 e 10
+-------------------------------------
+
+Sequenza OEIS A000008:
+Number of ways of making change for n cents using coins of 1, 2, 5, 10 cents.
+  1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 11, 12, 15, 16, 19, 22, 25, 28, 31, 34, 40,
+  43, 49, 52, 58, 64, 70, 76, 82, 88, 98, 104, 114, 120, 130, 140, 150, 160,
+  170, 180, 195, 205, 220, 230, 245, 260, 275, 290, 305, 320, 341, 356, 377,
+  392, 413, 434, 455, 476, 497, 518, 546, ...
+
+Vedi "Cambio monete 1 (LinkedIn)" su "Domande".
+
+(define (conta monete cifra)
+  ; vett[i] memorizza il numero di soluzioni per il valore i.
+  ; Servono (n + 1) righe perchè la tabella viene costruita
+  ; in modo bottom-up usando il caso base (n = 0).
+  (let ( (vett (array (+ cifra 1) '(0)))
+         (len (length monete))
+         (i 0) (j 0) )
+    ; caso base
+    (setf (vett 0) 1)
+    ; Prende tutte le monete una per una e aggiorna i valori
+    ; di vett dove l'indice è maggiore o uguale a quello
+    ; della moneta scelta.
+    (while (< i len)
+      (setq j (monete i))
+      (while (<= j cifra)
+        (setf (vett j) (+ (vett j) (vett (- j (monete i)))))
+        (++ j))
+      (++ i))
+    (vett cifra)))
+
+Proviamo:
+
+(map (fn(x) (conta '(1 2 5 10) x)) (sequence 1 60))
+;-> (1 2 2 3 4 5 6 7 8 11 12 15 16 19 22 25 28 31 34 40
+;->  43 49 52 58 64 70 76 82 88 98 104 114 120 130 140 150 160
+;->  170 180 195 205 220 230 245 260 275 290 305 320 341 356 377
+;->  392 413 434 455 476 497 518 546)
 
 ============================================================================
 

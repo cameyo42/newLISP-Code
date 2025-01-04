@@ -6196,6 +6196,8 @@ Scriviamo la funzione:
 (shannon-entropy "c")
 ;-> 0
 
+Vedi anche "La funzione Entropy (Mathematica)" su "Note libere 27".
+
 
 ------------------
 Triangolo di Floyd

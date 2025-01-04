@@ -6327,8 +6327,8 @@ La funzione Gather (Mathematica)
 
 In Wolfram Mathematica la funzione "Gather" prende una lista e raccoglie gli elementi identici in sottoliste.
 Per esempio:
-lista  = (a b a d b)
-output = ((a a) (b b) (d))
+  lista  = (a b a d b)
+  output = ((a a) (b b) (d))
 
 Scriviamo la funzione:
 

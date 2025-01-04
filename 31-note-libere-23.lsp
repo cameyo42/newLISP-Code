@@ -2800,6 +2800,8 @@ Vediamo la velocità delle tre funzioni:
 (time (mpezzi 680) 1e4)
 ;-> 15.586
 
+Vedi anche "Taglio di una torta (Numeri Cake)" su "Note libere 27".
+
 
 -----------------------------------------
 Rotolare una pallina attraverso una lista

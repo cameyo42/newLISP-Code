@@ -2760,10 +2760,15 @@ NOTE LIBERE 27
   Simulare N cicli for
   Somma X di N numeri (NSum)
   Segmenti paralelli e segmenti perpendicolari (ortogonali)
-  Piccoli numeri di Schroeder
+  Numeri di Schroeder (Piccoli e Grandi)
   Grandi numeri di Schroeder
   Trasformazione dei numeri primi
-  
+  La funzione Tally (Mathematica)
+  La funzione Entropy (Mathematica)
+  Taglio di una torta (Numeri Cake)
+  Parte intera della radice quadrata dell'n-esimo numero primo
+  Sommare a N con i numeri 1, 2, 5 e 10
+
 
 PROBLEMI SUI DADI
 =================

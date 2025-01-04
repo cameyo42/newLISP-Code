@@ -3567,7 +3567,7 @@ Funzione per calcolare la sequenza di kolakoski di lunghezza generica:
 
 (define (kolakoski-seq start-lst len)
   (let (s (array len '(0)))
-    (println (kolakoski start-lst len))
+    (kolakoski start-lst len)
     ;(println (possible-kolakoski s))
   ))
 
@@ -3578,6 +3578,21 @@ Funzione per calcolare la sequenza di kolakoski di lunghezza generica:
 (possible-kolakoski (kolakoski-seq '(1 3 1 2) 30))
 ;-> (1 3 3 3 1 1 1 2 2 2 1 3 1 2 2 1 1 3 3 1 2 2 2 1 3 3 1 1 2 1)
 ;-> true
+
+È un problema irrisolto dimostrare che la densità di 1 è uguale a 1/2.
+
+(define (density lst num-item)
+  (let (conta (count '(1 2) (array-list (kolakoski-seq lst num-item))))
+    (list (div (conta 0) num-item) (div (conta 1) num-item))))
+
+(density '(1 2) 1e2)
+;-> (0.49 0.51)
+
+(density '(1 2) 1e4)
+;-> (0.4996 0.5004)
+
+(density '(1 2) 1e6)
+;-> (0.499986 0.500014)
 
 
 ----------------------------------------

@@ -4097,6 +4097,7 @@ Il problema può essere risolto anche con la programmazione dinamica.
 
 Altra soluzione usando la programmazione dinamica:
 
+python:
 def make_change(coins, n):
     results = [0 for _ in range(n + 1)]
     results[0] = 1
@@ -4105,8 +4106,7 @@ def make_change(coins, n):
             results[i] += results[i - coin]
     return results[n]
 
-(setq t (array (+ 5 1) '(0)))
-
+newlisp:
 (define (conta monete cifra)
   (let (out (array (+ cifra 2) '(0)))
     (setq (out 0) 1)
@@ -4389,7 +4389,7 @@ Pattern Matching (Facebook)
 
 Implementare una funzione di pattern matching che supporta i caratteri jolly "?" (un  carattere qualunque) e "*" (zero o più caratteri qualunque).
 
-To understand this solution, you can use s="aab" and p="*ab".
+Per capire la soluzione usare: s="aab" e p="*ab".
 
 (define (isMatch s p)
   (local (i j staridx idx res)
