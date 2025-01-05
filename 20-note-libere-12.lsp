@@ -8848,7 +8848,7 @@ Cartella corrente/lavoro - Current/Working directory
 Percorso della cartella corrente con la primitiva newLISP "real-path":
 
 (real-path)
-;-> "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-NoteNEW"
+;-> "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-CodeNEW"
 
 Percorso della cartella corrente con una funzione di Windows:
 
@@ -8870,7 +8870,7 @@ Percorso della cartella corrente con una funzione di Windows:
     (string buff))
 
 (cwd)
-;-> "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-NoteNEW"
+;-> "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-CodeNEW"
 
 =============================================================================
 

@@ -4787,8 +4787,8 @@ Contare solo i caratteri ASCII da 32 a 126.
     )
     ))
 
-(freq-chars "newLISP-Note.lsp")
-;-> File: newLISP-Note.lsp
+(freq-chars "newLISP-Code.lsp")
+;-> File: newLISP-Code.lsp
 ;-> Caratteri ASCII: 3229530
 ;->   - 704059 - 21.80
 ;-> ! -    715 -  0.02

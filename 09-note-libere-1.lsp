@@ -726,7 +726,7 @@ Per verificare se una cartella esiste all'interno della cartella corrente:
 
 (define (directory-exists? folder) (directory? folder bool))
 
-(directory-exists? "newLISP-Note")
+(directory-exists? "newLISP-Code")
 ;-> true
 (directory-exists? "newLISP-No")
 ;-> nil
@@ -7169,8 +7169,8 @@ Possiamo scriviamo una versione semplificata delle funzioni "assoc" e "lookup":
 (lookup. 4 lst)
 ;-> nil
 
-Vedi anche "Modificare le liste di associazione" nel capitolo "09-Note-libere-1".
-Vedi anche "Ricerca nelle liste di associazione" nel capitolo "19-Note-libere-11".
+Vedi anche "Modificare le liste di associazione" nel capitolo "Note libere 1".
+Vedi anche "Ricerca nelle liste di associazione" nel capitolo "Note libere 11".
 
 
 -------------------------------

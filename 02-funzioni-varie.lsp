@@ -4972,7 +4972,8 @@ vet
 
 Sembra che tutto funzioni correttamente.
 
-Vedi anche "Estrazione di elementi con probabilità predefinite" nel capitolo "15-note-libere-07".
+Vedi anche "Estrazione di elementi con probabilità predefinite" nel capitolo "Note libere 7".
+
 
 ------------------------------
 Generatore di stringhe casuali

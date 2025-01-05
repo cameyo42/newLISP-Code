@@ -619,7 +619,7 @@ File di prova: "lines.txt" (si trova nella cartella "data")
 
 Nota: i file senza percorso vengono cercati nella cartella corrente della REPL,
 (real-path)
-;-> "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-NoteNEW"
+;-> "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-CodeNEW"
 
 
 Conteggio di linee, parole e caratteri di un file
@@ -647,7 +647,7 @@ Conteggio di linee, parole e caratteri di un file
 (lwc-count "lines.txt")
 ;-> (8 32 201)
 
-(lwc-count "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-NoteNEW\\newLISP-Note.lsp")
+(lwc-count "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-CodeNEW\\newLISP-Code.lsp")
 ;-> (124161 653567 4277748)
 
 Stampa di un file (stdout)
@@ -1581,7 +1581,7 @@ Proviamo:
 
 Purtroppo non possiamo calcolare tutti i 50 numeri primi per problemi di floating-point.
 
-Vedi anche "Formula per calcolare i numeri primi" sul capitolo "19-note-libere-11".
+Vedi anche "Formula per calcolare i numeri primi" sul capitolo "Note libere 11".
 
 
 ------------------------------------------------------

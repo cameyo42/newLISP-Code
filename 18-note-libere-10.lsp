@@ -8108,10 +8108,10 @@ Ecco un semplice metodo per avere la lista di tutti i file di una cartella.
 
 Valore della cartella corrente:
 (real-path)
-;-> "F:\\Lisp-Scheme\\newLisp\\newLISP-Note"
+;-> "F:\\Lisp-Scheme\\newLisp\\newLISP-Code"
 
 Cambio della cartella corrente:
-(change-dir "F:\\Lisp-Scheme\\newLisp\\newLISP-Note")
+(change-dir "F:\\Lisp-Scheme\\newLisp\\newLISP-Code")
 
 Funzione che ritorna una lista con tutti i file di una cartella:
 
@@ -8130,7 +8130,7 @@ Funzione che ritorna una lista con tutti i file di una cartella:
 ;->  "18-note-libere-10.lsp" "20-appendici.lsp" "21-bibliografia.lsp"
 ;->  "A-Introduction-to-newLISP.lisp" "B-Code-Patterns.lisp"
 ;->  "C-The-little-newLISPER.lisp" "D-Kazimir-Blog.lisp"
-;->  "data.zip" "LICENSE.txt" "make-newLISP-Note.bat" "newLISP-Note.lsp.old"
+;->  "data.zip" "LICENSE.txt" "make-newLISP-Code.bat" "newLISP-Code.lsp.old"
 ;->  "README.md" "yo.zip" "_npp-newlisp.ahk")
 > (list-files "c:\\")
 ;-> ("$Recycle.Bin" "$WinREAgent" "acl10.1express" "AdwCleaner"

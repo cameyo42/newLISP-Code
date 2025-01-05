@@ -29,7 +29,7 @@
   http://kazimirmajorinc.com/
 
   cameyo github:
-  https://github.com/cameyo42/newLISP-Note
+  https://github.com/cameyo42/newLISP-Code
 
   Libro sulla Fuzzy Logic (in newLISP):
   "A Practical Introduction to Fuzzy Logic using Lisp", Luis Arguelles Mendez, 2015
