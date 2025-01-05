@@ -3579,6 +3579,11 @@ Verifichiamo la funzione:
 
 Anche questa funzione presenta il problema dei tempi.
 
+Vedi anche "Somma di numeri in una lista (Google)" su "Domande".
+Vedi anche "Somma dei sottoinsiemi (Subset Sum Problem)" su "Note libere 8".
+Vedi anche "Subset Sum Problem" su "Note libere 17".
+Vedi anche "Somma N con una lista di numeri (Subset Sum Problem SSP)" su "Note libere 27".
+
 
 -------------------------------------------
 Somma dei sottoinsiemi (Subset Sum Problem)
@@ -3736,6 +3741,11 @@ Per calcolare i sottoinsiemi possiamo utilizzare la seguente funzione:
 
 (subset-sum-all (sequence 1 10) 10)
 ;-> ((1 2 3 4) (2 3 5) (1 4 5) (1 3 6) (4 6) (1 2 7) (3 7) (2 8) (1 9) (10))
+
+Vedi anche "Somma di numeri in una lista (Google)" su "Domande".
+Vedi anche "Somme dei sottoinsiemi di una lista" su "Note libere 8".
+Vedi anche "Subset Sum Problem" su "Note libere 17".
+Vedi anche "Somma N con una lista di numeri (Subset Sum Problem SSP)" su "Note libere 27".
 
 
 --------------

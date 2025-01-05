@@ -591,6 +591,11 @@ Algoritmo:
 (sol1 '(3 -2 15 10 7 -4 -11) 21)
 ;-> ()
 
+Vedi anche "Somme dei sottoinsiemi di una lista" su "Note libere 8".
+Vedi anche "Somma dei sottoinsiemi (Subset Sum Problem)" su "Note libere 8".
+Vedi anche "Subset Sum Problem" su "Note libere 17".
+Vedi anche "Somma N con una lista di numeri (Subset Sum Problem SSP)" su "Note libere 27".
+
 
 ---------------------------------
 Aggiornamento di una lista (Uber)

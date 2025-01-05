@@ -5694,25 +5694,6 @@ Una formula per generare la sequenza è la seguente:
 
   a(n) = (1/n)*Sum[k = 0..n] 2^k*C(n, k)*C(n, k-1), per n > 0.
 
-(define (binom num k)
-"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
-  (cond ((> k num) 0)
-        ((zero? k) 1)
-        ((< k 0) 0)
-        (true
-          (let (r 1L)
-            (for (d 1 k)
-              (setq r (/ (* r num) d))
-              (-- num))
-          r))))
-
-(define (** num power)
-"Calculates the integer power of an integer"
-  (if (zero? power) 1L
-      (let (out 1L)
-        (dotimes (i power)
-          (setq out (* out num))))))
-
 (define (a n)
   (cond
     ((zero? n) 1L)
@@ -6027,10 +6008,25 @@ Funzione che calcola un dato numero di numeri primi:
 ;->  20 20 20 21 21 21 21 21 21 21 22 22 22 22 22 22 22 23)
 
 
--------------------------------------
-Sommare a N con i numeri 1, 2, 5 e 10
--------------------------------------
+--------------------------------------------------------
+Somma N con una lista di numeri (Subset Sum Problem SSP)
+--------------------------------------------------------
 
+Data una lista di numeri interi positivi e un numero intero positivo N, determinare in quanti modi possiamo usare i numeri della lista per sommare a N.
+I numeri della lista possono essere usati più di una volta.
+
+Esempio 1:
+  Lista = (2 3 5 6)
+  N = 10
+  Modi: 5 --> (2 2 2 2 2) (2 2 3 3) (2 2 6) (2 3 5) (5 5)
+
+Esempio 2:
+  Lista = (1 2 3)
+  N = 4
+  Modi = 4 --> (1 1 1 1 1) (1 1 2) (2 2) (1 3)
+
+Esempio 3:
+Numero di modi di sommare a N con i numeri 1, 2, 5 e 10.
 Sequenza OEIS A000008:
 Number of ways of making change for n cents using coins of 1, 2, 5, 10 cents.
   1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 11, 12, 15, 16, 19, 22, 25, 28, 31, 34, 40,
@@ -6038,35 +6034,96 @@ Number of ways of making change for n cents using coins of 1, 2, 5, 10 cents.
   170, 180, 195, 205, 220, 230, 245, 260, 275, 290, 305, 320, 341, 356, 377,
   392, 413, 434, 455, 476, 497, 518, 546, ...
 
-Vedi "Cambio monete 1 (LinkedIn)" su "Domande".
+Problema 1: Calcolo del numero di combinazioni
+----------------------------------------------
 
-(define (conta monete cifra)
+Funzione che data una lista di interi positivi (nums) e un intero positivo (target) restituisce il numero di combinazioni dei numeri della lista (nums) che sommano all'intero (target):
+(Vedi "Cambio monete 1 (LinkedIn)" su "Domande")
+
+(define (ssp-count nums target)
   ; vett[i] memorizza il numero di soluzioni per il valore i.
   ; Servono (n + 1) righe perchè la tabella viene costruita
   ; in modo bottom-up usando il caso base (n = 0).
-  (let ( (vett (array (+ cifra 1) '(0)))
-         (len (length monete))
+  (let ( (vett (array (+ target 1) '(0)))
+         (len (length nums))
          (i 0) (j 0) )
     ; caso base
     (setf (vett 0) 1)
-    ; Prende tutte le monete una per una e aggiorna i valori
+    ; Prende tutte le nums una per una e aggiorna i valori
     ; di vett dove l'indice è maggiore o uguale a quello
-    ; della moneta scelta.
+    ; del numero scelto.
     (while (< i len)
-      (setq j (monete i))
-      (while (<= j cifra)
-        (setf (vett j) (+ (vett j) (vett (- j (monete i)))))
+      (setq j (nums i))
+      (while (<= j target)
+        (setf (vett j) (+ (vett j) (vett (- j (nums i)))))
         (++ j))
       (++ i))
-    (vett cifra)))
+    (vett target)))
 
 Proviamo:
 
-(map (fn(x) (conta '(1 2 5 10) x)) (sequence 1 60))
+(ssp-count '(2 3 5 6) 10)
+;-> 5
+
+(ssp-count '(1 2 3) 4)
+;-> 4
+
+(map (fn(x) (ssp-count '(1 2 5 10) x)) (sequence 1 60))
 ;-> (1 2 2 3 4 5 6 7 8 11 12 15 16 19 22 25 28 31 34 40
 ;->  43 49 52 58 64 70 76 82 88 98 104 114 120 130 140 150 160
 ;->  170 180 195 205 220 230 245 260 275 290 305 320 341 356 377
 ;->  392 413 434 455 476 497 518 546)
 
+Problema 2: Calcolo della lista delle combinazioni
+--------------------------------------------------
+
+Funzione che data una lista di interi positivi (nums) e un intero positivo (target) restituisce tutte le di combinazioni dei numeri della lista (nums) che sommano all'intero (target):
+(Questa funzione utilizza una versione iterativa del backtracking per trovare tutte le combinazioni di numeri nella lista "nums" che sommano a "target")
+
+(define (ssp-list nums target)
+  ;(setq result '())
+  (let (result '()) ; variabile globale per le chiamate ricorsive di backtrack
+    (define (backtrack temp remaining start)
+      (cond ((= remaining 0) (push temp result -1))
+            ((< remaining 0) nil)
+            (true
+            (for (i start (- (length nums) 1))
+              (let ((current (nums i)))
+                (backtrack (cons current temp) (- remaining current) i)))))
+      result)
+    (backtrack '() target 0)
+    result))
+
+Proviamo:
+
+(ssp-list '(2 3 5 6) 10)
+;-> ((2 2 2 2 2) (3 3 2 2) (6 2 2) (5 3 2) (5 5))
+
+(ssp-list '(1 2 3) 4)
+;-> ((1 1 1 1) (2 1 1) (3 1) (2 2))
+
+(ssp-list '(1 2 5 10) 10)
+;-> ((1 1 1 1 1 1 1 1 1 1) (2 1 1 1 1 1 1 1 1) (2 2 1 1 1 1 1 1)
+;->  (5 1 1 1 1 1) (2 2 2 1 1 1 1) (5 2 1 1 1) (2 2 2 2 1 1)
+;->  (5 2 2 1) (2 2 2 2 2) (5 5) (10))
+(length (ssp-list '(1 2 5 10) 10))
+;-> 11
+(ssp-count '(1 2 5 10) 10)
+;-> 11
+
+(length (ssp-list '(1 2 5 10) 30))
+;-> 98
+(ssp-count '(1 2 5 10) 30)
+;-> 98
+
+(length (ssp-list '(1 2 5 10) 50))
+;-> 341
+(ssp-count '(1 2 5 10) 50)
+;-> 341
+
+Vedi anche "Somma di numeri in una lista (Google)" su "Domande".
+Vedi anche "Somme dei sottoinsiemi di una lista" su "Note libere 8".
+Vedi anche "Somma dei sottoinsiemi (Subset Sum Problem)" su "Note libere 8".
+Vedi anche "Subset Sum Problem" su "Note libere 17".
 ============================================================================
 

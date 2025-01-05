@@ -4751,7 +4751,10 @@ Facciamo alcune prove:
 (separa (sequence 1 10) 20)
 ;-> ((3 4 5 6 7 8 9 10) (2 1))
 
-Vedere anche "Somma dei sottoinsiemi (Subset Sum Problem)" su "Note libere 8".
+Vedi anche "Somma di numeri in una lista (Google)" su "Domande".
+Vedi anche "Somme dei sottoinsiemi di una lista" su "Note libere 8".
+Vedi anche "Somma dei sottoinsiemi (Subset Sum Problem)" su "Note libere 8".
+Vedi anche "Somma N con una lista di numeri (Subset Sum Problem SSP)" su "Note libere 27".
 
 
 -------------------

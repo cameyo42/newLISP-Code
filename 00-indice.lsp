@@ -2767,7 +2767,7 @@ NOTE LIBERE 27
   La funzione Entropy (Mathematica)
   Taglio di una torta (Numeri Cake)
   Parte intera della radice quadrata dell'n-esimo numero primo
-  Sommare a N con i numeri 1, 2, 5 e 10
+  Somma N con una lista di numeri (Subset Sum Problem SSP)
 
 
 PROBLEMI SUI DADI
