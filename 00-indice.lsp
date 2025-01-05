@@ -2761,13 +2761,14 @@ NOTE LIBERE 27
   Somma X di N numeri (NSum)
   Segmenti paralelli e segmenti perpendicolari (ortogonali)
   Numeri di Schroeder (Piccoli e Grandi)
-  Grandi numeri di Schroeder
   Trasformazione dei numeri primi
   La funzione Tally (Mathematica)
   La funzione Entropy (Mathematica)
   Taglio di una torta (Numeri Cake)
   Parte intera della radice quadrata dell'n-esimo numero primo
   Somma N con una lista di numeri (Subset Sum Problem SSP)
+  Smallest prime power >= n
+  Numero di numeri interi positivi <= 2^n nella forma x^2 16*y^2
 
 
 PROBLEMI SUI DADI
@@ -2830,7 +2831,7 @@ LICENSE
 
 "MIT No Attribution" (MIT-0)
 
-Copyright (c) 2019-2024 Massimo Corinaldesi aka cameyo
+Copyright (c) 2019-2025 Massimo Corinaldesi aka cameyo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,6 +1,6 @@
 Licence "MIT No Attribution" (MIT-0)
 
-Copyright (c) 2019-2024 Massimo Corinaldesi aka cameyo
+Copyright (c) 2019-2025 Massimo Corinaldesi aka cameyo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@ Traduzione in italiano del 4 febbraio 2021 (Google Translate e modifiche):
 
 Licenza "MIT No Attribution" (MIT-0)
 
-Copyright (c) 2019-2024 Massimo Corinaldesi aka cameyo
+Copyright (c) 2019-2025 Massimo Corinaldesi aka cameyo
 
 L'autorizzazione è concessa, gratuitamente, a chiunque ottenga una copia 
 di questo software e dei file di documentazione associati (il "Software"),
@@ -32,7 +32,7 @@ di utilizzare, copiare, modificare, unire, pubblicare, distribuire,
 concedere in licenza e/o vendere copie del Software e per consentirlo anche 
 alle persone a cui è destinato il Software.
 
-IL SOFTWARE VIENE FORNITO "COSÌ COM'È", SENZA GARANZIA DI ALCUN TIPO, 
+IL SOFTWARE VIENE FORNITO "COSI' COM'È", SENZA GARANZIA DI ALCUN TIPO, 
 ESPRESSA O IMPLICITA, INCLUSE MA NON SOLO LE GARANZIE DI COMMERCIABILITÀ,
 IDONEITÀ PER UNO SCOPO PARTICOLARE E NON VIOLAZIONE. IN NESSUN CASO 
 GLI AUTORI O I TITOLARI DEL COPYRIGHT SONO RESPONSABILI DI QUALSIASI

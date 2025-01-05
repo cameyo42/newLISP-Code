@@ -6125,5 +6125,157 @@ Vedi anche "Somma di numeri in una lista (Google)" su "Domande".
 Vedi anche "Somme dei sottoinsiemi di una lista" su "Note libere 8".
 Vedi anche "Somma dei sottoinsiemi (Subset Sum Problem)" su "Note libere 8".
 Vedi anche "Subset Sum Problem" su "Note libere 17".
+
+
+-------------------------
+Smallest prime power >= n
+-------------------------
+
+"Smallest prime power >= n" (la più piccola potenza prima >= n) significa trovare il più piccolo numero che sia una potenza di un numero primo (ad esempio 2^3 = 8, 3^2 = 9, ecc.) e che sia maggiore o uguale a un dato numero n.
+
+Potenza di un numero primo: Un numero che può essere scritto come p^k, dove:
+  - p  è un numero primo (es. 2, 3, 5, 7, ...),
+  - k  è un numero intero positivo (k >= 1 ).
+
+Quindi l'obiettivo è trovare il più piccolo p^k tale che p^k >= n.
+Questa definizione viene utilizzata in matematica discreta, teoria dei numeri, o analisi di algoritmi.
+
+Esempio per n = 10:
+1. I numeri primi fino a 10: 2, 3, 5, 7, 11.
+2. Calcolo delle potenze:
+   - 2^1 = 2, 2^2 = 4, 2^3 = 8, 2^4 = 16 (16 >= 10).
+   - 3^1 = 3, 3^2 = 9, 3^3 = 27 (27 >= 10).
+   - 5^1 = 5, 5^2 = 25 (25 >= 10).
+   - 7^1 = 7, 7^2 = 49 (49 >= 10).
+   - 11^1 = 11 (11 >= 10).
+3. Ricerca della potenza più piccola:
+   La potenza più piccola >= 10 è 11 (11^1).
+
+Sequenza OEIS A000015:
+Smallest prime power >= n. With a(1) = 1.
+  1, 2, 3, 4, 5, 7, 7, 8, 9, 11, 11, 13, 13, 16, 16, 16, 17, 19, 19, 23, 23,
+  23, 23, 25, 25, 27, 27, 29, 29, 31, 31, 32, 37, 37, 37, 37, 37, 41, 41, 41,
+  41, 43, 43, 47, 47, 47, 47, 49, 49, 53, 53, 53, 53, 59, 59, 59, 59, 59, 59,
+  61, 61, 64, 64, 64, 67, 67, 67, 71, 71, 71, 71, 73, ...
+
+Algoritmo:
+1. Generare i primi fino al primo valore per cui risulta p^k >= n
+È sufficiente considerare i numeri primi fino che risulta p^k >= n, perché se p = n, allora la soluzione vale p^1.
+Questo ci assicura che nessuna potenza rilevante venga tralasciata.
+Il primo valore per cui risulta sicuramente p^k >= n si trova tra p(n) e p(2n).
+
+2. Calcolare le potenze p^k
+Per ogni primo p, calcolare p^k (con k >= 1 fino a quando (p^k >= n).
+
+3. Scegliere il valore più piccolo >= n
+Tra tutte le potenze p^k calcolate, il risultato sarà il più piccolo valore >= n).
+
+(define (primes-to num)
+"Generates all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Funzione che calcola le potenze di una lista di primi fino al primo valore per cui risulta p^k >= n:
+
+(define (prime-power lst n)
+  (setq out '())
+  (dolist (p lst)
+    (setq temp '())
+    (setq k 1)
+    (setq power (pow p k))
+    (while (>= n power)
+      (push power temp -1)
+      (++ k)
+      (setq power (pow p k))
+    )
+    ; aggiunge il primo p^k maggiore di n
+    (push power temp -1)
+    (extend out temp)))
+
+(setq n 10)
+; numeri primi fino a 2*n
+(setq primi (primes-to (* n 2)))
+;-> (2 3 5 7 11 13 17 19)
+; potenze dei primi fino al primo p^k >= n
+(setq potenze (prime-power primi n))
+;-> (2 4 8 16 3 9 27 5 25 7 49 11 13 17 19)
+; ordina le potenze
+(sort potenze)
+;-> (2 3 4 5 7 8 9 11 13 16 17 19 25 27 49)
+; ricerca il primo numero maggiore di n (10) su potenze
+(potenze (find n potenze <=))
+;-> 11
+
+Funzione che genera la sequenza fino ad una dato numero di elementi:
+
+(define (small n)
+  (let (numeri (sort (prime-power (primes-to (* n 2)) n)))
+    (push 1 (map (fn(x) (numeri (find x numeri <=))) (sequence 2 n)))))
+
+Proviamo:
+
+(small 100)
+;-> (1 2 3 4 5 7 7 8 9 11 11 13 13 16 16 16 17 19 19 23 23
+;->  23 23 25 25 27 27 29 29 31 31 32 37 37 37 37 37 41 41 41
+;->  41 43 43 47 47 47 47 49 49 53 53 53 53 59 59 59 59 59 59
+;->  61 61 64 64 64 67 67 67 71 71 71 71 73 73 79 79 79 79 79
+;->  79 81 81 83 83 89 89 89 89 89 89 97 97 97 97 97 97 97 97
+;->  101 101 101)
+
+
+--------------------------------------------------------------
+Numero di numeri interi positivi <= 2^n nella forma x^2 16*y^2
+--------------------------------------------------------------
+
+Sequenza OEIS A000018:
+Number of positive integers <= 2^n of form x^2 + 16*y^2.
+With: a(0)=1, a(1)=1, a(2)=2, a(3)=2
+  1, 1, 2, 2, 4, 8, 13, 25, 44, 83, 152, 286, 538, 1020, 1942, 3725, 7145,
+  13781, 26627, 51572, 100099, 194633, 379037, 739250, 1443573, 2822186,
+  5522889, 10818417, 21209278, 41613288, 81705516, 160532194, 315604479,
+  620834222, 1221918604, 2406183020, 4740461247, ...
+
+Algoritmo
+Ricerca esaustiva (brute-force) dei valori di x e y che soddisfano l'equazione.
+
+(define (a n)
+  (let ((limite (pow 2 n))
+        (numeri '()))
+    (for (x 0 (+ (int (sqrt limite)) 1))
+      (for (y 0 (+ (int (sqrt (div limite 16))) 1))
+        (let (valore (+ (* x x) (* 16 (* y y))))
+          (if (<= valore limite) (push valore numeri)))))
+    ; calcoliamo solo i valori unici e
+    ; togliamo 1 che rappresenta la soluzione non valida x=0 e y=0
+    (- (length (unique numeri)) 1)))
+
+Proviamo:
+
+(time (println (map a (sequence 4 10))))
+;-> 15.584
+(time (println (map a (sequence 4 15))))
+;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725)
+;-> 234.346
+(time (println (map a (sequence 4 16))))
+;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725 7145)
+;-> 1234.098
+Sembra veloce, ma... 
+(time (println (map a (sequence 4 17))))
+;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725 7145 13781)
+;-> 7969.508
+(time (println (map a (sequence 4 18))))
+;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725 7145 13781 26627)
+;-> 34300.208
+Questo perchè i cicli "for" vanno da 0 a 2^n... e 2^18 = 262144.
+
+L'approccio matematico per risolvere il problema è basato sulla teoria delle forme quadratiche e sui numeri gaussiani (ma non lo conosco per niente).
+
 ============================================================================
 
