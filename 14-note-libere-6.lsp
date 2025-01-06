@@ -2054,7 +2054,7 @@ Numeri regolari (5-smooth)
 
 I numeri regolari sono numeri che dividono equamente le potenze di 60 (o, equivalentemente, le potenze di 30). Ad esempio, 60^2 = 3600 = 48 × 75, quindi sia 48 che 75 sono divisori di una potenza di 60. Pertanto, sono numeri regolari. Equivalentemente, sono i numeri i cui unici divisori primi sono 2, 3 e 5.
 
-Sequenza OEIS: A051037
+Sequenza OEIS A051037:
   1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 27, 30, 32,
   36, 40, 45, 48, 50, 54, 60, 64, 72, 75, 80, 81, 90, 96, 100, 108,
   120, 125, 128, 135, 144, 150, 160, 162, 180, 192, 200, 216, 225,

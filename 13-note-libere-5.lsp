@@ -10491,7 +10491,8 @@ Adesso vediamo il numero 196:
 
 Quando e se terminerà... non si sa. Comunque qualcuno ha raggiunto il miliardo di iterazioni, arrivando a un numero con più di 600 milioni di cifre e ancora non è palindromo.
 
-Sequenza OEIS: A023108 Interi positivi che apparentemente non risultano mai palindromi sotto ripetute applicazioni della funzione A056964(x) = x (x con cifre invertite).
+Sequenza OEIS A023108:
+Interi positivi che apparentemente non risultano mai palindromi sotto ripetute applicazioni della funzione A056964(x) = x (x con cifre invertite).
 
   196, 295, 394, 493, 592, 689, 691, 788, 790, 879, 887, 978, 986,
   1495, 1497, 1585, 1587, 1675, 1677, 1765, 1767, 1855, 1857, 1945,

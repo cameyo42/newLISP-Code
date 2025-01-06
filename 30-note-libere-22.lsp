@@ -6414,7 +6414,7 @@ Numeri segmentati
 
 I numeri segmentati (OEIS A002048) è la sequenza di numeri tale che ciascun membro è il più piccolo numero positivo (maggiore di zero) che non può essere composto da una somma di numeri consecutivi precedenti, partendo con a(0) = 1.
 
-Sequenza OEIS: A002048
+Sequenza OEIS A002048:
   1, 2, 4, 5, 8, 10, 14, 15, 16, 21, 22, 25, 26, 28, 33, 34, 35, 36, 38,
   40, 42, 46, 48, 49, 50, 53, 57, 60, 62, 64, 65, 70, 77, 80, 81, 83, 85,
   86, 90, 91, 92, 100, 104, 107, 108, 116, 119, 124, 127, 132, 133, 137,
@@ -6479,7 +6479,7 @@ Proviamo:
 ;->  213 219 221 222 226 228 231 233 236 241 242 245 247 248 253 256 262
 ;->  266 268 272 274)
 
-Nota: Senza il requisito che le somme siano formate solo con i termini minori consecutivi, la sequenza diventa la sequenza delle potenze di 2 (Sequenza OEIS: A000079).
+Nota: Senza il requisito che le somme siano formate solo con i termini minori consecutivi, la sequenza diventa la sequenza delle potenze di 2 (Sequenza OEIS A000079).
 
 La funzione è lenta.
 
@@ -6540,7 +6540,7 @@ Inoltre risulta che un poligono con n lati è costruibile se il toziente di n è
 
 Scrivere una funzione che genera la sequenza dei lati dei poligoni che sono costruibili.
 
-Sequenza OEIS: A003401
+Sequenza OEIS A003401:
 Numbers of edges of regular polygons constructible with ruler and compass.
   1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 16, 17, 20, 24, 30, 32, 34, 40, 48, 51,
   60, 64, 68, 80, 85, 96, 102, 120, 128, 136, 160, 170, 192, 204, 240, 255,
@@ -6828,7 +6828,7 @@ Altri esempi:
   ...
   30 --> Un 3 e Uno 0 --> 1013 (ordine crescente delle cifre del numero)
 
-Sequenza OEIS: A047842
+Sequenza OEIS A047842:
 Describe n (count digits in order of increasing value, ignoring missing digits)
   10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 1011, 21, 1112, 1113, 1114, 1115,
   1116, 1117, 1118, 1119, 1012, 1112, 22, 1213, 1214, 1215, 1216, 1217, 1218,
@@ -6938,7 +6938,7 @@ Esempi di numeri autobiografici:
   22
   10213223
 
-Sequenza OEIS: A047841
+Sequenza OEIS A047841:
 Autobiographical numbers: Fixed under operator T (A047842): "Say what you see"
   22, 10213223, 10311233, 10313314, 10313315, 10313316, 10313317, 10313318,
   10313319, 21322314, 21322315, 21322316, 21322317, 21322318, 21322319,
@@ -7740,7 +7740,7 @@ Numeri densi
 Un numero denso è un numero che ha esattamente tanti divisori primi quanti divisori non primi (inclusi 1 e se stesso come divisori).
 In modo equivalente, un numero denso è un numero primo o un prodotto di due numeri primi distinti.
 
-Sequenza OEIS: A167171
+Sequenza OEIS A167171:
 Squarefree semiprimes together with primes
   2, 3, 5, 6, 7, 10, 11, 13, 14, 15, 17, 19, 21, 22, 23, 26, 29, 31, 33,
   34, 35, 37, 38, 39, 41, 43, 46, 47, 51, 53, 55, 57, 58, 59, 61, 62, 65,
@@ -7931,7 +7931,7 @@ Numeri divisibili dalla somma dei fattori
 
 Determinare la sequenza dei numeri che sono esattamente divisibili dalla somma dei loro fattori.
 
-Sequenza OEIS: A036844
+Sequenza OEIS A036844:
   Numbers k such that k/sopfr(k) is an integer.
   Where sopfr = sum-of-prime-factors
   2, 3, 4, 5, 7, 11, 13, 16, 17, 19, 23, 27, 29, 30, 31, 37, 41, 43, 47,
@@ -7959,7 +7959,7 @@ I primi di Wolstenholme sono quei primi p tale che:
 
   binomial(2p-1,p-1) == 1 (mod p^4)
 
-Sequenza OEIS: A088164
+Sequenza OEIS A088164:
 Wolstenholme primes: primes p such that binomial(2p-1,p-1) == 1 (mod p^4)
   16843, 2124679, ...
 

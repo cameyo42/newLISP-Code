@@ -3828,7 +3828,7 @@ Facciamo alcune prove:
 ;-> 497
 ;-> 162745.134
 
-Sequenza OEIS: A001235
+Sequenza OEIS A001235:
   1729, 4104, 13832, 20683, 32832, 39312, 40033, 46683, 64232,
   65728, 110656, 110808, 134379, 149389, 165464, 171288, 195841,
   216027, 216125, 262656, 314496, 320264, 327763, 373464, 402597,
@@ -7087,6 +7087,22 @@ Sequenza OEIS A000058:
 (sylvester 9)
 ;-> (2 3L 7L 43L 1807L 3263443L 10650056950807L 113423713055421844361000443L
 ;->  12864938683278671740537145998360961546653259485195807L)
+
+I valori della sequenza vengono chiamati anche numeri di Euclide, perché a(n) = a(0)*a(1)*...*a(n-1) + 1 per n>0, con a(0)=2.
+
+(define (euclide limit)
+  (local (arr prodotto)
+    (setq arr (array limit '(0)))
+    (setq (arr 0) 2L)
+    (setq prodotto 2L)
+    (for (i 1 (- limit 1))
+      (setf (arr i) (+ prodotto 1))
+      (setq prodotto (* prodotto (arr i))))
+    arr))
+
+(euclide 9)
+;-> (2L 3L 7L 43L 1807L 3263443L 10650056950807L 113423713055421844361000443L
+;->  12864938683278671740537145998360961546653259485195807L
 
 
 ------------------------------------

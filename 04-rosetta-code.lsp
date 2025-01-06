@@ -7730,7 +7730,7 @@ Il problema presenta n persone disposte in circolo in attesa di una esecuzione. 
 
 Per k = 2 otteniamo:
 
-Sequenza OEIS: A006257
+Sequenza OEIS A006257:
 Josephus problem: a(2*n) = 2*a(n)-1, a(2*n+1) = 2*a(n)+1.
   0, 1, 1, 3, 1, 3, 5, 7, 1, 3, 5, 7, 9, 11, 13, 15, 1, 3, 5, 7, 9, 11, 13,
   15, 17, 19, 21, 23, 25, 27, 29, 31, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21,

@@ -1915,7 +1915,7 @@ Dato un cerchio centrato nell'origine (0, 0) di raggio r, trovare tutti i punti 
 
 Nota: I punti interi (lattice points) sono tutti i punti con coordinate intere.
 
-Sequenza OEIS: A046109
+Sequenza OEIS A046109:
   1, 4, 4, 4, 4, 12, 4, 4, 4, 4, 12, 4, 4, 12, 4, 12, 4, 12, 4, 4,
   12, 4, 4, 4, 4, 20, 12, 4, 4, 12, 12, 4, 4, 4, 12, 12, 4, 12, 4,
   12, 12, 12, 4, 4, 4, 12, 4, 4, 4, 4, 20, ...
@@ -2458,7 +2458,7 @@ Esempio:
            + 1375846 + 1375886 + 1375884
 (in quest'ultimo esempio 1375846 compare due volte)
 
-Sequenza OEIS: A131639
+Sequenza OEIS A131639:
   1729404, 1800000, 13758846, 13800000, 14358846, 14400000, 15000000,
   28758846, 28800000, 29358846, 29400000, 1107488889, 1107489042,
   1111088889, 1111089042, 3277800000, 3281400000, 4388888889, 4388889042,
@@ -2515,7 +2515,7 @@ Si tatta dei numeri binari del tipo:
    1110111
   111101111
 
-Sequenza OEIS: A129868
+Sequenza OEIS A129868:
   0, 5, 27, 119, 495, 2015, 8127, 32639, 130815, 523775, 2096127,
   8386559, 33550335, 134209535, 536854527, 2147450879, 8589869055,
   34359607295, 137438691327, 549755289599, 2199022206975, 8796090925055,
@@ -2581,7 +2581,7 @@ Somma di due quadrati consecutivi
 
 Determinare se un numero n è la somma di due quadrati consecutivi.
 
-Sequenza OEIS: A001844
+Sequenza OEIS A001844:
   1, 5, 13, 25, 41, 61, 85, 113, 145, 181, 221, 265, 313, 365, 421, 481,
   545, 613, 685, 761, 841, 925, 1013, 1105, 1201, 1301, 1405, 1513, 1625,
   1741, 1861, 1985, 2113, 2245, 2381, 2521, 2665, 2813, 2965, 3121, 3281,
@@ -2640,7 +2640,7 @@ Somma di almeno due quadrati consecutivi
 
 Numeri che possono essere scritti come somma di almeno 2 quadrati di interi positivi consecutivi.
 
-Sequenza OEIS: A174069
+Sequenza OEIS A174069:
   5, 13, 14, 25, 29, 30, 41, 50, 54, 55, 61, 77, 85, 86, 90, 91, 110,
   113, 126, 135, 139, 140, 145, 149, 174, 181, 190, 194, 199, 203, 204,
   221, 230, 245, 255, 265, 271, 280, 284, 285, 294, 302, 313, 330, 355,
@@ -4920,7 +4920,7 @@ Per qualsiasi numero, abcd... = pow(a, p) + pow(b, p) + pow(c, p) + pow(d, p) + 
 
 Si può dimostrare che per una qualunque potenza p, il valore più grande per un PDI ha al massimo (p + 1) cifre.
 
-Sequenza OEIS: A023052
+Sequenza OEIS A023052:
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 153, 370, 371, 407, 1634, 4150, 4151,
   8208, 9474, 54748, 92727, 93084, 194979, 548834, 1741725, 4210818,
   9800817, 9926315, 14459929, 24678050, 24678051, 88593477, 146511208,

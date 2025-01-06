@@ -3667,10 +3667,10 @@ I numeri rari sono quei numeri che quando aggiunti o sottratti al suo rovescio d
   - (n - r) è la differenza e deve essere positiva
   - la somma e la differenza devono essere quadrati perfetti
 
-Sequenza OEIS: A035519
-65, 621770, 281089082, 2022652202, 2042832002, 868591084757, 872546974178,
-872568754178, 6979302951885, 20313693904202, 20313839704202, 20331657922202,
-20331875722202, 20333875702202, ...
+Sequenza OEIS A035519:
+  65, 621770, 281089082, 2022652202, 2042832002, 868591084757, 872546974178,
+  872568754178, 6979302951885, 20313693904202, 20313839704202, 20331657922202,
+  20331875722202, 20333875702202, ...
 
 Funzione che verifica se un numero è un quadrato perfetto:
 
@@ -6106,7 +6106,7 @@ Quindi 7 è un numero primo lungo.
 
 Nota: Il 2 non viene considerato un numero primo lungo.
 
-Sequenza OEIS: A001913
+Sequenza OEIS A001913:
   7, 17, 19, 23, 29, 47, 59, 61, 97, 109, 113, 131, 149, 167, 179, 181,
   193, 223, 229, 233, 257, 263, 269, 313, 337, 367, 379, 383, 389, 419,
   433, 461, 487, 491, 499, 503, 509, 541, ...

@@ -6068,6 +6068,9 @@ Proviamo:
 (ssp-count '(1 2 3) 4)
 ;-> 4
 
+(ssp-count '(5 10) 12)
+;-> 0
+
 (map (fn(x) (ssp-count '(1 2 5 10) x)) (sequence 1 60))
 ;-> (1 2 2 3 4 5 6 7 8 11 12 15 16 19 22 25 28 31 34 40
 ;->  43 49 52 58 64 70 76 82 88 98 104 114 120 130 140 150 160
@@ -6102,6 +6105,9 @@ Proviamo:
 (ssp-list '(1 2 3) 4)
 ;-> ((1 1 1 1) (2 1 1) (3 1) (2 2))
 
+(ssp-list '(5 10) 12)
+;-> ()
+
 (ssp-list '(1 2 5 10) 10)
 ;-> ((1 1 1 1 1 1 1 1 1 1) (2 1 1 1 1 1 1 1 1) (2 2 1 1 1 1 1 1)
 ;->  (5 1 1 1 1 1) (2 2 2 1 1 1 1) (5 2 1 1 1) (2 2 2 2 1 1)
@@ -6134,8 +6140,8 @@ Smallest prime power >= n
 "Smallest prime power >= n" (la più piccola potenza prima >= n) significa trovare il più piccolo numero che sia una potenza di un numero primo (ad esempio 2^3 = 8, 3^2 = 9, ecc.) e che sia maggiore o uguale a un dato numero n.
 
 Potenza di un numero primo: Un numero che può essere scritto come p^k, dove:
-  - p  è un numero primo (es. 2, 3, 5, 7, ...),
-  - k  è un numero intero positivo (k >= 1 ).
+  - p è un numero primo (es. 2, 3, 5, 7, ...),
+  - k è un numero intero positivo (k >= 1 ).
 
 Quindi l'obiettivo è trovare il più piccolo p^k tale che p^k >= n.
 Questa definizione viene utilizzata in matematica discreta, teoria dei numeri, o analisi di algoritmi.
@@ -6230,9 +6236,50 @@ Proviamo:
 ;->  101 101 101)
 
 
---------------------------------------------------------------
-Numero di numeri interi positivi <= 2^n nella forma x^2 16*y^2
---------------------------------------------------------------
+-----------------------------------------------------------------
+Numero di numeri interi positivi <= 2^n nella forma a*x^2 + b*y^2
+-----------------------------------------------------------------
+
+Algoritmo
+Ricerca esaustiva (brute-force) dei valori di x e y che soddisfano l'equazione.
+Nota: i due cicli "for" innestati vanno da 0 a 2^n... e 2^18 = 262144.
+
+(define (seq n a b)
+  (let ((limite (pow 2 n))
+        (numeri '()))
+    (for (x 0 (+ (int (sqrt (div limite a))) 1))
+      (for (y 0 (+ (int (sqrt (div limite b))) 1))
+        ;(print x { } y { } (+ (* a x x) (* b y y))) (read-line)
+        (let (valore (+ (* a x x) (* b y y)))
+          (if (<= valore limite) (push valore numeri)))))
+    ; calcoliamo solo i valori unici e
+    ; togliamo 1 che rappresenta la soluzione non valida x=0 e y=0
+    (- (length (unique numeri)) 1)))
+
+a = 1, b = 1
+------------
+
+Sequenza OEIS A000050:
+Number of positive integers <= 2^n of form x^2 + y^2.
+With a(0)=1, a(1)=2, a(2)=3
+1, 2, 3, 5, 9, 16, 29, 54, 97, 180, 337, 633, 1197, 2280, 4357, 8363, 16096, 31064, 60108, 116555, 226419, 440616, 858696, 1675603, 3273643, 6402706, 12534812, 24561934, 48168461, 94534626, 185661958, 364869032, 717484560, 1411667114, 2778945873, 5473203125
+
+(map (fn(x) (seq x 1 1)) (sequence 3 15))
+;-> (5 9 16 29 54 97 180 337 633 1197 2280 4357 8363)
+
+Vediamo la velocità della funzione:
+
+(time (map (fn(x) (seq x 1 1)) (sequence 3 10)))
+;-> 4.997
+(time (map (fn(x) (seq x 1 1)) (sequence 3 15)))
+;-> 6310.474
+(time (map (fn(x) (seq x 1 1)) (sequence 3 16)))
+La funzione e lenta perchè i cicli "for" innestati vanno da 0 a 2^n... e 2^16 = 65536.
+
+L'approccio matematico per risolvere il problema è basato sulla teoria delle forme quadratiche e sui numeri gaussiani (ma non lo conosco per niente).
+
+a = 1, b = 16
+-------------
 
 Sequenza OEIS A000018:
 Number of positive integers <= 2^n of form x^2 + 16*y^2.
@@ -6242,40 +6289,89 @@ With: a(0)=1, a(1)=1, a(2)=2, a(3)=2
   5522889, 10818417, 21209278, 41613288, 81705516, 160532194, 315604479,
   620834222, 1221918604, 2406183020, 4740461247, ...
 
-Algoritmo
-Ricerca esaustiva (brute-force) dei valori di x e y che soddisfano l'equazione.
+(map (fn(x) (seq x 1 16)) (sequence 4 15))
+;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725)
 
-(define (a n)
-  (let ((limite (pow 2 n))
-        (numeri '()))
-    (for (x 0 (+ (int (sqrt limite)) 1))
-      (for (y 0 (+ (int (sqrt (div limite 16))) 1))
-        (let (valore (+ (* x x) (* 16 (* y y))))
-          (if (<= valore limite) (push valore numeri)))))
-    ; calcoliamo solo i valori unici e
-    ; togliamo 1 che rappresenta la soluzione non valida x=0 e y=0
-    (- (length (unique numeri)) 1)))
+a = 1, b = 12
+-------------
+
+Sequenza OEIS A000021:
+Number of positive integers <= 2^n of form x^2 + 12 y^2.
+With: a(0)=1, a(1)=1, a(2)=2, a(3)=2
+  1, 1, 2, 2, 6, 9, 17, 30, 54, 98, 183, 341, 645, 1220, 2327, 4451, 8555,
+  16489, 31859, 61717, 119779, 232919, 453584, 884544, 1727213, 3376505,
+  6607371, 12942012, 25371540, 49777187, 97731027, 192010355, 377475336,
+  742512992, 1461352025, 2877572478, 5668965407, ...
+
+(map (fn(x) (seq x 1 12)) (sequence 4 15))
+;-> (6 9 17 30 54 98 183 341 645 1220 2327 4451)
+
+a = 1, b = 10
+-------------
+
+Sequenza OEIS A000024:
+Number of positive integers <= 2^n of form x^2 + 10 y^2.
+With: a(0)=1, a(1)=1, a(2)=2, a(3)=2
+  1, 1, 2, 2, 7, 10, 20, 36, 65, 118, 221, 409, 776, 1463, 2788, 5328,
+  10222, 19714, 38054, 73685, 142944, 277838, 540889, 1054535, 2058537,
+  4023278, 7871313, 15414638, 30213190, 59266422, 116343776, 228545682,
+  449240740, 883570480, 1738769611, 3423469891, 6743730746, ...
+
+(map (fn(x) (seq x 1 10)) (sequence 4 15))
+;-> (7 10 20 36 65 118 221 409 776 1463 2788 5328)
+
+
+a = 3, b = 4
+------------
+
+Sequenza OEIS A000049:
+Number of positive integers <= 2^n of the form 3*x^2 + 4*y^2.
+With: a(0)=0, a(1)=0, a(2)=2, a(3)=3
+  0, 0, 2, 3, 5, 9, 16, 29, 53, 98, 181, 341, 640, 1218, 2321, 4449, 8546,
+  16482, 31845, 61707, 119760, 232865, 453511, 884493, 1727125, 3376376,
+  6607207, 12941838, 25371086, 49776945, 97730393, 192009517, 377473965,
+  742511438, 1461351029, 2877568839, 5668961811, ...
+
+(map (fn(x) (seq x 3 4)) (sequence 4 15))
+;-> (5 9 16 29 53 98 181 341 640 1218 2321 4449)
+
+
+-----------------------------------------------
+Numeri mosaico o proiezione moltiplicativa di N
+-----------------------------------------------
+
+Data la scomposizione in fattori primi di un numero N:
+
+  N = p1^k1 * p2^k2 * ... * pm^km
+
+la Proiezione Moltiplicativa di N vale:
+
+  PM = p1*k1 * p2*k2 * ... * pm*km
+ 
+Sequenza OEIS A000026:
+Mosaic numbers or multiplicative projection of n: if n = Product (p_j^k_j) then a(n) = Product (p_j * k_j).
+  1, 2, 3, 4, 5, 6, 7, 6, 6, 10, 11, 12, 13, 14, 15, 8, 17, 12, 19, 20, 21,
+  22, 23, 18, 10, 26, 9, 28, 29, 30, 31, 10, 33, 34, 35, 24, 37, 38, 39, 30,
+  41, 42, 43, 44, 30, 46, 47, 24, 14, 20, 51, 52, 53, 18, 55, 42, 57, 58, 59,
+  60, 61, 62, 42, 12, 65, 66, 67, 68, 69, 70, 71, 36, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (pm n)
+  (apply * (flat (factor-group n))))
 
 Proviamo:
 
-(time (println (map a (sequence 4 10))))
-;-> 15.584
-(time (println (map a (sequence 4 15))))
-;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725)
-;-> 234.346
-(time (println (map a (sequence 4 16))))
-;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725 7145)
-;-> 1234.098
-Sembra veloce, ma... 
-(time (println (map a (sequence 4 17))))
-;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725 7145 13781)
-;-> 7969.508
-(time (println (map a (sequence 4 18))))
-;-> (4 8 13 25 44 83 152 286 538 1020 1942 3725 7145 13781 26627)
-;-> 34300.208
-Questo perchè i cicli "for" vanno da 0 a 2^n... e 2^18 = 262144.
-
-L'approccio matematico per risolvere il problema è basato sulla teoria delle forme quadratiche e sui numeri gaussiani (ma non lo conosco per niente).
+(map pm (sequence 1 72))
+;-> (1 2 3 4 5 6 7 6 6 10 11 12 13 14 15 8 17 12 19 20 21
+;->  22 23 18 10 26 9 28 29 30 31 10 33 34 35 24 37 38 39 30
+;->  41 42 43 44 30 46 47 24 14 20 51 52 53 18 55 42 57 58 59
+;->  60 61 62 42 12 65 66 67 68 69 70 71 36)
 
 ============================================================================
 

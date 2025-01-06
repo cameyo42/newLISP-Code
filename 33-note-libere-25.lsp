@@ -865,7 +865,7 @@ Numeri pratici
 
 Un numero n si dice pratico quando tutti i numeri interi positivi m < n si possono scrivere in almeno una maniera come somma di divisori distinti di n.
 
-Sequenza OEIS: A005153
+Sequenza OEIS A005153:
 Practical numbers: positive integers m such that every k <= sigma(m) is a sum of distinct divisors of m. Also called panarithmic numbers.
   1, 2, 4, 6, 8, 12, 16, 18, 20, 24, 28, 30, 32, 36, 40, 42, 48, 54, 56,
   60, 64, 66, 72, 78, 80, 84, 88, 90, 96, 100, 104, 108, 112, 120, 126, 128,
@@ -1907,7 +1907,7 @@ N = 18
 divisori propri = (1 2 3 6 9)
 In questo caso, la somma dei divisori (21) è maggiore di 18, ma 9 + 6 + 3 = 18, quindi il numero 18 non è weird.
 
-Sequenza OEIS: A006037
+Sequenza OEIS A006037:
 Weird numbers: abundant (A005101) but not pseudoperfect (A005835).
   70, 836, 4030, 5830, 7192, 7912, 9272, 10430, 10570, 10792, 10990, 11410,
   11690, 12110, 12530, 12670, 13370, 13510, 13790, 13930, 14770, 15610,
@@ -2163,14 +2163,14 @@ Proviamo:
 
 Questo problema è in relazione con le seguenti due sequenze:
 
-Sequenza OEIS: A033676
+Sequenza OEIS A033676:
 Largest divisor of n <= sqrt(n)
   1, 1, 1, 2, 1, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 4, 1, 3, 1, 4, 3, 2, 1, 4,
   5, 2, 3, 4, 1, 5, 1, 4, 3, 2, 5, 6, 1, 2, 3, 5, 1, 6, 1, 4, 5, 2, 1, 6,
   7, 5, 3, 4, 1, 6, 5, 7, 3, 2, 1, 6, 1, 2, 7, 8, 5, 6, 1, 4, 3, 7, 1, 8,
   1, 2, 5, 4, 7, 6, 1, 8, 9, 2, 1, 7, 5, 2, 3, ...
 
-Sequenza OEIS: A033677
+Sequenza OEIS A033677:
 Smallest divisor of n >= sqrt(n)
   1, 2, 3, 2, 5, 3, 7, 4, 3, 5, 11, 4, 13, 7, 5, 4, 17, 6, 19, 5, 7, 11, 23,
   6, 5, 13, 9, 7, 29, 6, 31, 8, 11, 17, 7, 6, 37, 19, 13, 8, 41, 7, 43, 11,
@@ -3511,7 +3511,7 @@ Calcolare la seguente sequenza:
 
 a(n) = Numero più piccolo con esattamente n divisori
 
-Sequenza OEIS: A005179
+Sequenza OEIS A005179:
 Smallest number with exactly n divisors.
   1, 2, 4, 6, 16, 12, 64, 24, 36, 48, 1024, 60, 4096, 192, 144, 120, 65536,
   180, 262144, 240, 576, 3072, 4194304, 360, 1296, 12288, 900, 960, 268435456,

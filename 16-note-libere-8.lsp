@@ -2559,7 +2559,7 @@ Numeri emirp
 
 Un emirp (prime scritto al contrario) è un numero primo che risulta in un primo diverso quando le sue cifre decimali sono invertite. Questa definizione esclude i numeri primi palindromici.
 
-Sequenza OEIS: A006567
+Sequenza OEIS A006567:
   13, 17, 31, 37, 71, 73, 79, 97, 107, 113, 149, 157, 167, 179, 199,
   311, 337, 347, 359, 389, 701, 709, 733, 739, 743, 751, 761, 769,
   907, 937, 941, 953, 967, 971, 983, 991, 1009, 1021, 1031, 1033,
@@ -2972,7 +2972,7 @@ Vediamo i tempi di esecuzione delle due funzioni:
 (time (poly-div? 345654) 100000)
 ;-> 150.697
 
-Sequenza OEIS: A144688
+Sequenza OEIS A144688:
 "Magic" numbers: all numbers from 0 to 9 are magic.
 A number >= 10 is magic if it is divisible by the number of its digits and the number obtained by deleting the final digit is also magic.
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28,

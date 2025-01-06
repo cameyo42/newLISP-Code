@@ -5807,7 +5807,7 @@ Numeri Triperfetti (Triperfect)
 Un intero positivo N si dice Triperfetto se la somma dei suoi divisori propri (escluso N stesso) è uguale a tre volte il numero N.
 In altre parole, se la somma dei divisori di N (escluso N) è uguale a 3 volte N, allora N è un numero triperfetto.
 
-Sequenza OEIS: A005820
+Sequenza OEIS A005820:
   120, 672, 523776, 459818240, 1476304896, 51001180160, ...
 
 (define (factor-group num)

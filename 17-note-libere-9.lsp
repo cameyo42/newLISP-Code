@@ -6916,7 +6916,7 @@ I numeri a una cifra da 0 a 9 sono inclusi come numeri magnanimi poiché non c'�
 
 Ci sono solo 571 numeri magnanimi conosciuti. Si sospetta, anche se non è stato dimostrato, che non ci siano numeri magnanimi superiori a 97393713331910.
 
-Sequenza OEIS: A252996
+Sequenza OEIS A252996:
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 16, 20, 21, 23, 25, 29, 30,
   32, 34, 38, 41, 43, 47, 49, 50, 52, 56, 58, 61, 65, 67, 70, 74, 76, 83,
   85, 89, 92, 94, 98, 101, 110, 112, 116, 118, 130, 136, 152, 158, 170,
@@ -7070,7 +7070,7 @@ Un intero positivo n è un numero aritmetico se la media dei suoi divisori posit
 
 Chiaramente tutti i numeri primi dispari p devono essere numeri aritmetici perché i loro unici divisori sono 1 e p la cui somma è pari e quindi la loro media deve essere un intero. Tuttavia, il numero primo 2 non è un numero aritmetico perché la media dei suoi divisori vale 1.5.
 
-Sequenza OEIS: A003601
+Sequenza OEIS A003601:
   1, 3, 5, 6, 7, 11, 13, 14, 15, 17, 19, 20, 21, 22, 23, 27, 29, 30, 31,
   33, 35, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 49, 51, 53, 54, 55, 56, 
   57, 59, 60, 61, 62, 65, 66, 67, 68, 69, 70, 71, 73, 77, 78, 79, 83, 85, 

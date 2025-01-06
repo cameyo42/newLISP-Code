@@ -24,7 +24,7 @@ Dato un numero intero positivo N, definiamo "autosomma digitale" il numero:
 
   ASD(N) = N + somma(cifre di N)
 
-Sequenza OEIS: A062028
+Sequenza OEIS A062028:
 a(n) = n + sum of the digits of n.
   0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 11, 13, 15, 17, 19, 21, 23, 25, 27,
   29, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 33, 35, 37, 39, 41, 43, 45,
@@ -600,7 +600,7 @@ Proviamo:
 
 Quante cifre occorrono per un libro di P pagine?
 
-Sequenza OEIS: A058183
+Sequenza OEIS A058183:
 Number of digits in concatenation of first n positive integers.
 Or, total number of digits in numbers from 1 through n.
   1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31,
@@ -866,7 +866,7 @@ Poiché le differenze arrivano fino a 4, sappiamo che la successiva differenza �
    Sequenza: (1 2 4 7 3 8)
    Differenze: (1 2 3 4 5)
 
-Sequenza OEIS: A081145
+Sequenza OEIS A081145:
 a(1)=1, thereafter, a(n) is the least positive integer which has not already occurred and is such that |a(n)-a(n-1)| is different from any |a(k)-a(k-1)| which has already occurred.
   1, 2, 4, 7, 3, 8, 14, 5, 12, 20, 6, 16, 27, 9, 21, 34, 10, 25, 41, 11,
   28, 47, 13, 33, 54, 15, 37, 60, 17, 42, 68, 18, 45, 73, 19, 48, 79, 22,
@@ -1364,7 +1364,7 @@ Base 2: C2 = 0.11011100101110111...
 
 Base 3: C3 = 0.12101112202122...
 
-Sequenza OEIS: A033307
+Sequenza OEIS A033307:
 Decimal expansion of Champernowne constant (or Mahler's number), formed by concatenating the positive integers.
   1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6,
   1, 7, 1, 8, 1, 9, 2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 6, 2, 7, 2, 8,
@@ -3807,7 +3807,7 @@ Sequenza di Alcuin
 
 Nella sequenza di Alcuin, a(n) è il numero di triangoli con lati interi e perimetro n.
 
-Sequenza OEIS: A005044
+Sequenza OEIS A005044:
 Alcuin's sequence: expansion of x^3/((1-x^2)*(1-x^3)*(1-x^4)).
   0, 0, 0, 1, 0, 1, 1, 2, 1, 3, 2, 4, 3, 5, 4, 7, 5, 8, 7, 10, 8, 12, 10,
   14, 12, 16, 14, 19, 16, 21, 19, 24, 21, 27, 24, 30, 27, 33, 30, 37, 33,
@@ -4393,7 +4393,7 @@ La funzione "seq-sum" è circa 20 volte più veloce di "seq-somma".
 
 Vediamo quante sequenze sono associate ad ogni numero.
 
-Sequenza OEIS: A069283
+Sequenza OEIS A069283:
 Number of nontrivial ways to write n as sum of at least 2 consecutive integers.
 a(n) = -1 + number of odd divisors of n.
   0, 0, 0, 1, 0, 1, 1, 1, 0, 2, 1, 1, 1, 1, 1, 3, 0, 1, 2, 1, 1, 3, 1, 1,
@@ -4482,7 +4482,7 @@ Le sequenze sono uguali (a parte il primo valore per N = 0 che nel coso dei divi
 
 Per completezza riportiamo la sequenza dei divisori dispari dei numeri interi:
 
-Sequenza OEIS: A001227
+Sequenza OEIS A001227:
 Number of odd divisors of n.
 Number of partitions of n into consecutive positive integers including the trivial partition of length 1 (the number itself).
 a(n) = d(n) if n is odd, 
@@ -4624,7 +4624,7 @@ a(23) = 23 perché ci sono 23 numeri generati dall'iterazione:
                    / \
                   1   2
 
-Sequenza OEIS: A256504
+Sequenza OEIS A256504:
 Summative Fission - For a positive integer n, find the greatest number of consecutive positive integers (at least 2) which add to n. For each of these do the same ... iterate to completion. 
 a(n) = the total number of integers (including n itself) defined.
   0, 1, 1, 3, 1, 5, 6, 5, 1, 6, 7, 12, 10, 12, 11, 12, 1, 8, 16, 14, 17,
@@ -5028,7 +5028,7 @@ S = (1 2 4 7 10)
 
 ecc.
 
-Sequenza OEIS: A033627
+Sequenza OEIS A033627:
 0-additive sequence: not the sum of any previous pair.
   1, 2, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52,
   55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 85, 88, 91, 94, 97, 100, 103,
@@ -7340,7 +7340,7 @@ La sequenza dei numeri di Ulam ha le seguenti caratteristiche:
 - u(2) = 2
 - Per n > 2, u(n) è il più piccolo intero maggiore di u(n-1) che è la somma di due distinti termini esattamente in un modo.
 
-Sequenza OEIS: A002858
+Sequenza OEIS A002858:
 Ulam numbers: a(1) = 1, a(2) = 2, for n>2: a(n) = least number > a(n-1) which is a unique sum of two distinct earlier terms.
   1, 2, 3, 4, 6, 8, 11, 13, 16, 18, 26, 28, 36, 38, 47, 48, 53, 57, 62, 69,
   72, 77, 82, 87, 97, 99, 102, 106, 114, 126, 131, 138, 145, 148, 155, 175,

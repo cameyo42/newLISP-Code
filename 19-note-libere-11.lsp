@@ -678,8 +678,7 @@ La sequenza di piegatura regolare della carta (regular paperfolding sequence), n
 
 compilando i punti interrogativi con un'altra copia dell'intera sequenza.
 
-Sequenza OEIS: A014577
-
+Sequenza OEIS A014577:
   1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, ...
 
 Se una striscia di carta viene piegata ripetutamente a metà nella stessa direzione, i volte, otteniamo (2^i - 1) pieghe, la cui direzione (sinistra o destra) è data dal motivo di 0 e 1 nei primi (2^i - 1) termini della normale sequenza di piegatura della carta. L'apertura di ogni piega per creare un angolo retto (o, equivalentemente, fare una sequenza di giri a sinistra e a destra attraverso una griglia regolare, seguendo lo schema della sequenza di piegatura della carta) produce una sequenza di catene poligonali che si avvicina al frattale della curva del drago.
@@ -784,7 +783,7 @@ La sequenza Hofstadter-Conway (o Newman-Conway), è definita dalla relazione di 
 
 con valori iniziali P(1) = 1 e P(2) = 1
 
-Sequenza OEIS: A004001
+Sequenza OEIS A004001:
   1, 1, 2, 2, 3, 4, 4, 4, 5, 6, 7, 7, 8, 8, 8, 8, 9, 10, 11, 12, 12,
   13, 14, 14, 15, 15, 15, 16, 16, 16, 16, 16, 17, 18, 19, 20, 21, 21,
   22, 23, 24, 24, 25, 26, 26, 27, 27, 27, 28, 29, 29, 30, 30, 30, 31,
@@ -1028,7 +1027,7 @@ Anche la somma delle cifre di 22 è 4, cioè 2 + 2.
 La somma delle loro cifre è 12, cioè 2 + 3 + 4.
 Anche la somma delle cifre di 84 è 12, cioè 8 + 4.
 
-Sequenza OEIS: A019506
+Sequenza OEIS A019506:
   22, 58, 84, 85, 94, 136, 160, 166, 202, 234, 250, 265, 274, 308, 319,
   336, 346, 355, 361, 364, 382, 391, 424, 438, 454, 456, 476, 483, 516,
   517, 526, 535, 562, 627, 634, 644, 645, 650, 654, 660, 663, 690, 702,
@@ -1253,7 +1252,7 @@ MCD delle cifre di un numero
 
 Scrivere una funzione per calcolare il MCD delle cifre di un numero intero positivo.
 
-Sequenza OEIS: A052423
+Sequenza OEIS A052423:
   1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2,
   1, 2, 1, 2, 1, 2, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3, 4, 1, 2, 1, 4,
   1, 2, 1, 4, 1, 5, 1, 1, 1, 1, 5, 1, 1, 1, 1, 6, 1, 2, 3, 2, 1, 6,
@@ -1637,7 +1636,7 @@ Alcuni esempi di numeri frugali sono:
 2) 512 = 2^9, qui il numero di cifre nel numero è 3 (5, 1 e 2) che è strettamente maggiore del numero di cifre nella sua fattorizzazione primi che è 2 (2 e 9).
 3) 1029 = 3 * 7^3, qui il numero di cifre nel numero è 4 (1, 0, 2 e 9) che è strettamente maggiore del numero di cifre la sua fattorizzazione primo che è 3 (3, 7 e 3 ).
 
-Sequenza OEIS: A046759
+Sequenza OEIS A046759:
   125, 128, 243, 256, 343, 512, 625, 729, 1024, 1029, 1215, 1250, 1280,
   1331, 1369, 1458, 1536, 1681, 1701, 1715, 1792, 1849, 1875, 2048, 2187,
   2197, 2209, 2401, 2560, 2809, 3125, 3481, 3584, 3645, 3721, 4096, 4374,
@@ -1700,7 +1699,7 @@ Numeri Blum
 Un numero Blum è un intero semiprimo (cioè un numero che è il prodotto esattamente di due numeri primi).
 Supponiamo che p e q siano i due fattori (cioè n = p * q), essi (p e q) sono della forma 4t + 3, dove t è un numero intero.
 
-Sequenza OEIS: A016105
+Sequenza OEIS A016105:
    21, 33, 57, 69, 77, 93, 129, 133, 141, 161, 177, 201, 209, 213, 217,
    237, 249, 253, 301, 309, 321, 329, 341, 381, 393, 413, 417, 437, 453,
    469, 473, 489, 497, 501, 517, 537, 553, 573, 581, 589, 597, 633, 649,
@@ -1838,7 +1837,7 @@ Numeri di Achille
 
 Un numero di Achille è un intero positivo potente (nel senso che ogni fattore primo si presenta con esponente maggiore di uno), ma imperfetto (nel senso che il numero non è una potenza perfetta).
 
-Sequenza OEIS: A052486
+Sequenza OEIS A052486:
   72, 108, 200, 288, 392, 432, 500, 648, 675, 800, 864, 968, 972, 1125,
   1152, 1323, 1352, 1372, 1568, 1800, 1944, 2000, 2312, 2592, 2700, 2888,
   3087, 3200, 3267, 3456, 3528, 3872, 3888, 4000, 4232, 4500, 4563, 4608,
@@ -1893,7 +1892,7 @@ Calcoliamo quanti sono i numeri di Achille fino ad 1 milione:
 
 Un numero intero positivo N è un numero di Achille forte se, sia N che toziente(N) sono numeri di Achille.
 
-Sequenza OEIS: A194085
+Sequenza OEIS A194085:
   500, 864, 1944, 2000, 2592, 3456, 5000, 10125, 10368, 12348, 12500,
   16875, 19652, 19773, 30375, 31104, 32000, 33275, 37044, 40500, 49392,
   50000, 52488, 55296, 61731, 64827, 67500, 69984, 78608, 80000, 81000,
@@ -1957,7 +1956,7 @@ La sequenza P(n) dei numeri di Perrin (o sequenza Ondrej Such) è definita dalla
  P(2) = 2
  P(n) = P(n-2) + P(n-3) per n > 2
 
-Sequenza OEIS: A001608
+Sequenza OEIS A001608:
   Perrin sequence (or Ondrej Such sequence): a(n) = a(n-2) + a(n-3) with a(0) = 3, a(1) = 0, a(2) = 2.
   3, 0, 2, 3, 2, 5, 5, 7, 10, 12, 17, 22, 29, 39, 51, 68, 90, 119, 158,
   209, 277, 367, 486, 644, 853, 1130, 1497, 1983, 2627, 3480, 4610, 6107,
@@ -4528,7 +4527,7 @@ La sequenza cifre-primi di Smarandache (SPDS - Smarandache prime-digital sequenc
 
 Ad esempio 257 è un elemento di questa sequenza perché è primo e le sue cifre: 2, 5 e 7 sono anche primi.
 
-Sequenza OEIS: A019546
+Sequenza OEIS A019546:
   2, 3, 5, 7, 23, 37, 53, 73, 223, 227, 233, 257, 277, 337, 353,
   373, 523, 557, 577, 727, 733, 757, 773, 2237, 2273, 2333, 2357,
   2377, 2557, 2753, 2777, 3253, 3257, 3323, 3373, 3527, 3533, 3557,
@@ -4796,7 +4795,7 @@ Un numero è Pierpont di secondo tipo se è un numero primo della forma:
 Pierpont di primo tipo
 ----------------------
 
-Sequenza OEIS: A005109
+Sequenza OEIS A005109:
   2, 3, 5, 7, 13, 17, 19, 37, 73, 97, 109, 163, 193, 257, 433, 487,
   577, 769, 1153, 1297, 1459, 2593, 2917, 3457, 3889, 10369, 12289,
   17497, 18433, 39367, 52489, 65537, 139969, 147457, 209953, 331777,
@@ -4841,7 +4840,7 @@ Sequenza OEIS: A005109
 Pierpont secondo tipo
 ---------------------
 
-Sequenza OEIS: A005105
+Sequenza OEIS A005105:
   2, 3, 5, 7, 11, 17, 23, 31, 47, 53, 71, 107, 127, 191, 383, 431,
   647, 863, 971, 1151, 2591, 4373, 6143, 6911, 8191, 8747, 13121,
   15551, 23327, 27647, 62207, 73727, 131071, 139967, 165887, 294911,
@@ -4949,7 +4948,7 @@ Usando C: (le ultime due si sono verificate un passo indietro)
 Usando C: (l'ultimo è apparso sei passi indietro)
 0 0 1 0 2 0 2 2 1 6
 
-Sequenza OEIS: A181391
+Sequenza OEIS A181391:
   0, 0, 1, 0, 2, 0, 2, 2, 1, 6, 0, 5, 0, 2, 6, 5, 4, 0, 5, 3, 0, 3, 2,
   9, 0, 4, 9, 3, 6, 14, 0, 6, 3, 5, 15, 0, 5, 3, 5, 2, 17, 0, 6, 11, 0,
   3, 8, 0, 3, 3, 1, 42, 0, 5, 15, 20, 0, 4, 32, 0, 3, 11, 18, 0, 4, 7,
@@ -5295,7 +5294,7 @@ Numeri primi additivi
 
 I numeri primi additivi sono numeri primi per i quali anche la somma delle cifre decimali è primo.
 
-Sequenza OEIS: A046704
+Sequenza OEIS A046704:
   2, 3, 5, 7, 11, 23, 29, 41, 43, 47, 61, 67, 83, 89, 101, 113, 131,
   137, 139, 151, 157, 173, 179, 191, 193, 197, 199, 223, 227, 229, 241,
   263, 269, 281, 283, 311, 313, 317, 331, 337, 353, 359, 373, 379, 397,
@@ -5330,7 +5329,7 @@ Numeri primi-primi
 
 I numeri primi-primi sono numeri primi per i quali ogni cifra è primo e anche la somma delle cifre è primo.
 
-Sequenza OEIS: A062088
+Sequenza OEIS A062088:
   2, 3, 5, 7, 23, 223, 227, 337, 353, 373, 557, 577, 733, 757, 773,
   2333, 2357, 2377, 2557, 2753, 2777, 3253, 3257, 3323, 3527, 3727,
   5233, 5237, 5273, 5323, 5527, 7237, 7253, 7523, 7723, 7727, 22573,

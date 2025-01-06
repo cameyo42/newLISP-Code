@@ -994,7 +994,7 @@ Esempi:
 113 × 691 (78083) è un numero brillante
 2 × 31 (62) non è un numero brillante (diverso numero di cifre nei due fattori 2 e 31)
 
-Sequenza OEIS: A078972
+Sequenza OEIS A078972:
  4, 6, 9, 10, 14, 15, 21, 25, 35, 49, 121, 143, 169, 187, 209,
  221, 247, 253, 289, 299, 319, 323, 341, 361, 377, 391, 403,
  407, 437, 451, 473, 481, 493, 517, 527, 529, 533, 551, 559,
@@ -3043,11 +3043,11 @@ In matematica , i numeri di Lah , scoperti da Ivo Lah nel 1954, [1] [2] sono coe
 
 I numeri Lah senza segno hanno un significato interessante in combinatoria : contano il numero di modi in cui un insieme di n elementi può essere partizionato in k sottoinsiemi ordinati linearmente non vuoti . [4] I numeri di Lah sono correlati ai numeri di Stirling . [5]
 
-Numeri Lah senza segno (sequenza OEIS: A105278):
+Numeri Lah senza segno (sequenza OEIS A105278):
 
 L(n,k) = binom[(n-1) (k-1)]*(n!/k!)
 
-Numeri Lah con segno (sequenza OEIS: A108297):
+Numeri Lah con segno (sequenza OEIS A108297):
 
 L(n,k) = ((-1)^n)*binom[(n-1) (k-1)]*(n!/k!)
 
@@ -5078,7 +5078,7 @@ Funzione che verifica se un numero è estetico:
 (estetico? 98765432109)
 ;-> nil
 
-Sequenza OEIS: A033075
+Sequenza OEIS A033075:
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 21, 23, 32, 34, 43, 45, 54, 56, 65,
   67, 76, 78, 87, 89, 98, 101, 121, 123, 210, 212, 232, 234, 321, 323,
   343, 345, 432, 434, 454, 456, 543, 545, 565, 567, 654, 656, 676, 678,
@@ -5515,7 +5515,7 @@ Molto, molto meno comuni sono le quadruple e le quintuple duffiniane.
 La prima quintupla duffiniana è (202605639573839041, 202605639573839042, 202605639573839043, 202605639573839044, 202605639573839045).
 Non è possibile avere sei numeri duffiniani consecutivi.
 
-Sequenza OEIS: A003624
+Sequenza OEIS A003624:
   4, 8, 9, 16, 21, 25, 27, 32, 35, 36, 39, 49, 50, 55, 57, 63, 64, 65,
   75, 77, 81, 85, 93, 98, 100, 111, 115, 119, 121, 125, 128, 129, 133,
   143, 144, 155, 161, 169, 171, 175, 183, 185, 187, 189, 201, 203, 205,
@@ -5709,7 +5709,7 @@ Ad esempio 16 è un numero equidigitale poiché la sua fattorizzazione primi è 
 Come altro esempio, 128 non è un equidigitale, infatti la sua fattorizzazione vale è 2^7 e ha un totale di 2 cifre (2 e 7), ma il numero ha 3 cifre.
 Tutti i numeri primi sono equidigitali.
 
-Sequenza OEIS: A046758
+Sequenza OEIS A046758:
   1, 2, 3, 5, 7, 10, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25, 27, 29, 31,
   32, 35, 37, 41, 43, 47, 49, 53, 59, 61, 64, 67, 71, 73, 79, 81, 83, 89,
   97, 101, 103, 105, 106, 107, 109, 111, 112, 113, 115, 118, 119, 121,
@@ -6575,7 +6575,7 @@ I termini possono essere calcolati anche utilizzando la seguente formula:
 
     J(n) = (2^n - (-1)^n)/3
 
-Sequenza OEIS: A001045
+Sequenza OEIS A001045:
   0, 1, 1, 3, 5, 11, 21, 43, 85, 171, 341, 683, 1365, 2731, 5461,
   10923, 21845, 43691, 87381, 174763, 349525, 699051, 1398101,
   2796203, 5592405, 11184811, 22369621, 44739243, 89478485,
@@ -6587,7 +6587,7 @@ I termini possono essere calcolati anche utilizzando la seguente formula:
 
   JL(n) = 2^n + (-1)^n
 
-Sequenza OEIS: A014551
+Sequenza OEIS A014551:
   2, 1, 5, 7, 17, 31, 65, 127, 257, 511, 1025, 2047, 4097, 8191, 16385,
   32767, 65537, 131071, 262145, 524287, 1048577, 2097151, 4194305, 8388607,
   16777217, 33554431, 67108865, 134217727, 268435457, 536870911, 1073741825,
@@ -7969,7 +7969,7 @@ Il numero k deve essere sempre dispari poiché 2 a qualsiasi potenza è sempre p
 
 Nota: I numeri diventano estremamente grandi molto velocemente. Ad oggi (2022) sono stati identificati solo diciannove elementi.
 
-Sequenza OEIS: A058220
+Sequenza OEIS A058220:
   1, 3, 5, 15, 5, 59, 159, 189, 569, 105, 1557, 2549, 2439, 13797,
   25353, 5627, 24317, 231425, 164073, ...
 

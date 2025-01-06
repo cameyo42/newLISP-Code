@@ -7579,7 +7579,7 @@ Nel libro "A Mathematician's Apology" l'autore G. H. Hardy descrive questo probl
 
 Si tratta dei numeri che sono multipli interi delle loro inversioni, esclusi i numeri palindromi e i multipli di 10.
 
-Sequenza OEIS: A031877
+Sequenza OEIS A031877:
   8712, 9801, 87912, 98901, 879912, 989901, 8799912, 9899901, 87128712, 
   87999912, 98019801, 98999901, 871208712, 879999912, 980109801, 989999901,
   8712008712, 8791287912, 8799999912, 9801009801, 9890198901, 9899999901,

@@ -2768,7 +2768,8 @@ NOTE LIBERE 27
   Parte intera della radice quadrata dell'n-esimo numero primo
   Somma N con una lista di numeri (Subset Sum Problem SSP)
   Smallest prime power >= n
-  Numero di numeri interi positivi <= 2^n nella forma x^2 16*y^2
+  Numero di numeri interi positivi <= 2^n nella forma a*x^2 + b*y^2
+  Numeri mosaico o proiezione moltiplicativa di N
 
 
 PROBLEMI SUI DADI
