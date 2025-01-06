@@ -6535,7 +6535,7 @@ Facciamo alcune prove:
 a*b + c = N
 -----------
 
-Danto un intero positivo N, trovare (se esistono) tre interi a, b, c che soddisfano:
+Dato un intero positivo N, trovare (se esistono) tre interi a, b, c che soddisfano:
 
   1) a*b + c = N
   2) a, b e c sono numeri primi

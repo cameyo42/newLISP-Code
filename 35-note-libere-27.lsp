@@ -6236,9 +6236,9 @@ Proviamo:
 ;->  101 101 101)
 
 
------------------------------------------------------------------
-Numero di numeri interi positivi <= 2^n nella forma a*x^2 + b*y^2
------------------------------------------------------------------
+----------------------------------------------------------
+Numero di interi positivi <= 2^n nella forma a*x^2 + b*y^2
+----------------------------------------------------------
 
 Algoritmo
 Ricerca esaustiva (brute-force) dei valori di x e y che soddisfano l'equazione.
@@ -6247,14 +6247,15 @@ Nota: i due cicli "for" innestati vanno da 0 a 2^n... e 2^18 = 262144.
 (define (seq n a b)
   (let ((limite (pow 2 n))
         (numeri '()))
-    (for (x 0 (+ (int (sqrt (div limite a))) 1))
-      (for (y 0 (+ (int (sqrt (div limite b))) 1))
+    (for (x 0 (+ (int (sqrt (div limite (abs a)))) 1))
+      (for (y 0 (+ (int (sqrt (div limite (abs b)))) 1))
         ;(print x { } y { } (+ (* a x x) (* b y y))) (read-line)
         (let (valore (+ (* a x x) (* b y y)))
           (if (<= valore limite) (push valore numeri)))))
     ; calcoliamo solo i valori unici e
     ; togliamo 1 che rappresenta la soluzione non valida x=0 e y=0
     (- (length (unique numeri)) 1)))
+
 
 a = 1, b = 1
 ------------
@@ -6335,6 +6336,47 @@ With: a(0)=0, a(1)=0, a(2)=2, a(3)=3
 (map (fn(x) (seq x 3 4)) (sequence 4 15))
 ;-> (5 9 16 29 53 98 181 341 640 1218 2321 4449)
 
+a = 1, b = 4
+------------
+
+Sequenza OEIS A000072:
+Number of positive integers <= 2^n of form x^2 + 4 y^2.
+With: a(0)=1, a(1)=1, a(2)=2, a(3)=4
+  1, 1, 2, 4, 7, 12, 22, 41, 72, 137, 254, 476, 901, 1716, 3274, 6286,
+  12090, 23331, 45140, 87511, 169972, 330752, 644499, 1257523, 2456736,
+  4804666, 9405749, 18429828, 36141339, 70928099, 139295793, 273741700,
+  538277486, 1059051586, 2084763319, 4105924366, ...
+
+(map (fn(x) (seq x 1 4)) (sequence 4 15))
+;-> (7 12 22 41 72 137 254 476 901 1716 3274 6286)
+
+a = 2, b = 3
+------------
+
+Sequenza OEIS A000075:
+Number of positive integers <= 2^n of form 2 x^2 + 3 y^2.
+With: a(0)=0, a(1)=1, a(2)=2, a(3)=4
+  0, 1, 2, 4, 7, 14, 23, 42, 76, 139, 258, 482, 907, 1717, 3269, 6257,
+  12020, 23171, 44762, 86683, 168233, 327053, 636837, 1241723, 2424228,
+  4738426, 9271299, 18157441, 35591647, 69820626, 137068908, 269270450,
+  529312241, 1041093048, 2048825748, 4034059456, ...
+
+(map (fn(x) (seq x 2 3)) (sequence 4 15))
+;-> (7 14 23 42 76 139 258 482 907 1717 3269 6257)
+
+a = 1, b = 6
+------------
+
+Sequenza OEIS A000077:
+Number of positive integers <= 2^n of form x^2 + 6 y^2.
+  1, 1, 2, 4, 8, 13, 24, 42, 76, 140, 257, 483, 907, 1717, 3272, 6261,
+  12027, 23172, 44769, 86708, 168245, 327073, 636849, 1241720, 2424290,
+  4738450, 9271396, 18157630, 35591729, 69820804, 137069245, 269270791,
+  529312776, 1041093937, 2048826229, 4034062310, ...
+
+(map (fn(x) (seq x 1 6)) (sequence 4 15))
+;-> (8 13 24 42 76 140 257 483 907 1717 3272 6261)
+
 
 -----------------------------------------------
 Numeri mosaico o proiezione moltiplicativa di N
@@ -6347,7 +6389,7 @@ Data la scomposizione in fattori primi di un numero N:
 la Proiezione Moltiplicativa di N vale:
 
   PM = p1*k1 * p2*k2 * ... * pm*km
- 
+
 Sequenza OEIS A000026:
 Mosaic numbers or multiplicative projection of n: if n = Product (p_j^k_j) then a(n) = Product (p_j * k_j).
   1, 2, 3, 4, 5, 6, 7, 6, 6, 10, 11, 12, 13, 14, 15, 8, 17, 12, 19, 20, 21,
@@ -6372,6 +6414,320 @@ Proviamo:
 ;->  22 23 18 10 26 9 28 29 30 31 10 33 34 35 24 37 38 39 30
 ;->  41 42 43 44 30 46 47 24 14 20 51 52 53 18 55 42 57 58 59
 ;->  60 61 62 42 12 65 66 67 68 69 70 71 36)
+
+
+----------------------
+Sequenza Dying rabbits
+----------------------
+
+La sequenza "Dying rabbits" è una variazione della sequenza di Fibonacci, che incorpora un elemento di "mortalità" per i conigli. 
+Viene definita come segue:
+
+Per n <= 12 si tratta della sequenza di Fibonacci:
+  
+  a(n) = a(n-1) + a(n-2), per n <= 12 
+  con a(0) = 0 e a(1) = 1.
+
+Per n >= 13 si tiene conto della "morte" dei conigli che hanno raggiunto un'età di 13 mesi, quindi il termine della sequenza è calcolato come:
+  
+  a(n) = a(n-1) + a(n-2) - a(n-13), per n >= 13
+  dove: a(n-1) + a(n-2) rappresenta la generazione attuale e la precedente che contribuiscono alla popolazione.
+        e a(n-13) rappresenta i conigli che muoiono dopo 13 mesi.
+
+Questa sequenza modella una popolazione di conigli dove ogni coppia produce un'altra coppia ogni mese (come nella sequenza di Fibonacci), ma con la differenza che i conigli hanno una vita massima di 13 mesi.
+Dopo il 12-esimo mese, si sottrae il numero di conigli che "muoiono" (ossia quelli che sono stati aggiunti alla popolazione 13 mesi fa).
+
+La sequenza introduce un elemento di mortalità costante, rendendo il modello più realistico rispetto al classico modello di Fibonacci., mentre la crescita della sequenza rallenta rispetto a Fibonacci puro, poiché la sottrazione di a(n-13) mitiga l'esplosione esponenziale della popolazione.
+Può essere utilizzata per modellare popolazioni con generazioni discrete e durata di vita definita.
+
+Sequenza OEIS A107358:
+Dying rabbits: a(n) = Fibonacci(n) for n <= 12, for n >= 13, a(n) = a(n-1) + a(n-2) - a(n-13).
+  0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 376, 608, 982, 1587,
+  2564, 4143, 6694, 10816, 17476, 28237, 45624, 73717, 119108, 192449,
+  310949, 502416, 811778, 1311630, 2119265, 3424201, 5532650, 8939375,
+  14443788, 23337539, 37707610, 60926041, 98441202, 159056294, ...
+
+(define (fibo-i num)
+"Calculates the Fibonacci number of an integer number"
+  (if (zero? num) 0L
+  ;else
+  (local (a b c)
+    (setq a 0L b 1L c 0L)
+    (for (i 0 (- num 1))
+      (setq c (+ a b))
+      (setq a b)
+      (setq b c)
+    )
+    a)))
+
+(define (seq limite)
+  (let (arr (array limite '(0)))
+    (for (i 0 12)
+      (setf (arr i) (fibo-i i)))
+    (for (i 13 (- limite 1))
+      (setf (arr i) (+ (arr (- i 1)) (arr (- i 2)) (- (arr (- i 13))))))
+    arr))
+
+Proviamo:
+
+(seq 42)
+;-> (0L 1L 1L 2L 3L 5L 8L 13L 21L 34L 55L 89L 144L 233L 376L 608L 982L 1587L
+;->  2564L 4143L 6694L 10816L 17476L 28237L 45624L 73717L 119108L 192449L
+;->  310949L 502416L 811778L 1311630L 2119265L 3424201L 5532650L 8939375L
+;->  14443788L 23337539L 37707610L 60926041L 98441202L 159056294L)
+
+
+-------------------------
+Primi nella forma k^4 + 1
+-------------------------
+
+Sequenza OEIS A037896:
+Primes of the form k^4 + 1.
+  2, 17, 257, 1297, 65537, 160001, 331777, 614657, 1336337, 4477457,
+  5308417, 8503057, 9834497, 29986577, 40960001, 45212177, 59969537,
+  65610001, 126247697, 193877777, 303595777, 384160001, 406586897,
+  562448657, 655360001, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (pk41 limite)
+  (local (out totale k)
+    (setq out '())
+    (setq totale 0)
+    (setq k 0L)
+    (until (= totale limite)
+      (setq num (+ 1L (* k k k k)))
+      (when (prime? num)
+        (push num out -1)
+        (++ totale))
+      (++ k))
+    out))
+
+Proviamo:
+
+(pk41 25)
+;-> (2L 17L 257L 1297L 65537L 160001L 331777L 614657L 1336337L 4477457L
+;->  5308417L 8503057L 9834497L 29986577L 40960001L 45212177L 59969537L
+;->  65610001L 126247697L 193877777L 303595777L 384160001L 406586897L
+;->  562448657L 655360001L)
+
+Sequenza OEIS A000068:
+Numbers k such that k^4 + 1 is prime.
+  1, 2, 4, 6, 16, 20, 24, 28, 34, 46, 48, 54, 56, 74, 80, 82, 88, 90, 106,
+  118, 132, 140, 142, 154, 160, 164, 174, 180, 194, 198, 204, 210, 220, 228,
+  238, 242, 248, 254, 266, 272, 276, 278, 288, 296, 312, 320, 328, 334, 340,
+  352, 364, 374, 414, 430, 436, 442, 466, ...
+
+
+(define (k41 limite)
+  (local (out totale k)
+    (setq out '())
+    (setq totale 0)
+    (setq k 0L)
+    (until (= totale limite)
+      (setq num (+ 1L (* k k k k)))
+      (when (prime? num)
+        (push k out -1)
+        (++ totale))
+      (++ k))
+    out))
+
+Proviamo:
+
+(k41 57)
+;-> (1L 2L 4L 6L 16L 20L 24L 28L 34L 46L 48L 54L 56L 74L 80L 82L 88L 90L 106L
+;->  118L 132L 140L 142L 154L 160L 164L 174L 180L 194L 198L 204L 210L 220L 228L
+;->  238L 242L 248L 254L 266L 272L 276L 278L 288L 296L 312L 320L 328L 334L 340L
+;->  352L 364L 374L 414L 430L 436L 442L 466L)
+
+Sequenza OEIS A000059:
+Numbers k such that (2k)^4 + 1 is prime.
+  1, 2, 3, 8, 10, 12, 14, 17, 23, 24, 27, 28, 37, 40, 41, 44, 45, 53, 59,
+  66, 70, 71, 77, 80, 82, 87, 90, 97, 99, 102, 105, 110, 114, 119, 121, 124,
+  127, 133, 136, 138, 139, 144, 148, 156, 160, 164, 167, 170, 176, 182, 187,
+  207, 215, 218, 221, 233, 236, 238, 244, 246, ...
+
+(define (k241 limite)
+  (local (out totale k k2)
+    (setq out '())
+    (setq totale 0)
+    (setq k 0L)
+    (until (= totale limite)
+      (setq k2 (* k 2L))
+      (setq num (+ 1L (* k2 k2 k2 k2)))
+      (when (prime? num)
+        (push k out -1)
+        (++ totale))
+      (++ k))
+    out))
+
+Proviamo:
+
+(k241 60)
+;-> (1L 2L 3L 8L 10L 12L 14L 17L 23L 24L 27L 28L 37L 40L 41L 44L 45L 53L 59L
+;->  66L 70L 71L 77L 80L 82L 87L 90L 97L 99L 102L 105L 110L 114L 119L 121L 124L
+;->  127L 133L 136L 138L 139L 144L 148L 156L 160L 164L 167L 170L 176L 182L 187L
+;->  207L 215L 218L 221L 233L 236L 238L 244L 246L)
+
+
+---------------
+Sequenza Beatty
+---------------
+
+La sequenza Beatty è una sequenza di interi derivati dalla funzione floor dei multipli di un numero irrazionale.
+Viene definita nel modo seguente:
+
+  a(n) = floor(n/(e - 2))
+ 
+dove "e" è il numero di Eulero 2.7182818284590451...
+
+Sequenza OEIS A000062:
+A Beatty sequence: a(n) = floor(n/(e-2)).
+  1, 2, 4, 5, 6, 8, 9, 11, 12, 13, 15, 16, 18, 19, 20, 22, 23, 25, 26, 27,
+  29, 30, 32, 33, 34, 36, 37, 38, 40, 41, 43, 44, 45, 47, 48, 50, 51, 52,
+  54, 55, 57, 58, 59, 61, 62, 64, 65, 66, 68, 69, 71, 72, 73, 75, 76, 77,
+  79, 80, 82, 83, 84, 86, 87, 89, 90, 91, 93, 94, 96, 97, 98, ...
+
+(define (beatty limite)
+  (let (costante (div 1 (sub (exp 1) 2)))
+    (map (fn (x) (floor (mul x costante))) (sequence 1 limite))))
+
+Proviamo:
+
+(beatty 71)
+;-> (1 2 4 5 6 8 9 11 12 13 15 16 18 19 20 22 23 25 26 27
+;->  29 30 32 33 34 36 37 38 40 41 43 44 45 47 48 50 51 52
+;->  54 55 57 58 59 61 62 64 65 66 68 69 71 72 73 75 76 77
+;->  79 80 82 83 84 86 87 89 90 91 93 94 96 97 98)
+
+
+--------------
+Numeri di Pell
+--------------
+
+I numeri di Pell, chiamati anche numeri lambda, sono una sequenza di interi definita nel modo seguente:
+
+Sequenza OEIS A000129:
+Pell numbers: a(0) = 0, a(1) = 1, for n > 1, a(n) = 2*a(n-1) + a(n-2).
+  0, 1, 2, 5, 12, 29, 70, 169, 408, 985, 2378, 5741, 13860, 33461, 80782,
+  195025, 470832, 1136689, 2744210, 6625109, 15994428, 38613965, 93222358,
+  225058681, 543339720, 1311738121, 3166815962, 7645370045, 18457556052,
+  44560482149, 107578520350, 259717522849, ...
+
+(define (pell limite)
+  (let (arr (array limite '(0)))
+    (setf (arr 0) 0)
+    (setf (arr 1) 1)
+    (for (i 2 (- limite 1))
+      (setf (arr i) (+ (* 2 (arr (- i 1))) (arr (- i 2)))))
+    arr))
+
+Proviamo:
+
+(pell 32)
+;-> (0 1 2 5 12 29 70 169 408 985 2378 5741 13860 33461 80782
+;->  195025 470832 1136689 2744210 6625109 15994428 38613965 93222358
+;->  225058681 543339720 1311738121 3166815962 7645370045 18457556052
+;->  44560482149 107578520350 259717522849)
+
+
+------------------------------------------
+Number of Boolean functions of n variables
+------------------------------------------
+
+"Number of Boolean functions of n variables" si riferisce al conteggio totale delle funzioni che possono essere definite su n variabili booleane.
+
+Spiegazione:
+
+1. Variabili booleane: Ogni variabile può assumere due valori: 0 (falso) o 1 (vero).
+
+2. Definizione di una funzione booleana: Una funzione booleana f su n variabili mappa ogni possibile combinazione di n variabili booleane a un risultato booleano (0 o 1).
+In simboli:
+
+   f: [0, 1]^n to [0, 1]
+
+3. Numero totale di combinazioni: Se abbiamo n variabili, il numero totale di combinazioni dei valori delle variabili è 2^n (perché ogni variabile ha due stati possibili).
+
+4. Possibili funzioni: Per ciascuna delle 2^n combinazioni, il risultato della funzione può essere scelto arbitrariamente come 0 o 1. Questo porta a 2^(2^n) funzioni booleane totali, perché ogni combinazione può essere mappata a due valori (0 o 1).
+
+Esempi:
+Per n = 1: Le variabili sono x, con due combinazioni (0) e (1). Puoi definire 2^(2^1) = 4 funzioni:
+  1. f(x) = 0
+  2. f(x) = 1
+  3. f(x) = x (identità)
+  4. f(x) = not(x) (negazione)
+
+Per n = 2: Le variabili sono x e y, con quattro combinazioni: (0,0), (0,1), (1,0), (1,1). Il numero totale di funzioni è 2^(2^2) = 16.
+
+Questo ragionamento non considera le simmetrie tra le variabili.
+La formula seguente per il numero di funzioni booleane non isomorfe (o equivalenti) di n variabili tiene conto delle simmetrie tra le variabili (In altre parole, due funzioni sono considerate equivalenti se si possono ottenere una dall'altra semplicemente riordinando o rinominando le variabili):
+
+               a                  b                c
+            -------    ----------------------  -------
+  seq(n) = (2^(2^n) + (2^n-1) * 2^(2^(n-1)+1))/2^(n+1).
+
+Analisi dei termini:
+
+Termine a: 2^(2^n)
+Questo è il numero totale di funzioni booleane su n variabili, senza considerare l'isomorfismo.
+
+Termine b: (2^n - 1) * 2^(2^(n-1) + 1):
+Questo termine aggiustativo considera il numero di funzioni che non sono uniche a causa delle simmetrie. Le simmetrie derivano dal fatto che permutazioni delle variabili non cambiano alcune funzioni.
+
+Termine c: Divisione per 2^(n+1)
+Normalizza il risultato dividendo per il numero di permutazioni delle variabili e altre trasformazioni che preservano l'isomorfismo.
+
+Esempio per n = 2:
+Passo 1:
+Calcola 2^(2^2) = 2^4 = 16
+Questo è il numero totale di funzioni booleane su due variabili.
+
+Passo 2:
+Calcola (2^2 - 1) * 2^(2^(2-1) + 1) = 24
+
+Passo 3:
+Somma e dividi per 2^(n+1) = 8:
+a(2) = (16 + 24)/8 = 40/8 = 5
+
+Per n = 2, il numero di funzioni booleane non isomorfe è 5, che corrisponde alle seguenti classi di funzioni:
+1. Costante 0 (sempre falso).
+2. Costante 1 (sempre vero).
+3. Identità di una variabile (x o y).
+4. Negazione di una variabile (not(x) o not(y)).
+5. XOR (x xor y) o equivalenti.
+
+Sequenza OEIS A000133:
+Number of Boolean functions of n variables.
+  2, 5, 30, 2288, 67172352, 144115192303714304,
+  1329227995784915891206435945914040320,
+  226156424291633194186662080095093570364871077725232774230036394136943198208,
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (seq n)
+  (setq a (** 2 (** 2 n)))
+  (setq b (* (- (** 2 n) 1) (** 2 (+ (** 2 (- n 1)) 1))))
+  (setq c (** 2 (+ n 1)))
+  (/ (+ a b) c))
+
+Proviamo:
+
+(seq 2)
+;-> 5L
+
+(map seq (sequence 1 8))
+;-> (2L 5L 30L 2288L 67172352L 144115192303714304L
+;->  1329227995784915891206435945914040320L
+;->  22615642429163319418666208009509357036487107
+;->  7725232774230036394136943198208L)
 
 ============================================================================
 
