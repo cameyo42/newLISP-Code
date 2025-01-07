@@ -2775,7 +2775,14 @@ NOTE LIBERE 27
   Sequenza Beatty
   Numeri di Pell
   Number of Boolean functions of n variables
+  Paradosso logico autoreferenziale
+  Numeri di Franel
+  Somma del quadrato delle cifre
+  Parte dispari di un numero N
 
+NOTE LIBERE 28
+==============
+  Assegnazione di un valore ad una serie di simboli
 
 PROBLEMI SUI DADI
 =================
@@ -2822,7 +2829,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (307 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (310 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

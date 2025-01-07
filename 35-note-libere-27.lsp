@@ -6369,6 +6369,7 @@ a = 1, b = 6
 
 Sequenza OEIS A000077:
 Number of positive integers <= 2^n of form x^2 + 6 y^2.
+With: a(0)=1, a(1)=1, a(2)=2, a(3)=4
   1, 1, 2, 4, 8, 13, 24, 42, 76, 140, 257, 483, 907, 1717, 3272, 6261,
   12027, 23172, 44769, 86708, 168245, 327073, 636849, 1241720, 2424290,
   4738450, 9271396, 18157630, 35591729, 69820804, 137069245, 269270791,
@@ -6376,6 +6377,20 @@ Number of positive integers <= 2^n of form x^2 + 6 y^2.
 
 (map (fn(x) (seq x 1 6)) (sequence 4 15))
 ;-> (8 13 24 42 76 140 257 483 907 1717 3272 6261)
+
+a = 1, b = 3
+------------
+
+Sequenza OEIS A000205:
+Number of positive integers <= 2^n of form x^2 + 3 y^2.
+With: a(0)=1, a(1)=1, a(2)=3, a(3)=4
+  1, 1, 3, 4, 8, 14, 25, 45, 82, 151, 282, 531, 1003, 1907, 3645, 6993,
+  13456, 25978, 50248, 97446, 189291, 368338, 717804, 1400699, 2736534,
+  5352182, 10478044, 20531668, 40264582, 79022464, 155196838, 304997408,
+  599752463, 1180027022, 2322950591, 4575114295, ...
+
+(map (fn(x) (seq x 1 3)) (sequence 4 15))
+;-> (8 14 25 45 82 151 282 531 1003 1907 3645 6993)
 
 
 -----------------------------------------------
@@ -6610,6 +6625,10 @@ Numeri di Pell
 
 I numeri di Pell, chiamati anche numeri lambda, sono una sequenza di interi definita nel modo seguente:
 
+  a(0) = 0
+  a(1) = 1
+  a(n) = 2*a(n-1) + a(n-2), per n > 1.
+
 Sequenza OEIS A000129:
 Pell numbers: a(0) = 0, a(1) = 1, for n > 1, a(n) = 2*a(n-1) + a(n-2).
   0, 1, 2, 5, 12, 29, 70, 169, 408, 985, 2378, 5741, 13860, 33461, 80782,
@@ -6647,7 +6666,7 @@ Spiegazione:
 2. Definizione di una funzione booleana: Una funzione booleana f su n variabili mappa ogni possibile combinazione di n variabili booleane a un risultato booleano (0 o 1).
 In simboli:
 
-   f: [0, 1]^n to [0, 1]
+   f:[0, 1]^n to [0, 1]
 
 3. Numero totale di combinazioni: Se abbiamo n variabili, il numero totale di combinazioni dei valori delle variabili è 2^n (perché ogni variabile ha due stati possibili).
 
@@ -6728,6 +6747,199 @@ Proviamo:
 ;->  1329227995784915891206435945914040320L
 ;->  22615642429163319418666208009509357036487107
 ;->  7725232774230036394136943198208L)
+
+
+---------------------------------
+Paradosso logico autoreferenziale
+---------------------------------
+
+Un paradosso logico autoreferenziale è una domanda o più in generale un'affermazione che fa riferimento a se
+stessa in modo tale da generare una contraddizione chiamata appunto un paradosso logico autoreferenziale.
+
+Uno dei paradossi più famosi è l;affermazione: "Questa frase è falsa".
+
+Vediamo un altro esempio di paradosso logico autoreferenziale.
+
+Supponiamo di avere una domanda scelta multipla (quindi qui al posto degli underscore "_"
+c'è una qualsiasi domanda) con quattro risposte:
+
+Domanda a scelta multipla: _____________________________
+Risposte:
+A) ________
+B) ________
+C) ________
+D) ________
+
+Possiamo avere i seguenti casi:
+
+1) Una sola risposta è corretta
+2) Più di una risposta corretta (anche tutte)
+3) Nessuna risposta è corretta
+
+Adesso poniamo che la "domanda a scelta multipla" (con le relative risposte) sia la seguente:
+
+Se rispondiamo a caso a questa domanda, con quale probabilità la risposta sarà corretta?
+A) 25%
+B) 50%
+C) 25%
+D) 0%
+
+Immaginiamo di scegliere una risposta a caso (ad esempio scegliendo una pallina da un'urna che ne contiene quattro)
+ed analizziamo una per una le varie risposte:
+
+Poichè ci sono quattro opzioni e noi scegliamo a caso abbiamo una possibilità su quattro di indovinare, la risposta spontanea è il 25%. Comunque il 25% compare in due risposte (A e C), quindi la risposta è il 50%.
+
+Ma se la risposta è 50%, non è più vero che abbiamo una possibilità su quattro di indovinare. Quindi neanche il 50% è la risposta corretta.
+
+Adesso rimane solo una opzione, la risposta potrebbe essere 0%.
+Ma se la risposta è 0% allora vuol dire che è impossibile rispondere correttamente, invece se scegliamo risposta D vuol dire che abbiamo risposto correttamente e quindi la risposta non può essere 0%.
+
+Quindi sembra che tutte le risposte siano sbagliate, ma se tutte le risposte fossero sbagliate, ad esempio se la risposta corretta fosse un'altra (per esempio 33%), allora la probabilità di rispondere correttamente sarebbe dello 0% perché se
+la risposta giusta non esiste, allora questo vale 0% e quindi anche l'ultima riposta è sbagliata.
+
+Alla fine del ragionamento risulta:
+1) non è vero che c'è una risposta giusta
+2) non è vero che ce n'è più di una
+3) non è  vero che sono tutte sbagliate quello che avete visto è
+
+Questo è un paradosso logico autoreferenziale.
+
+Nota: la risposta corretta non è una qualunque delle quattro proposte, ma è intrinsecamente legata alla nostra scelta.
+
+
+----------------
+Numeri di Franel
+----------------
+
+I numeri Franel hanno la seguente definizione:
+
+  F(a) = Sum[k=0..n] binomial(n,k)^3.
+
+Sequenza OEIS A000172:
+The Franel number a(n) = Sum[k=0..n] binomial(n,k)^3.
+  1, 2, 10, 56, 346, 2252, 15184, 104960, 739162, 5280932, 38165260,
+  278415920, 2046924400, 15148345760, 112738423360, 843126957056,
+  6332299624282, 47737325577620, 361077477684436, 2739270870994736,
+  20836827035351596, 158883473753259752, 1214171997616258240, ...
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (binom num k)
+"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+(define (franel n)
+  (let (somma 0)
+    (for (k 0 n) (++ somma (** (binom n k) 3)))
+    somma))
+
+(map franel (sequence 0 22))
+;-> (1 2 10 56 346 2252 15184 104960 739162 5280932 38165260
+;->  278415920 2046924400 15148345760 112738423360 843126957056
+;->  6332299624282 47737325577620 361077477684436 2739270870994736
+;->  20836827035351596 158883473753259752 1214171997616258240)
+
+
+------------------------------
+Somma del quadrato delle cifre
+------------------------------
+
+Dato un numero intero N con x cifre, la somma del quadrato delle cifre vale:
+
+  SQC = x(1)^2 + x(2)^2 + ... + x(n)^2
+
+Sequenza OEIS A000216:
+Take sum of squares of digits of previous term, starting with 2.
+  2, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4,
+  16, 37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16,
+  37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37,
+  58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37, ...
+
+(define (sqc num)
+  (let (out '())
+    (while (!= num 0)
+      (push (* (% num 10) (% num 10)) out)
+      (setq num (/ num 10)))
+    (apply + out)))
+
+(sqc 2)
+;-> 4
+(sqc 123)
+;-> 14
+
+(define (seq limite)
+  (let ( (val 2) (out (list 2)) )
+    (for (i 2 limite)
+      (setq val (sqc val))
+      (push val out -1))
+    out))
+
+Proviamo:
+
+(seq 76)
+;-> (2 4 16 37 58 89 145 42 20 4 16 37 58 89 145 42 20 4
+;->  16 37 58 89 145 42 20 4 16 37 58 89 145 42 20 4 16
+;->  37 58 89 145 42 20 4 16 37 58 89 145 42 20 4 16 37
+;->  58 89 145 42 20 4 16 37 58 89 145 42 20 4 16 37 58
+;->  89 145 42 20 4 16 37)
+
+La sequenza è periodica con perido: 4 16 37 58 89 145 42 20.
+
+
+----------------------------
+Parte dispari di un numero N
+----------------------------
+
+La parte dispari di un numero si ottiene eliminando tutti i fattori 2 dalla scomposizione in fattori primi di N.
+
+Sequenza OEIS A000265:
+Remove all factors of 2 from n, or largest odd divisor of n, or odd part of n.
+With a(1) = 1, a(2) = 1, a(3)=3
+  1, 1, 3, 1, 5, 3, 7, 1, 9, 5, 11, 3, 13, 7, 15, 1, 17, 9, 19, 5, 21, 11,
+  23, 3, 25, 13, 27, 7, 29, 15, 31, 1, 33, 17, 35, 9, 37, 19, 39, 5, 41, 21,
+  43, 11, 45, 23, 47, 3, 49, 25, 51, 13, 53, 27, 55, 7, 57, 29, 59, 15, 61,
+  31, 63, 1, 65, 33, 67, 17, 69, 35, 71, 9, 73, 37, 75, 19, 77, ...
+
+(define (dispari num)
+  (apply * (clean (fn(x) (= x 2)) (factor num))))
+
+(map dispari (sequence 2 77))
+;-> (1 3 1 5 3 7 1 9 5 11 3 13 7 15 1 17 9 19 5 21 11 23 3 25 13 27 7 29
+;->  15 31 1 33 17 35 9 37 19 39 5 41 21 43 11 45 23 47 3 49 25 51 13 53
+;->  27 55 7 57 29 59 15 61 31 63 1 65 33 67 17 69 35 71 9 73 37 75 19 77)
+
+La sequenza può essere definita anche nel modo seguente:
+
+  a(1) = 1
+  a(n) = n, se n è dispari (n > 1)
+  a(n) = a(n/2), se n è pari (n > 1)
+
+(define (seq-dispari limite)
+  (let (arr (array (+ limite 1) '(0)))
+    (setf (arr 1) 1)
+    (for (i 2 limite)
+      (if (even? i)
+          (setf (arr i) (arr (/ i 2)))
+          (setf (arr i) i)))
+    (slice arr 1)))
+
+(seq-dispari 77)
+;-> (1 1 3 1 5 3 7 1 9 5 11 3 13 7 15 1 17 9 19 5 21 11 23 3 25 13 27 7 29
+;->  15 31 1 33 17 35 9 37 19 39 5 41 21 43 11 45 23 47 3 49 25 51 13 53
+;-> 27 55 7 57 29 59 15 61 31 63 1 65 33 67 17 69 35 71 9 73 37 75 19 77)
 
 ============================================================================
 
