@@ -7,6 +7,20 @@
   To build up a library is to create a life.
   It’s never just a random collection of books.
 
+---------
+Buon 2025
+---------
+
+(string "Buon " (apply * (map char '("-" "-"))))
+;-> "Buon 2025"
+
+Come funziona?
+(char "-")
+;-> 45
+(* 45 45)
+;-> 2025 ; 2025 è un numero quadrato
+
+
 -------------------------------------------------
 Assegnazione di un valore ad una serie di simboli
 -------------------------------------------------
@@ -40,7 +54,321 @@ Come si può notare, la macro assegna il valore anche a simboli non ancora defin
 (set= '(0 1) v1 v2)
 ;-> ('(0 1) '(0 1))
 (println v1 { } v2)
-'(0 1) '(0 1)
+;-> '(0 1) '(0 1)
+
+
+------------------------------------------
+Numeri tetraedici (piramidali triangolari)
+------------------------------------------
+
+Un numero tetraedrico, o numero piramidale triangolare, è un numero figurato che rappresenta una piramide con una base triangolare (un tetraedro).
+L'n-esimo numero tetraedrico è la somma dei primi n numeri triangolari.
+
+La formula per il calcolo dei numeri tetraedici è la seguente:
+
+  T(n) = binom(n+2, 3) = n*(n + 1)*(n + 2)/6
+
+T(n) è il numero di palline in una piramide triangolare in cui ogni spigolo contiene n palline.
+
+Sequenza OEIS A000292:
+Tetrahedral (or triangular pyramidal) numbers: a(n) = C(n+2,3) = n*(n+1)*(n+2)/6.
+  0, 1, 4, 10, 20, 35, 56, 84, 120, 165, 220, 286, 364, 455, 560, 680, 816,
+  969, 1140, 1330, 1540, 1771, 2024, 2300, 2600, 2925, 3276, 3654, 4060,
+  4495, 4960, 5456, 5984, 6545, 7140, 7770, 8436, 9139, 9880, 10660, 11480,
+  12341, 13244, 14190, 15180, ...
+
+(define (tetra n)
+  (/ (* n (+ n 1) (+ n 2)) 6))
+
+(map tetra (sequence 0 28))
+(0 1 4 10 20 35 56 84 120 165 220 286 364 455 560 680 816
+ 969 1140 1330 1540 1771 2024 2300 2600 2925 3276 3654 4060)
+
+
+--------------------------
+Numeri piramidali quadrati
+--------------------------
+
+Un numero piramidale quadrato è un numero figurato che rappresenta una piramide a base quadrata.
+L'n-esimo numero di questo tipo è la somma dei quadrati dei primi n numeri naturali.
+In formule:
+
+                          n(n + 1)(2n + 1)
+ a(n) = Sum[k=1,n] k^2 = ------------------
+                                 6
+Sequenza OEIS A000330:
+Square pyramidal numbers: a(n) = 0^2 + 1^2 + 2^2 + ... + n^2 = n*(n+1)*(2*n+1)/6.
+  0, 1, 5, 14, 30, 55, 91, 140, 204, 285, 385, 506, 650, 819, 1015, 1240,
+  1496, 1785, 2109, 2470, 2870, 3311, 3795, 4324, 4900, 5525, 6201, 6930,
+  7714, 8555, 9455, 10416, 11440, 12529, 13685, 14910, 16206, 17575, 19019,
+  20540, 22140, 23821, 25585, 27434, 29370, ...
+
+(define (a n) (/ (* n (+ n 1) (+ (* 2 n) 1)) 6))
+
+(map a (sequence 0 38))
+;-> (0 1 5 14 30 55 91 140 204 285 385 506 650 819 1015 1240
+;->  1496 1785 2109 2470 2870 3311 3795 4324 4900 5525 6201 6930
+;->  7714 8555 9455 10416 11440 12529 13685 14910 16206 17575 19019)
+
+
+----------------
+Numeri dominanti
+----------------
+
+La sequenza dei numeri "dominanti" parte da 1 ed ogni numero successivo della sequenza è "i" volte più grande della somma dei numeri da 1 al numero precedente (dove "i" è l'indice del numero corrente).
+Dal punto di vista matematico la sequenza è definita nel modo seguente:
+
+  a(1) = 1,
+  a(n) = n*Sum[i=1..(n - 1)]a(i), per n > 1
+
+Sequenza OEIS A074143:
+a(1) = 1, a(n) = n * Sum_{k=1..n-1} a(k).
+  1, 2, 9, 48, 300, 2160, 17640, 161280, 1632960, 18144000, 219542400,
+  2874009600, 40475635200, 610248038400, 9807557760000, 167382319104000,
+  3023343138816000, 57621363351552000, 1155628453883904000,
+  24329020081766400000, 536454892802949120000, ...
+
+(define (seq limite)
+  (let ( (arr (array (+ limite 1) '(0L))) (somma 1L) )
+    (setf (arr 1) 1L)
+    (for (k 2 limite)
+      (setf (arr k) (* somma k))
+      (setq somma (+ somma (arr k)))
+    )
+    (slice arr 1)))
+
+Proviamo:
+
+(seq 21)
+;-> (1L 2L 9L 48L 300L 2160L 17640L 161280L 1632960L 18144000L 219542400L
+;->  2874009600L 40475635200L 610248038400L 9807557760000L 167382319104000L
+;->  3023343138816000L 57621363351552000L 1155628453883904000L
+;->  24329020081766400000L 536454892802949120000L)
+
+
+---------
+x^6 = 2^6
+---------
+
+Data l'espressione x^6 = 2^6, calcolare i valori di x che rendono valida l'uguaglianza.
+
+  x^6 - 2^6 = 0
+  (x^3)^2 - (2^3)^2 = 0
+  
+  a^2 - b^2 = (a + b)(a - b)
+  a = x^3
+  b = 2^3
+  
+  (x^3 + 2^3)(x^3 - 2^3) = 0
+  Caso 1: (x^3 + 2^3) = 0
+  Caso 2: (x^3 - 2^3) = 0
+  
+  Caso 1: (x^3 + 2^3) = 0
+  (a^3 + b^3) = (a + b)(a^2 - ab + b^2)
+  (x + 2)(x^2 - 2x + 2^2) = 0
+  Caso 1a: (x + 2) = 0  ==> x = -2
+  Caso 1b: (x^2 - 2x + 2^2) = 0
+  x(1,2) = (- b +- sqrt(b^2 - 4ac))/(2a)
+  x(1,2) = 1 +- sqrt(3)i
+  
+  Caso 2: (x^3 - 2^3) = 0
+  (a^3 - b^3) = (a - b)(a^2 + ab + b^2)
+  (x - 2)(x^2 + 2x + 2^2) = 0
+  Caso 2a: (x - 2) = 0  ==> x = 2
+  Caso 2b: (x^2 + 2x + 2^2) = 0
+  x(1,2) = (- b +- sqrt(b^2 - 4ac))/(2a)
+  x(1,2) = - 1 +- sqrt(3)i
+
+  Soluzioni: -2, 2, - 1 + sqrt(3)i, - 1 - sqrt(3)i, 1 + sqrt(3)i, 1 - sqrt(3)i
+
+
+------------------------------------------------
+Conteggio di bit nelle sequenze di numeri interi
+------------------------------------------------
+
+Dati due numeri interi positivi 'a' e 'b' (con b >= a), calcolare il numero totale di 0 e 1 nei numeri binari che vanno da 'a' a 'b'.
+
+(define (pop-count1 num)
+"Calculate the number of 1 in binary value of an integer number"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter)
+    )
+    counter))
+
+(define (pop-count0 num)
+"Calculate the number of 0 in binary value of an integer number"
+  (- (length (bits num)) (pop-count1 num)))
+
+Funzione che conta i bit 0 e 1 di un intervallo di numeri interi positivi:
+
+(define (bit-count a b)
+  (let ( (tot0 0) (tot1 0) )
+    (for (num a b)
+      (++ tot0 (pop-count0 num))
+      (++ tot1 (pop-count1 num)))
+    (list tot0 tot1)))
+
+(bit-count 0 10)
+;-> (13 17)
+(time (println (bit-count 0 1e6)))
+;-> (9066447 9884999)
+;-> 2659.116
+
+Se poniamo a = 1(binario) e b = 111..1(n+1 bits)(binario) otteniamo la seguente sequenza OEIS:
+
+Sequenza OEIS A000337:
+a(n) = (n-1)*2^n + 1.
+a(n) gives number of 0's in binary numbers 1 to 111..1 (n+1 bits)
+  0, 1, 5, 17, 49, 129, 321, 769, 1793, 4097, 9217, 20481, 45057, 98305,
+  212993, 458753, 983041, 2097153, 4456449, 9437185, 19922945, 41943041,
+  88080385, 184549377, 385875969, 805306369, 1677721601, 3489660929,
+  7247757313, 15032385537, 31138512897, 64424509441, ...
+
+Dove a(n) è il numero di 0 nei numeri binari da 1 a 111..1 (n+1 bits)
+
+(for (i 1 8)
+  (setq b (dup "1" i))
+  (setq num0 ((bit-count 1 (int b 0 2)) 0))
+  (println "n = " (- i 1) " [1," b  "("(int b 0 2)")]: " num0))
+;-> n = 0 [1,1(1)]: 0
+;-> n = 1 [1,11(3)]: 1
+;-> n = 2 [1,111(7)]: 5
+;-> n = 3 [1,1111(15)]: 17
+;-> n = 4 [1,11111(31)]: 49
+;-> n = 5 [1,111111(63)]: 129
+;-> n = 6 [1,1111111(127)]: 321
+;-> n = 7 [1,11111111(255)]: 769
+
+Se poniamo a = 0 e b = n otteniamo le seguenti sequenze OEIS:
+
+Sequenza OEIS A000788:
+Total number of 1's in binary expansions of 0, ..., n.
+a(0) = 0, a(2n) = a(n)+a(n-1)+n, a(2n+1) = 2a(n)+n+1
+  0, 1, 2, 4, 5, 7, 9, 12, 13, 15, 17, 20, 22, 25, 28, 32, 33, 35, 37, 40,
+  42, 45, 48, 52, 54, 57, 60, 64, 67, 71, 75, 80, 81, 83, 85, 88, 90, 93,
+  96, 100, 102, 105, 108, 112, 115, 119, 123, 128, 130, 133, 136, 140, 143,
+  147, 151, 156, 159, 163, 167, 172, 176, 181, 186, ...
+
+(define (seq1 limite)
+  (let (out '())
+    (for (i 0 limite) (push ((bit-count 0 i) 1) out -1))))
+
+(seq1 52)
+;-> (0 1 2 4 5 7 9 12 13 15 17 20 22 25 28 32 33 35 37 40
+;->  42 45 48 52 54 57 60 64 67 71 75 80 81 83 85 88 90 93
+;->  96 100 102 105 108 112 115 119 123 128 130 133 136 140 143)
+
+Sequenza OEIS A059015:
+Total number of 0's in binary expansions of 0, ..., n.
+a(n) = b(n)+1, with b(2n) = b(n)+b(n-1)+n, b(2n+1) = 2b(n)+n
+  1, 1, 2, 2, 4, 5, 6, 6, 9, 11, 13, 14, 16, 17, 18, 18, 22, 25, 28, 30, 33,
+  35, 37, 38, 41, 43, 45, 46, 48, 49, 50, 50, 55, 59, 63, 66, 70, 73, 76,
+  78, 82, 85, 88, 90, 93, 95, 97, 98, 102, 105, 108, 110, 113, 115, 117,
+  118, 121, 123, 125, 126, 128, 129, 130, 130, 136, 141, ...
+
+(define (seq0 limite)
+  (let (out '())
+    (for (i 0 limite) (push ((bit-count 0 i) 0) out -1))))
+
+(seq0 54)
+;-> (1 1 2 2 4 5 6 6 9 11 13 14 16 17 18 18 22 25 28 30 33
+;->  35 37 38 41 43 45 46 48 49 50 50 55 59 63 66 70 73 76
+;->  78 82 85 88 90 93 95 97 98 102 105 108 110 113 115 117)
+
+
+-----------------
+Sequenza fannkuck
+-----------------
+
+Questa è una sequenza generata da una semplificazione dell'algoritmo di benchmark "FANNKUCH" definito in "Performing Lisp Analysis of the FANNKUCH Benchmark" di Kenneth R. Anderson e Duane Rettig.
+FANNKUCH è l'abbreviazione del termine tedesco Pfannkuchen, ovvero frittelle, in analogia al gesto di girare le frittelle.
+
+https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html
+
+Algoritmo semplificato per calcolare FANNKUCH(n):
+-------------------------------------------------
+
+a) Prendere una permutazione di (1,...,n), ad esempio: (4 2 1 5 3).
+
+b) Prendere il primo elemento, qui 4, e invertire l'ordine dei primi 4 elementi: (5 1 2 4 3).
+
+c) Ripetere questo finché il primo elemento non è un 1, quindi l'inversione non cambierà più nulla:
+(3 4 2 1 5) (2 4 3 1 5) (4 2 3 1 5) (1 3 2 4 5).
+
+d) Contare il numero di inversioni, qui 5.
+
+e) Fare questo per tutte le n! permutazioni e registrare il numero totale di inversioni.
+
+(define (perm lst)
+"Generates all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i))))
+    out))
+
+(define (reverse-part obj idx len)
+"Reverses part of list or string"
+  (extend (slice obj 0 idx)             ; left part
+          (reverse (slice obj idx len)) ; invert part
+          (slice obj (+ idx len))))     ; right part
+
+Funzione funnkuck:
+
+(define (fannkuck n)
+  (local (permute inversioni)
+    (setq permute (perm (sequence 1 n)))
+    (setq inversioni 0)
+    (dolist (p permute)
+      ;(println p)
+      (until (= (p 0) 1)
+        (setq p (reverse-part p 0 (p 0)))
+        (++ inversioni)
+        ;(print p) (read-line)
+      )
+    )
+    inversioni))
+
+Proviamo:
+
+(fannkuck 3)
+;-> 6
+(fannkuck 4)
+;-> 38
+
+(time (println (map fannkuck (sequence 1 8))))
+;-> (0 1 6 38 265 2115 18508 180260)
+;-> 144.943
+
+(time (println (map fannkuck (sequence 1 9))))
+;-> (0 1 6 38 265 2115 18508 180260 1911505)
+;-> 1478.691
+
+(time (println (map fannkuck (sequence 1 10))))
+;-> (0 1 6 38 265 2115 18508 180260 1911505 22169434)
+;-> 16967.245
+
+(time (println (map fannkuck (sequence 1 11))))
+;-> (0 1 6 38 265 2115 18508 180260 1911505 22169434 277931375)
+;-> 266450.518
 
 ============================================================================
 

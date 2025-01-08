@@ -2782,7 +2782,14 @@ NOTE LIBERE 27
 
 NOTE LIBERE 28
 ==============
+  Buon 2025
   Assegnazione di un valore ad una serie di simboli
+  Numeri tetraedici (piramidali triangolari)
+  Numeri piramidali quadrati
+  Numeri dominanti
+  x^6 = 2^6
+  Conteggio di bit nelle sequenze di numeri interi
+  Sequenza fannkuck
 
 PROBLEMI SUI DADI
 =================
