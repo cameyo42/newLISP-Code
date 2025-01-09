@@ -377,7 +377,7 @@ Qaando dobbiamo verificare se alcune varibili, per esempio a, b e c, hanno tutte
 
 Comunque possiamo anche scrivere una espressione più compatta:
 
-(if (= 1 a b c 1)
+(if (= 1 a b c)
 
 opppure
 
@@ -398,6 +398,7 @@ Che, oltre ad essere più corta, è anche più elegante.
 ;-> nil
 
 Vediamo quale espressione è più veloce.
+(setq a 1) (setq b 1) (setq c 1)
 
 (define (e1 iterazioni)
   (for (i 1 iterazioni) (if (and (= a 1) (= b 1) (= c 1)) nil)))
@@ -406,11 +407,220 @@ Vediamo quale espressione è più veloce.
   (for (i 1 iterazioni) (if (= 1 a b c))))
 
 (time (e1 1e7))
-;-> 734.665
+;-> 980.244
 (time (e2 1e7))
-;-> 402.949
+;-> 490.232
 
 La versione compatta è anche più veloce.
+
+
+---------------------------
+Numeri quadrati persistenti
+---------------------------
+
+Un numero quadrato persistente di tipo 1 è un numero che rimane quadrato se tutte le sue cifre vengono incrementate di 1.
+Nota: 9 + 1 = 0
+
+Un numero quadrato persistente di tipo 2 è un numero che rimane quadrato se tutte le sue cifre vengono decrementate di 1.
+Nota: 0 - 1 = 9
+
+Per esempio (tipo 1):
+numero = 25 (che è il quadrato di 5)
+numero con cifre incrementate di 1 = 36 (che è il quadrato di 6)
+
+Sequenza OEIS A117755:
+Squares which remain squares when each digit is replaced by the next digit.
+  0, 9, 25, 2025, 13225, 1974025, 4862025, 6943225, 60415182025, 207612366025,
+  916408817340025, 9960302475729225, 153668543313582025, 1978088677245614025,
+  13876266042653742025, 20761288044852366025, 47285734107144405625,
+  406066810454367265225, ...
+
+Per esempio (tipo 2):
+numero = 24336 (che è il quadrato di 156)
+numero con cifre decrementate di 1 = 13225 (che è il quadrato di 115)
+Nota: in questo caso numeri del tipo "1..1abc..." diventano "0..0xyz...".
+
+Funzione che incrementa di 1 le cifre di un numero (9 + 1 = 0):
+
+(define (digit+1 num)
+  (if (zero? num) 1
+      ;else
+      (let (lst '() (new-digit 0))
+        ; Crea una lista con le cifre del numero aumentate di 1 (9 + 1 = 0)
+        (while (!= num 0)
+          (setq new-digit (% (+ (% num 10) 1) 10))
+          (push new-digit lst)
+          (setq num (/ num 10)))
+        ; Crea il nuovo numero con la lista delle cifre
+        (dolist (el lst) (setq num (+ el (* num 10))))
+        num)))
+
+Proviamo:
+
+(digit+1 0)
+;-> 1
+(digit+1 9)
+;-> 0
+(digit+1 25)
+;-> 36
+(digit+1 1899)
+;-> 2900
+(digit+1 9999)
+;-> 0
+(digit+1 25L)
+;-> 36L
+
+Funzione che decrementa di 1 le cifre di un numero (0 - 1 = 9):
+
+(define (digit-1 num)
+  (if (zero? num) 9
+      ;else
+      (let (lst '() (new-digit 0))
+        ; Crea una lista con le cifre del numero diminuite di 1 (0 - 1 = 9)
+        (while (!= num 0)
+          (if (zero? (% num 10))
+              (setq new-digit 9)
+              (setq new-digit (- (% num 10) 1)))
+          (push new-digit lst)
+          (setq num (/ num 10)))
+        ; Crea il nuovo numero con la lista delle cifre
+        (dolist (el lst) (setq num (+ el (* num 10))))
+        num)))
+
+Proviamo:
+
+(digit-1 0)
+;-> 9
+(digit-1 1)
+;-> 0
+(digit-1 36)
+;-> 25
+(digit-1 2900)
+;-> 1899
+(digit-1 118336)
+;-> 7225 ; perchè 11 diventa 00
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (isq (int (sqrt num)))
+    (= num (* isq isq))))
+
+; Versione alternativa (big-integer, slower)
+;(define (square? num)
+;"Check if an integer is a perfect square"
+;  (local (a)
+;    (setq a (bigint num))
+;    (while (> (* a a) num)
+;      (setq a (/ (+ a (/ num a)) 2))
+;    )
+;    (= (* a a) num)))
+;
+;(square? 0)
+;-> 0
+
+Funzione che calcola i numeri quadrati persistenti di tipo 1 fino ad un dato limite:
+
+(define (square-plus limite)
+  (let ( (out '()) (sq 0) )
+    (for (i 0 limite)
+      (setq sq (* i i))
+      (setq sq+1 (digit+1 sq))
+      (when (square? sq+1)
+          (push sq out -1)
+          (println (list (sqrt sq) sq) { } (list (sqrt sq+1) sq+1))))
+    out))
+
+Proviamo:
+
+(square-plus 1e4)
+;-> (0 0) (1 1)
+;-> (3 9) (0 0)
+;-> (5 25) (6 36)
+;-> (45 2025) (56 3136)
+;-> (115 13225) (156 24336)
+;-> (1405 1974025) (1444 2085136)
+;-> (2205 4862025) (2444 5973136)
+;-> (2635 6943225) (2656 7054336)
+;-> (0 9 25 2025 13225 1974025 4862025 6943225)
+
+(time (println (square-plus 1e7)))
+;-> (0 0) (1 1)
+;-> (3 9) (0 0)
+;-> (5 25) (6 36) !!!
+;-> (45 2025) (56 3136) !!!
+;-> (115 13225) (156 24336)
+;-> (1405 1974025) (1444 2085136)
+;-> (2205 4862025) (2444 5973136)
+;-> (2635 6943225) (2656 7054336)
+;-> (245795 60415182025) (267444 71526293136)
+;-> (455645 207612366025) (564556 318723477136)
+;-> (0 9 25 2025 13225 1974025 4862025 6943225 60415182025 207612366025)
+;-> 37686.073
+
+(time (println (squad 1e8)))
+;-> (0 0) (1 1)
+;-> (3 9) (0 0)
+;-> (5 25) (6 36)
+;-> (45 2025) (56 3136)
+;-> (115 13225) (156 24336)
+;-> (1405 1974025) (1444 2085136)
+;-> (2205 4862025) (2444 5973136)
+;-> (2635 6943225) (2656 7054336)
+;-> (245795 60415182025) (267444 71526293136)
+;-> (455645 207612366025) (564556 318723477136)
+;-> (30272245 916408817340025) (5245944 27519928451136)
+;-> (99801315 9960302475729225) (8450656 71413586830336)
+;-> (0 9 25 2025 13225 1974025 4862025 6943225 60415182025 207612366025
+;->  916408817340025 9960302475729225)
+;-> 426837.95
+
+Funzione che calcola i numeri quadrati persistenti di tipo 2 fino ad un dato limite:
+
+(define (square-minus limite)
+  (let ( (out '()) (sq 0) (sq-1 0))
+    (for (i 0 limite)
+      (setq sq (* i i))
+      (setq sq-1 (digit-1 sq))
+      (when (square? sq-1)
+          (push sq out -1)
+          (println (list (sqrt sq) sq) { } (list (sqrt sq-1) sq-1))))
+    out))
+
+Proviamo:
+
+(square-minus 1e4)
+;-> (0 0) (3 9)
+;-> (1 1) (0 0)
+;-> (6 36) (5 25)
+;-> (56 3136) (45 2025)
+;-> (156 24336) (115 13225)
+;-> (344 118336) (85 7225)
+;-> (356 126736) (125 15625)
+;-> (1444 2085136) (1405 1974025)
+;-> (2444 5973136) (2205 4862025)
+;-> (2656 7054336) (2635 6943225)
+;-> (0 1 36 3136 24336 118336 126736 2085136 5973136 7054336)
+
+(time (println (square-minus 1e7)))
+;-> (0 0) (3 9)
+;-> (1 1) (0 0)
+;-> (6 36) (5 25)
+;-> (56 3136) (45 2025)
+;-> (156 24336) (115 13225)
+;-> (344 118336) (85 7225)
+;-> (356 126736) (125 15625)
+;-> (1444 2085136) (1405 1974025)
+;-> (2444 5973136) (2205 4862025)
+;-> (2656 7054336) (2635 6943225)
+;-> (10656 113550336) (1565 2449225)
+;-> (267444 71526293136) (245795 60415182025)
+;-> (336944 113531259136) (49195 2420148025)
+;-> (371156 137756776336) (163235 26645665225)
+;-> (564556 318723477136) (455645 207612366025)
+;-> (1192856 1422905436736) (558475 311894325625)
+;-> (0 1 36 3136 24336 118336 126736 2085136 5973136 7054336 113550336
+;->  71526293136 113531259136 137756776336 318723477136 1422905436736)
+;-> 67669.743
 
 ============================================================================
 

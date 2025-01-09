@@ -2791,6 +2791,7 @@ NOTE LIBERE 28
   Conteggio di bit nelle sequenze di numeri interi
   Sequenza fannkuck
   Verificare se N variabili hanno lo stesso valore
+  Numeri quadrati persistenti
 
 PROBLEMI SUI DADI
 =================
