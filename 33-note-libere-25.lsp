@@ -419,6 +419,36 @@ Vediamo i tempi di esecuzione:
 (time (println (rand-sort (randomize (sequence 1 15)))))
 ...fermato dopo 5 minuti...
 
+Vediamo, in media, il numero di "randomizzazioni" necessarie per ordinare una lista lunga N con interi da 1 a N (e il tempo impiegato):
+
+(define (test N iterazioni)
+  (local (totale counter lst)
+    (setq totale 0)
+    (seed (time-of-day) true)
+    (for (i 1 iterazioni)
+      (setq counter 0)
+      ; (randomize lst) genera liste sempre diverse (più lenta)
+      ; (randomize lst true) può generare liste uguali
+      (setq lst (randomize (sequence 1 N) true))
+      (until (sorted? lst) (setq lst (randomize lst true)) (++ counter))
+      (++ totale counter)
+    )
+    (div totale iterazioni))
+
+(for (n 2 10)
+  (setq tempo (time (setq scambi (test n 100))))
+  (println "n = " n " --> scambi = " scambi " (" tempo " msec)")
+)
+;-> n = 2 --> scambi = 1.01 (0 msec)
+;-> n = 3 --> scambi = 5 (0 msec)
+;-> n = 4 --> scambi = 19.95 (0 msec)
+;-> n = 5 --> scambi = 118.31 (0 msec)
+;-> n = 6 --> scambi = 713.49 (31.269 msec)
+;-> n = 7 --> scambi = 5580.77 (203.078 msec)
+;-> n = 8 --> scambi = 44719.39 (1736.607 msec)
+;-> n = 9 --> scambi = 431966.8 (17691.01 msec)
+;-> n = 10 --> scambi = 3253654.3 (140827.016 msec)
+
 Nota: i generatori casuali di tipo PRNG hanno un ciclo, quindi non è garantito che vengano considerate tutte le permutazioni (quindi la funzione "rand-sort" potrebbe non terminare mai).
 
 Proviamo con un metodo simile che scambia due elementi casuali per ogni ciclo:

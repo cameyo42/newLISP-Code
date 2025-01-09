@@ -154,15 +154,15 @@ Data l'espressione x^6 = 2^6, calcolare i valori di x che rendono valida l'uguag
 
   x^6 - 2^6 = 0
   (x^3)^2 - (2^3)^2 = 0
-  
+
   a^2 - b^2 = (a + b)(a - b)
   a = x^3
   b = 2^3
-  
+
   (x^3 + 2^3)(x^3 - 2^3) = 0
   Caso 1: (x^3 + 2^3) = 0
   Caso 2: (x^3 - 2^3) = 0
-  
+
   Caso 1: (x^3 + 2^3) = 0
   (a^3 + b^3) = (a + b)(a^2 - ab + b^2)
   (x + 2)(x^2 - 2x + 2^2) = 0
@@ -170,7 +170,7 @@ Data l'espressione x^6 = 2^6, calcolare i valori di x che rendono valida l'uguag
   Caso 1b: (x^2 - 2x + 2^2) = 0
   x(1,2) = (- b +- sqrt(b^2 - 4ac))/(2a)
   x(1,2) = 1 +- sqrt(3)i
-  
+
   Caso 2: (x^3 - 2^3) = 0
   (a^3 - b^3) = (a - b)(a^2 + ab + b^2)
   (x - 2)(x^2 + 2x + 2^2) = 0
@@ -338,13 +338,9 @@ Funzione funnkuck:
     (setq permute (perm (sequence 1 n)))
     (setq inversioni 0)
     (dolist (p permute)
-      ;(println p)
       (until (= (p 0) 1)
         (setq p (reverse-part p 0 (p 0)))
-        (++ inversioni)
-        ;(print p) (read-line)
-      )
-    )
+        (++ inversioni)))
     inversioni))
 
 Proviamo:
@@ -369,6 +365,52 @@ Proviamo:
 (time (println (map fannkuck (sequence 1 11))))
 ;-> (0 1 6 38 265 2115 18508 180260 1911505 22169434 277931375)
 ;-> 266450.518
+
+
+------------------------------------------------
+Verificare se N variabili hanno lo stesso valore
+------------------------------------------------
+
+Qaando dobbiamo verificare se alcune varibili, per esempio a, b e c, hanno tutte lo stesso valore, per esempio 1, in genere utilizziamo l'operatore "and" e scriviamo:
+
+(if (and (= a 1) (= b 1) (= c 1)))
+
+Comunque possiamo anche scrivere una espressione più compatta:
+
+(if (= 1 a b c 1)
+
+opppure
+
+(if (= a b c 1))
+
+Che, oltre ad essere più corta, è anche più elegante.
+
+(setq a 1) (setq b 1) (setq c 1)
+(if (and (= a 1) (= b 1) (= c 1)))
+;-> true
+(if (= 1 a b c))
+;-> true
+
+(setq a 1) (setq b 2) (setq c 1)
+(if (and (= a 1) (= b 1) (= c 1)))
+;-> nil
+(if (= 1 a b c))
+;-> nil
+
+Vediamo quale espressione è più veloce.
+
+(define (e1 iterazioni)
+  (for (i 1 iterazioni) (if (and (= a 1) (= b 1) (= c 1)) nil)))
+
+(define (e2 iterazioni)
+  (for (i 1 iterazioni) (if (= 1 a b c))))
+
+(time (e1 1e7))
+;-> 734.665
+(time (e2 1e7))
+;-> 402.949
+
+La versione compatta è anche più veloce.
 
 ============================================================================
 

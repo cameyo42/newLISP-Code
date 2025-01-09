@@ -2790,6 +2790,7 @@ NOTE LIBERE 28
   x^6 = 2^6
   Conteggio di bit nelle sequenze di numeri interi
   Sequenza fannkuck
+  Verificare se N variabili hanno lo stesso valore
 
 PROBLEMI SUI DADI
 =================
