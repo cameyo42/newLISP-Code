@@ -3191,6 +3191,27 @@ Creiamo i file "poly-5.ps" e "poly-5.pdf":
 
 Nota: questo algoritmo non trova il percorso minimo tra i punti.
 
+Altra funzione per generare un poligono con i punti ordinati in modo antiorario:
+
+(define (poligono punti)
+  ;; Calcola il centroide
+  (setq centroide 
+        (list (div (apply add (map (fn (p) (p 0)) punti)) (length punti))
+              (div (apply add (map (fn (p) (p 1)) punti)) (length punti))))
+  ; (println centroide)
+  ;; Ordina i punti rispetto all'angolo con il centroide
+  (setq punti-ordinati
+        (sort punti
+              (fn (a b)
+              (< (atan (- (a 1) (centroide 1)) (- (a 0) (centroide 0)))
+                 (atan (- (b 1) (centroide 1)) (- (b 0) (centroide 0)))))))
+  ;; Ritorna i punti ordinati per formare il poligono
+  punti-ordinati)
+
+(setq punti '((4 3) (1 2) (2 8) (3 5)))
+(poligono punti)
+;-> ((1 2) (4 3) (3 5) (2 8))
+
 
 -------------------------------------
 Percorso minimo di una lista di punti

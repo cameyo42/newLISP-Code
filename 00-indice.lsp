@@ -2792,6 +2792,8 @@ NOTE LIBERE 28
   Sequenza fannkuck
   Verificare se N variabili hanno lo stesso valore
   Numeri quadrati persistenti
+  Logging I/O
+  Numeri nella forma x^2 + y^2 + z^2
 
 PROBLEMI SUI DADI
 =================

@@ -2989,6 +2989,8 @@ The script npp-newLISP.ahk exchange the brackets () and [] in the keyboard.
 You can edit the file to disable this (you must comment two lines).
 The script also enable other shortcuts... see the source.
 
+Nota: vedi il file "_npp-newLISP.ahk" nella cartella "data".
+
 
 ============================================================================
  Visual Studio Code e newLISP

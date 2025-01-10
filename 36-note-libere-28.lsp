@@ -622,5 +622,118 @@ Proviamo:
 ;->  71526293136 113531259136 137756776336 318723477136 1422905436736)
 ;-> 67669.743
 
+
+-----------
+Logging I/O
+-----------
+
+In any mode, newLISP can write a log when started with the -l or -L option.
+Depending on the mode newLISP is running, different output is written to the log file.
+Both options always must specify the path of a log-file.
+The path may be a relative path and can be either attached or detached to the -l or -L option.
+If the file does not exist, it is created when the first logging output is written.
+
+newlisp -l ./logfile.txt -c
+
+newlisp -L /usr/home/www/log.txt -http -w /usr/home/www/htpdocs
+
+The following table shows the items logged in different situations:
+
+Logging mode Command-line and net-eval with -c      HTTP server with -http
+------------ ---------------------------------      ----------------------
+newlisp -l   log only input and network connections log only network connections
+newlisp -L   log also newLISP output (w/o prompts)  log also HTTP requests
+
+All logging output is written to the file specified after the -l or -L option.
+
+Nota: se il file di log esiste, le attività di logging vengono registrate alla fine del file.
+
+Vedi il file "_npp-newlisp-log.ahk" nella cartella "data".
+
+
+----------------------------------
+Numeri nella forma x^2 + y^2 + z^2
+----------------------------------
+
+Determinare la lista dei numeri che sono nella forma: x^2 + y^2 + z^2, con x,y,z >= 0.
+
+Sequenza OEIS A000378:
+Sums of three squares: numbers of the form x^2 + y^2 + z^2.
+  0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21,
+  22, 24, 25, 26, 27, 29, 30, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43,
+  44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 61, 62, 64, 65,
+  66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 80, 81, 82, 83, ...
+
+
+Algoritmo brute-force
+---------------------
+Doppio ciclo 'for' per x e y e verifica del valore di z.
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (isq (int (sqrt num)))
+    (= num (* isq isq))))
+
+(define (xyz1? num)
+  (catch
+    (let ( (x 0) (y 0) )
+      (for (x 0 1e7)
+        (if (> (* 3 x x) num) (throw nil))
+        (setq quit-y nil)
+        (for (y x 1e7 1 quit-y)
+          (cond ((> (+ (* x x) (* 2 y y)) num) (setq quit-y true))
+                ((square? (- num (* x x) (* y y))) (throw true))))))))
+
+Proviamo:
+
+(xyz1? 30)
+;-> true
+(xyz1? 31)
+;-> nil
+
+(filter xyz1? (sequence 0 100))
+;-> (0 1 2 3 4 5 6 8 9 10 11 12 13 14 16 17 18 19 20 21
+;->  22 24 25 26 27 29 30 32 33 34 35 36 37 38 40 41 42 43
+;->  44 45 46 48 49 50 51 52 53 54 56 57 58 59 61 62 64 65
+;->  66 67 68 69 70 72 73 74 75 76 77 78 80 81 82 83 84 85
+;->  86 88 89 90 91 93 94 96 97 98 99 100)
+
+
+Algoritmo matematico
+--------------------
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (calc n b)
+  (let (v 0)
+    (while (and (> n 1) (zero? (% n b)))
+      (setq n (/ n b))
+      (++ v))
+    v))
+
+(define (xyz2? n) (!= (% (/ n (** 4 (calc n 4))) 8) 7))
+
+Proviamo:
+
+(xyz2? 30)
+;-> true
+(xyz2? 31)
+;-> nil
+
+(filter xyz2? (sequence 0 100))
+;-> (0 1 2 3 4 5 6 8 9 10 11 12 13 14 16 17 18 19 20 21
+;->  22 24 25 26 27 29 30 32 33 34 35 36 37 38 40 41 42 43
+;->  44 45 46 48 49 50 51 52 53 54 56 57 58 59 61 62 64 65
+;->  66 67 68 69 70 72 73 74 75 76 77 78 80 81 82 83 84 85
+;->  86 88 89 90 91 93 94 96 97 98 99 100)
+
+(= (filter xyz1? (sequence 0 100)) (filter xyz2? (sequence 0 100)))
+;-> true
+
 ============================================================================
 
