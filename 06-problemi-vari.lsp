@@ -2699,14 +2699,14 @@ I numeri poligonali derivano dalle seguenti operazioni:
 1 + 7 + 13 + 19 + 25 + ... genera numeri ottagonali   1, 8, 21, 40, 65 ...
 
 Formule:
-numeri triangolari = (n * (n - 1))/2
-numeri quadrati    = n * n
-numeri pentagonali = (n * (3*n - 1))/2
-numeri esagonali   = n * (2*n - 1)
-numeri eptagonali  = (5*n*n - 3*n)/2
-numeri ottagonali  = (3*n*n - 2*n)
-...
-numeri p-gonali = p*n*(n - 1)/2 - n*(n - 2)
+  numeri triangolari = (n * (n - 1))/2
+  numeri quadrati    = n * n
+  numeri pentagonali = (n * (3*n - 1))/2
+  numeri esagonali   = n * (2*n - 1)
+  numeri eptagonali  = (5*n*n - 3*n)/2
+  numeri ottagonali  = (3*n*n - 2*n)
+  ...
+  numeri p-gonali = p*n*(n - 1)/2 - n*(n - 2)
 
 I numeri triangolari possono essere ottenuti anche in modo ricorsivo:
 
@@ -2751,6 +2751,8 @@ Nota: Ogni numero esagonale è anche un numero triangolare.
 
 (numpoligonale-list 4 10)
 ;-> (1 4 9 16 25 36 49 64 81 100)
+
+Vedi anche "Numeri poligonali (multipli)" su "Note libere 28".
 
 
 --------------

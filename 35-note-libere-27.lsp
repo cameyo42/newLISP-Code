@@ -5957,7 +5957,7 @@ La formula per calcolare la sequenza è la seguente:
 ;->  834L 988L 1160L 1351L 1562L 1794L 2048L 2325L 2626L 2952L 3304L 3683L
 ;->  4090L 4526L)
 
-Vedi anche "Taglio di una torta" su "Note linere 10".
+Vedi anche "Taglio di una torta" su "Note libere 10".
 
 
 ------------------------------------------------------------

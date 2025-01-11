@@ -2794,6 +2794,12 @@ NOTE LIBERE 28
   Numeri quadrati persistenti
   Logging I/O
   Numeri nella forma x^2 + y^2 + z^2
+  Numero minimo rimuovendo K cifre
+  Giorni fortunati
+  Numero di ipercubi 4D in un ipercubo n-dimensionale
+  Intersezione di più liste (set)
+  Numeri poligonali (multipli)
+  Giorni fortunati
 
 PROBLEMI SUI DADI
 =================

@@ -646,7 +646,7 @@ newlisp -L   log also newLISP output (w/o prompts)  log also HTTP requests
 
 All logging output is written to the file specified after the -l or -L option.
 
-Nota: se il file di log esiste, le attività di logging vengono registrate alla fine del file.
+Nota: se il file di log esiste, le nuove attività di logging vengono registrate alla fine del file.
 
 Vedi il file "_npp-newlisp-log.ahk" nella cartella "data".
 
@@ -698,7 +698,6 @@ Proviamo:
 ;->  66 67 68 69 70 72 73 74 75 76 77 78 80 81 82 83 84 85
 ;->  86 88 89 90 91 93 94 96 97 98 99 100)
 
-
 Algoritmo matematico
 --------------------
 
@@ -732,8 +731,510 @@ Proviamo:
 ;->  66 67 68 69 70 72 73 74 75 76 77 78 80 81 82 83 84 85
 ;->  86 88 89 90 91 93 94 96 97 98 99 100)
 
-(= (filter xyz1? (sequence 0 100)) (filter xyz2? (sequence 0 100)))
+Vediamo se le funzioni producono gli stessi risultati:
+
+(= (filter xyz1? (sequence 0 1000)) (filter xyz2? (sequence 0 1000)))
 ;-> true
+
+Vediamo la velocità delle due funzioni:
+
+(time (filter xyz1? (sequence 0 1e4)))
+;-> 937.21
+(time (filter xyz2? (sequence 0 1e4)))
+;-> 15.585
+
+
+--------------------------------
+Numero minimo rimuovendo K cifre
+--------------------------------
+
+Dato un numero intero non negativo N e un intero k, restituire il più piccolo intero possibile dopo aver rimosso k cifre da N.
+Esempi:
+
+Numero = 3611729, k = 3
+Minimo = 1129
+
+Numero = 123456789, k = 5
+Minimo = 1234
+
+Numero = 1000, k = 1
+Minimo = 0
+
+Numero = 10700, k = 1
+Minimo = 700
+
+Numero = 1700, k = 1
+Minimo = 100
+
+Numero = 77, k = 2
+Minimo = 0
+
+Algoritmo greedy
+----------------
+Per avere un numero il più piccolo possibile, deve risultare che i valori posizionali più alti (come migliaia, centinaia , decine, ecc.) abbiano le cifre più piccole possibili.
+Pertanto, durante l'analisi dell numero da sinistra a destra, se incontriamo una cifra più grande di quella successiva, rimuoviamo la cifra più grande (che ha un valore posizionale più alto).
+Questa decisione è detta 'greedy' perché fa la scelta migliore a ogni passaggio, per posizionare le cifre più piccole nei valori posizionali più alti.
+Utilizziamo una pila per gestire i dati.
+Ogni volta che aggiungiamo una nuova cifra alla pila, la confrontiamo con l'elemento in cima alla pila (che rappresenta la cifra precedente nel numero).
+Se la nuova cifra è più piccola, significa che possiamo rendere il numero più piccolo estraendo la cifra più grande dalla pila.
+Ripetiamo questo processo k volte.
+La pila rappresenta le cifre del numero risultante con le cifre più piccole in basso (valori posizionali più alti).
+Dopo aver eseguito k rimozioni, oppure il numero è stato completamente analizzato e abbiamo rimosso le ultime n - k cifre dallo stack (dove n è la lunghezza del numero), ricostruiamo il numero con le cifre contenute nello stack.
+Gli zeri iniziali non influenzano il valore del numero.
+Se vengono rimosse tutte le cifre restituiamo 0 (che è il più piccolo intero non negativo).
+
+(define (minimo num k)
+  (cond ((>= k (length num)) 0)
+        ((zero? k) num)
+        (true
+  (local (out stack)
+    (setq out 0)
+    (setq stack '())
+    ; Converte il numero in stringa
+    (setq num (string num))
+    ; Ciclo sulle cifre del numero...
+    (for (i 0 (- (length num) 1))
+      ; Finché la cifra corrente è più piccola dell'ultima cifra nello stack e
+      ; abbiamo ancora cifre da rimuovere (k > 0), rimuove l'ultima cifra
+      (while (and (> k 0) (!= stack '()) (> (stack -1) (num i)))
+        (pop stack -1)
+        (-- k)
+      )
+      ; Inserisce la cifra corrente nello stack
+      (push (num i) stack -1)
+    )
+    ;(print stack) (read-line)
+    ; Se dopo il ciclo dobbiamo rimuovere altre cifre,
+    ; occorre rimuoverle dalla fine.
+    (while (> k 0)
+      (pop stack -1)
+      (-- k)
+    )
+    ; Converte lo stack (lista) di cifre (stringhe) in numero intero
+    (dolist (el stack) (setq out (+ (int el 0 10) (* out 10))))))))
+
+Proviamo:
+
+(minimo 3611729 3)
+;-> 1129
+(minimo 123456789 5)
+;-> 1234
+(minimo 1000 1)
+;-> 0
+(minimo 10700 1)
+;-> 700
+(minimo 1700 1)
+;-> 100
+(minimo 77 2)
+;-> 0
+
+
+----------------
+Giorni fortunati
+----------------
+
+Un giorno viene chiamato "fortunato" se i numeri della data (anno, mese, giorno) sono composti da cifre tutte diverse.
+Per esempio il 23 aprile 1965 (1965 4 23) è stato un giorno fortunato.
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out))
+
+Funzione che verifica se una data è valida:
+
+(define (verify-date anno mese giorno)
+  (let ((giorni-mese '(0 31 28 31 30 31 30 31 31 30 31 30 31))
+        (bisestile (and (= 0 (mod anno 4)) (or (!= 0 (mod anno 100)) (= 0 (mod anno 400))))))
+    (if bisestile (setf (giorni-mese 2) 29))
+    (not (or (< mese 1) (> mese 12) (< giorno 1) (> giorno (giorni-mese mese))))))
+
+Funzione che verifica se un giorno (data) è fortunato:
+
+(define (lucky-day? anno mese giorno)
+  (let (lst (append (int-list anno) (int-list mese) (int-list giorno)))
+    (= (unique lst) lst)))
+
+Proviamo:
+
+(lucky-day? 1965 4 23)
+;-> true
+(lucky-day? 2025 12 31)
+;-> nil
+
+Funzione che trova i giorni fortunati in un intervallo di anni:
+
+(define (luckys anno1 anno2)
+  (let (out '())
+  (for (anno anno1 anno2)
+    (for (mese 1 12)
+      (for (giorno 1 31)
+        (if (and (lucky-day? anno mese giorno) (verify-date anno mese giorno))
+            (push (list anno mese giorno) out -1)))))
+  out))
+
+Proviamo:
+
+(luckys 1980 1982)
+;-> ((1980 2 3) (1980 2 4) (1980 2 5) (1980 2 6) (1980 2 7) (1980 3 2) 
+;->  (1980 3 4) (1980 3 5) (1980 3 6) (1980 3 7) (1980 3 24) (1980 3 25)
+;->  ...
+;->  (1982 6 30) (1982 7 3) (1982 7 4) (1982 7 5) (1982 7 6) (1982 7 30))
+
+(luckys 1990 2000)
+;-> ()
+
+
+---------------------------------------------------
+Numero di ipercubi 4D in un ipercubo n-dimensionale
+---------------------------------------------------
+
+Quanti ipercubi 4D si trovano in un ipercubo n-dimensionale?
+
+Sequenza OEIS A003472:
+a(n) = 2^(n-4)*C(n,4).
+  1, 10, 60, 280, 1120, 4032, 13440, 42240, 126720, 366080, 1025024, 2795520,
+  7454720, 19496960, 50135040, 127008768, 317521920, 784465920, 1917583360,
+  4642570240, 11142168576, 26528972800, 62704844800, 147220070400, ...
+
+Formula: a(n) = Sum[k=4..n]binom(n k)*binom(k 4)
+
+(define (binom num k)
+"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num)
+            )
+          r))))
+
+(define (a n)
+  (let (sum 0)
+    (for (k 4 n) (setq sum (+ sum (* (binom n k) (binom k 4)))))
+    sum))
+
+(map a (sequence 4 27))
+;-> (1 10 60 280 1120 4032 13440 42240 126720 366080 1025024 2795520
+;->  7454720 19496960 50135040 127008768 317521920 784465920 1917583360
+;->  4642570240 11142168576 26528972800 62704844800 147220070400)
+
+
+-------------------------------
+Intersezione di più liste (set)
+-------------------------------
+
+Per effettuare l'intersezione tra due liste possiamo usare la funzione "intersect".
+
+***********************
+>>> funzione INTERSECT
+***********************
+sintassi: (intersect list-A list-B)
+sintassi: (intersect list-A list-B bool)
+
+Nella prima sintassi, intersect restituisce un elenco contenente una copia di ogni elemento trovato sia in list-A che in list-B.
+
+(intersect '(3 0 1 3 2 3 4 2 1) '(1 4 2 5))
+;-> (2 4 1)
+
+Nella seconda sintassi, intersect restituisce una lista di tutti gli elementi in list-A che sono anche in list-B, senza eliminare i duplicati in list-A. bool è un'espressione che valuta true o qualsiasi altro valore diverso da nil.
+
+(intersect '(3 0 1 3 2 3 4 2 1) '(1 4 2 5) true)
+;-> (1 2 4 2 1)
+
+Vedi anche le funzioni per i set "difference", "unique" e "union".
+In the first syntax, intersect returns a list containing one copy of each element found both in list-A and list-B.
+
+(intersect '(3 0 1 3 2 3 4 2 1) '(1 4 2 5))  
+;-> (2 4 1)
+------------
+
+Se vogliamo effettuare l'intersezione di più liste dobbiamo applicare "intersect" ripetutamente.
+Per esempio, per effettuare l'intersezione di 3 liste possiamo scrivere:
+
+(setq A '(1 2 3))
+(setq B '(1 2))
+(setq C '(2 3 4))
+(intersect (intersect A B) C)
+;-> (2)
+
+Possiamo scrivere una funzione "intersects" che effettua l'intersezione di più liste:
+
+(define (intersects)
+  (let (base (args 0))
+    (for (k 1 (- (length (args)) 1))
+      (setq base (intersect base (args k))))))
+
+Proviamo:
+
+(intersects A B C)
+;-> (2)
+(apply intersects (list A B C))
+;-> (2)
+
+
+----------------------------
+Numeri poligonali (multipli)
+----------------------------
+
+Un numero poligonale è un numero figurato che può essere disposto a raffigurare un poligono regolare.
+Esempi:
+Numero triangolare = 10             Numero quadrato = 16
+            *                               * * * *
+           * *                              * * * *    
+          * * *                             * * * *
+         * * * *                            * * * *
+
+Un numero poligonale multiplo è un numero figurato che può essere disposto a raffigurare più di un poligono regolare.
+Esempio:
+Numero poligonale multiplo = 36 (triangolare e quadrato)
+
+            *               * * * * * *
+           * *              * * * * * *    
+          * * *             * * * * * *
+         * * * *            * * * * * *
+        * * * * *           * * * * * *
+       * * * * * *          * * * * * *
+      * * * * * * *                         
+     * * * * * * * * 
+
+Formule per il calcolo dei numeri poligonali:
+
+  Numeri triangolari = (n * (n - 1))/2
+  Numeri quadrati    = n * n
+  Numeri pentagonali = (n * (3*n - 1))/2
+  Numeri esagonali   = n * (2*n - 1)
+  Numeri eptagonali  = (5*n*n - 3*n)/2
+  Numeri ottagonali  = (3*n*n - 2*n)
+  ...
+
+Formula generale
+----------------
+
+  Numeri p-gonali = p*n*(n - 1)/2 - n*(n - 2)
+  
+  Numeri p-gonali = (1/2)*n*[(p - 2)*n - (p - 4)]
+
+oppure:
+
+                     (p - 2)*n^2 - (p - 4)*n
+  Numeri p-gonali = -------------------------
+                               2
+
+Formula inversa
+---------------
+
+Per un dato valore p-gonale X, è possibile trovare n mediante la formula:
+
+       sqrt(8*(p - 2)*X + (p - 4)^2) + p - 4
+  n = ---------------------------------------
+                     2*(p - 2)
+
+Verifica di un numero X
+-----------------------
+
+Un numero intero X è un numero p-gonale se:
+
+  8*(p - 2)*X + (p - 4)^2 è un quadrato perfetto
+
+Funzione che calcola il valore n-esimo dei numeri poligonali con p lati:
+
+(define (polygonal-number p n) (- (/ (* p n (- n 1)) 2) (* n (- n 2))))
+
+Proviamo con p (numero lati del poligono) che va da 3 a 8:
+
+(for (p 3 8)
+  (println "numeri " p "-gonali:")
+  (println (map (curry polygonal-number p) (sequence 1 20))))
+;-> numeri 3-gonali:
+;-> (1 3 6 10 15 21 28 36 45 55 66 78 91 105 120 136 153 171 190 210)
+;-> numeri 4-gonali:
+;-> (1 4 9 16 25 36 49 64 81 100 121 144 169 196 225 256 289 324 361 400)
+;-> numeri 5-gonali:
+;-> (1 5 12 22 35 51 70 92 117 145 176 210 247 287 330 376 425 477 532 590)
+;-> numeri 6-gonali:
+;-> (1 6 15 28 45 66 91 120 153 190 231 276 325 378 435 496 561 630 703 780)
+;-> numeri 7-gonali:
+;-> (1 7 18 34 55 81 112 148 189 235 286 342 403 469 540 616 697 783 874 970)
+;-> numeri 8-gonali:
+;-> (1 8 21 40 65 96 133 176 225 280 341 408 481 560 645 736 833 936 1045 1160)
+
+Sequenza OEIS A000217:
+Triangular numbers: a(n) = binomial(n+1,2) = n*(n+1)/2 = 0 + 1 + 2 + ... + n.
+  0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153,
+  171, 190, 210, 231, 253, 276, 300, 325, 351, 378, 406, 435, 465, 496,
+  528, 561, 595, 630, 666, 703, 741, 780, 820, 861, 903, 946, 990, 1035,
+  1081, 1128, 1176, 1225, 1275, 1326, 1378, 1431, ...
+
+Sequenza OEIS A000290:
+The squares: a(n) = n^2.
+  0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256, 289,
+  324, 361, 400, 441, 484, 529, 576, 625, 676, 729, 784, 841, 900, 961, 1024,
+  1089, 1156, 1225, 1296, 1369, 1444, 1521, 1600, 1681, 1764, 1849, 1936,
+  2025, 2116, 2209, 2304, 2401, 2500, ...
+
+Sequenza OEIS A000326:
+Pentagonal numbers: a(n) = n*(3*n-1)/2.
+  0, 1, 5, 12, 22, 35, 51, 70, 92, 117, 145, 176, 210, 247, 287, 330, 376,
+  425, 477, 532, 590, 651, 715, 782, 852, 925, 1001, 1080, 1162, 1247, 1335,
+  1426, 1520, 1617, 1717, 1820, 1926, 2035, 2147, 2262, 2380, 2501, 2625,
+  2752, 2882, 3015, 3151, ...
+
+Sequenza OEIS A000384:
+Hexagonal numbers: a(n) = n*(2*n-1).
+  0, 1, 6, 15, 28, 45, 66, 91, 120, 153, 190, 231, 276, 325, 378, 435, 496,
+  561, 630, 703, 780, 861, 946, 1035, 1128, 1225, 1326, 1431, 1540, 1653,
+  1770, 1891, 2016, 2145, 2278, 2415, 2556, 2701, 2850, 3003, 3160, 3321,
+  3486, 3655, 3828, 4005, 4186, 4371, 4560, ...
+
+Sequenza OEIS A000566:
+Heptagonal numbers (or 7-gonal numbers): n*(5*n-3)/2.
+  0, 1, 7, 18, 34, 55, 81, 112, 148, 189, 235, 286, 342, 403, 469, 540, 616,
+  697, 783, 874, 970, 1071, 1177, 1288, 1404, 1525, 1651, 1782, 1918, 2059,
+  2205, 2356, 2512, 2673, 2839, 3010, 3186, 3367, 3553, 3744, 3940, 4141,
+  4347, 4558, 4774, 4995, 5221, 5452, 5688, ...
+
+Sequenza OEIS A000567:
+Octagonal numbers: n*(3*n-2). Also called star numbers.
+  0, 1, 8, 21, 40, 65, 96, 133, 176, 225, 280, 341, 408, 481, 560, 645, 736,
+  833, 936, 1045, 1160, 1281, 1408, 1541, 1680, 1825, 1976, 2133, 2296, 2465,
+  2640, 2821, 3008, 3201, 3400, 3605, 3816, 4033, 4256, 4485, 4720, 4961,
+  5208, 5461, ...
+
+Nota: per i numeri ottagonali 0, 1, 8, 21, 40, 65, ...
+Write 1,2,3,4,... in a hexagonal spiral around 0:
+Then a(n) is the sequence found by reading the line from 0,1,8,21,...
+The spiral:
+
+                 85--84--83--82--81--80
+                 /                     \
+               86  56--55--54--53--52  79
+               /   /                 \   \
+             87  57  33--32--31--30  51  78
+             /   /   /             \   \   \
+           88  58  34  16--15--14  29  50  77
+           /   /   /   /         \   \   \   \
+         89  59  35  17   5---4  13  28  49  76
+         /   /   /   /   /     \   \   \   \   \
+       90  60  36  18   6   0   3  12  27  48  75
+       /   /   /   /   /   /   /   /   /   /   /
+     91  61  37  19   7   1---2  11  26  47  74
+       \   \   \   \   \ .       /   /   /   /
+       92  62  38  20   8---9--10  25  46  73
+         \   \   \   \ .           /   /   /
+         93  63  39  21--22--23--24  45  72
+           \   \   \ .               /   /
+           94  64  40--41--42--43--44  71
+             \   \ .                   /
+             95  65--66--67--68--69--70
+               \ .
+               96
+
+Scriviamo una funzione che trova i valori che compaiono in sequenze diverse (cioè i numeri poligonali multipli).
+La funzione prende una lista di interi che rappresentano il tipo di numeri poligonali (3 = numero triangolare, 4 = numero quadrato, ecc.) e un intero che rappresenta il numero di elementi da calcolare di ogni sequenza di numeri poligonali.
+
+(define (polygonal-number p n) (- (/ (* p n (- n 1)) 2) (* n (- n 2))))
+
+Funzione che effettua l'intersezione di più liste (set):
+
+(define (intersects)
+  (let (base (args 0))
+    (for (k 1 (- (length (args)) 1))
+      (setq base (intersect base (args k))))))
+
+(define (overlay lst n)
+  (let ( (len (length lst)) (all '()) )
+    (dolist (p lst)
+      (setq nums (map (curry polygonal-number p) (sequence 1 n)))
+      ;(println nums)
+      (push nums all -1)
+    )
+    (apply intersects all)))
+
+Proviamo:
+
+Numeri triangolari e quadrati nei primi 1000 termini:
+(overlay '(3 4) 1000)
+;-> (1 36 1225 41616)
+
+Numeri triangolari e quadrati e esagonali nei primi 1000 termini:
+(overlay '(3 4 6) 1000)
+;-> (1 1225)
+
+Numeri triangolari e esagonali e ottagonali nei primi 1000 termini:
+(overlay '(3 6 8) 1000)
+;-> (1 11781)
+
+Numeri triangolari pentagonali e esagonali nei primi 1000 termini:
+(overlay '(5 6) 1000)
+;-> (1 40755)
+
+Numeri triangolari pentagonali e esagonali nei primi 1e5 (centomila) termini:
+(overlay '(3 5) 1e5)
+;-> (1 210 40755 7906276 1533776805)
+
+
+----------------
+Giorni fortunati
+----------------
+
+Un giorno viene chiamato "fortunato" se i numeri della data (anno, mese, giorno) sono composti da cifre tutte diverse.
+Per esempio il 23 aprile 1965 (1965 4 23) è stato un giorno fortunato.
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out))
+
+Funzione che verifica se una data è valida:
+
+(define (verify-date anno mese giorno)
+  (let ((giorni-mese '(0 31 28 31 30 31 30 31 31 30 31 30 31))
+        (bisestile (and (= 0 (mod anno 4)) (or (!= 0 (mod anno 100)) (= 0 (mod anno 400))))))
+    (if bisestile (setf (giorni-mese 2) 29))
+    (not (or (< mese 1) (> mese 12) (< giorno 1) (> giorno (giorni-mese mese))))))
+
+Funzione che verifica se un giorno (data) è fortunato:
+
+(define (lucky-day? anno mese giorno)
+  (let (lst (append (int-list anno) (int-list mese) (int-list giorno)))
+    (= (unique lst) lst)))
+
+Proviamo:
+
+(lucky-day? 1965 4 23)
+;-> true
+(lucky-day? 2025 12 31)
+;-> nil
+
+Funzione che trova i giorni fortunati in un intervallo di anni:
+
+(define (luckys anno1 anno2)
+  (let (out '())
+  (for (anno anno1 anno2)
+    (for (mese 1 12)
+      (for (giorno 1 31)
+        (if (and (lucky-day? anno mese giorno) (verify-date anno mese giorno))
+            (push (list anno mese giorno) out -1)))))
+  out))
+
+Proviamo:
+
+(luckys 1980 1982)
+;-> ((1980 2 3) (1980 2 4) (1980 2 5) (1980 2 6) (1980 2 7) (1980 3 2)
+;->  (1980 3 4) (1980 3 5) (1980 3 6) (1980 3 7) (1980 3 24) (1980 3 25)
+;->  ...
+;->  (1982 6 30) (1982 7 3) (1982 7 4) (1982 7 5) (1982 7 6) (1982 7 30))
+
+(luckys 1990 2000)
+;-> ()
 
 ============================================================================
 
