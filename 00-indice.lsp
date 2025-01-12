@@ -2800,6 +2800,8 @@ NOTE LIBERE 28
   Intersezione di più liste (set)
   Numeri poligonali (multipli)
   Giorni fortunati
+  Numeri primi nelle cifre di e (numeri google)
+  Numeri primi nelle cifre di pi greco
 
 PROBLEMI SUI DADI
 =================

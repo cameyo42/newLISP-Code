@@ -1236,5 +1236,150 @@ Proviamo:
 (luckys 1990 2000)
 ;-> ()
 
+
+---------------------------------------------
+Numeri primi nelle cifre di e (numeri google)
+---------------------------------------------
+
+L'n-esimo numero di Google è il primo numero primo di n cifre trovato nello sviluppo decimale di e.
+
+Sono chiamati numeri di Google a causa dell'insolito annuncio di assunzione pubblicato da Google nel 2004 nella stazione di Harvard Square Red Line [First 10-digit prime found in consecutive digits of e].
+https://web.archive.org/web/20041204231318/http://www.boston.com/news/local/articles/2004/09/09/comprehension_test/
+Vedi immagine "google-banner.jpg" nella cartella "data".
+
+Sequenza OEIS A095935:
+First prime of length n encountered in the decimal representation of e.
+  2, 71, 271, 4523, 74713, 904523, 2718281, 72407663, 360287471, 7427466391,
+  75724709369, 749669676277, 8284590452353, 99959574966967, 724709369995957,
+  2470936999595749, 28459045235360287, 571382178525166427, ...
+
+Per calcolare le cifre decimali di "e" usiamo il metodo spigot.
+
+Vedi "Calcolo di e con il metodo spigot" su "Funzioni varie" .
+
+(define (spigot-e n)
+  (local (vec cifra out)
+    (setq out '(2))
+    ; vettore con n elementi tutti di valore 1
+    (setq vec (array n '(1)))
+    (for (i 0 (- n 1))
+      (setq cifra 0)
+      (for (j (- n 1) 0 -1)
+        (setf (vec j) (+ (* 10 (vec j)) cifra))
+        (setq cifra (/ (vec j) (+ j 2)))
+        (setf (vec j) (% (vec j) (+ j 2)))
+      )
+      (push cifra out -1))
+    out))
+
+(spigot-e 1000)
+;-> (2 7 1 8 2 8 1 8 2 8 4 5 9 0 ... 5 7 0 3 5 0 3 5 4)
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che trova i numeri google fino ad un dato limite:
+
+(define (google cifre limite)
+  (local (out found k num)
+    (setq out '())
+    (setq cifre (join (map string (slice (spigot-e (+ cifre 100)) 0 cifre))))
+    (for (n 1 limite 1 stop)
+      (setq found nil)
+      (setq k 0)
+      (until found
+        (setq num (int (slice cifre k n) 0 10))
+        (when (and (= n (length num)) (prime? num))
+          ;(println num)
+          (push num out -1)
+          (setq found true))
+        (++ k)))
+    out))
+
+(time (println (google 1000 10)))
+;-> (2 71 271 4523 74713 904523 2718281 72407663 360287471 7427466391)
+;-> 349.873
+
+(time (println (google 2000 18)))
+;-> (2 71 271 4523 74713 904523 2718281 72407663 360287471 7427466391
+;->  75724709369 749669676277 8284590452353 99959574966967 724709369995957
+;->  2470936999595749 28459045235360287 571382178525166427)
+;-> 14488.73
+
+
+------------------------------------
+Numeri primi nelle cifre di pi greco
+------------------------------------
+
+Scrivere una funzione che cerca il primo numero primo di n cifre nello sviluppo decimale di pi greco.
+
+Sequenza OEIS A104841:
+The first n-digit prime occurring in the decimal expansion of Pi, A000796.
+  3, 31, 653, 4159, 14159, 314159, 1592653, 28841971, 795028841, 5926535897,
+  93238462643, 141592653589, 9265358979323, 23846264338327, 841971693993751,
+  8628034825342117, 89793238462643383, 348253421170679821,
+  3832795028841971693, 89793238462643383279, ...
+
+Vedi "Calcolo di pi greco con il metodo spigot" su "Note libere 24".
+
+(define (spigot-pi digits)
+  (local (d q r t i u y out)
+    (setq out '())
+    (setq d 0)
+    (set 'q 1L 'r 180L 't 60L 'i 2L)
+    (while (< d digits)
+      (setq u (+ (* 27L i (+ i 1L)) 6L))
+      (setq y (/ (+ (* q (- (* 27L i) 12L)) (* 5L r)) (* 5L t)))
+      (push (+ 0 y) out -1)
+      (setq r (* (* 10L u) (- (+ (* q (- (* 5L i) 2L)) r) (* y t))))
+      (setq q (* 10L q i (- (* 2L i) 1L)))
+      (setq t (* t u))
+      (setq i (+ i 1))
+      ;(print q { } r { } t { } i) (read-line)
+      (++ d))
+    out))
+
+(spigot-pi 1000)
+;-> (3 1 4 1 5 9 2 6 5 3 5 8 9 7 9 3 2 3 8 4 6 2 6 4 3 3 8 3 2 7 9 5
+;->  ...
+;->  0 6 6 1 3 0 0 1 9 2 7 8 7 6 6 1 1 1 9 5 9 0 9 2 1 6 4 2 0 1 9 8)
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che cerca il primo numero primo di n cifre nello sviluppo decimale di pi greco fino a un dato limite:
+
+(define (primi-pi cifre limite)
+  (local (out found k num)
+    (setq out '())
+    (setq cifre (join (map string (slice (spigot-pi (+ cifre 100)) 0 cifre))))
+    (for (n 1 limite 1 stop)
+      (setq found nil)
+      (setq k 0)
+      (until found
+        (setq num (int (slice cifre k n) 0 10))
+        (when (and (= n (length num)) (prime? num))
+          ;(println num)
+          (push num out -1)
+          (setq found true))
+        (++ k)))
+    out))
+
+Proviamo:
+
+(time (println (primi-pi 1000 10)))
+;-> (3 31 653 4159 14159 314159 1592653 28841971 795028841 5926535897)
+;-> 39.71
+
+(time (println (primi-pi 2000 18)))
+;-> (3 31 653 4159 14159 314159 1592653 28841971 795028841 5926535897
+;->  93238462643 141592653589 9265358979323 23846264338327 841971693993751
+;->  8628034825342117 89793238462643383 348253421170679821)
+;-> 17334.912
+
 ============================================================================
 
