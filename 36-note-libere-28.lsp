@@ -1381,5 +1381,87 @@ Proviamo:
 ;->  8628034825342117 89793238462643383 348253421170679821)
 ;-> 17334.912
 
+
+-------------------------
+Numeri somma di due primi
+-------------------------
+
+Dobbiamo stabilire quali numeri interi positivi possono essere espressi come somma di due numeri primi (e quelli che non possono essere espressi come somma di due numeri primi).
+
+Sequenza OEIS A014091:
+Numbers that are the sum of 2 primes.
+  4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 24, 25, 26,
+  28, 30, 31, 32, 33, 34, 36, 38, 39, 40, 42, 43, 44, 45, 46, 48, 49, 50,
+  52, 54, 55, 56, 58, 60, 61, 62, 63, 64, 66, 68, 69, 70, 72, 73, 74, 75,
+  76, 78, 80, 81, 82, 84, 85, 86, 88, 90, 91, 92, 94, 96, 98, ...
+
+Sequenza OEIS A014092:
+Numbers that are not the sum of 2 primes.
+  1, 2, 3, 11, 17, 23, 27, 29, 35, 37, 41, 47, 51, 53, 57, 59, 65, 67, 71,
+  77, 79, 83, 87, 89, 93, 95, 97, 101, 107, 113, 117, 119, 121, 123, 125,
+  127, 131, 135, 137, 143, 145, 147, 149, 155, 157, 161, 163, 167, 171, 173,
+  177, 179, 185, 187, 189, 191, 197, 203, 205, 207, 209, ...
+
+(define (primes-to num)
+"Generates all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Funzione che prende un intero n e calcola la coppia di numeri primi che sommano a n:
+(se i numeri non esistono ritorna '())
+
+(define (sum-of-primes n)
+  (if (zero? n) '()
+  ;else
+  (let ( (out '()) (stop nil) (primi (primes-to n)) )
+    (setq stop nil)
+    ; Ciclo per ogni numero primo...
+    (dolist (p primi stop)
+      ;(print p { } (- n p)) (read-line)
+      ; se troviamo (- n p) sui primi, allora è la soluzione
+      (when (member (- n p) primi)
+        (setq out (list p (- n p)))
+        ; esce dal ciclo
+        (setq stop true))
+      ; se (p > n), allora usciamo dal ciclo  
+      (if (> p n) (setq stop true))
+    )
+    out)))
+
+Proviamo:
+
+(sum-of-primes 12)
+;-> (7 5)
+(sum-of-primes 23)
+;-> ()
+
+Per calcolare le due sequenze possiamo modificare la funzione precedente oppure usare il metodo seguente:
+
+1) calcolare le coppie
+(setq coppie (map sum-of-primes (sequence 0 20)))
+;-> (() () () () (2 2) (2 3) (3 3) (2 5) (3 5) (2 7) (3 7)
+;->  () (5 7) (2 11) (3 11) (2 13) (3 13) () (5 13) (2 17) (3 17))
+
+2) calcolare la somma di ogni coppia
+(setq somme (map (fn(x) (apply + x)) somme))
+;-> (0 0 0 0 4 5 6 7 8 9 10 0 12 13 14 15 16 0 18 19 20)
+
+3) trovare i valori diversi da 0
+Numeri che sono somma di due primi
+(setq num-ok (clean zero? somme))
+;-> (4 5 6 7 8 9 10 12 13 14 15 16 18 19 20)
+
+4) trovare gli indici che hanno 0 come valore associato
+Numeri che non sono somma di due primi
+(setq num-no (flat (ref-all 0 somme)))
+;-> (0 1 2 3 11 17)
+
 ============================================================================
 

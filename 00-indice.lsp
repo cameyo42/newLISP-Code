@@ -2802,6 +2802,7 @@ NOTE LIBERE 28
   Giorni fortunati
   Numeri primi nelle cifre di e (numeri google)
   Numeri primi nelle cifre di pi greco
+  Numeri somma di due primi
 
 PROBLEMI SUI DADI
 =================
@@ -2848,7 +2849,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (314 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (315 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
