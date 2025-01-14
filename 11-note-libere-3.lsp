@@ -5492,6 +5492,9 @@ Vediamo i tempi di esecuzione:
 (time (find-array-bs 2 arr) 10000)
 ;-> 1465.604
 
+Vedi anche "Funzioni di ricerca per vettori" su "Note libere 15".
+Vedi anche "Ricerche su vettori" su "Note libere 28".
+
 
 ----------------
 Variabili libere

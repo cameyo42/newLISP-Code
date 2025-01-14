@@ -109,7 +109,7 @@ n AND (n - 1)
 
 Calcolare la sequenza di numeri generata dall'operazione di AND binario (n & (n - 1)).
 
-Sequenza OEIS 129760:
+Sequenza OEIS A129760:
 Bitwise AND of binary representation of n-1 and n
   0, 0, 2, 0, 4, 4, 6, 0, 8, 8, 10, 8, 12, 12, 14, 0, 16, 16, 18, 16, 20,
   20, 22, 16, 24, 24, 26, 24, 28, 28, 30, 0, 32, 32, 34, 32, 36, 36, 38,

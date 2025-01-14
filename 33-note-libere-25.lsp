@@ -2376,6 +2376,8 @@ Proviamo:
 
 Per convertire un numero decimale in una frazione vedi "Frazione generatrice" su "Problemi vari".
 
+Vedi anche "Divisione tra interi con precisione illimitata (algoritmo elementare)" su "Note libere 28".
+
 
 ----------------------------
 Stringhe con tutte le vocali

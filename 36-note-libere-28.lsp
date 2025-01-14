@@ -1308,6 +1308,8 @@ Funzione che trova i numeri google fino ad un dato limite:
 ;->  2470936999595749 28459045235360287 571382178525166427)
 ;-> 14488.73
 
+Nota: MAX-INT ha 19 cifre.
+
 
 ------------------------------------
 Numeri primi nelle cifre di pi greco
@@ -1380,6 +1382,67 @@ Proviamo:
 ;->  93238462643 141592653589 9265358979323 23846264338327 841971693993751
 ;->  8628034825342117 89793238462643383 348253421170679821)
 ;-> 17334.912
+
+Nota: MAX-INT ha 19 cifre.
+
+
+-------------------------------------------
+Numeri primi nella concatenazione dei primi
+-------------------------------------------
+
+Scrivere una funzione che cerca il primo numero primo di n cifre nella concatenazione dei numeri primi (235711131719232931374143475359...).
+
+Sequenza OEIS A073062:
+Take A000040 (prime numbers), omit commas: 235711131719232931374143,... select first n-digit prime.
+  2, 23, 571, 2357, 11131, 711131, 1923293, 35711131, 711131719, 4753596167,
+  23571113171, 379838997101, 7535961677173, 29313741434753, 571113171923293,
+  7414347535961677, 57111317192329313, 167717379838997101
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes num-primes)
+"Generates a given number of prime numbers (starting from 2)"
+  (let ( (k 3) (tot 1) (out '(2)) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k 2))
+    out))
+
+Funzione che cerca il primo numero primo di n cifre nella concatenazione dei primi:
+
+(define (find-prime num-primi limite)
+  (local (out cifre found k num)
+    (setq out '())
+    (setq cifre (join (map string (primes num-primi))))
+    (for (n 1 limite 1 stop)
+      (setq found nil)
+      (setq k 0)
+      (until found
+        (setq num (int (slice cifre k n) 0 10))
+        (when (and (= n (length num)) (prime? num))
+          ;(print num) (read-line)
+          (push num out -1)
+          (setq found true))
+        (++ k)))
+    out))
+
+Proviamo:
+
+(time (println (find-prime 100 10)))
+;-> (2 23 571 2357 11131 711131 1923293 35711131 711131719 4753596167)
+;-> 9.56
+
+(time (println (find-prime 100 18)))
+;-> (2 23 571 2357 11131 711131 1923293 35711131 711131719 4753596167
+;->  23571113171 379838997101 7535961677173 29313741434753 571113171923293
+;->  7414347535961677 57111317192329313 167717379838997101)
+
+Nota: MAX-INT ha 19 cifre.
 
 
 -------------------------
@@ -1462,6 +1525,338 @@ Numeri che sono somma di due primi
 Numeri che non sono somma di due primi
 (setq num-no (flat (ref-all 0 somme)))
 ;-> (0 1 2 3 11 17)
+
+
+---------------------------------------------------------------------
+Divisione tra interi con precisione illimitata (algoritmo elementare)
+---------------------------------------------------------------------
+
+L'algoritmo per la divisione di due numeri interi viene insegnato alle scuole elementari.
+Scriviamo una funzione che implementa questo algoritmo.
+
+Esempio:
+
+(div 34278 24)
+;-> 1428.25
+
+  34278 : 24
+  34/24 = 1 <---
+  34 - 1*24 = 10
+  -----------------
+  10278
+  102/24 = 4 <---
+  102 - (4*24) = 6
+  -----------------
+  678
+  67/24 = 2 <---
+  67 - (2*24) = 19
+  -----------------
+  198
+  198/24 = 8 <---
+  198 - (8*24) = 6
+  -----------------
+  . <---
+  60
+  60/24 = 2 <---
+  60 - (2*24) = 12
+  -----------------
+  120
+  120/24 = 5 <---
+  120 - (5*24) = 0
+  -----------------
+  1428.25
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+Funzione che trova il dividendo minore tra num1 e num2:
+(define (trova-dividendo num1 num2)
+  (cond ((<= num1 num2) num1)
+    (true
+      (let ( (dividendo 0) (k 0) (L1 (int-list num1)))
+        (while (< dividendo num2)
+          (setq dividendo (+ (L1 k) (* dividendo 10)))
+          ;(println k { } dividendo)
+          (++ k))
+        dividendo))))
+
+Proviamo:
+
+(trova-dividendo 34278 24)
+;-> 34
+
+(trova-dividendo 34278 45)
+;-> 342
+
+(trova-dividendo 34278 400)
+;-> 3427
+
+Funzione che implementa l'algoritmo della divisione:
+Parametri:
+  num1 = dividendo
+  num2 = divisore
+  decimali = numero massimo di decimali dopo la virgola (precisione)
+
+(define (divisione num1 num2 decimali)
+  (local (out resto virgola dividendo cifra)
+    (setq out '())
+    (setq resto nil)
+    (setq virgola nil)
+    (setq decimali (or decimali 16))
+    ; Ciclo fino a che non abbiamo resto 0...
+    (until (zero? resto)
+      ; Calcolo del dividendo corrente
+      (setq dividendo (trova-dividendo num1 num2))
+      ; Calcola la cifra corrente del risultato
+      (setq cifra (/ dividendo num2))
+      (push cifra out -1)
+      ; Calcolo del resto
+      (setq resto (- dividendo (* cifra num2)))
+      ; Calcolo nuovo numero
+      (cond
+        ; Se resto = 0, 
+        ; allora fine della divisione (se abbiamo messo la virgola)
+        ((and (zero? resto) virgola) nil)
+        (true
+          ; Creazione nuovo numero
+          (setq num1 (int (string resto
+                                (slice (string num1) (length dividendo))) 0 10))
+          ; Se il nuovo numero < divisore, allora mettiamo la virgola e
+          ; aggiungiamo uno zero al nuovo numero
+          (when (< num1 num2)
+            (setq num1 (* num1 10))
+            ; mettiamo la virgola se non l'abbiamo già messa prima
+            (if (not virgola) (begin
+                (setq virgola true) (push "." out -1)))))
+      )
+      ;(print (join (map string out))) (read-line)
+      ; Se abbiamo calcolato il numero di decimali predefinito,
+      ; allora fermiamo la divisione (ponendo resto = 0)
+      (when virgola
+        (if (> (length (slice out (find "." out))) decimali) (setq resto 0))
+      )
+    )
+    (join (map string out))))
+
+Proviamo:
+
+(divisione 34278 24)
+;-> "1428.25"
+(divisione 13 7)
+;-> "1.8571428571428571"
+(divisione 13 7 25)
+;-> "1.8571428571428571428571428"
+(divisione 1 3)
+;-> "0.3333333333333333"
+(divisione 1000405 100000)
+;-> "1.00405"
+(divisione 0 10)
+;-> "0."
+(divisione 10 0)
+;-> ERR: division by zero in function /
+;-> called from user function (divisione 10 0)
+(div 123 42358)
+;-> 0.002903819821521318
+(divisione 123 42358 20)
+;-> "0.00290381982152131828"
+
+Nota: per trovare il periodo (eventuale) dei decimali deve risultare che durante l'algoritmo un resto sia uguale ad uno dei precedenti (dopo che sia stata messa la virgola).
+
+Scriviamo una funzione che spiega tutti i passaggi dell'algoritmo:
+
+(define (elementare num1 num2 decimali)
+  (local (out resto virgola dividendo cifra)
+    (setq out '())
+    (setq resto nil)
+    (setq virgola nil)
+    (setq decimali (or decimali 16))
+    ; Ciclo fino a che non abbiamo resto 0...
+    (println num1 " : " num2 " = ")
+    (until (zero? resto)
+      ; Calcolo del dividendo corrente
+      (setq dividendo (trova-dividendo num1 num2))
+      ; Calcola la cifra corrente del risultato
+      (setq cifra (/ dividendo num2))
+      (push cifra out -1)
+      (println "Prendiamo il numero " dividendo ".")
+      (println "Il " num2 " sta " cifra " volte nel " dividendo ".")
+      (println "Scriviamo " cifra " nel risultato.")
+      (println "Risultato: "(join (map string out)))
+      (read-line)
+      ; Calcolo del resto
+      (setq resto (- dividendo (* cifra num2)))
+      (println "Calcoliamo il resto: " dividendo " - (" cifra "*" num2 ") = " resto)
+      ; Calcolo nuovo numero
+      (cond
+        ; Se resto = 0, 
+        ; allora fine della divisione (se abbiamo messo la virgola)
+        ((and (zero? resto) virgola) nil)
+        (true
+          ; Creazione nuovo numero
+          (setq num1 (int (string resto
+                                (slice (string num1) (length dividendo))) 0 10))
+          (println "Calcolo del nuovo numero: " num1)
+          ; Se il nuovo numero < divisore, allora mettiamo la virgola e
+          ; aggiungiamo uno zero al nuovo numero
+          (when (< num1 num2)
+            (println "Nuovo numero: " num1 " è minore del divisore")
+            (setq num1 (* num1 10))
+            (println "aggiungo uno 0 al nuovo numero " num1)
+            ; mettiamo la virgola se non l'abbiamo già messa prima
+            (if (not virgola) (begin
+                (println "Mettiamo la virgola al risultato"
+                (setq virgola true) (push "." out -1)))))
+      )
+      ;(print (join (map string out))) (read-line)
+      ; Se abbiamo calcolato il numero di decimalii predefinito,
+      ; allora fermiamo la divisione (ponendo resto = 0)
+      (when virgola
+        (if (> (length (slice out (find "." out))) decimali) (setq resto 0))
+      )
+    )
+  )
+  (println "Resto uguale a 0 o precisione raggiunta. La divisione è terminata.")
+  (println "Risultato: " (join (map string out))) '>))
+
+(elementare 34278 24)
+;-> 34278 : 24 =
+;-> Prendiamo il numero 34.
+;-> Il 24 sta 1 volte nel 34.
+;-> Scriviamo 1 nel risultato.
+;-> Risultato: 1
+;-> 
+;-> Calcoliamo il resto: 34 - (1*24) = 10
+;-> Calcolo del nuovo numero: 10278
+;-> Prendiamo il numero 102.
+;-> Il 24 sta 4 volte nel 102.
+;-> Scriviamo 4 nel risultato.
+;-> Risultato: 14
+;-> 
+;-> Calcoliamo il resto: 102 - (4*24) = 6
+;-> Calcolo del nuovo numero: 678
+;-> Prendiamo il numero 67.
+;-> Il 24 sta 2 volte nel 67.
+;-> Scriviamo 2 nel risultato.
+;-> Risultato: 142
+;-> 
+;-> Calcoliamo il resto: 67 - (2*24) = 19
+;-> Calcolo del nuovo numero: 198
+;-> Prendiamo il numero 198.
+;-> Il 24 sta 8 volte nel 198.
+;-> Scriviamo 8 nel risultato.
+;-> Risultato: 1428
+;-> 
+;-> Calcoliamo il resto: 198 - (8*24) = 6
+;-> Calcolo del nuovo numero: 6
+;-> Nuovo numero: 6 è minore del divisore
+;-> aggiungo uno 0 al nuovo numero 60
+;-> Mettiamo la virgola al risultatotrue(1 4 2 8 ".")
+;-> Prendiamo il numero 60.
+;-> Il 24 sta 2 volte nel 60.
+;-> Scriviamo 2 nel risultato.
+;-> Risultato: 1428.2
+;-> 
+;-> Calcoliamo il resto: 60 - (2*24) = 12
+;-> Calcolo del nuovo numero: 12
+;-> Nuovo numero: 12 è minore del divisore
+;-> aggiungo uno 0 al nuovo numero 120
+;-> Prendiamo il numero 120.
+;-> Il 24 sta 5 volte nel 120.
+;-> Scriviamo 5 nel risultato.
+;-> Risultato: 1428.25
+;-> 
+;-> Calcoliamo il resto: 120 - (5*24) = 0
+;-> Resto uguale a 0 o precisione raggiunta. La divisione è terminata.
+;-> Risultato: 1428.25
+
+Vedi anche "Periodo e antiperiodo della divisione decimale di due interi M/N" su "Note libere 25".
+
+
+-------------------
+Ricerche su vettori
+-------------------
+
+newLISP non ha funzioni di ricerca sui vettori come "find", "ref", "ref-all", ecc. per le liste. 
+
+find per vettori:
+
+(define (find-arr)
+  (let (param (args))
+    (setf (param 1) (array-list (args 1)))
+    (apply find param)))
+
+(setq vet (array 7 '(2 4 5 6 3 1 3)))
+(find-arr '3 vet)
+;-> 4
+
+ref per vettori:
+
+(define (ref-arr)
+  (let (param (args))
+    (setf (param 1) (array-list (args 1)))
+    (apply ref param)))
+
+(ref-arr '3 vet)
+;-> (4)
+
+ref-all per vettori:
+
+(define (ref-all-arr)
+  (let (param (args))
+    (setf (param 1) (array-list (args 1)))
+    (apply ref-all param)))
+
+(ref-all-arr '3 vet)
+;-> ((4) (6))
+
+Vediamo la velocità delle funzioni:
+
+(silent (setq lista (rand 1e6 10000))
+        (setq vettore (array 10000 lista)))
+
+(setq v1 (lista 0))
+(setq v2 (lista -1))
+
+(time (find v1 lista) 1e4)
+;-> 0
+(time (find-arr v1 vettore) 1e4)
+;-> 3770.371
+(time (find v2 lista) 1e4)
+;-> 883.567
+(time (find-arr v2 vettore) 1e4)
+;-> 4640.935
+
+(time (ref v1 lista) 1e4)
+;-> 0
+(time (ref-arr v1 vettore) 1e4)
+;-> 3791.012
+(time (ref v2 lista) 1e4)
+;-> 863.914
+(time (ref-arr v2 vettore) 1e4)
+;-> 4628.432
+
+(time (ref-all v1 lista) 1e4)
+;-> 821.617
+(time (ref-all-arr v1 vettore) 1e4)
+;-> 4635.193
+(time (ref-all v2 lista) 1e4)
+;-> 865.061
+(time (ref-all-arr v2 vettore) 1e4)
+;-> 4627.265
+
+Le funzioni sono molto lente.
+
+Vedi anche "find per vettori" su "Note libere 3".
+Vedi anche "Funzioni di ricerca per vettori" su "Note libere 15".
 
 ============================================================================
 

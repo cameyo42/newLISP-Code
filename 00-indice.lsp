@@ -2802,7 +2802,10 @@ NOTE LIBERE 28
   Giorni fortunati
   Numeri primi nelle cifre di e (numeri google)
   Numeri primi nelle cifre di pi greco
+  Numeri primi nella concatenazione dei primi
   Numeri somma di due primi
+  Divisione tra interi con precisione illimitata (algoritmo elementare)
+  Ricerche su vettori
 
 PROBLEMI SUI DADI
 =================

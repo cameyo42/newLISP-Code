@@ -6529,6 +6529,9 @@ Invece la ricerca su una lista uguale ad a6:
 (time (find 123 lst) 10)
 ;-> 14.089
 
+Vedi anche "find per vettori" su "Note libere 3".
+Vedi anche "Ricerche su vettori" su "Note libere 28".
+
 
 --------------------
 Primi nelle stringhe
