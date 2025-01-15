@@ -651,9 +651,9 @@ Nota: se il file di log esiste, le nuove attività di logging vengono registrate
 Vedi il file "_npp-newlisp-log.ahk" nella cartella "data".
 
 
-----------------------------------
-Numeri nella forma x^2 + y^2 + z^2
-----------------------------------
+----------------------------------------------------------
+Numeri nella forma x^2 + y^2 + z^2 (Somma di tre quadrati)
+----------------------------------------------------------
 
 Determinare la lista dei numeri che sono nella forma: x^2 + y^2 + z^2, con x,y,z >= 0.
 
@@ -663,7 +663,6 @@ Sums of three squares: numbers of the form x^2 + y^2 + z^2.
   22, 24, 25, 26, 27, 29, 30, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43,
   44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 61, 62, 64, 65,
   66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 80, 81, 82, 83, ...
-
 
 Algoritmo brute-force
 ---------------------
@@ -985,6 +984,7 @@ Numeri poligonali (multipli)
 Un numero poligonale è un numero figurato che può essere disposto a raffigurare un poligono regolare.
 Esempi:
 Numero triangolare = 10             Numero quadrato = 16
+
             *                               * * * *
            * *                              * * * *    
           * * *                             * * * *
@@ -1579,6 +1579,7 @@ Esempio:
     (dolist (el lst) (setq num (+ el (* num 10))))))
 
 Funzione che trova il dividendo minore tra num1 e num2:
+
 (define (trova-dividendo num1 num2)
   (cond ((<= num1 num2) num1)
     (true
@@ -1857,6 +1858,236 @@ Le funzioni sono molto lente.
 
 Vedi anche "find per vettori" su "Note libere 3".
 Vedi anche "Funzioni di ricerca per vettori" su "Note libere 15".
+
+
+------------------
+Orologio analogico
+------------------
+
+Scriviamo una funzione che mostra l'ora corrente come un orologio analogico.
+I quadranti dell'orologio sono i seguenti:
+
+  Quadrante delle ore               Quadrante dei minuti
+                                             00
+                                       55          05
+          12                                 00
+      11      01                         55      05
+          12                     50          00          10
+  10    11  01    02                 50    55  05    10
+      10      02                         50      10
+09   09   **   03   03        45   45   45   **   15   15   15
+      08      04                         40      20
+  08    07  05    04                 40    35  25    20
+          06                     40          30          20
+      07      05                         35      25
+          06                                 30
+                                       35          25
+                                             30
+
+I minuti vengono arrotondati a 5 oppure a 0.
+
+Esempio:
+ora: 8:23
+output:
+
+          **
+      08
+  08        25
+
+              25
+
+                25
+
+ora: 1:12
+output:
+
+      01
+              10
+    01    10
+      10
+  **
+
+ora: 10:15
+output:
+
+  10
+      10
+          **   15   15   15
+
+Funzione che stampa una matrice di caratteri con cornice:
+
+(define (print-matrix matrix)
+  (local (row col)
+    (setq row (length matrix))
+    (setq col (length (first matrix)))
+    (println "+" (dup "-" col) "+")
+    (for (r 0 (- row 1))
+      (print "|")
+      (for (c 0 (- col 1))
+        (print (matrix r c)))
+      (println "|"))
+    (println "+" (dup "-" col) "+") '>))
+
+Funzione che arrotonda un intero a 0 o 5:
+
+(define (round5 numero)
+  (let ((resto (mod numero 5)))
+    (if (< resto 3)
+      (- numero resto)
+      (+ numero (- 5 resto)))))
+
+(round5 12)
+;-> 10
+(round5 18)
+;-> 20
+(round5 10)
+;-> 10
+
+Funzione che mostra l'ora corrente come orologio analogico:
+
+(define (clock)
+  (local (w posti-ore posti-minuti hh mm char-hh char-mm)
+    (setq posti-ore
+    '(("01" ((3 19) (3 20) (5 17) (5 18)))
+      ("02" ((5 23) (5 24) (6 19) (6 20)))
+      ("03" ((7 20) (7 21) (7 25) (7 26)))
+      ("04" ((8 19) (8 20) (9 23) (9 24)))
+      ("05" ((9 17) (9 18) (11 19) (11 20)))
+      ("06" ((10 15) (10 16) (12 15) (12 16)))
+      ("07" ((9 13) (9 14) (11 11) (11 12)))
+      ("08" ((8 11) (8 12) (9 7) (9 8)))
+      ("09" ((7 5) (7 6) (7 10) (7 11)))
+      ("10" ((5 7) (5 8) (6 11) (6 12)))
+      ("11" ((3 11) (3 12) (5 13) (5 14)))
+      ("12" ((2 15) (2 16) (4 15) (4 16)))))
+    (setq posti-minuti
+    '(("00" ((0 15) (0 16) (2 15) (2 16) (4 15) (4 16)))
+      ("05" ((1 21) (1 22) (3 19) (3 20) (5 17) (5 18)))
+      ("10" ((4 27) (4 28) (5 23) (5 24) (6 19) (6 20)))
+      ("15" ((7 20) (7 21) (7 25) (7 26) (7 30) (7 31)))
+      ("20" ((8 19) (8 20) (9 23) (9 24) (10 27) (10 28)))
+      ("25" ((9 17) (9 18) (11 19) (11 20) (13 21) (13 22)))
+      ("30" ((10 15) (10 16) (12 15) (12 16) (14 15) (14 16)))
+      ("35" ((9 13) (9 14) (11 11) (11 12) (13 9) (13 10)))
+      ("40" ((8 11) (8 12) (9 7) (9 8) (10 3) (10 4)))
+      ("45" ((7 0) (7 1) (7 5) (7 6) (7 10) (7 11)))
+      ("50" ((4 3) (4 4) (5 7) (5 8) (6 11) (6 12)))
+      ("55" ((1 9) (1 10) (3 11) (3 12) (5 13) (5 14)))))
+      ; matrice di caratteri
+      (setq w (array-list (array 15 32 '(" "))))
+      (setq (w 7 15) "*")
+      (setq (w 7 16) "*")
+      ;; clear screen (ANSI sequence)
+      (print "\027[H\027[2J")
+      ; calcolo ora
+      (setq hh (+ ((now) 3) 1))
+      (if (> hh 12) (-- hh 12))
+      (setq hh (format "%02d" hh))
+      ; calcolo minuti
+      (setq mm ((now) 4))
+      (setq mm (round5 mm))
+      (setq mm (format "%02d" mm))
+      ; indici delle ore
+      (setq char-hh (lookup hh posti-ore))
+      ; indici dei minuti
+      (setq char-mm (lookup mm posti-minuti))
+      ; aggiornamento matrice con indici delle ore
+      (dolist (ch char-hh)
+        (if (even? $idx)
+            (setf (w (ch 0) (ch 1)) (hh 0))
+            (setf (w (ch 0) (ch 1)) (hh 1))))
+      ; aggiornamento matrice con indici dei minuti
+      (dolist (ch char-mm)
+        (if (even? $idx)
+            (setf (w (ch 0) (ch 1)) (mm 0))
+            (setf (w (ch 0) (ch 1)) (mm 1))))
+      ; stampa orologio
+      (print-matrix w)))
+
+(clock)
+;-> +--------------------------------+
+;-> |                                |
+;-> |                     05         |
+;-> |                                |
+;-> |                   05           |
+;-> |                                |
+;-> |                 05             |
+;-> |                                |
+;-> |               **   03   03     |
+;-> |                                |
+;-> |                                |
+;-> |                                |
+;-> |                                |
+;-> |                                |
+;-> |                                |
+;-> |                                |
+;-> +--------------------------------+
+
+
+---------------------
+Group-by di una lista
+---------------------
+
+Supponiamo di avere una lista con elementi (sottoliste) del tipo: (el0 el1 ... elN).
+Vogliamo raggruppare i valori delle sottoliste in base al primo valore di ogni sottolista.
+
+Esempio:
+lista = ((a 1 2) (b 6 4 5) (b 1 2) (c 3 5) (a 6 8) (d 1))
+group-by (primo valore) = ((a 1 2 6 8) (b 6 4 5 1 2) (c 3 5) (d 1)
+Abbiamo raggruppato i valori di a, b, c e d che sono i primi valori di ogni sottolista.
+
+Esempio:
+lista = (("A" (1 2)) ("B" (4 3)) ("A" (5 5)) ("C" (7 8)) ("C" (4 3) (5 6)))
+group-by (primo valore) (("A" (1 2) (5 5)) ("B" (4 3)) ("C" (7 8) (4 3) (5 6)))
+Abbiamo raggruppato i valori di "A", "B" e "C".
+
+Funzione che raggruppa i valori delle sottoliste di una lista in base al primo valore di ogni sottolista:
+lst = lista con elementi del tipo (el0 el1 ... elN)
+assoc-lst = boolean (true --> crea una lista associativa)
+sorted = boolean (true --> crea una lista associativa con sottoliste ordinate)
+
+(define (group-by-first lst assoc-lst sorted)
+  (local (out idx valori)
+    (setq out '())
+    ; Ciclo per ogni elemento della lista
+    (dolist (el lst)
+      (setq idx (find (list (el 0) '*) out match))
+      ; Esiste il primo valore dell'elemento corrente nella lista di output?
+      (cond (idx
+        ; Esiste: calcola i valori da aggiungere
+        (setq valori (rest el))
+        ;(setf (out idx) (append (out idx) valori)))
+        ; Aggiorna il relativo elemento della lista di output
+        ; aggiungendo i nuovi valori
+        (extend (out idx) valori))
+        (true
+          ; Non esiste: aggiunge l'elemento corrente alla lista di output
+          (push el out -1))))
+    ; Crea la lista di associazione?
+    (if assoc-lst 
+        ; Sottoliste ordinate?
+        (if sorted
+            (map (fn(x) (list (x 0) (sort (rest x)))) out)
+            (map (fn(x) (list (x 0) (rest x))) out))
+        out)))
+
+Proviamo:
+
+(setq a '((a 1 2) (b 6 4 5) (b 1 2) (c 3 5) (a 6 8) (d 1)))
+(group-by-first a)
+;-> ((a 1 2 6 8) (b 6 4 5 1 2) (c 3 5) (d 1))
+
+(setq a '((a 1 2 3) (b 2 1) (b 4 3 5) (a 4 5) (b 6) (c 1) (a 6)))
+(group-by-first a)
+;-> ((a 1 2 3 4 5 6) (b 2 1 4 3 5 6) (c 1))
+(group-by-first a true)
+;-> ((a (1 2 3 4 5 6)) (b (2 1 4 3 5 6)) (c (1)))
+(group-by-first a true true)
+;-> ((a (1 2 3 4 5 6)) (b (1 2 3 4 5 6)) (c (1)))
+(lookup 'a (group-by-first a true))
+;-> (1 2 3 4 5 6)
+
+Vedi anche "Raggruppamento di liste di liste (tabelle) - groupby" su "Note libere 25".
 
 ============================================================================
 

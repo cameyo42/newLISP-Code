@@ -6605,6 +6605,8 @@ Proviamo:
 ;->  (("giallo" 150) "giallo" 150 50.2 "B")
 ;->  (("bianco" 150) "bianco" 150 55.2 "B"))
 
+Vedi anche "Group-by di una lista" su "Note libere 28".
+
 
 --------------------------------------
 Elementi comuni e non comuni tra liste

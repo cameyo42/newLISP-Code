@@ -2793,7 +2793,7 @@ NOTE LIBERE 28
   Verificare se N variabili hanno lo stesso valore
   Numeri quadrati persistenti
   Logging I/O
-  Numeri nella forma x^2 + y^2 + z^2
+  Numeri nella forma x^2 + y^2 + z^2 (Somma di tre quadrati)
   Numero minimo rimuovendo K cifre
   Giorni fortunati
   Numero di ipercubi 4D in un ipercubo n-dimensionale
@@ -2806,6 +2806,8 @@ NOTE LIBERE 28
   Numeri somma di due primi
   Divisione tra interi con precisione illimitata (algoritmo elementare)
   Ricerche su vettori
+  Orologio analogico
+  Group-by di una lista
 
 PROBLEMI SUI DADI
 =================
