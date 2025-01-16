@@ -2808,6 +2808,9 @@ NOTE LIBERE 28
   Ricerche su vettori
   Orologio analogico
   Group-by di una lista
+  Numero più grande/piccolo adiacente ad un dato numero
+  Giustificare una stringa
+  Moltiplicazione tra interi (algoritmo elementare)
 
 PROBLEMI SUI DADI
 =================
@@ -2847,6 +2850,7 @@ APPENDICI
   C/C++ Datatype
   Solarized Color Scheme
   Regole di Internet
+  Criteri di divisibilità (2..12)
   Considerazioni lungo il tragitto
 
 BIBLIOGRAFIA/WEB
@@ -2854,7 +2858,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (315 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (318 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

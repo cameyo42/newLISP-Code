@@ -7285,6 +7285,34 @@ Regola 75: La regola 75 è una bugia. OH CAZZ-
 Regola 77: Internet ti rende stupido.
 NESSUNA ECCEZIONE!
 
+=================================
+ Criteri di divisibilità (2..12)
+=================================
+
+Un numero è divisibile per 2 se termina con 0, 2, 4, 6, 8.
+
+Un numero è divisibile per 3 se la somma delle cifre è un multiplo di 3.
+
+Un numero è divisibile per 4 se la cifra delle decine è dispari e termina con 2, 6 oppure se la cifra delle decine è pari e termina con 0, 4, 8.
+
+Un numero è divisibile per 4 se le ultime due cifre sono 00 oppure formano un numero multiplo di 4.
+
+Un numero è divisibile per 5 se termina con 0, 5.
+
+Un numero è divisibile per 6 se è divisibile per 2 e per 3.
+
+Un numero è divisibile per 7 se raddoppiando l'ultima cifra del numero e sottraendola dal numero rimanente il risultato è divisibile per 7 (compreso 0) (il processo è ripetibile).
+
+Un numero è divisibile per 8 se le ultime tre cifre sono 000 oppure formano un numero multiplo di 8.
+
+Un numero è divisibile per 9 se la somma ripetuta delle cifre è divisibile per 9.
+
+Un numero è divisibile per 10 se termina con 0.
+
+Un numero è divisibile per 11 se la differenza tra la somma delle cifre in posizioni dispari (1 da sinistra) e la somma delle cifre in posizioni pari è divisibile per 11 (compreso 0).
+
+Un numero è divisibile per 12 se è divisibile per 3 e per 4.
+
   
 ============================================================================
  Considerazioni lungo il tragitto

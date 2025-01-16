@@ -2073,21 +2073,189 @@ sorted = boolean (true --> crea una lista associativa con sottoliste ordinate)
 
 Proviamo:
 
-(setq a '((a 1 2) (b 6 4 5) (b 1 2) (c 3 5) (a 6 8) (d 1)))
-(group-by-first a)
+(setq lst '((a 1 2) (b 6 4 5) (b 1 2) (c 3 5) (a 6 8) (d 1)))
+(group-by-first lst)
 ;-> ((a 1 2 6 8) (b 6 4 5 1 2) (c 3 5) (d 1))
 
-(setq a '((a 1 2 3) (b 2 1) (b 4 3 5) (a 4 5) (b 6) (c 1) (a 6)))
-(group-by-first a)
+(setq lst '((a 1 2 3) (b 2 1) (b 4 3 5) (a 4 5) (b 6) (c 1) (a 6)))
+(group-by-first lst)
 ;-> ((a 1 2 3 4 5 6) (b 2 1 4 3 5 6) (c 1))
-(group-by-first a true)
+(group-by-first lst true)
 ;-> ((a (1 2 3 4 5 6)) (b (2 1 4 3 5 6)) (c (1)))
-(group-by-first a true true)
+(group-by-first lst true true)
 ;-> ((a (1 2 3 4 5 6)) (b (1 2 3 4 5 6)) (c (1)))
-(lookup 'a (group-by-first a true))
+(lookup 'a (group-by-first lst true))
 ;-> (1 2 3 4 5 6)
 
 Vedi anche "Raggruppamento di liste di liste (tabelle) - groupby" su "Note libere 25".
+
+
+-----------------------------------------------------
+Numero più grande/piccolo adiacente ad un dato numero
+-----------------------------------------------------
+
+Data una lista di numeri interi e un numero intero K trovare il valore più grande e il valore più piccolo della lista adiacenti a K.
+
+Esempio:
+Lista = (1 4 3 9 0 3 7 0)
+K = 0
+Output = 9 (numero più grande adiacente a 0)
+         3 (numero più piccolo adiacente a 0)
+
+Funzione che trova i numeri più grande/piccolo adiacenti ad un dato numero:
+
+(define (adjacent lst k)
+  (let ( (maxi -1e99) (mini 1e99) )
+    ; Crea le coppie con indici 0-1, 1-2, 2-3, ecc.
+    (setq pair (map list (chop lst) (rest lst)))
+    ; Ciclo per ogni coppia...
+    (dolist (el pair)
+      ; se uno dei valori della coppia vale K,
+      ; allora aggiorna i valori minimo e massimo
+      (cond ((= (el 0) k)
+              (setq maxi (max maxi (el 1)))
+              (setq mini (min mini (el 1))))
+            ((= (el 1) k)
+              (setq maxi (max maxi (el 0)))
+              (setq mini (min mini (el 0))))))
+    ; se k non esiste nella lista, allora restituisce nil
+    (if (and (= mini 1e99) (= maxi-1e99)) nil
+        (list mini maxi))))
+
+Proviamo:
+
+(setq a '(1 4 3 9 0 3 7 0))
+(adjacent a 0)
+;-> (3 9)
+(adjacent a 2)
+;-> nil
+(adjacent a 1)
+;-> (4 4)
+
+(setq b '(9 4 9 0 9 0 9 15 -2))
+(adjacent b 0)
+;-> (9 9)
+(adjacent b 9)
+;-> (0 15)
+
+(setq c '(1 1 1 1 1 1))
+(adjacent c 1)
+;-> (1 1)
+
+(setq d '(-8 3 -4 1 -6 2 -3 5 9))
+(adjacent d 1)
+;-> (-6 -4)
+
+
+------------------------
+Giustificare una stringa
+------------------------
+
+Funzioni per giustificare/allineare una stringa a sinistra, a destra e al centro.
+
+Left justify
+------------
+(define (left-string str num-chars fill-char)
+"Justify a string to the left"
+  (letn ( (len-str (length str)) (space (- num-chars len-str)) )
+    (setq fill-char (or fill-char " "))
+    (append str (dup fill-char (- num-chars len-str)))))
+
+(left-string "newLISP" 15)
+;-> "newLISP        "
+(left-string "newLISP" 15 "-")
+;-> "newLISP--------"
+
+Right justify
+-------------
+(define (right-string str num-chars fill-char)
+"Justify a string to the right"
+  (letn ( (len-str (length str)) (space (- num-chars len-str)) )
+    (setq fill-char (or fill-char " "))
+    (append (dup fill-char (- num-chars len-str)) str)))
+
+(right-string "newLISP" 15)
+;-> "        newLISP"
+(right-string "newLISP" 15 "+")
+;-> "++++++++newLISP"
+
+Center justify
+--------------
+(define (center-string str num-chars fill-char)
+"Justify a string to the center"
+  (letn ( (len-str (length str)) (space (- num-chars len-str)) )
+    (setq fill-char (or fill-char " "))
+    (if (even? space)
+      ; centratura pari
+      (append (dup fill-char (/ space 2)) str (dup fill-char (/ space 2)))
+      ; centratura dispari
+      (append (dup fill-char (/ space 2)) str (dup fill-char (+ (/ space 2) 1))))))
+
+(center-string "newLISP" 15)
+;-> "    newLISP    "
+(center-string "newLISP" 15 ".")
+;-> "....newLISP...."
+
+
+-------------------------------------------------
+Moltiplicazione tra interi (algoritmo elementare)
+-------------------------------------------------
+
+Scriviamo una funzione che stampa il processo della moltiplicazione tra interi che abbiamo imparato alle elementari.
+
+(define (moltiplicazione a b)
+  (local (result len pad sa sb res)
+    (if (> b a) (swap a b))
+    (setq result (* a b))
+    (setq len (length result))
+    (setq pad (+ len 2))
+    (setq sa (string a))
+    (setq sb (string b))
+    (println (right-string sa pad) " x")
+    (println (right-string sb pad) " =")
+    (println (right-string (dup "-" (length result)) pad) "--")
+    (for (i (- (length b) 1) 0 -1)
+      (setq res (string (* a (int (sb i))) (dup "0" (- (length b) i 1))))
+      ;(if (zero? i)
+      ;    (println (right-string (string res) pad) " =")
+      ;    (println (right-string (string res) pad) " +"))
+      (if (zero? i)
+          (print (right-string (string res) pad) " =  ") 
+          (print (right-string (string res) pad) " +  "))
+      (println "(" a " x " (sb i) (dup "0" (- (length b) i 1)) ")")
+    )
+    (println (right-string (dup "-" (length result)) pad) "--")
+    (println (right-string (string result) pad)) '>))
+
+Proviamo:
+
+(moltiplicazione 342 3566)
+;->      3566 x
+;->       342 =
+;->   ---------
+;->      7132 +  (3566 x 2)
+;->    142640 +  (3566 x 40)
+;->   1069800 =  (3566 x 300)
+;->   ---------
+;->   1219572
+
+(moltiplicazione 123 123)
+;->     123 x
+;->     123 =
+;->   -------
+;->     369 +  (123 x 3)
+;->    2460 +  (123 x 20)
+;->   12300 =  (123 x 100)
+;->   -------
+;->   15129
+
+(moltiplicazione 1 1)
+;->   1 x
+;->   1 =
+;->   ---
+;->   1 =  (1 x 1)
+;->   ---
+;->   1
 
 ============================================================================
 
