@@ -5830,6 +5830,10 @@ Per cancellare tutti i simboli di un contesto (es. FOO) possiamo usare la seguen
 
 (map delete (symbols 'FOO)))
 
+Lutz:
+Contexts are quick to create, but expensive to delete in larger programs, because of reference checking of symbols in the whole cell space.
+Because of this, contexts should be only used as fairly static objects, created once and living until the program exits.
+
 
 ================
  USO DEI MODULI

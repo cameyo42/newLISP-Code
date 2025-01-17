@@ -2811,6 +2811,8 @@ NOTE LIBERE 28
   Numero più grande/piccolo adiacente ad un dato numero
   Giustificare una stringa
   Moltiplicazione tra interi (algoritmo elementare)
+  Eureka N.3 - The Archimedeans' Journal
+  Numeri ibridi
 
 PROBLEMI SUI DADI
 =================

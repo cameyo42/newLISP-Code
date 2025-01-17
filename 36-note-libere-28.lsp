@@ -1656,6 +1656,10 @@ Proviamo:
 ;-> "1.8571428571428571"
 (divisione 13 7 25)
 ;-> "1.8571428571428571428571428"
+(divisione 12400 300)
+;-> "41.3333333333333333"
+(divisione 12400 300 6)
+;-> "41.333333"
 (divisione 1 3)
 ;-> "0.3333333333333333"
 (divisione 1000405 100000)
@@ -1714,19 +1718,20 @@ Scriviamo una funzione che spiega tutti i passaggi dell'algoritmo:
             (println "aggiungo uno 0 al nuovo numero " num1)
             ; mettiamo la virgola se non l'abbiamo già messa prima
             (if (not virgola) (begin
-                (println "Mettiamo la virgola al risultato"
+                (println "Mettiamo la virgola al risultato")
                 (setq virgola true) (push "." out -1)))))
       )
       ;(print (join (map string out))) (read-line)
-      ; Se abbiamo calcolato il numero di decimalii predefinito,
+      ; Se abbiamo calcolato il numero di decimali predefinito,
       ; allora fermiamo la divisione (ponendo resto = 0)
       (when virgola
         (if (> (length (slice out (find "." out))) decimali) (setq resto 0))
       )
     )
-  )
   (println "Resto uguale a 0 o precisione raggiunta. La divisione è terminata.")
   (println "Risultato: " (join (map string out))) '>))
+
+Proviamo:
 
 (elementare 34278 24)
 ;-> 34278 : 24 =
@@ -1760,7 +1765,7 @@ Scriviamo una funzione che spiega tutti i passaggi dell'algoritmo:
 ;-> Calcolo del nuovo numero: 6
 ;-> Nuovo numero: 6 è minore del divisore
 ;-> aggiungo uno 0 al nuovo numero 60
-;-> Mettiamo la virgola al risultatotrue(1 4 2 8 ".")
+;-> Mettiamo la virgola al risultato
 ;-> Prendiamo il numero 60.
 ;-> Il 24 sta 2 volte nel 60.
 ;-> Scriviamo 2 nel risultato.
@@ -2256,6 +2261,128 @@ Proviamo:
 ;->   1 =  (1 x 1)
 ;->   ---
 ;->   1
+
+
+--------------------------------------
+Eureka N.3 - The Archimedeans' Journal
+--------------------------------------
+
+Archimede dice ad Euclide:
+in città il numero di fisici elevato al numero di matematici è uguale al numero di matematici elevato al numero di chimici.
+Inoltre, il numero di chimici elevato il numero di matematici è uguale al numero di matematici elevato al numero di fisici.
+Infine, il numero di chimici elevato il numero di fisici è uguale al numero di fisici elevato al numero di chimici.
+
+Euclide risponde:
+Bene, quindi abbiamo lo stesso numero di matematici, fisici e chimici.
+
+Archimede:
+No, stranamente ci sono più matematici che chimici
+
+Euclide (dopo averci pensato un pò):
+Allora posso dirti quanti sono per ogni categoria.
+
+Sappiamo risolvere il problema?
+
+Equazioni:
+
+  f^m = m^c
+  c^m = m^f
+  c^f = f^c
+  m > c
+
+Espressione: c^f = f^c
+
+(for (c 1 100)
+  (for (f 1 100)
+    (if (and (!= c f) (= (pow c f) (pow f c))) (println c { } f))))
+;-> 2 4
+;-> 4 2
+
+  Caso 1:           Caso 2:           Caso 3: 
+  c = 2             c = 4             c = f, con c,f > 0
+  f = 4             f = 2             c^m = m^c
+  4^m = m^2         2^m = m^4         
+  2^m = m^4         4^m = m^2
+  m > 2             m > 4
+
+Caso 1:
+(for (m 1 100) 
+  (if (and (= (pow 4 m) (pow m 2))
+           (= (pow 2 m) (pow m 4)))
+  (println m)))
+;-> nil
+
+Caso 2:
+(for (m 1 100) 
+  (if (and (= (pow 2 m) (pow m 4))
+           (= (pow 4 m) (pow m 2)))
+  (println m)))
+;-> nil
+
+Caso 3:
+(for (c 1 100)
+  (for (m 1 100)
+    (if (and (!= c m) (= (pow c m) (pow m c))) (println c { } m))))
+;-> 2 4
+;-> 4 2
+Poichè m > c, c = 2 e m = 4.
+
+Soluzione
+  c = 2
+  f = 2
+  m = 4
+
+
+-------------
+Numeri ibridi
+-------------
+
+Un numero intero della forma p^q * q^p con numeri primi p != q è detto "intero ibrido" (hybrid-integer).
+Ad esempio, 800 = 2^5 5^2 è un numero intero ibrido.
+
+Sequenza OEIS A082949:
+Numbers of the form p^q * q^p, with distinct primes p and q.
+  72, 800, 6272, 30375, 247808, 750141, 1384448, 37879808, 189267968,
+  235782657, 1313046875, 3502727631, 4437573632, 451508436992, 634465620819,
+  2063731785728, 7863818359375, 7971951402153, 188153927303168,
+  453238525390625, 1145440056788109
+
+(define (primes num-primes)
+"Generates a given number of prime numbers (starting from 2)"
+  (let ( (k 3) (tot 1) (out '(2)) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k 2))
+    out))
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+Funzione che calcola i numeri ibridi:
+
+(define (hybrid num-primes)
+  (let ( (out '())
+         (lst (array-list (array num-primes (primes num-primes)))) )
+    (for (i 0 (- (length lst) 2))
+      (for (j (+ i 1) (- (length lst) 1))
+        (setq a (lst i)) (setq b (lst j))
+        ;(push (list (* (** a b) (** b a)) a b) out -1)))
+        (push (* (** a b) (** b a)) out -1)))
+    (sort out)))
+
+Proviamo:
+
+(slice (hybrid 100) 0 21)
+;-> (72L 800L 6272L 30375L 247808L 750141L 1384448L 37879808L 189267968L
+;->  235782657L 1313046875L 3502727631L 4437573632L 451508436992L 634465620819L
+;->  2063731785728L 7863818359375L 7971951402153L 188153927303168L
+;->  453238525390625L 1145440056788109L)
 
 ============================================================================
 

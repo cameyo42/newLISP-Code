@@ -10,7 +10,8 @@
 Il problema della celebrità
 ---------------------------
 
-Ci sono N persone a una festa. A ogni persona è stato assegnato un ID univoco compreso tra 0 e N-1. Una celebrità è una persona che è nota a tutti, ma non conosce nessuno alla festa.
+Ci sono N persone a una festa. A ogni persona è stato assegnato un ID univoco compreso tra 0 e N-1.
+Una celebrità è una persona che è nota a tutti, ma non conosce nessuno alla festa.
 Il problema è quello di scoprire la celebrità alla festa:
   - se esiste la celebrità, allora restituire il suo ID.
   - se non esiste la celebrità, allora restituire nil.
@@ -86,33 +87,6 @@ Se esiste un tale ID (potenziale candidato per la celebrità), allora determinar
 
 (celebrity festa)
 ;-> 2
-
-int findCelebrity(int n) {
-    int celebrity = -1;
-    // Check one by one whether the person is a celebrity or not.
-    for(int i = 0; i < n; i++) {
-        bool knowAny = false, knownToAll = true;
-        // Check whether person with id 'i' knows any other person.
-        for(int j = 0; j < n; j++) {
-            if(knows(i, j)) {
-                knowAny = true;
-                break;
-            }
-        }
-        // Check whether person with id 'i' is known to all the other person.
-        for(int j = 0; j < n; j++) {
-            if(i != j and !knows(j, i)) {
-                knownToAll = false;
-                break;
-            }
-        }
-        if(!knowAny && knownToAll) {
-            celebrity = i;
-            break;
-        }
-    }
-    return celebrity;
-}
 
 Algoritmo 2 (grafo)
 -------------------

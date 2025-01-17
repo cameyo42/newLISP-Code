@@ -10144,6 +10144,10 @@ Se vuoi usare la funzione predefinita di un altro contesto in un contesto, devi 
 
 Fare riferimento al manuale per maggiori dettagli, http://www.newlisp.org/downloads/newlisp_manual.html#contexts
 
+Lutz:
+Contexts are quick to create, but expensive to delete in larger programs, because of reference checking of symbols in the whole cell space.
+Because of this, contexts should be only used as fairly static objects, created once and living until the program exits.
+
 
 -------------------------------------
 Numeri palindromi e numeri di Lychrel
