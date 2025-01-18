@@ -2384,5 +2384,90 @@ Proviamo:
 ;->  2063731785728L 7863818359375L 7971951402153L 188153927303168L
 ;->  453238525390625L 1145440056788109L)
 
+
+---------------
+La funzione pow
+---------------
+
+*****************
+>>> funzione POW
+*****************
+sintassi: (pow num-1 num-2 [num-3 ... ])
+sintassi: (pow num-1)
+
+Calcola num-1 alla potenza di num-2 e così via.
+
+(pow 100 2)
+;-> 10000
+(pow 100 0.5)
+;-> 10
+(pow 100 0.5 3)
+;-> 1000
+(pow 3)
+;-> 9
+Quando num-1 è l'unico argomento, "pow" presuppone 2 come esponente.
+------------
+
+Ci sono alcuni casi in cui la funzione "pow" non produce il risultato desiderato.
+
+Consideriamo l'espressione 2^7 = 128
+(pow 2 7)
+;-> 128
+Quindi la radice settima di 128 vale 2:
+(pow 128 (div 7))
+;-> 2
+
+Consideriamo l'espressione (-2)^7 = -128
+(pow -2 7)
+;-> -128
+In questo caso la radice settima di -128 vale -2:
+(pow -128 (div 7))
+;-> -1.#IND
+Invece la funzione "pow" produce un valore indeterminato (NaN).
+Questo perchè (pow x y) è progettata per restituire NaN per x negativo e y non intero.
+
+Matematicamente la radice settima di 128 ha sette soluzioni (sei immaginarie e una reale che vale -2).
+Vedi immagine "radice-settima-di-meno-128.png" nella cartella "data".
+
+Per ottenere il valore reale occorre calcolare - pow(- base power):
+(sub 0 (pow (sub 0 -128) (div 7)))
+;-> -2
+
+Facciamo un altro esempio, vogliamo calcolare la radice sesta di -128:
+(pow -128 (div 6))
+;-> -1.#IND
+
+(sub 0 (pow (sub 0 -128) (div 6)))
+;-> -2.244924096618746
+(pow -2.244924096618746 6)
+;-> 128
+
+Funzione "pow" estesa:
+
+(define (pow-ext x n)
+  (if (< x 0)
+      (sub 0 (pow (sub 0 x) n))
+      (pow x n)))
+
+Proviamo:
+
+(pow-ext 128 (div 7))
+;-> 2
+
+(pow-ext -128 (div 7))
+;-> -2
+
+(pow-ext -128 (div 6))
+;-> -2.244924096618746
+
+(pow-ext -3 (div -3))
+;-> -0.6933612743506348
+(pow -0.6933612743506348 -3)
+;-> -3
+
+Nota: in Mathematica l'espressione (-128)^(1/7) produce la seguente soluzione approssimata:
+  1.8019 + 0.8677i
+si tratta del valore principale che viene scelto per convenzione in modo che la funzione diventi monovalore.
+
 ============================================================================
 

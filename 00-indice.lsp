@@ -2813,6 +2813,7 @@ NOTE LIBERE 28
   Moltiplicazione tra interi (algoritmo elementare)
   Eureka N.3 - The Archimedeans' Journal
   Numeri ibridi
+  La funzione pow
 
 PROBLEMI SUI DADI
 =================
