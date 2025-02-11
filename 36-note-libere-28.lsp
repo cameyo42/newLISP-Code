@@ -2469,5 +2469,102 @@ Nota: in Mathematica l'espressione (-128)^(1/7) produce la seguente soluzione ap
   1.8019 + 0.8677i
 si tratta del valore principale che viene scelto per convenzione in modo che la funzione diventi monovalore.
 
+
+-----------------------------------------------
+La radice quadrata di 2 è un numero irrazionale
+-----------------------------------------------
+
+La radice quadrata di 2 sqrt(2) è un numero irrazionale, ossia un numero che non si può esprimere in forma di frazione m/n con m e n numeri interi).
+Dimostriamo questa proposizione utilizziamo il metodo per assurdo: si presuppone vera l'affermazione contraria e si
+mostra che questa porta ad una contraddizione.
+
+Per comprendere questa dimostrazione occorre tener presente che:
+a  a) un qualsiasi numero naturale moltiplicato per 2 produce un numero pari;
+a1 b) un numero naturale pari n può essere rappresentato come n = 2*k, con k numero naturale;
+b  c) se il quadrato di un numero n è pari anche n è pari;
+c  d) una frazione può essere ridotta ai minimi termini con un numero finito di passaggi;
+d  e) nella Logica matematica se un proposizione P è vera la sua negazione è falsa e viceversa.
+
+Iniziamo la dimostrazione per assurdo affermando che sqrt(2) può esere espresse come rapporto di due numeri interi:
+
+  sqrt(2) = m/n     (1)
+
+La frazione m/n è ridotta ai minimi termini e i numeri m e n sono coprimi tra loro (quindi non possono essere entrambi pari).
+  
+Eleviamo al quadrato l'espressione (1):
+
+  2 = m^2/n^2       (2)
+
+Ricaviamo m^2:
+
+  m^2 = 2*n^2       (3)
+
+Per la proprietà a) risulta che 2*n^2 è un numero pari, quindi anche m^2 è pari.
+Per la proprietà c) poichè m^2 è un numero pari, anche m è un numero pari.
+Poichè m è pari, per la proprietà b) risulta:
+
+  m = 2*k                   (4)
+  m^2 = (2*k)^2 = 4*k^2     (5)
+
+Sosituiamo nella (3) il valore di m^2 dato dalla (5):
+
+  4*k^2 = 2*n^2             (6) 
+  
+Dividiamo per 2 entrambi i membri della (6):
+
+  2*k^2 = n^2
+
+Per la proprietà a) risulta che 2*k^2 è un numero pari, quindi anche n^2 è pari.
+Per la proprietà c) poichè n^2 è un numero pari, anche n è un numero pari.
+
+A questo punto risulta che m e n sono entrambi pari, che è una contraddizione (abbiamo stabilito all'inizio che m e n non possono essere entrambi pari), quindi se una proposizione è falsa, allora la sua negazione è vera.
+
+Questa dimostrazione è stata formulata per la prima volta da Euclide.
+
+
+---------------------------------------------
+Conversione gradi <--> radianti (ottimizzate)
+---------------------------------------------
+
+Formula per convertire da gradi a radianti:
+
+  gradi = (radianti * 180)/PI
+
+(setq PI 3.1415926535897931)
+
+(define (deg2rad deg)
+"Convert decimal degrees to radiants"
+  (div (mul deg PI) 180))
+
+Formula per convertire da radianti a gradi:
+
+  radianti = (gradi * PI)/180
+
+(define (rad2deg rad)
+"Convert radiants to decimal degrees"
+  (div (mul rad 180) PI))
+
+Possiamo ottimizzare le funzioni e renderle più veloci:
+
+(define (deg-rad deg)
+"Convert decimal degrees to radiants"
+  (mul deg 1.745329251994329577e-2))
+
+(define (rad-deg rad)
+"Convert radiants to decimal degrees"
+  (mul rad 57.29577951308232088))
+
+Vediamo la velocità delle funzioni:
+
+(time (deg-rad 60.5) 5e6)
+;-> 290.111
+(time (deg2rad 60.5) 5e6)
+;-> 393.166
+
+(time (rad-deg 12.14) 5e6)
+;-> 293.166
+(time (rad2deg 12.14) 5e6)
+;-> 401.92
+
 ============================================================================
 

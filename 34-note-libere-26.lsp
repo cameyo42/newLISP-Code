@@ -1215,6 +1215,50 @@ Fibonacci (Lutz):
 ;-> (0L 1L 1L 2L 3L 5L 8L 13L 21L 34L 55L 89L 144L 233L 377L 610L
 ;->  987L 1597L 2584L 4181L 6765L))
 
+Fibonacci (Nayuki):
+
+# Fast doubling Fibonacci algorithm (Python)
+# by Project Nayuki, 2015. Public domain.
+# https://www.nayuki.io/page/fast-fibonacci-algorithms
+# (Public) Returns F(n).
+def fibonacci(n):
+	if n < 0:
+		raise ValueError("Negative arguments not implemented")
+	return _fib(n)[0]
+# (Private) Returns the tuple (F(n), F(n+1)).
+def _fib(n):
+	if n == 0:
+		return (0, 1)
+	else:
+		a, b = _fib(n // 2)
+		c = a * (b * 2 - a)
+		d = a * a + b * b
+		if n % 2 == 0:
+			return (c, d)
+		else:
+			return (d, c + d)
+
+(define (fibo-Nayuki n)
+  (if (< n 0) nil (fib n)))
+
+(define (fib n)
+  (local (a b c d)
+    (cond ((zero? n) '(0 1))
+          (true
+            (setq lst (fib (/ n 2)))
+            (setq a (lst 0))
+            (setq b (lst 1))
+            (setq c (* a (- (* b 2) a)))
+            (setq d (+ (* a a) (* b b)))
+            (if (even? n)
+              (list c d)
+              (list d (+ c d)))))))
+
+(map fibo-Nayuki (sequence 0 20))
+;-> ((0 1) (1 1) (1 2) (2 3) (3 5) (5 8) (8 13) (13 21) (21 34) (34 55)
+;->  (55 89) (89 144) (144 233) (233 377) (377 610) (610 987) (987 1597)
+;->  (1597 2584) (2584 4181) (4181 6765) (6765 10946))
+
 Formula di Binet:
 
   F(n) = (phi^n - psi^n)/sqrt(5)

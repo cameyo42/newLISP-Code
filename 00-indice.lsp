@@ -2814,6 +2814,8 @@ NOTE LIBERE 28
   Eureka N.3 - The Archimedeans' Journal
   Numeri ibridi
   La funzione pow
+  La radice quadrata di 2 è un numero irrazionale
+  Conversione gradi <--> radianti (ottimizzate)
 
 PROBLEMI SUI DADI
 =================
