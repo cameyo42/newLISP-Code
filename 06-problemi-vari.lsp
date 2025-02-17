@@ -1227,7 +1227,7 @@ Il quadrato magico di Dürer è un quadrato magico con costante magica 34 utiliz
   16  3  3 13
    5 10 11  8
    9  6  7 12
-   4 15 14  1   
+   4 15 14  1
 
 Il quadrato magico di Dürer ha la proprietà aggiuntiva che le somme in ciascuno dei quattro quadranti, così come la somma dei quattro numeri centrali, sono tutte 34 (si tratta quindi di un quadrato magico gnomonico).
 Inoltre, qualsiasi coppia di numeri posizionata simmetricamente attorno al centro del quadrato somma a 17, una proprietà che rende il quadrato ancora più magico.
@@ -2032,6 +2032,8 @@ Scriviamo una funzione che calcola le soluzioni di una equazione di secondo grad
 ; x1 = -b/(2*a) + (sqrt(b*b - 4*a*c))/(2*a)
 ; x2 = -b/(2*a) - (sqrt(b*b - 4*a*c))/(2*a)
 
+; Calcola le soluzioni dell'equazione: a*x^2 + b*x + c = 0
+; (solve-quadratic a b c)
 (define (solve-quadratic a b c)
   (if (and (null? a) (null? b) (null? c))
       (begin
@@ -2064,10 +2066,6 @@ Scriviamo una funzione che calcola le soluzioni di una equazione di secondo grad
   )
   ) ;endif
 )
-
-(solve-quadratic)
-;-> (solve-quadratic a b c)
-;-> Calcola le soluzioni dell'equazione: a*x^2 + b*x + c = 0
 
 (solve-quadratic -3 -3 -20)
 ;-> -231
@@ -2867,8 +2865,8 @@ Versione con grafica passo per passo:
   (setq st stato)
   (dolist (el st)
   ; da: ((2 3 4) (1) ())
-  ; a:  (("        " 2 3 4) 
-  ;      ("        " "        " "        " 1) 
+  ; a:  (("        " 2 3 4)
+  ;      ("        " "        " "        " 1)
   ;      ("        " "        " "        "  "        "))
     (if (!= (length el) numdisk)
         ;(println (dup " " (- numdisk (length el)) true))
@@ -2876,11 +2874,11 @@ Versione con grafica passo per passo:
     )
   )
   (dolist (row st)
-  ; da: (("        " 2 3 4) 
-  ;      ("        " "        " "        " 1) 
-  ;      ("        " "        " "        "  "        "))  
-  ; a:  (("        " "        " "        ") 
-  ;      ("   * *  " "        " "        ") 
+  ; da: (("        " 2 3 4)
+  ;      ("        " "        " "        " 1)
+  ;      ("        " "        " "        "  "        "))
+  ; a:  (("        " "        " "        ")
+  ;      ("   * *  " "        " "        ")
   ;      ("  * * * " "        " "        ")
   ;      (" * * * *" "    *   " "        "))
     (setq tmp '())
@@ -2900,8 +2898,8 @@ Versione con grafica passo per passo:
   )
   (setq st (transpose st))
   ; La trasposta è pronta per la stampa...
-  ; (("        " "        " "        ") 
-  ;  ("   * *  " "        " "        ") 
+  ; (("        " "        " "        ")
+  ;  ("   * *  " "        " "        ")
   ;  ("  * * * " "        " "        ")
   ;  (" * * * *" "    *   " "        "))
   (dolist (p st)
@@ -2912,7 +2910,7 @@ Versione con grafica passo per passo:
 
 (setq numdisk 4)
 (print-stato '((2 3 4) (1) ()))
-;-> 
+;->
 ;->    * *
 ;->   * * *
 ;->  * * * *    *
@@ -2941,36 +2939,36 @@ Proviamo:
 ;->   ████
 ;->  ██████
 ;-> ████████
-;-> ------------------------ 
-;->                          
+;-> ------------------------
+;->
 ;-> 1) da 1 a 2              2) da 1 a 3              3) da 2 a 3
-;->                                                   
-;->   ████                                            
+;->
+;->   ████
 ;->  ██████                   ██████                   ██████            ██
 ;-> ████████   ██            ████████   ██     ████   ████████          ████
 ;-> ------------------------ ------------------------ ------------------------
-;->                                                   
+;->
 ;-> 4) da 1 a 2              5) da 3 a 1              6) da 3 a 2
-;->                                                   
-;->                                                   
+;->
+;->
 ;->                    ██       ██                       ██     ████
 ;-> ████████ ██████   ████   ████████ ██████   ████   ████████ ██████
 ;-> ------------------------ ------------------------ ------------------------
-;->                                                   
+;->
 ;-> 7) da 1 a 2              8) da 1 a 3              9) da 2 a 3
-;->                                                   
-;->            ██                       ██            
+;->
+;->            ██                       ██
 ;->           ████                     ████                     ████     ██
 ;-> ████████ ██████                   ██████ ████████          ██████ ████████
 ;-> ------------------------ ------------------------ ------------------------
-;->                                                   
+;->
 ;-> 10) da 2 a 1             11) da 3 a 1             12) da 2 a 3
-;->                                                   
-;->                                                   
+;->
+;->
 ;->                    ██       ██                       ██            ██████
 ;->   ████   ██████ ████████   ████   ██████ ████████   ████          ████████
 ;-> ------------------------ ------------------------ ------------------------
-;->                                                   
+;->
 ;-> 13) da 1 a 2             14) da 1 a 3             15) da 2 a 3
 ;->                                                                      ██
 ;->                                            ████                     ████
@@ -2990,7 +2988,7 @@ Proviamo con 5 dischi:
 ;-> ██████████
 ;-> ------------------------------
 ;-> ...
-;-> 
+;->
 ;-> 31) da 1 a 3
 ;->                         ██
 ;->                        ████
@@ -3603,6 +3601,7 @@ Il metodo del contadino russo può essere utilizzato per moltiplicare o elevare 
 
 (russian-exp 3 42)
 ;-> 109418989131512359209L
+
 
 ---------------------
 Distanza di Manhattan
@@ -6587,6 +6586,7 @@ Vedi anche "Labirinti (Maze)" su "Note libere 3".
 Vedi anche "Algoritmo Lee - Ricerca del percorso in un labirinto" su "Note libere 7".
 Vedi anche "Generazione di labirinti" su "Note libere 26"
 
+
 --------------------------
 Moltiplicazioni di fattori
 --------------------------
@@ -7226,7 +7226,6 @@ In questo caso l'errore è molto piccolo:
   (if (> (abs (sub (poly2 x) (poly4 x))) eps)
       (println x { } (poly2 x) { } (poly4 x))))
 ;-> nil
-
 
 
 ------------------------------
@@ -8128,7 +8127,7 @@ Nel 1742, il matematico prussiano Christian Goldbach scrisse una lettera a Leonh
 
   "Ogni numero intero maggiore di 2 può essere scritto come la somma di tre numeri primi."
 
-Considerava 1 un numero primo, una convenzione successivamente abbandonata. 
+Considerava 1 un numero primo, una convenzione successivamente abbandonata.
 Quindi oggi, la congettura originale di Goldbach sarebbe stata scritta:
 
   "Ogni numero intero maggiore di 5 può essere scritto come la somma di tre numeri primi."
@@ -10455,15 +10454,15 @@ Poniamo lupo e cavoli uguale ad "x" e capra uguale a "y".
 Un contadino deve attraversare un fiume con due x e una y. La barca può trasportare (oltre a lui) soltanto una tra le due x o la y. Non è possibile lasciare da sole x e y. Quindi come trasportare tutti sull'altra riva del fiume?
 
 Adesso il problema è molto più facile da risolvere perchè esiste una sola soluzione:
-attraversare con y      
+attraversare con y
 tornare indietro         (y)
-                         
-atraversare con x        
+
+atraversare con x
 tornare indietro con y   (x)
-                         
-attraversare con x       
+
+attraversare con x
 tornare indietro         (x x)
-                         
+
 attraversare con y       (x x y)
 
 

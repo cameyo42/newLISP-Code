@@ -2816,6 +2816,7 @@ NOTE LIBERE 28
   La funzione pow
   La radice quadrata di 2 è un numero irrazionale
   Conversione gradi <--> radianti (ottimizzate)
+  Problema degli asini
 
 PROBLEMI SUI DADI
 =================

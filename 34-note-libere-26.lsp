@@ -1266,10 +1266,11 @@ Formula di Binet:
                psi = (1 - sqrt(5))/2
 
 (define (fibo n)
-  (setq sr (sqrt 5))
-  (setq phi (div (add 1 sr) 2))
-  (setq psi (div (sub 1 sr) 2))
-  (floor (add 0.5 (div (sub (pow phi n) (pow psi n)) sr))))
+  (local (sr phi psi)
+    (setq sr (sqrt 5))
+    (setq phi (div (add 1 sr) 2))
+    (setq psi (div (sub 1 sr) 2))
+    (floor (add 0.5 (div (sub (pow phi n) (pow psi n)) sr)))))
 
 (fibo 3)
 ;-> 2
@@ -1282,8 +1283,7 @@ Un numero n è un numero di Fibonacci se e solo se (5*n^2 + 4) oppure (5*n^2 - 4
 
 (define (square? num)
 "Check if an integer is a perfect square"
-  (local (a)
-    (setq a (bigint num))
+  (let (a (bigint num))
     (while (> (* a a) num)
       (setq a (/ (+ a (/ num a)) 2))
     )
@@ -1300,7 +1300,11 @@ Indice di un numero di Fibonacci:
 
   n = floor(log(phi) / log(F*sqrt(5) + (1/2)))
 
-(define (n-fibo fib) (floor (div (log (add (mul fib sr) 0.5)) (log phi))))
+(define (n-fibo fib)
+  (local (sr phi)
+    (setq sr (sqrt 5))
+    (setq phi (div (add 1 sr) 2))
+  (floor (div (log (add (mul fib sr) 0.5)) (log phi)))))
 
 (n-fibo 6765)
 ;-> 20
@@ -8312,7 +8316,7 @@ Vediamo la funzione che divide effettivamente la lista in parti uguali (se possi
             (dolist (el as)
               (cond ((= (el 1) 1) ; numero con 1 occorrenza
                       ; inserire il numero nella lista attiva
-                      (if flag 
+                      (if flag
                          (push (el 0) L1 -1)
                          (push (el 0) L2 -1))
                      ; cambia il flag della lista attiva

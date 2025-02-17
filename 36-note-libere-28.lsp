@@ -2566,5 +2566,48 @@ Vediamo la velocità delle funzioni:
 (time (rad2deg 12.14) 5e6)
 ;-> 401.92
 
+
+--------------------
+Problema degli asini
+--------------------
+
+Un mercante ha 3 asini in vendita. Un contadino ha intenzione di acquistarli, ma prima vorrebbe sapere la loro età.
+Il mercante risponde: "hanno tutti più di un anno, il prodotto delle loro età vale 72 e la loro somma è pari al numero di stelle che ci sono adesso nel cielo".
+Il contadino ci pensa un pò e poi risponde: "non è possibile rispondere al problema".
+Allora il mercante continua: "il più grande ha la criniera bianca".
+A questo punto il contadino dichiara di conoscere le età dei 3 asini.
+Quanti anni hanno i 3 asini?
+
+Vediamo quali numeri soddisfano i vincoli dati.
+
+(factor 72)
+;-> (2 2 2 3 3)
+
+(setq sol '())
+
+(for (i 2 18)
+  (for (j 2 18)
+    (for (k 2 18)
+      ; se la somma vale 72, allora i,j e k sono una possibile soluzione
+      (if (= (* i j k) 72) (push (sort (list i j k)) sol)))))
+; elimina le soluzioni uguali e calcola la somma di ogni soluzione
+(map (fn(x) (list x (apply + x))) (unique sol))
+;-> (((2 2 18) 22) ((2 3 12) 17) ((2 4 9) 15)
+;->  ((3 3 8) 14) ((2 6 6) 14) ((3 4 6) 13))
+
+Le soluzioni candidate sono 6:
+eta        somma 
+(2 2 18)   22
+(2 3 12)   17
+(2 4 9)    15
+(3 3 8)    14
+(2 6 6)    14
+(3 4 6)    13
+
+Se in numero di stelle nel cielo fosse 22 o 17 o 15 o 13, allora il contadino saprebbe rispondere alla domanda (perchè il numero di stelle sarebbe unico).
+Quindi nel cielo ci devono essere 14 stelle (motivo per cui il contadino dichiara di non conoscere la risposta).
+A questo punto la soluzione può essere (3 3 8) oppure (2 6 6).
+Poichè deve esistere un "unico asino più grande" (che risulta 8), allora la soluzione vale (3 3 8).
+
 ============================================================================
 
