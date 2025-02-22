@@ -1507,6 +1507,7 @@ Facciamo alcune prove:
 Vedi anche "Circonferenza per tre punti" su "Note libere 25".
 Vedi anche "Circonferenze di raggio R passanti per 2 punti" su "Note libere 27".
 
+
 ---------------------------
 Determinante di una matrice
 ---------------------------

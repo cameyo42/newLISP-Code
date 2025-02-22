@@ -2609,5 +2609,86 @@ Quindi nel cielo ci devono essere 14 stelle (motivo per cui il contadino dichiar
 A questo punto la soluzione può essere (3 3 8) oppure (2 6 6).
 Poichè deve esistere un "unico asino più grande" (che risulta 8), allora la soluzione vale (3 3 8).
 
+
+---------------------
+Minori di una matrice
+---------------------
+
+Data una matrice A (M x N), chiamiamo "minori" le matrici, M(i j), ottenute eliminando la riga "i" e la colonna "j" della matrice A (con 0 <= i <= (M-1), e 0 <= j <= (N-1)).
+
+(define (minor matrix r c)
+"Removes a row and a column from a matrix"
+  (pop matrix r)
+  (setq matrix (transpose matrix))
+  (pop matrix c)
+  (transpose matrix))
+
+(define (print-matrix matrix)
+"Print a matrix m x n"
+  (local (row col lenmax digit fmtstr)
+    ; converto matrice in lista?
+    (if (array? matrix) (setq matrix  (array-list matrix)))
+    ; righe della matrice
+    (setq row (length matrix))
+    ; colonne della matrice
+    (setq col (length (first matrix)))
+    ; valore massimo della lunghezza di un elemento (come stringa)
+    (setq lenmax (apply max (map length (map string (flat matrix)))))
+    ; calcolo spazio per gli elementi
+    (setq digit (+ 1 lenmax))
+    ; creo stringa di formattazione
+    (setq fmtstr (append "%" (string digit) "s"))
+    ; stampa la matrice
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        (print (format fmtstr (string (matrix i j))))
+      )
+      (println))))
+
+Proviamo:
+
+(setq m '((1 2 3) (4 5 6) (7 8 9)))
+(print-matrix m)
+;-> 1 2 3
+;-> 4 5 6
+;-> 7 8 9
+(print-matrix (minor m 0 0))
+;-> 5 6
+;-> 8 9
+(print-matrix (minor m 1 1))
+;-> 1 3
+;-> 7 9
+(print-matrix (minor m 1 2))
+;-> 1 2
+;-> 7 8
+
+(setq m1 '((1 2 3) (4 5 6) (7 8 9) (10 11 12) (13 14 15)))
+(print-matrix m1)
+;->  1  2  3
+;->  4  5  6
+;->  7  8  9
+;-> 10 11 12
+;-> 13 14 15
+(print-matrix (minor m1 0 0))
+;->  5  6
+;->  8  9
+;-> 11 12
+;-> 14 15
+(print-matrix (minor m1 1 1))
+;->  1  3
+;->  7  9
+;-> 10 12
+;-> 13 15
+(print-matrix (minor m1 1 2))
+;->  1  2
+;->  7  8
+;-> 10 11
+;-> 13 14
+(print-matrix (minor m1 4 0))
+;->  2  3
+;->  5  6
+;->  8  9
+;-> 11 12
+
 ============================================================================
 

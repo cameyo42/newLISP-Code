@@ -2817,6 +2817,7 @@ NOTE LIBERE 28
   La radice quadrata di 2 è un numero irrazionale
   Conversione gradi <--> radianti (ottimizzate)
   Problema degli asini
+  Minori di una matrice
 
 PROBLEMI SUI DADI
 =================
