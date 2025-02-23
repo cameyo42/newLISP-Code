@@ -1508,9 +1508,9 @@ Vedi anche "Circonferenza per tre punti" su "Note libere 25".
 Vedi anche "Circonferenze di raggio R passanti per 2 punti" su "Note libere 27".
 
 
----------------------------
-Determinante di una matrice
----------------------------
+-----------------------------------
+Determinante di una matrice (Gauss)
+-----------------------------------
 
 Per calcolare il determinante di una matrice, prima trasformiamo la matrice data in una matrice triangolare superiore usando le operazioni sulle righe. Al termine il prodotto degli elementi diagonali della matrice diagonale è il determinante.
 
@@ -1563,10 +1563,14 @@ Facciamo alcune prove e verifiche:
 ;-> 120
 (det '((-1 -2 -3) (4 -5 6) (-7 -8 -9)))
 ;-> 120
+(deter '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(det '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
 
 Vediamo la differenza di velocità tra la nostra funzione "deter" e la funzione integrata "det":
 
-Creiamo una matrice casuale 10x10 con numeri da 1 a 100:
+Creiamo una matrice casuale 10x10 con numeri da 0 a 10:
 
 (setq test (explode (rand 10 100) 10))
 
@@ -1587,6 +1591,8 @@ Vediamo la velocità di esecuzione:
 ;-> 14.961
 
 La funzione integrata "det" è 50 volte più veloce.
+
+Vedi anche "Determinante di una matrice (Laplace e Gauss)" su "Note libere 28".
 
 
 -------------------------

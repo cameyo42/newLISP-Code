@@ -1300,7 +1300,7 @@ NOTE LIBERE 10
   Numeri brillanti
   StrappaCamicia
   Circonferenza passante per tre punti
-  Determinante di una matrice
+  Determinante di una matrice (Gauss)
   Multiple Value Bind macro
   100 prigionieri
   Morra Cinese
@@ -2818,6 +2818,8 @@ NOTE LIBERE 28
   Conversione gradi <--> radianti (ottimizzate)
   Problema degli asini
   Minori di una matrice
+  Determinante di una matrice (Laplace e Gauss)
+  Numeri (e parole) lessicograficamente crescenti/decrescenti
 
 PROBLEMI SUI DADI
 =================

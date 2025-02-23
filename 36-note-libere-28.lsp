@@ -2690,5 +2690,265 @@ Proviamo:
 ;->  8  9
 ;-> 11 12
 
+
+---------------------------------------------
+Determinante di una matrice (Laplace e Gauss)
+---------------------------------------------
+
+Il determinante di una matrice quadrata nxn è un valore scalare che fornisce informazioni fondamentali sulla matrice.
+
+Proprietà fondamentali
+   - Se una matrice ha una riga o una colonna nulla, il determinante è 0.
+   - Se due righe (o colonne) sono uguali, il determinante è 0.
+   - Scambiando due righe (o colonne), il determinante cambia segno.
+   - Moltiplicando una riga per uno scalare k, il determinante viene moltiplicato per k.
+   - Se la matrice è triangolare (superiore o inferiore), il determinante è il prodotto degli elementi diagonali.
+   - Una matrice quadrata A è invertibile se e solo se det(A) != 0.
+   - Il determinante misura il fattore di scala della trasformazione lineare rappresentata dalla matrice.
+   - È fondamentale nella soluzione dei sistemi lineari (Regola di Cramer) e nell'algebra multilineare.
+
+Metodi per il calcolo del determinante
+
+1. Matrici 2x2
+   Il determinante di una matrice A = ((a b) (c d)) è dato dalla formula:
+
+   det(A) = ad - bc
+
+2. Espansione di Laplace (Sviluppo per righe o colonne)
+   Il determinante di una matrice nxn può essere calcolato sviluppando lungo una riga o una colonna mediante i minori algebrici. Per una matrice A di ordine n:
+
+   det(A) = Sum[j=1..n] ((-1)^(i+j))*a(ij)*M(ij)
+
+   dove M(ij) è il determinante della matrice minore ottenuta eliminando la riga i e la colonna j.
+   La variabile i rappresenta la riga lungo la quale si sta sviluppando il determinante.
+
+- Se si sviluppa lungo una riga fissata i:
+  - i rimane costante e si somma su tutti gli indici di colonna j da 1 a n.
+  - In questo caso, la formula diventa:
+
+  det(A) = Sum[j=1..n] ((-1)^(i+j))*a(ij)*M(ij)
+
+- Se si sviluppa lungo una colonna fissata j:
+  - j rimane costante e si somma sugli indici di riga i da 1 a n.
+  - La formula diventa:
+
+  det(A) = Sum[i=1..n] ((-1)^(i+j))*a(ij)*M(ij)
+
+Quindi, a seconda della scelta di sviluppo, i o j rimane fisso mentre l'altro varia da 1 a n.
+
+Scriviamo una funzione che calcola il determinate di una matrice con l'espansione di Laplace.
+
+(define (minor matrix r c)
+"Removes a row and a column from a matrix"
+  (pop matrix r)
+  (setq matrix (transpose matrix))
+  (pop matrix c)
+  (transpose matrix))
+
+Funzione che calcola il determinante con il metodo di Laplace:
+
+(define (laplace matrice)
+  (let (len (length matrice))
+    (if (= len 1)
+        (matrice 0 0)
+        (let (deter 0)
+          (for (j 0 (- len 1))
+            (setq deter (add deter (mul (matrice 0 j) (pow -1 j) (laplace (minor matrice 0 j))))))
+          deter))))
+
+Proviamo:
+
+(laplace '((1 2) (2 1)))
+;-> -3
+(det '((1 2) (2 1)))
+;-> -3
+(laplace '((1 3) (3 1)))
+;-> -8
+(det '((1 3) (3 1)))
+;-> -8
+(laplace '((1 2 3) (4 5 6) (7 8 9)))
+;-> 0
+(det '((1 2 3) (4 5 6) (7 8 9)))
+;-> 6.661338147750939e-016
+(laplace '((-1 -2 -3) (4 -5 6) (-7 -8 -9)))
+;-> 120
+(det '((-1 -2 -3) (4 -5 6) (-7 -8 -9)))
+;-> 120
+(laplace '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(det '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(laplace '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(det '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(laplace '((0 1 2) (0 3 4) (5 6 7)))
+;-> -10
+(det '((0 1 2) (0 3 4) (5 6 7)))
+;-> -10
+
+3. Metodo di Gauss
+   Utilizzando l'eliminazione di Gauss, è possibile ridurre una matrice a forma triangolare superiore, calcolando il determinante come prodotto degli elementi sulla diagonale, tenendo conto delle operazioni elementari eseguite.
+
+Scriviamo una funzione che calcola il determinate di una matrice con il metodo di Gauss.
+
+(define (gauss matrice)
+  (let ((n (length matrice)) (deter 1) (tolleranza 1e-10) (trovato false))
+    (for (i 0 (sub n 2))
+      (let ((pivot (matrice i i)) (pivot-row i))
+        (if (< (abs pivot) tolleranza)
+            (for (j (add i 1) (sub n 1))
+              (if (and (not trovato) (> (abs (matrice j i)) tolleranza))
+                  (begin
+                    (swap (matrice i) (matrice j))
+                    (setq pivot (matrice i i))
+                    (setq deter (mul deter -1))
+                    (setq pivot-row j)
+                    (setq trovato true)))))
+        (if (< (abs pivot) tolleranza)
+            (setq deter 0)
+            (for (j (add i 1) (sub n 1))
+              (let ((fattore (div (matrice j i) pivot)))
+                (for (k i (sub n 1))
+                  (setf (matrice j k) (sub (matrice j k) (mul fattore (matrice i k))))))))))
+    (if (!= deter 0)
+        (for (i 0 (sub n 1))
+          (setq deter (mul deter (matrice i i)))))
+    deter))
+
+Proviamo:
+
+(gauss '((1 2) (2 1)))
+;-> -3
+(det '((1 2) (2 1)))
+;-> -3
+(gauss '((1 3) (3 1)))
+;-> -8
+(det '((1 3) (3 1)))
+;-> -8
+(gauss '((1 2 3) (4 5 6) (7 8 9)))
+;-> 0
+(det '((1 2 3) (4 5 6) (7 8 9)))
+;-> 6.661338147750939e-016
+(gauss '((-1 -2 -3) (4 -5 6) (-7 -8 -9)))
+;-> 120
+(det '((-1 -2 -3) (4 -5 6) (-7 -8 -9)))
+;-> 120
+(gauss '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(det '((-1.1 -2.2 -3.3) (4.4 -5.5 6.6) (-7.7 -8.8 -9.9)))
+;-> 159.72
+(gauss '((0 1 2) (0 3 4) (5 6 7)))
+;-> -10
+(det '((0 1 2) (0 3 4) (5 6 7)))
+;-> -10
+
+Vediamo la differenza di velocità tra le funzione "laplace", "gauss" e la funzione integrata "det".
+
+Creiamo una matrice 10x10 con numeri compresi tra 0 a 9:
+
+(setq t '((0 5 1 8 5 4 3 8 8 7) 
+          (1 8 7 5 3 0 0 3 1 1)
+          (9 4 1 0 0 3 5 5 6 6)
+          (1 6 4 3 0 6 7 8 5 3)
+          (8 7 9 9 5 1 4 2 8 2)
+          (7 8 9 9 6 3 2 2 8 0)
+          (3 0 6 0 0 9 2 2 5 6)
+          (8 7 4 2 7 4 4 9 7 1)
+          (5 3 7 6 5 3 1 2 4 8)
+          (5 9 7 3 1 6 4 0 6 5)))
+
+Calcoliamo il determinante con le tre funzioni:
+
+(laplace t)
+;-> 139223208
+
+(gauss t)
+;-> 139223208
+
+(det t)
+;-> 139223208
+
+Vediamo la velocità di esecuzione:
+
+(time (laplace t) 5)
+;-> 24372.759
+La funzione "laplace" è molto lenta perchè è ricorsiva.
+
+Confrontiamo le altre due funzioni:
+
+(time (gauss t) 10000)
+;-> 608.275
+
+(time (det test) 10000)
+;-> 14.018
+
+Vedi anche "Determinante di una matrice (Gauss)" su "Note libere 10".
+
+
+-----------------------------------------------------------
+Numeri (e parole) lessicograficamente crescenti/decrescenti
+-----------------------------------------------------------
+
+Un numero lessicograficamente crescente/decrescente è un intero le cui cifre sono in ordine strettamente crescente/decrescente.
+Una parola (stringa) lessicograficamente crescente/decrescente è una stringa in cui i caratteri sono in ordine strettamente crescente/decrescente (ordine del codice ASCII).
+
+Scriviamo una funzione che verifica se una stringa (parola o numero) è lessicograficamente ordinata in un dato tipo.
+Il parametro "tipo" può valere:
+  1) <  (strettamente crescente)
+  2) >  (strettamente decrescente)
+  3) >= (decrescente)
+  4) <= (crescente)
+  5) =  (costante) (cioè tutti i caratteri sono uguali)
+
+(define (lexicographic? str tipo)
+  (if (< (length str) 2) true ; 0 o 1 carattere
+  ;else
+  (apply tipo (explode str))))
+
+Proviamo:
+
+(lexicographic? "" <)
+;-> true
+(lexicographic? "1" >)
+;-> true
+(lexicographic? "123" <)
+;-> true
+(lexicographic? "123" >)
+;-> nil
+(lexicographic? "122" <=)
+;-> true
+(lexicographic? "111" =)
+;-> true
+(lexicographic? "111" >=)
+;-> true
+(lexicographic? "111" <=)
+;-> true
+(lexicographic? "111" >)
+;-> nil
+(lexicographic? "111" <)
+;-> nil
+(lexicographic? "01a" <)
+;-> true
+(lexicographic? "abc" <)
+;-> true
+(lexicographic? "abb" <)
+;-> nil
+(lexicographic? "Aa" <)
+;-> true
+(lexicographic? "aA" <)
+;-> nil
+
+Scriviamo una funzione che calcola tutti i numeri lessicograficamente crescenti in un intervallo [a, b].
+
+(define (numeri-lexi a b)
+  (filter (fn(x) (lexicographic? x <)) (map string (sequence a b))))
+
+(numeri-lexi 1 100)
+;-> ("1" "2" "3" "4" "5" "6" "7" "8" "9" "12" "13" "14" "15" "16" "17"
+;->  "18" "19" "23" "24" "25" "26" "27" "28" "29" "34" "35" "36" "37" 
+;->  "38" "39" "45" "46" "47" "48" "49" "56" "57" "58" "59" "67" "68" 
+;->  "69" "78" "79" "89")
+
 ============================================================================
 
