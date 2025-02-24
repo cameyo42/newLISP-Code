@@ -41,11 +41,11 @@ Problem Solving e Matematica ricreativa con newLISP
 33) Note libere 25 (80)
 34) Note libere 26 (80)
 35) Note libere 27 (80)
-36) Note libere 28 (38)
+36) Note libere 28 (39)
 96) Problemi sui dadi (79)
 97) Appendici (34)
 98) Bibliografia
-99) yo library (yo.zip) (318)
+99) yo library (yo.zip) (319)
 
 Documentazione Extra:  
 A) Introduction to newLISP (by Cormullion)  

@@ -2820,6 +2820,7 @@ NOTE LIBERE 28
   Minori di una matrice
   Determinante di una matrice (Laplace e Gauss)
   Numeri (e parole) lessicograficamente crescenti/decrescenti
+  Generatore di cartelle BINGO
 
 PROBLEMI SUI DADI
 =================
@@ -2867,7 +2868,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (318 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (319 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

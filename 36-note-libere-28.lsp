@@ -2950,5 +2950,141 @@ Scriviamo una funzione che calcola tutti i numeri lessicograficamente crescenti 
 ;->  "38" "39" "45" "46" "47" "48" "49" "56" "57" "58" "59" "67" "68" 
 ;->  "69" "78" "79" "89")
 
+
+----------------------------
+Generatore di cartelle BINGO
+----------------------------
+
+Le cartelle del BINGO (Italia) hanno 3 righe e 9 colonne.
+Un totale di 15 numeri (casuali da 1 a 90 e tutti diversi) vengono inseriti nella cartella in modo che esistano 5 numeri per ogni riga ed almeno un numero per ogni colonna.
+Nella colonna 1 devono essere inseriti solo i numeri che vanno da  1 a 10.
+Nella colonna 2 devono essere inseriti solo i numeri che vanno da 11 a 20.
+Nella colonna 3 devono essere inseriti solo i numeri che vanno da 21 a 30.
+Nella colonna 4 devono essere inseriti solo i numeri che vanno da 31 a 40.
+Nella colonna 5 devono essere inseriti solo i numeri che vanno da 41 a 50.
+Nella colonna 6 devono essere inseriti solo i numeri che vanno da 51 a 60.
+Nella colonna 7 devono essere inseriti solo i numeri che vanno da 61 a 70.
+Nella colonna 8 devono essere inseriti solo i numeri che vanno da 71 a 80.
+Nella colonna 9 devono essere inseriti solo i numeri che vanno da 81 a 90.
+I 15 numeri sono ordinati in modo crescente in ogni riga e in ogni colonna.
+
+Esempio di cartella:
+
+  +----+----+----+----+----+----+----+----+----+
+  |  5 |    |    |    | 49 |    | 63 | 75 | 80 |
+  +----+----+----+----+----+----+----+----+----+
+  |    |    | 28 | 34 |    | 52 | 66 | 77 |    |
+  +----+----+----+----+----+----+----+----+----+
+  |  6 | 11 |    |    |    | 59 | 69 |    | 82 |
+  +----+----+----+----+----+----+----+----+----+
+
+Scriviamo una funzione che genera una cartella del BINGO.
+
+Algoritmo
+1) Inserimento di 9 numeri nelle colonne con riga casuale.
+2) Inserimento di 6 numeri in righe e colonne casuali
+3) Ordinamento dei numeri per ogni colonna
+
+(define (rand-range min-val max-val)
+"Generate a random integer in a closed range"
+  (if (> min-val max-val) (swap min-val max-val))
+  (+ min-val (rand (+ (- max-val min-val) 1))))
+
+(apply rand-range '(1 10))
+;-> 5
+
+Funzione che stampa una cartella del BINGO:
+
+(define (print-bingo lst)
+  (println "+----+----+----+----+----+----+----+----+----+")
+  (for (r 0 2)
+    (for (c 0 8)
+      (if (= (lst r c) nil)
+          (print "|    ")
+          (print "|" (format "%4d" (out r c))))
+    )
+    (println "|")
+    (println "+----+----+----+----+----+----+----+----+----+")))
+
+Funzione che ordina le colonne di una cartella del BINGO:
+
+(define (sort-bingo lst)
+  (local (out valori idx-valori tmp)
+    (setq out '())
+    ; Traspone righe e colonne
+    (setq lst (transpose lst))
+    ; Ciclo per ogni riga
+    (dolist (riga lst)
+      ; elimina i nil e ordina la riga
+      (setq valori (sort (clean nil? riga)))
+      (setq idx-valori 0)
+      (setq tmp '())
+      ; Crea la nuova riga
+      (dolist (el riga)
+        (cond ((nil? el) (push nil tmp -1)) ; nil rimane al proprio posto
+              (true
+                (push (valori idx-valori) tmp -1) ; inserimento valore corrente
+                (++ idx-valori))))
+      ; Inserisce la nuova riga nella soluzione
+      (push tmp out -1))
+    ; Traspone righe e colonne
+    (transpose out)))
+
+Funzione che genera una cartella del BINGO:
+
+(define (bingo)
+  (setq out (array-list (array 3 9 '())))
+  (setq range '((1 10) (11 20) (21 30) (31 40) (41 50)
+                 (51 60) (61 70) (71 80) (81 90)))
+  ; Inserisce un numero per ogni colonna con riga random (9 numeri)
+  (for (col 0 8)
+    (setf (out (rand 3) col) (apply rand-range (range col)))
+  )
+  ; Inserisce i 6 numeri che mancano
+  (for (k 0 5)
+    (setq inserito nil)
+    (until inserito
+      (setq riga (rand 3))    ; riga random
+      (setq colonna (rand 9)) ; colonna random
+      ; Genera un numero in base al valore di "colonna"
+      (setq valore (apply rand-range (range colonna)))
+      ; Se il numero non compare in "out" e la casella non è occupata...
+      (when (and (not (find valore (flat out)))
+                 (= (out riga colonna) nil))
+            ; ... allora inserisce il numero in "out"
+            (setf (out riga colonna) valore)
+            (setq inserito true)
+      )
+    )
+  )
+  ; Adesso la cartella non ha le colonne ordinate
+  (print-bingo out)
+  (println)
+  ; Ordinamento dei numeri per ogni colonna
+  (setq out (sort-bingo out))
+  (print-bingo out)
+  out)
+
+Proviamo:
+
+(bingo)
+;-> +----+----+----+----+----+----+----+----+----+
+;-> |   5|  14|  30|  32|    |  53|  64|  76|  83|
+;-> +----+----+----+----+----+----+----+----+----+
+;-> |    |    |    |    |  42|    |    |  71|  82|
+;-> +----+----+----+----+----+----+----+----+----+
+;-> |   1|    |  23|    |  48|    |    |    |  89|
+;-> +----+----+----+----+----+----+----+----+----+
+;-> 
+;-> +----+----+----+----+----+----+----+----+----+
+;-> |   1|  14|  23|  32|    |  53|  64|  71|  82|
+;-> +----+----+----+----+----+----+----+----+----+
+;-> |    |    |    |    |  42|    |    |  76|  83|
+;-> +----+----+----+----+----+----+----+----+----+
+;-> |   5|    |  30|    |  48|    |    |    |  89|
+;-> +----+----+----+----+----+----+----+----+----+
+;-> ((1 14 23 32 nil 53 64 71 82) (nil nil nil nil 42 nil nil 76 83) (5 nil 30 nil 48
+;->   nil nil nil 89))
+
 ============================================================================
 
