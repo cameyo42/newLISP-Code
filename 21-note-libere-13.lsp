@@ -2397,12 +2397,13 @@ Altri acronimi:
 ("Friends" "Lovers" "Admirers"     "Marriage" "Enemies" "Secret Lovers")
 
 
------------------------------------------
-Newton forward and backward interpolation
------------------------------------------
+-----------------------------------------------
+Interpolazione di Newton (forward and backward)
+-----------------------------------------------
+
+L'interpolazione è la tecnica di stima del valore di una funzione per qualsiasi valore intermedio della variabile indipendente, mentre il processo di calcolo del valore della funzione al di fuori dell'intervallo dato è detto estrapolazione.
 
 Per maggiori informazioni vedere:
-
 https://www.geeksforgeeks.org/newton-forward-backward-interpolation/
 
 Newton forward interpolation

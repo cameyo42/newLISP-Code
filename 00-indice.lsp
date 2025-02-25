@@ -1551,7 +1551,7 @@ NOTE LIBERE 13
   Algoritmo Undo/Redo
   Multiple stack/queue
   FLAMES: il gioco delle relazioni
-  Newton forward and backward interpolation
+  Interpolazione di Newton (forward and backward)
   Ragazzi e ragazze
   Divisione del premio
   Codice numerico univoco per stringhe (ASCII)
@@ -2821,6 +2821,8 @@ NOTE LIBERE 28
   Determinante di una matrice (Laplace e Gauss)
   Numeri (e parole) lessicograficamente crescenti/decrescenti
   Generatore di cartelle BINGO
+  Ordinamento di righe e colonne di una matrice
+  NASA's 10 Rules for Developing Safety-Critical Code
 
 PROBLEMI SUI DADI
 =================
