@@ -2759,7 +2759,7 @@ NOTE LIBERE 27
   Numero di linee continue per rappresentare un grafico a linee (Line Chart)
   Simulare N cicli for
   Somma X di N numeri (NSum)
-  Segmenti paralelli e segmenti perpendicolari (ortogonali)
+  Segmenti paralleli e segmenti perpendicolari (ortogonali)
   Numeri di Schroeder (Piccoli e Grandi)
   Trasformazione dei numeri primi
   La funzione Tally (Mathematica)

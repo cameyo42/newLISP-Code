@@ -3621,7 +3621,7 @@ Se non esiste una soluzione, allora la funzione restituisce una matrice MxN con 
 Funzione che colora una matrice MxN con K colori (Adiacenza a 4 posti):
 
 (define (riempi-matrice M N K)
-  (let ((matrice (array-list (array M N '(-1)))) (stop false))
+  (let ((matrice (array-list (array M N '(-1)))) (continua nil))
     (define (valido? x y v)
       (and (!= (matrice x y) v)
            (or (< x 1) (!= (matrice (- x 1) y) v))
@@ -3629,7 +3629,7 @@ Funzione che colora una matrice MxN con K colori (Adiacenza a 4 posti):
            (or (>= x (- M 1)) (!= (matrice (+ x 1) y) v))
            (or (>= y (- N 1)) (!= (matrice x (+ y 1)) v))))
     (define (riempi x y)
-      (if (>= x M) (setq stop true)
+      (if (>= x M) (setq continua true)
           (let ((nx (if (>= (+ y 1) N) (+ x 1) x))
                 (ny (% (+ y 1) N)))
             (dolist (v (randomize (sequence 0 (- K 1))))
@@ -3637,7 +3637,7 @@ Funzione che colora una matrice MxN con K colori (Adiacenza a 4 posti):
                   (begin
                     (setf (matrice x y) v)
                     (riempi nx ny)
-                    (if stop (setq stop true) (setf (matrice x y) -1))))))))
+                    (if (not continua) (setf (matrice x y) -1))))))))
     (riempi 0 0)
     matrice))
 
@@ -3667,7 +3667,7 @@ Proviamo:
 Funzione che colora una matrice MxN con K colori (Adiacenza a 8 posti):
 
 (define (riempi-matrice8 M N K)
-  (let ((matrice (array-list (array M N '(-1)))) (stop false))
+  (let ((matrice (array-list (array M N '(-1)))) (continua nil))
     (define (valido? x y v)
       (and (!= (matrice x y) v)
            (or (< x 1) (!= (matrice (- x 1) y) v))
@@ -3679,7 +3679,7 @@ Funzione che colora una matrice MxN con K colori (Adiacenza a 8 posti):
            (or (>= x (- M 1)) (< y 1) (!= (matrice (+ x 1) (- y 1)) v))
            (or (>= x (- M 1)) (>= y (- N 1)) (!= (matrice (+ x 1) (+ y 1)) v))))
     (define (riempi x y)
-      (if (>= x M) (setq stop true)
+      (if (>= x M) (setq continua true)
           (let ((nx (if (>= (+ y 1) N) (+ x 1) x))
                 (ny (% (+ y 1) N)))
             (dolist (v (randomize (sequence 0 (- K 1))))
@@ -3687,7 +3687,7 @@ Funzione che colora una matrice MxN con K colori (Adiacenza a 8 posti):
                   (begin
                     (setf (matrice x y) v)
                     (riempi nx ny)
-                    (if stop (setq stop true) (setf (matrice x y) -1))))))))
+                    (if (not continua) (setf (matrice x y) -1))))))))
     (riempi 0 0)
     matrice))
 

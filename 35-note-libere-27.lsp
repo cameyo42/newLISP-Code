@@ -5539,10 +5539,10 @@ Proviamo:
 
 
 ---------------------------------------------------------
-Segmenti paralelli e segmenti perpendicolari (ortogonali)
+Segmenti paralleli e segmenti perpendicolari (ortogonali)
 ---------------------------------------------------------
 
-Segmenti paralelli
+Segmenti paralleli
 ------------------
 Per verificare se due segmenti s1(p1, p2) e s2(p3, p4) sono paralleli, possiamo confrontare i loro vettori direzionali.
 Due segmenti sono paralleli se i loro vettori direzionali sono proporzionali.
