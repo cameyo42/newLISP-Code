@@ -2823,6 +2823,7 @@ NOTE LIBERE 28
   Generatore di cartelle BINGO
   Ordinamento di righe e colonne di una matrice
   NASA's 10 Rules for Developing Safety-Critical Code
+  Colorare una griglia con 4 colori
 
 PROBLEMI SUI DADI
 =================
@@ -2870,7 +2871,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (319 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (323 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

@@ -3323,5 +3323,429 @@ Static analyzers have a somewhat bad reputation due to early versions that produ
 The best static analyzers today are fast, and they produce accurate messages.
 Their use should not be negotiable on any serious software project.
 
+
+---------------------------------
+Colorare una griglia con 4 colori
+---------------------------------
+
+Data una matrice MxN (M righe e N colonne) colorare le celle con K colori in modo che non esistano due celle adiacenti con lo stesso colore.
+La proprietà di "adiacenza" ha due tipologie:
+1) Adiacenza delle celle orizzontali e verticali
+   (al massimo 4 celle adiacenti)
+2) Adiacenza delle celle orizzontali, verticali e diagonali
+   (al massimo 8 celle adiacenti)
+
+Al posto dei colori utilizziamo i numeri:
+  rosso  --> 1
+  blu    --> 2
+  giallo --> 3
+  verde  --> 4
+
+Esempio:
+Matrice con 2 righe e 3 colonne, M=2 e N=3.
+Una possibile soluzione:
+
+  +---+---+---+
+  | 1 | 2 | 3 |
+  +---+---+---+
+  | 3 | 4 | 1 |
+  +---+---+---+
+
+(define (print-matrix matrix)
+"Print a matrix m x n"
+  (local (row col lenmax digit fmtstr)
+    ; converto matrice in lista?
+    (if (array? matrix) (setq matrix  (array-list matrix)))
+    ; righe della matrice
+    (setq row (length matrix))
+    ; colonne della matrice
+    (setq col (length (first matrix)))
+    ; valore massimo della lunghezza di un elemento (come stringa)
+    (setq lenmax (apply max (map length (map string (flat matrix)))))
+    ; calcolo spazio per gli elementi
+    (setq digit (+ 1 lenmax))
+    ; creo stringa di formattazione
+    (setq fmtstr (append "%" (string digit) "s"))
+    ; stampa la matrice
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        (print (format fmtstr (string (matrix i j))))
+      )
+      (println))))
+
+Funzione che restituisce i valori adiacenti al valore di una data riga e colonna di una matrice:
+Adiacenza orizzontale e diagonale (al massimo 4 valori)
+
+(define (adiacenti4 row col matrix rows cols)
+  (let (out '())
+    (setq rows (or rows (length matrix)))
+    (setq cols (or cols (length (matrix 0))))
+    ; Nord
+    (if (>= (- row 1) 0) (push (matrix (- row 1) col) out -1))
+    ; Est
+    (if (< (+ col 1) cols) (push (matrix row (+ col 1)) out -1))
+    ; Sud
+    (if (< (+ row 1) rows) (push (matrix (+ row 1) col) out -1))
+    ; Ovest
+    (if (>= (- col 1) 0) (push (matrix row (- col 1)) out -1))
+    out))
+
+Funzione che restituisce i valori adiacenti al valore di una data riga e colonna di una matrice:
+Adiacenza orizzontale, diagonale e diagonale (al massimo 8 valori)
+
+(define (adiacenti8 row col matrix rows cols)
+  (let (out '())
+    (setq rows (or rows (length matrix)))
+    (setq cols (or cols (length (matrix 0))))
+    ; Nord
+    (if (>= (- row 1) 0) (push (matrix (- row 1) col) out -1))
+    ; Nord-Est
+    (if (and (>= (- row 1) 0) (< (+ col 1) cols))
+        (push (matrix (- row 1) (+ col 1)) out -1))
+    ; Est
+    (if (< (+ col 1) cols) (push (matrix row (+ col 1)) out -1))
+    ; Sud-Est
+    (if (and (< (+ row 1) rows) (< (+ col 1) cols))
+        (push (matrix (+ row 1) (+ col 1)) out -1))
+    ; Sud
+    (if (< (+ row 1) rows) (push (matrix (+ row 1) col) out -1))
+    ; Sud-Ovest
+    (if (and (< (+ row 1) rows) (>= (- col 1) 0))
+        (push (matrix (+ row 1) (- col 1)) out -1))
+    ; Ovest
+    (if (>= (- col 1) 0) (push (matrix row (- col 1)) out -1))
+    ; Nord-Ovest
+    (if (and (>= (- row 1) 0) (>= (- col 1) 0))
+        (push (matrix (- row 1) (- col 1)) out -1))
+    out))
+
+(setq m '((1 2 3 4)
+          (5 6 7 8)
+          (4 3 2 1)))
+
+(adiacenti4 0 0 m)
+;-> (2 5)
+(adiacenti8 0 0 m)
+;-> (2 6 5)
+(adiacenti4 1 1 m)
+;-> (2 7 3 5)
+(adiacenti8 1 1 m)
+;-> (2 3 7 2 3 4 5 1)
+(adiacenti4 2 3 m)
+;-> (8 2)
+(adiacenti8 2 3 m)
+;-> (8 2 7)
+
+Algoritmo Random
+----------------
+
+Per ogni cella:
+a) calcolare i colori delle celle adiacenti
+b) selezionare un colore in modo casuale diverso da quello delle celle adiacenti
+
+Questo è un algoritmo random senza backtracking, quindi non genera sempre una soluzione corretta.
+
+Funzione che colora una matrice MxN con K colori (Adiacenza a 4 posti):
+
+(define (colora4 rows cols num-colori)
+  (local (matrix colori vicini scelta)
+    (setq matrix (array-list (array rows cols '(0))))
+    (setq colori (sequence 1 num-colori))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        ; calcola i colori adiacenti
+        (setq vicini (adiacenti4 r c matrix))
+        ; seleziona un colore diverso dai colori adiacenti
+        (setq scelta (difference colori vicini))
+        ;(print r { } c { } colori { } scelta) (read-line)
+        (if scelta
+            (setf (matrix r c) (scelta (rand (length scelta))))
+            (println "Soluzione errata: riga = " r ", colonna = " c))))
+  matrix))
+
+Proviamo:
+
+(print-matrix (colora4 10 10 4))
+;->  1 3 1 4 2 3 2 4 3 4
+;->  2 4 3 2 1 2 1 2 1 2
+;->  4 2 1 3 2 3 4 3 4 3
+;->  1 4 2 1 3 2 3 4 2 1
+;->  4 3 4 3 2 1 2 1 4 2
+;->  3 4 3 4 3 2 1 2 3 1
+;->  2 1 4 1 2 4 2 1 4 3
+;->  4 3 1 2 4 2 3 4 3 1
+;->  2 1 4 3 2 3 1 2 1 4
+;->  3 4 3 2 1 4 2 1 4 2
+
+(print-matrix (colora4 10 10 2))
+;->  1 2 1 2 1 2 1 2 1 2
+;->  2 1 2 1 2 1 2 1 2 1
+;->  1 2 1 2 1 2 1 2 1 2
+;->  2 1 2 1 2 1 2 1 2 1
+;->  1 2 1 2 1 2 1 2 1 2
+;->  2 1 2 1 2 1 2 1 2 1
+;->  1 2 1 2 1 2 1 2 1 2
+;->  2 1 2 1 2 1 2 1 2 1
+;->  1 2 1 2 1 2 1 2 1 2
+;->  2 1 2 1 2 1 2 1 2 1
+
+Nota: con l'adiacenza a 4 posti sono sufficienti 2 colori.
+
+Funzione che colora una matrice MxN con K colori (Adiacenza a 8 posti):
+
+(define (colora8 rows cols num-colori)
+  (local (matrix colori vicini scelta)
+    (setq matrix (array-list (array rows cols '(0))))
+    (setq colori (sequence 1 num-colori))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        ; calcola i colori adiacenti
+        (setq vicini (adiacenti8 r c matrix))
+        ; seleziona un colore diverso dai colori adiacenti
+        (setq scelta (difference colori vicini))
+        ;(print r { } c { } colori { } scelta) (read-line)
+        (if scelta
+            (setf (matrix r c) (scelta (rand (length scelta))))
+            (println "Errore: (" r "," c ") = 0"))))
+  matrix))
+
+Proviamo:
+
+(print-matrix (colora8 3 4 4))
+;-> Errore: (1,1) = 0
+;->  2 3 1 2
+;->  4 0 4 3
+;->  3 1 2 1
+
+(print-matrix (colora8 3 4 4))
+;->  3 2 4 2
+;->  4 1 3 1
+;->  3 2 4 2
+
+(print-matrix (colora8 8 8 4))
+;-> Errore: (1,3) = 0
+;-> Errore: (1,5) = 0
+;-> Errore: (2,1) = 0
+;-> Errore: (4,1) = 0
+;->  4 2 3 2 1 4 2 1
+;->  3 1 4 0 3 0 3 4
+;->  2 0 2 1 2 1 2 1
+;->  1 4 3 4 3 4 3 4
+;->  2 0 2 1 2 1 2 1
+;->  3 4 3 4 3 4 3 4
+;->  1 2 1 2 1 2 1 2
+;->  3 4 3 4 3 4 3 4
+
+Scriviamo una funzione che prova a colorare una matrice MxN con K colori un determinato numero di volte.
+
+(define (color8 rows cols num-colori)
+(catch
+  (local (matrix colori vicini scelta)
+    (setq matrix (array-list (array rows cols '(0))))
+    (setq colori (sequence 1 num-colori))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        ; calcola i colori adiacenti
+        (setq vicini (adiacenti8 r c matrix))
+        ; seleziona un colore diverso dai colori adiacenti
+        (setq scelta (difference colori vicini))
+        ;(print r { } c { } colori { } scelta) (read-line)
+        (if scelta
+            (setf (matrix r c) (scelta (rand (length scelta))))
+            (throw nil))))
+  matrix)))
+
+(define (colora-8 rows cols num-colori iterazioni)
+  (local (found res)
+    (setq found nil)
+    (for (i 1 iterazioni 1 found)
+      (setq res (color8 rows cols num-colori))
+      (when res (print-matrix res) (setq found true)))))
+
+Facendo alcune prove si possono trovare delle disposizioni simmetriche dei colori (numeri):
+
+(colora-8 10 10 4 10000)
+;->  4 1 4 1 4 1 4 1 4 1
+;->  3 2 3 2 3 2 3 2 3 2
+;->  1 4 1 4 1 4 1 4 1 4
+;->  3 2 3 2 3 2 3 2 3 2
+;->  4 1 4 1 4 1 4 1 4 1
+;->  3 2 3 2 3 2 3 2 3 2
+;->  4 1 4 1 4 1 4 1 4 1
+;->  3 2 3 2 3 2 3 2 3 2
+;->  1 4 1 4 1 4 1 4 1 4
+;->  2 3 2 3 2 3 2 3 2 3
+
+(colora-8 6 6 4 10000)
+;->  3 2 3 2 3 4
+;->  1 4 1 4 1 2
+;->  3 2 3 2 3 4
+;->  1 4 1 4 1 2
+;->  3 2 3 2 3 4
+;->  1 4 1 4 1 2
+
+(colora-8 7 7 4 10000)
+;->  1 3 1 4 1 3 2
+;->  2 4 2 3 2 4 1
+;->  1 3 1 4 1 3 2
+;->  2 4 2 3 2 4 1
+;->  1 3 1 4 1 3 2
+;->  2 4 2 3 2 4 1
+;->  1 3 1 4 1 3 2
+
+(colora-8 2 10 4 10000)
+;->  3 2 3 1 4 2 3 1 4 2
+;->  4 1 4 2 3 1 4 2 3 1
+
+(colora-8 5 20 4 10000)
+;->  3 2 4 1 3 2 4 1 3 2 4 1 3 1 3 1 3 2 3 1
+;->  4 1 3 2 4 1 3 2 4 1 3 2 4 2 4 2 4 1 4 2
+;->  3 2 4 1 3 2 4 1 3 2 4 1 3 1 3 1 3 2 3 1
+;->  4 1 3 2 4 1 3 2 4 1 3 2 4 2 4 2 4 1 4 2
+;->  3 2 4 1 3 2 4 1 3 2 4 1 3 1 3 1 3 2 3 1
+
+(colora-8 5 20 4 10000)
+;->  3 4 3 4 1 4 3 4 1 4 1 4 3 2 3 2 3 4 3 2
+;->  1 2 1 2 3 2 1 2 3 2 3 2 1 4 1 4 1 2 1 4
+;->  3 4 3 4 1 4 3 4 1 4 1 4 3 2 3 2 3 4 3 2
+;->  1 2 1 2 3 2 1 2 3 2 3 2 1 4 1 4 1 2 1 4
+;->  3 4 3 4 1 4 3 4 1 4 1 4 3 2 3 2 3 4 3 2
+
+Algoritmo Backtracking
+----------------------
+
+Adesso scriviamo due funzioni che utilizzano il backtracking per riempire la matrice rispettando i vincoli di adiacenza dei numeri.
+Le funzioni tentano di riempire la matrice partendo dall'angolo in alto a sinistra e procedendo per righe, riprovando in caso di fallimento.
+Se non esiste una soluzione, allora la funzione restituisce una matrice MxN con tutti i valori uguali a -1.
+
+Funzione che colora una matrice MxN con K colori (Adiacenza a 4 posti):
+
+(define (riempi-matrice M N K)
+  (let ((matrice (array-list (array M N '(-1)))) (stop false))
+    (define (valido? x y v)
+      (and (!= (matrice x y) v)
+           (or (< x 1) (!= (matrice (- x 1) y) v))
+           (or (< y 1) (!= (matrice x (- y 1)) v))
+           (or (>= x (- M 1)) (!= (matrice (+ x 1) y) v))
+           (or (>= y (- N 1)) (!= (matrice x (+ y 1)) v))))
+    (define (riempi x y)
+      (if (>= x M) (setq stop true)
+          (let ((nx (if (>= (+ y 1) N) (+ x 1) x))
+                (ny (% (+ y 1) N)))
+            (dolist (v (randomize (sequence 0 (- K 1))))
+              (if (valido? x y v)
+                  (begin
+                    (setf (matrice x y) v)
+                    (riempi nx ny)
+                    (if stop (setq stop true) (setf (matrice x y) -1))))))))
+    (riempi 0 0)
+    matrice))
+
+Proviamo:
+
+(riempi-matrice 5 5 3)
+;-> ((1 0 2 0 1)
+;->  (0 1 0 1 0)
+;->  (2 0 2 0 1)
+;->  (1 2 0 1 0)
+;->  (2 0 1 0 1))
+
+(riempi-matrice 5 5 2)
+;-> ((1 0 1 0 1)
+;->  (0 1 0 1 0)
+;->  (1 0 1 0 1)
+;->  (0 1 0 1 0)
+;->  (1 0 1 0 1))
+
+(riempi-matrice 5 5 1)
+;-> ((-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1))
+
+Funzione che colora una matrice MxN con K colori (Adiacenza a 8 posti):
+
+(define (riempi-matrice8 M N K)
+  (let ((matrice (array-list (array M N '(-1)))) (stop false))
+    (define (valido? x y v)
+      (and (!= (matrice x y) v)
+           (or (< x 1) (!= (matrice (- x 1) y) v))
+           (or (< y 1) (!= (matrice x (- y 1)) v))
+           (or (>= x (- M 1)) (!= (matrice (+ x 1) y) v))
+           (or (>= y (- N 1)) (!= (matrice x (+ y 1)) v))
+           (or (< x 1) (< y 1) (!= (matrice (- x 1) (- y 1)) v))
+           (or (< x 1) (>= y (- N 1)) (!= (matrice (- x 1) (+ y 1)) v))
+           (or (>= x (- M 1)) (< y 1) (!= (matrice (+ x 1) (- y 1)) v))
+           (or (>= x (- M 1)) (>= y (- N 1)) (!= (matrice (+ x 1) (+ y 1)) v))))
+    (define (riempi x y)
+      (if (>= x M) (setq stop true)
+          (let ((nx (if (>= (+ y 1) N) (+ x 1) x))
+                (ny (% (+ y 1) N)))
+            (dolist (v (randomize (sequence 0 (- K 1))))
+              (if (valido? x y v)
+                  (begin
+                    (setf (matrice x y) v)
+                    (riempi nx ny)
+                    (if stop (setq stop true) (setf (matrice x y) -1))))))))
+    (riempi 0 0)
+    matrice))
+
+Proviamo:
+
+(riempi-matrice8 5 5 5)
+;-> ((1 3 1 4 3)
+;->  (4 2 0 2 0)
+;->  (0 3 4 1 3)
+;->  (2 1 0 2 4)
+;->  (4 3 4 3 1))
+
+(riempi-matrice8 5 5 4)
+;-> ((3 1 0 1 3)
+;->  (0 2 3 2 0)
+;->  (3 1 0 1 3)
+;->  (0 2 3 2 0)
+;->  (3 1 0 1 3))
+
+(riempi-matrice8 5 5 3)
+;-> ((-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1)
+;->  (-1 -1 -1 -1 -1))
+
+(time (println (riempi-matrice8 10 10 4)))
+;-> ((0 1 3 2 3 2 0 2 3 1) 
+;->  (3 2 0 1 0 1 3 1 0 2)
+;->  (0 1 3 2 3 2 0 2 3 1)
+;->  (3 2 0 1 0 1 3 1 0 2)
+;->  (0 1 3 2 3 2 0 2 3 1)
+;->  (3 2 0 1 0 1 3 1 0 2)
+;->  (0 1 3 2 3 2 0 2 3 1)
+;->  (3 2 0 1 0 1 3 1 0 2)
+;->  (0 1 3 2 3 2 0 2 3 1)
+;->  (3 2 0 1 0 1 3 1 0 2))
+;-> 11.837
+
+(time (println (riempi-matrice8 15 15 4)))
+;-> ((1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0)
+;->  (0 2 1 2 1 3 0 3 1 3 1 2 1 2 1)
+;->  (1 3 0 3 0 2 1 2 0 2 0 3 0 3 0))
+;-> 4162.02
+
+Nota: il tempo di esecuzione aumenta con le dimensioni delle matrici, ma non è costante con gli stessi parametri poichè l'algoritmo inserisce i numeri nelle celle in modo casuale.
+
 ============================================================================
 
