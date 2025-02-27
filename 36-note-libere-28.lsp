@@ -3747,5 +3747,220 @@ Proviamo:
 
 Nota: il tempo di esecuzione aumenta con le dimensioni delle matrici, ma non è costante con gli stessi parametri poichè l'algoritmo inserisce i numeri nelle celle in modo casuale.
 
+
+-----------------------------------
+"Half price for every second pizza"
+-----------------------------------
+
+Link al problema originale:
+https://codegolf.stackexchange.com/questions/278114/half-price-for-every-second-pizza
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+"Ogni seconda pizza a metà prezzo"
+---------------------------------
+PizzaTata è un famoso ristorante specializzato nella consegna di pizze.
+I clienti possono ordinare le pizze per telefono.
+E ogni ordine viene addebitato in base alla somma dei prezzi delle pizze e della tariffa di consegna.
+
+Prezzi delle pizze: il costo di ogni singola pizza.
+Costo di consegna: costo fisso per ordine, indipendentemente dal numero di pizze.
+
+Di recente, PizzaTata ha annunciato una promozione intitolata "Half Price for Every Second Pizza".
+Tuttavia, l'applicazione dello sconto si basa sulle pizze più economiche nell'ordine, anziché rigorosamente su ogni seconda pizza.
+
+Le regole della promozione sono le seguenti:
+
+1) Ordine singolo di pizza: non viene applicato nessuno sconto.
+2) Due pizze: la pizza con il prezzo più basso riceve uno sconto del 50%. La pizza con il prezzo più alto rimane al suo prezzo originale.
+3) Tre pizze: solo la pizza più economica riceve uno sconto del 50%. Le altre due pizze rimangono ai loro prezzi originali.
+4) Quattro o più pizze: per un ordine di pizze, il cliente riceve uno sconto del 50% su floor(n/2) pizze (dividere n per 2 e arrotondare per difetto). Le pizze rimanenti vengono addebitate ai prezzi originali.
+
+Spese di consegna: le spese di consegna vengono aggiunte al costo totale dell'ordine senza alcuno sconto.
+
+Esempi:
+Supponiamo che Mike abbia ordinato 1 pizza al prezzo di $20 e che la tariffa di consegna sia di $6. Quindi Mike deve pagare $26 in totale.
+
+Supponiamo che Tom abbia ordinato 3 pizze con prezzo di $20, $30 e $40. E la tariffa di consegna è di $6. Quindi Tom deve pagare ($20 * 50%) + $30 + $40 + $6 = $86 in totale.
+
+Bob vuole ordinare 4 pizze.
+E i prezzi di queste pizze sono $20, $30, $60, $70.
+La tariffa di consegna è di $6.
+Si rende presto conto che, se acquista tutte le pizze in un unico ordine, deve pagare ($20 * 50%) + ($30 * 50%) + $60 + $70 + $6 = $161.
+Ma se acquista le pizze con due ordini, deve pagare solo [($20 * 50%) + $30 + $6] + [($60 * 50%) + $70 + $6] = $152.
+E poiché Bob vuole risparmiare denaro proprio come ogni altro cliente, acquisterà queste pizze con due ordini separati.
+
+Problema
+Data una lista di prezzi di pizza e la tariffa di consegna, determina il modo ottimale per dividere le pizze in uno o più ordini per minimizzare il costo totale.
+
+Casi di prova:
+Costo fisso, Prezzi pizze -> Costo toale
+   6, (20) -> 26
+   6, (20, 30) -> 46
+   6, (20, 20) -> 36
+  12, (20, 2200) -> 2222
+   6, (20, 30, 40) -> 86
+   6, (20, 30, 60) -> 106
+   6, (20, 40, 60) -> 112
+   6, (20, 30, 40, 50) -> 121
+   6, (20, 30, 60, 70) -> 152
+   4, (20, 30, 20, 20, 30) -> 103
+   4, (30, 30, 20, 20, 30) -> 113
+   5, (88, 88, 88, 88, 8, 8) -> 286
+   5, (20, 20, 20, 20, 20, 20, 20) -> 115
+ 100, (10, 20, 10, 20, 10, 20, 10, 20) -> 200
+   2, (10, 20, 30, 40, 50, 60, 70, 80) -> 288
+   5, (16, 30, 18, 10, 14, 12, 20, 28) -> 126
+
+Nota: i prezzi delle pizze devono essere ordinati in modo crescente.
+
+(define (partition lst)
+"Generates all the partitions of a list"
+  (if (= (length lst) 1) (list lst)
+  (local (out len max-tagli taglio fmt)
+    (setq out '())
+    (setq len (length lst))
+    ; numero massimo di tagli
+    (setq max-tagli (- len 1))
+    ; formattazione con 0 davanti
+    (setq fmt (string "%0" max-tagli "s"))
+    (for (i 0 (- (pow 2 max-tagli) 1))
+      ; taglio corrente
+      (setq taglio (format fmt (bits i)))
+      ; taglia la lista con taglio corrente
+      ; e la inserisce nella lista soluzione
+      (push (partition-aux lst taglio) out -1))
+    out)))
+; Auxiliary function for (partition lst)
+(define (partition-aux lst binary)
+  (local (out tmp)
+    (setq out '())
+    (setq tmp '())
+    (for (i 0 (- (length binary) 1))
+      (cond ((= (binary i) "1") ; taglio
+              (push (lst i) tmp -1)
+              (push tmp out -1)
+              (setq tmp '()))
+            (true  ; nessun taglio
+              (push (lst i) tmp -1))))
+    ; inserisce lista finale
+    (push (lst -1) tmp -1)
+    (push tmp out -1)
+    out))
+
+(partition '(20))
+;-> ((20))
+(partition '(10 20))
+;-> (((10 20)) ((10) (20)))
+(partition '(20 30 60 70))
+;-> (((20 30 60 70)) ((20 30 60) (70)) ((20 30) (60 70))
+;->  ((20 30) (60) (70)) ((20) (30 60 70)) ((20) (30 60) (70))
+;->  ((20) (30) (60 70)) ((20) (30) (60) (70)))
+
+Funzione che calcola il prezzo minimo:
+
+(define (prezzo-minimo lst)
+  (local (fisso ordini minimo ottimo)
+    ; costo della consegna
+    (setq fisso (pop lst))
+    ; ordinamento dei prezzi delle pizze
+    (sort lst)
+    ; genera tutte le partizioni (cioè tutti i possibili ordini)
+    (setq ordini (partition lst))
+    ;(println "ordini: " ordini)
+    (setq minimo 999999)
+    (setq ottimo '())
+    (if (= (length ordini) 1)
+      (set 'minimo (add (ordini 0 0) fisso) 'ottimo (ordini 0))
+      ;else
+      ; Ciclo su ogni ordine per calcolarne il prezzo
+      (dolist (ordine ordini)
+        ;(println $idx)
+        (setq prezzo (calcola-prezzo ordine))
+        ;(println "Prezzo e minimo: " prezzo {, } minimo)
+        ; aggiornamento prezzo minimo e relativo ordine
+        (if (< prezzo minimo) (set 'minimo prezzo 'ottimo ordine))
+        ;(println "Prezzo e minimo: " prezzo {, } minimo)
+      )
+    )
+    (list minimo ottimo)))
+
+Funzione che calcola il prezzo di un ordine:
+
+(define (calcola-prezzo ordine)
+  (local (prezzo len tmp)
+    (setq prezzo 0)
+    ;(println "ordine: " ordine)
+    ; Ciclo su ogni elemento dell'ordine per calcolarene il prezzo totale
+    (dolist (el ordine)
+      ; numero di pizze dell'elemento corrente
+      (setq len (length el))
+      (setq tmp 0)
+      ; calcolo del prezzo dell'elemento corrente
+      (cond ((= len 1) ; 1 pizza
+              (setq tmp (el 0)))
+            ((= len 2) ; 2 pizze
+              (setq tmp (add (el 1) (div (el 0) 2))))
+            ((= len 3) ; 3 pizze
+              (setq tmp (add (el 2) (el 1) (div (el 0) 2))))
+            (true ; > 3 pizze
+              (setq soglia (/ len 2))
+              (dolist (k el)
+                (if (< $idx soglia)
+                    (setq tmp (add tmp (div k 2)))
+                    (setq tmp (add tmp k)))
+              ))
+      )
+      ;(println "tmp: " tmp)
+      ; aggiorna il prezzo totale dell'ordine
+      (setq prezzo (add prezzo tmp fisso))
+      ;(println "prezzo: " prezzo)
+      ;(read-line)
+    )
+    prezzo))
+
+Proviamo:
+
+(prezzo-minimo '(6 20))
+;-> (26 (20))
+(prezzo-minimo '(6 20 30 40))
+;-> (86 ((20 30 40)))
+(prezzo-minimo '(6 20 30 60 70))
+;-> (152 ((20 30) (60 70)))
+
+(prezzo-minimo '(6 20))
+;-> (26 (20))
+(prezzo-minimo '(6 20 30))
+;-> (46 ((20 30)))
+(prezzo-minimo '(6 20 20))
+;-> (36 ((20 20)))
+(prezzo-minimo '(12 20 2200))
+;-> (2222 ((20 2200)))
+(prezzo-minimo '(6 20 30 40))
+;-> (86 ((20 30 40)))
+(prezzo-minimo '(6 20 30 60))
+;-> (106 ((20 30 60)))
+(prezzo-minimo '(6 20 40 60))
+;-> (112 ((20) (40 60)))
+(prezzo-minimo '(6 20 30 40 50))
+;-> (121 ((20 30 40 50)))
+(prezzo-minimo '(6 20 30 60 70))
+;-> (152 ((20 30) (60 70)))
+(prezzo-minimo '(4 20 30 20 20 30))
+;-> (103 ((20 20 20) (30 30)))
+(prezzo-minimo '(4 30 30 20 20 30))
+;-> (113 ((20 20 30) (30 30)))
+(prezzo-minimo '(5 88 88 88 88 8 8))
+;-> (286 ((8 8) (88 88 88 88)))
+(prezzo-minimo '(5 20 20 20 20 20 20 20))
+;-> (115 ((20 20 20 20 20 20 20)))
+(prezzo-minimo '(100 10 20 10 20 10 20 10 20))
+;-> (200 ((10 10 10 10 20 20 20 20)))
+(prezzo-minimo '(2 10 20 30 40 50 60 70 80))
+;-> (288 ((10 20) (30 40) (50 60) (70 80)))
+(prezzo-minimo '(5 16 30 18 10 14 12 20 28))
+;-> (126 ((10 12 14 16 18 20) (28 30)))
+
 ============================================================================
 

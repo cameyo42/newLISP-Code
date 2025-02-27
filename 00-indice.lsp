@@ -2824,6 +2824,7 @@ NOTE LIBERE 28
   Ordinamento di righe e colonne di una matrice
   NASA's 10 Rules for Developing Safety-Critical Code
   Colorare una griglia con 4 colori
+  "Half price for every second pizza"
 
 PROBLEMI SUI DADI
 =================
