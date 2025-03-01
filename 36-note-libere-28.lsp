@@ -3962,5 +3962,132 @@ Proviamo:
 (prezzo-minimo '(5 16 30 18 10 14 12 20 28))
 ;-> (126 ((10 12 14 16 18 20) (28 30)))
 
+
+------------------------
+Equazione di primo grado
+------------------------
+
+Data un equazione che contiene:
+
+1) numeri interi
+2) una variabile x (con eventualmente il coefficiente, per esempio 7x)
+3) le operazioni di addizione (+) e sottrazione (-)
+
+Scrivere una funzione per determinare il valore della x.
+
+Esempi:
+equazione: 2x + 3 - x = 9 - x
+soluzione: x = 3
+
+equazione: 2x + 3 - x = 9 - x
+soluzione: x = 3
+equazione: -40 + 10x - 3x +10 +x = 20x - 9 + 10x -x
+soluzione: x = -1
+
+equazione: 21x - 30 - x = -99 - 2x
+soluzione: x = -69/22 = -3.136363636363636
+
+Funzione che calcola il valore di x dell'equazione:
+
+(define (solve eqn)
+  (local (sx-dx cifre sx dx valore-sx valore-dx coeff-x costante)
+    (setq cifre (explode "0123456789"))
+    ; Elimina gli spazi dall'equazione
+    (replace " " eqn "")
+    ; Divide l'equazione in due parti: sx e dx
+    (setq sx-dx (parse eqn "="))
+    (setq sx (sx-dx 0))
+    (setq dx (sx-dx 1))
+    ; Normalizza la parte sx dell'equazione
+    (if (and (!= (sx 0) "+") (!= (sx 0) "-") (push "+" sx)))
+    (replace "-x" sx "-1x")
+    (replace "+x" sx "+1x")
+    ; Normalizza la parte dx dell'equazione
+    (if (and (!= (dx 0) "+") (!= (dx 0) "-") (push "+" dx)))
+    (replace "-x" dx "-1x")
+    (replace "+x" dx "+1x")
+    ; Stampa equazione normalizzata
+    (println sx {=} dx)
+    ; Calcola il valore della parte sinistra (coefficiente e costante)
+    (setq valore-sx (calcola sx))
+    ;(println valore-sx)
+    ; Calcola il valore della parte sinistra (coefficiente e costante)
+    (setq valore-dx (calcola dx))
+    ;(println valore-dx)
+    ; Calcola il valore del coefficiente di x
+    (setq coeff-x (sub (valore-sx 0) (valore-dx 0)))
+    ; Calcola il valore della costante
+    (setq costante (sub (valore-dx 1) (valore-sx 1)))
+    ; Calcolo del valore di x
+    (println "x = " costante "/" coeff-x)
+    (div costante coeff-x)))
+
+Funzione che calcola il coefficiente di x e la costante di una parte dell'equazione:
+
+(define (calcola str)
+  (local (len val-x val k termine ch)
+    (setq len (length str))
+    (setq val-x 0)
+    (setq val 0)
+    (setq k 0)
+    (setq termine "")
+    ; calcolo di ogni termine
+    (while (< k len)
+      (setq ch (str k))
+            ; se il termine è nullo oppure
+            ; il termine non è nullo e il carattere è diverso da "+" e "-"...
+      (cond ((or (= termine "") (and (!= termine "") (!= ch "-") (!= ch "+")))
+              ; ... allora continua la costruzione del termine
+              (extend termine ch) (++ k))
+            ; se il termine non è nullo e il carattere vale "=" o "-"...
+            ((and (!= termine "") (or (= ch "-") (= ch "+")))
+              ; ... allora calcoliamo il valore del termine
+              (if (find "x" termine)
+                    ; il valore del termine è il coefficiente di x 
+                    (setq val-x (add val-x (int termine)))
+                    ; il valore del termine è la costante
+                    (setq val (add val (int termine))))
+              (setq termine "")))
+    )
+    ; calcoliamo il valore dell'ultimo termine
+    (if (find "x" termine)
+        (setq val-x (add val-x (int termine)))
+        (setq val (add val (int termine)))
+    )
+    ; restituisce il coefficiente di x e la costante
+    (list val-x val)))
+
+Proviamo:
+
+(solve "2x + 3 - x = 9 - x")
+;-> x = 6/2
+;-> 3
+
+(solve "-40 + 10x - 3x +10 +x = 20x - 9 + 10x -x")
+;-> x = 21/-21
+;-> -1
+
+(solve "21x - 30 - x = -99 - 2x")
+;-> +21x-30-1x=-99-2x
+;-> x = -69/22
+;-> -3.136363636363636
+
+(solve "2x = x")
+;-> +2x=+1x
+;-> x = 0/1
+;-> 0
+(solve "x = 2x")
+;-> +1x=+2x
+;-> x = 0/-1
+;-> -0
+(solve "x = x")
+;-> +1x=+1x
+;-> x = 0/0
+;-> -1.#IND
+(solve "x = -x")
+;-> +1x=-1x
+;-> x = 0/2
+;-> 0
+
 ============================================================================
 

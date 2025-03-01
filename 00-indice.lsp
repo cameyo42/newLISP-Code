@@ -2825,6 +2825,7 @@ NOTE LIBERE 28
   NASA's 10 Rules for Developing Safety-Critical Code
   Colorare una griglia con 4 colori
   "Half price for every second pizza"
+  Equazione di primo grado
 
 PROBLEMI SUI DADI
 =================
