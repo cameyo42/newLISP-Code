@@ -4089,5 +4089,205 @@ Proviamo:
 ;-> x = 0/2
 ;-> 0
 
+
+---------------------------------------
+Alfabeto quadrato con caratteri a scale
+---------------------------------------
+
+Scrivere una funzione per generare il testo seguente:
+  azzzzzzzzzzzzzzzzzzzzzzzzzz
+  bbyyyyyyyyyyyyyyyyyyyyyyyyy
+  cccxxxxxxxxxxxxxxxxxxxxxxxx
+  ddddwwwwwwwwwwwwwwwwwwwwwww
+  eeeeevvvvvvvvvvvvvvvvvvvvvv
+  ffffffuuuuuuuuuuuuuuuuuuuuu
+  gggggggtttttttttttttttttttt
+  hhhhhhhhsssssssssssssssssss
+  iiiiiiiiirrrrrrrrrrrrrrrrrr
+  jjjjjjjjjjqqqqqqqqqqqqqqqqq
+  kkkkkkkkkkkpppppppppppppppp
+  llllllllllllooooooooooooooo
+  mmmmmmmmmmmmmnnnnnnnnnnnnnn
+  nnnnnnnnnnnnnnmmmmmmmmmmmmm
+  ooooooooooooooollllllllllll
+  ppppppppppppppppkkkkkkkkkkk
+  qqqqqqqqqqqqqqqqqjjjjjjjjjj
+  rrrrrrrrrrrrrrrrrriiiiiiiii
+  ssssssssssssssssssshhhhhhhh
+  ttttttttttttttttttttggggggg
+  uuuuuuuuuuuuuuuuuuuuuffffff
+  vvvvvvvvvvvvvvvvvvvvvveeeee
+  wwwwwwwwwwwwwwwwwwwwwwwdddd
+  xxxxxxxxxxxxxxxxxxxxxxxxccc
+  yyyyyyyyyyyyyyyyyyyyyyyyybb
+  zzzzzzzzzzzzzzzzzzzzzzzzzza
+
+(define (scala1)
+  (for (i 1 26) (println (dup (char (+ 96 i)) i))) '>)
+
+(scala1)
+;-> a
+;-> bb
+;-> ccc
+;-> dddd
+;-> eeeee
+;-> ffffff
+;-> ggggggg
+;-> hhhhhhhh
+;-> iiiiiiiii
+;-> jjjjjjjjjj
+;-> kkkkkkkkkkk
+;-> llllllllllll
+;-> mmmmmmmmmmmmm
+;-> nnnnnnnnnnnnnn
+;-> ooooooooooooooo
+;-> pppppppppppppppp
+;-> qqqqqqqqqqqqqqqqq
+;-> rrrrrrrrrrrrrrrrrr
+;-> sssssssssssssssssss
+;-> tttttttttttttttttttt
+;-> uuuuuuuuuuuuuuuuuuuuu
+;-> vvvvvvvvvvvvvvvvvvvvvv
+;-> wwwwwwwwwwwwwwwwwwwwwww
+;-> xxxxxxxxxxxxxxxxxxxxxxxx
+;-> yyyyyyyyyyyyyyyyyyyyyyyyy
+;-> zzzzzzzzzzzzzzzzzzzzzzzzzz
+
+(define (scala2)
+  (for (i 26 1) (println (dup (char (+ 96 i)) i))) '>)
+
+(scala2)
+;-> zzzzzzzzzzzzzzzzzzzzzzzzzz
+;-> yyyyyyyyyyyyyyyyyyyyyyyyy
+;-> xxxxxxxxxxxxxxxxxxxxxxxx
+;-> wwwwwwwwwwwwwwwwwwwwwww
+;-> vvvvvvvvvvvvvvvvvvvvvv
+;-> uuuuuuuuuuuuuuuuuuuuu
+;-> tttttttttttttttttttt
+;-> sssssssssssssssssss
+;-> rrrrrrrrrrrrrrrrrr
+;-> qqqqqqqqqqqqqqqqq
+;-> pppppppppppppppp
+;-> ooooooooooooooo
+;-> nnnnnnnnnnnnnn
+;-> mmmmmmmmmmmmm
+;-> llllllllllll
+;-> kkkkkkkkkkk
+;-> jjjjjjjjjj
+;-> iiiiiiiii
+;-> hhhhhhhh
+;-> ggggggg
+;-> ffffff
+;-> eeeee
+;-> dddd
+;-> ccc
+;-> bb
+;-> a
+
+(define (quadrato)
+  (for (i 1 26) (println (dup (char (+ 96 i)) i)
+                         (dup (char (+ 96 (- 27 i))) (- 27 i)))) '>)
+
+(quadrato)
+;-> azzzzzzzzzzzzzzzzzzzzzzzzzz
+;-> bbyyyyyyyyyyyyyyyyyyyyyyyyy
+;-> cccxxxxxxxxxxxxxxxxxxxxxxxx
+;-> ddddwwwwwwwwwwwwwwwwwwwwwww
+;-> eeeeevvvvvvvvvvvvvvvvvvvvvv
+;-> ffffffuuuuuuuuuuuuuuuuuuuuu
+;-> gggggggtttttttttttttttttttt
+;-> hhhhhhhhsssssssssssssssssss
+;-> iiiiiiiiirrrrrrrrrrrrrrrrrr
+;-> jjjjjjjjjjqqqqqqqqqqqqqqqqq
+;-> kkkkkkkkkkkpppppppppppppppp
+;-> llllllllllllooooooooooooooo
+;-> mmmmmmmmmmmmmnnnnnnnnnnnnnn
+;-> nnnnnnnnnnnnnnmmmmmmmmmmmmm
+;-> ooooooooooooooollllllllllll
+;-> ppppppppppppppppkkkkkkkkkkk
+;-> qqqqqqqqqqqqqqqqqjjjjjjjjjj
+;-> rrrrrrrrrrrrrrrrrriiiiiiiii
+;-> ssssssssssssssssssshhhhhhhh
+;-> ttttttttttttttttttttggggggg
+;-> uuuuuuuuuuuuuuuuuuuuuffffff
+;-> vvvvvvvvvvvvvvvvvvvvvveeeee
+;-> wwwwwwwwwwwwwwwwwwwwwwwdddd
+;-> xxxxxxxxxxxxxxxxxxxxxxxxccc
+;-> yyyyyyyyyyyyyyyyyyyyyyyyybb
+;-> zzzzzzzzzzzzzzzzzzzzzzzzzza
+
+
+------------------------
+Punteggio di una stringa
+------------------------
+
+Il punteggio di una stringa è dato dal numero di caratteri distinti, più ogni numero intero unico n tale che un carattere appaia esattamente n volte.
+Esempio:
+stringa = "xyzxxzzxz"
+punteggio = 8
+Perchè ci sono 3 caratteri distinti e ci sono caratteri che compaiono 1 volta (y) e 4 volte (x) e (z), quindi 3 + 1 + 4 = 8.
+
+(define (score str)
+  (local (s chars distinti conta interi)
+    ; lista di caratteri
+    (setq s (explode str))
+    ; caratteri unici
+    (setq chars (unique s))
+    ; numero caratteri unici
+    (setq distinti (length chars))
+    ; conta le occorrenze dei caratteri unici
+    (setq conta (count chars s))
+    ; calcola i numeri unici delle occorrenze
+    (setq interi (apply + (unique conta)))
+    ; somma dei caratteri unici e delle occorrenze uniche
+    (+ distinti interi)))
+
+Proviamo:
+
+(score "")
+;-> 0
+(score "xyzxxzzxz")
+;-> 8
+(score "a")
+;-> 2
+(score "aa")
+;-> 3
+(score "aaa")
+;-> 4
+(score "aaazzz")
+;-> 5
+(score "newlisp")
+;-> 8
+(score "aabbcccdddd")
+;-> 13
+
+La stessa funzione con 89 caratteri:
+
+(define (f s)
+  (letn ((l (explode s)) (c (unique l)))
+    (+ (length c) (apply + (unique (count c l))))))
+
+(define(f s)(letn((l(explode s))(c(unique l)))(+(length c)(apply +(unique(count c l))))))
+
+(f "")
+;-> 0
+(f "xyzxxzzxz")
+;-> 8
+(f "a")
+;-> 2
+(f "aa")
+;-> 3
+(f "aaa")
+;-> 4
+(f "aaazzz")
+;-> 5
+(f "newlisp")
+;-> 8
+(f "aabbcccdddd")
+;-> 13
+
+Vedi anche "Costo di una stringa" su "Note libere 21".
+
+
 ============================================================================
 

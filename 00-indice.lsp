@@ -2826,6 +2826,8 @@ NOTE LIBERE 28
   Colorare una griglia con 4 colori
   "Half price for every second pizza"
   Equazione di primo grado
+  Alfabeto quadrato con caratteri a scale
+  Punteggio di una stringa
 
 PROBLEMI SUI DADI
 =================

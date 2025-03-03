@@ -3683,6 +3683,8 @@ Proviamo:
 (costo "----------")
 ;-> 55
 
+Vedi anche "Punteggio di una stringa" su "Note libere 28".
+
 
 ----------------------------------------------
 Stampare un numero con un display a 7 segmenti
