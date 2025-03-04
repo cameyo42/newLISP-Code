@@ -5711,6 +5711,9 @@ b) con un Vettore
 (time (linear t1000))
 ;-> 0
 
+Vedi anche "Somma massima di una sottolista (Algoritmo Kadane)" su "Problemi vari".
+Vedi anche "Somma assoluta massima di una sottolista" su "Note libere 28".
+
 
 -----------------------------------------
 La Pasta e la teoria della Programmazione

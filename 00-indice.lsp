@@ -2824,10 +2824,14 @@ NOTE LIBERE 28
   Ordinamento di righe e colonne di una matrice
   NASA's 10 Rules for Developing Safety-Critical Code
   Colorare una griglia con 4 colori
-  "Half price for every second pizza"
+  Half price for every second pizza
   Equazione di primo grado
   Alfabeto quadrato con caratteri a scale
   Punteggio di una stringa
+  Conto alla rovescia da N a 0 (number of 1's in Gray code for n)
+  Somma assoluta massima di una sottolista
+  Inversione dei bit di un numero binario
+  Permutazioni distinte
 
 PROBLEMI SUI DADI
 =================

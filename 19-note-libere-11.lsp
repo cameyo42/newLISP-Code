@@ -3286,6 +3286,8 @@ Quarta funzione:
 ;-> 99.359
 La funzione "set-ref-all" è veloce ed elegante.
 
+Vedi anche "Inversione dei bit di un numero binario" su "Note libere 28".
+
 
 --------------------------------
 Logaritmi: ln, log2, log10, logN

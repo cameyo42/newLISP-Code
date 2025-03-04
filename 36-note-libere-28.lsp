@@ -3748,9 +3748,9 @@ Proviamo:
 Nota: il tempo di esecuzione aumenta con le dimensioni delle matrici, ma non è costante con gli stessi parametri poichè l'algoritmo inserisce i numeri nelle celle in modo casuale.
 
 
------------------------------------
-"Half price for every second pizza"
------------------------------------
+---------------------------------
+Half price for every second pizza
+---------------------------------
 
 Link al problema originale:
 https://codegolf.stackexchange.com/questions/278114/half-price-for-every-second-pizza
@@ -3759,7 +3759,7 @@ Nota:
 Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
 
 "Ogni seconda pizza a metà prezzo"
----------------------------------
+----------------------------------
 PizzaTata è un famoso ristorante specializzato nella consegna di pizze.
 I clienti possono ordinare le pizze per telefono.
 E ogni ordine viene addebitato in base alla somma dei prezzi delle pizze e della tariffa di consegna.
@@ -4288,6 +4288,525 @@ La stessa funzione con 89 caratteri:
 
 Vedi anche "Costo di una stringa" su "Note libere 21".
 
+
+---------------------------------------------------------------
+Conto alla rovescia da N a 0 (number of 1's in Gray code for n)
+---------------------------------------------------------------
+
+Dato un intero N non negativo, applicare le seguenti operazioni:
+  N = 123456
+  1) Convertire N in binario ("11110001001000000")
+  2) Capovolgere ogni bit (flip) ("00001110110111111")
+  3) Rimuovere gli zeri iniziali ("1110110111111")
+  4) Convertire in decimale (7615)
+
+Continuando ad applicare ripetutamente questi passaggi il numero N iniziale raggiunge il valore 0.
+
+Scrivere una funzione che, dato N, calcola il numero di ripetizioni dei passaggi per raggiungere 0.
+
+Sequenza OEIS A005811:
+Number of runs in binary expansion of n (n>0), number of 1's in Gray code for n.
+  0, 1, 2, 1, 2, 3, 2, 1, 2, 3, 4, 3, 2, 3, 2, 1, 2, 3, 4, 3, 4, 5, 4, 3,
+  2, 3, 4, 3, 2, 3, 2, 1, 2, 3, 4, 3, 4, 5, 4, 3, 4, 5, 6, 5, 4, 5, 4, 3,
+  2, 3, 4, 3, 4, 5, 4, 3, 2, 3, 4, 3, 2, 3, 2, 1, 2, 3, 4, 3, 4, 5, 4, 3,
+  4, 5, 6, 5, 4, 5, 4, 3, 4, 5, 6, 5, 6, 7, 6, 5, 4, 5, 6, 5, 4, 5, ...
+
+(setq N 123456)
+; Converte N in binario
+(setq N (bits N))
+; Capovolge ogni bit (flip)
+(setq N (join (map (fn (c) (if (= c "0") "1" "0")) (explode N))))
+; Rimuove gli zeri iniziali
+(setq N (trim N "0" ""))
+; Converte in decimale
+(setq N (int N 0 2))
+
+(define (countdown N)
+  (let (conta 0)
+    (until (zero? N)
+      (++ conta)
+      ; Converte N in binario
+      (setq N (bits N))
+      ; Capovolge ogni bit (flip)
+      (setq N (join (map (fn (c) (if (= c "0") "1" "0")) (explode N))))
+      ; Rimuove gli zeri iniziali
+      (setq N (trim N "0" ""))
+      ; Converte in decimale
+      (setq N (int N 0 2)))
+    conta))
+
+Proviamo:
+
+(countdown 123456)
+;-> 6
+
+(map countdown (sequence 0 100))
+;-> (0 1 2 1 2 3 2 1 2 3 4 3 2 3 2 1 2 3 4 3 4 5 4 3
+;->  2 3 4 3 2 3 2 1 2 3 4 3 4 5 4 3 4 5 6 5 4 5 4 3
+;->  2 3 4 3 4 5 4 3 2 3 4 3 2 3 2 1 2 3 4 3 4 5 4 3
+;->  4 5 6 5 4 5 4 3 4 5 6 5 6 7 6 5 4 5 6 5 4 5 4 3
+;->  2 3 4 3 4)
+
+
+----------------------------------------
+Somma assoluta massima di una sottolista
+----------------------------------------
+
+Dato una lista di numeri interi è trovare la somma assoluta massima di una sua sottolista.
+Una sottolista è una serie di elementi contigui della lista originale (da () a tutta la lista).
+La somma assoluta è la somma totale in cui consideriamo un totale negativo come la sua controparte positiva (ovvero, applichiamo l'operazione di valore assoluto alla somma).
+La somma assoluta massima è il valore più alto di abs(sum) che possiamo ottenere da tutte le possibili sottoliste della lista data.
+
+Algoritmo
+1) Attraversare la lista tenendo traccia di due valori: la somma massima della sottolista corrente e la somma minima della sottolista corrente.
+2) Al termine restituire il valore massimo dei due valori tracciati.
+
+In questo modo consideriamo sia i numeri positivi che quelli negativi perché la somma assoluta massima potrebbe provenire da una sottolista con una somma negativa a causa dell'operazione di valore assoluto.
+Poichè ci interessa solo il valore massimo, non abbiamo bisogno di mantenere una lista completa di somme, ma semplicemente aggiornare le nostre due variabili mentre eseguiamo attraversiamo la lista.
+
+Questa soluzione è un adattamento dell'algoritmo di Kadane, utilizzato per trovare la sottolista di somma massima.
+In questo caso l'algoritmo è stato modificato per tenere conto anche delle somme negative massimizzando i valori assoluti.
+
+(define (max-abs-sum lst)
+  (let ((out 0) (max-sum 0) (min-sum 0))
+    (dolist (el lst)
+      ; Aggiorna la somma massima della sottolista 
+      ; che termina nella posizione corrente.
+      ; Reimposta al numero corrente se la somma massima diventa negativa.
+      (setq max-sum (max el (+ max-sum el)))
+      ; Aggiorna la somma minima della sottolista
+      ; che termina nella posizione corrente.
+      ; Reimposta al numero corrente se la somma minima diventa positiva.      
+      (setq min-sum (min el (+ min-sum el)))
+      ; Aggiorna la soluzione out con il valore massimo tra out corrente,
+      ; la somma massima corrente della sottolista
+      ; e il valore assoluto della la somma minima corrente della sottolista.
+      (setq out (max out max-sum (- min-sum)))
+    )
+    out))
+
+Proviamo:
+
+(max-abs-sum '(1 -3 2 3 -4))
+;-> 5
+(max-abs-sum '(2 -5 1 -4 3 -2))
+;-> 8
+
+Vedi anche "Somma massima di una sottolista (Algoritmo Kadane)" su "Problemi vari".
+Vedi anche "Somma massima di una sottolista (Maximum Subarray Sum Problem)" su "Note libere 23".
+
+
+---------------------------------------
+Inversione dei bit di un numero binario
+---------------------------------------
+
+Dato un numero binario, invertire tutti i suoi bit (0 --> 1 e 1 --> 0).
+
+Un numero binario può essere di tipo intero (es. 101011) oppure di tipo stringa (es. "101011") oppure di tipo lista (es. (1 0 1 0 1 1) o ("1" "0" "1" "0" "1" "1").
+I numeri binari che a sinistra iniziano con 0 non possono essere rappresentati come interi, ma devono essere di tipo stringa (es. "0101110") o di tipo lista.
+
+Funzione che inverte un singolo bit (intero: 0 o 1):
+
+(define (flip-bit x) (- 1 x))
+
+(flip-bit 1)
+;-> 0
+(flip-bit 0)
+;-> 1
+
+Funzione che inverte un singolo bit (stringa: "0" o "1"):
+
+(define (flip-bit-str c) (if (= c "0") "1" "0"))
+
+(flip-bit-str "0")
+;-> "1"
+(flip-bit-str "1")
+;-> "0"
+
+Numero binario come stringa
+---------------------------
+
+Funzione che inverte i bit di un numero binario (stringa):
+
+(define (invert-str1 s)
+  (join (map (fn (c) (if (= c "0") "1" "0")) (explode s))))
+
+(invert-str1 "101010")
+;-> "010101"
+(invert-str1 "111111")
+;-> "000000"
+(invert-str1 "000000")
+;-> "111111"
+(invert-str1 "000111")
+;-> "111000"
+
+Funzione che inverte i bit di un numero binario (stringa):
+
+(define (invert-str2 s)
+  (dostring (c s)
+    (if (= c 48) (setf (s $idx) "1") (setf (s $idx) "0")))
+  s)
+
+(invert-str2 "101010")
+;-> "010101"
+(invert-str2 "111111")
+;-> "000000"
+(invert-str2 "000000")
+;-> "111111"
+(invert-str2 "111000")
+;-> "000111"
+(invert-str2 "000111")
+;-> "111000"
+
+Numero binario come intero
+--------------------------
+
+Funzione che inverte i bit di un numero binario (intero):
+(il numero binario non deve iniziare con 0 a sinistra)
+
+(define (invert-bin num)
+  (let (lst '())
+    (while (!= num 0)
+      (push (- 1 (% num 10)) lst)
+      (setq num (/ num 10)))
+      ;(println num { } lst)
+    (dolist (el lst) (setq num (+ el (* num 10)))) num))
+
+(invert-bin 101010)
+;-> 10101
+(invert-bin 111111)
+;-> 0
+(invert-bin 000000)
+;-> 0   ;errore: il numero inizia con 0
+(invert-bin 111000)
+;-> 111
+(invert-bin 000111)
+;-> -62 ;errore: il numero inizia con 0
+
+Numero binario come lista di interi (0 e 1)
+-------------------------------------------
+
+Funzione che inverte i bit di un numero binario (lista interi 0 e 1):
+
+(define (invert-lst1 lst) (map (fn(x) (- 1 x)) lst))
+
+(invert-lst1 '(1 0 1 0 1 0))
+;-> (0 1 0 1 0 1)
+(invert-lst1 '(1 1 1 1 1 1))
+;-> (0 0 0 0 0 0)
+(invert-lst1 '(0 0 0 0 0 0))
+;-> (1 1 1 1 1 1)
+(invert-lst1 '(1 1 1 0 0 0))
+;-> '(0 0 0 1 1 1 )
+(invert-lst1 '(0 0 0 1 1 1))
+;-> (1 1 1 0 0 0)
+
+Funzione che inverte i bit di un numero binario (lista interi 0 e 1):
+
+(define (invert-lst2 lst) (dolist (x lst) (setf (lst $idx) (- 1 x))) lst)
+
+(invert-lst2 '(1 0 1 0 1 0))
+;-> (0 1 0 1 0 1)
+(invert-lst2 '(1 1 1 1 1 1))
+;-> (0 0 0 0 0 0)
+(invert-lst2 '(0 0 0 0 0 0))
+;-> (1 1 1 1 1 1)
+(invert-lst2 '(1 1 1 0 0 0))
+;-> '(0 0 0 1 1 1 )
+(invert-lst2 '(0 0 0 1 1 1))
+;-> (1 1 1 0 0 0)
+
+Funzione che inverte i bit di un numero binario (lista caratteri ("0" e "1")):
+
+(define (invert-lst3 lst) (map (fn(c) (if (= c "0") "1" "0")) lst))
+
+(invert-lst3 '("1" "0" "1" "0" "1" "0"))
+;-> ("0" "1" "0" "1" "0" "1")
+(invert-lst3 '("1" "1" "1" "1" "1" "1"))
+;-> ("0" "0" "0" "0" "0" "0")
+(invert-lst3 '("0" "0" "0" "0" "0" "0"))
+;-> ("1" "1" "1" "1" "1" "1")
+(invert-lst3 '("1" "1" "1" "0" "0" "0"))
+;-> '(0" "0" "0" "1" "1" "1" ")
+(invert-lst3 '("0" "0" "0" "1" "1" "1"))
+;-> ("1" "1" "1" "0" "0" "0")
+
+Funzione che inverte i bit di un numero binario (lista caratteri ("0" e "1")):
+
+(define (invert-lst4 lst) 
+  (dolist (c lst) 
+    (if (= c "0") 
+        (setf (lst $idx) "1")
+        (setf (lst $idx) "0")))
+  lst)
+
+(invert-lst4 '("1" "0" "1" "0" "1" "0"))
+;-> ("0" "1" "0" "1" "0" "1")
+(invert-lst4 '("1" "1" "1" "1" "1" "1"))
+;-> ("0" "0" "0" "0" "0" "0")
+(invert-lst4 '("0" "0" "0" "0" "0" "0"))
+;-> ("1" "1" "1" "1" "1" "1")
+(invert-lst4 '("1" "1" "1" "0" "0" "0"))
+;-> '(0" "0" "0" "1" "1" "1" ")
+(invert-lst4 '("0" "0" "0" "1" "1" "1"))
+;-> ("1" "1" "1" "0" "0" "0")
+
+Vediamo la velocità delle funzioni:
+
+(setq str "10101010101010101010101010101010101")
+(setq bin 10101010101010101010101010101010101)
+(setq lst-str '("1" "0" "1" "0" "1" "0" "1" "0" "1" "0" "1" "0" "1"
+                "0" "1" "0" "1" "0" "1" "0" "1" "0" "1" "0" "1" "0"
+                "1" "0" "1" "0" "1" "0" "1" "0" "1"))
+(setq lst-bin '(1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0
+                1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1))
+
+(time (invert-str1 str) 1e5)
+;-> 944.976
+(time (invert-str2 str) 1e5)
+;-> 1093.429
+(time (invert-bin bin) 1e5)
+;-> 2151.868
+(time (invert-lst1 lst-bin 1e5))
+;-> 0
+(time (invert-lst2 lst-bin 1e5))
+;-> 0
+(time (invert-lst3 lst-str) 1e5)
+;-> 1282.227
+(time (invert-lst4 lst-str) 1e5))
+;-> 1291.227
+
+Le funzioni più veloci sono quelle che usano una lista di interi (0 e 1) come rappresentazione del numero binario.
+
+Vedi anche "Inversione dei valori di un matrice binaria (0 -> 1), (1 -> 0)" su "Note libere 11".
+
+
+---------------------
+Permutazioni distinte
+---------------------
+
+Abbiamo una stringa di N caratteri.
+Se i caratteri sono tutti diversi possiamo generare N! stringhe diverse (numero di permutazioni).
+Se alcuni caratteri si ripetono, allora il numero di stringhe diverse che possiamo generare è dato dalla formula del numero di permutazioni con ripetizioni:
+
+             N!
+  -----------------------
+   k(1)!*k(2)!*...*k(m)!
+
+dove k(i) è il numero di ripetizioni del carattere i-esimo.
+
+Esempio:
+Supponiamo di avere la stringa "AAB":
+- N = 3
+- "A" che si ripete 2 volte k(1) = 2,
+- "B" che appare 1 volta k(2) = 1.
+
+Il numero di stringhe diverse vale:
+
+     3!       6 
+  ------- = ----- = 3
+   2!*1!      2
+
+Le stringhe distinte sono: "AAB", "ABA", "BAA".
+
+1) Stringa con caratteri tutti diversi
+--------------------------------------
+
+Possiamo generare tutte le permutazioni (tutte le stringhe diverse) con una funzione ricorsiva o con una funzione iterativa (molto più veloce).
+
+Funzione che genera le permutazioni (ricorsiva):
+
+(define (permutazioni lst)
+  (let ((risultati '()))
+    (define (genera s r)
+      (if (= (length r) 0)
+          (push s risultati -1)
+          (dolist (i (sequence 0 (- (length r) 1)))
+            (let ((c (r i)))
+              (genera (append s (list c)) (append (slice r 0 i) (slice r (+ i 1))))))))
+    (genera '() lst)
+    risultati))
+
+Funzione che genera le permutazioni (iterativa):
+
+(define (perm lst)
+"Generates all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+       )
+    )
+    out))
+
+2) Stringa con alcuni caratteri ripetuti
+----------------------------------------
+
+Possiamo generare tutte le permutazioni (tutte le stringhe diverse) con una funzione ricorsiva o con una funzione iterativa (molto più veloce).
+
+Funzione che genera le permutazioni distinte (ricorsiva):
+
+(define (permutazioni-distinte lst)
+  (let ((risultati '()))
+    (define (genera s r)
+      (if (= (length r) 0)
+          (push s risultati -1)
+          (let ((usati '()))
+            (dolist (i (sequence 0 (- (length r) 1)))
+              (let ((c (r i)))
+                (unless (ref c usati)
+                  (push c usati)
+                  (genera (append s (list c)) (append (slice r 0 i) (slice r (+ i 1))))))))))
+    (genera '() lst)
+    risultati))
+
+Funzione che genera le permutazioni distinte (iterativa):
+
+(define (perm-distinte lst)
+  (unique (perm lst)))
+
+Proviamo:
+
+(perm '(a a b))
+;-> ((a a b) (a a b) (b a a) (a b a) (a b a) (b a a))
+(permutazioni '(a a b))
+;-> ((a a b) (a b a) (a a b) (a b a) (b a a) (b a a))
+(perm-distinte '(a a b))
+;-> ((a a b) (b a a) (a b a))
+(permutazioni-distinte '(a a b))
+;-> ((a a b) (a b a) (b a a))
+
+(= (sort (perm '(1 2 3 4 5))) (sort (permutazioni '(1 2 3 4 5))))
+;-> true
+(= (sort (perm-distinte '(1 2 3 4 5))) (sort (permutazioni-distinte '(1 2 3 4 5))))
+;-> true
+
+(= (sort (perm '(1 2 3 1 2))) (sort (permutazioni '(1 2 3 1 2))))
+;-> true
+(= (sort (perm-distinte '(1 2 3 1 2))) (sort (permutazioni-distinte '(1 2 3 1 2))))
+;-> true
+
+Vediamo dove possiamo arrivare con la funzione "perm"...
+
+(time (perm (sequence 0 9)))
+;-> 3109.934
+(time (perm (sequence 0 10)))
+;-> 64869.73
+
+Possiamo usare stringhe con 10 caratteri al massimo.
+
+(define (fact-i num)
+"Calculates the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+Funzione che calcola il numero di permutazioni distinte di una lista:
+
+(define (num-perm-dist lst)
+  (local (len unici conta)
+    (setq len (length lst))
+    (setq unici (unique lst))
+    (setq conta (count unici lst))
+    (/ (fact-i len) (apply * (map fact-i conta)))))
+
+Proviamo:
+
+(setq a '(1 2 3 2 1))
+(length (perm-distinte a))
+;-> 30
+(num-perm-dist a)
+;-> 30L
+
+Adesso verifichiamo la formula del numero di permutazioni in modo casuale.
+Scriviamo una funzione che calcola, in media, quante volte dobbiamo mischiare una stringa prima di ottenere la stringa di partenza.
+
+(define (uguale lst)
+  (let (conta 1)
+    (until (= lst (randomize lst true)) (++ conta))
+    conta))
+
+(uguale (explode "pippo"))
+;-> 14
+(uguale (explode "123456789"))
+;-> 386363
+(uguale (explode "ppppp"))
+;-> 1
+
+(define (test str iter)
+  (local (lst totale)
+    (setq lst (explode str))
+    (setq totale 0)
+    (for (i 1 iter)
+      (++ totale (uguale lst))
+    )
+    (println "permutazioni (formula): " (num-perm-dist lst))
+    (println "permutazioni (funzione): " (length (perm-distinte lst)))
+    (println "permutazioni (random): " (div totale iter)) '>))
+
+Proviamo:
+
+(test "12345" 1e5)
+;-> permutazioni (formula): 120L
+;-> permutazioni (funzione): 120
+;-> permutazioni (random): 120.36656
+
+(test "12321" 1e5)
+;-> permutazioni (formula): 30L
+;-> permutazioni (funzione): 30
+;-> permutazioni (random): 30.05655
+
+(test "12121" 1e5)
+;-> permutazioni (formula): 10L
+;-> permutazioni (funzione): 10
+;-> permutazioni (random): 10.00086
+
+(test "11112" 1e5)
+;-> permutazioni (formula): 5L
+;-> permutazioni (funzione): 5
+;-> permutazioni (random): 5.01836
+
+(test "11111" 1e5)
+;-> permutazioni (formula): 1L
+;-> permutazioni (funzione): 1
+;-> permutazioni (random): 1
+
+(time (test "123456" 1e5))
+;-> permutazioni (formula): 720L
+;-> permutazioni (funzione): 720
+;-> permutazioni (random): 718.55216
+;-> 39618.784
+
+(time (test "123456789" 100))
+;-> permutazioni (formula): 362880L
+;-> permutazioni (funzione): 362880
+;-> permutazioni (random): 339682.86
+;-> 28131.006
+
+(time (test "123456789" 1000))
+;-> permutazioni (formula): 362880L
+;-> permutazioni (funzione): 362880
+;-> permutazioni (random): 350682.536
+;-> 270377.925
 
 ============================================================================
 

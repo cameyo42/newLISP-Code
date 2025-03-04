@@ -5250,6 +5250,7 @@ La funzione definitiva è la seguente:
 L'algoritmo Kadane ha complessità temporale O(n).
 
 Vedi anche "Somma massima di una sottolista (Maximum Subarray Sum Problem)" su "Note libere 23".
+Vedi anche "Somma assoluta massima di una sottolista" su "Note libere 28".
 
 
 ----------------------------------
