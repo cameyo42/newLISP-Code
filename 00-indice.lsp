@@ -426,7 +426,7 @@ DOMANDE PROGRAMMATORI (CODING INTERVIEW QUESTIONS)
   Contare i bit di un numero (McAfee)
   Scambiare il valore di due variabili (McAfee)
   Funzione "atoi" (McAfee)
-  Somma di numeri in una lista (Google)
+  Coppia di numeri che sommano a k (Google)
   Aggiornamento di una lista (Uber)
   Ricerca numero su una lista (Stripe)
   Decodifica di un messaggio (Facebook)
@@ -2832,6 +2832,8 @@ NOTE LIBERE 28
   Somma assoluta massima di una sottolista
   Inversione dei bit di un numero binario
   Permutazioni distinte
+  Rettangolo massimo in una matrice
+  
 
 PROBLEMI SUI DADI
 =================

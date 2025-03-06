@@ -480,9 +480,9 @@ Per una corretta implementazione devono essere considerati i seguenti casi:
 ;-> nil
 
 
--------------------------------------
-Somma di numeri in una lista (Google)
--------------------------------------
+-----------------------------------------
+Coppia di numeri che sommano a k (Google)
+-----------------------------------------
 
 Data una lista di numeri e un numero k, restituire se due numeri dalla lista si sommano a k.
 Ad esempio, dati (10 15 3 7) e k di 17, restituisce true da 10 + 7 che vale 17.
@@ -534,7 +534,7 @@ Per esempio:
 
 Comunque la complessità temporale rimane sempre O(n^2).
 
-Quindi la soluzione è iterare sulla lista e per ogni elemento cercare se qualsiasi elemento della lista successiva somma fino a 17.
+Quindi la soluzione è iterare sulla lista e per ogni elemento cercare se qualsiasi elemento della lista successiva somma fino a k (17).
 
 (define (sol lst n)
   (local (out ll)

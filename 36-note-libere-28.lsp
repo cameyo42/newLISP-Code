@@ -4808,5 +4808,219 @@ Proviamo:
 ;-> permutazioni (random): 350682.536
 ;-> 270377.925
 
+
+---------------------------------
+Rettangolo massimo in una matrice
+---------------------------------
+
+Data una matrice binaria MxN determinare il rettangolo con area massima.
+Un rettangolo è formato da quattro '1' come vertici.
+Un rettangolo non può avere vertici coincidenti.
+L'area minima di un rettangolo vale 4:
+  1 1
+  1 1
+
+Per esempio nella seguente matrice:
+
+  1 1 0 1 0
+  0 0 1 0 1
+  0 0 1 0 1
+  1 1 0 0 0
+
+ci sono due rettangoli:
+
+   1 1
+   0 0       1 0 1
+   0 0       1 0 1
+   1 1
+area = 8    area = 6
+
+Per esempio nella seguente matrice:
+
+  1 1 0 1 0
+  0 0 1 0 1
+  0 0 1 0 1
+  1 1 0 1 0
+
+ci sono quattro rettangoli:
+
+   1 1      1 1 0 1      1 0 1
+   0 0      0 0 1 0      0 1 0      1 0 1
+   0 0      0 0 1 0      0 1 0      1 0 1
+   1 1      1 1 0 1      1 0 1
+area = 8   area = 16   area = 12   area = 6
+
+Algoritmo
+1) Per ogni riga
+   1.1) Calcolare tutte le coppie di '1' (colonne)
+   1.2) Per ogni coppia di '1'
+        1.2.1) Cercare un rettangolo nelle righe inferiori e aggiornare area massima temporanea
+   1.3) Aggiornare area massima
+   
+In altre parole, partiamo dalle coppie di '1' su una riga e poi verifichiamo la presenza dei vertici inferiori corrispondenti.
+Questo garantisce che tutti i rettangoli validi vengano considerati.
+
+Nota: per capire meglio l'algoritmo possiamo usare 'verbose' uguale a true e visualizzare i valori intermedi dei calcoli.
+
+Funzione che trova il rettangolo massimo data una riga e una coppia di colonne:
+
+(define (find-rect-max row colonne)
+  (let ( (colonna-sx (colonne 0))
+         (colonna-dx (colonne 1))
+         (area 0)
+         (max-val 0)
+         (rectangle '()) )
+    (if verbose (println "colonne: " colonne))
+    ; Ricerca del rettangolo massimo per la riga 'row'
+    ; e le colonne sx e dx
+    (for (r (+ row 1) (- rows 1))
+    ;(for (r row (- rows 1)) ; per rettangoli con vertici coincidenti
+      ; Verifica se abbiamo trovato un rettangolo...
+      (when (and (= (matrice r colonna-sx) 1) (= (matrice r colonna-dx) 1))
+        ; Calcola area del rettangolo
+        (setq area (* (+ (- r row) 1) (+ (- colonna-dx colonna-sx) 1)))
+        (if verbose (begin (println "rettangolo: " row { } colonna-sx { } r { } colonna-dx)
+                           (print "area:" area) (read-line)))
+        ; Aggiorna il valore massimo dell'area
+        (when (> area max-val)
+          (setq max-val area)
+          (setq rectangle (list row colonna-sx r colonna-dx area))
+        )
+      )
+    )
+    rectangle))
+
+Funzione che trova il rettangolo massimo in una matrice MxN:
+La funzione restituisce una lista con i seguenti valori:
+(row-alto-sx col-alto-sx row-basso-dx col-basso-dx area)
+
+(define (trova-max-rectangle matrice verbose)
+  (let ( (rows (length matrice))
+         (cols (length (matrice 0)))
+         (uno-idx '())
+         (coppie '())
+         (rect-max-tmp '())
+         (rettangolo '())
+         (massimo 0) )
+    ; Ciclo per ogni riga (fino alla penultima)
+    (for (row 0 (- rows 2))
+    ;(for (row 0 (- rows 1)) ; per rettangoli con vertici coincidenti
+      (if verbose (println "Riga: " row))
+      ; Calcolo indici degli 1 nella riga corrente
+      (setq uno-idx (flat (ref-all 1 (matrice row))))
+      (if verbose (println "uno-idx: " uno-idx))
+      ; Quando esistono almeno due 1 nella riga corrente...
+      (when (> (length uno-idx) 1)
+        ; Genera tutte le coppie di indici delle colonne che puntano a 1
+        ; (nella riga corrente 'row')
+        (setq coppie '())
+        (for (i 0 (- (length uno-idx) 2))
+          (for (j (+ i 1) (- (length uno-idx) 1))
+              (push (list (uno-idx i) (uno-idx j)) coppie -1)))
+        (if verbose (println "coppie: " coppie))
+        ; Ciclo per ogni coppia di indici di colonne
+        (dolist (colonne coppie)
+          ; Calcola il rettangolo massimo
+          ; per la coppia di indici di colonne corrente e la riga corrente
+          (setq rect-max-tmp (find-rect-max row colonne))
+          ; Aggiorna il valore massimo del rettangolo
+          (if (> (length rect-max-tmp) 1)
+            (when (> (rect-max-tmp -1) massimo)
+              (setq rettangolo rect-max-tmp)
+              (setq massimo (rect-max-tmp -1))
+              (if verbose (begin (print "Rettangolo massimo:" rettangolo)
+                          (read-line)))
+            )
+          )
+        )
+      )
+    )
+    rettangolo))
+
+Proviamo:
+
+(setq m '((1 1 0 1 0)
+          (0 0 1 0 1)
+          (0 0 1 0 1)
+          (1 1 0 0 0)))
+
+(trova-max-rectangle m)
+;-> (0 0 3 1 8)
+(trova-max-rectangle m true)
+;-> Riga: 0
+;-> uno-idx: (0 1 3)
+;-> coppie: ((0 1) (0 3) (1 3))
+;-> colonne: (0 1)
+;-> rettangolo: 0 0 3 1
+;-> area:8
+;-> Rettangolo massimo:(0 0 3 1 8)
+;-> colonne: (0 3)
+;-> colonne: (1 3)
+;-> Riga: 1
+;-> uno-idx: (2 4)
+;-> coppie: ((2 4))
+;-> colonne: (2 4)
+;-> rettangolo: 1 2 2 4
+;-> area:6
+;-> Riga: 2
+;-> uno-idx: (2 4)
+;-> coppie: ((2 4))
+;-> colonne: (2 4)
+;-> (0 0 3 1 8)
+
+(setq m1 '((1 1 0 1 0)
+           (0 0 1 0 1)
+           (0 0 1 0 1)
+           (1 1 0 1 0)))
+
+(trova-max-rectangle m1)
+;-> (0 0 3 3 16)
+(trova-max-rectangle m1 true)
+
+(setq m2 '((1 1 0 1 0)
+           (0 0 1 0 1)
+           (0 0 1 0 1)
+           (1 1 1 1 1)))
+
+(trova-max-rectangle m2)
+;-> (0 0 3 3 16)
+(trova-max-rectangle m2 true)
+
+(setq m3 '((1 1 0 0 0)
+           (0 0 0 0 0)
+           (0 0 0 0 0)
+           (0 0 0 1 1)))
+
+(trova-max-rectangle m3)
+;-> ()
+(trova-max-rectangle m3 true)
+
+(setq m4 '((1 0 0 0 0)
+           (0 0 0 0 0)
+           (0 0 0 0 0)
+           (0 0 0 0 0)))
+
+(trova-max-rectangle m4)
+;-> ()
+(trova-max-rectangle m4 true)
+
+(setq m5 '((0 0 0 0 0)
+           (0 0 0 0 0)
+           (0 0 0 0 0)
+           (0 0 0 0 0)))
+
+(trova-max-rectangle m5)
+;-> ()
+(trova-max-rectangle m5 true)
+
+(setq m6 '((1 1 1 1 1)
+           (1 1 1 1 1)
+           (1 1 1 1 1)
+           (1 1 1 1 1)))
+
+(trova-max-rectangle m6)
+;-> (0 0 3 4 20)
+(trova-max-rectangle m6 true)
+
 ============================================================================
 
