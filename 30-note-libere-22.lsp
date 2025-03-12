@@ -25,10 +25,10 @@ Primo caso: inversione dell'intero numero binario
 
 Sequenza OEIS A030101:
 a(n) is the number produced when n is converted to binary digits, the binary digits are reversed and then converted back into a decimal number.
-  0, 1, 1, 3, 1, 5, 3, 7, 1, 9, 5, 13, 3, 11, 7, 15, 1, 17, 9, 25, 5, 21, 
-  13, 29, 3, 19, 11, 27, 7, 23, 15, 31, 1, 33, 17, 49, 9, 41, 25, 57, 5, 
-  37, 21, 53, 13, 45, 29, 61, 3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23, 
-  55, 15, 47, 31, 63, 1, 65, 33, 97, 17, 81, 49, 113, 9, 73, 41, 105, 
+  0, 1, 1, 3, 1, 5, 3, 7, 1, 9, 5, 13, 3, 11, 7, 15, 1, 17, 9, 25, 5, 21,
+  13, 29, 3, 19, 11, 27, 7, 23, 15, 31, 1, 33, 17, 49, 9, 41, 25, 57, 5,
+  37, 21, 53, 13, 45, 29, 61, 3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23,
+  55, 15, 47, 31, 63, 1, 65, 33, 97, 17, 81, 49, 113, 9, 73, 41, 105,
   25, 89, 57 , ...
 
 La sequenza può essere generata anche dalla seguente funzione f:
@@ -59,7 +59,7 @@ La sequenza può essere generata anche dalla seguente funzione f:
 
 Secondo caso: inversione dei singoli bit del numero binario
 
-(define (invert2 num) 
+(define (invert2 num)
   (int (join (map (fn(x) (if (= x "0") "1" "0")) (explode (bits num)))) 0 2))
 
 (map invert2 (sequence 0 50))
@@ -642,9 +642,9 @@ Esempi:
 
   00:00:00 --> 0 + 0 + 0 = 0
   23:59:59 --> 23 + 59 + 59 = 141
-  21:08:42 --> 21 + 8 + 42 = 71 
-  09:08:01 --> 9 + 8 + 1 = 18 
-   9:08:01 --> 9 + 8 + 1 = 18 
+  21:08:42 --> 21 + 8 + 42 = 71
+  09:08:01 --> 9 + 8 + 1 = 18
+   9:08:01 --> 9 + 8 + 1 = 18
 
 (define (ore num)
   (let (out '())
@@ -1035,7 +1035,7 @@ Il quinto primo è errato perchè A^(3^5) è maggiore del massimo intero Int64.
 (genera 5)
 ;-> 1.602223620400958e+028
 
-Non si conosce una formula chiusa per la costante di Mills, quindi è impossibile fare un'approssimazione a priori. 
+Non si conosce una formula chiusa per la costante di Mills, quindi è impossibile fare un'approssimazione a priori.
 Comunque è possibile determinare la successione dei primi di Mills tramite una stima del valore della costante, e da questi ricavarne un valore più preciso (ricorsione).
 
 
@@ -1425,13 +1425,13 @@ Proviamo:
 (sever a)
 ;-> (2 2 3 3 4 4 8 9)
 
-(setq a '(14 94 14 90 69 30 42 7 96 68 15 87 82 58 19 17 81 47 15 
-           50 73 40 27 56 68 75 72 47 12 36 83 3 51 66 42 10 94 92 
+(setq a '(14 94 14 90 69 30 42 7 96 68 15 87 82 58 19 17 81 47 15
+           50 73 40 27 56 68 75 72 47 12 36 83 3 51 66 42 10 94 92
            54 34 47 37 84 31 45 27 98 29 73 56))
 
 (sever a)
-;-> (3 7 10 12 14 14 15 15 17 19 27 27 29 30 31 34 36 37 40 
-;->  42 42 45 47 47 47 50 51 54 56 56 58 66 68 68 69 72 73 
+;-> (3 7 10 12 14 14 15 15 17 19 27 27 29 30 31 34 36 37 40
+;->  42 42 45 47 47 47 50 51 54 56 56 58 66 68 68 69 72 73
 ;->  73 75 81 82 83 84 87 90 92 94 94 96 98)
 
 Nota: è un miglioramento dell'algoritmo bubble-sort, perchè scambia due o più numeri ad ogni passaggio (comunque dobbiamo implementare il 'reverse' durante il ciclo di attraversamento della lista).
@@ -1872,7 +1872,7 @@ Metodo ricorsivo 1:
   (cond ((<= x y) y)
         (true (tr1 (tr1 (- x 1) y z) (tr1 (- y 1) z x) (tr1 (- z 1) x y)))))
 
-Proviamo: 
+Proviamo:
 
 (tr1 3 5 15)
 ;-> 5
@@ -2060,61 +2060,61 @@ Proviamo:
 (mirror-length 10000)
 ;-> 0 : 1
 ;-> ((0 0))
-;-> 
+;->
 ;-> 22 : 2
 ;-> ((11 11) (20 2))
-;-> 
+;->
 ;-> 44 : 3
 ;-> ((31 13) (22 22) (40 4))
-;-> 
+;->
 ;-> 66 : 4
 ;-> ((51 15) (42 24) (33 33) (60 6))
-;-> 
+;->
 ;-> 88 : 5
 ;-> ((71 17) (62 26) (53 35) (44 44) (80 8))
-;-> 
+;->
 ;-> 1111 : 6
 ;-> ((902 209) (803 308) (704 407) (605 506) (1010 101) (1100 11))
-;-> 
+;->
 ;-> 1661 : 7
-;-> ((1060 601) (1150 511) (1240 421) (1330 331) (1420 241) (1510 151) 
+;-> ((1060 601) (1150 511) (1240 421) (1330 331) (1420 241) (1510 151)
 ;->  (1600 61))
-;-> 
+;->
 ;-> 1771 : 8
 ;-> ((1070 701) (1160 611) (1250 521) (1340 431) (1430 341) (1520 251)
 ;->  (1610 161) (1700 71))
-;-> 
+;->
 ;-> 1881 : 9
 ;-> ((1080 801) (1170 711) (1260 621) (1350 531) (1440 441) (1530 351)
 ;->  (1620 261) (1710 171) (1800 81))
-;-> 
+;->
 ;-> 1991 : 10
 ;-> ((1090 901) (1180 811) (1270 721) (1360 631) (1450 541) (1540 451)
 ;->  (1630 361) (1720 271) (1810 181) (1900 91))
-;-> 
+;->
 ;-> 2662 : 11
 ;-> ((1601 1061) (1511 1151) (1421 1241) (1331 1331) (2060 602) (2150 512)
 ;->  (2240 422) (2330 332) (2420 242) (2510 152) (2600 62))
-;-> 
+;->
 ;-> 2772 : 12
 ;-> ((1701 1071) (1611 1161) (1521 1251) (1431 1341) (2070 702) (2160  612)
 ;->  (2250 522) (2340 432) (2430 342) (2520 252) (2610 162) (2700 72))
-;-> 
+;->
 ;-> 4444 : 13
 ;-> ((3401 1043) (3311 1133) (3221 1223) (3131 1313) (3041 1403) (2402 2042)
 ;->  (2312 2132) (2222 2222) (4040 404) (4130 314) (4220 224) (4310 134)
 ;->  (4400 44))
-;-> 
+;->
 ;-> 6336 : 14
 ;-> ((5301 1035) (5211 1125) (5121 1215) (5031 1305) (4302 2034) (4212 2124)
 ;->  (4122 2214) (4032 2304) (3303 3033) (3213 3123) (6030 306) (6120 216)
 ;->  (6210 126) (6300 36))
-;-> 
+;->
 ;-> 6545 : 15
 ;-> ((4951 1594) (4861 1684) (4771 1774) (4681 1864) (4591 1954) (3952 2593)
 ;->  (3862 2683) (3772 2773) (3682 2863) (3592 2953) (5590 955) (5680 865)
 ;->  (5770 775) (5860 685) (5950 595))
-;-> 
+;->
 ;-> 7337 : 16
 ;-> ((6301 1036) (6211 1126) (6121 1216) (6031 1306) (5302 2035) (5212 2125)
 ;->  (5122 2215) (5032 2305) (4303 3034) (4213 3124) (4123 3214) (4033 3304)
@@ -2129,8 +2129,8 @@ La sequenza Mephisto Waltz è definita iniziando con 0 e poi sostituendo 0 con 0
 Questi numeri non contengono le quarte potenze (Allouche e Shallit 2003).
 
 Sequenza OEIS A064990:
-  If A_k denotes the first 3^k terms, 
-  then A_0 = 0, A_{k+1} = A_k A_k B_k, 
+  If A_k denotes the first 3^k terms,
+  then A_0 = 0, A_{k+1} = A_k A_k B_k,
   where B_k is obtained from A_k by interchanging 0's and 1's.
   0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0,
   0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0,
@@ -2155,7 +2155,7 @@ Sequenza OEIS A064990:
 Proviamo:
 
 (mw 5)
-;-> ("0" "001" "001001110" "001001110001001110110110001" 
+;-> ("0" "001" "001001110" "001001110001001110110110001"
 ;->  "001001110001001110110110001001001110001001110110110
 ;->   001110110001110110001001001110"
 ;->  "001001110001001110110110001001001110001001110110110
@@ -2290,7 +2290,7 @@ Proviamo:
 ;-> 1 . * . *   1 . * . *
 ;-> 2 . . * .   2 . . * .
 ;-> 3 . * . .   3 . * . .
-;-> 
+;->
 ;-> ****** GAME OVER ******
 ;-> Tempo: 23s 399ms
 
@@ -2440,7 +2440,7 @@ Le formule più comuni sono le seguenti:
 Per generare N numeri compositi consecutivi:
 
   (N+1)! + 2, (N+1)! + 3, ..., (N+1)! + (N+1)
-  
+
 Per generare (N-1) numeri compositi consecutivi:
 
     N! + 2, N! + 3, ..., N! + N
@@ -2458,7 +2458,7 @@ Per generare (N-1) numeri compositi consecutivi:
     (map (fn(x) (+ f x)) (sequence 2 (+ num 1)))))
 
 (map (fn(x) (list $idx (genera1 x))) (sequence 1 5))
-;-> ((0 (4L)) (1 (8L 9L)) (2 (26L 27L 28L)) (3 (122L 123L 124L 125L)) 
+;-> ((0 (4L)) (1 (8L 9L)) (2 (26L 27L 28L)) (3 (122L 123L 124L 125L))
 ;->  (4 (722L 723L 724L 725L 726L)))
 
 (define (genera2 num)
@@ -2466,7 +2466,7 @@ Per generare (N-1) numeri compositi consecutivi:
     (map (fn(x) (+ f x)) (sequence 2 num))))
 
 (map (fn(x) (list $idx (genera2 x))) (sequence 1 5))
-;-> ((0 (3L 2L)) (1 (4L)) (2 (8L 9L)) (3 (26L 27L 28L)) 
+;-> ((0 (3L 2L)) (1 (4L)) (2 (8L 9L)) (3 (26L 27L 28L))
 ;->  (4 (122L 123L 124L 125L)))
 
 
@@ -2478,22 +2478,22 @@ Scrivere una funzione che stampa la tavola delle moltiplicazioni (tavola pitagor
 
 Per esempio la seguente è una tavola delle moltiplicazioni con i numeri che vanno da 0 (00) a 15 (0f):
 
-  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 
-  00 02 04 06 08 0a 0c 0e 10 12 14 16 18 1a 1c 1e 
-  00 03 06 09 0c 0f 12 15 18 1b 1e 21 24 27 2a 2d 
-  00 04 08 0c 10 14 18 1c 20 24 28 2c 30 34 38 3c 
-  00 05 0a 0f 14 19 1e 23 28 2d 32 37 3c 41 46 4b 
-  00 06 0c 12 18 1e 24 2a 30 36 3c 42 48 4e 54 5a 
-  00 07 0e 15 1c 23 2a 31 38 3f 46 4d 54 5b 62 69 
-  00 08 10 18 20 28 30 38 40 48 50 58 60 68 70 78 
-  00 09 12 1b 24 2d 36 3f 48 51 5a 63 6c 75 7e 87 
-  00 0a 14 1e 28 32 3c 46 50 5a 64 6e 78 82 8c 96 
-  00 0b 16 21 2c 37 42 4d 58 63 6e 79 84 8f 9a a5 
-  00 0c 18 24 30 3c 48 54 60 6c 78 84 90 9c a8 b4 
-  00 0d 1a 27 34 41 4e 5b 68 75 82 8f 9c a9 b6 c3 
-  00 0e 1c 2a 38 46 54 62 70 7e 8c 9a a8 b6 c4 d2 
-  00 0f 1e 2d 3c 4b 5a 69 78 87 96 a5 b4 c3 d2 e1 
+  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f
+  00 02 04 06 08 0a 0c 0e 10 12 14 16 18 1a 1c 1e
+  00 03 06 09 0c 0f 12 15 18 1b 1e 21 24 27 2a 2d
+  00 04 08 0c 10 14 18 1c 20 24 28 2c 30 34 38 3c
+  00 05 0a 0f 14 19 1e 23 28 2d 32 37 3c 41 46 4b
+  00 06 0c 12 18 1e 24 2a 30 36 3c 42 48 4e 54 5a
+  00 07 0e 15 1c 23 2a 31 38 3f 46 4d 54 5b 62 69
+  00 08 10 18 20 28 30 38 40 48 50 58 60 68 70 78
+  00 09 12 1b 24 2d 36 3f 48 51 5a 63 6c 75 7e 87
+  00 0a 14 1e 28 32 3c 46 50 5a 64 6e 78 82 8c 96
+  00 0b 16 21 2c 37 42 4d 58 63 6e 79 84 8f 9a a5
+  00 0c 18 24 30 3c 48 54 60 6c 78 84 90 9c a8 b4
+  00 0d 1a 27 34 41 4e 5b 68 75 82 8f 9c a9 b6 c3
+  00 0e 1c 2a 38 46 54 62 70 7e 8c 9a a8 b6 c4 d2
+  00 0f 1e 2d 3c 4b 5a 69 78 87 96 a5 b4 c3 d2 e1
 
 (define (print-ff a b)
   (local (max-len fmt)
@@ -2605,7 +2605,7 @@ b) Sequenze binarie totalmente bilanciate
     (setq conta (count '("1" "0") binary))
     (cond ((odd? len) nil)
           ((!= (conta 0) (conta 1)) nil)
-          (true 
+          (true
             (let ( (exceed nil) (n1 0) (n0 0) )
               (dolist (b binary exceed)
                 (cond ((= b "1") (++ n1))
@@ -2880,7 +2880,7 @@ Per esempio prendiamo il gruppo con N=3:
 ;-> ((9 8 7) (8 7 6) (7 6 5) (6 5 4) (5 4 3) (4 3 2) (3 2 1) (2 1 0))
 
 Le permutazioni del termine (9 8 7) sono:
-  
+
   (7 8 9) (8 7 9) (9 7 8) (7 9 8) (8 9 7) (9 8 7)
 
 Ognuna di queste permutazioni rappresenta un numero ordinabile.
@@ -2941,7 +2941,7 @@ Funzione che calcola la lista di tutti i numeri ordinabili:
       )
     )
     ; ordina in base al numero che rappresentano le liste
-    (sort totale)    
+    (sort totale)
     ; aggiunge il numero 0 come termine
     (push '(0) totale)))
 
@@ -3180,8 +3180,8 @@ Programma autoriavviante dopo N secondi
 Scrivere una funzione/programma che si riavvia dopo N secondi.
 
 (define (ora-esatta pausa)
-  ; creazione della funzione ausiliaria 'run' 
-  ; che chiama la funzione 'ora-esatta' 
+  ; creazione della funzione ausiliaria 'run'
+  ; che chiama la funzione 'ora-esatta'
   ; dopo un dato numero di millisecondi
   ;(eval-string "(define (run delay) (sleep delay) (ora-esatta delay))")
   (define (run delay) (sleep delay) (ora-esatta delay))
@@ -3687,7 +3687,7 @@ Proviamo:
 ;->  -1 1 -1 -1 -1 1 1 1 -1 1 1 1 1 -1 1 1 -1 1 1 1 1 -1
 ;->  -1 -1 1 -1 -1 -1 -1)
 
-Metodo 3 
+Metodo 3
 --------
 
 (define (rs3 num)
@@ -3705,7 +3705,7 @@ Proviamo:
 
 Vediamo se le tre funzioni producono risultati uguali:
 
-(= (map rs1 (sequence 0 1000)) 
+(= (map rs1 (sequence 0 1000))
    (map rs2 (sequence 0 1000))
    (map rs3 (sequence 0 1000)))
 ;-> true
@@ -3724,7 +3724,7 @@ Per risolvere il problema si utilizza un trucco in cui la faccia con un "6" può
 Ad esempio, un cubo può avere le facce "012345" e l'altro "012678" dove il "6" può anche essere un "9".
 In questo modo abbiamo la seguente situazione:
 
-  cubo1 = 0, 1, 2, x1, y1, z1 
+  cubo1 = 0, 1, 2, x1, y1, z1
   cubo2 = 0, 1, 2, x2, y2, z2
 
 e dobbiamo inserire i numeri 3, 4, 5, 6/9, 7, 8 nella sei facce restanti (x1,y1,z1 e x2,y2,z2).
@@ -3872,7 +3872,7 @@ Tutti gli altri caratteri rimangono gli stessi.
 (for (i 0 25) (println (upper i) { } (upper (- (+ i 1)))))
 (for (i 0 25) (println (lower i) { } (lower (- (+ i 1)))))
 (for (i 0 9) (println (digit i) { } (digit (- (+ i 1)))))
-  
+
 (map char '("a" "z" "A" "Z" "0" "9"))
 ;-> (97 122 65 90 48 57)
 
@@ -3930,7 +3930,7 @@ Un numero indicibile è un numero divisibile per sette o che ha sette come cifra
 La versione di Cantor è la sequenza definita riempiendo la sequenza "1 2 3 4 5 6 ( ) 8..." negli spazi vuoti ( ) con la sequenza progressiva 1, 2, 3, 4, 5, 6, ( ), 8, 9, 10, 11, 12, 13, ( ), 15,... in modo ricorsivo:
 
   1 2 3 4 5 6 (1) 8 9 10 11 12 13 (2) 15 16 (3) 18 19 20 (4) 22 23 24 25 26 (5) (6) 29 30 31 32 33 34 ( ) 36 (8) 38 ...
-  
+
   1 2 3 4 5 6 (1) 8 9 10 11 12 13 (2) 15 16 (3) 18 19 20 (4) 22 23 24 25 26 (5) (6) 29 30 31 32 33 34 (1) 36 (8) 38 ...
   ...
 
@@ -3938,12 +3938,12 @@ Sequenza OEIS A328018:
 If n is the k-th number divisible by 7 or containing a digit 7 (in base 10) then a(n) = a(k) otherwise a(n) = n
   1, 2, 3, 4, 5, 6, 1, 8, 9, 10, 11, 12, 13, 2, 15, 16, 3, 18, 19, 20, 4,
   22, 23, 24, 25, 26, 5, 6, 29, 30, 31, 32, 33, 34, 1, 36, 8, 38, 39, 40,
-  41, 9, 43, 44, 45, 46, 10, 48, 11, 50, 51, 52, 53, 54, 55, 12, 13, 58, 
+  41, 9, 43, 44, 45, 46, 10, 48, 11, 50, 51, 52, 53, 54, 55, 12, 13, 58,
   59, 60, 61, 62, 2, 64, 65, 66, 15, 68, 69, 16, 3, ...
 
 (setq oeis '(1 2 3 4 5 6 1 8 9 10 11 12 13 2 15 16 3 18 19 20 4
              22 23 24 25 26 5 6 29 30 31 32 33 34 1 36 8 38 39 40
-             41 9 43 44 45 46 10 48 11 50 51 52 53 54 55 12 13 58 
+             41 9 43 44 45 46 10 48 11 50 51 52 53 54 55 12 13 58
              59 60 61 62 2 64 65 66 15 68 69 16 3))
 (length oeis)
 ;-> 71
@@ -3968,7 +3968,7 @@ Funzione che genera gli indicibili di Cantor fino ad un certo limite:
       (setq val 1)
       ; ciclo per ogni () che si trova nella lista base
       (dolist (v vuoti)
-        ; modifica la corrente () della lista base 
+        ; modifica la corrente () della lista base
         ; con il valore corrente o con ()
         (if (seven? val)
             (setf (base v) '())
@@ -4005,7 +4005,7 @@ Una semplice animazione durante la ricerca di una password alfanumerica.
     (until (= code pwd)
       ; genera carattere casuale
       (setq cur-char (char (+ 32 (rand 95))))
-      (cond ((= cur-char (pwd idx)) 
+      (cond ((= cur-char (pwd idx))
             ; carattere casuale = carettere password
               (push cur-char code -1)
               (print code)
@@ -4183,7 +4183,7 @@ La dimensione ricorsiva di una lista è definita come segue:
 - se la lista conitne sottoliste, allora la lunghezza è data dalla somma delle lunghezze ricorsive delle sue sottoliste
 
 Per esempio:
-  
+
   lista = (a b c), lunghezza ricorsiva = 3
   a --> 1
   b --> 2
@@ -4325,7 +4325,7 @@ Cioè deve avere tante lettere minuscole o maiuscole quanto è lunga la codifica
                 ("Y" "BBAAA") ("Z" "BBAAB")))
     (setq code "")
     (setq msg (upper-case msg))
-    ; crea la codifica 
+    ; crea la codifica
     (dolist (ch (explode msg))
       (cond ((and (>= (char ch) 65) (<= (char ch) 90)) ; A..Z
             (extend code (lookup ch alst)))
@@ -4407,14 +4407,14 @@ Esaminare tutti (abbastanza) i numeri primi:
 Selezionare i numeri primi in cui risulta (primo − 1) divisibile per N (4 in questo caso):
 
   5 13 17 29 37 41 53 61 73 89 97 ...
- 
+
 Selezionare l'N-esimo termine in questa sequenza (il quarto in questo caso):
 
 Output = 29
 
 Sequenza OEIS A077317: a(n) is the n-th prime == 1 (mod n)
   2, 5, 19, 29, 71, 43, 211, 193, 271, 191, 661, 277, 937, 463, 691, 769,
-  1531, 613, 2357, 1021, 1723, 1409, 3313, 1609, 3701, 2029, 3187, 2437, 
+  1531, 613, 2357, 1021, 1723, 1409, 3313, 1609, 3701, 2029, 3187, 2437,
   6961, 1741, 7193, 3617, 4951, 3877, 7001, 3169, 10657, 6271, 7879, 5521,
   13613, 3823, 15137, 7349, 9091, 7499, ...
 
@@ -4455,9 +4455,9 @@ Proviamo:
 ;-> 191
 
 (time (println (sequenza 100 1e6)))
-;-> (2 5 19 29 71 43 211 193 271 191 661 277 937 463 691 769 1531 613 2357 
-;->  1021 1723 1409 3313 1609 3701 2029 3187 2437 6961 1741 7193 3617 4951 
-;->  3877 7001 3169 10657 6271 7879 5521 13613 3823 15137 7349 9091 7499 
+;-> (2 5 19 29 71 43 211 193 271 191 661 277 937 463 691 769 1531 613 2357
+;->  1021 1723 1409 3313 1609 3701 2029 3187 2437 6961 1741 7193 3617 4951
+;->  3877 7001 3169 10657 6271 7879 5521 13613 3823 15137 7349 9091 7499
 ;->  18049 6529 18229 7151 13159 10141 26501 7669 19801 11593 18127 13109
 ;->  32569 8221 34649 17981 21799 16001 28081 10429 39799 19381 29947 14771
 ;->  47713 16417 51539 25013 29101 26449 50051 16927 54037 23761 41149 31489
@@ -4587,7 +4587,7 @@ Scrivere la funzione più breve possibile che applica questo algoritmo ad una st
 (define (str-num str)
   (join (map (fn(x) (format "%02d" (- (char x) 96))) (explode str))))
 
-Proviamo: 
+Proviamo:
 
 (str-num "newlisp")
 ;-> "14052312091916"
@@ -4712,7 +4712,7 @@ Animazione 4:
       (println))))
 
 (setq linee '(
-  "    *             *             *             *             *         " 
+  "    *             *             *             *             *         "
   "   * *           * *           * *           * *           * *        "
   "  *   *         *   *         *   *         *   *         *   *       "
   " *     *       *     *       *     *       *     *       *     *      "
@@ -4778,7 +4778,7 @@ Coppie di primi che sommano ad un intero N
 Dato un numero intero positivo N, trovare tutte le coppie univoche di numeri primi la cui somma vale N.
 
 Algoritmo:
-Ciclo per un numero intero k da 2 a N - 2 
+Ciclo per un numero intero k da 2 a N - 2
 (poiché il numero primo minimo è 2 e la differenza massima possibile tra due numeri primi inferiori o uguali a N è N - 2)
   se sia K che (N - K) sono primi, aggiungerli alla lista delle coppie.
 
@@ -4874,8 +4874,8 @@ per un numero dispari N, a(N) = 0 se N-2 non è primo, altrimenti a(N) = 1.
   (let (out '())
     (for (num 0 limite)
       (setq conta 0)
-      (cond ((odd? num) 
-              (if (prime? (- num 2)) 
+      (cond ((odd? num)
+              (if (prime? (- num 2))
                   (push 1 out -1)
                   (push 0 out -1)))
             (true
@@ -4916,7 +4916,7 @@ Creazione di liste di orari
 
 Scriviamo una funzione che genera una lista con tutti gli orari dall'ora x all'ora y.
 Gli orari in formato 24-ore sono rappresentati da una lista (ore minuti secondi) :
-  
+
   HH-MM-SS, con HH=(0..23), MM=(0..59), SS=(0..59)
 
 Per esempio:
@@ -4964,7 +4964,7 @@ Speed up the code
 -----------------
 
 Alcune raccomandazioni da parte di Lutz per velocizzare i programmi newLISP.
- 
+
 Several recommendations to speed up the code and other comments:
 
 instead of:
@@ -5010,7 +5010,7 @@ do:
 
 (local (param) ...)
 
-It is reassigning the same global symbol over and over. 
+It is reassigning the same global symbol over and over.
 That couldn't be causing the slowdown, could it?
 
 If that global variable always gets the same value, I would set it only once.
@@ -5305,7 +5305,7 @@ Proviamo:
 ;->  55 56 57 58 59 60 61 62 63
 ;->  64 65 66 67 68 69 70 71 72
 ;->  73 74 75 76 77 78 79 80 81
-;-> 
+;->
 ;-> Togliamo i numeri multipli di 2 (tranne il 2):
 ;->      2  3     5     7     9
 ;->     11    13    15    17
@@ -5316,7 +5316,7 @@ Proviamo:
 ;->  55    57    59    61    63
 ;->     65    67    69    71
 ;->  73    75    77    79    81
-;-> 
+;->
 ;-> Togliamo i numeri multipli di 3 (tranne il 3):
 ;->      2  3     5     7
 ;->     11    13          17
@@ -5327,7 +5327,7 @@ Proviamo:
 ;->  55          59    61
 ;->     65    67          71
 ;->  73          77    79
-;-> 
+;->
 ;-> Togliamo i numeri multipli di 5 (tranne il 5):
 ;->      2  3     5     7
 ;->     11    13          17
@@ -5338,7 +5338,7 @@ Proviamo:
 ;->              59    61
 ;->           67          71
 ;->  73          77    79
-;-> 
+;->
 ;-> Togliamo i numeri multipli di 7 (tranne il 7):
 ;->      2  3     5     7
 ;->     11    13          17
@@ -5349,7 +5349,7 @@ Proviamo:
 ;->              59    61
 ;->           67          71
 ;->  73                79
-;-> 
+;->
 ;-> Numeri primi:
 ;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79)
 
@@ -5370,7 +5370,7 @@ Proviamo:
 ;->  181 182 183 184 185 186 187 188 189 190 191 192 193 194 195
 ;->  196 197 198 199 200 201 202 203 204 205 206 207 208 209 210
 ;->  211 212 213 214 215 216 217 218 219 220 221 222 223 224 225
-;-> 
+;->
 ;-> Togliamo i numeri multipli di 2 (tranne il 2):
 ;->        2   3       5       7       9      11      13      15
 ;->       17      19      21      23      25      27      29
@@ -5534,12 +5534,12 @@ Funzione che annida i caratteri di una stringa in una lista:
 
 (define (nest-string str)
   ; inserisce l'ultimo carattere nella lista
-  (let (out (list (str -1))) 
+  (let (out (list (str -1)))
     (for (i (- (length str) 2) 0)
       ; annida il carattere corrente nella lista
       (setq out (list (str i) out))
     )
-    out)
+    out))
 
 Proviamo:
 
@@ -5548,6 +5548,35 @@ Proviamo:
 
 (nest-string "una stringa")
 ;-> ("u" ("n" ("a" (" " ("s" ("t" ("r" ("i" ("n" ("g" ("a")))))))))))
+
+Versione simile:
+
+(define (annida-stringa str)
+  (let (out nil)
+    (dolist (c (reverse (explode str)))
+      (setq out (if out (list c out) (list c))))
+    out))
+
+;(define (annida-stringa str)
+;  (let (out (list (pop str -1)))
+;    (dolist (c (reverse (explode str)))
+;      (setq out (list c out)))
+;    out))
+
+(annida-stringa "newLISP")
+;-> ;-> ("n" ("e" ("w" ("L" ("I" ("S" ("P")))))))
+
+Vediamo la velocità delle due funzioni:
+
+(time (nest-string (dup "1" 10 true)) 1e5)
+;-> 623.014
+(time (annida-stringa (dup "1" 10 true)) 1e5)
+;-> 805.132
+
+(time (nest-string (dup "1" 1000 true)) 100)
+;-> 4021.99
+(time (annida-stringa (dup "1" 1000 true)) 100)
+;-> 4630.877
 
 
 ----------------------------------
@@ -5573,7 +5602,7 @@ Nota: il file deve essere chiuso prima di chiudere la REPL.
 Il codice Baudot
 ----------------
 
-Nel 1870 Émile Baudot inventò il codice Baudot, una codifica di caratteri a lunghezza fissa per la telegrafia.
+Nel 1870 Emile Baudot inventò il codice Baudot, una codifica di caratteri a lunghezza fissa per la telegrafia.
 Il codice veniva inserito tramite una tastiera manuale con soli cinque tasti.
 Ognuno dei 32 simboli ha una codifica binaria di 5 bit.
 
@@ -5918,7 +5947,7 @@ Codici ANSI ESCape (ESCAPE ANSI CODE)
 ;(println (_back 220) (_fore 45) "Celeste su sfondo giallo" _reset-all)
 ;
 ; See "ANSI-colors.png" in "data" folder:
-;(for (i 0 255) 
+;(for (i 0 255)
 ;  (print (_fore i) "██" "(" (format "%03d" i) ") ")
 ;  (if (zero? (% i 15)) (println)))
 
@@ -5944,7 +5973,7 @@ Scrivere una funzione che restituisce tutti i suoi caratteri in modo casuale.
 ;->    (setq src (explode src))
 ;->    (println (join src))
 ;->    (join (randomize src))))
-;-> 
+;->
 ;-> "(()zca\rucjr)(\rdnuieo  cs(er) r s)oir(oioq\r a)n(\rno ednn)rtu
 ;-> (e\r(\nid)\n \n\n  olxrnc e(plc'sr -d\norn  n e\r)tt  sm eo-s f
 ;->   ed(am  l )ci\n)arrtt(j o)pamss  "
@@ -6140,16 +6169,16 @@ Per esempio:
 
   Z = 3, U = 2
   bin       dec
-  00011 -->  3  
-  00101 -->  5  
-  00110 -->  6  
-  01001 -->  9  
-  01010 --> 10 
-  01100 --> 12 
-  10001 --> 17 
-  10010 --> 18 
-  10100 --> 20 
-  11000 --> 24 
+  00011 -->  3
+  00101 -->  5
+  00110 -->  6
+  01001 -->  9
+  01010 --> 10
+  01100 --> 12
+  10001 --> 17
+  10010 --> 18
+  10100 --> 20
+  11000 --> 24
   Output = (3 5 6 9 10 12 17 18 20 24)
 
 Tutti i numeri positivi binari con Z zeri e U uno sono chiaramente minori di 2^(Z+U), poiché la rappresentazione binaria di quest'ultimo ha (Z + U + 1) cifre.
@@ -6404,7 +6433,7 @@ Proviamo:
 
 Nota: il numero delle sottoliste/sottostringhe è dato dalla somma dei numeri da 1 fino alla lunghezza della lista/stringa iniziale:
 
-  lunghezza-output = Sum[1..lunghezza-input] = 
+  lunghezza-output = Sum[1..lunghezza-input] =
   = (lunghezza-input*(lunghezza-input+1))/2
 
 
@@ -6569,7 +6598,7 @@ Numbers of edges of regular polygons constructible with ruler and compass.
 Proviamo:
 
 (sides 200)
-;-> (1 2 3 4 5 6 8 10 12 15 16 17 20 24 30 32 34 40 48 51 60 
+;-> (1 2 3 4 5 6 8 10 12 15 16 17 20 24 30 32 34 40 48 51 60
 ;->  64 68 80 85 96 102 120 128 136 160 170 192)
 
 
@@ -6616,7 +6645,7 @@ Funzione che stampa una matrice (caratteri):
   (setq cols (length (matrix 0)))
   (for (r 0 (- rows 1))
     (for (c 0 (- cols 1))
-      (if (= (matrix r c) 1) 
+      (if (= (matrix r c) 1)
           (print ch)
           ;else
           (print " ")
@@ -6681,8 +6710,8 @@ Rettangolo minimo di inclusione di circonferenze
 Dato una lista di circonferenze (centro e raggio), generare le coordinate del rettangolo più piccolo che contiene tutti le circonferenze.
 
     ul (x-min y-max)                   ur (x-max y-max)
-     +---------------------------------+              
-     |             |                   | 
+     +---------------------------------+
+     |             |                   |
      |    |      --+--                 |
      |    |        | C2        |       |
      |----+----                |       |
@@ -6716,7 +6745,7 @@ Funzione che calcola il rettangolo che include tutti i cerchi:
     (setq x-max (apply max x-coord))
     (setq y-max (apply max y-coord))
     (setq x-min (apply min x-coord))
-    (setq y-min (apply min y-coord))  
+    (setq y-min (apply min y-coord))
     ; lower-left
     (setq ll (list x-min y-min))
     ;upper-left
@@ -6738,7 +6767,7 @@ Proviamo:
 
 Nota: se le circonferenze sono libere di muoversi, allora ci troviamno di fronte ad un problema  "quadratically-constrained quadratic program" e trovare l'ottimo globale per un QCQP non convesso è NP-hard.
 Per problemi di questo tipo possiamo utilizzare il programma free "SCIP", disponibile al seguente indirizzo web: https://www.scipopt.org/.
-"SCIP is currently one of the fastest non-commercial solvers for mixed integer programming (MIP) and mixed integer nonlinear programming (MINLP). 
+"SCIP is currently one of the fastest non-commercial solvers for mixed integer programming (MIP) and mixed integer nonlinear programming (MINLP).
 It is also a framework for constraint integer programming and branch-cut-and-price.
 It allows for total control of the solution process and the access of detailed information down to the guts of the solver."
 
@@ -6767,7 +6796,7 @@ Scriviamo una funzione che converte una stringa numerica in big-integer:
             (pop str)
             (dolist (el (explode str)) (setq num (+ (* num 10) (int el))))
             (* num -1))
-          (true 
+          (true
             (dolist (el (explode str)) (setq num (+ (* num 10) (int el))))))))
 
 Proviamo:
@@ -6783,7 +6812,7 @@ Proviamo:
 ;-> 34585725372834572357423475L
 (integer? 34585725372834572357423475L)
 ;-> true
-(bigint? 34585725372834572357423475L) 
+(bigint? 34585725372834572357423475L)
 ;-> true
 
 Per convertire un big-integer in intero (se possibile) possiamo usare la seguente funzione:
@@ -6870,7 +6899,7 @@ Proviamo:
 
 (descrizione 12345678901234567890)
 ;-> "20212223242526272829"
-     
+
 (map descrizione (sequence 1 50))
 ;-> ("11" "12" "13" "14" "15" "16" "17" "18" "19" "1011" "21" "1112" "1113"
 ;->  "1114" "1115" "1116" "1117" "1118" "1119" "1012" "1112" "22" "1213"
@@ -6996,7 +7025,7 @@ Possiamo inserire i valori in una lista con elementi (frequenza cifra):
 
 Poi scriviamo la funzione che genera tutti i numeri che rispettano le occorrenze delle cifre specificate in una lista:
 
-Usiamo la ricorsione per generare tutti i possibili numeri combinando le cifre fornite nella lista, rispettando il numero massimo di ripetizioni (frequenza) per ciascuna cifra. 
+Usiamo la ricorsione per generare tutti i possibili numeri combinando le cifre fornite nella lista, rispettando il numero massimo di ripetizioni (frequenza) per ciascuna cifra.
 
 (define (genera-aux coppie idx cur-number)
   (local (freq-max digit new-number)
@@ -7062,8 +7091,8 @@ Scriviamo la funzione che calcola tutti i numeri autobiografici:
          ;(println (int cur-number)) (read-line)
          ; controllo numero autobiografico
          (setq x (describe cur-number))
-         (if (= x (describe x)) 
-           (begin 
+         (if (= x (describe x))
+           (begin
              ;(println "x: " x)
              (++ conta)
              (push x out -1))))
@@ -7088,8 +7117,8 @@ Proviamo:
 
 (setq seq (autobio coppie))
 ;-> ("22" "10213223" "21322319" "21322318" "21322317" "21322316" "21322315"
-;->  "21322314" "10313319" "10313318" "31331819" "10313317" "31331719" 
-;->  "31331718" "10313316" "31331619" "31331618" "31331617" "10313315" 
+;->  "21322314" "10313319" "10313318" "31331819" "10313317" "31331719"
+;->  "31331718" "10313316" "31331619" "31331618" "31331617" "10313315"
 ;->  ...
 ;->  "1011112131415161718" "1111213141516171819" "101112213141516171819")
 
@@ -7852,7 +7881,7 @@ Le caratteristiche di un linguaggio funzionale
 Immutability (Immutabilità)
 ---------------------------
 L'aspetto più importante della FP è l'immutabilità.
-In generale, questo significa mancanza di cambiamento. 
+In generale, questo significa mancanza di cambiamento.
 Qualcosa è considerato immutabile se non possiamo modificarlo in qualche modo.
 
 Considera il seguente semplice ciclo for che stampa i numeri da 0 a 10.
@@ -7885,7 +7914,7 @@ Sembra che sia sempre possibile farlo. Vediamo un esempio eseguendo la funzione 
 (now)
 ;-> (2024 3 16 15 28 29 184021 76 6 60 1)
 
-Se sostituisco il corpo della funzione con questo risultato e chiamo nuovamente la funzione otterrò la risposta sbagliata. 
+Se sostituisco il corpo della funzione con questo risultato e chiamo nuovamente la funzione otterrò la risposta sbagliata.
 Quindi la funzione oggi non ha trasparenza referenziale.
 Un concetto correlato FP è la "purezza".
 In generale, una funzione si dice pura se non ha effetti collaterali e per un dato input,
@@ -7895,8 +7924,8 @@ Un effetto collaterale è tutto ciò che accade all'esterno del contesto della f
 
 Higher Order Functions (Funzioni di ordine superiore)
 -----------------------------------------------------
-La FP è tutta una questione di funzioni. 
-Ciò che vogliamo, in un linguaggio FP, è la capacità di trattare le funzioni come 'cittadini di prima classe'. 
+La FP è tutta una questione di funzioni.
+Ciò che vogliamo, in un linguaggio FP, è la capacità di trattare le funzioni come 'cittadini di prima classe'.
 Ciò significa che dovremmo essere in grado di passarle come parametri di funzione e restituirle dalle funzioni.
 
 Lazy evaluation (Valutazione pigra)
@@ -7914,7 +7943,7 @@ The story of "null"
 
 Tony Hoare, the inventor of null, said it was his billion-dollar mistake:
 
-I call it my billion-dollar mistake. 
+I call it my billion-dollar mistake.
 It was the invention of the null reference in 1965.
 At that time, I was designing the first comprehensive type system for references in an object-oriented language (ALGOL W).
 My goal was to ensure that all use of references should be absolutely safe, with checking performed automatically by the compiler.

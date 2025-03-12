@@ -2833,7 +2833,9 @@ NOTE LIBERE 28
   Inversione dei bit di un numero binario
   Permutazioni distinte
   Rettangolo massimo in una matrice
-  
+  Stampa di una stringa per caratteri
+  Principio di Archimede
+  Sequenza di Gessel
 
 PROBLEMI SUI DADI
 =================

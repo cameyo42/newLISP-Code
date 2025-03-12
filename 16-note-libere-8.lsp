@@ -5935,7 +5935,6 @@ Ordinamento per anno di nascita crescente:
 ;->  ("John Backus" 1924 2007)
 ;->  ("Edsger Dijkstra" 1930 2002))
 
-
 Ordinamento per anno di nascita crescente e anno di morte decrescente:
 
 (define (comp x y)
@@ -5954,6 +5953,15 @@ Ordinamento per anno di nascita crescente e anno di morte decrescente:
 ;->  ("Kenneth Iverson" 1920 2004)
 ;->  ("John Backus" 1924 2007)
 ;->  ("Edsger Dijkstra" 1930 2002))
+
+Nota: se la lista da ordinare contiene tipi diversi, l'ordine di precedenza è il seguente:
+1) numeri
+2) caratteri/stringhe
+3) simboli
+4) liste
+
+(sort '((2 "c") C 1 "g" A 2.24 1.12 5 2 "ba" K (1 "a") (2 "a")))
+;-> (1 1.12 2 2.24 5 "ba" "g" A C K (1 "a") (2 "a") (2 "c"))
 
 
 -----------------

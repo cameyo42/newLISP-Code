@@ -5022,5 +5022,170 @@ Proviamo:
 ;-> (0 0 3 4 20)
 (trova-max-rectangle m6 true)
 
+
+-----------------------------------
+Stampa di una stringa per caratteri
+-----------------------------------
+
+Data una stringa in maiuscolo stamparla con le seguenti regole:
+1) un carattere per riga
+2) ogni carattere va ripetuto tante volte (nella stessa riga) in base alla sua posizione nell'alfabeto inglese (Il carattere "A" ha posizione 1).
+
+La stringa può essere composta solo da caratteri maiuscoli dell'alfabeto inglese "ABCDEFGHIJKLMNOPQRSTUVWXYZ" e dallo spazio " ".
+
+Esempi:
+stringa = "ABC"
+Output =
+  "A"
+  "BB"
+  "CCC"
+
+stringa = "LILLA"
+Output =
+  "LLLLLLLLLLLL"
+  "IIIIIIIII"
+  "LLLLLLLLLLLL"
+  "LLLLLLLLLLLL"
+  "A"
+
+stringa = "A B"
+Output =
+  "A"
+  
+  "BB"
+
+Alfabeto: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+(- (char "A") 64)
+;-> 1
+
+(define (show str)
+  (dostring (ch str) (println (dup (char ch) (- ch 64)))))
+
+(define(f s)(dostring(c s)(println(dup(char c)(- c 64)))))
+
+(f "ABC")
+;-> A
+;-> BB
+;-> CCC
+
+(f "LILLA")
+;-> LLLLLLLLLLLL
+;-> IIIIIIIII
+;-> LLLLLLLLLLLL
+;-> LLLLLLLLLLLL
+;-> A
+
+(f "ONE TWO")
+;-> OOOOOOOOOOOOOOO
+;-> NNNNNNNNNNNNNN
+;-> EEEEE
+;-> 
+;-> TTTTTTTTTTTTTTTTTTTT
+;-> WWWWWWWWWWWWWWWWWWWWWWW
+;-> OOOOOOOOOOOOOOO
+
+
+----------------------
+Principio di Archimede
+----------------------
+
+Gerone II, tiranno di Siracusa, ordinò a un orafo di realizzare una corona d'oro per un tempio, fornendogli una quantità precisa di oro puro.
+Quando la corona fu completata, Gerone sospettò che l'orafo avesse sostituito parte dell'oro con un metallo meno prezioso (argento o rame), trattenendo per sé una parte del metallo prezioso.
+Non volendo fondere la corona per verificarne la purezza, il re si rivolse ad Archimede per trovare una soluzione.
+Secondo la leggenda, quando Archimede scoprì il principio del galleggiamento mentre era immerso nella vasca da bagno, capì immediatamente come risolvere il problema della corona. 
+Preso dall'entusiasmo, saltò fuori dall'acqua e corse per le strade di Siracusa gridando "Eureka! Eureka!", che in greco significa "Ho trovato! Ho trovato!".
+Notò che, immergendosi nell'acqua, il livello dell'acqua si alzava.
+Questo lo portò a formulare il principio di Archimede, secondo cui un corpo immerso in un fluido riceve una spinta verso l'alto pari al peso del fluido spostato.
+Per verificare la frode, Archimede confrontò la corona con un lingotto d'oro di pari peso.
+Immergendo entrambi in acqua, osservò che la corona spostava più acqua del lingotto puro, segno che aveva un volume maggiore e quindi una densità inferiore a quella dell'oro puro.
+Questo confermava che l'orafo aveva mescolato l'oro con un metallo meno prezioso.
+Grazie a questa scoperta, l'inganno fu smascherato e l'orafo fu punito.
+
+Nota: Il principio di Archimede è un pilastro della fisica, con applicazioni fondamentali in idrostatica e ingegneria navale.
+
+densita Oro = 19.32 g/cm^3
+densita Argento = 10.49 g/cm^3
+densita Rame = 8.96 g/cm^3
+
+Volume = massa/densita
+
+Differenza tra Massa e Peso
+---------------------------
+Massa: misura la quantità di materia di un oggetto, ed è espressa in kg o g.
+Peso: è una forza che dipende dalla gravità e si misura in Newton (N).
+
+Poiché la densità è data in unità di massa per unità di volume (g/cm³ o kg/m³), per trovare il volume dobbiamo usare la massa e non il peso.
+
+Nota: Se portassimo un chilo d'oro sulla Luna, il suo peso cambierebbe (perché la gravità è minore), ma la sua massa e il suo volume rimarrebbero invariati.
+
+Scriviamo una funzione che calcola il volume di un dato numero di elementi (massa e densita').
+
+lst = ((massa1 densita1) (massa2 densita2) ... (massaN densitaN))
+
+(define (volume-mix lst)
+  (setq peso (apply add (map first lst)))
+  (setq volume 0)
+  (dolist (el lst)
+    (setq volume (add volume (div (el 0) (el 1))))
+  )
+  (list peso volume))
+
+(volume-mix '((1000 19.32)))
+;-> (1000 51.75983436853002)
+(volume-mix '((1000 19.32) (1000 19.32)))
+;-> (2000 103.51966873706)
+(volume-mix '((500 19.32) (500 19.32)))
+;-> (1000 51.75983436853002)
+(volume-mix '((800 19.32) (200 10.49)))
+;-> (1000 60.47364442523393)
+
+Elenco di elementi che hanno una densita' maggiore dell'oro:
+
+  Osmio     22.59 g/cm^3
+  Iridio    22.56 g/cm^3
+  Platino   21.45 g/cm^3
+  Renio     21.02 g/cm^3
+  Neptunio  20.45 g/cm^3
+  Plutonio  19.84 g/cm^3
+  Oro       19.32 g/cm^3
+
+
+------------------
+Sequenza di Gessel
+------------------
+
+La sequenza fornisce il numero di cammini di Gessel g(n) di lunghezza 2n.
+Un cammino di Gessel è:
+- un cammino sul reticolo quadrato che inizia e finisce nell'origine
+- con possibili passi (1,0), (-1,0), (1,1), (-1,-1)
+- che rimane all'interno del quadrante non negativo.
+
+Sequenza OEIS A135404:
+Gessel sequence: the number of paths of length 2m in the plane, starting and ending at (0,1), with unit steps in the four directions (north, east, south, west) and staying in the region y > 0, x > -y.
+  1, 2, 11, 85, 782, 8004, 88044, 1020162, 12294260, 152787976, 1946310467,
+  25302036071, 334560525538, 4488007049900, 60955295750460, 836838395382645,
+  11597595644244186, 162074575606984788, 2281839419729917410,
+  32340239369121304038, 461109219391987625316, 6610306991283738684600, ...
+
+OEIS formula:
+  
+  (10+11*n+3*n^2)*a(n+1) = (20+64*n+48*n^2)*a(n)
+
+Formula modificata per calcolare a(n) da a(n-1):
+  
+  a(0) = 1;
+  a(n) = a(n-1)*(48*n^2-32*n+4)/(3*n^2+5*n+2);
+
+(define (gessel n)
+  (if (zero? n) 1L
+  (/ (* (gessel (- n 1)) (+ (* 48L n n) (* -32L n) 4L))
+     (+ (* 3L n n) (* 5L n) 2L))))
+
+(map gessel (sequence 1 21))
+;-> (2L 11L 85L 782L 8004L 88044L 1020162L 12294260L 152787976L 1946310467L
+;->  25302036071L 334560525538L 4488007049900L 60955295750460L 836838395382645L
+;->  11597595644244186L 162074575606984788L 2281839419729917410L
+;->  32340239369121304038L 461109219391987625316L 6610306991283738684600L)
+
 ============================================================================
 
