@@ -5187,5 +5187,118 @@ Formula modificata per calcolare a(n) da a(n-1):
 ;->  11597595644244186L 162074575606984788L 2281839419729917410L
 ;->  32340239369121304038L 461109219391987625316L 6610306991283738684600L)
 
+
+-------------
+Re del torneo
+-------------
+
+Consideriamo un torneo all'italiana, in cui ogni giocatore gioca una partita contro ogni altro giocatore.
+Non ci sono pareggi, quindi ogni partita ha un vincitore e uno sconfitto.
+Un giocatore A è un re del torneo, se per ogni altro giocatore B, o A ha battuto B, o A ha battuto un altro giocatore C che a sua volta ha battuto B.
+Si può dimostrare che ogni torneo ha almeno un re (anche se potrebbero essercene diversi).
+In input abbiamo una matrice booleana T (N × N).
+Ogni elemento T[i][j] rappresenta l'esito della partita tra i concorrenti i e j, con valore 1 che rappresenta una vittoria per i e 0 una vittoria per j.
+Nota che T[i][j] == 1-T[j][i] se i != j.
+La diagonale di T è composta da tutti 0.
+
+Scrivere una funzione che trova tutti i re del torneo (senza duplicati).
+
+Algoritmo
+Ciclo per ogni giocatore "i" per verificare se esiste un percorso indiretto di vittorie tra i vari giocatori (cioè controlla se "i" può battere ogni altro giocatore j direttamente o indirettamente tramite un terzo giocatore k).
+Se un giocatore soddisfa queste condizioni, viene aggiunto alla lista dei re.
+
+(define (trova-re T)
+  (let ((N (length T))
+        (out '()))
+    (define (batte a b) (= 1 (T a b)))
+    (dotimes (i N)
+      (let ((is-re true))
+        (dotimes (j N)
+          (if (and (!= i j)
+                   (not (or (batte i j)
+                            (exists (fn (k) (and (batte i k) (batte k j)))
+                                    (sequence 0 (- N 1))))))
+              (setq is-re nil)))
+        (if is-re (push i out -1))))
+    out))
+
+Proviamo:
+
+(setq m '((0 0) (1 0)))
+(trova-re m)
+;-> (1)
+
+(setq m '((0 1 0) (0 0 0) (1 1 0)))
+(trova-re m)
+;-> (2)
+
+(setq m '((0 1 0) (0 0 1) (1 0 0)))
+(trova-re m)
+;-> (0 1 2)
+
+(setq m '((0 1 1 1) (0 0 1 0) (0 0 0 0) (0 1 1 0)))
+(trova-re m)
+;-> (0)
+
+(setq m '((0 1 1 0) (0 0 1 0) (0 0 0 1) (1 1 0 0)))
+(trova-re m)
+;-> (0 2 3)
+
+(setq m '((0 1 0 0 1) (0 0 0 0 1) (1 1 0 0 0) (1 1 1 0 1) (0 0 1 0 0)))
+(trova-re m)
+;-> (3)
+
+(setq m '((0 1 0 1 0) (0 0 1 1 1) (1 0 0 0 0) (0 0 1 0 1) (1 0 1 0 0)))
+(trova-re m)
+;-> (0 1 4)
+
+(setq m '((0 0 0 0 0) (1 0 1 1 0) (1 0 0 0 1) (1 0 1 0 1) (1 1 0 0 0)))
+(trova-re m)
+;-> (1 3 4)
+
+(setq m '((0 0 0 0 0 0) (1 0 1 1 0 0) (1 0 0 1 1 0) 
+          (1 0 0 0 1 1) (1 1 0 0 0 1) (1 1 1 0 0 0)))
+(trova-re m)
+;-> (1 2 3 4 5)
+
+(setq m '((0 0 1 1 1 0) (1 0 0 1 1 1) (0 1 0 0 1 0) 
+          (0 0 1 0 0 1) (0 0 0 1 0 1) (1 0 1 0 0 0)))
+(trova-re m)
+;-> (0 1 2 3 5)
+
+(setq m '((0 1 1 0 0 1) (0 0 0 1 0 1) (0 1 0 1 1 0)
+          (1 0 0 0 1 1) (1 1 0 0 0 0) (0 0 1 0 1 0)))
+(trova-re m)
+;-> (0 1 2 3 4 5)
+
+(setq m '((0 0 1 1 0 1 1 1) (1 0 1 0 1 1 0 0) (0 0 0 1 1 0 0 0) 
+          (0 1 0 0 0 1 0 0) (1 0 0 1 0 1 0 0) (0 0 1 0 0 0 1 0) 
+          (0 1 1 1 1 0 0 1) (0 1 1 1 1 1 0 0)))
+(trova-re m)
+-> (0 1 4 6 7)
+
+(setq m '((0 0 1 1 0 1 1 0 0 0 0 1 1 0 1 1 1 1 0 1)
+          (1 0 1 1 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1) 
+          (0 0 0 1 0 0 0 1 1 0 1 0 1 0 0 0 0 0 1 1) 
+          (0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1) 
+          (1 0 1 0 0 0 0 1 1 0 1 1 1 0 1 1 1 1 0 1) 
+          (0 1 1 0 1 0 1 1 1 1 1 0 1 1 1 0 1 1 0 1) 
+          (0 0 1 0 1 0 0 1 1 0 1 0 1 1 1 1 1 0 1 0) 
+          (1 0 0 0 0 0 0 0 1 0 1 1 1 1 0 0 1 1 1 0) 
+          (1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 1) 
+          (1 0 1 0 1 0 1 1 0 0 1 0 0 0 0 1 0 1 1 1) 
+          (1 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0) 
+          (0 1 1 0 0 1 1 0 0 1 0 0 1 1 1 1 1 0 1 1) 
+          (0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 1 0 1 1 1) 
+          (1 0 1 1 1 0 0 0 0 1 0 0 1 0 1 1 1 1 1 1) 
+          (0 0 1 0 0 0 0 1 0 1 1 0 0 0 0 1 1 0 0 1) 
+          (0 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0 0 1 1 1) 
+          (0 0 1 1 0 0 0 0 0 1 1 0 1 0 0 1 0 0 1 1) 
+          (0 0 1 0 0 0 1 0 1 0 1 1 0 0 1 0 1 0 1 1) 
+          (1 0 0 0 1 1 0 0 0 0 1 0 0 0 1 0 0 0 0 0) 
+          (0 0 0 0 0 0 1 1 0 0 1 0 0 0 0 0 0 0 1 0)))
+(trova-re m)
+-> (0 1 3 4 5 7 8 11 15 17 18)
+
 ============================================================================
 

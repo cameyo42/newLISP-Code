@@ -2836,6 +2836,7 @@ NOTE LIBERE 28
   Stampa di una stringa per caratteri
   Principio di Archimede
   Sequenza di Gessel
+  Re del torneo
 
 PROBLEMI SUI DADI
 =================
