@@ -2834,7 +2834,7 @@ La funzione finale utilizza la funzione "triple" e tiene conto del numero (indic
   (local (lst tri val out)
     (setq out "")
     (if (= (string num) "0")
-      (setq out "zero")
+      (setq out "Zero")
       (begin
         ; calcola il numero di triplette
         (if (zero? (% (length (string num)) 3))
@@ -2869,6 +2869,10 @@ La funzione finale utilizza la funzione "triple" e tiene conto del numero (indic
   )
 )
 
+Proviamo:
+
+(numero "00010")
+;-> "Dieci"
 (numero "2001001")
 ;-> "DueMilioniMilleUno"
 (numero "1000000")

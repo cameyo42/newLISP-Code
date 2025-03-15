@@ -2837,6 +2837,9 @@ NOTE LIBERE 28
   Principio di Archimede
   Sequenza di Gessel
   Re del torneo
+  Numero di lettere dei numeri interi
+  Distanza minima tra K punti N-dimensionali
+  Raddoppia caratteri
 
 PROBLEMI SUI DADI
 =================

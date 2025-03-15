@@ -5670,9 +5670,9 @@ Per completezza riportiamo una funzione che calcola la somma delle cifre di un n
 ;-> 45
 
 
---------------------------
-Coppia di punti più vicina
---------------------------
+---------------------------------------------------
+Coppia di punti più vicina (Closest pair of points)
+---------------------------------------------------
 
 Data una serie di n punti nel piano, trovare la coppia di punti che hanno distanza minore.
 
@@ -5847,7 +5847,10 @@ Funzione brute-force per calcolare la distanza minima tra N punti:
 (bruteDist lst)
 ;-> 1
 
-Funzione distanza tra i punti più vicini di una striscia di dimensioni date. Tutti i punti nella striscia sono ordinati in base alla coordinata y. Hanno tutti un limite superiore sulla distanza minima che vale d. Nota che questo metodo sembra essere un metodo O(n^2), ma è O(n) poichè si può dimostrare che il ciclo interno viene eseguito al massimo 7 volte.
+Funzione distanza tra i punti più vicini di una striscia di dimensioni date.
+Tutti i punti nella striscia sono ordinati in base alla coordinata y.
+Hanno tutti un limite superiore sulla distanza minima che vale d.
+Nota che questo metodo sembra essere un metodo O(n^2), ma è O(n) poichè si può dimostrare che il ciclo interno viene eseguito al massimo 7 volte.
 
 (define (stripClosest strip n d)
   (local (minimo)
@@ -6036,6 +6039,12 @@ La prima funzione "closestPairs" aveva un output con punti diversi ((2815 1408) 
 
 (println (closest-pairs (randomize d)))
 ;-> ((2815 1409) (2815 1408))
+
+Nota:
+Il metodo Divide and Conquer si basa su un ordinamento rispetto a una coordinata fissa, il che funziona bene in 2D ma diventa meno efficace in dimensioni superiori.
+Tuttavia, il concetto può essere esteso a N dimensioni utilizzando un Kd-tree, che permette di partizionare lo spazio adattivamente in base alla dimensione considerata.
+
+Vedi anche "Distanza minima tra K punti N-dimensionali" su "Note libere 28".
 
 
 --------------------------------------------

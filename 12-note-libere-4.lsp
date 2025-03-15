@@ -7633,7 +7633,7 @@ Se nella finestra presente non è possibile eliminare più caratteri allora iniz
 
 Nota:
 "Supercalifragilisticexpialidocious" è una canzone scritta dai fratelli Richard Sherman e Robert Sherman, che fa parte della colonna sonora di Mary Poppins, film Disney del 1964.
-Nella versione originale la parola ha un significato ben preciso, che si evince scomponendola: Super (sopra) – cali (bellezza) – fragilistic (delicato) – expiali (fare ammenda) – docious (istruibile). Quindi il significato delle sue parti sarebbe “fare ammenda per la possibilità di insegnare attraverso la delicata bellezza”.
+Nella versione originale la parola ha un significato ben preciso, che si evince scomponendola: Super (sopra) – cali (bellezza) – fragilistic (delicato) – expiali (fare ammenda) – docious (istruibile). Quindi il significato delle sue parti sarebbe "fare ammenda per la possibilità di insegnare attraverso la delicata bellezza".
 La versione italiana "Supercalifragilistichespiralidoso" è cantata da Tina Centi, Rita Pavone e Nancy Cuomo.
 
 

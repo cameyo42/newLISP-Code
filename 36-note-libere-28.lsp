@@ -5275,7 +5275,7 @@ Proviamo:
           (0 1 0 0 0 1 0 0) (1 0 0 1 0 1 0 0) (0 0 1 0 0 0 1 0) 
           (0 1 1 1 1 0 0 1) (0 1 1 1 1 1 0 0)))
 (trova-re m)
--> (0 1 4 6 7)
+;-> (0 1 4 6 7)
 
 (setq m '((0 0 1 1 0 1 1 0 0 0 0 1 1 0 1 1 1 1 0 1)
           (1 0 1 1 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1) 
@@ -5298,7 +5298,267 @@ Proviamo:
           (1 0 0 0 1 1 0 0 0 0 1 0 0 0 1 0 0 0 0 0) 
           (0 0 0 0 0 0 1 1 0 0 1 0 0 0 0 0 0 0 1 0)))
 (trova-re m)
--> (0 1 3 4 5 7 8 11 15 17 18)
+;-> (0 1 3 4 5 7 8 11 15 17 18)
+
+
+-----------------------------------
+Numero di lettere dei numeri interi
+-----------------------------------
+
+Dato un numero intero non-negativo, di quante lettere è composto il suo nome in italiano?
+
+Esempi:
+  1 -> uno -> 3 lettere
+  11 -> undici -> 6 lettere
+  44 -> quarantaquattro -> 15 lettere
+
+Sequenza OEIS A026858:
+Number of letters in n (in Italian).
+  4, 3, 3, 3, 7, 6, 3, 5, 4, 4, 5, 6, 6, 7, 11, 8, 6, 11, 8, 10, 5, 7, 8,
+  8, 12, 11, 8, 10, 8, 9, 6, 8, 9, 9, 13, 12, 9, 11, 9, 10, 8, 10, 11, 11,
+  15, 14, 11, 13, 11, 12, 9, 11, 12, 12, 16, 15, 12, 14, 12, 13, 8, 10, 11,
+  11, 15, 14, 11, 13, 11, 12, 8, 10, 11, 11, 15, 14, 11, 13, 11, 12, 7, 9, ...
+
+Funzioni per convertire un numero da cifre a lettere.
+Vedi "Conversione numero da cifre a lettere" su "Funzioni varie".
+
+(define (triple num)
+  (local (lst res)
+    (setq res "")
+    ; lista delle cifre
+    (setq lst (map int (explode (string num))))
+    (dolist (el lst)
+      (cond ((= el 0) nil)
+            (true (cond ((= $idx 2) ; cifra unita ?
+                          (if (!= 1 (lst 1)) ; ultime 2 cifre > 19 ?
+                              (setq res (append res (cifre el)))))
+                        ((= $idx 1) ; cifra decine ?
+                          (if (= el 1) ; ultime 2 cifre < 20 ?
+                            ; prendo il numero da 11 a 19
+                            (setq res (append res (venti (+ 9 el (lst 2)))))
+                            ; oppure prendo le decine
+                            (if (or (= 1 (lst 2)) (= 8 (lst 2))) ; numero finisce con 1 o con 8?
+                              ; prendo le decine senza vocale finale
+                              (setq res (append res (dcn el)))
+                              ; oppure prendo le decine con vocale finale
+                              (setq res (append res (decine el))))))
+                        ((= $idx 0) ; cifra centinaia ?
+                          (if (= el 1) ; cifra centinaia = 1 ?
+                              ; prendo solo "cento"
+                              (setq res (append res cento))
+                              ; prendo il numero e "cento"
+                              (setq res (append res (venti el) cento))))))
+      )
+    )
+    res))
+
+(define (pad num len ch)
+  (local (out)
+    (setq out (string num))
+    (while (> len (length out))
+      (setq out (string ch out)))
+  out))
+
+(define (numero num)
+  (local (lst tri val out)
+    ; la cifra 1
+    (setq un "Un")
+    ; le dieci cifre - codeA
+    (setq cifre '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+      "Otto" "Nove"))
+    ; i primi venti numeri - code
+    (setq venti '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+      "Otto" "Nove" "Dieci" "Undici" "Dodici" "Tredici" "Quattordici"
+      "Quindici" "Sedici" "Diciassette" "Diciotto" "Diciannove"))
+    ; le decine - codeB
+    (setq decine '("" "" "Venti" "Trenta" "Quaranta" "Cinquanta"
+      "Sessanta" "Settanta" "Ottanta" "Novanta"))
+    ; le decine senza vocali - codeB1
+    (setq dcn    '("" "" "Vent" "Trent" "Quarant" "Cinquant"
+      "Sessant" "Settant" "Ottant" "Novant"))
+    ; il numero 100
+    (setq cento "Cento")
+    ; multipli con la cifra 1 - codeC
+    (setq multiplo '("" "Mille" "Milione" "Miliardo" "Bilione" "Biliardo"
+      "Trilione" "Triliardo" "Quadrilione" "Quadriliardo"))
+    ; multipli con la cifra diversa da 1 - codeC1
+    (setq multipli '("" "Mila" "Milioni" "Miliardi" "Bilioni" "Biliardi"
+      "Trilioni" "Triliardi" "Quadrilioni" "Quadriliardi"))
+    (setq out "")
+    (if (= (string num) "0")
+      (setq out "Zero")
+      (begin
+        ; calcola il numero di triplette
+        (if (zero? (% (length (string num)) 3))
+            (setq tri (/ (length (string num)) 3))
+            (setq tri (+ (/ (length (string num)) 3) 1))
+        )
+        ; formatta in stringa il numero (padding)
+        ; e crea una lista con tutte le triplette
+        (setq lst (explode (pad (string num) (* 3 tri) "0") 3))
+        ; ciclo per la creazione della stringa finale
+        (dolist (el lst)
+          ; creazione del numero rappresentato dalla tripletta
+          (setq val (triple el))
+          ; controllo se tale numero vale "Uno"
+          (if (= val "Uno")
+            (cond ((= $idx (- (length lst) 1)) ; primo gruppo a destra ?
+                  (setq out (append out val))) ; aggiungo solo "Uno"
+                  ((= $idx (- (length lst) 2)) ; secondo gruppo a destra ?
+                  (setq out (string out (multiplo (- tri 1))))) ;aggiungo solo "Mille"
+                  ;altrimenti aggiungo "Un" e il codice corrispondente
+                  (true (setq out (string out "Un" (multiplo (- tri 1)))))
+            )
+            (if (!= val "") ; se la tripletta vale "000" --> val = ""
+              (setq out (string out val (multipli (- tri 1)))))
+          )
+          (-- tri)
+          ;(println (triple el))
+        )
+        out))))
+
+Proviamo:
+
+(for (i 0 100) (println i { - } (numero i)))
+;-> 0 - Zero
+;-> 1 - Uno
+;-> 2 - Due
+;-> 3 - Tre
+;-> ...
+;-> 98 - NovantOtto
+;-> 99 - NovantaNove
+;-> 100 - Cento
+
+Calcoliamo la sequenza OEIS:
+
+(setq seq (map (fn(x) (length (numero x))) (sequence 0 100)))
+;-> (4 3 3 3 7 6 3 5 4 4 5 6 6 7 11 8 6 11 8 10 5 7 8
+;->  8 12 11 8 10 8 9 6 8 9 9 13 12 9 11 9 10 8 10 11 11
+;->  15 14 11 13 11 12 9 11 12 12 16 15 12 14 12 13 8 10 11
+;->  11 15 14 11 13 11 12 8 10 11 11 15 14 11 13 11 12 7 9 
+;->  10 10 14 13 10 12 10 11 7 9 10 10 14 13 10 12 10 11 5)
+
+
+------------------------------------------
+Distanza minima tra K punti N-dimensionali
+------------------------------------------
+
+Abbiamo K punti N-dimensionali. Calcolare i due punti piu vicini (distanza euclidea).
+
+Distanza euclidea di due punti P1=(a1,b1,...,z1), P2=(a2,b2,...,z2):
+
+  Distanza = sqrt((a1 - a2)^2 + (b1 - b2)^2 + ... + (z1 - z2)^2)
+
+(define (dist p1 p2)
+"Calculates Cartesian distance of two points N dimensional: P1=(x1 y1 ... z1) e P2=(x2 y2 ... z2)"
+  (sqrt (apply add (map (fn(x) (mul x x)) (map sub p1 p2)))))
+
+(setq p1 '(1.1234 2.3456 3.4567))
+(setq p2 '(7.9876 8.7654 9.8765))
+
+(dist p1 p2)
+;-> 11.38177954978922
+
+Funzione che calcola i due punti N-dimensionali più vicini:
+
+(define (coppia-distanza-minima punti)
+  (let ( (min-dist 1e9) (min-coppia '()) (dist-coppia 1e9) )
+    ; Cicli innestati per calcolare tutte le coppie di punti
+    (for (i 0 (- (length punti) 2))
+      (for (j (+ i 1) (- (length punti) 1))
+        ; calcolo distanza coppia corrente
+        (setq dist-coppia (dist (punti i) (punti j)))
+        ;(print (punti i) { } (punti j) { } dist-coppia) (read-line)
+        ; verifica se occorre aggiornare distanza minima e coppia minima
+        (when (< dist-coppia min-dist)
+          (setq min-dist dist-coppia)
+          (setq min-coppia (list (punti i) (punti j))))))
+    min-coppia))
+
+Proviamo:
+
+(setq punti '((1 2 3) (4 5 6) (1.1 2.1 3.1) (7 8 9)))
+(coppia-distanza-minima punti)
+;-> ((1 2 3) (1.1 2.1 3.1))
+
+Vedi anche "Coppia di punti più vicina (Closest pair of points)" su "Problemi vari".
+
+
+-------------------
+Raddoppia caratteri
+-------------------
+
+Data una stringa di caratteri ASCII, restituire una stringa con tutti i caratteri raddoppiati.
+
+Esempi:
+stringa: "parola"
+output:  "ppaarroollaa"
+
+stringa: "mamma"
+output:  "mmaammmmaa"
+
+(define (doppia1 str)
+  (let (out "")
+    (dostring (c str) (extend out (dup (char c) 2)))))
+
+Proviamo:
+
+(doppia1 "parola")
+;-> "ppaarroollaa"
+(doppia1 "mamma")
+;-> "mmaammmmaa"
+
+Data una stringa di caratteri ASCII, restituire una stringa raddoppiando solo i caratteri diversi dal successivo (cioè solo i caratteri che non compaiono in coppia es. "mm").
+
+Esempi:
+stringa: "parola"
+output:  "ppaarroollaa"
+
+stringa: "mamma"
+output:  "mmaammaa"
+
+stringa: "errrore"
+output:  "eerrrroorree"
+
+stringa: "furr"
+output:  "ffuurr"
+
+stringa: "aa"
+output:  "aa"
+
+stringa: "aaaaa"
+output:  "aaaaaa"
+
+(define (doppia2 str)
+  (let ( (out "") (len (length str)) (idx 0) )
+    (while (< idx (- len 1))
+      ; Inserisce due volte il carattere corrente nella stringa
+      (extend out (dup (str idx) 2))
+      ; Se i carateri adiacenti sono uguali...
+      (if (= (str idx) (str (+ idx 1)))
+          ; aumenta l'indice di 2
+          (++ idx 2)
+          ; altrimenti aumenta l'indice di 1
+          (++ idx 1))
+    )
+    ; Verifica se occorre raddoppiare l'ultimo carattere
+    (if (!= idx len) (extend out (dup (str idx) 2)))
+    out))
+
+Proviamo:
+
+(doppia2 "parola")
+;-> "ppaarroollaa"
+(doppia2 "mamma")
+;-> "mmaammaa"
+(doppia2 "errrore")
+;-> "eerrrroorree"
+(doppia2 "furr")
+;-> "ffuurr"
+(doppia2 "aa")
+;-> "aa"
+(doppia2 "aaaaa")
+;-> "aaaaaa"
 
 ============================================================================
 
