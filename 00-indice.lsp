@@ -2840,6 +2840,9 @@ NOTE LIBERE 28
   Numero di lettere dei numeri interi
   Distanza minima tra K punti N-dimensionali
   Raddoppia caratteri
+  Standard representation of geographic point location by coordinates
+  Risultati di un torneo
+  2 + 2 = 5
 
 PROBLEMI SUI DADI
 =================

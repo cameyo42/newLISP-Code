@@ -5560,5 +5560,237 @@ Proviamo:
 (doppia2 "aaaaa")
 ;-> "aaaaaa"
 
+
+-------------------------------------------------------------------
+Standard representation of geographic point location by coordinates
+-------------------------------------------------------------------
+
+ISO 6709, Standard representation of geographic point location by coordinates, is the international standard for representation of latitude, longitude and altitude for geographic point locations.
+
+Items
+-----
+A geographical point is specified by the following four items:
+
+- First horizontal position coordinate (Φ or y), such as latitude (negative number south of equator and positive north of equator)
+- Second horizontal coordinate (λ or x), such as longitude (negative values west of Prime Meridian and positive values east of Prime Meridian)
+- Vertical coordinate, i.e. height or depth (optional)
+- Identification of coordinate reference system (CRS) (optional)
+
+The first three items are numerical values called coordinates.
+The CRS gives the relationship between the coordinates and a point on the earth.
+The identification of CRS could be a full description of properties defined in ISO 19111.
+Only an identifier given by some registry (such as EPSG) is used in most cases, since only such identification is enough for most information exchange purposes.
+
+Order, sign, and units
+----------------------
+Order, positive direction, and units of coordinates are supposed to be defined by the CRS.
+When CRS identification is missing, the data must be interpreted by the following conventions:
+
+- Latitude comes before longitude
+- North latitude is positive
+- East longitude is positive
+- Fraction of degrees (decimal degrees) is preferred in digital data exchange, while sexagesimal notation is tolerated for compatibility
+
+There is no such interpretation rule for vertical coordinates.
+
+Decimal Degrees
+---------------
+Decimal degrees (DD) is a notation for expressing latitude and longitude geographic coordinates as decimal fractions of a degree.
+DD are used in many geographic information systems (GIS), web mapping applications such as OpenStreetMap, and GPS devices.
+Decimal degrees are an alternative to using degrees-minutes-seconds (DMS) notation.
+As with latitude and longitude, the values are bounded by ±90° and ±180° respectively.
+Positive latitudes are north of the equator, negative latitudes are south of the equator.
+
+Precision
+The radius of the semi-major axis of the Earth at the equator is 6,378,137.0 metres resulting in a circumference of 40,075,016.7 metres.
+The equator is divided into 360 degrees of longitude, so each degree at the equator represents 111,319.5 metres.
+As one moves away from the equator towards a pole, however, one degree of longitude is multiplied by the cosine of the latitude, decreasing the distance, approaching zero at the pole.
+The number of decimal places required for a particular precision at the equator is:
+
+Degree precision versus length
+------------------------------
+Decimal  DD          DMS                N/S or E/W  E/W       E/W       E/W        
+                                        at equator  at 23N/S  at 45N/S  at 67N/S  Object unambiguously recognized
+0        1.0         1° 00' 0''         111 km      102 km    78.7 km   43.5 km   country or large region                 
+1        0.1         0° 06' 0''         11.1 km     10.2 km   7.87 km   4.35 km   large city or district                  
+2        0.01        0° 00' 36''        1.11 km     1.02 km   0.787 km  0.435 km  town or village                         
+3        0.001       0° 00' 3.6''       111 m       102 m     78.7 m    43.5 m    neighborhood, street                    
+4        0.0001      0° 00' 0.36''      11.1 m      10.2 m    7.87 m    4.35 m    individual street, large buildings      
+5        0.00001     0° 00' 0.036''     1.11 m      1.02 m    0.787 m   0.435 m   individual trees, houses                
+6        0.000001    0° 00' 0.0036''    111 mm      102 mm    78.7 mm   43.5 mm   individual humans                       
+7        0.0000001   0° 00' 0.00036''   11.1 mm     10.2 mm   7.87 mm   4.35 mm   practical limit of commercial surveying 
+8        0.00000001  0° 00' 0.000036''  1.11 mm     1.02 mm   0.787 mm  0.435 mm  specialized surveying                   
+
+Google Maps actually uses signed values to represent the position:
+
+  Latitude: max/min 90.0000000 to -90.0000000
+  Longitude: max/min 180.0000000 to -180.0000000
+
+We need 7 decimals to works with it.
+
+Comic strip: https://xkcd.com/2170/
+
+Vedi "coordinate-precision.png" nella cartella "data".
+Vedi anche "Distanza tra due punti della terra" su "Rosetta code".
+
+
+----------------------
+Risultati di un torneo
+----------------------
+
+Generare tutte le matrici binarie NxN in cui la diagonale principale ha tutti 0 e se m(i,j)=1, allora m(j,i) =0 (e viceversa).
+Si tratta di matrici che rappresentano il risultato di un torneo con N giocatori in cui ogni partita ha un vincitore e un perdente (nessun pareggio).
+
+Il numero di matrici generate per un torneo di N giocatori, seguendo le regole date, è legato al numero di possibili ordinamenti dei risultati delle partite.
+Questo si può determinare considerando che ogni giocatore affronta (N - 1) avversari e che ogni partita ha un unico vincitore.
+Per una matrice NxN:
+La diagonale principale non contribuisce, dato che è sempre composta da 0.
+Per la parte superiore della matrice (sopra la diagonale principale) ogni elemento può essere 0 o 1, mentre la parte inferiore della matrice viene determinata automaticamente per rispettare l'antisimmetria.
+Pertanto, il numero di combinazioni uniche è determinato dal numero di configurazioni della parte superiore della matrice, che contiene: 2^(N*(N-1)/2) elementi (triangolare superiore esclusa la diagonale).
+Il totale è quindi: 2^(N*(N-1)/2).
+
+Ad esempio:
+  N = 3 --> matrici = 8
+  N = 4 --> matrici = 64
+  N = 5 --> matrici = 1024
+
+(define (numero-matrici n) (pow 2 (/ (* n (- n 1)) 2)))
+
+(numero-matrici 3)
+;-> 8
+(numero-matrici 5)
+;-> 1024
+(numero-matrici 6)
+;-> 32768
+(numero-matrici 7)
+;-> 2097152
+(numero-matrici 10)
+;-> 35184372088832
+
+Per generare tutte le matrici binarie NxN possiamo considerare i seguenti punti:
+1. La diagonale principale è sempre 0, quindi m(i,i) = 0 per ogni i.
+2. Se m(i,j) = 1, allora m(j,i) = 0, e viceversa. Questo garantisce che ogni partita abbia un vincitore e un perdente.
+3. La matrice è antisimmmetrica rispetto alla diagonale principale: (m(i,j) = 1 implica m(j,i) = 0.
+
+Vediamo come sono gestite queste regole all'interno della funzione:
+1. Antisimmetria: Ogni volta che viene settato un valore m(i, j), viene settato automaticamente il valore opposto m(j, i).
+2. Diagonale principale: Viene ignorata completamente durante la generazione dei valori.
+3. Ricorsione: La funzione `recursive-fill` esplora tutte le possibili configurazioni valide per la matrice.
+
+(define (torneo n)
+  (let ((out '()))
+    (define (recursive-fill i j matrix)
+      (cond
+        ((>= i n)
+         ;(println (length out))
+         (push matrix out)) ; Aggiungi una copia della matrice ai risultati
+        ((>= j n)
+         (recursive-fill (+ i 1) 0 matrix)) ; Passa alla riga successiva
+        ((= i j)
+         (recursive-fill i (+ j 1) matrix)) ; Salta la diagonale principale
+        (true
+         (if (> i j)
+             ; Salta le celle sotto la diagonale principale (gestite dall'antisimmetria)
+             (recursive-fill i (+ j 1) matrix)
+             ; Considera i due casi validi per la cella (i, j)
+             (begin
+               ; Caso 1: m(i, j) = 1, m(j, i) = 0
+               (setf (matrix i j) 1)
+               (setf (matrix j i) 0)
+               (recursive-fill i (+ j 1) matrix)
+               ; Caso 2: m(i, j) = 0, m(j, i) = 1
+               (setf (matrix i j) 0)
+               (setf (matrix j i) 1)
+               (recursive-fill i (+ j 1) matrix))))))
+    ; Inizializza una matrice NxN con tutti 0
+    (let ((matrix (array n n '(0))))
+      (recursive-fill 0 0 matrix))
+    out))
+
+(define (print-matrix matrix border)
+"Print a matrix m x n"
+  (local (row col lenmax fmtstr)
+    ; converto matrice in lista?
+    (if (array? matrix) (setq matrix  (array-list matrix)))
+    ; righe della matrice
+    (setq row (length matrix))
+    ; colonne della matrice
+    (setq col (length (first matrix)))
+    ; valore massimo della lunghezza tra gli elementi (come stringa)
+    (setq lenmax (apply max (map length (map string (flat matrix)))))
+    ; creo stringa di formattazione
+    (setq fmtstr (append "%" (string (+ lenmax 1) "s")))
+    ; stampa la matrice
+    (for (i 0 (- row 1))
+      (if border (print "|"))
+      (for (j 0 (- col 1))
+        (print (format fmtstr (string (matrix i j))))
+      )
+      (if border (println " |") (println))
+    ) nil))
+
+Proviamo:
+
+(setq matrici (torneo 3))
+;-> (((0 0 0) (1 0 0) (1 1 0))
+;->  ((0 0 0) (1 0 1) (1 0 0))
+;->  ((0 0 1) (1 0 0) (0 1 0))
+;->  ((0 0 1) (1 0 1) (0 0 0))
+;->  ((0 1 0) (0 0 0) (1 1 0))
+;->  ((0 1 0) (0 0 1) (1 0 0))
+;->  ((0 1 1) (0 0 0) (0 1 0))
+;->  ((0 1 1) (0 0 1) (0 0 0)))
+(dolist (m matrici) (print-matrix m) (read-line))
+;->  0 0 0    0 0 0    0 0 1    0 0 1    0 1 0    0 1 0    0 1 1    0 1 1
+;->  1 0 0    1 0 1    1 0 0    1 0 1    0 0 0    0 0 1    0 0 0    0 0 1
+;->  1 1 0    1 0 0    0 1 0    0 0 0    1 1 0    1 0 0    0 1 0    0 0 0
+
+(setq matrici (torneo 5))
+;-> (((0 0 0 0 0) (1 0 0 0 0) (1 1 0 0 0) (1 1 1 0 0) (1 1 1 1 0))
+;->  ((0 0 0 0 0) (1 0 0 0 0) (1 1 0 0 0) (1 1 1 0 1) (1 1 1 0 0))
+;->  ((0 0 0 0 0) (1 0 0 0 0) (1 1 0 0 1) (1 1 1 0 0) (1 1 0 1 0))
+;-> ...
+;->  ((0 1 1 1 1) (0 0 1 1 1) (0 0 0 1 0) (0 0 0 0 1) (0 0 1 0 0))
+;->  ((0 1 1 1 1) (0 0 1 1 1) (0 0 0 1 1) (0 0 0 0 0) (0 0 0 1 0))
+;->  ((0 1 1 1 1) (0 0 1 1 1) (0 0 0 1 1) (0 0 0 0 1) (0 0 0 0 0)))
+
+(length matrici)
+;-> 1024
+
+Vediamo la velocità della funzione:
+
+(time (torneo 4))
+;-> 0
+(reset) ; to avoid memory leaks after recursion
+(time (torneo 5))
+;-> 343.571
+(reset) ; to avoid memory leaks after recursion
+(time (torneo 6))
+;-> 1352965.177
+
+La ricorsione è molto lenta in newLISP.
+
+
+---------
+2 + 2 = 5
+---------
+
+newLISP is strange...
+
+(setq i (sym "(+ 2 2)"))
+;-> (+ 2 2)
+(set i 5)
+;-> 5
+(println i " = " (eval i))
+;-> (+ 2 2) = 5
+
+(define (wrong)
+  (let (expr (sym "(+ 2 2) ="))
+    (set expr 5)
+    (println expr { } (eval expr)) '>))
+
+(wrong)
+;-> (+ 2 2) = 5
+
 ============================================================================
 
