@@ -1824,11 +1824,13 @@ L'ordinamento delle liste può essere sia crescente che decrescente. Useremo un 
 Salire le scale (Amazon)
 ------------------------
 
-Esiste una scala con N scalini e puoi salire di 1 o 2 passi alla volta. Dato N, scrivi una funzione che restituisce il numero di modi unici in cui puoi salire la scala. L'ordine dei passaggi è importante.
+Esiste una scala con N scalini e puoi salire di 1 o 2 passi alla volta.
+Dato N, scrivi una funzione che restituisce il numero di modi unici in cui puoi salire la scala.
+L'ordine dei passaggi è importante.
 
 Ad esempio, se N è 4, esistono 5 modi unici: (1, 1, 1, 1) (2, 1, 1) (1, 2, 1) (1, 1, 2) (2, 2).
 
-Cosa succede se, invece di essere in grado di salire di 1 o 2 passi alla volta, è possibile salire qualsiasi numero da un insime di interi positivi X? Ad esempio, se X = {1, 3, 5}, potresti salire 1, 3 o 5 passi alla volta.
+Cosa succede se, invece di essere in grado di salire di 1 o 2 passi alla volta, è possibile salire qualsiasi numero da un insieme di interi positivi X? Ad esempio, se X = {1, 3, 5}, potresti salire 1, 3 o 5 passi alla volta.
 
 Questo è un classico problema ricorsivo. Iniziamo con casi semplici e cercando di trovare una regola di calcolo (relazione).
 
@@ -1882,6 +1884,7 @@ Versione ricorsiva memoized:
 ;-> 0
 
 Versione iterativa (che funziona anche per i big integer):
+La versione iterativa sfrutta il fatto che per calcolare il valore corrente occorrono solo i due termini precedenti.
 
 (define (fibo-i n)
   (local (a b c)
@@ -1891,9 +1894,7 @@ Versione iterativa (che funziona anche per i big integer):
       (setq a b)
       (setq b c)
     )
-    a
-  )
-)
+    a))
 
 (fibo-i 35)
 ;-> 14930352L

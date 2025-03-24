@@ -5792,5 +5792,111 @@ newLISP is strange...
 (wrong)
 ;-> (+ 2 2) = 5
 
+
+---------------------------------------
+Somma cumulativa di una lista di numeri
+---------------------------------------
+
+La somma cumulativa di una lista di numeri è una lista in cui ogni elemento è la somma di tutti i numeri precedenti fino a quel punto.
+Invece, la somma di tutti i numeri è un unico valore ottenuto sommando tutti gli elementi della lista.
+L'ultimo valore della somma cumulativa è sempre uguale alla somma di tutti i numeri della lista.
+
+Data una lista (a1, a2, ..., aN), allora:
+La somma totale è S = a1 + a2 + ... + aN
+La somma cumulativa è (a1, a1 + a2, a1 + a2 + a3, ... , a1 + a2 + ... + aN)
+Quindi, l'ultimo elemento della somma cumulativa è sempre S, la somma di tutti i numeri.
+
+Nota: il numero di elementi della somma cumulativa è uguale al numero di elementi della lista data.
+
+Esempio:
+Lista = (1 2 4 7)
+Somma Totale = 1 + 2 + 4 + 7 = 14
+Somma cumulativa = (1 (1 + 2) (1 + 2 + 4) (1 + 2 + 4 + 7)) = (1 3 7 14)
+
+Funzione cha calcola la somma cumulativa di una lista di numeri:
+
+(define (cumsum lst)
+  (let ( (sum 0) (out '()) )
+    (dolist (el lst)
+      (push (setq sum (add el sum)) out -1))
+    out))
+
+(cumsum '(1 2 4 7))
+;-> (1 3 7 14)
+(cumsum '(2 4 6 8))
+;-> (2 6 12 20)
+
+Questa è un'altra soluzione:
+
+(define (somma-cumulativa lst somma) (map (fn(x) (inc somma x)) lst))
+
+(somma-cumulativa '(1 2 4 7) 0)
+;-> (1 3 7 14)
+(somma-cumulativa '(2 4 6 8) 0)
+;-> (2 6 12 20)
+
+Nota: 'inc' può essere usato anche con simboli con valore nil.
+
+(somma-cumulativa '(1 2 4 7))
+;-> (1 3 7 14)
+(somma-cumulativa '(2 4 6 8))
+;-> (2 6 12 20)
+
+
+-----------------------------------
+Prodotto di un intervallo di interi
+-----------------------------------
+
+Dati due numeri interi 'a' e 'b', calcolare Prod[a,b], cioè il prodotto dei numeri da 'a' a 'b' compresi.
+
+Esempi:
+  [2,5]   --> 2*3*4*5 = 120
+  [5,10]  --> 151200
+  [-4,3]  --> 0
+  [0,3]   --> 0
+  [-4,-1] --> 24
+
+Versione lunga:
+
+(define (prodotto a b)
+  (if (> a b) (swap a b))
+  (cond ((or (zero? a) (zero? b)) 0)
+        ((and (< a 0) (> b 0)) 0)
+        (true
+          (let (prod a)
+            (for (num (+ a 1) b)
+              (setq prod (* prod num)))
+            prod))))
+
+(prodotto 2 5)
+;-> 120
+(prodotto -4 3)
+;-> 0
+(prodotto 0 3)
+;-> 0
+(prodotto -4 -1)
+;-> 24
+(prodotto -4 -2)
+;-> -24
+(prodotto 5 2)
+;-> 120
+
+Versione corta (39 caratteri):
+
+(define(f a b)(apply *(sequence a b)))
+
+(f 2 5)
+;-> 120
+(f -4 3)
+;-> 0
+(f 0 3)
+;-> 0
+(f -4 -1)
+;-> 24
+(f -4 -2)
+;-> -24
+(f 5 2)
+;-> 120
+
 ============================================================================
 

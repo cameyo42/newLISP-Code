@@ -2843,6 +2843,8 @@ NOTE LIBERE 28
   Standard representation of geographic point location by coordinates
   Risultati di un torneo
   2 + 2 = 5
+  Somma cumulativa di una lista di numeri
+  Prodotto di un intervallo di interi
 
 PROBLEMI SUI DADI
 =================
