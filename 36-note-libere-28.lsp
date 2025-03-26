@@ -877,7 +877,7 @@ Funzione che trova i giorni fortunati in un intervallo di anni:
 Proviamo:
 
 (luckys 1980 1982)
-;-> ((1980 2 3) (1980 2 4) (1980 2 5) (1980 2 6) (1980 2 7) (1980 3 2) 
+;-> ((1980 2 3) (1980 2 4) (1980 2 5) (1980 2 6) (1980 2 7) (1980 3 2)
 ;->  (1980 3 4) (1980 3 5) (1980 3 6) (1980 3 7) (1980 3 24) (1980 3 25)
 ;->  ...
 ;->  (1982 6 30) (1982 7 3) (1982 7 4) (1982 7 5) (1982 7 6) (1982 7 30))
@@ -949,7 +949,7 @@ Nella seconda sintassi, intersect restituisce una lista di tutti gli elementi in
 Vedi anche le funzioni per i set "difference", "unique" e "union".
 In the first syntax, intersect returns a list containing one copy of each element found both in list-A and list-B.
 
-(intersect '(3 0 1 3 2 3 4 2 1) '(1 4 2 5))  
+(intersect '(3 0 1 3 2 3 4 2 1) '(1 4 2 5))
 ;-> (2 4 1)
 ------------
 
@@ -986,7 +986,7 @@ Esempi:
 Numero triangolare = 10             Numero quadrato = 16
 
             *                               * * * *
-           * *                              * * * *    
+           * *                              * * * *
           * * *                             * * * *
          * * * *                            * * * *
 
@@ -995,13 +995,13 @@ Esempio:
 Numero poligonale multiplo = 36 (triangolare e quadrato)
 
             *               * * * * * *
-           * *              * * * * * *    
+           * *              * * * * * *
           * * *             * * * * * *
          * * * *            * * * * * *
         * * * * *           * * * * * *
        * * * * * *          * * * * * *
-      * * * * * * *                         
-     * * * * * * * * 
+      * * * * * * *
+     * * * * * * * *
 
 Formule per il calcolo dei numeri poligonali:
 
@@ -1017,7 +1017,7 @@ Formula generale
 ----------------
 
   Numeri p-gonali = p*n*(n - 1)/2 - n*(n - 2)
-  
+
   Numeri p-gonali = (1/2)*n*[(p - 2)*n - (p - 4)]
 
 oppure:
@@ -1493,7 +1493,7 @@ Funzione che prende un intero n e calcola la coppia di numeri primi che sommano 
         (setq out (list p (- n p)))
         ; esce dal ciclo
         (setq stop true))
-      ; se (p > n), allora usciamo dal ciclo  
+      ; se (p > n), allora usciamo dal ciclo
       (if (> p n) (setq stop true))
     )
     out)))
@@ -1624,7 +1624,7 @@ Parametri:
       (setq resto (- dividendo (* cifra num2)))
       ; Calcolo nuovo numero
       (cond
-        ; Se resto = 0, 
+        ; Se resto = 0,
         ; allora fine della divisione (se abbiamo messo la virgola)
         ((and (zero? resto) virgola) nil)
         (true
@@ -1702,7 +1702,7 @@ Scriviamo una funzione che spiega tutti i passaggi dell'algoritmo:
       (println "Calcoliamo il resto: " dividendo " - (" cifra "*" num2 ") = " resto)
       ; Calcolo nuovo numero
       (cond
-        ; Se resto = 0, 
+        ; Se resto = 0,
         ; allora fine della divisione (se abbiamo messo la virgola)
         ((and (zero? resto) virgola) nil)
         (true
@@ -1739,28 +1739,28 @@ Proviamo:
 ;-> Il 24 sta 1 volte nel 34.
 ;-> Scriviamo 1 nel risultato.
 ;-> Risultato: 1
-;-> 
+;->
 ;-> Calcoliamo il resto: 34 - (1*24) = 10
 ;-> Calcolo del nuovo numero: 10278
 ;-> Prendiamo il numero 102.
 ;-> Il 24 sta 4 volte nel 102.
 ;-> Scriviamo 4 nel risultato.
 ;-> Risultato: 14
-;-> 
+;->
 ;-> Calcoliamo il resto: 102 - (4*24) = 6
 ;-> Calcolo del nuovo numero: 678
 ;-> Prendiamo il numero 67.
 ;-> Il 24 sta 2 volte nel 67.
 ;-> Scriviamo 2 nel risultato.
 ;-> Risultato: 142
-;-> 
+;->
 ;-> Calcoliamo il resto: 67 - (2*24) = 19
 ;-> Calcolo del nuovo numero: 198
 ;-> Prendiamo il numero 198.
 ;-> Il 24 sta 8 volte nel 198.
 ;-> Scriviamo 8 nel risultato.
 ;-> Risultato: 1428
-;-> 
+;->
 ;-> Calcoliamo il resto: 198 - (8*24) = 6
 ;-> Calcolo del nuovo numero: 6
 ;-> Nuovo numero: 6 è minore del divisore
@@ -1770,7 +1770,7 @@ Proviamo:
 ;-> Il 24 sta 2 volte nel 60.
 ;-> Scriviamo 2 nel risultato.
 ;-> Risultato: 1428.2
-;-> 
+;->
 ;-> Calcoliamo il resto: 60 - (2*24) = 12
 ;-> Calcolo del nuovo numero: 12
 ;-> Nuovo numero: 12 è minore del divisore
@@ -1779,7 +1779,7 @@ Proviamo:
 ;-> Il 24 sta 5 volte nel 120.
 ;-> Scriviamo 5 nel risultato.
 ;-> Risultato: 1428.25
-;-> 
+;->
 ;-> Calcoliamo il resto: 120 - (5*24) = 0
 ;-> Resto uguale a 0 o precisione raggiunta. La divisione è terminata.
 ;-> Risultato: 1428.25
@@ -1791,7 +1791,7 @@ Vedi anche "Periodo e antiperiodo della divisione decimale di due interi M/N" su
 Ricerche su vettori
 -------------------
 
-newLISP non ha funzioni di ricerca sui vettori come "find", "ref", "ref-all", ecc. per le liste. 
+newLISP non ha funzioni di ricerca sui vettori come "find", "ref", "ref-all", ecc. per le liste.
 
 find per vettori:
 
@@ -2069,7 +2069,7 @@ sorted = boolean (true --> crea una lista associativa con sottoliste ordinate)
           ; Non esiste: aggiunge l'elemento corrente alla lista di output
           (push el out -1))))
     ; Crea la lista di associazione?
-    (if assoc-lst 
+    (if assoc-lst
         ; Sottoliste ordinate?
         (if sorted
             (map (fn(x) (list (x 0) (sort (rest x)))) out)
@@ -2225,7 +2225,7 @@ Scriviamo una funzione che stampa il processo della moltiplicazione tra interi c
       ;    (println (right-string (string res) pad) " =")
       ;    (println (right-string (string res) pad) " +"))
       (if (zero? i)
-          (print (right-string (string res) pad) " =  ") 
+          (print (right-string (string res) pad) " =  ")
           (print (right-string (string res) pad) " +  "))
       (println "(" a " x " (sb i) (dup "0" (- (length b) i 1)) ")")
     )
@@ -2298,22 +2298,22 @@ Espressione: c^f = f^c
 ;-> 2 4
 ;-> 4 2
 
-  Caso 1:           Caso 2:           Caso 3: 
+  Caso 1:           Caso 2:           Caso 3:
   c = 2             c = 4             c = f, con c,f > 0
   f = 4             f = 2             c^m = m^c
-  4^m = m^2         2^m = m^4         
+  4^m = m^2         2^m = m^4
   2^m = m^4         4^m = m^2
   m > 2             m > 4
 
 Caso 1:
-(for (m 1 100) 
+(for (m 1 100)
   (if (and (= (pow 4 m) (pow m 2))
            (= (pow 2 m) (pow m 4)))
   (println m)))
 ;-> nil
 
 Caso 2:
-(for (m 1 100) 
+(for (m 1 100)
   (if (and (= (pow 2 m) (pow m 4))
            (= (pow 4 m) (pow m 2)))
   (println m)))
@@ -2490,7 +2490,7 @@ Iniziamo la dimostrazione per assurdo affermando che sqrt(2) può esere espresse
   sqrt(2) = m/n     (1)
 
 La frazione m/n è ridotta ai minimi termini e i numeri m e n sono coprimi tra loro (quindi non possono essere entrambi pari).
-  
+
 Eleviamo al quadrato l'espressione (1):
 
   2 = m^2/n^2       (2)
@@ -2508,8 +2508,8 @@ Poichè m è pari, per la proprietà b) risulta:
 
 Sosituiamo nella (3) il valore di m^2 dato dalla (5):
 
-  4*k^2 = 2*n^2             (6) 
-  
+  4*k^2 = 2*n^2             (6)
+
 Dividiamo per 2 entrambi i membri della (6):
 
   2*k^2 = n^2
@@ -2596,7 +2596,7 @@ Vediamo quali numeri soddisfano i vincoli dati.
 ;->  ((3 3 8) 14) ((2 6 6) 14) ((3 4 6) 13))
 
 Le soluzioni candidate sono 6:
-eta        somma 
+eta        somma
 (2 2 18)   22
 (2 3 12)   17
 (2 4 9)    15
@@ -2847,7 +2847,7 @@ Vediamo la differenza di velocità tra le funzione "laplace", "gauss" e la funzi
 
 Creiamo una matrice 10x10 con numeri compresi tra 0 a 9:
 
-(setq t '((0 5 1 8 5 4 3 8 8 7) 
+(setq t '((0 5 1 8 5 4 3 8 8 7)
           (1 8 7 5 3 0 0 3 1 1)
           (9 4 1 0 0 3 5 5 6 6)
           (1 6 4 3 0 6 7 8 5 3)
@@ -2946,8 +2946,8 @@ Scriviamo una funzione che calcola tutti i numeri lessicograficamente crescenti 
 
 (numeri-lexi 1 100)
 ;-> ("1" "2" "3" "4" "5" "6" "7" "8" "9" "12" "13" "14" "15" "16" "17"
-;->  "18" "19" "23" "24" "25" "26" "27" "28" "29" "34" "35" "36" "37" 
-;->  "38" "39" "45" "46" "47" "48" "49" "56" "57" "58" "59" "67" "68" 
+;->  "18" "19" "23" "24" "25" "26" "27" "28" "29" "34" "35" "36" "37"
+;->  "38" "39" "45" "46" "47" "48" "49" "56" "57" "58" "59" "67" "68"
 ;->  "69" "78" "79" "89")
 
 
@@ -3075,7 +3075,7 @@ Proviamo:
 ;-> +----+----+----+----+----+----+----+----+----+
 ;-> |   1|    |  23|    |  48|    |    |    |  89|
 ;-> +----+----+----+----+----+----+----+----+----+
-;-> 
+;->
 ;-> +----+----+----+----+----+----+----+----+----+
 ;-> |   1|  14|  23|  32|    |  53|  64|  71|  82|
 ;-> +----+----+----+----+----+----+----+----+----+
@@ -3232,7 +3232,7 @@ NASA/JPL Laboratory for Reliable Software
 
 Adhering to a set of 10 verifiable coding rules can make the analysis of critical software components more
 reliable.
-For fairly pragmatic reasons our coding rules primarily target C and attempt to optimize our ability to more thoroughly check the reliability of critical applications written in C. 
+For fairly pragmatic reasons our coding rules primarily target C and attempt to optimize our ability to more thoroughly check the reliability of critical applications written in C.
 
 Rule 1: Restrict all code to very simple control flow constructs—do not use goto statements, setjmp or longjmp constructs, or direct or indirect recursion.
 
@@ -3715,7 +3715,7 @@ Proviamo:
 ;->  (-1 -1 -1 -1 -1))
 
 (time (println (riempi-matrice8 10 10 4)))
-;-> ((0 1 3 2 3 2 0 2 3 1) 
+;-> ((0 1 3 2 3 2 0 2 3 1)
 ;->  (3 2 0 1 0 1 3 1 0 2)
 ;->  (0 1 3 2 3 2 0 2 3 1)
 ;->  (3 2 0 1 0 1 3 1 0 2)
@@ -4043,7 +4043,7 @@ Funzione che calcola il coefficiente di x e la costante di una parte dell'equazi
             ((and (!= termine "") (or (= ch "-") (= ch "+")))
               ; ... allora calcoliamo il valore del termine
               (if (find "x" termine)
-                    ; il valore del termine è il coefficiente di x 
+                    ; il valore del termine è il coefficiente di x
                     (setq val-x (add val-x (int termine)))
                     ; il valore del termine è la costante
                     (setq val (add val (int termine))))
@@ -4370,13 +4370,13 @@ In questo caso l'algoritmo è stato modificato per tenere conto anche delle somm
 (define (max-abs-sum lst)
   (let ((out 0) (max-sum 0) (min-sum 0))
     (dolist (el lst)
-      ; Aggiorna la somma massima della sottolista 
+      ; Aggiorna la somma massima della sottolista
       ; che termina nella posizione corrente.
       ; Reimposta al numero corrente se la somma massima diventa negativa.
       (setq max-sum (max el (+ max-sum el)))
       ; Aggiorna la somma minima della sottolista
       ; che termina nella posizione corrente.
-      ; Reimposta al numero corrente se la somma minima diventa positiva.      
+      ; Reimposta al numero corrente se la somma minima diventa positiva.
       (setq min-sum (min el (+ min-sum el)))
       ; Aggiorna la soluzione out con il valore massimo tra out corrente,
       ; la somma massima corrente della sottolista
@@ -4533,9 +4533,9 @@ Funzione che inverte i bit di un numero binario (lista caratteri ("0" e "1")):
 
 Funzione che inverte i bit di un numero binario (lista caratteri ("0" e "1")):
 
-(define (invert-lst4 lst) 
-  (dolist (c lst) 
-    (if (= c "0") 
+(define (invert-lst4 lst)
+  (dolist (c lst)
+    (if (= c "0")
         (setf (lst $idx) "1")
         (setf (lst $idx) "0")))
   lst)
@@ -4603,7 +4603,7 @@ Supponiamo di avere la stringa "AAB":
 
 Il numero di stringhe diverse vale:
 
-     3!       6 
+     3!       6
   ------- = ----- = 3
    2!*1!      2
 
@@ -4856,7 +4856,7 @@ Algoritmo
    1.2) Per ogni coppia di '1'
         1.2.1) Cercare un rettangolo nelle righe inferiori e aggiornare area massima temporanea
    1.3) Aggiornare area massima
-   
+
 In altre parole, partiamo dalle coppie di '1' su una riga e poi verifichiamo la presenza dei vertici inferiori corrispondenti.
 Questo garantisce che tutti i rettangoli validi vengano considerati.
 
@@ -5051,7 +5051,7 @@ Output =
 stringa = "A B"
 Output =
   "A"
-  
+
   "BB"
 
 Alfabeto: ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -5079,7 +5079,7 @@ Alfabeto: ABCDEFGHIJKLMNOPQRSTUVWXYZ
 ;-> OOOOOOOOOOOOOOO
 ;-> NNNNNNNNNNNNNN
 ;-> EEEEE
-;-> 
+;->
 ;-> TTTTTTTTTTTTTTTTTTTT
 ;-> WWWWWWWWWWWWWWWWWWWWWWW
 ;-> OOOOOOOOOOOOOOO
@@ -5092,7 +5092,7 @@ Principio di Archimede
 Gerone II, tiranno di Siracusa, ordinò a un orafo di realizzare una corona d'oro per un tempio, fornendogli una quantità precisa di oro puro.
 Quando la corona fu completata, Gerone sospettò che l'orafo avesse sostituito parte dell'oro con un metallo meno prezioso (argento o rame), trattenendo per sé una parte del metallo prezioso.
 Non volendo fondere la corona per verificarne la purezza, il re si rivolse ad Archimede per trovare una soluzione.
-Secondo la leggenda, quando Archimede scoprì il principio del galleggiamento mentre era immerso nella vasca da bagno, capì immediatamente come risolvere il problema della corona. 
+Secondo la leggenda, quando Archimede scoprì il principio del galleggiamento mentre era immerso nella vasca da bagno, capì immediatamente come risolvere il problema della corona.
 Preso dall'entusiasmo, saltò fuori dall'acqua e corse per le strade di Siracusa gridando "Eureka! Eureka!", che in greco significa "Ho trovato! Ho trovato!".
 Notò che, immergendosi nell'acqua, il livello dell'acqua si alzava.
 Questo lo portò a formulare il principio di Archimede, secondo cui un corpo immerso in un fluido riceve una spinta verso l'alto pari al peso del fluido spostato.
@@ -5168,11 +5168,11 @@ Gessel sequence: the number of paths of length 2m in the plane, starting and end
   32340239369121304038, 461109219391987625316, 6610306991283738684600, ...
 
 OEIS formula:
-  
+
   (10+11*n+3*n^2)*a(n+1) = (20+64*n+48*n^2)*a(n)
 
 Formula modificata per calcolare a(n) da a(n-1):
-  
+
   a(0) = 1;
   a(n) = a(n-1)*(48*n^2-32*n+4)/(3*n^2+5*n+2);
 
@@ -5256,12 +5256,12 @@ Proviamo:
 (trova-re m)
 ;-> (1 3 4)
 
-(setq m '((0 0 0 0 0 0) (1 0 1 1 0 0) (1 0 0 1 1 0) 
+(setq m '((0 0 0 0 0 0) (1 0 1 1 0 0) (1 0 0 1 1 0)
           (1 0 0 0 1 1) (1 1 0 0 0 1) (1 1 1 0 0 0)))
 (trova-re m)
 ;-> (1 2 3 4 5)
 
-(setq m '((0 0 1 1 1 0) (1 0 0 1 1 1) (0 1 0 0 1 0) 
+(setq m '((0 0 1 1 1 0) (1 0 0 1 1 1) (0 1 0 0 1 0)
           (0 0 1 0 0 1) (0 0 0 1 0 1) (1 0 1 0 0 0)))
 (trova-re m)
 ;-> (0 1 2 3 5)
@@ -5271,31 +5271,31 @@ Proviamo:
 (trova-re m)
 ;-> (0 1 2 3 4 5)
 
-(setq m '((0 0 1 1 0 1 1 1) (1 0 1 0 1 1 0 0) (0 0 0 1 1 0 0 0) 
-          (0 1 0 0 0 1 0 0) (1 0 0 1 0 1 0 0) (0 0 1 0 0 0 1 0) 
+(setq m '((0 0 1 1 0 1 1 1) (1 0 1 0 1 1 0 0) (0 0 0 1 1 0 0 0)
+          (0 1 0 0 0 1 0 0) (1 0 0 1 0 1 0 0) (0 0 1 0 0 0 1 0)
           (0 1 1 1 1 0 0 1) (0 1 1 1 1 1 0 0)))
 (trova-re m)
 ;-> (0 1 4 6 7)
 
 (setq m '((0 0 1 1 0 1 1 0 0 0 0 1 1 0 1 1 1 1 0 1)
-          (1 0 1 1 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1) 
-          (0 0 0 1 0 0 0 1 1 0 1 0 1 0 0 0 0 0 1 1) 
-          (0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1) 
-          (1 0 1 0 0 0 0 1 1 0 1 1 1 0 1 1 1 1 0 1) 
-          (0 1 1 0 1 0 1 1 1 1 1 0 1 1 1 0 1 1 0 1) 
-          (0 0 1 0 1 0 0 1 1 0 1 0 1 1 1 1 1 0 1 0) 
-          (1 0 0 0 0 0 0 0 1 0 1 1 1 1 0 0 1 1 1 0) 
-          (1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 1) 
-          (1 0 1 0 1 0 1 1 0 0 1 0 0 0 0 1 0 1 1 1) 
-          (1 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0) 
-          (0 1 1 0 0 1 1 0 0 1 0 0 1 1 1 1 1 0 1 1) 
-          (0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 1 0 1 1 1) 
-          (1 0 1 1 1 0 0 0 0 1 0 0 1 0 1 1 1 1 1 1) 
-          (0 0 1 0 0 0 0 1 0 1 1 0 0 0 0 1 1 0 0 1) 
-          (0 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0 0 1 1 1) 
-          (0 0 1 1 0 0 0 0 0 1 1 0 1 0 0 1 0 0 1 1) 
-          (0 0 1 0 0 0 1 0 1 0 1 1 0 0 1 0 1 0 1 1) 
-          (1 0 0 0 1 1 0 0 0 0 1 0 0 0 1 0 0 0 0 0) 
+          (1 0 1 1 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1)
+          (0 0 0 1 0 0 0 1 1 0 1 0 1 0 0 0 0 0 1 1)
+          (0 0 0 0 1 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1)
+          (1 0 1 0 0 0 0 1 1 0 1 1 1 0 1 1 1 1 0 1)
+          (0 1 1 0 1 0 1 1 1 1 1 0 1 1 1 0 1 1 0 1)
+          (0 0 1 0 1 0 0 1 1 0 1 0 1 1 1 1 1 0 1 0)
+          (1 0 0 0 0 0 0 0 1 0 1 1 1 1 0 0 1 1 1 0)
+          (1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 1 1)
+          (1 0 1 0 1 0 1 1 0 0 1 0 0 0 0 1 0 1 1 1)
+          (1 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 0 0 0 0)
+          (0 1 1 0 0 1 1 0 0 1 0 0 1 1 1 1 1 0 1 1)
+          (0 0 0 1 0 0 0 0 0 1 0 0 0 0 1 1 0 1 1 1)
+          (1 0 1 1 1 0 0 0 0 1 0 0 1 0 1 1 1 1 1 1)
+          (0 0 1 0 0 0 0 1 0 1 1 0 0 0 0 1 1 0 0 1)
+          (0 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0 0 1 1 1)
+          (0 0 1 1 0 0 0 0 0 1 1 0 1 0 0 1 0 0 1 1)
+          (0 0 1 0 0 0 1 0 1 0 1 1 0 0 1 0 1 0 1 1)
+          (1 0 0 0 1 1 0 0 0 0 1 0 0 0 1 0 0 0 0 0)
           (0 0 0 0 0 0 1 1 0 0 1 0 0 0 0 0 0 0 1 0)))
 (trova-re m)
 ;-> (0 1 3 4 5 7 8 11 15 17 18)
@@ -5435,7 +5435,7 @@ Calcoliamo la sequenza OEIS:
 ;-> (4 3 3 3 7 6 3 5 4 4 5 6 6 7 11 8 6 11 8 10 5 7 8
 ;->  8 12 11 8 10 8 9 6 8 9 9 13 12 9 11 9 10 8 10 11 11
 ;->  15 14 11 13 11 12 9 11 12 12 16 15 12 14 12 13 8 10 11
-;->  11 15 14 11 13 11 12 8 10 11 11 15 14 11 13 11 12 7 9 
+;->  11 15 14 11 13 11 12 8 10 11 11 15 14 11 13 11 12 7 9
 ;->  10 10 14 13 10 12 10 11 7 9 10 10 14 13 10 12 10 11 5)
 
 
@@ -5609,17 +5609,17 @@ The number of decimal places required for a particular precision at the equator 
 
 Degree precision versus length
 ------------------------------
-Decimal  DD          DMS                N/S or E/W  E/W       E/W       E/W        
+Decimal  DD          DMS                N/S or E/W  E/W       E/W       E/W
                                         at equator  at 23N/S  at 45N/S  at 67N/S  Object unambiguously recognized
-0        1.0         1° 00' 0''         111 km      102 km    78.7 km   43.5 km   country or large region                 
-1        0.1         0° 06' 0''         11.1 km     10.2 km   7.87 km   4.35 km   large city or district                  
-2        0.01        0° 00' 36''        1.11 km     1.02 km   0.787 km  0.435 km  town or village                         
-3        0.001       0° 00' 3.6''       111 m       102 m     78.7 m    43.5 m    neighborhood, street                    
-4        0.0001      0° 00' 0.36''      11.1 m      10.2 m    7.87 m    4.35 m    individual street, large buildings      
-5        0.00001     0° 00' 0.036''     1.11 m      1.02 m    0.787 m   0.435 m   individual trees, houses                
-6        0.000001    0° 00' 0.0036''    111 mm      102 mm    78.7 mm   43.5 mm   individual humans                       
-7        0.0000001   0° 00' 0.00036''   11.1 mm     10.2 mm   7.87 mm   4.35 mm   practical limit of commercial surveying 
-8        0.00000001  0° 00' 0.000036''  1.11 mm     1.02 mm   0.787 mm  0.435 mm  specialized surveying                   
+0        1.0         1° 00' 0''         111 km      102 km    78.7 km   43.5 km   country or large region
+1        0.1         0° 06' 0''         11.1 km     10.2 km   7.87 km   4.35 km   large city or district
+2        0.01        0° 00' 36''        1.11 km     1.02 km   0.787 km  0.435 km  town or village
+3        0.001       0° 00' 3.6''       111 m       102 m     78.7 m    43.5 m    neighborhood, street
+4        0.0001      0° 00' 0.36''      11.1 m      10.2 m    7.87 m    4.35 m    individual street, large buildings
+5        0.00001     0° 00' 0.036''     1.11 m      1.02 m    0.787 m   0.435 m   individual trees, houses
+6        0.000001    0° 00' 0.0036''    111 mm      102 mm    78.7 mm   43.5 mm   individual humans
+7        0.0000001   0° 00' 0.00036''   11.1 mm     10.2 mm   7.87 mm   4.35 mm   practical limit of commercial surveying
+8        0.00000001  0° 00' 0.000036''  1.11 mm     1.02 mm   0.787 mm  0.435 mm  specialized surveying
 
 Google Maps actually uses signed values to represent the position:
 
@@ -5897,6 +5897,236 @@ Versione corta (39 caratteri):
 ;-> -24
 (f 5 2)
 ;-> 120
+
+
+-----------------
+Insiemi di numeri
+-----------------
+
+Definizione degli insiemi di numeri più conosciuti:
+
+- B (Boolean): L'insieme dei valori logici (0,1), spesso interpretati come false/nil e true rispettivamente.
+- N (Natural): L'insieme dei numeri naturali (1,2,3,...) (escludendo lo zero, secondo la definizione standard in teoria dei numeri).
+- W (Whole): L'insieme dei numeri interi non negativi (0,1,2,3,...) (comprende lo zero e tutti i numeri naturali).
+- Z (Integer): L'insieme dei numeri interi (..., -2, -1, 0, 1, 2, 3, ...).
+- Q (Rational): L'insieme dei numeri razionali, ovvero frazioni della forma a/b, dove a e b sono interi e b ≠ 0. Comprende numeri decimali finiti e periodici (es. -3/4, 3.45, 1/2).
+- P (Irrational): Numeri reali che non possono essere espressi come frazioni a/b. Esempi sono √2, π, e, ecc.
+- R (Real): L'insieme dei numeri reali, che comprende sia i razionali (Q) che gli irrazionali (P).
+- I (Imaginary): Numeri della forma bi, dove b è un numero reale e i è l'unità immaginaria, con i² = -1.
+- C (Complex): L'insieme dei numeri complessi, della forma a + bi, dove a e b sono numeri reali e i è l'unità immaginaria.
+- A (Algebraic): Numeri che sono soluzioni di un'equazione polinomiale con coefficienti interi (es. √2, -1/2, i).
+- T (Transcendental): Numeri reali o complessi che non sono soluzioni di alcuna equazione polinomiale a coefficienti interi. Esempi sono π ed e.
+- H (Quaternion): Estensione dei numeri complessi della forma a + bi + cj + dk, dove i² = j² = k² = ijk = -1.
+- O (Octonion): Generalizzazione degli quaternioni con 8 dimensioni, non associativi.
+- R* (Hyperreal): Numeri che estendono i reali includendo infinitesimi e infiniti, usati in analisi non standard.
+- S (Surreal): Generalizzazione dei numeri reali e ordinali, che include sia infinitesimi che infiniti in modo più strutturato rispetto agli iperreali.
+- Computable Numbers: Numeri reali che possono essere calcolati da un algoritmo con precisione arbitraria.
+
+Vedi immagine "classi_di_numeri.jpg" nella cartella "data".
+
+
+---------
+Evitare 0
+---------
+
+Dato un numero intero non negativo n, scrivere la funzione più breve che restituisce 1 se n vale 0, altrimenti restituisce n.
+
+Cominciamo con una funzione che utilizza la logica della definizione del problema:
+
+; 30 caratteri
+(define(f n)(if(zero? n) 1 n))
+(map f (sequence 0 10))
+;-> (1 1 2 3 4 5 6 7 8 9 10)
+
+Possiamo ridurre la funzione cambiando "(zero? n)" con "(= n 0)":
+
+; 28 caratteri
+(define(f n)(if(= n 0) 1 n))
+(map f (sequence 0 10))
+;-> (1 1 2 3 4 5 6 7 8 9 10)
+
+Infine, se usiamo la funzione "max" otteniamo una funzione ancora più breve:
+
+; 22 caratteri
+(define(f n)(max n 1))
+(map f (sequence 0 10))
+;-> (1 1 2 3 4 5 6 7 8 9 10)
+
+
+------------------------------
+Moltiplicazione di una stringa
+------------------------------
+
+Data una stringa S e un numero decimale N, scrivere una funzione che restituisce la stringa moltiplicata per quel numero.
+Il numero N può essere un numero float o un numero intero.
+In altre parole, bisogna restituire la stringa floor(n) volte e poi di nuovo i primi caratteri floor((n − floor(n)) * length(s)).
+
+Esempi:
+S = "casa", N = 2.5
+Output = "casacasaca"
+
+S = "(prendiamo un terzo di questa stringa)", N = 0.3333
+Output = "(prendiamo u"
+
+S = "tutto", N = 1
+Output = "tutto"
+
+S = "continua", N = 0.5
+Output = "cont"
+
+(define (mul-string str n)
+    (if (integer? n) (dup str n)
+        (let ( (out (dup str (floor n))) (len (length str)) )
+          (extend out (slice str 0 (floor (mul (sub n (floor n)) len)))))))
+
+Proviamo:
+
+(mul-string "casa" 2.5)
+;-> "casacasaca"
+(mul-string "(prendiamo un terzo di questa stringa)" 0.3333)
+;-> "(prendiamo u)"
+(mul-string "continua" 0.5)
+;-> "cont"
+
+Versione compatta:
+
+(define (mul-string str n)
+  (let (out (dup str (floor n)))
+    (extend out (slice str 0 (floor (mul (sub n (floor n)) (length str)))))))
+
+
+--------------------------------
+Fix that slightly incorrect sum!
+--------------------------------
+
+Link al problema originale:
+https://codegolf.stackexchange.com/questions/278835/fix-that-slightly-incorrect-sum
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Oh no! Una somma corretta è stata rovinata da un errore di battitura.
+
+Scrivere una funzione che possa correggere una singola cifra errata in una somma altrimenti corretta.
+
+Input
+Tre interi a, b, c che rappresentano una somma errata della forma a + b = c.
+Ad esempio, (135 246 341) che rappresenta 135 + 246 = 341 (Vedi le note sottostanti).
+
+Output
+Una stringa/lista contenente l'equazione corretta che è la stessa della somma rappresentata dall'input, eccetto per una cifra modificata in uno degli interi.
+Nell'esempio sopra, 135 + 246 = 381 è un output corretto, così come 135 + 206 = 341.
+
+- Tutti i numeri nell'input sono numeri interi compresi tra 0 e 999999.
+- Non occorre gestire somme che non possono essere corrette sostituendo una sola cifra, né casi in cui la somma è già corretta.
+- Non devi emettere numeri con 0 o segni meno iniziali. (Il numero 0 stesso è consentito, come in 5 + 0 = 5).
+- I numeri di output devono essere nello stesso ordine, con lo stesso numero di cifre ciascuno.
+- Ci saranno spesso più possibili output corretti. Qualsiasi va bene.
+A volte occorre modificare la somma, altre volte bisogna modificare un operando.
+A volte sono possibili entrambe le cose.
+
+Esempi:
+  1 + 5 = 1 -> 1 + 5 = 6 o 1 + 0 = 1
+  80 + 120 = 300 -> 80 + 120 = 200 o 80 + 220 = 300
+  1 + 95 = 104 -> 9 + 95 = 104 (deve cambiare il primo operando)
+  9 + 880 = 898 -> 9 + 889 = 898 (deve cambiare il secondo operando)
+  22 + 88 = 910 -> 22 + 88 = 110 (deve cambiare la somma)
+  999999 + 9 = 999999 -> 999999 + 0 = 999999 o 999990 + 9 = 999999
+  1000 + 100 = 1110 -> 1010 + 100 = 1110 o 1000 + 110 = 1110 o 1000 + 100 = 1100
+  10 + 15 = 15 -> 10 + 15 = 25 (l'output 00 + 15 = 25 o 10 + 05 = 15 non è valido)
+  90 + 699 = 699 -> 90 + 609 = 699 (simile)
+  1 + 2 = 3 -> 1 + 2 = 3 (nessun cambio)
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+Funzione che verifica la somma di tre numeri:
+
+(define (verify a b c) (= (+ a b) c))
+
+Funzione che prende un numero e genera una lista con tutti i numeri che hanno una sola cifra diversa dal numero dato:
+
+(define (change num)
+  (local (out len digits tmp numero)
+    (setq out '())
+    (setq len (length num))
+    (setq digits (int-list num))
+    (dolist (d digits)
+      (setq tmp digits)
+      (if (and (zero? $idx) (> len 1)) (setq start 1) (setq start 0))
+      (for (cifra start 9)
+        (setf (tmp $idx) cifra)
+        (setq numero (list-int tmp))
+        (push numero out -1)
+      )
+    )
+    out))
+
+(change 0)
+;-> (0 1 2 3 4 5 6 7 8 9)
+(change 1)
+;-> (0 1 2 3 4 5 6 7 8 9)
+(change 12)
+;-> (12 22 32 42 52 62 72 82 92 10 11 12 13 14 15 16 17 18 19)
+
+Funzione che corregge una somma errata (solo una cifra, ma tutte le soluzioni):
+
+(define (correct a b c)
+  (if (verify a b c) (println a " + " b " = " c)
+  ;else
+  (let ( (a1 (change a))
+         (b1 (change b))
+         (c1 (change c)) )
+  (dolist (el a1)
+    (if (verify el b c) (println el " + " b " = " c)))
+  (dolist (el b1)
+    (if (verify a el c) (println a " + " el " = " c)))
+  (dolist (el c1)
+    (if (verify a b el) (println a " + " b " = " el)))))'>)
+
+Proviamo:
+
+(correct 1 5 1)
+;-> 1 + 0 = 1
+;-> 1 + 5 = 6
+
+(correct 80 120 300)
+;-> 80 + 220 = 300
+;-> 80 + 120 = 200
+
+(correct 1 95 104)
+;-> 9 + 95 = 104
+
+(correct 22 88 910)
+;-> 22 + 88 = 110
+
+(correct 999999 9 999999)
+;-> 999990 + 9 = 999999
+;-> 999999 + 0 = 999999
+
+(correct 1000 100 1110)
+;-> 1010 + 100 = 1110
+;-> 1000 + 110 = 1110
+;-> 1000 + 100 = 1100
+
+(correct 10 15 15)
+;-> 10 + 15 = 25
+
+(correct 90 699 699)
+;-> 90 + 609 = 699
+
+(correct 1 2 3)
+;-> 1 + 2 = 3
 
 ============================================================================
 

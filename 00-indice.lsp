@@ -2845,6 +2845,10 @@ NOTE LIBERE 28
   2 + 2 = 5
   Somma cumulativa di una lista di numeri
   Prodotto di un intervallo di interi
+  Classi di numeri
+  Evitare 0
+  Moltiplicazione di una stringa
+  Fix that slightly incorrect sum!
 
 PROBLEMI SUI DADI
 =================
