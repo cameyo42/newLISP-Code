@@ -5922,7 +5922,7 @@ Definizione degli insiemi di numeri più conosciuti:
 - S (Surreal): Generalizzazione dei numeri reali e ordinali, che include sia infinitesimi che infiniti in modo più strutturato rispetto agli iperreali.
 - Computable Numbers: Numeri reali che possono essere calcolati da un algoritmo con precisione arbitraria.
 
-Vedi immagine "classi_di_numeri.jpg" nella cartella "data".
+Vedi immagine "classi-di-numeri.jpg" nella cartella "data".
 
 
 ---------
@@ -6127,6 +6127,73 @@ Proviamo:
 
 (correct 1 2 3)
 ;-> 1 + 2 = 3
+
+
+-------------------------------
+Permutazioni-Rotazioni cicliche
+-------------------------------
+
+In combinatoria, l'insieme di tutte le rotazioni cicliche di una sequenza/lista si chiama "orbita ciclica".
+Un altro termine comune è "permutazioni cicliche" o "rotazioni cicliche di una lista".
+
+Esempio:
+lista = (A B C)
+Rotazioni cicliche = (A B C) (B C A) (C A B)
+
+Funzione che genera tutte le permutazioni cicliche di una lista o una stringa:
+
+(define (perm-cycle lst)
+  (let (out '())
+    (for (r 0 (- (length lst) 1))
+      (push (rotate lst) out))
+    out))
+
+Proviamo:
+
+(perm-cycle '(A B C))
+;-> ((A B C) (B C A) (C A B))
+
+(perm-cycle "newLISP")
+;-> ("newLISP" "ewLISPn" "wLISPne" "LISPnew" "ISPnewL" "SPnewLI" "PnewLIS")
+
+Nota: il numero di permutazioni cicliche è uguale al numero di elementi della lista (o di caratteri della stringa).
+
+Altro metodo usando la funzione "collect":
+
+(define (perm-cycle2 lst)
+  (collect (rotate lst) (length lst)))
+
+Proviamo:
+
+(perm-cycle2 '(A B C))
+;-> ((C A B) (B C A) (A B C))
+
+(perm-cycle2 "newLISP")
+;-> ("PnewLIS" "SPnewLI" "ISPnewL" "LISPnew" "wLISPne" "ewLISPn" "newLISP")
+
+Vediamo la velocità delle due funzioni:
+
+(time (perm-cycle (sequence 1 100)) 1e3)
+;-> 234.419
+(time (perm-cycle2 (sequence 1 100)) 1e3)
+;-> 78.14
+
+(time (perm-cycle (sequence 1 100)) 1e4)
+;-> 2281.423
+(time (perm-cycle2 (sequence 1 100)) 1e4)
+;-> 797.025
+
+(time (perm-cycle (sequence 1 1000)) 1e2)
+;-> 2796.99
+(time (perm-cycle2 (sequence 1 1000)) 1e2)
+;-> 953.057
+
+(time (perm-cycle (sequence 1 1000)) 1e3)
+;-> 27596.106
+(time (perm-cycle2 (sequence 1 1000)) 1e3)
+;-> 10779.299
+
+La funzione che usa "collect" è 3 volte più veloce.
 
 ============================================================================
 

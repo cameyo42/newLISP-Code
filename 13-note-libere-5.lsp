@@ -966,7 +966,7 @@ La lancetta delle ore di un orologio analogico a 12 ore ruota di 360° in 12 ore
 
   Gradi(minuti) = minuti*(360/60)
 
-dove: 0 <= ore <= 23 e 0 <= minuti <= 59
+dove: 0 <= ore <= 12 e 0 <= minuti <= 59
 
 L'angolo deve essere in gradi e misurato in senso orario dalla posizione delle ore 12 dell'orologio. Se l'angolo è maggiore di 180°, allora prendere la sua differenza con 360.
 
@@ -976,7 +976,7 @@ L'angolo deve essere in gradi e misurato in senso orario dalla posizione delle o
     (setq angle-minuti (/ (* minuti 360) 60))
     (setq diff (abs (- angle-ore angle-minuti)))
     (if (> diff 180)
-        (- 360 diff)
+        (abs (- 360 diff))
         diff)))
 
 (angolo 5 30)
@@ -987,6 +987,49 @@ L'angolo deve essere in gradi e misurato in senso orario dalla posizione delle o
 ;-> 57
 (angolo 1 30)
 ;-> 135
+(angolo 6 0)
+;-> 180
+
+Versione floating-point con h (ore) da 0 a 23:
+
+(define (angle ore minuti)
+  (local (angle-ore angle-minuti)
+    (setq angle-ore (add (div (mul ore 360) 12) (div (mul minuti 360) (mul 12 60))))
+    (setq angle-minuti (div (mul minuti 360) 60))
+    (setq diff (abs (sub angle-ore angle-minuti)))
+    ;(println diff)
+    (while (> diff 180) (setq diff (sub diff 360)))
+    (abs diff)))
+
+(angolo 12 1)
+;-> 5
+(angle 12 1)
+;-> 5.5
+
+(angle 18 1)
+;-> 174.5
+(angle 21 1)
+;-> 95.5
+
+Angoli di tutti gli orari hh:mm di una giornata (da 0:0 a 23:59):
+
+(for (h 0 23)
+  (for (m 0 59)
+    (println h {:} m { } (angle h m))))
+;-> 0:0 0
+;-> 0:1 5.5
+;-> 0:2 11
+;-> 0:3 16.5
+;-> 0:4 22
+;-> 0:5 27.5
+;-> 0:6 33
+;-> 0:7 38.5
+;-> ...
+;-> 23:55 27.5
+;-> 23:56 22
+;-> 23:57 16.5
+;-> 23:58 11
+;-> 23:59 5.5
 
 Vedi anche "Angolo minore delle lancette di un'orologio" su "Note libere 25".
 

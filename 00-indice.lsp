@@ -2849,6 +2849,7 @@ NOTE LIBERE 28
   Evitare 0
   Moltiplicazione di una stringa
   Fix that slightly incorrect sum!
+  Permutazioni-Rotazioni cicliche
 
 PROBLEMI SUI DADI
 =================
