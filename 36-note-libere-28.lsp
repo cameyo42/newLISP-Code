@@ -6195,5 +6195,110 @@ Vediamo la velocità delle due funzioni:
 
 La funzione che usa "collect" è 3 volte più veloce.
 
+
+----------
+Invarianti
+----------
+
+Cos'è un invariante?
+Un invariante** è una proprietà che rimane **sempre vera** in ogni stato possibile di esecuzione di un algoritmo.  
+La correttezza di un programma astratto, secondo Lamport (creatore di LaTeX), si dimostra attraverso l'identificazione di un invariante.
+
+Esempio Intuitivo
+Immagina di scalare una scala con gli occhi chiusi. Un invariante potrebbe essere:  
+"Ogni volta che metto un piede avanti, sono sempre su un gradino."
+Non importa quanti passi fai o in quale direzione: se l'invariante è mantenuto, **non cadrai nel vuoto**.
+
+Invarianti negli Algoritmi
+Negli algoritmi, un invariante è una condizione che resta vera **prima, durante e dopo** ogni iterazione di un ciclo o di un processo ricorsivo. Gli invarianti sono fondamentali per dimostrare la **correttezza** degli algoritmi.  
+
+Tipi di invarianti
+1. Invariante di un ciclo – resta vero in ogni iterazione di un ciclo (for, while).
+2. Invariante di un algoritmo – è valido in tutte le fasi di esecuzione.
+3. Invariante di una struttura dati – mantiene una certa proprietà in ogni operazione (es. albero bilanciato).
+
+Esempi di Invarianti
+1. Ordinamento per inserzione (Insertion Sort)  
+   - Invariante: Dopo ogni iterazione, i primi k+1 elementi sono ordinati.  
+2. Ricerca binaria  
+   - Invariante: L'elemento cercato, se esiste, è sempre dentro l'intervallo [low, high].  
+3. Somma dei primi n numeri naturali  
+   - Invariante: Dopo k iterazioni, la somma parziale è sempre (k*(k+1))/2.  
+
+L'uso degli invarianti è un metodo potente per dimostrare che un algoritmo è corretto e per evitare errori logici. Ogni volta che scrivi un algoritmo, chiediti:  
+"Quale proprietà resta sempre vera in ogni passo dell'esecuzione?"  
+
+Un esempio classico di invariante è nell'algoritmo di ordinamento per inserzione (insertion sort).
+
+Esempio di invariante
+Nel ciclo principale dell'algoritmo di ordinamento per inserzione, l'invariante è:
+
+"All'inizio di ogni iterazione del ciclo, i primi k elementi dell'array sono ordinati."
+
+Spiegazione
+1. Base: Prima di iniziare il ciclo, abbiamo un solo elemento (che è ordinato di per sé).
+2. Passo induttivo: Alla k-esima iterazione, il primo sottoarray di lunghezza k è già ordinato.
+3. Passo successivo: Inserendo il nuovo elemento nella posizione corretta, manteniamo l'ordinamento del sottoarray fino a k+1.
+
+Poiché l'invariante è valido prima dell'inizio e viene mantenuto a ogni iterazione, al termine del ciclo l'intera lista risulterà ordinata.
+
+Ecco un'implementazione dell'Insertion Sort, con un invariante che garantisce che la porzione iniziale della lista sia sempre ordinata:
+
+(define (insertion-sort lst)
+  (for (i 1 (- (length lst) 1))
+    (let (j i val (lst i))
+      (while (and (> j 0) (> (lst (- j 1)) val))
+        (setf (lst j) (lst (- j 1)))
+        (dec j))
+      (setf (lst j) val)))
+  lst)
+
+(insertion-sort '(5 3 8 6 2 7))  ; Output: (2 3 5 6 7 8)
+
+Invariante dell'algoritmo
+"Dopo ogni iterazione del ciclo for, i primi i+1 elementi della lista sono ordinati."
+
+Come viene mantenuto?
+- Il ciclo 'for' parte dal secondo elemento e lo confronta con quelli precedenti.
+- Il 'while' sposta gli elementi più grandi a destra finché trova la posizione corretta.
+- Quando il ciclo 'for' termina, tutti gli elementi sono stati inseriti nella posizione giusta, quindi l'intera lista è ordinata.
+
+Questa implementazione segue il principio dell'inserimento successivo, mantenendo sempre ordinata la porzione della lista già elaborata.
+
+Un altro esempio di invariante si trova nell'algoritmo di Ricerca Binaria.
+L'algoritmo di ricerca binaria trova un elemento in una lista ordinata dividendo ripetutamente l'intervallo di ricerca a metà.
+
+Invariante della ricerca binaria:
+"Se l'elemento è presente nella lista, si troverà sempre nell'intervallo [low, high]."
+
+Questa proprietà è valida all'inizio e viene mantenuta in ogni iterazione, garantendo che, alla fine, se l'elemento esiste, verrà trovato.
+
+Ecco una versione della ricerca binaria:
+
+(define (binary-search lst target)
+  (let (low 0 high (- (length lst) 1) found nil)
+    (while (and (<= low high) (not found))
+      (let (mid (div (add low high) 2))
+        (cond
+          ((= (lst mid) target) (set 'found true))
+          ((< (lst mid) target) (set 'low (add mid 1)))
+          (true (set 'high (sub mid 1))))))
+    found))
+
+(binary-search '(1 3 5 7 9 11) 5)
+;-> true
+(binary-search '(1 3 5 7 9 11) 6)
+;-> nil
+
+Come viene mantenuto l'invariante?
+1. Base: All'inizio, l'intervallo di ricerca è l'intera lista (low = 0, high = lunghezza - 1), quindi l'elemento, se presente, deve essere nell'intervallo.
+2. Passo induttivo:
+   - Se l'elemento a 'mid' è il target, terminiamo con successo.
+   - Se il target è maggiore di 'lst[mid]', restringiamo la ricerca alla metà destra (low = mid + 1).
+   - Se il target è minore, restringiamo alla metà sinistra (high = mid - 1).
+3. Alla fine: 'low' supera 'high', quindi se non abbiamo trovato l'elemento, significa che non è nella lista.
+
+L'invariante garantisce che non perdiamo mai il target, se esiste nella lista.
+
 ============================================================================
 
