@@ -2851,6 +2851,8 @@ NOTE LIBERE 28
   Fix that slightly incorrect sum!
   Permutazioni-Rotazioni cicliche
   Invarianti
+  Metodo di Muller f(x)=0
+  Rota-Baxter words
 
 PROBLEMI SUI DADI
 =================

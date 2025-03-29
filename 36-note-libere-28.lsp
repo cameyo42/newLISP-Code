@@ -6300,5 +6300,168 @@ Come viene mantenuto l'invariante?
 
 L'invariante garantisce che non perdiamo mai il target, se esiste nella lista.
 
+
+-----------------------
+Metodo di Muller f(x)=0
+-----------------------
+
+Il metodo Muller è un algoritmo di ricerca delle radici per trovare una radice di un'equazione della forma f(x)=0.
+È stato scoperto da David E. Muller nel 1956.
+Inizia con tre ipotesi della radice, quindi costruisce una parabola attraverso questi tre punti e considera l'intersezione dell'asse x con la parabola come prima approssimazione.
+Questo processo continua finché non viene trovata una radice con il livello di accuratezza desiderato.
+
+Velocità di convergenza degli algoritmi per la ricerca di radici:
+
+  +----------------+----------+
+  | Metodo         | Velocità |
+  +----------------+----------+
+  |Newton-Raphson  | 2        |
+  |Muller          | 1.84     |
+  |Secante         | 1.62     |
+  |Regula-falsi    | 1        |
+  |Bisezione       | 1        |
+  +----------------+----------+
+
+Vantaggi:
+Converge rapidamente
+Non bisogna calcolare derivate.
+
+Svantaggi:
+È lungo da fare a mano, aumentando la probabilità di commettere errori.
+Si possono trovare radici estranee.
+
+Funzione f(x):
+x^3 + 2x^2 + 10x -20 = 0
+
+Soluzioni:
+x1 = 1.3688
+x2 = -1.6844 - 3.4313i
+x3 = -1.6844 + 3.4313i
+
+(define (f x)
+  (add (mul x x x) (mul 2 x x) (mul 10 x) -20))
+
+Funzione che trova una radice di f(x)=0 con il metodo di Muller:
+
+(define (muller a b c)
+(catch
+  (local (i res max-iter)
+    (setq max-iter 1e4)
+    (setq res 0)
+    (setq i 0)
+    (while true
+      (setq f1 (f a))
+      (setq f2 (f b))
+      (setq f3 (f c))
+      (setq d1 (sub f1 f3))
+      (setq d2 (sub f2 f3))
+      (setq h1 (sub a c))
+      (setq h2 (sub b c))
+      (setq a0 f3)
+      (setq a1 (div (sub (mul d2 h1 h1) (mul d1 h2 h2))
+                    (mul h1 h2 (sub h1 h2))))
+      (setq a2 (div (sub (mul d1 h2) (mul d2 h1))
+                    (mul h1 h2 (sub h1 h2))))
+      ;(println a0 { } a1 { } a2) (read-line)
+      ; check for negative parameter of sqrt
+      (if (< (sub (mul a1 a1) (mul 4 a0 a2) 0)) (throw nil))
+      (setq x (div (mul -2 a0)
+                   (add a1 (abs (sqrt (sub (mul a1 a1) (mul 4 a0 a2)))))))
+      (setq y (div (mul -2 a0)
+                   (sub a1 (abs (sqrt (sub (mul a1 a1) (mul 4 a0 a2)))))))
+      ;(println x { } y) (read-line)
+      (if (>= x y)
+          (setq res (add x c))
+          (setq res (add y c))
+      )
+      (setq m (mul res 100))
+      (setq n (mul c 100))
+      (setq m (floor m))
+      (setq n (floor n))
+      (if (= m n) (throw res))
+      (setq a b)
+      (setq b c)
+      (setq c res)
+      (if (> i max-iter) (throw nil))
+      (++ i)
+    )
+    (if (<= i max-iter)
+        res
+        (list res i))
+  )))
+
+Proviamo:
+
+(muller 0 1 2)
+;-> 1.368808036892429
+
+(f (muller 0 1 2))
+;-> -1.496326838434925e-006
+
+
+-----------------
+Rota-Baxter words
+-----------------
+
+a(n) is the number of associate Rota-Baxter words in one idempotent generator x and one idempotent operator in which x appears n times (idempotent is also known as the exponent 1 case).
+An associate Rota-Baxter word in this case is a parenthesized expression in x which either begins or ends in x (or both).
+It is related to counting other (bracketed, decomposable, indecomposable) Rota-Baxter words and is a special case of a(m,n) when the number m of pairs of parenthesis is unrestricted.
+
+Sequenza OEIS A157418:
+a(n) is the number of ways to insert single pairs of parenthesis to completely separate n identical objects in a straight line such that at least one of the objects at the two ends is not enclosed.
+  1, 2, 5, 16, 55, 202, 773, 3052, 12339, 50830, 212593, 900368,
+  3853551, 16641554, 72423661, 317312532, 1398490091, 6195882006,
+  27578607593, 123270393880, 553075982311, 2489989595162, 11245131702245,
+  50929608736796, ...
+
+                            binom(n, (i-1)) * binom(2*(n-i), n)
+S(n) = Sum[i=1,floor(n/2)] -------------------------------------
+                                          (n - i)
+
+(define (binom num k)
+"Calculates the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k) (setq r (/ (* r num) d)) (-- num))
+          r))))
+
+(define (rb n)
+  (cond 
+    ((= n 0) 1)
+    ;((= n 1) 2)
+    (true
+      (let (sum 0)
+        (for (i 1 (floor(div n 2)))
+          (setq sum (+ sum (div (* (binom n (- i 1)) (binom (* 2 (- n i)) n)) (- n i))))
+        )
+        sum))))
+
+(define (rb1 n)
+  (cond 
+    ((= n 0) 0)
+    ;((= n 1) 2)
+    (true
+      (let (sum 0)
+        (for (i 1 (floor(div n 2)))
+          (setq sum (+ sum (div (* (binom n (- i 1)) (binom (* 2 (- n i)) n)) (- n i))))
+        )
+        sum))))
+
+(define (rota-baxter n)
+  (if (= n 0) 0
+      (= n 1) 1
+      (+ (* 2 (rb n)) (rb1 (- n 1)))))
+
+Proviamo:
+
+(map rota-baxter (sequence 1 24))
+;-> (1 2 5 16 55 202 773 3052 12339 50830 212593 900368
+;->  3853551 16641554 72423661 317312532 1398490091 6195882006
+;->  27578607593 123270393880 553075982311 2489989595162 11245131702245
+;->  50929608736796)
+
 ============================================================================
 
