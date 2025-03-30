@@ -5404,6 +5404,8 @@ Vediamo la differenza di velocità con i cicli "for":
 (div 41050.7 10157.162)
 ;-> 4.041552157974835
 
+Vedi anche "Cicli variabili" su "Note libere 28".
+
 
 --------------------------
 Somma X di N numeri (NSum)

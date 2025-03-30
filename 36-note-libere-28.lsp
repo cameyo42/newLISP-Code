@@ -6205,12 +6205,13 @@ Un invariante** è una proprietà che rimane **sempre vera** in ogni stato possi
 La correttezza di un programma astratto, secondo Lamport (creatore di LaTeX), si dimostra attraverso l'identificazione di un invariante.
 
 Esempio Intuitivo
-Immagina di scalare una scala con gli occhi chiusi. Un invariante potrebbe essere:  
+Immagina di scalare una scala con gli occhi chiusi.
+Un invariante potrebbe essere:  
 "Ogni volta che metto un piede avanti, sono sempre su un gradino."
-Non importa quanti passi fai o in quale direzione: se l'invariante è mantenuto, **non cadrai nel vuoto**.
+Non importa quanti passi fai o in quale direzione: se l'invariante è mantenuto, non cadrai nel vuoto.
 
 Invarianti negli Algoritmi
-Negli algoritmi, un invariante è una condizione che resta vera **prima, durante e dopo** ogni iterazione di un ciclo o di un processo ricorsivo. Gli invarianti sono fondamentali per dimostrare la **correttezza** degli algoritmi.  
+Negli algoritmi, un invariante è una condizione che resta vera 'prima, durante e dopo' ogni iterazione di un ciclo o di un processo ricorsivo. Gli invarianti sono fondamentali per dimostrare la correttezza degli algoritmi.  
 
 Tipi di invarianti
 1. Invariante di un ciclo – resta vero in ogni iterazione di un ciclo (for, while).
@@ -6462,6 +6463,241 @@ Proviamo:
 ;->  3853551 16641554 72423661 317312532 1398490091 6195882006
 ;->  27578607593 123270393880 553075982311 2489989595162 11245131702245
 ;->  50929608736796)
+
+
+------------------------------------
+Una equazione diofantea esponenziale
+------------------------------------
+
+Makowski ha dimostrato che l'equazione 13^x - 3^y = 10 ha solo le soluzioni:
+1) x = 1, y = 1 e
+2) x = 3, y = 7.
+
+(define (solve func val-min val-max)
+  (for (x val-min val-max)
+    (for (y val-min val-max)
+      (if (zero? (func x y)) (println x { } y)))))
+
+(define (f x y) (- (pow 13 x) (pow 3 y) 10))
+
+(solve f -1000 1000)
+;-> 1 1
+;-> 3 7
+
+A. Makowski, On the equation 13^x - 3^y = 10, Math. Stu. 28 (1960), 87 (1962). 
+
+
+---------
+2^4 = 4^2
+---------
+
+Il numero intero 16 è l'unico intero positivo n per cui esistono interi x e y tali che x^x = y^x = n.
+Infatti, con x=2 e y=4 risulta: 2^4 = 4^2 = 16.
+Goldbach ed Eulero scoprirono che x^y = y^x ha le soluzioni razionali:
+  
+  x = (1 + 1/n)^n, y = (1 + 1/n)^(n+1), per n = 1,2,....
+
+Queste sono le uniche soluzioni razionali (Sved, 1990).
+
+Marta Sved, On the rational solutions of x^y = y^x, Math. Mag. 63 (1990) 30-33. 
+
+Funzioni per il calcolo con le frazioni:
+
+(define (rat n d)
+  (let (g (gcd n d))
+    (map (curry * 1L)
+         (list (/ n g) (/ d g)))))
+(define (+rat r1 r2)
+  (rat (+ (* (r1 0) (r2 1))
+          (* (r2 0) (r1 1)))
+       (* (r1 1) (r2 1))))
+(define (-rat r1 r2)
+  (rat (- (* (r1 0) (r2 1))
+          (* (r2 0) (r1 1)))
+       (* (r1 1) (r2 1))))
+(define (*rat r1 r2)
+  (rat (* (r1 0) (r2 0))
+       (* (r1 1) (r2 1))))
+(define (/rat r1 r2)
+  (rat (* (r1 0) (r2 1))
+       (* (r1 1) (r2 0))))
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (**rat r n)
+  (rat (** (r 0) n) (** (r 1) n)))
+
+(setq n 2)
+(setq x (+rat '(1 1) (list 1 n)))
+;-> (3L 2L)
+(setq x (**rat x n))
+;-> (9L 4L)
+(setq y (+rat '(1 1) (list 1 n)))
+;-> (3L 2L)
+(setq y (**rat y (+ n 1)))
+;-> (27L 8L)
+
+(setq x^y (pow (div (x 0) (x 1)) (div (y 0) (y 1))))
+;-> 15.43888735855258
+(setq y^x (pow (div (y 0) (y 1)) (div (x 0) (x 1))))
+;-> 15.43888735855258
+
+(div
+  (pow (x 0) (div (y 0) (y 1)))
+  (pow (x 1) (div (y 0) (y 1)))
+)
+;-> 15.43888735855258
+
+Funzione che verifica le soluzioni:
+
+(define (test n)
+  (local (x y x^y y^x)
+    (setq x (+rat '(1 1) (list 1 n)))
+    ;-> (3L 2L)
+    (setq x (**rat x n))
+    ;-> (9L 4L)
+    (setq y (+rat '(1 1) (list 1 n)))
+    ;-> (3L 2L)
+    (setq y (**rat y (+ n 1)))
+    ;-> (27L 8L)
+    (setq x^y (pow (div (x 0) (x 1)) (div (y 0) (y 1))))
+    ;-> 15.43888735855258
+    (setq y^x (pow (div (y 0) (y 1)) (div (x 0) (x 1))))
+    (list x^y y^x)))
+
+Proviamo:
+
+(map test (sequence 1 10))
+;-> ((16 16) 
+;->  (15.43888735855258 15.43888735855258)
+;->  (15.29693134361786 15.29693134361786)
+;->  (15.23995052905966 15.23995052905966)
+;->  (15.21141689175832 15.21141689175832)
+;->  (15.19509891904216 15.19509891904216)
+;->  (15.18489535160378 15.18489535160378)
+;->  (15.17809090218196 15.17809090218196)
+;->  (15.17332680013565 15.17332680013565)
+;->  (15.16986148731007 15.16986148731007))
+
+
+---------------
+Cicli variabili
+---------------
+
+Scrivere una funzione che prende 3 parametri:
+1) n -> numero di cicli for
+2) minimo -> valore di inizio di ogni ciclo
+2) massimo -> valore di fine di ogni ciclo
+e genera la lista delle somme degli indici ad ogni ciclo.
+
+Esempio:
+n = 2
+minimo = 1
+massimo = 3
+Output = (2 3 4 3 4 5 4 5 6)
+
+(setq out '())
+(for (i 1 3)
+  (for (j 1 3)
+    (push (+ i j) out -1)))
+out
+;-> (2 3 4 3 4 5 4 5 6)
+
+Il problema può essere risolto scrivendo una funzione che genera la funzione da eseguire per ottenere il risultato.
+La seguente implementazione usa due metodi per costruire la funzione da eseguire:
+1) il metodo eval-string per costruire l'espressione di somma degli indici
+2) il metodo delle liste per costruire la funzione e l'espressione dei cicli for innestati
+
+(define (genera-cicli n minimo massimo)
+  (local (s body)
+    ; Creazione di una funzione vuota
+    (setq func '(lambda () nil))
+    ; Creazione stringa: "(push (+ i1 i2 ... in) out -1)"
+    (setq s "'(push (+ ")
+    (for (i 1 n) (extend s "i" (string i) " "))
+    (extend s ") out -1)")
+    ; Creazione espressione: (push (+ i1 i2 ... in) out -1)
+    (setq body (eval-string s))
+    ; Creazione espressione: cicli for innestati
+    (for (i n 1 -1)
+      (set 'body (list 'for (list (sym (string "i" i)) minimo massimo) body))
+    )
+    ; Inserimento dell'espressione dei cicli for innestati nella funzione
+    (setf (last func) body)
+    ; Inserimento dell'espressione "(setq out '())" nella funzione
+    (push '(setq out '()) func 1)
+    func))
+
+Proviamo:
+
+(genera-cicli 2 1 3)
+;-> (lambda () (setq out '())
+;->  (for (i1 1 3)
+;->   (for (i2 1 3)
+;->    (push (+ i1 i2) out -1))))
+(func)
+;-> (2 3 4 3 4 5 4 5 6)
+
+(genera-cicli 3 1 2)
+;-> (lambda ()
+;->  (setq out '())
+;->  (for (i1 1 2)
+;->   (for (i2 1 2)
+;->    (for (i3 1 2)
+;->     (push (+ i1 i2 i3) out -1)))))
+(func)
+;-> (3 4 4 5 4 5 5 6)
+
+(genera-cicli 3 3 4)
+;-> (lambda () (setq out '())
+;->  (for (i1 3 4)
+;->   (for (i2 3 4)
+;->    (for (i3 3 4)
+;->     (push (+ i1 i2 i3) out -1)))))
+(func)
+;-> (9 10 10 11 10 11 11 12)
+
+Il numero di iterazioni di tutti i cicli for vale: (massimo - minimo + 1)^n
+
+(define (num-iter n minimo massimo)
+  (if (> minimo massimo) (swap minimo massimo))
+  (pow (+ massimo 1 (- minimo)) n))
+
+(genera-cicli 4 10 15)
+(length (func))
+;-> 1296
+(num-iter 4 10 15)
+;-> 1296
+
+Cicli con indici decrescenti:
+(genera-cicli 3 10 1)
+;-> (lambda () (setq out '())
+;->  (for (i1 10 1)
+;->   (for (i2 10 1)
+;->    (for (i3 10 1)
+;->     (push (+ i1 i2 i3) out -1)))))
+(length (func))
+;-> 1000
+(num-iter 3 10 1)
+;-> 1000
+
+Cicli con indici negativi:
+(genera-cicli 2 -3 -5)
+;-> (lambda () (setq out '())
+;->  (for (i1 -3 -5)
+;->   (for (i2 -3 -5)
+;->    (push (+ i1 i2) out -1))))
+(length (func))
+;-> 9
+(num-iter 2 -3 -5)
+;-> 9
+
+Vedi anche "Simulare N cicli for" su "Note libere 27".
 
 ============================================================================
 

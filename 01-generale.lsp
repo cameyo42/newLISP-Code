@@ -1939,7 +1939,6 @@ http://kazimirmajorinc.com/Documents/Crawler-tractor/index.html
 
 Crawler Tractor (Trattore Cingolato) di Kazimir Majorinc
 --------------------------------------------------------
-
 Viene presentato un esempio di programma Lisp di auto-elaborazione. La funzione f incrementa continuamente il valore della variabile "counter" e ne stampa il valore. Tuttavia, l'implementazione di f non contiene alcun ciclo o ricorsione. Invece, la funzione cambia il codice della sua definizione durante la valutazione.
 
 (set 'f

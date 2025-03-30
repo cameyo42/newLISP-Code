@@ -2853,6 +2853,9 @@ NOTE LIBERE 28
   Invarianti
   Metodo di Muller f(x)=0
   Rota-Baxter words
+  Una equazione diofantea esponenziale
+  2^4 = 4^2
+  Cicli variabili
 
 PROBLEMI SUI DADI
 =================
