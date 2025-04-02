@@ -6699,5 +6699,292 @@ Cicli con indici negativi:
 
 Vedi anche "Simulare N cicli for" su "Note libere 27".
 
+
+----------------------
+Cifre uguali nei primi
+----------------------
+
+Considerando i numeri primi con N cifre e una cifra D (0..9), definiamo:
+- M:     numero massimo di ripetizioni della cifra D nei primi con N cifre
+- N-lst: lista dei numeri primi con N cifre che hanno M volte la cifra D
+- S:     somma dei numeri primi con N cifre che hanno M volte la cifra D
+
+Scrivere una funzione che calcola S(N,d).
+
+Esempio
+Per N = 4 si hanno i seguenti valori:
+N  Cifra  Ripetizioni  Numero-primi Lista-primi                                                        Somma-primi
+4  0      2            13           (1009 2003 3001 4001 4003 4007 5003 5009 6007 7001 8009 9001 9007) 67061
+4  1      3            9            (1117 1151 1171 1181 1511 1811 2111 4111 8111)                     22275
+4  2      3            1            (2221)                                                             2221
+4  3      3            12           (2333 3313 3323 3331 3343 3373 3433 3533 3733 3833 5333 7333)      46214
+4  4      3            2            (4441 4447)                                                        8888
+4  5      3            1            (5557)                                                             5557
+4  6      3            1            (6661)                                                             6661
+4  7      3            9            (1777 2777 7177 7477 7577 7717 7727 7757 7877)                     57863
+4  8      3            1            (8887)                                                             8887
+4  9      3            7            (1999 2999 4999 8999 9199 9929 9949)                               48073
+
+(define (primes-range n1 n2)
+"Generates all prime numbers in the interval [n1..n2]"
+  (if (> n1 n2) (swap n1 n2))
+  (cond ((= n2 1) '())
+        ((= n2 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ n2 1))))
+            ; initialize lst
+            (if (> n1 2) (setq lst '()))
+            (for (x 3 n2 2)
+              (when (not (arr x))
+                ; push current primes (x) only if > n1
+                (if (>= x n1) (push x lst -1))
+                (for (y (* x x) n2 (* 2 x) (> y n2))
+                  (setf (arr y) true)))) lst))))
+
+(time (primes-range 1e6 1e7))
+;-> 1717.152
+(time (primes-range 1e7 1e8))
+;-> 18950.29
+;(time (primes-range 1e8 1e9)) ;non riesce a calcolarlo...
+
+Funzione che calcola i valori del problema:
+
+(define (solve cifre)
+  (local (primi minimo massimo max-rip num-N lst-N somma ds stop rip)
+    (for (N 1 cifre)
+      (setq minimo (pow 10 (- N 1)))
+      (setq massimo (- (pow 10 N) 1))
+      ;(println "Calcolo primi da " minimo " a " massimo "...")
+      (setq primi (primes-range minimo massimo))
+      ;(println "...primi calcolati.")
+      (for (d 0 9)
+        ; max ripetizione della cifra 'd' in 'primi'
+        (setq max-rip 0)
+        ; numero dei primi che hanno 'max-rip' ripetizioni della cifra 'd' in 'primi'
+        (setq num-N 0)
+        ; lista dei primi che hanno 'max-rip' ripetizioni della cifra 'd' in 'primi'
+        (setq lst-N '())
+        ; somma della lista dei primi che hanno 'max-rip' ripetizioni della cifra 'd' in 'primi'
+        (setq somma 0)
+        ; Calcola la max ripetizione della cifra 'd' in 'primi'
+        (setq ds (string d))
+        (setq stop nil)
+        (dolist (el primi stop)
+          (setq rip (length (find-all ds (string el))))
+          (setq max-rip (max max-rip rip))
+          (if (= max-rip (- cifre 1)) (setq stop true))
+        )
+        ; Calcola la lista dei primi che hanno 'max-rip' ripetizioni della cifra 'd' in 'primi'
+        (dolist (el primi)
+          (setq rip (length (find-all ds (string el))))
+          (if (= max-rip rip) (push el lst-N -1))
+        )
+        (setq num-N (length lst-N))
+        (setq somma (apply + lst-N))
+        ;(list max-rip num-N lst-N somma)
+        (println N { } d { } max-rip { } num-N { } lst-N { } somma)
+      )
+    )
+))
+
+Proviamo:
+
+(solve 4)
+;-> 1 0 0 4 (2 3 5 7) 17
+;-> 1 1 0 4 (2 3 5 7) 17
+;-> 1 2 1 1 (2) 2
+;-> 1 3 1 1 (3) 3
+;-> 1 4 0 4 (2 3 5 7) 17
+;-> 1 5 1 1 (5) 5
+;-> 1 6 0 4 (2 3 5 7) 17
+;-> 1 7 1 1 (7) 7
+;-> 1 8 0 4 (2 3 5 7) 17
+;-> 1 9 0 4 (2 3 5 7) 17
+;-> 2 0 0 21 (11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97) 1043
+;-> 2 1 2 1 (11) 11
+;-> 2 2 1 2 (23 29) 52
+;-> 2 3 1 8 (13 23 31 37 43 53 73 83) 356
+;-> 2 4 1 3 (41 43 47) 131
+;-> 2 5 1 2 (53 59) 112
+;-> 2 6 1 2 (61 67) 128
+;-> 2 7 1 8 (17 37 47 67 71 73 79 97) 488
+;-> 2 8 1 2 (83 89) 172
+;-> 2 9 1 6 (19 29 59 79 89 97) 372
+;-> 3 0 1 15 (101 103 107 109 307 401 409 503 509 601 607 701 709 809 907) 6883
+;-> 3 1 2 10 (101 113 131 151 181 191 211 311 811 911) 3112
+;-> 3 2 2 3 (223 227 229) 679
+;-> 3 3 2 9 (233 313 331 337 353 373 383 433 733) 3489
+;-> 3 4 2 2 (443 449) 892
+;-> 3 5 2 1 (557) 557
+;-> 3 6 2 1 (661) 661
+;-> 3 7 2 10 (277 577 677 727 757 773 787 797 877 977) 7226
+;-> 3 8 2 3 (881 883 887) 2651
+;-> 3 9 2 7 (199 499 599 919 929 991 997) 5133
+;-> 4 0 2 13 (1009 2003 3001 4001 4003 4007 5003 5009 6007 7001 8009 9001 9007) 67061
+;-> 4 1 3 9 (1117 1151 1171 1181 1511 1811 2111 4111 8111) 22275
+;-> 4 2 3 1 (2221) 2221
+;-> 4 3 3 12 (2333 3313 3323 3331 3343 3373 3433 3533 3733 3833 5333 7333) 46214
+;-> 4 4 3 2 (4441 4447) 8888
+;-> 4 5 3 1 (5557) 5557
+;-> 4 6 3 1 (6661) 6661
+;-> 4 7 3 9 (1777 2777 7177 7477 7577 7717 7727 7757 7877) 57863
+;-> 4 8 3 1 (8887) 8887
+;-> 4 9 3 7 (1999 2999 4999 8999 9199 9929 9949) 48073
+
+Per rendere più veloce questa funzione possiamo evitare di calcolare la lista dei numeri primi con N cifre che hanno M volte la cifra D.
+Inoltre effettuiamo un solo ciclo calcolando la somma dei numeri primi con N cifre per tutte le cifre e poi prendiamo quaella che ha il massimo numero di ripetizioni.
+
+(define (solve2 cifre)
+  (local (minimo massimo primi ds somma rip max-rip)
+    (for (N 1 cifre)
+      (println "N = " N)
+      (setq minimo (pow 10 (- N 1)))
+      (setq massimo (- (pow 10 N) 1))
+      ;(println "Calcolo primi da " minimo " a " massimo "...")
+      (setq primi (primes-range minimo massimo))
+      ;(println "...primi calcolati.")
+      (for (d 0 9)
+        (setq ds (string d))
+        (setq somma (array 10 '(0)))
+        (setq max-rip 0)
+        (dolist (el primi)
+          (setq rip (length (find-all ds (string el))))
+          (setf (somma rip) (+ (somma rip) el))
+          (setq max-rip (max max-rip rip))
+        )
+        (println "cifra = " d ", Somma = " (somma max-rip))
+      )
+    )
+))
+
+Proviamo:
+
+(solve2 4)
+;-> N = 1
+;-> cifra = 0, Somma = 17
+;-> cifra = 1, Somma = 17
+;-> cifra = 2, Somma = 2
+;-> cifra = 3, Somma = 3
+;-> cifra = 4, Somma = 17
+;-> cifra = 5, Somma = 5
+;-> cifra = 6, Somma = 17
+;-> cifra = 7, Somma = 7
+;-> cifra = 8, Somma = 17
+;-> cifra = 9, Somma = 17
+;-> N = 2
+;-> cifra = 0, Somma = 1043
+;-> cifra = 1, Somma = 11
+;-> cifra = 2, Somma = 52
+;-> cifra = 3, Somma = 356
+;-> cifra = 4, Somma = 131
+;-> cifra = 5, Somma = 112
+;-> cifra = 6, Somma = 128
+;-> cifra = 7, Somma = 488
+;-> cifra = 8, Somma = 172
+;-> cifra = 9, Somma = 372
+;-> N = 3
+;-> cifra = 0, Somma = 6883
+;-> cifra = 1, Somma = 3112
+;-> cifra = 2, Somma = 679
+;-> cifra = 3, Somma = 3489
+;-> cifra = 4, Somma = 892
+;-> cifra = 5, Somma = 557
+;-> cifra = 6, Somma = 661
+;-> cifra = 7, Somma = 7226
+;-> cifra = 8, Somma = 2651
+;-> cifra = 9, Somma = 5133
+;-> N = 4
+;-> cifra = 0, Somma = 67061
+;-> cifra = 1, Somma = 22275
+;-> cifra = 2, Somma = 2221
+;-> cifra = 3, Somma = 46214
+;-> cifra = 4, Somma = 8888
+;-> cifra = 5, Somma = 5557
+;-> cifra = 6, Somma = 6661
+;-> cifra = 7, Somma = 57863
+;-> cifra = 8, Somma = 8887
+;-> cifra = 9, Somma = 48073
+
+Comunque anche con queste modifiche possiamo calcolare solo fino a N = 8.
+
+(time (solve2 6))
+;-> 1170.039
+
+(time (solve2 7))
+;-> 10331.253
+
+(time (solve2 8))
+;-> 95693.119
+
+
+---------------------------
+Trovare la lettera mancante
+---------------------------
+
+"Find the missing letter"
+https://codegolf.stackexchange.com/questions/132771/find-the-missing-letter
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Scrivere una funzione che prende una lista di lettere consecutive (crescenti) e restituisce la lettera mancante nella lista.
+
+Regole:
+- La lista in ingresso è sempre valida
+- La lista contiene sempre solo una lettera mancante
+- La lunghezza della lista è compresa tra 2 e 25
+- La lista contiene solo un tipo di lettere (maiuscolo o minuscolo)
+- La lista contiene tutte lettere valide
+- Il carattere di output deve essere del tipo della lista (maiuscolo o minuscolo)
+- La prima e l'ultima lettera della lista non mancano mai
+
+(define (missing lst)
+  (let ( (base (char (lst 0))) (ch "") (stop nil) )
+    (dolist (c lst stop)
+      (when (!= c (setq ch (char (+ base $idx))))
+        (setq stop true)
+        (println ch))) '>))
+
+(missing '("a" "b" "d" "e"))
+;-> c
+
+(missing '("a" "b" "c" "d" "f"))
+;-> e
+
+(missing '("O" "Q" "R" "S"))
+;-> P
+
+(missing '("x" "z"))
+;-> y
+
+(missing '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o"
+           "p" "q" "r" "s" "t" "u" "w" "x" "y" "z") )
+;-> v
+
+Possiamo scrivere una funzione più breve usando la funzione "difference":
+
+(define (missing2 lst)
+  (difference (map char (sequence (char (lst 0)) (char (lst -1)))) lst))
+
+(missing2 '("a" "b" "d" "e"))
+;-> ("c")
+
+(missing2 '("a" "b" "c" "d" "f"))
+;-> ("e")
+
+(missing2 '("O" "Q" "R" "S"))
+;-> ("P")
+
+(missing2 '("x" "z"))
+;-> ("y")
+
+(missing2 '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o"
+           "p" "q" "r" "s" "t" "u" "w" "x" "y" "z") )
+;-> ("v")
+
+Nota che (map char (sequence (char "a") (char "f"))) crea la lista dei caratteri da "a" a "f":
+(map char (sequence (char "a") (char "f")))
+;-> ("a" "b" "c" "d" "e" "f")
+
 ============================================================================
 

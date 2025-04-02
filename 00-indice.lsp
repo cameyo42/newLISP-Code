@@ -2856,6 +2856,8 @@ NOTE LIBERE 28
   Una equazione diofantea esponenziale
   2^4 = 4^2
   Cicli variabili
+  Cifre uguali nei primi
+  Trovare la lettera mancante
 
 PROBLEMI SUI DADI
 =================
