@@ -2858,6 +2858,13 @@ NOTE LIBERE 28
   Cicli variabili
   Cifre uguali nei primi
   Trovare la lettera mancante
+  Il numero Dottie
+  Sequenze di caratteri
+  La sequenza Inventory
+  Numero plastico
+  
+NOTE LIBERE 29
+==============
 
 PROBLEMI SUI DADI
 =================

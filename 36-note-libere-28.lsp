@@ -1601,6 +1601,9 @@ Proviamo:
 (trova-dividendo 34278 400)
 ;-> 3427
 
+(trova-dividendo 400 34278)
+;-> 400
+
 Funzione che implementa l'algoritmo della divisione:
 Parametri:
   num1 = dividendo
@@ -6201,17 +6204,17 @@ Invarianti
 ----------
 
 Cos'è un invariante?
-Un invariante** è una proprietà che rimane **sempre vera** in ogni stato possibile di esecuzione di un algoritmo.  
+Un invariante** è una proprietà che rimane **sempre vera** in ogni stato possibile di esecuzione di un algoritmo.
 La correttezza di un programma astratto, secondo Lamport (creatore di LaTeX), si dimostra attraverso l'identificazione di un invariante.
 
 Esempio Intuitivo
 Immagina di scalare una scala con gli occhi chiusi.
-Un invariante potrebbe essere:  
+Un invariante potrebbe essere:
 "Ogni volta che metto un piede avanti, sono sempre su un gradino."
 Non importa quanti passi fai o in quale direzione: se l'invariante è mantenuto, non cadrai nel vuoto.
 
 Invarianti negli Algoritmi
-Negli algoritmi, un invariante è una condizione che resta vera 'prima, durante e dopo' ogni iterazione di un ciclo o di un processo ricorsivo. Gli invarianti sono fondamentali per dimostrare la correttezza degli algoritmi.  
+Negli algoritmi, un invariante è una condizione che resta vera 'prima, durante e dopo' ogni iterazione di un ciclo o di un processo ricorsivo. Gli invarianti sono fondamentali per dimostrare la correttezza degli algoritmi.
 
 Tipi di invarianti
 1. Invariante di un ciclo – resta vero in ogni iterazione di un ciclo (for, while).
@@ -6219,15 +6222,15 @@ Tipi di invarianti
 3. Invariante di una struttura dati – mantiene una certa proprietà in ogni operazione (es. albero bilanciato).
 
 Esempi di Invarianti
-1. Ordinamento per inserzione (Insertion Sort)  
-   - Invariante: Dopo ogni iterazione, i primi k+1 elementi sono ordinati.  
-2. Ricerca binaria  
-   - Invariante: L'elemento cercato, se esiste, è sempre dentro l'intervallo [low, high].  
-3. Somma dei primi n numeri naturali  
-   - Invariante: Dopo k iterazioni, la somma parziale è sempre (k*(k+1))/2.  
+1. Ordinamento per inserzione (Insertion Sort)
+   - Invariante: Dopo ogni iterazione, i primi k+1 elementi sono ordinati.
+2. Ricerca binaria
+   - Invariante: L'elemento cercato, se esiste, è sempre dentro l'intervallo [low, high].
+3. Somma dei primi n numeri naturali
+   - Invariante: Dopo k iterazioni, la somma parziale è sempre (k*(k+1))/2.
 
-L'uso degli invarianti è un metodo potente per dimostrare che un algoritmo è corretto e per evitare errori logici. Ogni volta che scrivi un algoritmo, chiediti:  
-"Quale proprietà resta sempre vera in ogni passo dell'esecuzione?"  
+L'uso degli invarianti è un metodo potente per dimostrare che un algoritmo è corretto e per evitare errori logici. Ogni volta che scrivi un algoritmo, chiediti:
+"Quale proprietà resta sempre vera in ogni passo dell'esecuzione?"
 
 Un esempio classico di invariante è nell'algoritmo di ordinamento per inserzione (insertion sort).
 
@@ -6430,7 +6433,7 @@ S(n) = Sum[i=1,floor(n/2)] -------------------------------------
           r))))
 
 (define (rb n)
-  (cond 
+  (cond
     ((= n 0) 1)
     ;((= n 1) 2)
     (true
@@ -6441,7 +6444,7 @@ S(n) = Sum[i=1,floor(n/2)] -------------------------------------
         sum))))
 
 (define (rb1 n)
-  (cond 
+  (cond
     ((= n 0) 0)
     ;((= n 1) 2)
     (true
@@ -6484,7 +6487,7 @@ Makowski ha dimostrato che l'equazione 13^x - 3^y = 10 ha solo le soluzioni:
 ;-> 1 1
 ;-> 3 7
 
-A. Makowski, On the equation 13^x - 3^y = 10, Math. Stu. 28 (1960), 87 (1962). 
+A. Makowski, On the equation 13^x - 3^y = 10, Math. Stu. 28 (1960), 87 (1962).
 
 
 ---------
@@ -6494,12 +6497,12 @@ A. Makowski, On the equation 13^x - 3^y = 10, Math. Stu. 28 (1960), 87 (1962).
 Il numero intero 16 è l'unico intero positivo n per cui esistono interi x e y tali che x^x = y^x = n.
 Infatti, con x=2 e y=4 risulta: 2^4 = 4^2 = 16.
 Goldbach ed Eulero scoprirono che x^y = y^x ha le soluzioni razionali:
-  
+
   x = (1 + 1/n)^n, y = (1 + 1/n)^(n+1), per n = 1,2,....
 
 Queste sono le uniche soluzioni razionali (Sved, 1990).
 
-Marta Sved, On the rational solutions of x^y = y^x, Math. Mag. 63 (1990) 30-33. 
+Marta Sved, On the rational solutions of x^y = y^x, Math. Mag. 63 (1990) 30-33.
 
 Funzioni per il calcolo con le frazioni:
 
@@ -6573,7 +6576,7 @@ Funzione che verifica le soluzioni:
 Proviamo:
 
 (map test (sequence 1 10))
-;-> ((16 16) 
+;-> ((16 16)
 ;->  (15.43888735855258 15.43888735855258)
 ;->  (15.29693134361786 15.29693134361786)
 ;->  (15.23995052905966 15.23995052905966)
@@ -6985,6 +6988,241 @@ Possiamo scrivere una funzione più breve usando la funzione "difference":
 Nota che (map char (sequence (char "a") (char "f"))) crea la lista dei caratteri da "a" a "f":
 (map char (sequence (char "a") (char "f")))
 ;-> ("a" "b" "c" "d" "e" "f")
+
+
+----------------
+Il numero Dottie
+----------------
+
+Il numero Dottie è il nome dato da Kaplan (2007) all'unica radice reale di cosx=x (vale a dire, l'unico punto fisso reale della funzione coseno), che è 0.7390851332151606... (OEIS A003957).
+Il nome "Dottie" non ha alcun significato matematico fondamentale, poiché si riferisce a una particolare professoressa francese che, senza dubbio come molti altri utenti di calcolatrici prima e dopo di lei, notò che ogni volta che digitava un numero sulla sua calcolatrice e premeva ripetutamente il pulsante coseno, il risultato convergeva sempre verso questo valore.
+
+Sequenza OEIS A003957:
+The Dottie number: decimal expansion of root of cos(x) = x.
+  7, 3, 9, 0, 8, 5, 1, 3, 3, 2, 1, 5, 1, 6, 0, 6, 4, 1, 6, 5, 5, 3, 1, 2,
+  0, 8, 7, 6, 7, 3, 8, 7, 3, 4, 0, 4, 0, 1, 3, 4, 1, 1, 7, 5, 8, 9, 0, 0,
+  7, 5, 7, 4, 6, 4, 9, 6, 5, 6, 8, 0, 6, 3, 5, 7, 7, 3, 2, 8, 4, 6, 5, 4,
+  8, 8, 3, 5, 4, 7, 5, 9, 4, 5, 9, 9, 3, 7, 6, 1, 0, 6, 9, 3, 1, 7, 6, 6,
+  5, 3, 1, 8, 4, 9, 8, 0, 1, 2, 4, 6, ...
+
+(define (dottie iter)
+  ((series 0.7 (fn (x) (cos x)) iter) -1))
+
+(map dottie '(10 100 1000))
+;-> (0.7401852853967579 0.7390851332151607 0.7390851332151607)
+
+Per il seno:
+
+(define (dott iter)
+  ((series 0.7 (fn (x)  (sub 1 (sin x))) iter) -1))
+
+(map dott '(10 100 1000 10000))
+;-> (0.4593073460775855 0.5109731928444039
+;->  0.5109734293885688 0.5109734293885688)
+
+
+---------------------
+Sequenze di caratteri
+---------------------
+
+La funzione "sequence" lavora con numeri:
+
+(sequence num-start num-end [num-step])
+
+(sequence 10 5)
+;-> (10 9 8 7 6 5)
+(sequence 0 1 0.2)
+;-> (0 0.2 0.4 0.6 0.8 1)
+(sequence 2 0 0.3)
+;-> (2 1.7 1.4 1.1 0.8 0.5 0.2)
+
+Possiamo scrivere una funzione simile per i caratteri:
+
+(define (sequence-chars ch1 ch2 step)
+  (setq step (or step 1))
+  (map char (sequence (char ch1) (char ch2) step)))
+
+Proviamo:
+
+(sequence-chars "a" "e")
+;-> ("a" "b" "c" "d" "e")
+
+(sequence-chars "a" "e" 2)
+;-> ("a" "c" "e")
+
+(sequence-chars "a" "f" 2)
+;-> ("a" "c" "e")
+
+(sequence-chars "A" "Z")
+;-> ("A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"
+;->  "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z")
+
+(sequence-chars "0" "9")
+;-> ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")
+
+(sequence-chars " " "/")
+;-> (" " "!" "\"" "#" "$" "%" "&" "'" "(" ")" "*" "+" "," "-" "." "/")
+
+
+---------------------
+La sequenza Inventory
+---------------------
+
+Sequenza OEIS A342585:
+Inventory sequence: record the number of zeros thus far in the sequence, then the number of ones thus far, then the number of twos thus far and so on, until a zero is recorded: the inventory then starts again, recording the number of zeros.
+  0, 1, 1, 0, 2, 2, 2, 0, 3, 2, 4, 1, 1, 0, 4, 4, 4, 1, 4, 0, 5, 5, 4,
+  1, 6, 2, 1, 0, 6, 7, 5, 1, 6, 3, 3, 1, 0, 7, 9, 5, 3, 6, 4, 4, 2, 0,
+  8, 9, 6, 4, 9, 4, 5, 2, 1, 3, 0, 9, 10, 7, 5, 10, 6, 6, 3, 1, 4, 2, 0,
+  10, 11, 8, 6, 11, 6, 9, 3, 2, 5, 3, 2, 0, 11, 11, 10, ...
+
+To get started we ask: how many zero terms are there? Since there are no terms in the sequence yet, we record a '0', and having recorded a '0', we begin again: How many zero terms are there? There is now one 0, so we record a '1' and continue.
+How many 1's are there? There's currently one '1' in the sequence, so we record a '1' and continue.
+How many 2's are there? There are no 2's yet, so we record a '0', and having recorded a 0, we begin again with the question "how many zero terms are there?" And so on.
+
+The inventory sequence is generated by:
+1. Setting the index to 0
+2. Print how many times a value equal to the current index was already printed.
+3. If the last printed number was 0, go back to 1.
+4. If the last printed number was not 0, increment the index and go back to 2.
+
+(define (inventory number)
+  (let ( (lst '()) (conteggio 0) (valore 0) )
+    (for (i 0 (- number 1))
+        (setq valore (first (count (list conteggio) lst)))
+        (push valore lst -1)
+        (if (= valore 0)
+            (setq conteggio 0)
+        ;else
+            (++ conteggio)))
+    valore))
+
+(map inventory (sequence 1 85))
+;-> (0 1 1 0 2 2 2 0 3 2 4 1 1 0 4 4 4 1 4 0 5 5 4
+;->  1 6 2 1 0 6 7 5 1 6 3 3 1 0 7 9 5 3 6 4 4 2 0
+;->  8 9 6 4 9 4 5 2 1 3 0 9 10 7 5 10 6 6 3 1 4 2 0
+;->  10 11 8 6 11 6 9 3 2 5 3 2 0 11 11 10)
+
+
+---------------
+Numero plastico
+---------------
+
+Il numero plastico P è l'unica soluzione reale dell'equazione x^3 - x - 1 = 0.
+Il numero plastico P vale 1.32471795724474602596...
+Tre numeri a > b > c > 0 sono in rapporto plastico se risulta:
+
+   b + c     a     b
+  ------- = --- = --- = P
+     a       b     c
+
+quindi il rapporto plastico è una proporzione geometrica.
+
+Ponendo b = P*c, a = P*b, il valore di c si elimina e risulta:
+
+   P + 1     P^2     P
+  ------- = ----- = ---
+    P^2       P      1
+
+Quindi risulta che il rapporto plastico P è l'unica soluzione reale dell'equazione P^3 - P - 1 = 0.
+
+Sequenza OEIS A060006:
+Decimal expansion of real root of x^3 - x - 1 (the plastic constant).
+  1, 3, 2, 4, 7, 1, 7, 9, 5, 7, 2, 4, 4, 7, 4, 6, 0, 2, 5, 9, 6, 0, 9,
+  0, 8, 8, 5, 4, 4, 7, 8, 0, 9, 7, 3, 4, 0, 7, 3, 4, 4, 0, 4, 0, 5, 6,
+  9, 0, 1, 7, 3, 3, 3, 6, 4, 5, 3, 4, 0, 1, 5, 0, 5, 0, 3, 0, 2, 8, 2,
+  7, 8, 5, 1, 2, 4, 5, 5, 4, 7, 5, 9, 4, 0, 5, 4, 6, 9, 9, 3, 4, 7, 9,
+  8, 1, 7, 8, 7, 2, 8, 0, 3, 2, 9, 9, 1, ...
+
+Funzione che calcola le soluzioni di una equazione di terzo grado:
+
+(define (solve-cubic a b c d)
+  (local (x1 x2 x3 i1 i2 i3 F G H I J K L M N P Q R S T U)
+    (setq x1 0 x2 0 x3 0 i1 0 i2 0 i3 0)
+    ; Calcolo discriminanti F, G, H
+    ; F = (3*(c/a) - (b*b)/(a*a)) / 3
+    (setq F (div (sub (mul 3 (div c a)) (div (mul b b) (mul a a))) 3))
+    ; (println "F = " F)
+    ; G = ((2*(b*b*b)/(a*a*a)) - (9*b*c/(a*a)) + (27*(d/a))) / 27
+    (setq G (div (add (sub (mul 2 (div (mul b b b) (mul a a a))) (div (mul 9 b c) (mul a a))) (mul 27 (div d a))) 27))
+    ; (println "G = " G)
+    ; H = ((G*G)/4) + ((F*F*F)/27)
+    (setq H (add (div (mul G G) 4) (div (mul F F F) 27)))
+    ; (println "H = " H)
+    ; Controllo discriminanti per determinare il tipo delle radici
+    (cond ((> H 0) ; una radice reale e due radici complesse
+            ; I = -(G/2) + Math.sqrt(H)
+            (setq I (sub (sqrt H) (div G 2)))
+            ;(println "I = " I)
+            ; J = Math.cbrt(I)
+            (setq J (my-pow I (div 1 3)))
+            ;(println "J = " J)
+            ; K = (-G/2) - Math.sqrt(H)
+            (setq K (sub (sub 0 (div G 2)) (sqrt H)))
+            ;(println "K = " K)
+            ; L = Math.cbrt(K)
+            (setq L (my-pow K (div 1 3)))
+            ;(println "L = " L)
+            ; x1 =  (J + L) - (b/(3*a))
+            (setq x1 (sub (add J L) (div b (mul 3 a))))
+            ; x2 = -(J + L)/2 - (b/(3*a))
+            (setq x2 (sub (sub 0 (div (add J L) 2)) (div b (mul 3 a))))
+            ; i2 =  (J - L) * Math.sqrt(3)/2
+            (setq i2 (mul (sub J L) (div (sqrt 3) 2)))
+            ; x3 =  x2
+            (setq x3 x2)
+            ; i3 = -i2
+            (setq i3 (sub 0 i2)))
+          ((and (zero? F) (zero? G) (zero? H)) ; tre radici reali coincidenti
+            ; x1 = Math.cbrt(d/a) * (-1)
+            (setq x1 (sub 0 (my-pow (div d a) (div 1 3))))
+            (setq x2 x1)
+            (setq x3 x1))
+          ((<= H 0) ; tre radici reali
+            ; M = Math.sqrt((G*G)/4 - H)
+            (setq M (sqrt (sub (div (mul G G) 4) H)))
+            ;(println "M = " M)
+            ; N = Math.cbrt(M)
+            (setq N (my-pow M (div 1 3)))
+            ;(println "N = " N)
+            ; P = Math.acos(-(G/(2*M)))
+            (setq P (acos (sub 0 (div G (mul M 2)))))
+            ;(println "P = " P)
+            ; Q = N*(-1)
+            (setq Q (sub 0 N))
+            ;(println "Q = " Q)
+            ; R = Math.cos(P/3)
+            (setq R (cos (div P 3)))
+            ;(println "R = " R)
+            ; S = Math.sqrt(3) * Math.sin(P/3)
+            (setq S (mul (sqrt 3) (sin (div P 3))))
+            ;(println "S = " S)
+            ; T = (b/(3*a)) * (-1)
+            (setq T (sub 0 (div b (mul 3 a))))
+            ;(println "T = " T)
+            ; x1 = 2*N*Math.cos(P/3) - (b/(3*a))
+            (setq x1 (sub (mul 2 N (cos (div P 3))) (div b (mul 3 a))))
+            ; x2 = Q * (R + S) + T
+            (setq x2 (add T (mul Q (add R S))))
+            ; x3 = Q * (R - S) + T;
+            (setq x3 (add T (mul Q (sub R S)))))
+          (true (println "errore"))
+    );cond
+    (list (list x1 i1) (list x2 i2) (list x3 i3))
+  );local
+)
+
+; calcola anche le potenze di numeri negativi con esponenti non interi
+(define (my-pow x n)
+  (if (< x 0)
+      ; cambio segno a x, calcolo la potenza, cambio segno al risultato
+      (sub 0 (pow (sub 0 x) n))
+      (pow x n)))
+
+; f(x) = x^3 - x - 1 = 0
+(solve-cubic 1 0 -1 -1)
+;-> ((1.324717957244746 0)
+;->  (-0.6623589786223729 0.5622795120623013)
+;->  (-0.6623589786223729 -0.5622795120623013))
 
 ============================================================================
 
