@@ -7224,5 +7224,25 @@ Funzione che calcola le soluzioni di una equazione di terzo grado:
 ;->  (-0.6623589786223729 0.5622795120623013)
 ;->  (-0.6623589786223729 -0.5622795120623013))
 
+Risolvendo l'equazione con la formula di Cardano si ottiene:
+
+        1          1          23
+  w1 = --- * (1 + --- * sqrt(----))
+        2          3           3
+
+        1          1          23
+  w2 = --- * (1 - --- * sqrt(----))
+        2          3           3
+
+  P = cbrt(w1) + cbrt(w2)
+
+(define (P-cardano)
+  (setq w1 (div (add 1 (mul (div 3) (sqrt (div 23 3)))) 2))
+  (setq w2 (div (sub 1 (mul (div 3) (sqrt (div 23 3)))) 2))
+  (add (pow w1 (div 3)) (pow w2 (div 3))))
+
+(P-cardano)
+;-> 1.324717957244746
+
 ============================================================================
 

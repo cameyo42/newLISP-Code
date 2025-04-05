@@ -2865,7 +2865,12 @@ NOTE LIBERE 28
   
 NOTE LIBERE 29
 ==============
-
+  Hello World
+  Lista dei caratteri mancanti in una funzione
+  Il numero di Khinchin
+  Il numero di Somos
+  Pipistrello intorno alla Luna
+  
 PROBLEMI SUI DADI
 =================
   Problemi 1,...,79
