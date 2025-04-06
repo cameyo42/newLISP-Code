@@ -420,7 +420,7 @@ Terzo esempio:
       (true
         (println "")))
   )
-  (sleep 250)
+  (sleep 400)
 )
 
 (define (animazione-atterraggio)
@@ -436,6 +436,83 @@ Terzo esempio:
   '>)
 
 (animazione-atterraggio)
+
+
+----------------------------------
+Somma delle cifre di un fattoriale
+----------------------------------
+
+Dato un numero intero positivo N, scrivere la funzione più corta possibile per trovare la somma delle cifre del fattoriale di N.
+
+Esempio:
+N = 8
+fatoriale(8) = 40320
+Somma delle cifre = 4 + 0 + 3 + 2 + 0 = 9
+
+Sequenza OEIS A004152:
+Sum of digits of n!.
+  1, 1, 2, 6, 6, 3, 9, 9, 9, 27, 27, 36, 27, 27, 45, 45, 63, 63, 54, 45,
+  54, 63, 72, 99, 81, 72, 81, 108, 90, 126, 117, 135, 108, 144, 144, 144,
+  171, 153, 108, 189, 189, 144, 189, 180, 216, 207, 216, 225, 234, 225,
+  216, 198, 279, 279, 261, 279, 333, 270, 288, ...
+
+Scriviamo prima una funzione che risolve il problema.
+
+(define (fact-i num)
+"Calculates the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(define (digit-sum num)
+"Calculates the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+(define (sum-digit-fact N) (digit-sum (fact-i N)))
+
+Proviamo:
+
+(sum-digit-fact 8)
+;-> 9
+
+(map sum-digit-fact (sequence 1 20))
+;-> (1 2 6 6 3 9 9 9 27 27 36 27 27 45 45 63 63 54 45 54)
+
+(map sum-digit-fact (sequence 1 58))
+;-> (1 2 6 6 3 9 9 9 27 27 36 27 27 45 45 63 63 54 45 54
+;->  63 72 99 81 72 81 108 90 126 117 135 108 144 144 144
+;->  171 153 108 189 189 144 189 180 216 207 216 225 234 225
+;->  216 198 279 279 261 279 333 270 288)
+
+Per scrivere una funzione più breve utilizziamo:
+
+(apply * (map bigint (sequence 1 N)))
+per calcolare il fattoriale di N.
+
+Poi usiamo:
+
+(apply + (map int (chop (explode (string (fattoriale N))))))
+per calcolare la somma delle cifre del fattoriale di N.
+
+Funzione compatta (89 caratteri):
+
+(define(f N)(apply +(map int(chop(explode(string(apply *(map bigint(sequence 1 N)))))))))
+
+(map f (sequence 1 20))
+;-> (1 2 6 6 3 9 9 9 27 27 36 27 27 45 45 63 63 54 45 54)
+
+(map f (sequence 1 58))
+;-> (1 2 6 6 3 9 9 9 27 27 36 27 27 45 45 63 63 54 45 54
+;->  63 72 99 81 72 81 108 90 126 117 135 108 144 144 144
+;->  171 153 108 189 189 144 189 180 216 207 216 225 234 225
+;->  216 198 279 279 261 279 333 270 288)
 
 ============================================================================
 

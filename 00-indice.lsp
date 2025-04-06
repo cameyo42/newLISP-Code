@@ -2872,6 +2872,7 @@ NOTE LIBERE 29
   Pipistrello intorno alla Luna
   Facce opposte di un dado
   ASCII animation
+  Somma delle cifre di un fattoriale
   
 PROBLEMI SUI DADI
 =================
