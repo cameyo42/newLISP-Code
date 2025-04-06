@@ -2870,6 +2870,8 @@ NOTE LIBERE 29
   Il numero di Khinchin
   Il numero di Somos
   Pipistrello intorno alla Luna
+  Facce opposte di un dado
+  ASCII animation
   
 PROBLEMI SUI DADI
 =================
@@ -2917,7 +2919,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (323 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (324 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

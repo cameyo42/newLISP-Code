@@ -260,19 +260,182 @@ Giro del pipistrello:
     '>))
 (fly)
 
-Versione compatta:
+Versione animata compatta:
 
-(define (fly)
+(define (fly pause)
  (for (p 0 6)
+   (print "\027[H\027[2J")
    (for (i 0 6)
      (setq b (if (= i p) "^o^" ""))
-     (println (append (dup " " ('(6 6 4 3 4 6 6) i)) (dup "m" ('(0 3 7 9 7 3 0) i)) b))))
+     (println (append (dup " " ('(6 6 4 3 4 6 6) i)) (dup "m" ('(0 3 7 9 7 3 0) i)) b)))
+     (sleep pause))
  (for (p 1 6)
+   (print "\027[H\027[2J")
    (for (i 6 0)
      (setq b (if (= i p) "^o^" "   "))
-     (println (append (dup " " ('(6 3 1 0 1 3 6) i)) b (dup "m" ('(0 3 7 9 7 3 0) i))))))'>)
+     (println (append (dup " " ('(6 3 1 0 1 3 6) i)) b (dup "m" ('(0 3 7 9 7 3 0) i)))))
+     (sleep pause))'>)
 
-(fly)
+(fly 200)
+
+
+------------------------
+Facce opposte di un dado
+------------------------
+
+In un dado standard a 6 facce (come quelli usati nei giochi da tavolo), le facce opposte sono disposte in modo che la somma dei numeri su due facce opposte sia sempre 7.
+Quindi, le coppie di facce opposte sono: (1 6) (2 5) (3 4)
+Questa disposizione è comune nei dadi standard per garantire un equilibrio simmetrico.
+
+Calcolare il valore medio atteso se lanciando due dadi consideriamo il seguente valore:
+valore = somma del prodotto di ogni dado con la sua faccia opposta
+
+In altre parole, per ogni dado, se otteniamo 1 o 6 abbiamo il valore 1 * 6 = 6,
+se otteniamo 2 o 5 abbiamo il valore 2 * 5 = 10,
+se otteniamo 3 o 4 abbiamo il valore 3 * 4 = 12.
+Quindi il valore di ogni lancio è dato dalla somma dei prodotti delle facce opposte di ogni dado.
+
+Esempio:
+dado1 = 4  --> valore del prodotto = 4 * 3 = 12
+dado2 = 1  --> valore del prodotto = 1 * 6 = 6
+valore del lancio = 12 + 6 = 18
+
+(define (dadi iter)
+  (let ( (totale 0) (somma 0) (prod '(0 6 10 12 12 10 6)) )
+    (for (i 1 iter)
+      (setq d1 (prod (+ 1 (rand 6))))
+      (setq d2 (prod (+ 1 (rand 6))))
+      (setq totale (+ totale d1 d2))
+    )
+    (div totale iter)))
+
+Proviamo:
+
+(map dadi '(1e3 1e4 1e5 1e6 1e7))
+;-> (18.662 18.717 18.66298 18.668098 18.6666276)
+
+Dal punto di vista matematico:
+
+Vogliamo calcolare il valore medio atteso della seguente quantità quando si lanciano due dadi a 6 facce:
+
+  valore = (x * x') + (y * y')
+
+Dove:
+- x e y sono i risultati dei due dadi,
+- x' è la faccia opposta di x ,
+- y' è la faccia opposta di y ,
+- Per un dado standard: x' = 7 - x , y' = 7 - y 
+
+Quindi:
+
+  valore = x*(7 - x) + y*(7 - y)
+
+Essendo i due dadi indipendenti e identici, il valore atteso totale sarà:
+
+  E[valore] = 2 * E[x(7 - x)]
+
+Ora calcoliamo:
+
+  E[x(7 - x)] = (1/6)*Sum[x=1..6](x*(7-x))
+
+Calcoliamo i singoli termini:
+
+  1 * 6 = 6 
+  2 * 5 = 10 
+  3 * 4 = 12 
+  4 * 3 = 12 
+  5 * 2 = 10 
+  6 * 1 = 6 
+
+  Somma: 6 + 10 + 12 + 12 + 10 + 6 = 56 
+
+Quindi:
+
+  E[x(7 - x)] = 56/6 = 28/3 = 9.333333333333334
+
+Di conseguenza il valore medio atteso vale:
+
+  E[valore] = 2 * 28/3 = 56/3 = 18.66666666666667
+
+
+---------------
+ASCII animation
+---------------
+
+Vediamo alcuni esempi di animazione ASCII in un terminale.
+
+Primo esempio:
+
+(define animazioni
+  '(
+    "   o\n  /|\\\n  / \\"       ; frame 1
+    "   o\n  \\|/\n  / \\"       ; frame 2
+    "   o\n  _|_\n  / \\"))      ; frame 3
+
+(define (mostra-animazione)
+  (for (i 0 9)
+    (print "\027[H\027[2J") ; pulisce lo schermo
+    (println (animazioni (% i (length animazioni))))
+    (sleep 200)
+  ))
+
+(mostra-animazione)
+
+Secondo esempio:
+
+(define animazioni
+  '(
+    "     ^\n    / \\\n   |---|\n   |   |\n    |_|"
+    "    ^\n   / \\\n  |---|\n  |   |\n   |_| \n    *"
+    "   ^\n  / \\\n |---|\n |   |\n  |_| \n   ***"
+    "  ^\n / \\\n|---|\n|   |\n |_| \n  *****"
+    " ^\n/ \\\n---|\n   |\n_|_ \n*******"))
+
+(define (mostra-animazione)
+  (for (i 0 20)
+    (print "\027[H\027[2J") ; pulisce lo schermo
+    (println (animazioni (% i (length animazioni))))
+    (sleep 200)
+  ))
+
+(mostra-animazione)
+
+Terzo esempio:
+
+(define pista "____|     |____")
+(define aereo "--o--")
+(define righe-schermo 10)
+(define riga-pista 9)
+(define colonna-finale 5)
+(define colonna-iniziale 14)
+
+(define (stampa-frame riga-aereo colonna-aereo)
+  (print "\027[H\027[2J") ; pulisci schermo
+  (for (i 0 (- righe-schermo 1))
+    (cond
+      ((= i riga-aereo)
+        (println (string (dup " " colonna-aereo) aereo)))
+      ((= i riga-pista)
+        (println pista))
+      (true
+        (println "")))
+  )
+  (sleep 250)
+)
+
+(define (animazione-atterraggio)
+  (let ((passi (- colonna-iniziale colonna-finale)))
+    (for (i 0 (- passi 1))
+      (stampa-frame i (- colonna-iniziale i))
+    )
+    ; Ultimo frame: aereo integrato nella pista
+    (print "\027[H\027[2J")
+    (for (i 0 (- riga-pista 1)) (println))
+    (println "____|--o--|____")
+  )
+  '>)
+
+(animazione-atterraggio)
 
 ============================================================================
 

@@ -5632,8 +5632,8 @@ Google Maps actually uses signed values to represent the position:
 We need 7 decimals to works with it.
 
 Comic strip: https://xkcd.com/2170/
-
 Vedi "coordinate-precision.png" nella cartella "data".
+
 Vedi anche "Distanza tra due punti della terra" su "Rosetta code".
 
 
