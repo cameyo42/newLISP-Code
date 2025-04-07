@@ -514,5 +514,342 @@ Funzione compatta (89 caratteri):
 ;->  171 153 108 189 189 144 189 180 216 207 216 225 234 225
 ;->  216 198 279 279 261 279 333 270 288)
 
+
+-------------------------
+Disuguaglianze e poligoni
+-------------------------
+
+Le seguenti disuguaglianze:
+
+  ax + by <= c
+  dx + ey <= f
+  gx + hy <= i
+  jx + ky <= l
+
+racchiudono una regione a forma di poligono convesso.
+Note: per ipotesi le disuguaglianze (che rappresentano anche delle rette) non sono in parallelo tra loro.
+Scrivere una funzione che, dati i valori a,b,c,d,e,f,g,h,i,j,k, determina i vertici che racchiudono il poligono convesso.
+
+Esempio:
+   2.20x − 4.1y  <= −0.87
+   2.15x − 2.2y  <= −3.47
+  −7.50x + 4y    <= 30
+   1x    + 0.24y <= 0.47
+
+Le coordinate dei vertici di questa regione sono approssimativamente:
+
+(−0.91724 5.78017) (0.07408 1.64967) (−3.09761 −1.44994) (−5.4451 −2.70957)
+
+Per calcolare tutti i vertici del poligono definito dalle quattro disuguaglianze lineari nel piano cartesiano, possiamo seguire questi passaggi:
+
+1. Rappresentare le disuguaglianze come equazioni: 
+Ogni disuguaglianza può essere scritta come un'equazione di una retta.
+
+2. Calcolare le intersezioni tra le rette: 
+Risolvere i sistemi di equazioni corrispondenti alle coppie di rette per trovare i punti di intersezione.
+
+3. Verificare l'appartenenza dei punti alla regione definita dalle disuguaglianze:
+Assicurarsi che ogni punto di intersezione soddisfi tutte le disuguaglianze.
+
+4. Ordinare i vertici:
+Disporre i punti in ordine orario o antiorario, formando il perimetro del poligono.
+
+Funzione che calcola l'intersezione tra le rette.
+Calcola l'intersezione tra due rette definite dalle equazioni ax + by = c e dx + ey = f.
+Se le rette sono parallele (determinante zero), restituisce 'nil'.
+
+(define (intersezione a b c d e f)
+  (let ((deter (sub (mul a e) (mul b d))))
+    (if (= deter 0)
+        nil
+        (letn (
+               (x (div (sub (mul c e) (mul b f)) deter))
+               (y (div (sub (mul a f) (mul c d)) deter))
+               (x (if (= x 0) 0 x))
+               (y (if (= y 0) 0 y)))
+          (list x y)))))
+
+(define epsilon 1e-10)  ; epsilon di errore
+
+Funzione che verifica l'appartenenza di un punto al poligono:
+Verifica se un punto (x, y) soddisfa tutte le disuguaglianze definite dalle rette.
+
+(define (valido? x y dis)
+  (for-all (fn (ineq)
+           (<= (add (mul (ineq 0) x) (mul (ineq 1) y)) (add (ineq 2) epsilon)))
+         dis))
+
+Funzione che calcola i vertici del poligono convesso:
+- Definisce le disuguaglianze come una lista di liste.
+- Calcola tutte le possibili intersezioni tra le coppie di disuguaglianze.
+- Verifica la validità di ogni punto di intersezione.
+- Memorizza i vertici validi in una lista e la restituisce.
+
+(define (calcola-vertici)
+  (let (
+        (disuguaglianze (list
+                          (list a b c)
+                          (list d e f)
+                          (list g h i)
+                          (list j k l)))
+        (vertici '()))
+        
+    (for (i 0 2)
+      (for (j (add i 1) 3)
+        (letn (
+               (eq1 (disuguaglianze i))
+               (eq2 (disuguaglianze j))
+               (p (intersezione (eq1 0) (eq1 1) (eq1 2)
+                                (eq2 0) (eq2 1) (eq2 2))))
+          (if (and p (valido? (p 0) (p 1) disuguaglianze) (not (ref p vertici)))
+              (push p vertici -1)))))
+    vertici))
+
+Esempio 1:
+
+  x <= 3
+  y <= 3
+  -x <= 0 --> x >= 0
+  -y <= 0 --> y >= 0
+
+(set 'a 1 'b 0 'c 3) 
+(set 'd 0 'e 1 'f 3) 
+(set 'g -1 'h 0 'i 0)
+(set 'j 0 'k -1 'l 0)
+
+(calcola-vertici)
+;-> ((3 3) (3 0) (0 3) (0 0))
+
+Esempio 2:
+
+   2.20x − 4.1y  <= −0.87
+   2.15x − 2.2y  <= −3.47
+  −7.50x + 4y    <= 30
+   1x    + 0.24y <= 0.47
+
+(set 'a 2.2 'b −4.1 'c −0.87)
+(set 'd 2.15 'e −2.2 'f −3.47)
+(set 'g −7.5  'h 4 'i 30)
+(set 'j 1 'k 0.24 'l 0.47)
+
+(calcola-vertici)
+;-> ((-3.097610062893083 -1.44993710691824)
+;->  (-5.445102505694761 -2.709567198177677)
+;->  (0.07407952871870399 1.649668630338733)
+;->  (-0.9172413793103448 5.780172413793103))
+
+Per finire ecco una funzione che ordina una lista di vertici nel senso antiorario attorno al baricentro (solo per poligoni convessi):
+- Calcola il centroide cx, cy della nuvola di punti.
+- Ordina i vertici usando atan2 per l'angolo rispetto al centro.
+- Il confronto è <, quindi l'ordine è antiorario.
+
+(define (ordina-antiorario vertici)
+  (letn ( (n (length vertici))
+          (cx (div (apply add (map first vertici)) n))
+          (cy (div (apply add (map last vertici)) n)) )
+    (sort vertici (fn (a b)
+      (< (atan2 (sub (last a) cy) (sub (first a) cx))
+         (atan2 (sub (last b) cy) (sub (first b) cx)))))))
+
+(ordina-antiorario (calcola-vertici))
+;-> ((-5.445102505694761 -2.709567198177677)
+;->  (-3.097610062893083 -1.44993710691824)
+;->  (0.07407952871870399 1.649668630338733)
+;->  (-0.9172413793103448 5.780172413793103))
+
+
+---------------------------
+Quadrato magico di prodotti
+---------------------------
+
+La seguente matrice è un quadrato magico di prodotti:
+
+   2 36  3
+   9  6  4
+  12  1 18
+
+cioè, il prodotto di ogni riga, di ogni colonna e delle diagonali maggiori vale 216.
+
+Prodotti righe:
+   2 * 3 * 36 = 216
+   9 * 6 *  4 = 216
+  12 * 1 * 18 = 216
+
+Prodotti colonne:
+   2 * 9 * 12 = 216
+  36 * 6 *  1 = 216
+  12 * 1 * 18 = 216
+
+Prodotti diagonali:
+   2 * 6 * 18 = 216
+   3 * 6 * 12 = 216
+
+Come scrivere una funzione per determinare un quadrato magico di prodotti?
+
+Il primo tentativo è quello di scrivere 9 cicli for innestati che vanno da 1 a N (pessima idea):
+
+(define (magic1 n)
+  (let ((result '()))
+    (for (a 1 n)
+      (for (b 1 n)
+        (for (c 1 n)
+          (for (d 1 n)
+            (for (e 1 n)
+              (for (f 1 n)
+                (for (g 1 n)
+                  (for (h 1 n)
+                    (for (i 1 n)
+                      (when (and (= (length (unique (list a b c d e f g h i))) 9)
+                                 (= (* a b c) (* d e f) (* g h i) (* a d g) (* b e h) (* c f i) (* a e i) (* c e g)))
+                        (println a { } b { } c)
+                        (println d { } e { } f)
+                        (println g { } h { } i)
+                        (println)
+                      )
+                    ))))))))) '>))
+
+Proviamo con N = 7 (cioè 10^7 iterazioni):
+
+(time (magic1 7))
+;-> 37519.203
+
+Con N = 36 il programma effettuare 36^9 = 101559956668416 iterazioni, quindi questa funzione è inutilizzabile.
+
+Invece di usare la frza bruta dobbiamo usare qualche criterio matematico per selezionare i numeri candidati.
+Dopo diversi tentativi mi è venuto in mente di scegliere i numeri che hanno 9 divisori.
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+Calcoliamo i numeri fino a 1000 che hanno esattamente 9 divisori:
+
+(define (divisori9 limite)
+  (let (divisori '())
+    (for (i 1 limite)
+      (setq divisori (divisors i))
+      (if (= (length divisori) 9)
+          (println i { } divisori)))))
+
+(divisori9 1000)
+;-> 36 (1 2 3 4 6 9 12 18 36)
+;-> 100 (1 2 4 5 10 20 25 50 100)
+;-> 196 (1 2 4 7 14 28 49 98 196)
+;-> 225 (1 3 5 9 15 25 45 75 225)
+;-> 256 (1 2 4 8 16 32 64 128 256)
+;-> 441 (1 3 7 9 21 49 63 147 441)
+;-> 484 (1 2 4 11 22 44 121 242 484)
+;-> 676 (1 2 4 13 26 52 169 338 676)
+
+Adesso prendiamo una delle liste con 9 divisori (numeri candidati), calcoliamo tutte le permutazioni e verifichiamo se ogni permutazione è un quadrato magico di prodotti.
+
+(define (perm lst)
+"Generates all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+       )
+    )
+    out))
+
+Impostiamo le liste dei numeri candidati:
+
+(setq nums1 '(1 2 3 4 6 9 12 18 36))
+(setq nums2 '(1 2 3 4 6 8 12 16 24 48))
+(setq nums3 '(1 2 4 5 10 20 25 50 100))
+(setq nums4 '(1 2 4 7 14 28 49 98 196))
+(setq nums5 '(1 3 5 9 15 25 45 75 225))
+
+(define (magic2 nums)
+  (dolist (el (perm nums))
+    (set 'a (el 0) 'b (el 1) 'c (el 2) 'd (el 3) 'e (el 4) 'f (el 5) 'g (el 6) 'h (el 7) 'i (el 8))
+    (when (= (* a b c) (* d e f) (* g h i) (* a d g) (* b e h) (* c f i) (* a e i) (* c e g))
+      (println a { } b { } c)
+      (println d { } e { } f)
+      (println g { } h { } i)
+      (println)))'>)
+
+Proviamo:
+
+(time (magic2 nums1))
+;-> 12 1 18
+;-> 9 6 4
+;-> 2 36 3
+;-> ...
+;-> 2 36 3
+;-> 9 6 4
+;-> 12 1 18
+;-> 468.632
+
+(magic2 nums2)
+;-> nil
+
+(magic2 nums3)
+;-> 5 100 2
+;-> 4 10 25
+;-> 50 1 20
+;-> ...
+;-> 2 100 5
+;-> 25 10 4
+;-> 20 1 50
+
+(magic2 nums4)
+;-> 7 196 2
+;-> 4 14 49
+;-> 98 1 28
+;-> ...
+;-> 2 196 7
+;-> 49 14 4
+;-> 28 1 98
+
+(magic2 nums5)
+;-> 45 1 75
+;-> 25 15 9
+;-> 3 225 5
+;-> ...
+;-> 3 225 5
+;-> 25 15 9
+;-> 45 1 75
+
 ============================================================================
 

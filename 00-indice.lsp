@@ -2873,6 +2873,8 @@ NOTE LIBERE 29
   Facce opposte di un dado
   ASCII animation
   Somma delle cifre di un fattoriale
+  Disuguaglianze e poligoni
+  Quadrato magico di prodotti
   
 PROBLEMI SUI DADI
 =================
