@@ -753,7 +753,7 @@ Calcoliamo i numeri fino a 1000 che hanno esattamente 9 divisori:
       (if (= (length divisori) 9)
           (println i { } divisori)))))
 
-(divisori9 1000)
+(divisori9 100000)
 ;-> 36 (1 2 3 4 6 9 12 18 36)
 ;-> 100 (1 2 4 5 10 20 25 50 100)
 ;-> 196 (1 2 4 7 14 28 49 98 196)
@@ -791,7 +791,7 @@ Adesso prendiamo una delle liste con 9 divisori (numeri candidati), calcoliamo t
        )
     )
     out))
-
+(magic2 '(1 2 4 157 314 628 24649 49298 98596))
 Impostiamo le liste dei numeri candidati:
 
 (setq nums1 '(1 2 3 4 6 9 12 18 36))
@@ -799,6 +799,8 @@ Impostiamo le liste dei numeri candidati:
 (setq nums3 '(1 2 4 5 10 20 25 50 100))
 (setq nums4 '(1 2 4 7 14 28 49 98 196))
 (setq nums5 '(1 3 5 9 15 25 45 75 225))
+
+Funzione che verifica se una lista di numeri può essere un quadrato magico di prodotti:
 
 (define (magic2 nums)
   (dolist (el (perm nums))
@@ -850,6 +852,223 @@ Proviamo:
 ;-> 3 225 5
 ;-> 25 15 9
 ;-> 45 1 75
+
+Divisori di 98596: (1 2 4 157 314 628 24649 49298 98596)
+
+(magic2 '(1 2 4 157 314 628 24649 49298 98596))
+;-> 157 98596 2
+;-> 4 314 24649
+;-> 49298 1 628
+;-> ...
+;-> 2 98596 157
+;-> 24649 314 4
+;-> 628 1 49298
+
+
+---------------------------------
+The Curious Case of Steve Ballmer
+---------------------------------
+
+https://codegolf.stackexchange.com/questions/123971/the-curious-case-of-steve-ballmer
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Scrivere la funzione più corta che stampa le seguenti 4 stringhe (senza i doppi apici):
+
+"Steve Ballmer still does not know."
+"Steve Ballmer still does not know what he did."
+"Steve Ballmer still does not know what he did wrong."
+"Steve Ballmer still does not know what he did wrong with mobile."
+
+(define (f)
+  (let (s "")
+    (map (fn(x) (println (push x s -2))) '("Steve Ballmer still does not know." " what he did" " wrong" " with mobile"))'>))
+
+(f)
+;-> Steve Ballmer still does not know.
+;-> Steve Ballmer still does not know what he did.
+;-> Steve Ballmer still does not know what he did wrong.
+;-> Steve Ballmer still does not know what he did wrong with mobile.
+
+Versione compatta (132 caratteri):
+
+(define(f)(let(s"")(map(fn(x)(println(push x s -2)))'("Steve Ballmer still does not know."" what he did"" wrong"" with mobile"))'>))
+
+(f)
+;-> Steve Ballmer still does not know.
+;-> Steve Ballmer still does not know what he did.
+;-> Steve Ballmer still does not know what he did wrong.
+;-> Steve Ballmer still does not know what he did wrong with mobile.
+
+
+-------------
+Biscotti Oreo
+-------------
+
+Un biscotto Oreo è formato da è formato da due biscotti circolari a base di cacao e uno strato interno di crema.
+Esempio di biscotto Oreo:
+
+  ******    biscotto circolare
+  ------    strato di crema
+  ******    biscotto circolare
+
+Supponiamo di avere una pila di N strati che si alternano tra biscotto circolare e strato di crema e in cui lo strato in fondo alla pila è sempre un biscotto circolare.
+
+Quanti biscotti Oreo possiamo confezionare con N strati?
+Quanti strati rimangono inutilizzati con N strati?
+
+Esempio:
+N = 2
+  ------    strato di crema
+  ******    biscotto circolare
+Nessun biscotto Oreo
+2 strati inutilizzati
+
+Esempio:
+N = 5
+  ******
+  ------
+  ******
+  ------
+  ******
+Un biscotto Oreo.
+1 strato inutilizzato
+
+Esempio:
+N = 7
+  ******
+  ------
+  ******
+  ------
+  ******
+  ------
+  ******
+Due biscotti Oreo.
+1 strato inutilizzato.
+
+Possiamo fare un biscotto ogni quattro strati (3 strati + 1 in eccesso) tranne che il primo che usa solo 3 strati, per 3*int((N+1)/4 biscotti.
+
+Quindi gli strati che rimangono sono:
+
+  strati-rimasti = N - 3*int((N+1)/4)
+
+  biscotti-confezionati = (N - strati-rimasti)/3
+
+Sequenza OEIS A110657: 
+a(n) = A028242(A028242(n)) (strati rimasti).
+  0, 1, 2, 0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6, 4, 5, 6, 7, 5,
+  6, 7, 8, 6, 7, 8, 9, 7, 8, 9, 10, 8, 9, 10, 11, 9, 10, 11, 12, 10, 11,
+  12, 13, 11, 12, 13, 14, 12, 13, 14, 15, 13, 14, 15, 16, 14, 15, 16, 17,
+  15, 16, 17, 18, 16, 17, 18, 19, 17, 18, 19, 20, 18, 19, 20, 21, 19, 20,
+  21, ...
+
+(define (oreo N)
+  (setq resto (- N (* 3 (int (/ (+ N 1) 4)))))
+  (list (/ (- N resto) 3) resto))
+
+Proviamo:
+
+(map oreo (sequence 0 10))
+;-> ((0 0) (0 1) (0 2) (1 0) (1 1) (1 2) (1 3) (2 1) (2 2) (2 3) (2 4))
+
+(map last (map oreo (sequence 0 50)))
+;-> (0 1 2 0 1 2 3 1 2 3 4 2 3 4 5 3 4 5 6 4 5 6 7 5
+;->  6 7 8 6 7 8 9 7 8 9 10 8 9 10 11 9 10 11 12 10 11
+;->  12 13 11 12 13 14)
+
+(map first (map oreo (sequence 0 50)))
+;-> (0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4 5 5 5 5 6 6 6 6
+;->  7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 11 11 11 11 12 12 12 12)
+
+
+-----------------------------
+The Midpoint Circle Algorithm
+-----------------------------
+
+The Midpoint Circle Algorithm è un algoritmo per disegnare un cerchio in una griglia con coordinate intere (pixel dello schermo).
+
+Vedi "The Midpoint Circle Algorithm Explained Step by Step"
+https://www.youtube.com/watch?v=hpiILbMkF9w
+
+(define (draw-circle cx cy r)
+  (let ( (pts '()) (x 0) (y (- r)) (p (- r)) )
+    (while (< x (- y))
+      (if (> p 0) 
+        (begin (++ y) (setq p (+ p (* 2 (+ x y)) 1)))
+        ;else
+        (setq p (+ p (* 2 x) 1))
+      )
+      (push (list (+ cx x) (+ cy y)) pts -1)
+      (push (list (- cx x) (+ cy y)) pts -1)
+      (push (list (+ cx x) (- cy y)) pts -1)
+      (push (list (- cx x) (- cy y)) pts -1)
+      (push (list (+ cx y) (+ cy x)) pts -1)
+      (push (list (+ cx y) (- cy x)) pts -1)
+      (push (list (- cx y) (+ cy x)) pts -1)
+      (push (list (- cx y) (- cy x)) pts -1)
+      (++ x)
+    )
+  pts))
+
+Proviamo:
+
+(draw-circle 0 0 100)
+
+(setq circle (draw-circle 100 100 100))
+
+Conversione della lista di punti in immagine con ImageMagick:
+
+(define (list-IM lst file-str)
+"Creates a graphic file (RGBA 8 bit) from a list of coords (with ImageMagick)"
+  (local (outfile x-width y-height line)
+    ; remove duplicate pixel
+    (setq lst (sort (unique lst)))
+    ; open output file
+    (setq outfile (open file-str "write"))
+    ;(print outfile { }) ; debug
+    ; Calculates image dimension (width and height)
+    (setq x-width (add 1 (apply max (map (fn(c) (c 0)) lst))))
+    (setq y-height (add 1 (apply max (map (fn(c) (c 1)) lst))))
+    ; write file (ImageMagick format: rgba, 8bit)
+    (write-line outfile (string "# ImageMagick pixel enumeration: "
+                (string x-width) "," (string y-height) ",256,rgba"))
+    (setq mode (length (lst 0)))
+    (cond ((= mode 2) ; only coords
+            (dolist (el lst)
+              (setq line (string (string (el 0)) ", " (string (el 1))
+                    ": (0,0,0,255)")) ; color black with alpha=100%
+              (write-line outfile line)))
+          ((= mode 5) ; coords and r g b
+            (dolist (el lst)
+              (setq line (string (string (el 0)) ", " (string (el 1)) ": ("
+                    (string (el 1)) ", " (string (el 2)) ", " (string (el 3))
+                    ", 255)")) ; color r g b with alpha=100%
+              (write-line outfile line)))
+          ((= mode 6) ; coords and r g b a
+            (dolist (el lst)
+              (setq line (string (string (el 0)) ", " (string (el 1)) ": ("
+                    (string (el 1)) ", " (string (el 2)) ", " (string (el 3))
+                    ", " (string (el 4)))) ; color r g b with alpha=100%
+              (write-line outfile line)))
+          (true (println "Error: only 2, 5 or 6 elements are allowed")))
+    (close outfile)))
+
+(list-IM circle "cerchio.txt")
+;-> true
+
+cerchio.txt
+# ImageMagick pixel enumeration: 201,201,256,rgba
+0, 90: (0,0,0,255)
+0, 91: (0,0,0,255)
+0, 92: (0,0,0,255)
+...
+200, 108: (0,0,0,255)
+200, 109: (0,0,0,255)
+200, 110: (0,0,0,255)
+
+(exec "convert cerchio.txt -background white -flatten cerchio.png")
+
+Vedi immagine "cerchio.png" nella cartella "data".
 
 ============================================================================
 

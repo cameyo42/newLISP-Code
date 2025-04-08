@@ -2548,6 +2548,14 @@ oppure
 quoziente = - 2 - 4*x + 2*x^2 = 2*x^2 - 4*x - 2
 resto = 0
 
+(- x - 3)/(- x - 3)
+(div-poly '(-3 -1) '(-3 -1))
+;-> ((1) (0))
+
+(- x - 3)/(x - 3)
+(div-poly '(-3 -1) '(-3 1))
+;-> ((-1) (-6))
+
 
 ----------------
 Coda di priorità
@@ -3332,11 +3340,11 @@ Facciamo un paio di prove:
 
 Nota: l'applicazione della formula "shoelace" comporta una perdita di precisione se x,y hanno grandi offset.
 Prima di applicare la formula rimuovere questi offset. Per esempio,
-x = x - media(x)
-y = y - media(y)
+  x = x - media(x)
+  y = y - media(y)
 oppure
-x = x - x[0]
-y = y - y[0]
+  x = x - x[0]
+  y = y - y[0]
 
 
 ---------------------------

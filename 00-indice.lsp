@@ -2875,6 +2875,9 @@ NOTE LIBERE 29
   Somma delle cifre di un fattoriale
   Disuguaglianze e poligoni
   Quadrato magico di prodotti
+  The Curious Case of Steve Ballmer
+  Biscotti Oreo
+  The Midpoint Circle Algorithm
   
 PROBLEMI SUI DADI
 =================
