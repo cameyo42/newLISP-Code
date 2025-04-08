@@ -3929,7 +3929,7 @@ lista degli indici:
 
 lista degli elementi:
 (ref-all nil a (fn (x) true) true)
-;-> ((1 2) 1 2 ((2 (3)) (4 4)) (2 (3)) 2 
+;-> ((1 2) 1 2 ((2 (3)) (4 4)) (2 (3)) 2
 ;->  (3) 3 (4 4) 4 4 (((7))) ((7)) (7) 7)
 ----------------------------
 
@@ -6088,7 +6088,7 @@ Numeri primi lunghi
 -------------------
 
 I numeri primi lunghi sono numeri primi i cui reciproci (in decimali) hanno una lunghezza del periodo inferiore di uno al numero primo.
-Altra definizione: 
+Altra definizione:
 numeri primi p tali che l'espansione decimale di 1/p abbia periodo p-1 (che è il periodo più grande possibile per qualsiasi intero).
 
 I primi lunghi (long primes) sono anche conosciuti come:
@@ -6682,7 +6682,10 @@ Calcoliamo i primi 10 numeri super-d per d da 2 a 9:
 Algoritmo di Bresenham
 ----------------------
 
-L'algoritmo di Bresenham è un algoritmo per disegnare linee in una griglia bidimensionale (raster) conoscendo il punto di inizio e di fine della linea. Questo algoritmo è uno dei primi ad essere stato introdotto nel campo della computer grafica e viene comunemente usato per disegnare linee primitive in un'immagine bitmap (es. lo schermo di un computer), poiché utilizza solo addizione, sottrazione e shift di interi. È un algoritmo di errore incrementale che non supporta l'antialiasing, ma è molto veloce. Per un metodo che supporta l'antialiasing vedi l'algoritmo di Wu.
+L'algoritmo di Bresenham è un algoritmo per disegnare linee in una griglia bidimensionale (raster) conoscendo il punto di inizio e di fine della linea.
+Questo algoritmo è uno dei primi ad essere stato introdotto nel campo della computer grafica e viene comunemente usato per disegnare linee primitive in un'immagine bitmap (es. lo schermo di un computer), poiché utilizza solo addizione, sottrazione e shift di interi.
+È un algoritmo di errore incrementale che non supporta l'antialiasing, ma è molto veloce.
+Per un metodo che supporta l'antialiasing vedi l'algoritmo di Wu.
 
 Per informazioni dettagliate vedere:
 "Michael Abrash's Graphics Programming Black Book Special Edition"
@@ -8094,6 +8097,8 @@ Verifichiamo che la somma valga sempre 1 (o 0.9999999999999999):
 Nota:
 (add 0.9999999999999999 1)
 ;-> 2
+(add 0.9999999999999998 1)
+;-> 2
 
 Purtroppo questo metodo non produce una distribuzione uniforme dei valori (perchè una distribuzione uniforme non è più tale dopo un'operazione di scala).
 
@@ -8503,7 +8508,7 @@ Ottimizziamo la funzione precalcolando le potenze:
 ;-> 2431.726
 
 (time (println (armstrong-to 1e7)))
-;-> (1 2 3 4 5 6 7 8 9 153 370 371 407 1634 8208 9474 54748 
+;-> (1 2 3 4 5 6 7 8 9 153 370 371 407 1634 8208 9474 54748
 ;->  92727 93084 548834 1741725 4210818 9800817 9926315)
 ;-> 25830.001
 

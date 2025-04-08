@@ -2878,6 +2878,7 @@ NOTE LIBERE 29
   The Curious Case of Steve Ballmer
   Biscotti Oreo
   The Midpoint Circle Algorithm
+  Rubik ASCII
   
 PROBLEMI SUI DADI
 =================
