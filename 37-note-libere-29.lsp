@@ -1102,5 +1102,394 @@ Scrivere una funzione per stampare la seguente figura (cubo di Rubik):
 ;->   \_\_\_\/\/
 ;->    \_\_\_\/
 
+
+-----------------------------
+Output lungo come la funzione
+-----------------------------
+
+Scrivere la funzione più corta possibile che restituisce un output lungo come la funzione (cioè con lo stesso numero di caratteri).
+La funzione stessa non è valida come output (no quine).
+
+Funzione 1
+----------
+Lunghezza funzione: 69 caratteri
+(define (funzione) (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19))
+(funzione)
+;-> ERR: illegal parameter type : 2
+;-> called from user function (funzione)
+Lunghezza output: 69 caratteri (\r\n in windows)
+
+Funzione 2
+----------
+Lunghezza funzione: 27 caratteri
+(define(f) (sequence 0 11))
+(f)
+;-> (0 1 2 3 4 5 6 7 8 9 10 11)
+Lunghezza output: 27 caratteri
+
+Funzione 3
+----------
+Lunghezza funzione: 25 caratteri
+(define (f) (dup "1" 23))
+(f)
+;-> "11111111111111111111111"
+Lunghezza output: 25 caratteri
+
+Funzione 4
+----------
+Lunghezza funzione: 15 caratteri
+(define(f)1e14)
+(f)
+;-> 100000000000000
+Lunghezza output: 15 caratteri
+
+
+---------------
+Numeri in scala
+---------------
+
+Dati due numeri interi positivi 'a' e 'b' con a < b, scrivere una funzione che stampa i numeri in scala e in sequenza.
+
+Esempio:
+a = 1, b = 5
+Output:
+1
+ 2
+  3
+   4
+    5
+Esempio:
+a = 98, b = 102
+Output:
+98
+  99
+    100
+       101
+          102
+
+(define (scale a b)
+  (let (space "")
+    (for (x a b)
+      (println space x)
+      (extend space (dup " " (length x))))'>))
+
+Proviamo:
+
+(scale 1 5)
+;-> 1
+;->  2
+;->   3
+;->    4
+;->     5
+
+(scale 98 102)
+;-> 98
+;->   99
+;->     100
+;->        101
+;->           102
+
+(scale 998 1005)
+;-> 998
+;->    999
+;->       1000
+;->           1001
+;->               1002
+;->                   1003
+;->                       1004
+;->                           1005
+
+
+--------------------------------------
+Bresenham per Linee, Cerchi ed Ellissi
+--------------------------------------
+
+Al seguente indirizzo web si trovano funzioni in C per la rasterizzazione di alcune primitive grafiche:
+
+https://zingl.github.io/bresenham.html
+
+Le funzioni sono tutte basate sull'algoritmo di Bresenham.
+
+Riportiamo il codice C per il disegno di Linee, Cerchi ed Ellissi e la relativa conversione in newLISP.
+
+LINEE
+-----
+
+void plotLine(int x0, int y0, int x1, int y1)
+{
+   int dx =  abs(x1-x0), sx = x0<x1 ? 1 : -1;
+   int dy = -abs(y1-y0), sy = y0<y1 ? 1 : -1;
+   int err = dx+dy, e2; /* error value e_xy */
+
+   for(;;){  /* loop */
+      setPixel(x0,y0);
+      if (x0==x1 && y0==y1) break;
+      e2 = 2*err;
+      if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+      if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+   }
+}
+
+La funzione 'plotLine' disegna una linea tra due punti '(x0, y0)' e '(x1, y1)' usando una versione dell'algoritmo di Bresenham per linee, ma estesa per gestire tutte le direzioni e inclinazioni, non solo quelle a pendenza ≤ 1.
+Questa funzione disegna una linea rasterizzata da '(x0, y0)' a '(x1, y1)' con un'ottima approssimazione visiva, senza usare float, divisioni o radici quadrate. È molto efficiente e precisa anche per linee diagonali, verticali, orizzontali o qualsiasi pendenza.
+
+int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+int err = dx + dy, e2;
+
+- 'dx': distanza orizzontale tra i due punti.
+- 'dy': distanza verticale negata tra i due punti (questo è importante per il calcolo dell'errore).
+- 'sx', 'sy': direzioni di avanzamento su x e y (possono essere '1' o '-1' a seconda di dove si trova il punto finale).
+- 'err = dx + dy': valore d'errore iniziale.
+
+for(;;) {
+   setPixel(x0, y0);
+   if (x0 == x1 && y0 == y1) break;
+   e2 = 2 * err;
+   if (e2 >= dy) { err += dy; x0 += sx; }
+   if (e2 <= dx) { err += dx; y0 += sy; }
+}
+
+- Disegna il pixel corrente con 'setPixel(x0, y0)'.
+- Se il punto corrente è il punto finale, esce dal ciclo.
+- Calcola 'e2 = 2 * err' per confrontare separatamente gli errori lungo x e y:
+  - Se 'e2 >= dy', si avanza in 'x' (cioè si fa uno step orizzontale).
+  - Se 'e2 <= dx', si avanza in 'y' (cioè si fa uno step verticale).
+- Così la linea risulta sempre continua, evitando buchi o salti.
+
+Versione in newLISP:
+
+Funzione che genera i punti di una linea tra due punti '(x0, y0)' e '(x1, y1)' con l'algoritmo di Bresenham:
+
+(define (line x0 y0 x1 y1)
+  (letn ( (dx (abs (- x1 x0)))
+          (sx (if (< x0 x1) 1 -1))
+          (dy (- (abs (- y1 y0))))
+          (sy (if (< y0 y1) 1 -1))
+          (err (+ dx dy))
+          (e2 0) (done nil) (pts '()) )
+    (until done
+      (push (list x0 y0) pts -1)
+      ; termina il ciclo se siamo arrivati al punto finale
+      (cond ((and (= x0 x1) (= y0 y1)) (setq done true))
+            (true ; altrimenti calcola il prossimo punto
+              (setq e2 (* 2 err))
+              (when (>= e2 dy) (setq err (+ err dy)) (setq x0 (+ x0 sx)))
+              (when (<= e2 dx) (setq err (+ err dx)) (setq y0 (+ y0 sy))))
+      )
+    )
+    pts))
+
+Proviamo:
+
+(line 1 1 10 6)
+;-> ((1 1) (2 2) (3 2) (4 3) (5 3) (6 4) (7 4) (8 5) (9 5) (10 6))
+
+(line -4 5 10 -12)
+;-> ((-4 5) (-3 4) (-2 3) (-2 2) (-1 1) (0 0) (1 -1) (2 -2) (3 -3) (3 -4) (4 -5) (5 -6)
+;->  (6 -7) (7 -8) (8 -9) (8 -10) (9 -11) (10 -12))
+
+(line 0 0 0 0)
+;-> ((0 0))
+
+(line 0 0 0 5)
+;-> ((0 0) (0 1) (0 2) (0 3) (0 4) (0 5))
+
+CERCHI
+------
+
+void plotCircle(int xm, int ym, int r)
+{
+   int x = -r, y = 0, err = 2-2*r; /* II. Quadrant */
+   do {
+      setPixel(xm-x, ym+y); /*   I. Quadrant */
+      setPixel(xm-y, ym-x); /*  II. Quadrant */
+      setPixel(xm+x, ym-y); /* III. Quadrant */
+      setPixel(xm+y, ym+x); /*  IV. Quadrant */
+      r = err;
+      if (r <= y) err += ++y*2+1;           /* e_xy+e_y < 0 */
+      if (r > x || err > y) err += ++x*2+1; /* e_xy+e_x > 0 or no 2nd y-step */
+   } while (x < 0);
+}
+
+La funzione 'plotCircle' disegna un cerchio centrato in '(xm, ym)' con raggio 'r' utilizzando un algoritmo senza moltiplicazioni né radici quadrate, ottimizzato per grafica raster (tipico nei disegni su schermo pixel per pixel). Questo è una variante dell'algoritmo di Bresenham per cerchi (o Midpoint Circle Algorithm).
+
+void plotCircle(int xm, int ym, int r)
+
+- 'xm, ym': coordinate del centro del cerchio.
+- 'r': raggio del cerchio.
+- Non restituisce nulla ('void').
+- Usa una funzione 'setPixel(x, y)' (non definita nel codice) per disegnare un pixel sullo schermo.
+
+int x = -r, y = 0, err = 2 - 2 * r;
+
+- Inizializza 'x = -r' per partire dalla sinistra estrema del cerchio.
+- 'y = 0': parte da y = 0, quindi dal centro orizzontale.
+- 'err' è una variabile che tiene traccia dell'errore dell'approssimazione del cerchio perfetto.
+
+do {
+   setPixel(xm-x, ym+y); // I quadrante
+   setPixel(xm-y, ym-x); // II quadrante
+   setPixel(xm+x, ym-y); // III quadrante
+   setPixel(xm+y, ym+x); // IV quadrante
+
+- Dato un punto '(x, y)' calcolato nel secondo quadrante (x negativo), calcola simmetricamente i pixel negli altri quadranti.
+- In pratica, disegna otto punti per ogni iterazione, grazie alla simmetria del cerchio.
+
+r = err;
+if (r <= y) err += ++y*2+1;
+if (r > x || err > y) err += ++x*2+1;
+
+- Varia le coordinate 'x' e 'y' in modo tale da seguire il bordo del cerchio, correggendo l'errore man mano che ci si muove.
+- Il primo 'if' incrementa 'y' e aggiorna l'errore.
+- Il secondo 'if' incrementa 'x' (che è negativo e tende verso zero), gestendo quando serve fare uno "step diagonale".
+
+} while (x < 0);
+
+- Il ciclo termina quando 'x' raggiunge 0, cioè quando si è completato il disegno di mezzo cerchio (l'altra metà è simmetrica).
+
+In sintesi questa funzione:
+- Usa simmetria per ridurre il numero di calcoli.
+- È veloce perché usa solo somme, sottrazioni e shift.
+- Disegna un cerchio di raggio 'r' centrato in '(xm, ym)' usando il rasterizzazione per pixel.
+
+(define (circle xc yc r)
+  (let ( (x (- 0 r)) (y 0) (err (- 2 (* 2 r))) (pts '()) )
+    (do-while (< x 0)
+      (push (list (- xc x) (+ yc y)) pts -1) ; I quadrante
+      (push (list (- xc y) (- yc x)) pts -1) ; II quadrante
+      (push (list (+ xc x) (- yc y)) pts -1) ; III quadrante
+      (push (list (+ xc y) (+ yc x)) pts -1) ; IV quadrante
+      (setq r err)
+      (if (<= r y) (setq err (+ err (+ (* 2 (++ y)) 1))))
+      (if (or (> r x) (> err y)) (setq err (+ err (+ (* 2 (++ x)) 1))))
+    )
+    pts))
+
+Proviamo:
+
+(circle 0 0 5)
+;-> ((5 0) (0 5) (-5 0) (0 -5) (5 1) (-1 5) (-5 -1) (1 -5) (5 2) (-2 5)
+;->  (-5 -2) (2 -5) (4 3) (-3 4) (-4 -3) (3 -4) (3 4) (-4 3) (-3 -4) (4 -3)
+;->  (2 5) (-5 2) (-2 -5) (5 -2) (1 5) (-5 1) (-1 -5) (5 -1))
+
+ELLISSI
+-------
+
+void plotEllipseRect(int x0, int y0, int x1, int y1)
+{
+   int a = abs(x1-x0), b = abs(y1-y0), b1 = b&1; /* values of diameter */
+   long dx = 4*(1-a)*b*b, dy = 4*(b1+1)*a*a; /* error increment */
+   long err = dx+dy+b1*a*a, e2; /* error of 1.step */
+
+   if (x0 > x1) { x0 = x1; x1 += a; } /* if called with swapped points */
+   if (y0 > y1) y0 = y1; /* .. exchange them */
+   y0 += (b+1)/2; y1 = y0-b1;   /* starting pixel */
+   a *= 8*a; b1 = 8*b*b;
+
+   do {
+       setPixel(x1, y0); /*   I. Quadrant */
+       setPixel(x0, y0); /*  II. Quadrant */
+       setPixel(x0, y1); /* III. Quadrant */
+       setPixel(x1, y1); /*  IV. Quadrant */
+       e2 = 2*err;
+       if (e2 <= dy) { y0++; y1--; err += dy += a; }  /* y step */
+       if (e2 >= dx || 2*err > dy) { x0++; x1--; err += dx += b1; } /* x step */
+   } while (x0 <= x1);
+
+   while (y0-y1 < b) {  /* too early stop of flat ellipses a=1 */
+       setPixel(x0-1, y0); /* -> finish tip of ellipse */
+       setPixel(x1+1, y0++);
+       setPixel(x0-1, y1);
+       setPixel(x1+1, y1--);
+   }
+}
+
+Note:
+1) 'b1 = b & 1' è equivalente a 'b1 = (b % 2)' (b è pari o dispari?).
+2) 'err += dy += a' è una forma compatta (e un po' criptica) di scrittura in C, che usa assegnazioni concatenate.
+In pratica effettua le seguenti operazoni:
+dy += a;        // prima: aggiorna dy
+err += dy;      // poi: aggiorna err usando il nuovo valore di dy
+
+La funzione 'plotEllipseRect' implementa una versione ottimizzata dell'algoritmo di Bresenham per il disegno di ellissi, noto anche come algoritmo midpoint per ellissi.
+
+- È una variante dell'algoritmo di Bresenham per il disegno di cerchi ed ellissi.
+- Utilizza solo interi (niente funzioni trigonometriche o float), rendendolo molto efficiente.
+- Divide il disegno in quattro quadranti e sfrutta la simmetria dell'ellisse per disegnare solo un quarto e replicare i punti negli altri tre.
+- Usa errori incrementali ('err', 'dx', 'dy') per decidere quando muoversi lungo l'asse x o y, mantenendo l'ellisse il più vicino possibile alla forma ideale.
+
+- La funzione prende due punti '(x0, y0)' e '(x1, y1)' che rappresentano i vertici opposti del rettangolo che contiene l'ellisse.
+- Calcola i semiassi 'a' (larghezza) e 'b' (altezza).
+- I valori 'dx', 'dy', e 'err' sono utilizzati per determinare la direzione e la quantità dell'errore accumulato nel disegno.
+- La parte finale del ciclo 'while (y0-y1 < b)' serve a correggere la forma nel caso di ellissi molto piatte (dove 'a = 1'), dove il ciclo principale può terminare troppo presto.
+
+Versione newLISP:
+
+(define (ellipse x0 y0 x1 y1)
+  (local (a b b1 dx dy err e2 pts)
+    (setq pts '())
+    (setq a (abs (- x1 x0)))  ; semi-asse orizzontale
+    (setq b (abs (- y1 y0)))  ; semi-asse verticale
+    (setq b1 (% b 2))         ; b è dispari?
+    (setq dx (* 4 (- 1 a) (* b b)))  ; incremento errore x
+    (setq dy (* 4 (+ b1 1) (* a a))) ; incremento errore y
+    (setq err (+ dx dy (* b1 (* a a))))  ; errore iniziale
+    (setq e2 0)
+    (when (> x0 x1) (setq x0 x1) (setq x1 (+ x1 a)))  ; se i punti sono scambiati
+    (if (> y0 y1) (setq y0 y1))  ; scambio y
+    (setq y0 (+ y0 (/ (+ b 1) 2)))
+    (setq y1 (- y0 b1))  ; pixel iniziale
+    (setq a (* 8 a a))
+    (setq b1 (* 8 b b))
+    (do-while (<= x0 x1)
+      (push (list x1 y0) pts -1)  ; I Quadrante
+      (push (list x0 y0) pts -1)  ; II Quadrante
+      (push (list x0 y1) pts -1)  ; III Quadrante
+      (push (list x1 y1) pts -1)  ; IV Quadrante
+      (setq e2 (* 2 err))
+      (if (<= e2 dy)
+          (begin (setq y0 (+ y0 1)) (setq y1 (- y1 1))  (setq dy (+ dy a)) (setq err (+ err dy)))) ; step su y
+      (if (or (>= e2 dx) (> (* 2 err) dy))
+          (begin (setq x0 (+ x0 1)) (setq x1 (- x1 1)) (setq dx (+ dx b1)) (setq err (+ err dx))))
+    )
+    (while (< (- y0 y1) b) ; arresto troppo anticipato delle ellissi piatte a=1
+      (push (list (- x0 1) y0) pts -1)   ; completamento della punta dell'ellisse
+      (push (list (+ x1 1) (++ y0)) pts -1)
+      (push (list (- x0 1) y1) pts -1)
+      (push (list (+ x1 1) (-- y1)) pts -1)
+    )
+  pts))
+
+Proviamo:
+
+(ellipse 30 30 70 50)
+;-> ((12 4) (0 4) (0 4) (12 4) (12 5) (0 5) (0 3) (12 3) (12 6) (0 6) (0 2)
+;->  (12 2) (11 7) (1 7) (1 1) (11 1) (11 8) (1 8) (1 0) (11 0) (11 9) (1 9)
+;->  (1 -1) (11 -1) (11 10) (1 10) (1 -2) (11 -2) (10 11) (2 11) (2 -3) (10 -3)
+;->  (10 12) (2 12) (2 -4) (10 -4) (9 13) (3 13) (3 -5) (9 -5) (8 14) (4 14)
+;->  (4 -6) (8 -6) (7 15) (5 15) (5 -7) (7 -7) (6 16) (6 16) (6 -8) (6 -8))
+
+Proviamo a generare alcune figure in un unica immagine:
+(Per la funzione "list-IM" vedi la libreria "yo.lsp".)
+
+(setq linea1 (line 10 10 200 200))
+(setq linea2 (line 150 150 25 25))
+(setq quad (append (line 10 250 50 250) (line 50 250 50 350) 
+                   (line 50 350 10 350) (line 10 350 10 250)))
+(setq cerchio (circle 100 100 100))
+(setq ellisse (ellipse 80 50 250 100))
+(setq limiti '((0 0) (400 0) (400 400) (0 400)))
+
+(setq draw (append limiti linea1 linea2 quad cerchio ellisse))
+(list-IM draw "draw.txt")
+;-> true
+(exec "convert draw.txt -background white -flatten draw.png")
+;-> ()
+
+L'immagine "draw.png" si trova nella cartella "data".
+
+Vedi anche "Algoritmo di Bresenham" su "Note libere 4".
+
 ============================================================================
 

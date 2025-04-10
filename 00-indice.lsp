@@ -2879,6 +2879,9 @@ NOTE LIBERE 29
   Biscotti Oreo
   The Midpoint Circle Algorithm
   Rubik ASCII
+  Output lungo come la funzione
+  Numeri in scala
+  Bresenham per Linee, Cerchi ed Ellissi
   
 PROBLEMI SUI DADI
 =================

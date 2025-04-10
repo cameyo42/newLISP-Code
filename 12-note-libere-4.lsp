@@ -6771,6 +6771,8 @@ Con la funzione "plot" (vedi il capitolo "Funzioni varie"):
 ;->      ·        ■
 ;->      ·         ■
 
+Vedi anche "Bresenham per Linee, Cerchi ed Ellissi" su "Note libere 29".
+
 
 ------------------------------------------
 Associare gli elementi di una lista ogni k
