@@ -4551,6 +4551,8 @@ Proviamo:
 ;-> 37875937519577818577805321712268066130019278766111959092164201981000
 
 Vedi anche "Calcolo di e con il metodo spigot" su "Funzioni varie".
+Vedi anche "Calcolo di Pi greco" su "Rosetta code".
+Vedi anche "Calcolo di pi greco (Formula di Rabinowitz-Wagon)" su "Note libere 29".
 
 
 -----------------------------------

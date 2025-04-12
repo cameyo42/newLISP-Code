@@ -4565,6 +4565,9 @@ Maggiore sarà il numero di punti generati più precisa sarà l'approssimazione 
 (pi 1e8)
 ;-> 3.14176444
 
+Vedi anche "Calcolo di pi greco con il metodo spigot" su "Note libere 24".
+Vedi anche "Calcolo di pi greco (Formula di Rabinowitz-Wagon)" su "Note libere 29".
+
 
 ---------------
 NUMERI DI LUCAS

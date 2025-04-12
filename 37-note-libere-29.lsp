@@ -1084,6 +1084,8 @@ Scrivere una funzione per stampare la seguente figura (cubo di Rubik):
    \_\_\_\/\/
     \_\_\_\/
 
+Modifichiamo i caratteri '\' della figura con '\\'.
+
 (define (rubik) (println
 "      _ _ _
     /_/_/_/\\
@@ -1490,6 +1492,262 @@ Proviamo a generare alcune figure in un unica immagine:
 L'immagine "draw.png" si trova nella cartella "data".
 
 Vedi anche "Algoritmo di Bresenham" su "Note libere 4".
+
+
+----------------------------------
+Avanti e indietro in un intervallo
+----------------------------------
+
+Consideriamo i numeri interi in un intervallo [a,b] con (b > a >= 0) e una stringa binaria.
+Scrivere una funzione per simulare il seguente processo:
+1. Partire da un numero predefinito dell'intervallo
+2. Attraversare tutta la stringa:
+   se incontriamo "0" allora ci spostiamo a sinistra dell'intervallo (-1)
+   se incontriamo "1" allora ci spostiamo a destra dell'intervallo (+1)
+   Comunque la posizione deve sempre rimanere nell'intervallo:
+   (cioè +1 da 'b' rimane 'b' e -1 da 'a' rimane 'a').
+3. Restituire la posizione finale
+
+(define (left-right a b bin x)
+  (let (pos (or x a))
+    (dostring (c bin)
+      (if (= c 48) ; (char "0") = 48
+        (setq pos (if (= pos a) a (- pos 1)))
+        (setq pos (if (= pos b) b (+ pos 1)))
+      )
+      ;(print c { } pos) (read-line)
+    )
+    pos))
+
+Proviamo:
+
+(left-right 0 5 "101010111111100000000011")
+;-> 2
+
+(left-right 100 105 "101010111111100000000011" 105)
+;-> 102
+
+(left-right 100 110 "101010111111100000000011" 105)
+;-> 103
+
+
+---------------------------------
+Tante volte quanto vale il numero
+---------------------------------
+
+Problema 1
+----------
+Dato un intero positivo N, scrivere una funzione che restituisce una lista che contiene ogni numero intero da 1 a N ripetuto x volte, dove x è il valore di ciascun numero intero.
+Per esempio, con N = 5 la funzione deve restituire la seguente lista:
+(1 2 2 3 3 3 4 4 4 4 5 5 5 5 5)
+Cioè, 1 per una volta, 2 per due volte, 3 per tre volte, 4 per quattro volte e 5 per cinque volte.
+
+Sequenza OEIS A002024:
+k appears k times. a(n) = floor(sqrt(2n) + 1/2).
+  1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
+  7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+  11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+  12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, ...
+
+In questo caso il parametro 'n' della nostra funzione rappresenta il numero finale della sequenza (per esempio, n = 3 produce la sequenza 1 2 2 3 3 3).
+
+Somma dei primi N numeri naturali: (N+1)*N/2
+
+(define (seq1 n)
+  (let (out '())
+    ; Quantità di numeri da generare
+    (setq n (/ (* (+ n 1) n) 2))
+    ; Generazione dei numeri con la formula: a(n) = floor(sqrt(2n) + 1/2)
+    (for (i 1 n)
+      (push (floor (add (sqrt (mul 2 i)) 0.5)) out -1))
+    out))
+
+Proviamo:
+
+(seq1 3)
+;-> (1 2 2 3 3 3)
+
+(seq1 5)
+;-> (1 2 2 3 3 3 4 4 4 4 5 5 5 5 5)
+
+Problema 2
+----------
+Dato un intero positivo N, scrivere una funzione che restituisce una lista che contiene ogni numero intero da 1 a N ripetuto x volte, dove x è il valore di ciascun numero intero.
+Inoltre, la lista di output non deve avere due interi adiacenti uguali.
+
+(define (seq2 n)
+  (let (x '())
+    (for (i n 1 -1)
+      (setq x (append x (sequence i n))))))
+
+Proviamo:
+
+(seq2 3)
+;-> (3 2 3 1 2 3)
+
+(seq2 5)
+(5 4 5 3 4 5 2 3 4 5 1 2 3 4 5)
+
+Verifichiamo che i numeri sono gli stessi:
+
+(= (seq1 10) (sort (seq2 10)))
+;-> true
+
+Come funziona?
+Facciamo un esempio con n=5:
+La sequenza OEIS (generata da (seq1 5)) vale:
+(1 2 2 3 3 3 4 4 4 4 5 5 5 5 5)
+
+Partiamo da una lista vuota:
+(setq x '())
+
+Estendiamo la lista vuota con l'espressione (setq (append x (sequence i n)) all'interno di un ciclo for con il contatore 'i' che va da n a 1:
+(setq n 5)
+(setq i 5)
+;(setq (append x (sequence i n))
+(setq (append x (sequence 5 5)) ;(sequence 5 5) --> (5)
+;-> (5)
+(setq i 4)
+(setq (append x (sequence 4 5)) ;(sequence 4 5) --> (4 5)
+;-> (5 4 5)
+(setq i 3)
+(setq (append x (sequence 3 5)) ;(sequence 3 5) --> (3 4 5)
+;-> (5 4 5 3 4 5)
+(setq i 2)
+(setq (append x (sequence 2 5)) ;(sequence 2 5) --> (2 3 4 5)
+;-> (5 4 5 3 4 5 2 3 4 5)
+(setq i 1)
+(setq (append x (sequence 1 5)) ;(sequence 1 5) --> (1 2 3 4 5)
+;-> (5 4 5 3 4 5 2 3 4 5 1 2 3 4 5)
+
+
+------------
+cowsay e tux
+------------
+
+'cowsay' è un programma, scritto in Perl da Tony Monroe, che genera immagini di una mucca (ASCII art) con un messaggio (passato come parametro).
+Al posto di una mucca è possibile generare il pinguino Tux (la mascotte di Linux).
+
+Il comando ha diversi parametri opzionali che trascureremo nella nostra funzione.
+Inoltre, per semplicità, il messaggio è una stringa di una sola linea (non multilinea).
+
+Esempi:
+
+comando: cowsay "Messaggio dalla mucca!"
+output:
+ ________________________
+< Messaggio dalla mucca! >
+ ------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+comando: cowsay "Messaggio dal pinguino!" true
+ _________________________
+< Messaggio dal pinguino! >
+ -------------------------
+   \
+    \
+        .--.
+       |o_o |
+       |:_/ |
+      //   \ \
+     (|     | )
+    /'\_   _/`\
+    \___)=(___/
+
+Modifichiamo i caratteri '\' della mucca e del pinguino con '\\'.
+
+(define (cowsay str fig)
+  (let (stra "")
+    (setq text (string " " (dup "_" (+ (length str) 2)) "\n"
+                      "< " str " >" "\n"
+                      " " (dup "-" (+ (length str) 2)) "\n"))
+    (print text)
+    (cond
+      ((true? fig) ; pinguino
+        (println "   \\")
+        (println "    \\")
+        (println "        .--.")
+        (println "       |o_o |")
+        (println "       |:_/ |")
+        (println "      //   \\ \\")
+        (println "     (|     | )")
+        (println "    /'\\_   _/`\\")
+        (println "    \\___)=(___/"))
+      ; mucca
+      (true
+        (println "        \\   ^__^")
+        (println "         \\  (oo)\\_______")
+        (println "            (__)\\       )\\/\\")
+        (println "                ||----w |")
+        (println "                ||     ||"))) '>))
+
+(cowsay "Buongiorno a te...")
+;->  ____________________
+;-> < Buongiorno a te... >
+;->  --------------------
+;->         \   ^__^
+;->          \  (oo)\_______
+;->             (__)\       )\/\
+;->                 ||----w |
+;->                 ||     ||
+
+(cowsay "Buonanotte a me." true)
+;->  __________________
+;-> < Buonanotte a me. >
+;->  ------------------
+;->    \
+;->     \
+;->         .--.
+;->        |o_o |
+;->        |:_/ |
+;->       //   \ \
+;->      (|     | )
+;->     /'\_   _/`\
+;->     \___)=(___/
+
+
+-------------------------------------------------
+Calcolo di pi greco (Formula di Rabinowitz-Wagon)
+-------------------------------------------------
+
+Nel 1995, Stanley Rabinowitz e Stan Wagon scoprirono un algoritmo per generare le cifre di pi greco una alla volta senza memorizzare i risultati precedenti.
+
+La formula generale utilizzata è la seguente:
+
+                     1        2        3            k
+  pi greco = 2*(1 + ---*(1 + ---*(1 + ---*(1 + ...------*(1+ ...))))
+                     3        5        7           2k+1
+
+pi = 3.14159265358979323846264338327950288419716939937510582097494459230781...
+
+Implementazione della formula:
+
+(define (calcola-pi k)
+  (let (pi (add 1.0 (div k (add (mul 2 k) 1.0)))) ; base: (1 + k/(2k+1))
+    (for (i (- k 1) 1 -1)
+      (setq pi (add 1.0 (mul (div i (add (mul 2 i) 1.0)) pi))))
+    (mul 2 pi)))
+
+Proviamo:
+
+(map (fn(x) (list x (calcola-pi x))) '(1 5 10 20 30 40 50 60))
+;-> ((1 2.666666666666667) 
+;->  (5 3.121500721500722)
+;->  (10 3.141106021601377)
+;->  (20 3.141592298740339)
+;->  (30 3.14159265330116)
+;->  (40 3.141592653589546)
+;->  (50 3.141592653589793)
+;->  (60 3.141592653589793))
+
+Vedi anche "Calcolo di Pi greco" su "Rosetta code".
+Vedi anche "Calcolo di pi greco con il metodo spigot" su "Note libere 24".
+
 
 ============================================================================
 

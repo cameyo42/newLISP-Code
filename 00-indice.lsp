@@ -2882,7 +2882,11 @@ NOTE LIBERE 29
   Output lungo come la funzione
   Numeri in scala
   Bresenham per Linee, Cerchi ed Ellissi
-  
+  Avanti e indietro in un intervallo
+  Tante volte quanto vale il numero
+  cowsay e tux
+  Calcolo di pi greco (Formula di Rabinowitz-Wagon)
+
 PROBLEMI SUI DADI
 =================
   Problemi 1,...,79
