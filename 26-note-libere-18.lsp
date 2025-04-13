@@ -1670,10 +1670,10 @@ Dato un numero decimale frazionario n e un intero k, convertire il numero decima
 
 Esempi:
 
-Input: n = 2,47, k = 5
+Input: n = 2.47, k = 5
 Output: 10.01111
 
-Input: n = 6,986 k = 8
+Input: n = 6.986 k = 8
 Output: 110.11111100
 
 A) Convertire la parte intera del numero nell'equivalente binario
@@ -1758,9 +1758,13 @@ Facciamo alcune prove:
 
 (frac-bin 6.986 15)
 ;-> "110.111111000110101"
+(bin-frac (frac-bin 6.986 15))
+;-> 6.985992431640625
 
 (frac-bin (div 1 3) 10)
 ;-> "0.0101010101"
+(bin-frac (frac-bin (div 1 3) 10))
+;-> 0.3330078125
 
 
 --------------------------------------------------------------

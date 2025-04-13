@@ -887,7 +887,7 @@ NOTE LIBERE 5
   Eredità
   Sequenza di Farey
   Distanza di Chebyshev
-  Anti-primi
+  Anti-primi (numeri altamente composti)
   Numeri altamente abbondanti
   Creazione dinamica di variabili
   La funzione "curry"
@@ -2886,6 +2886,8 @@ NOTE LIBERE 29
   Tante volte quanto vale il numero
   cowsay e tux
   Calcolo di pi greco (Formula di Rabinowitz-Wagon)
+  Concatenare n con n + 1
+  Teorema di Vantieghems
 
 PROBLEMI SUI DADI
 =================

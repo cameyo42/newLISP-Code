@@ -1749,5 +1749,145 @@ Vedi anche "Calcolo di Pi greco" su "Rosetta code".
 Vedi anche "Calcolo di pi greco con il metodo spigot" su "Note libere 24".
 
 
+-----------------------
+Concatenare n con n + 1
+-----------------------
+
+Consideriamo la sequenza di numeri la cui espansione decimale è una concatenazione di 2 numeri consecutivi crescenti non negativi.
+In altre parole, ogni numero nella sequenza è formato mettendo insieme n con n+1.
+
+Sequenza OEIS A127421:
+Numbers whose decimal expansion is a concatenation of 2 consecutive increasing nonnegative numbers.
+  1, 12, 23, 34, 45, 56, 67, 78, 89, 910, 1011, 1112, 1213, 1314, 1415,
+  1516, 1617, 1718, 1819, 1920, 2021, 2122, 2223, 2324, 2425, 2526, 2627,
+  2728, 2829, 2930, 3031, 3132, 3233, 3334, 3435, 3536, 3637, 3738, 3839,
+  3940, 4041, 4142, 4243, 4344, 4445, 4546, ...
+
+Scrivere una funzione che calcola la sequenza fino ad determinato numero di elementi.
+
+(define (concat n) (int (string n (+ n 1))))
+
+(define (concatena num)
+  (let ( (out '()) (idx 0) )
+  (until (>= idx num)
+    (push (concat idx) out -1)
+    (++ idx))
+    out))
+
+(concatena 46)
+;-> (1 12 23 34 45 56 67 78 89 910 1011 1112 1213 1314 1415 1516 1617 1718
+;->  1819 1920 2021 2122 2223 2324 2425 2526 2627 2728 2829 2930 3031 3132
+;->  3233 3334 3435 3536 3637 3738 3839 3940 4041 4142 4243 4344 4445 4546)
+
+Funzione compatta (60 caratteri):
+
+(define(c n)(map(fn(x)(int(string(- x 1)x)))(sequence 1 n)))
+
+(c 46)
+;-> (1 12 23 34 45 56 67 78 89 910 1011 1112 1213 1314 1415 1516 1617 1718
+;->  1819 1920 2021 2122 2223 2324 2425 2526 2627 2728 2829 2930 3031 3132
+;->  3233 3334 3435 3536 3637 3738 3839 3940 4041 4142 4243 4344 4445 4546)
+
+
+----------------------
+Teorema di Vantieghems
+----------------------
+
+Il teorema di Vantieghem è una condizione necessaria e sufficiente affinché un numero sia primo.
+Afferma che, affinché un numero naturale n sia primo, il prodotto di (2^i - 1), dove 0 < i < n, è congruente a n mod (2^n - 1).
+In altre parole, un numero n è primo se e solo se:
+
+  Prod[i=1..(n-1)](2^i - 1) congruente n mod (2^n - 1)
+
+Un altro modo per enunciare il teorema di cui sopra è:
+
+se (2^n - 1) divide Prod[i=1..(n-1)](2^i - 1) - n, allora n è primo.
+
+(define (product n) ; funzione non usata
+  (let (p 1)
+  (for (i 1 (- n 1))
+    (setq p (* p (- (<< 1 i) 1))))
+  p))
+
+(define (vantieghems limite)
+  (cond ((< limite 2) '())
+        ((= limite 2) '(2))
+        (true
+          (let ( (prod 3L) (out '(2)) )
+            (for (n 3 (- limite 1))
+              ;(println "n: " n { --- } "prod: " prod)
+              ; verifica la condizione di primalità
+              (if (zero? (% (- prod n) (- (pow 2 n) 1)))
+                  (push n out -1))
+              ; aggiorna la produttoria
+              (setq prod (* prod (- (pow 2 n) 1)))
+            )
+            (println "Cifre produttoria = " (length prod))
+            out))))
+
+Proviamo:
+
+(vantieghems 20)
+;-> Cifre produttoria = 57
+;-> (2 3 5 7 11 13 17 19)
+
+(vantieghems 100)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61) ; output errato
+;-> Cifre produttoria = 1290
+
+Modi di calcolare 2^n:
+  +-----------+----------+-------------+
+  | Modo      | Velocità | Numeri      |
+  +-----------+----------+-------------+
+  | (<< 1 n)  | veloce   | int64       |
+  |------------------------------------|
+  | (pow 2 n) | normale  | float       |
+  |------------------------------------|
+  | (** 2 n)  | lenta    | big integer |
+  +------------------------------------+
+
+Proviamo con i big-integer.
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (vantieghems limite)
+  (cond ((< limite 2) '())
+        ((= limite 2) '(2))
+        (true
+          (let ( (prod 3L) (out '(2)) )
+            (for (n 3 (- limite 1))
+              ;(println "n: " n { --- } "prod: " prod)
+              ; verifica la condizione di primalità
+              (if (zero? (% (- prod n) (- (** 2 n) 1)))
+              ;(if (zero? (% (- prod n) (- (<< 1 n) 1)))
+              ;(if (zero? (% (- prod n) (- (pow 2 n) 1)))
+                  (push n out -1))
+              ; aggiorna la produttoria
+              (setq prod (* prod (- (** 2 n) 1)))
+              ;(setq prod (* prod (- (<< 1 n) 1)))
+              ;(setq prod (* prod (- (pow 2 n) 1)))
+            )
+            (println "Cifre produttoria = " (length prod))
+            out))))
+
+(vantieghems 20)
+;-> Cifre produttoria = 57
+;-> (2 3 5 7 11 13 17 19)
+
+(vantieghems 100)
+;-> Cifre produttoria = 1490
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97)
+
+(time (vantieghems 1000))
+;-> Cifre produttoria = 150364
+;-> 1786.247
+
+Il teorema ha valore teorico, ma in pratica non è utilizzabile per calcolare i numeri primi.
+
 ============================================================================
 

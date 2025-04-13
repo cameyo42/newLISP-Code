@@ -1273,9 +1273,9 @@ Quindi la funzione generica per calcolare la distanza di Chebyshev tra due punti
 ;-> 3
 
 
-----------
-Anti-primi
-----------
+--------------------------------------
+Anti-primi (numeri altamente composti)
+--------------------------------------
 
 Gli anti-primi (o numeri altamente composti) sono i numeri naturali con più fattori di quelli più piccoli di se stesso. In altre parole, i numeri altamente composti sono quei numeri n dove d(n), il numero di divisori di n, aumenta a record (cioè è maggiore del precedente).
 
