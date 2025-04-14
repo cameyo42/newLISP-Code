@@ -1135,6 +1135,8 @@ Nota: 1/2 + 1/3 + 1/9 = 17/18 = 34/36
 Il notaio presta un cammello e, dei 36 cammelli totali, il primo figlio ne prende 18 (la metà), il secondo 12 (la terza parte) ed il terzo 4 (la nona parte). In totale i cammelli "spartiti" sono 34. I due cammelli rimasti vengono presi dal notaio (uno già gli apparteneva) che quindi ottiene un cammello come ricompensa.
 Da notare che tutti i figli hanno avuto di più della parte stabilita nel testamento.
 
+Vedi anche "Divisione incongrue" su "Note libere 9".
+
 
 -----------------
 Sequenza di Farey

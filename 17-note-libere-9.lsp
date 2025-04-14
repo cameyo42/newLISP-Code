@@ -3940,7 +3940,7 @@ Nota: se usiamo map con una funzione primitiva possiamo usarla direttamente, per
 
 
 -------------------
-Divisione incongrue
+Divisioni incongrue
 -------------------
 
 1. L'eredità degli 11 cammelli

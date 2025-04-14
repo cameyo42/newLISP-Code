@@ -1256,7 +1256,7 @@ NOTE LIBERE 9
   Numero mancante in una progressione aritmetica
   List comprehensions
   map e funzioni con argomenti multipli
-  Divisione incongrue
+  Divisioni incongrue
   Numeri causali e numero di eulero
   Funzioni e indici degli elementi
   Numeri cistercensi
@@ -2888,6 +2888,7 @@ NOTE LIBERE 29
   Calcolo di pi greco (Formula di Rabinowitz-Wagon)
   Concatenare n con n + 1
   Teorema di Vantieghems
+  Teorema di Hardy-Ramanujan
 
 PROBLEMI SUI DADI
 =================

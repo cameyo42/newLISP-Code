@@ -1889,5 +1889,88 @@ Proviamo con i big-integer.
 
 Il teorema ha valore teorico, ma in pratica non è utilizzabile per calcolare i numeri primi.
 
+
+--------------------------
+Teorema di Hardy-Ramanujan
+--------------------------
+
+Il teorema di Hardy Ramanujan afferma che il numero di fattori primi distinti di n sarà approssimativamente log(log(n)) per la maggior parte dei numeri naturali n.
+Nota: 'log' è il logaritmo naturale.
+
+Esempi:
+
+Numero: 5192
+Fattori primi: 2 2 2 11 59
+Fattori primi distinti: 11 59
+Numero di fattori primi distinti: 2
+(log (log 5192)) = 2.146501209209714
+
+Numero: 51242183
+Fattori primi: 19 23 117259
+Fattori primi distinti: 19 23 117259
+Numero di fattori primi distinti: 3
+(log (log 51242183)) = 2.876502333746978
+
+Funzione che calcola log(log(n) di un numero:
+
+(define (HR n) (log (log n)))
+
+(define (once lst)
+"Return the elements of a list that appear only once"
+  (local (out unici all)
+    (setq out '())
+    (setq unici (unique lst))
+    ; conta le occorrenze di ogni elemento
+    (setq all (map list unici (count unici lst)))
+    ; filtra gli elementi che compaiono solo una volta (occorrenza = 1)
+    (dolist (el all)
+      (if (= (el 1) 1) (push (el 0) out -1))
+    )
+    out))
+
+Funzione che calcola il numero esatto di fattori primi distinti di un numero:
+
+(define (num-distinct-factor n) (length (once (factor n))))
+
+Proviamo:
+
+(num-distinct-factor 5192)
+;-> 2
+(HR 5192)
+;-> 2.146501209209714
+
+(num-distinct-factor 51242183)
+;-> 3
+(HR 51242183)
+;-> 2.876502333746978
+
+Per alcuni numeri i risutati sono molto differenti:
+
+(num-distinct-factor 30030)
+;-> 6
+(HR 30030)
+;-> 2.333109657957713
+
+(num-distinct-factor 510510)
+;-> 7
+(HR 510510)
+;-> 2.575901890058003
+
+Vediamo per quali numeri abbiamo il massimo e il minimo scostamento tra il valore reale e il valore di Hardy-Ramanujan dei fattori primi distinti:
+
+(define (test limite)
+  (let ((out '()))
+    (for (n 2 limite)
+      (push (list (abs (sub (num-distinct-factor n) (HR n))) n) out -1)
+    )
+    (sort out)
+    (println "Errore minimo: " (out 0 0) " per il Numero: " (out 0 1))
+    (println "Errore massimo: " (out -1 0) " per il Numero: " (out -1 1))))
+
+(time (test 1e7))
+;-> Errore minimo: 1.488716955821978e-005 per il Numero: 1618
+;-> Errore massimo: 5.221950932354477 per il Numero: 9699690
+;-> 52094.829
+
 ============================================================================
 
