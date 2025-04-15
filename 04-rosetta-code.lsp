@@ -12089,9 +12089,18 @@ Qualsiasi sistema che utilizza gli angoli di Eulero (Maya, Max, Lightwave, Softi
 Il programma ZBrush (Pixologic) utilizza internamente sia gli angoli di Eulero che i quaternioni, ma il linguaggio di scripting mette a disposizione solo gli angoli di Eulero. Questa è la risposta di Pixolator (alias Ofer Alon, creatore del programma Zbrush) ad una mia richiesta di spiegazioni nel lontano luglio 2003:
 
 "Hi Cameyo:
-As you have already figured out, rotation system is a bit complicated. Internally, ZBrush is utilizing rotation matrices, Euler angles as well as quaternions.The rotation values in the TRNASFORM palette (and the TransformGet commands) are values that have been translated from ZBrush's internal representation into a more readable x,y,z angles format. The effective range for Y and Z rotations is ± 180 degrees. Values that are outside this range are automatically readjusted to fit within this range. The effective range for the X axis is only ±90 (this is why your ZScript is problematic when the X axis angle crosses the 90 degrees range). If you use values outside this range, the X will be readjusted and may require the Y axis to be reflected (+180 degrees). As mentioned above, "Gimbal lock" is also an issue when rotating an object by 90 degrees increments.
+As you have already figured out, rotation system is a bit complicated. Internally, ZBrush is utilizing rotation matrices, Euler angles as well as quaternions.
+The rotation values in the TRANSFORM palette (and the TransformGet commands) are values that have been translated from ZBrush's internal representation into a more readable x,y,z angles format.
+The effective range for Y and Z rotations is ± 180 degrees.
+Values that are outside this range are automatically readjusted to fit within this range.
+The effective range for the X axis is only ±90 (this is why your ZScript is problematic when the X axis angle crosses the 90 degrees range).
+If you use values outside this range, the X will be readjusted and may require the Y axis to be reflected (+180 degrees).
+As mentioned above, "Gimbal lock" is also an issue when rotating an object by 90 degrees increments.
 
-These factors must be taken into consideration when ZScripting rotation commands. One of ZBrush's standard ZScripts is the "PointFromTo" ZScript. This ZScript present a solution to a different, but yet related, rotation problem. I am including the source code of the "PointFromTo" ZScript here, you may find it helpful to your rotation explorations
+These factors must be taken into consideration when ZScripting rotation commands.
+One of ZBrush's standard ZScripts is the "PointFromTo" ZScript.
+This ZScript present a solution to a different, but yet related, rotation problem.
+I am including the source code of the "PointFromTo" ZScript here, you may find it helpful to your rotation explorations.
 
 -Pixolator"
 
@@ -12106,7 +12115,7 @@ Un bioritmo è un tentativo di identificare vari aspetti della vita di una perso
 
 Secondo la teoria dei bioritmi, la vita di una persona è caratterizzata da cicli biologici ritmici che influenzano le attività e le abilità personali in vari aspetti: fisico, emotivo e mentale (intellettuale). Questi cicli iniziano alla nascita ed oscillano in modo costante (onde sinusoidali) nel corso della vita.
 
-La maggior parte dei modelli di bioritmo usa tre cicli: uno fisico di 23 giorni, uno emotivo di 28 ed uno mentale di 33. Sebbene il ciclo di 28 giorni sia della stessa lunghezza del ciclo mestruale medio delle donne, e sia stato in origine definito come ciclo “femminile” (vedi in seguito), i due non sono necessariamente sincronizzati. Ognuno di questi cicli varia tra estremi alti e bassi, in modo sinusoidale, con giorni in cui il ciclo incrocia la linea dello zero, descritti come "giorni critici" a maggior rischio di incertezza. In aggiunta a questi tre cicli, sono stati proposti vari altri cicli, basati sulla combinazione lineare dei tre, o su cicli più lunghi o più corti.
+La maggior parte dei modelli di bioritmo usa tre cicli: uno fisico di 23 giorni, uno emotivo di 28 ed uno mentale di 33. Sebbene il ciclo di 28 giorni sia della stessa lunghezza del ciclo mestruale medio delle donne, e sia stato in origine definito come ciclo "femminile" (vedi in seguito), i due non sono necessariamente sincronizzati. Ognuno di questi cicli varia tra estremi alti e bassi, in modo sinusoidale, con giorni in cui il ciclo incrocia la linea dello zero, descritti come "giorni critici" a maggior rischio di incertezza. In aggiunta a questi tre cicli, sono stati proposti vari altri cicli, basati sulla combinazione lineare dei tre, o su cicli più lunghi o più corti.
 
 Le equazioni che regolano i tre cicli di base sono:
 

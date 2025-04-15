@@ -5017,7 +5017,7 @@ We can use either option, as long as we are consistent in the use.
 
 The more imposing the variable name is the bigger the scope. Since letter variables are for a few lines of code in the middle of a function. Large screaming snake case constants are constants that span 1 or more files.
 
-Just for very simple variables which have no meaning other than iterative variables like “int i”, or “char c” for one line variables.
+Just for very simple variables which have no meaning other than iterative variables like "int i", or "char c" for one line variables.
 Or, like lambda function parameters (k, v) for map's.
 Though I do see value in naming row / col instead of r / c.
 

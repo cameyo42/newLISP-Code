@@ -2889,6 +2889,8 @@ NOTE LIBERE 29
   Concatenare n con n + 1
   Teorema di Vantieghems
   Teorema di Hardy-Ramanujan
+  Numeri Belli (Beatiful)
+  Numeri Radice
 
 PROBLEMI SUI DADI
 =================

@@ -7,6 +7,7 @@
              (a work continually in progress)
             version July 3, 2022 (76 problems)
             version July 7, 2024 (79 problems)
+            version March 25, 2025 (80 problems)
 
                      Matthew M. Conroy
             doctormatt "at" madandmoonly dot com
@@ -26,21 +27,21 @@ Here, I try solve the problems (and/or verify the results) with simulations (if 
 + = solved/verified
 - = unsolved
 
-1. Standard Dice (1..26)
-1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
-+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
+1. Standard Dice (1..28)
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
++ + + + + + + + + +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
-2. Dice Sums (27..45)
-27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
-+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
+2. Dice Sums (29..47)
+29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
++  +  +  +  +  +  +  +  +  +  +  +     +  +  +  +  +
 
-3. Non-standard Dice (46..55)
-46 47 48 49 50 51 52 53 54 55
-+  +  +  +  +  +  +  +  +  +
+3. Non-standard Dice (48..58)
+48 49 50 51 52 53 54 55 56 57 58
++  +  +  +  +  +  +  +  +     +
 
-4. Game with Dice (56..76)
-56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
-+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
+4. Game with Dice (59..80)
+59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80
++  +  +  +  +  +  +  +  +  +  +  +  +     +  +  +  +  +  +  +  + 
 
 Note: Number of iterations (minimum) = 1e6 (if possible)
 
@@ -218,7 +219,7 @@ Probability for d2:
 ;; eof
 
 ==========================
- 1. Standard Dice (1..26)
+ 1. Standard Dice (1..28)
 ==========================
 
 ---------
@@ -1695,18 +1696,132 @@ Solution = 31.008483737975263
 ;-> 57661.46
 
 
+----------
+Problem 27
+----------
+Suppose we roll n s-sided dice. Let a(i) be the number of times face i appears.
+What is the expected value of Prod[i=1,s]a(i) ?
+
+Solution:
+
+  E = (s!/s^s)*binom(n s)
+
+For example, with six-sided dice (s = 6), we have:
+
+   n   E
+   6   5/324 ≈ 0.015432
+   7   35/324 ≈ 0.108024
+   8   35/81 ≈ 0.432098
+   9   35/27 ≈ 1.296296
+  10   175/54 ≈ 3.240740
+  11   385/54 ≈ 7.129629
+  12   385/27 ≈ 14.259259
+  13   715/27 ≈ 26.481481
+  14   5005/108 ≈ 46.342592
+  15   25025/324 ≈ 77.237654
+  16   10010/81 ≈ 123.580246
+  17   15470/81 ≈ 190.987654
+  18   7735/27 ≈ 286.481481
+  19   11305/27 ≈ 418.703703
+  20   16150/27 ≈ 598.148148
+
+(define (p27 s n iter)
+  (local (e a)
+    (setq e 0)
+    (for (i 1 iter)
+      (setq a (array (+ s 1) '(0)))
+      (setq (a 0) 1)
+      (for (k 1 n)
+        (++ (a (die s)))
+      )
+      (++ e (apply * a))
+    )
+    (div e iter)))
+
+(for (n 1 20) (println n { } (p27 6 n 1e6)))
+;-> 1 0
+;-> 2 0
+;-> 3 0
+;-> 4 0
+;-> 5 0
+;-> 6 0.015443
+;-> 7 0.106916
+;-> 8 0.434207
+;-> 9 1.297102
+;-> 10 3.255819
+;-> 11 7.119598
+;-> 12 14.248753
+;-> 13 26.523132
+;-> 14 46.315728
+;-> 15 77.159852
+;-> 16 123.608169
+;-> 17 190.783714
+;-> 18 286.449315
+;-> 19 418.670602
+;-> 20 598.782021
+
+
+----------
+Problem 28
+----------
+What is the probability that, if we roll two dice, the product of the faces will start with the digit '1'?
+What if we roll three dice, or, ten dice? What is going on?
+
+Solution:
+
+The probability of the product of two dice starting with the digit '1' is
+1/3 = 0.333333...
+
+Here's a table with the probabilities for various numbers of dice:
+
+  1   1/6                 0.166666...
+  2   1/3                 0.333333...
+  3   65/216              0.300925925...
+  4   379/1296            0.2924382716...
+  5   2317/7776           0.2979681069...
+  6   193/648             0.2978395061...
+  7   41977/139968        0.2999042638...
+  8   28123/93312         0.3013867455...
+  9   3043945/10077696    0.3020477101...
+ 10   18271529/60466176   0.3021776836...
+
+For (n -> Inf) the probabilities -> log10(2) = 0.3010299956639811...
+
+This is an example of what is often call Benford’s Law, that certain distributions of numbers tend to
+have a probability of a leading '1' digit of around log10(2).
+
+(define (p28 n iter)
+  (let (tot 0)
+    (for (i 1 iter)
+      (setq val (apply * (dice6-lst n)))
+      (if (= ((string val) 0) "1") (++ tot)))
+    (div tot iter)))
+
+(for (n 1 10) (println n { } (p28 n 1e7)))
+;-> 1 0.1667753
+;-> 2 0.3331679
+;-> 3 0.3011348
+;-> 4 0.2924967
+;-> 5 0.2978085
+;-> 6 0.2977742
+;-> 7 0.3000358
+;-> 8 0.3014381
+;-> 9 0.3021887
+;-> 10 0.3019918
+
+
 =======================
- 2. Dice Sums (27..45)
+ 2. Dice Sums (29..45)
 =======================
 
 ----------
-Problem 27
+Problem 29
 ----------
 Show that the probability of rolling 14 is the same whether we throw 3 dice or 5 dice.
 
 Solution = 5/72 = 0.06944444444444445
 
-(define (p27 iter)
+(define (p29 iter)
   (local (s1 s2)
     (setq s1 0 s2 0)
     (for (i 1 iter)
@@ -1715,16 +1830,16 @@ Solution = 5/72 = 0.06944444444444445
     )
     (list (div s1 iter) (div s2 iter))))
 
-(time (println (p27 1e6)))
+(time (println (p29 1e6)))
 ;-> (0.069704 0.069616)
 ;-> 658.65
-(time (println (p27 1e7)))
+(time (println (p29 1e7)))
 ;-> (0.0693125 0.0694063)
 ;-> 6469.459
 
 
 ----------
-Problem 28
+Problem 30
 ----------
 Show that the probability of rolling a sum of 9 with a pair of 5-sided dice is the same as rolling a sum
 of 9 with a pair of 10-sided dice.
@@ -1783,7 +1898,7 @@ s2-sided dice.
 ;->  (26 39 37) (30 60 49) (30 90 55) (35 70 57) (40 80 65) (45 90 73)
 ;->  (50 100 81) (51 85 76) (52 78 73) (75 100 97))
 
-(define (p28 sides1 sides2 val iter)
+(define (p30 sides1 sides2 val iter)
   (local (s1 s2)
     (setq s1 0 s2 0)
     (for (i 1 iter)
@@ -1792,21 +1907,21 @@ s2-sided dice.
     )
     (list (div s1 iter) (div s2 iter))))
 
-(time (println (p28 5 10 9 1e7)))
+(time (println (p30 5 10 9 1e7)))
 ;-> (0.0799434 0.0800273)
 ;-> 5356.291
 
-(time (println (p28 5 15 10 1e7)))
+(time (println (p30 5 15 10 1e7)))
 ;-> (0.0400338 0.040021)
 ;-> 5316.93
 
-(time (println (p28 75 100 97 1e7)))
+(time (println (p30 75 100 97 1e7)))
 ;-> (0.009624000000000001 0.009652300000000001)
 ;-> 5332.902
 
 
 ----------
-Problem 29
+Problem 31
 ----------
 Suppose we roll n dice and sum the highest 3.
 What is the probability that the sum is 18?
@@ -1820,14 +1935,14 @@ Solution =
   4  0.0162037037037037
   5  0.03549382716049383
 
-(define (p29 n iter)
+(define (p31 n iter)
   (let (sum 0)
     (for (i 1 iter)
       (if (= 18 (apply + (slice (sort (dice6-lst n) >) 0 3))) (++ sum))
     )
     (div sum iter)))
 
-(time (for (n 3 5) (println (p29 n 1e7))))
+(time (for (n 3 5) (println (p31 n 1e7))))
 ;-> 0.0046275
 ;-> 0.0161614
 ;-> 0.0356094
@@ -1835,21 +1950,21 @@ Solution =
 
 
 ----------
-Problem 30
+Problem 32
 ----------
 Four fair, 6-sided dice are rolled. The highest three are summed.
 What is the distribution of the sum?
 
 Solution = the most likely roll is 13
 
-(define (p30 iter)
+(define (p32 iter)
   (let ((sum 0) (freq (array 19 '(0))))
     (for (i 1 iter)
       (++ (freq (apply + (slice (sort (dice6-lst 4) >) 0 3))))
     )
     (dolist (f freq) (println $idx { } f))))
 
-(time (p30 1e6))
+(time (p32 1e6))
 ;-> 0 0
 ;-> 1 0
 ;-> 2 0
@@ -1873,7 +1988,7 @@ Solution = the most likely roll is 13
 
 
 ----------
-Problem 31
+Problem 33
 ----------
 Three fair, n-sided dice are rolled.
 What is the probability that the sum of two of the faces rolled equals the value of the other rolled face?
@@ -1884,9 +1999,9 @@ Solution =
   prob = -----------
             2*n^2
 
-(define (p31-exact n) (div (* 3 (- n 1)) (* 2 n n)))
+(define (p33-exact n) (div (* 3 (- n 1)) (* 2 n n)))
 
-(for (n 4 10) (println n { } (p31-exact n)))
+(for (n 4 10) (println n { } (p33-exact n)))
 ;-> 4 0.28125
 ;-> 5 0.24
 ;-> 6 0.2083333333333333
@@ -1900,14 +2015,14 @@ Solution =
       (= (+ (lst 0) (lst 2)) (lst 1))
       (= (+ (lst 1) (lst 2)) (lst 0))))
 
-(define (p31 sides iter)
+(define (p33 sides iter)
   (let (sum 0)
     (for (i 1 iter)
       (if (check-equal (dice-lst 3 sides)) (++ sum))
     )
     (div sum iter)))
 
-(time (for (n 4 10) (println n { } (p31 n 1e7))))
+(time (for (n 4 10) (println n { } (p33 n 1e7))))
 ;->  4 0.2810453
 ;->  5 0.2398544
 ;->  6 0.208315
@@ -1919,7 +2034,7 @@ Solution =
 
 
 ----------
-Problem 32
+Problem 34
 ----------
 A fair, n-sided die is rolled until a roll of k or greater appears.
 All rolls are summed. What is the expected value of the sum?
@@ -1932,11 +2047,11 @@ The expected value of the sum is:
   ESum(n,k) = ---------------
                2*n - 2*k + 2
 
-(define (p32-exact n k) (div (+ n (* n n)) (+ (* 2 n) (* -2 k) 2)))
+(define (p34-exact n k) (div (+ n (* n n)) (+ (* 2 n) (* -2 k) 2)))
 
 (for (n 4 10)
   (for (k 1 n)
-    (println n { } k { } (p32-exact n k))))
+    (println n { } k { } (p34-exact n k))))
 ;->  4  1  2.5
 ;->  4  2  3.333333333333334
 ;->  4  3  5
@@ -1987,7 +2102,7 @@ The expected value of the sum is:
 ;-> 10  9 27.5
 ;-> 10 10 55
 
-(define (p32 sides k iter)
+(define (p34 sides k iter)
   (local (sum cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2004,7 +2119,7 @@ The expected value of the sum is:
 
 (for (n 4 10)
   (for (k 1 n)
-    (println n { } k { } (p32 n k 1e6))))
+    (println n { } k { } (p34 n k 1e6))))
 ;->  4  1  2.499844
 ;->  4  2  3.334495
 ;->  4  3  4.997689
@@ -2057,7 +2172,7 @@ The expected value of the sum is:
 
 
 ----------
-Problem 33
+Problem 35
 ----------
 A pair of dice is rolled repeatedly.
 What is the expected number of rolls until all eleven possible sums have appeared?
@@ -2068,7 +2183,7 @@ Solution =
   E(11) = 61.217384763957...
   E(16) = 338.45308554395589...
 
-(define (p33-1 iter)
+(define (p35-1 iter)
   (local (sum faces trial stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2086,11 +2201,11 @@ Solution =
     )
     (div sum iter)))
 
-(time (println (p33-1 1e6)))
+(time (println (p35-1 1e6)))
 ;-> 61.181503
 ;-> 24784.804
 
-(define (p33-2 iter)
+(define (p35-2 iter)
   (local (sum faces trial stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2109,12 +2224,13 @@ Solution =
     )
     (div sum iter)))
 
-(time (println (p33-2 1e6)))
+(time (println (p35-2 1e6)))
 ;-> 338.273674
 ;-> 151208.602
 
+
 ----------
-Problem 34
+Problem 36
 ----------
 A die is rolled repeatedly and summed.
 What can you say about the expected number of rolls until the sum is greater than or equal to n?
@@ -2148,7 +2264,7 @@ E(n) is very closely approximated by g(n) = (2/7)*n + 10/21 as n get large.
  90   26.19047619   26.19047619    6.32378328*10-14
 100   29.04761905   29.04761905    6.478729760*10-15
 
-(define (p34 n iter)
+(define (p36 n iter)
   (local (sum trial cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2165,7 +2281,7 @@ E(n) is very closely approximated by g(n) = (2/7)*n + 10/21 as n get large.
     (div sum iter)))
 
 (setq test '(1 2 3 4 5 6 7 8 9 10 15 20 25 30 35 40 45 50 60 70 80 90 100))
-(time (dolist (t test) (println t { } (p34 t 1e6))))
+(time (dolist (t test) (println t { } (p36 t 1e6))))
 ;->   1 1
 ;->   2 1.166995
 ;->   3 1.360913
@@ -2193,7 +2309,7 @@ E(n) is very closely approximated by g(n) = (2/7)*n + 10/21 as n get large.
 
 
 ----------
-Problem 35
+Problem 37
 ----------
 
 A die is rolled repeatedly and summed.
@@ -2201,7 +2317,7 @@ Show that the expected number of rolls until the sum is a multiple of n is n.
 
 Solution = n
 
-(define (p35 n iter)
+(define (p37 n iter)
   (local (sum trial cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2217,7 +2333,7 @@ Solution = n
     )
     (div sum iter)))
 
-(time (for (n 5 50 5) (println n { } (p35 n 1e6))))
+(time (for (n 5 50 5) (println n { } (p37 n 1e6))))
 ;->  5 5.004791
 ;-> 10 10.017
 ;-> 15 14.995774
@@ -2232,7 +2348,7 @@ Solution = n
 
 
 ----------
-Problem 36
+Problem 38
 ----------
 
 A fair, n-sided die is rolled and summed until the sum is at least n.
@@ -2260,7 +2376,7 @@ Solution =
 
 For n -> infinito, E(n) -> e = 2.7182818284590451
 
-(define (p36 n iter)
+(define (p38 n iter)
   (local (sum trial cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2276,7 +2392,7 @@ For n -> infinito, E(n) -> e = 2.7182818284590451
     )
     (div sum iter)))
 
-(time (for (n 1 10) (println n { } (p36 n 1e6))))
+(time (for (n 1 10) (println n { } (p38 n 1e6))))
 ;->  1 1
 ;->  2 1.500262
 ;->  3 1.777915
@@ -2289,17 +2405,17 @@ For n -> infinito, E(n) -> e = 2.7182818284590451
 ;-> 10 2.358849
 ;-> 5050.859
 
-(time (println (p36 1000 1e6)))
+(time (println (p38 1000 1e6)))
 ;-> 2.713591
 ;-> 636.463
 
-(time (println (p36 1e7 1e7)))
+(time (println (p38 1e7 1e7)))
 ;-> 2.717951
 ;-> 6521.895
 
 
 ----------
-Problem 37
+Problem 39
 ----------
 A die is rolled and summed repeatedly.
 What is the probability that the sum will ever be a given value x?
@@ -2331,7 +2447,7 @@ Solution =
 
 For x -> infinite, p(x) -> 2/7 = 0.2857142857142857...
 
-(define (p37 x iter)
+(define (p39 x iter)
   (local (sum success cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2348,7 +2464,7 @@ For x -> infinite, p(x) -> 2/7 = 0.2857142857142857...
     )
     (div sum iter)))
 
-(time (for (x 1 20) (println x { } (p37 x 1e6))))
+(time (for (x 1 20) (println x { } (p39 x 1e6))))
 ;->  1 0.16666
 ;->  2 0.194341
 ;->  3 0.226992
@@ -2371,7 +2487,7 @@ For x -> infinite, p(x) -> 2/7 = 0.2857142857142857...
 ;-> 20 0.285544
 ;-> 14729.982
 
-(time (for (x 1 20) (println x { } (p37 x 1e7))))
+(time (for (x 1 20) (println x { } (p39 x 1e7))))
 ;->  1 0.166676
 ;->  2 0.1943121
 ;->  3 0.2268943
@@ -2394,13 +2510,13 @@ For x -> infinite, p(x) -> 2/7 = 0.2857142857142857...
 ;-> 20 0.2854919
 ;-> 146949.576
 
-(time (println 1000 { } (p37 1000 1e6)))
+(time (println 1000 { } (p39 1000 1e6)))
 ;-> 1000 0.285877
 ;-> 46318.398
 
 
 ----------
-Problem 38
+Problem 40
 ----------
 
 A die is rolled and summed repeatedly.
@@ -2417,7 +2533,7 @@ For x -> infinite, p(x,x+1,x+2,x+3) = 6/7 = 0.8571428...
 For x -> infinite, p(x,x+1,x+2,x+3,x+4) = 20/21 = 0.9523809...
 For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 
-(define (p38 x gap iter)
+(define (p40 x gap iter)
   (local (sum success cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2436,7 +2552,7 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
     (div sum iter)))
 
 (x, x+1)
-(time (for (x 1 20) (println x { } (p38 x 1 1e6))))
+(time (for (x 1 20) (println x { } (p40 x 1 1e6))))
 ;->  1 0.332811
 ;->  2 0.38873
 ;->  3 0.453138
@@ -2459,12 +2575,12 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 20 0.525442
 ;-> 18010.568
 
-(time (println 1000 { } (p38 1000 1 1e6)))
+(time (println 1000 { } (p40 1000 1 1e6)))
 ;-> 1000 0.523654
 ;-> 56682.654
 
 (x, x+1, x+2)
-(time (for (x 1 20) (println x { } (p38 x 2 1e6))))
+(time (for (x 1 20) (println x { } (p40 x 2 1e6))))
 ;->  1 0.500194
 ;->  2 0.582479
 ;->  3 0.680495
@@ -2486,12 +2602,12 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 19 0.713592
 ;-> 20 0.714175
 ;-> 17893.32
-(time (println 1000 { } (p38 1000 2 1e6)))
+(time (println 1000 { } (p40 1000 2 1e6)))
 ;-> 1000 0.713795
 ;-> 56830.675
 
 (x, x+1, x+2, x+3)
-(time (for (x 1 20) (println x { } (p38 x 3 1e6))))
+(time (for (x 1 20) (println x { } (p40 x 3 1e6))))
 ;->  1 0.666952
 ;->  2 0.778021
 ;->  3 0.907369
@@ -2513,12 +2629,12 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 19 0.856979
 ;-> 20 0.857325
 ;-> 17783.638
-(time (println 1000 { } (p38 1000 3 1e6)))
+(time (println 1000 { } (p40 1000 3 1e6)))
 ;-> 1000 0.856998
 ;-> 56763.018
 
 (x, x+1, x+2, x+3, x+4)
-(time (for (x 1 20) (println x { } (p38 x 4 1e6))))
+(time (for (x 1 20) (println x { } (p40 x 4 1e6))))
 ;->  1 0.833231
 ;->  2 0.972125
 ;->  3 0.967781
@@ -2540,13 +2656,13 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 19 0.952328
 ;-> 20 0.952618
 ;-> 17658.901
-(time (println 1000 { } (p38 1000 4 1e6)))
+(time (println 1000 { } (p40 1000 4 1e6)))
 ;-> 1000 0.952544
 ;-> 56576.821
 
 (x, x+1, x+2, x+3, x+4, x+5)
-(time (for (x 1 20) (println x { } (p38 x 5 1e6))))
-(time (println 1000 { } (p38 1000 5 1e6)))
+(time (for (x 1 20) (println x { } (p40 x 5 1e6))))
+(time (println 1000 { } (p40 1000 5 1e6)))
 ;->  1 1
 ;->  2 1
 ;->  3 1
@@ -2569,9 +2685,16 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 20 1
 ;-> 17597.076
 
+----------
+Problem 41
+----------
+A die is rolled and summed repeatedly.
+Let x be a positive integer.
+What is the probability that the sum will ever be x or x+1?
+What is the probability that the sum will ever be x, x+1, or x+2? Etc.?
 
 ----------
-Problem 39
+Problem 42
 ----------
 A die is rolled once: call the result N.
 Then N dice are rolled once and summed.
@@ -2589,7 +2712,7 @@ Solution =
   (N)   E = 12.25, Most likely value = 6
   (N,M) E = 42.875, Most likely value = 20
 
-(define (p39-1 iter)
+(define (p42-1 iter)
   (local (sum freq N cur-sum fmax fmax-val)
     (setq sum 0)
     (setq freq (dup '0 37))
@@ -2607,7 +2730,7 @@ Solution =
     (println (div sum iter)
     (println fmax-val))))
 
-(time (p39-1 1e7))
+(time (p42-1 1e7))
 ;->  0 0
 ;->  1 277432
 ;->  2 323936
@@ -2649,7 +2772,7 @@ Solution =
 ;-> 6           ; most likely value
 ;-> 4539.027
 
-(define (p39-2 iter)
+(define (p42-2 iter)
   (local (sum freq N M cur-sum fmax fmax-val)
     (setq sum 0)
     (setq freq (dup '0 217))
@@ -2668,7 +2791,7 @@ Solution =
     (println (div sum iter)
     (println fmax-val))))
 
-(time (p39-2 1e7))
+(time (p42-2 1e7))
 ;->   0 0
 ;->   1 46219
 ;->   2 54959
@@ -2833,7 +2956,7 @@ Solution =
 
 
 ----------
-Problem 40
+Problem 43
 ----------
 A die is rolled once. Call the result N.
 Then, the die is rolled N times, and those rolls which are equal to or greater than N are summed (other rolls are not summed).
@@ -2845,7 +2968,7 @@ Solution =
   E = 133/18 = 7.388888888888889
   Most likely value = 6
 
-(define (p40 iter)
+(define (p43 iter)
   (local (sum freq N roll cur-sum fmax fmax-val)
     (setq sum 0)
     (setq freq (dup '0 37))
@@ -2864,7 +2987,7 @@ Solution =
     (println (div sum iter)
     (println fmax-val))))
 
-(time (p40 1e7))
+(time (p43 1e7))
 ;->  0 989821
 ;->  1 277782
 ;->  2 370955
@@ -2908,7 +3031,7 @@ Solution =
 
 
 ----------
-Problem 41
+Problem 44
 ----------
 Suppose n six-sided dice are rolled and summed.
 For each six that appears, we sum the six, and reroll that die and sum, and continue to reroll and sum until we roll something other than a six with that die.
@@ -2930,7 +3053,7 @@ Solution =
     )
     sum))
 
-(define (p41 n iter)
+(define (p44 n iter)
   (local (sum freq cur-sum roll sixes fmax fmax-val)
     (setq sum 0)
     (setq sixes 0)
@@ -2962,7 +3085,7 @@ Solution =
     )
     (println (format "%4d %4.8f %4.8f %4d" n (div sum iter) (mul n 4.2) fmax-val))))
 
-(time (for (n 1 10) (p41 n 1e6)))
+(time (for (n 1 10) (p44 n 1e6)))
        n  E(n)        4.2*n        Max probability value
 ;->    1  4.19778900  4.20000000    1
 ;->    2  8.39903500  8.40000000    6
@@ -2978,7 +3101,7 @@ Solution =
 
 
 ----------
-Problem 42
+Problem 45
 ----------
 A die is rolled until all sums from 1 to x are attainable from some subset of rolled faces.
 For example, if x = 3, then we might roll until a 1 and 2 are rolled, or until three 1s appear, or until two 1s and a 3.
@@ -3014,7 +3137,7 @@ Solution =
     )
     (dp sum)))
 
-(define (p42 x iter)
+(define (p45 x iter)
   (local (sum roll found trial wrong)
     (setq sum 0)
     (for (i 1 iter)
@@ -3037,7 +3160,7 @@ Solution =
     )
     (div sum iter)))
 
-(time (for (x 2 11) (println x { } (p42 x 1e6))))
+(time (for (x 2 11) (println x { } (p45 x 1e6))))
 ;->  2 7.505095
 ;->  3 7.716187
 ;->  4 7.931494
@@ -3052,7 +3175,7 @@ Solution =
 
 
 ----------
-Problem 43
+Problem 46
 ----------
 How long, on average, do we need to roll a die and sum the rolls until the sum is a perfect square (1, 4, 9, 16, ...)?
 
@@ -3064,7 +3187,7 @@ Solution =
   (let (v (+ (sqrt n 0.5)))
     (= n (* v v))))
 
-(define (p43 iter)
+(define (p46 iter)
   (local (total success trial sum)
     (setq total 0)
     (setq success 0)
@@ -3079,13 +3202,13 @@ Solution =
     )
     (div total iter)))
 
-(time (println (p43 1e7)))
+(time (println (p46 1e7)))
 ;-> 7.082254
 ;-> 19181.145
 
 
 ----------
-Problem 44
+Problem 47
 ----------
 How long, on average, do we need to roll a die and sum the rolls until the sum is prime?
 What if we roll until the sum is composite?
@@ -3095,7 +3218,7 @@ Solution =
   E(prime) = 2.428497913693504230366081906...
   E(composite) = 2.12848699151757507022715820...
 
-(define (p44-1 iter)
+(define (p47-1 iter)
   (local (total success trial sum)
     (setq total 0)
     (setq success 0)
@@ -3110,11 +3233,11 @@ Solution =
     )
     (div total iter)))
 
-(time (println (p44-1 1e7)))
+(time (println (p47-1 1e7)))
 ;-> 2.4286145
 ;-> 7089.412
 
-(define (p44-2 iter)
+(define (p47-2 iter)
   (local (total success trial sum)
     (setq total 0)
     (setq success 0)
@@ -3130,65 +3253,21 @@ Solution =
     )
     (div total iter)))
 
-(time (println (p44-2 1e7)))
+(time (println (p47-2 1e7)))
 ;-> 2.1282056
 ;-> 7237.64
 
 
-----------
-Problem 45
-----------
-What is the probability that, if we roll two dice, the product of the faces will start with the digit '1'?
-What if we roll three dice, or, ten dice?
-What is going on?
-
-Solution =
-
-   n   prob(n)
-   1   0.1666666666...
-   2   0.3333333333...
-   3   0.300925925...
-   4   0.2924382716...
-   5   0.2979681069...
-   6   0.2978395061...
-   7   0.2999042638...
-   8   0.3013867455...
-   9   0.3020477101...
-  10   0.3021776836...
-
-(define (p45 n iter)
-  (local (success digit)
-    (setq success 0)
-    (for (i 1 iter)
-      (setq val (string (apply * (dice6-lst n))))
-      (if (= (val 0) "1") (++ success))
-    )
-    (div success iter)))
-
-(time (for (n 1 10) (println n { } (p45 n 1e6))))
-;->  1 0.166148
-;->  2 0.334088
-;->  3 0.301635
-;->  4 0.292251
-;->  5 0.298389
-;->  6 0.298034
-;->  7 0.299466
-;->  8 0.301169
-;->  9 0.301953
-;-> 10 0.302202
-;-> 11839.709
-
-
 ===============================
- 3. Non-standard Dice (46..55)
+ 3. Non-standard Dice (48..58)
 ===============================
 
 ----------
-Problem 46
+Problem 48
 ----------
-Show that the probability of rolling doubles with a non-fair (“fixed”) die is greater than with a fair die.
+Show that the probability of rolling doubles with a non-fair ("fixed") die is greater than with a fair die.
 
-(define (p46 prob iter)
+(define (p48 prob iter)
   (local (die-fair1 die-fair2 die-not1 sum-not2 sum-fair sum-not)
     (setq sum-fair 0 sum-not 0)
     (for (i 1 iter)
@@ -3199,14 +3278,14 @@ Show that the probability of rolling doubles with a non-fair (“fixed”) die i
 
 (setq prob8 '(0.1 0.1 0.15 0.2 0.2 0.25)))
 (apply add prob8)
-(time (println (p46 prob8 1e6)))
+(time (println (p48 prob8 1e6)))
 ;-> (166260 185267)
 ;-> 1721.195
 
 (setq prob6 '(0.1 0.12 0.15 0.18 0.2 0.25))
 (apply add prob6)
 ;-> 1
-(time (println (p46 prob6 1e6)))
+(time (println (p48 prob6 1e6)))
 ;-> (166444 182700)
 ;-> 1730.433
 
@@ -3214,13 +3293,13 @@ With a fair dice:
 (setq prob6 (list (div 6) (div 6) (div 6) (div 6) (div 6) (div 6)))
 (apply add prob6)
 ;-> 0.9999999999999999
-(time (println (p46 prob6 1e6)))
+(time (println (p48 prob6 1e6)))
 ;-> (166441 166271)
 ;-> 1634.85
 
 
 ----------
-Problem 47
+Problem 49
 ----------
 Is it possible to have a non-fair six-sided die such that the probability of rolling 2, 3, 4, 5 and 6 is the same whether we roll it once or twice (and sum)?
 What about for other numbers of sides?
@@ -3240,7 +3319,7 @@ Solution =
 )
 ;-> 1
 
-(define (p47 prob face iter)
+(define (p49 prob face iter)
   (local (sum1 sum2)
     (setq sum1 0 sum2 0)
     (for (i 1 iter)
@@ -3249,7 +3328,7 @@ Solution =
     )
     (list (div sum1 iter) (div sum2 iter))))
 
-(for (f 2 6) (println f { } (p47 p6 f 1e6)))
+(for (f 2 6) (println f { } (p49 p6 f 1e6)))
 ;-> 2 (0.147239 0.146712)
 ;-> 3 (0.111974 0.112795)
 ;-> 4 (0.108161 0.10761)
@@ -3258,7 +3337,7 @@ Solution =
 
 
 ----------
-Problem 48
+Problem 50
 ----------
 Find a pair of 6-sided dice, labelled with positive integers differently from the standard dice, so that the sum probabilities are the same as for a pair of standard dice.
 
@@ -3270,7 +3349,7 @@ These dice are known as Sicherman dice, named for George Sicherman who communica
 (setq d1 '(1 2 2 3 3 4))
 (setq d2 '(1 3 4 5 6 8))
 
-(define (p48 d1 d2 iter)
+(define (p50 d1 d2 iter)
   (local (sum1 sum2)
     (setq sum1 0 sum2 0)
     (for (i 1 iter)
@@ -3279,13 +3358,13 @@ These dice are known as Sicherman dice, named for George Sicherman who communica
     )
     (list (div sum1 iter) (div sum2 iter))))
 
-(time (println (p48 d1 d2 1e7)))
+(time (println (p50 d1 d2 1e7)))
 ;-> (7.000902 7.0004783)
 ;-> 5649.916
 
 
 ----------
-Problem 49
+Problem 51
 ----------
 Is it possible to have two non-fair n-sided dice, with sides numbered 1 through n, with the property that their sum probabilities are the same as for two fair n-sided dice?
 
@@ -3306,7 +3385,7 @@ Example with n = 10:
 
 First method:
 
-(define (p49-1 p1 p2 iter)
+(define (p51-1 p1 p2 iter)
   (local (sum1 sum2)
     (setq sum1 0 sum2 0)
     (for (i 1 iter)
@@ -3315,7 +3394,7 @@ First method:
     )
     (list (div sum1 iter) (div sum2 iter))))
 
-(time (println (p49-1 p1 p2 1e7)))
+(time (println (p51-1 p1 p2 1e7)))
 ;-> (10.9931278 10.9978537)
 ;-> 22000.378
 
@@ -3330,6 +3409,11 @@ Convert probabilities to relative dice:
 (replace 9223372036854775807 o2 1)
 ;-> (7 1 4 1 7 7 1 4 1 7)
 
+(define (lcm_ a b) (/ (* a b) (gcd a b)))
+(define-macro (lcm)
+"Calculates the lcm of two or more number"
+  (apply lcm_ (map eval (args)) 2))
+
 (setq l1 (apply lcm o1))
 ;-> 2520
 (setq l2 (apply lcm o2))
@@ -3340,7 +3424,7 @@ Convert probabilities to relative dice:
 (replace l2 freq2 0)
 ;-> (4 0 7 0 4 4 0 7 0 4)
 
-(define (make-die lst-freq)
+(define (make-die lst)
   (setq out '())
   (dolist (el lst)
     (extend out (dup (+ $idx 1) el))))
@@ -3351,7 +3435,7 @@ Convert probabilities to relative dice:
 (setq d2 (make-die freq2))
 ;-> (1 1 1 1 3 3 3 3 3 3 3 5 5 5 5 6 6 6 6 8 8 8 8 8 8 8 10 10 10 10)
 
-(define (p49 d1 d2 iter)
+(define (p51 d1 d2 iter)
   (local (sum1 sum2)
     (setq sum1 0 sum2 0)
     (for (i 1 iter)
@@ -3360,13 +3444,13 @@ Convert probabilities to relative dice:
     )
     (list (div sum1 iter) (div sum2 iter))))
 
-(time (println (p49a d1 d2 1e6)))
+(time (println (p51 d1 d2 1e6)))
 ;-> (10.998034 11.00234)
 ;-> 18078.842
 
 
 ----------
-Problem 50
+Problem 52
 ----------
 Is it possible to have two non-fair 6-sided dice, with sides numbered 1 through 6, with a uniform sum probability?
 What about n-sided dice?
@@ -3375,7 +3459,7 @@ Solution = impossible
 
 
 ----------
-Problem 51
+Problem 53
 ----------
 
 Suppose that we renumber three fair 6-sided dice (A,B,C) as follows:
@@ -3397,7 +3481,7 @@ This is a set of non-transitive dice.
 (setq b '(1 1 6 6 8 8))
 (setq c '(3 3 5 5 7 7))
 
-(define (p51 d1 d2 d3 iter)
+(define (p53 d1 d2 d3 iter)
   (local (sum1 sum2 sum3 v1 v2 v3)
     (setq sum1 0 sum2 0 sum3 0)
     (for (i 1 iter)
@@ -3410,13 +3494,13 @@ This is a set of non-transitive dice.
     )
     (list (div sum1 iter) (div sum2 iter) (div sum3 iter))))
 
-(time (println (p51 a b c 1e7)))
+(time (println (p53 a b c 1e7)))
 ;-> (0.5554282 0.5556569 0.5556225)
 ;-> 5958.57
 
 
 ----------
-Problem 52
+Problem 54
 ----------
 Find every six-sided die with sides numbered from the set (1,2,3,4,5,6) such that rolling the die twice and summing the values yields all values between 2 and 12 (inclusive).
 For instance, the die numbered 1,2,4,5,6,6 is one such die.
@@ -3441,7 +3525,7 @@ Solution =
 
 The error here is the sum of the square of the difference between 1/11 and the actual probability of rolling each of the sums 2 through 12 (the probability we would have for each sum if we had a uniform distribution).
 
-(define (p52 d iter)
+(define (p54 d iter)
   (local (freq prob err)
     (setq freq (array 13 '(0)))
     (for (i 1 iter)
@@ -3465,7 +3549,7 @@ The error here is the sum of the square of the difference between 1/11 and the a
   (1 1 2 4 5 6)
   (1 1 2 3 5 6)))
 
-(time (dolist (el all) (println el { } (p52 el 1e7))))
+(time (dolist (el all) (println el { } (p54 el 1e7))))
 ;-> (1 2 4 5 6 6) 0.0232782519392491
 ;-> (1 2 4 5 5 6) 0.03254526711120909
 ;-> (1 2 4 4 5 6) 0.02947838086894909
@@ -3481,7 +3565,7 @@ The error here is the sum of the square of the difference between 1/11 and the a
 
 
 ----------
-Problem 53
+Problem 55
 ----------
 If we roll a standard die twice and sum, the probability that the sum is prime is 15/36 = 5/12.
 If we renumber the faces of the die, with all faces being different, what is the largest probability of a prime sum that can be achieved?
@@ -3493,7 +3577,7 @@ Solution =
 (div 5 12)
 ;-> 0.4166666666666667
 
-(define (p53-1 iter)
+(define (p55-1 iter)
   (local (total success)
     (setq success 0)
     (for (i 1 iter)
@@ -3501,7 +3585,7 @@ Solution =
     )
     (div success iter)))
 
-(time (println (p53-1 1e7)))
+(time (println (p55-1 1e7)))
 ;-> 0.4165748
 ;-> 3624.193
 
@@ -3509,7 +3593,7 @@ Solution =
 ;-> 0.5277777777777778
 (setq die '(1 2 3 4 9 10))
 
-(define (p53-1 d iter)
+(define (p55-1 d iter)
   (local (total success)
     (setq success 0)
     (for (i 1 iter)
@@ -3517,13 +3601,13 @@ Solution =
     )
     (div success iter)))
 
-(time (println (p53-1 die 1e7)))
+(time (println (p55-1 die 1e7)))
 ;-> 0.5280959
 ;-> 4791.631
 
 
 ----------
-Problem 54
+Problem 56
 ----------
 Let's make pairs of dice that only sum to prime values.
 If we minimize the sum of all the values on the faces, what dice do we get for 2-sided dice, 3-sided dice, etc.?
@@ -3558,7 +3642,7 @@ and, in particular, the six-sided dice with sides (1, 3, 9, 27, 57, 267) and (2,
     )
     out))
 
-(define (p54 sides)
+(define (p56 sides)
   (local (d1 d2 cur turn)
     (setq d1 '(1))
     (setq d2 '(2))
@@ -3580,13 +3664,21 @@ and, in particular, the six-sided dice with sides (1, 3, 9, 27, 57, 267) and (2,
     )
     (list (slice d1 0 sides) (slice d2 0 sides))))
 
-(time (println (p54 7)))
+(time (println (p56 7)))
 ;-> ((1 3 9 27 57 267 1227) (2 4 10 70 100 1060 27790))
 ;-> 21.042
 
 
 ----------
-Problem 55
+Problem 57
+----------
+What if we want to make a die that when rolled twice and summed only yields primes?
+If we want all the faces to be different, we cannot do that.
+But, what if we roll twice, sum and add one?
+
+
+----------
+Problem 58
 ----------
 Show that you cannot have a pair of dice with more than two sides that only gives sums that are
 Fibonacci numbers.
@@ -3602,11 +3694,11 @@ Three or more sides dice whose sums are all Fibonacci are impossible.
 
 
 ============================
- 4. Game with Dice (56..76)
+ 4. Game with Dice (59..80)
 ============================
 
 ----------
-Problem 56
+Problem 59
 ----------
 
 Two players each roll two standard dice, first player A, then player B.
@@ -3617,7 +3709,7 @@ What is the probability that player A wins?
 
 Solution = prob(A) = 30/61 = 0.4918032786885246...
 
-(define (p56 iter)
+(define (p59 iter)
   (local (winA winB end-turn)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3630,12 +3722,12 @@ Solution = prob(A) = 30/61 = 0.4918032786885246...
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p56 1e7)))
+(time (println (p59 1e7)))
 ;-> (0.4916672 0.5083328)
 ;-> 17661.87
 
 ----------
-Problem 57
+Problem 60
 ----------
 In the previous problem, we find out that the game is not fair.
 Are there sum targets for player A and player B that would make the game fair?
@@ -3651,7 +3743,7 @@ Three dice:
   If the players throw three dice, and player A's target is a sum of 4 or 8 while player B's target is a sum
   of 11, then the game is fair (prob(4 or 8) = prob(11)).
 
-(define (p57-1 iter)
+(define (p60-1 iter)
   (local (winA winB end-turn a b)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3668,11 +3760,11 @@ Three dice:
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p57-1 1e7)))
+(time (println (p60-1 1e7)))
 ;-> (0.4997299 0.5002701000000001)
 ;-> 12995.46
 
-(define (p57-2 iter)
+(define (p60-2 iter)
   (local (winA winB end-turn a b)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3689,11 +3781,11 @@ Three dice:
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p57-2 1e7)))
+(time (println (p60-2 1e7)))
 ;-> (0.5001118 0.4998882)
 ;-> 12963.13
 
-(define (p57-3 iter)
+(define (p60-3 iter)
   (local (winA winB end-turn a b)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3710,13 +3802,13 @@ Three dice:
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p57-3 1e7)))
+(time (println (p60-3 1e7)))
 ;-> (0.5000294 0.4999706)
 ;-> 28849.649
 
 
 ----------
-Problem 58
+Problem 61
 ----------
 Two players each roll two dice. Player A is trying to roll a sum of 6, player B is trying to roll a sum of 7.
 Player A starts, and rolls once.
@@ -3728,7 +3820,7 @@ Solution =
   prob(A) = 10355/22631 = 0.4575582166055411...
   prob(B) = 12276/22631 = 0.5424417833944589...
 
-(define (p58 iter)
+(define (p61 iter)
   (local (winA winB end-turn a1 a2 b1 b2)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3749,13 +3841,13 @@ Solution =
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p58 1e7)))
+(time (println (p61 1e7)))
 ;-> (0.4575554 0.5424446000000001)
 ;-> 21491.455
 
 
 ----------
-Problem 59
+Problem 62
 ----------
 Two players each roll a die.
 Player 1 rolls a fair m-sided die, while player 2 rolls a fair n sided die, with m > n.
@@ -3785,7 +3877,7 @@ Qual è la probabilità che il giocatore 2 vinca?
 Qual è la probabilità di un pareggio?
 Se i giocatori continuano a tirare in caso di pareggio fino a quando non lo fanno, quale giocatore ha la maggiore probabilità di vincere? Se il pareggio significa una vittoria per il giocatore 1 (o il giocatore 2), qual è la loro probabilità di vittoria?
 
-(define (p59-exact m n)
+(define (p62-exact m n)
   (local (pA pB pD)
     (setq pA (sub 1 (div (+ n 1) (* 2 m))))
     (setq pB (div (- n 1) (* 2 m)))
@@ -3831,7 +3923,7 @@ Se i giocatori continuano a tirare in caso di pareggio fino a quando non lo fann
 ;->  14  10  +0.6071 +0.3214 +0.0714
 ;->  15  10  +0.6333 +0.3000 +0.0667
 
-(define (p59 m n iter)
+(define (p62 m n iter)
   (local (winA winB draw a b)
     (setq winA 0 winB 0 draw 0)
     (for (i 1 iter)
@@ -3846,7 +3938,7 @@ Se i giocatori continuano a tirare in caso di pareggio fino a quando non lo fann
 
 (for (n 6 10)
   (for (m (+ n 1) 15)
-   (println (format "%3d %3d  " m n) (format "%+4.4f %+4.4f %+4.4f" (p59 m n 1e6)))))
+   (println (format "%3d %3d  " m n) (format "%+4.4f %+4.4f %+4.4f" (p62 m n 1e6)))))
 ;->   7   6  +0.5000 +0.3570 +0.1430
 ;->   8   6  +0.5628 +0.3121 +0.1251
 ;->   9   6  +0.6109 +0.2777 +0.1114
@@ -3885,7 +3977,7 @@ Se i giocatori continuano a tirare in caso di pareggio fino a quando non lo fann
 
 
 ----------
-Problem 60
+Problem 63
 ----------
 Two players each start with 12 tokens.
 They roll three dice until the sum is either 14 or 11.
@@ -3900,7 +3992,7 @@ Solution =
 
   prob(B) = 244140625/282673677106 = 0.0008636836209848062...
 
-(define (p60 iter)
+(define (p63 iter)
   (local (winA winB tokenA tokenB end-turn ab)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3917,13 +4009,13 @@ Solution =
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p60 1e6)))
+(time (println (p63 1e6)))
 ;-> (0.999135 0.000865)
 ;-> 77783.01700000001
 
 
 ----------
-Problem 61
+Problem 64
 ----------
 Two players each start a game with a score of zero, and they alternate rolling dice once to add to their scores.
 Player A rolls three six-sided dice on each turn, while player B always gets 11 points on their turn.
@@ -3933,7 +4025,7 @@ Solution =
 
 prob(A) = (2752158142349325632513/5458615301746502664192) = 0.5041861333347...
 
-(define (p61 iter)
+(define (p64 iter)
   (local (winA winB scoreA scoreB end-turn)
     (setq winA 0 winB 0)
     (for (i 1 iter)
@@ -3962,13 +4054,13 @@ prob(A) = (2752158142349325632513/5458615301746502664192) = 0.5041861333347...
     )
     (list (div winA iter) (div winB iter))))
 
-(time (println (p61 1e7)))
+(time (println (p64 1e7)))
 ;-> (0.5039937 0.4960063)
 ;-> 42292.122
 
 
 ----------
-Problem 62
+Problem 65
 ----------
 Craps:
 The game of craps is perhaps the most famous of all dice games.
@@ -3981,7 +4073,7 @@ The natural question is: what is a player's probability of winning?
 
 Solution = 0.49(29)...
 
-(define (p62 iter)
+(define (p65 iter)
   (local (win lose)
     (setq win 0 lose 0)
     (for (i 1 iter)
@@ -4011,13 +4103,13 @@ Solution = 0.49(29)...
     )
     (list (div win iter) (div lose iter))))
 
-(time (println (p62 1e7)))
+(time (println (p65 1e7)))
 ;-> (0.4927017 0.5072983)
 ;-> 12070.984
 
 
 ----------
-Problem 63
+Problem 66
 ----------
 Non-Standard Craps:
 We can generalize the games of craps to allow dice with other than six sides.
@@ -4049,7 +4141,7 @@ Solution =
    100000  0.386299...
   1000000  0.38629486...
 
-(define (p63 n iter)
+(define (p66 n iter)
   (local (win lose)
     (setq win 0 lose 0)
     (for (i 1 iter)
@@ -4079,7 +4171,7 @@ Solution =
     )
     (div win iter)))
 
-(time (for (n 3 10) (println (format "%4d %4.4f" n (p63 n 1e6)))))
+(time (for (n 3 10) (println (format "%4d %4.4f" n (p66 n 1e6)))))
 ;->    3 0.5548
 ;->    4 0.5366
 ;->    5 0.5120
@@ -4100,7 +4192,7 @@ Solution =
 
 
 ----------
-Problem 64
+Problem 67
 ----------
 Yahtzee.
 There are many probability questions we may ask with regard to the game of Yahtzee.
@@ -4121,7 +4213,7 @@ Solution =
   e) A long straight  = 5/162   = 0.030864197530864...
   f) A small straight = 10/81   = 0.123456790123456...
 
-(define (p64 iter)
+(define (p67 iter)
   (local (freq roll roll-u res)
     (setq freq (array 6 '(0)))
     (for (i 1 iter)
@@ -4149,7 +4241,7 @@ Solution =
     )
     (dolist (f freq) (println (format "%2.6f" (div f iter))))))
 
-(time (p64 1e7))
+(time (p67 1e7))
 ;-> 0.000776
 ;-> 0.019359
 ;-> 0.038599
@@ -4160,7 +4252,7 @@ Solution =
 
 
 ----------
-Problem 65
+Problem 68
 ----------
 More Yahtzee.
 What is the probability of getting Yahtzee, assuming that we are trying just to get Yahtzee, we make reasonable choices about which dice to re-roll, and we have three rolls?
@@ -4168,7 +4260,7 @@ That is, if we're in the situation where all we have left to get in a game of Ya
 
 Solution = 347897/7558272 = 0.04602864252569899...
 
-(define (p65 iter)
+(define (p68 iter)
   (local (dadi roll res val-count val roll-out done success))
     (setq success 0)
     (for (i 1 iter)
@@ -4198,9 +4290,9 @@ Solution = 347897/7558272 = 0.04602864252569899...
     )
     (div success iter))
 
-(time (println (p65 1e7)))
+(time (println (p68 1e7)))
 
-(p65 1e6)
+(p68 1e6)
 ;-> 0.0459954
 ;-> 62990.475
 
@@ -4209,7 +4301,7 @@ Solution = 347897/7558272 = 0.04602864252569899...
 
 
 ----------
-Problem 66
+Problem 69
 ----------
 Drop Dead.
 In the game of Drop Dead, the player starts by rolling five standard dice.
@@ -4242,7 +4334,7 @@ Solution =
   100   17.26412423601867057324993502
   250   17.26412422187783220247082379
 
-(define (p66-1 n iter)
+(define (p69-1 n iter)
   (local (sum cur-sum stop dice freq)
     (setq sum 0)
     (setq freq (array 400 '(0)))
@@ -4266,7 +4358,7 @@ Solution =
     )
     (div sum iter)))
 
-(time (for (n 1 6) (println n { } (p66-1 n 1e6))))
+(time (for (n 1 6) (println n { } (p69-1 n 1e6))))
 ;-> 1  7.01086
 ;-> 2 11.204745
 ;-> 3 13.716989
@@ -4275,13 +4367,13 @@ Solution =
 ;-> 6 16.591312
 ;-> 19830.116
 
-(time (println (p66-1 10 1e6)))
+(time (println (p69-1 10 1e6)))
 ;-> 17.208222
 ;-> 6640.889
-(time (println (p66-1 100 1e6)))
+(time (println (p69-1 100 1e6)))
 ;-> 17.263307
 ;-> 36982.736
-(time (println (p66-1 250 1e6)))
+(time (println (p69-1 250 1e6)))
 
 (define (slice-last lst value)
   (local (idx)
@@ -4293,7 +4385,7 @@ Solution =
 (slice-last '(0 0 0) 0)
 ;-> ()
 
-(define (p66-2 n iter)
+(define (p69-2 n iter)
   (local (sum cur-sum stop dice freq)
     (setq sum 0)
     (setq freq (array 400 '(0)))
@@ -4317,7 +4409,7 @@ Solution =
     )
     (slice-last freq 0)))
 
-;-> (time (for (n 1 6) (println n { } (p66-2 n 1e6))))
+(time (for (n 1 6) (println n { } (p69-2 n 1e6))))
 ;-> 1 (333100 55762 9314 57101 74017 23233 69737 42789 24793 29344 36344
 ;->  21165 24459 22080 17443 15372 16630 12800 11663 11082 9685 8227 7985
 ;->  7023 6196 5445 5066 4285 4024 3458 3184 2739 2477 2278 2059 1853
@@ -4380,7 +4472,7 @@ Solution =
 
 
 ----------
-Problem 67
+Problem 70
 ----------
 Threes.
 In the game of Threes, the player starts by rolling five standard dice.
@@ -4406,7 +4498,7 @@ Implement the following simple strategy (different from the optimal (complex) st
 2) Turn 3 and Turn 4: Take only 3,2,1 or minimum value
 3) Turn 5: Take 3 or minimum value
 
-(define (p67 iter debugger)
+(define (p70 iter debugger)
   (local (sum cur-sum dice stop one two three)
     (setq sum 0)
     (for (i 1 iter)
@@ -4479,16 +4571,16 @@ Implement the following simple strategy (different from the optimal (complex) st
 ; For debugging:
 ;(p67 10 true)
 
-(p67 1e6)
+(p70 1e6)
 ;-> 6.479533
 
-(time (println (p67 1e7)))
+(time (println (p70 1e7)))
 ;-> 6.478153
 ;-> 51216.747
 
 
 ----------
-Problem 68
+Problem 71
 ----------
 Pig.
 In the game of Pig, two players take turns rolling a die.
@@ -4506,7 +4598,7 @@ Solution =
   M = 20
   E(20) = 8.1417948937...
 
-(define (p68 m iter)
+(define (p71 m iter)
   (local (sum cur-sum stop val)
     (setq sum 0)
     (for (i 1 iter)
@@ -4527,7 +4619,7 @@ Solution =
     )
     (div sum iter)))
 
-(time (for (m 1 30) (println m { } (p68 m 1e6))))
+(time (for (m 1 30) (println m { } (p71 m 1e6))))
 ;->  1 3.333214
 ;->  2 3.834163
 ;->  3 4.30442
@@ -4567,7 +4659,15 @@ See "The Game of Pig" in "Problemi vari" and "Il gioco del Pig" in "Note libere 
 
 
 ----------
-Problem 69
+Problem 72
+----------
+More Pig.
+Suppose in a game of Pig, a player decides to just go for it and try to roll 100 points on their first turn.
+What is the probability that they will succeed?
+
+
+----------
+Problem 73
 ----------
 Suppose we play a game with a die where we roll and sum our rolls.
 We can stop any time and take the sum as our score, but if we roll a face we've rolled before then we lose everything.
@@ -4585,7 +4685,7 @@ Solution =
   E(score) = 6.19(4)
   p(0) = 0.2(7)
 
-(define (p69 iter)
+(define (p73 iter)
   (local (sum zero cur-sum va1 val2 val3 stop)
     (setq sum 0)
     (setq zero 0)
@@ -4610,13 +4710,13 @@ Solution =
     )
     (list (div sum iter) (div zero iter))))
 
-(time (println (p69 1e7)))
+(time (println (p73 1e7)))
 ;-> (6.1959964 0.277585)
 ;-> 5209.803
 
 
 ----------
-Problem 70
+Problem 74
 ----------
 (Same as previous game, but with two dice.)
 Suppose we play a game with two dice where we roll and sum our rolls.
@@ -4649,7 +4749,7 @@ If we are lucky enough to roll five times, we should stop.
 Simple Strategy:
 Always roll at least three times (if we can) and stop if our score is 16 or greater.
 
-(define (p70 iter)
+(define (p74 iter)
   (local (sum cur-sum val1 val2 val3 val4)
     (setq sum 0)
     (for (i 1 iter)
@@ -4673,13 +4773,13 @@ Always roll at least three times (if we can) and stop if our score is 16 or grea
     )
     (div sum iter)))
 
-(time (println (p70 1e7)))
+(time (println (p74 1e7)))
 ;-> 14.6003762
 ;-> 11992.483
 
 
 ----------
-Problem 71
+Problem 75
 ----------
 Suppose we play a game with a die where we roll and sum our rolls.
 We can stop any time and take the sum as our score, but if we roll the same face twice in a row we lose everything.
@@ -4695,7 +4795,7 @@ Strategy:
   where r is last rolled face and S is our current sum.
   Generalizing to m-sided dice, we should stop if the current sum plus the last roll exceeds the sum of all faces of the die.
 
-(define (p70 iter)
+(define (p75 iter)
   (local (sum zero stop prev cur-sum)
     (setq sum 0)
     (setq zero 0)
@@ -4720,13 +4820,13 @@ Strategy:
     )
     (list (div sum iter) (div zero iter))))
 
-(time (println (p70 1e7)))
+(time (println (p75 1e7)))
 ;-> (8.663689 0.5569268000000001)
 ;-> 11654.338
 
 
 ----------
-Problem 72
+Problem 76
 ----------
 Suppose we play a game with a die where we roll and sum our rolls as long as we keep rolling larger values.
 For instance, we might roll a sequence like 1-3-4 and then roll a 2, so our sum would be 8.
@@ -4742,7 +4842,7 @@ Solution =
   lim [E(n)] = e - 1 = 1.718281828459...
   n->inf
 
-(define (p72 n iter)
+(define (p76 n iter)
   (local (sum cur-sum num-rolls cur-rolls stop prev val)
     (setq sum 0)
     (setq num-rolls 0)
@@ -4767,11 +4867,11 @@ Solution =
     )
     (list (div sum iter) (div num-rolls iter))))
 
-(time (println (p72 6 1e7)))
+(time (println (p76 6 1e7)))
 ;-> (5.9997993 1.521597)
 ;-> 6952.703
 
-(time (dolist (n '(1e2 1e3 1e4 1e5 1e6 1e7)) (println n { } ((p72 n 1e7) 1))))
+(time (dolist (n '(1e2 1e3 1e4 1e5 1e6 1e7)) (println n { } ((p76 n 1e7) 1))))
 ;-> 100 1.7048834
 ;-> 1000 1.7168343
 ;-> 10000 1.7177737
@@ -4782,7 +4882,7 @@ Solution =
 
 
 ----------
-Problem 73
+Problem 77
 ----------
 Suppose we play a game with a die where we roll and add our rolls to our total when the face that appears has not occurred before, and subtract it from our total if it has.
 For example, if we rolled the sequence 1, 3, 4, 3, our corresponding totals would be 1, 4, 8, 5.
@@ -4793,7 +4893,7 @@ Solution = 8.7
 
 To maximize the expected value of our score, we should keep rolling until the sum of distinct faces thrown is 11 or more.
 
-(define (p73 iter)
+(define (p77 iter)
   (local (sum cur-sum stop rolled val)
     (setq sum 0)
     (for (i 1 iter)
@@ -4815,13 +4915,13 @@ To maximize the expected value of our score, we should keep rolling until the su
     )
     (div sum iter)))
 
-(time (println (p73 1e7)))
+(time (println (p77 1e7)))
 ;-> 8.7322159
 ;-> 15561.306
 
 
 ----------
-Problem 74
+Problem 78
 ----------
 Suppose we roll a single die, repeatedly if we like, and sum.
 We can stop at any point, and the sum becomes our score.
@@ -4836,7 +4936,7 @@ The optimal strategy is: roll again if the score is 5 or less, and stick otherwi
 
   E = 6.99879972565157...
 
-(define (p74 iter)
+(define (p78 iter)
   (local (sum cur-sum stop val)
     (setq sum 0)
     (for (i 1 iter)
@@ -4858,7 +4958,7 @@ The optimal strategy is: roll again if the score is 5 or less, and stick otherwi
 
 
 ----------
-Problem 75
+Problem 79
 ----------
 Suppose we play a game with a die where we roll and sum our rolls.
 We can stop any time, and the sum is our score.
@@ -4892,6 +4992,129 @@ We should roll unless the sum is 24 or 25 or greater than 33.
 ;-> 13.2154769
 ;-> 17725.157
 
+
+----------
+Problem 80
+----------
+Suppose we play a game with a die in which we use two rolls of the die to create a two-digit number.
+The player rolls the die once and decides which of the two digits they want that roll to represent.
+Then, the player rolls a second time and this determines the other digit.
+For instance, the player might roll a 5, and decide this should be the "tens" digit, and then roll a 6, so their resulting number is 56.
+What strategy should be used to create the largest number on average?
+What about the three digit version of the game?
+
+Solution =
+
+Two digit version:
+
+a = first digit rolled
+b = second digit rolled
+
+Best strategy
+  If (a < 4) then a is "units" digit
+  If (a >= 4) then a is "tens" digit
+
+Expected value = 45.25
+
+(define (p80-aux soglia iter)
+  (local (a b sum)
+    (setq sum 0)
+    (for (i 1 iter)
+      (setq a (die6))
+      (setq b (die6))
+      (if (< a soglia) 
+        (++ sum (+ (* 10 b) a))
+        (++ sum (+ (* 10 a) b)))
+    )
+    (div sum iter)))
+
+(p80-aux 4 1e6)
+;-> 45.26546
+
+(define (p80 iter)
+  (local (atteso-max soglia-max)
+    (setq atteso-max 0)
+    (for (s 1 6)
+      (setq atteso (p80-aux s iter))
+      (when (> atteso atteso-max)
+        (setq atteso-max atteso)
+        (setq soglia-max s))
+    )
+    (list soglia-max atteso-max)))
+
+(p80 1e6)
+;-> (4 45.249379)
+
+(time (println (p80 1e6)))
+;-> (4 45.2520554)
+;-> 1868.528
+
+(time (println (p80 1e7)))
+;-> (4 45.2449624)
+;-> 18617.625
+
+Three digit version:
+
+Best strategy
+
+  First roll:
+  If it is 5 or 6, put it in the "hundreds" digit;
+  If it is 3 or 4, put it in the "tens" digit;
+  otherwise, put it in the "units" digit.
+
+  Second roll:
+  If the second roll is 4, 5, or 6, place it in the largest available digit.
+
+Expected value = 504
+
+Quindi la strategia per il primo tiro è questa:
+se è almeno 5, mettilo nella cifra delle "centinaia";
+se è 3 o 4, mettilo nella cifra delle "decine";
+altrimenti, mettilo nella cifra delle "unità".
+Se il secondo tiro è 4, 5 o 6, mettilo nella cifra più grande disponibile.
+
+(define (p80-2 iter)
+  (local (sum a b c a1 b1 c1)
+    (setq sum 0)
+    (for (i 1 iter)
+      (setq a1 nil)
+      (setq b1 nil)
+      (setq c1 nil)
+      (setq a (die6))
+      (setq b (die6))
+      (setq c (die6))
+      ; set a1 (hundreds digit)
+      (cond ((or (= a 5) (= a 6)) (setq a1 a))
+            ((or (= a 3) (= a 4)) (setq b1 a))
+            (true (setq c1 a)))
+      ; set b1 (tens digit)
+      (if (>= b 4)
+        (cond ((= a1 nil) (setq a1 b))
+              ((= b1 nil) (setq b1 b))
+              (true (setq c1 b)))
+        ;else
+        (cond ((= c1 nil) (setq c1 b))
+              ((= b1 nil) (setq b1 b))
+              (true (setq a1 b))))
+      ; set c1 (units digit)
+      (cond ((= a1 nil) (setq a1 c))
+            ((= b1 nil) (setq b1 c))
+            (true (setq c1 c)))
+      ;(println a { } b { } c)
+      ;(print a1 { } b1 { } c1) (read-line)
+      (++ sum (+ (* 100 a1) (* 10 b1) c1))
+    )
+    (div sum iter)))
+
+(time (println (p80-2 1e7)))
+;-> 504.063245
+;-> 7306.012
+
+(time (println (p80-2 1e8)))
+;-> 504.0430185
+;-> 72580.145
+
+***************************************************************
 
 ----------
 Problem 76
@@ -5168,125 +5391,8 @@ time.
 ;-> 156308.517
 
 
-----------
-Problem 79
-----------
-Suppose we play a game with a die in which we use two rolls of the die to create a two-digit number.
-The player rolls the die once and decides which of the two digits they want that roll to represent.
-Then, the player rolls a second time and this determines the other digit.
-For instance, the player might roll a 5, and decide this should be the "tens" digit, and then roll a 6, so their resulting number is 56.
-What strategy should be used to create the largest number on average?
-What about the three digit version of the game?
 
-Solution =
 
-Two digit version:
 
-a = first digit rolled
-b = second digit rolled
-
-Best strategy
-  If (a < 4) then a is "units" digit
-  If (a >= 4) then a is "tens" digit
-
-Expected value = 45.25
-
-(define (p79-aux soglia iter)
-  (local (a b sum)
-    (setq sum 0)
-    (for (i 1 iter)
-      (setq a (die6))
-      (setq b (die6))
-      (if (< a soglia) 
-        (++ sum (+ (* 10 b) a))
-        (++ sum (+ (* 10 a) b)))
-    )
-    (div sum iter)))
-
-(p79-aux 4 1e6)
-;-> 45.26546
-
-(define (p79 iter)
-  (local (atteso-max soglia-max)
-    (setq atteso-max 0)
-    (for (s 1 6)
-      (setq atteso (p79-aux s iter))
-      (when (> atteso atteso-max)
-        (setq atteso-max atteso)
-        (setq soglia-max s))
-    )
-    (list soglia-max atteso-max)))
-
-(p79 1e6)
-;-> (4 45.249379)
-
-(time (println (p79 1e6)))
-;-> (4 45.2520554)
-;-> 1868.528
-
-(time (println (p79 1e7)))
-;-> (4 45.2449624)
-;-> 18617.625
-
-Three digit version:
-
-Best strategy
-
-  First roll:
-  If it is 5 or 6, put it in the "hundreds" digit;
-  If it is 3 or 4, put it in the "tens" digit;
-  otherwise, put it in the "units" digit.
-
-  Second roll:
-  If the second roll is 4, 5, or 6, place it in the largest available digit.
-
-Expected value = 504
-
-Quindi la strategia per il primo tiro è questa:
-se è almeno 5, mettilo nella cifra delle "centinaia";
-se è 3 o 4, mettilo nella cifra delle "decine";
-altrimenti, mettilo nella cifra delle "unità".
-Se il secondo tiro è 4, 5 o 6, mettilo nella cifra più grande disponibile.
-
-(define (p79-2 iter)
-  (local (sum a b c a1 b1 c1)
-    (setq sum 0)
-    (for (i 1 iter)
-      (setq a1 nil)
-      (setq b1 nil)
-      (setq c1 nil)
-      (setq a (die6))
-      (setq b (die6))
-      (setq c (die6))
-      ; set a1 (hundreds digit)
-      (cond ((or (= a 5) (= a 6)) (setq a1 a))
-            ((or (= a 3) (= a 4)) (setq b1 a))
-            (true (setq c1 a)))
-      ; set b1 (tens digit)
-      (if (>= b 4)
-        (cond ((= a1 nil) (setq a1 b))
-              ((= b1 nil) (setq b1 b))
-              (true (setq c1 b)))
-        ;else
-        (cond ((= c1 nil) (setq c1 b))
-              ((= b1 nil) (setq b1 b))
-              (true (setq a1 b))))
-      ; set c1 (units digit)
-      (cond ((= a1 nil) (setq a1 c))
-            ((= b1 nil) (setq b1 c))
-            (true (setq c1 c)))
-      ;(println a { } b { } c)
-      ;(print a1 { } b1 { } c1) (read-line)
-      (++ sum (+ (* 100 a1) (* 10 b1) c1))
-    )
-    (div sum iter)))
-
-(time (println (p79-2 1e7)))
-;-> 504.063245
-;-> 7306.012
-
-(time (println (p79-2 1e8)))
-;-> 504.0430185
-;-> 72580.145
 =============================================================================
 

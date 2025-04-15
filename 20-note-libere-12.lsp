@@ -8622,7 +8622,7 @@ Poi stese a terra un tappeto sul quale aveva disegnato un "reticolato" composto 
 La conformazione dell'esercito presentata dal mercante era ovviamente stabilita secondo la concezione  dell'epoca, quindi guerrieri a piedi, truppe a cavallo e su elefante, carri per il trasporto delle vettovaglie e delle salmerie e poi il sovrano con il suo generale.
 Sistemò quei pezzi e cominciò a spiegare le regole del movimento di ciascuno e lo scopo del "gioco", che era evidentemente uccidere il re (lo scià) nemico.
 Chi fosse riuscito avrebbe potuto gridare "Shah mat!", "il Re è morto!"
-E proprio dall'espressione “Shah mat!” per assonanza deriverà “scacco matto!”.
+E proprio dall'espressione "Shah mat!" per assonanza deriverà "scacco matto!".
 Il Principe guardò perplesso il mercante e gli chiese spiegazioni sulle regole.
 Il mercante gliele mostrò, sconfiggendolo in una partita dimostrativa.
 Punto sull'orgoglio il Principe chiese la rivincita, perdendo nuovamente.

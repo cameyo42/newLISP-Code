@@ -653,7 +653,7 @@ Trovare una prova per una congettura può essere difficile e può richiedere un 
 Proviamo a dimostrare la nostra congettura, cioè che il numero totale di vertici nel problema dei quadrati è dato dalla formula f(n) = 3n + 1.
 Potremmo prima chiederci: perché la formula termina con "+1"? Che significato ha? A cosa corrisponde?
 Vediamo se esiste un singolo oggetto che potrebbe darci il "+1" nella formula.
-Poiché la formula conta i vertici, il "+1" sembra indicare uno speciale vertice "extra" che deve essere aggiunto alla fine. Osservando l'immagine, potremmo ipotizzare che il “+1” corrisponda al singolo vertice condiviso da tutti i quadrati.
+Poiché la formula conta i vertici, il "+1" sembra indicare uno speciale vertice "extra" che deve essere aggiunto alla fine. Osservando l'immagine, potremmo ipotizzare che il "+1" corrisponda al singolo vertice condiviso da tutti i quadrati.
 In tal caso, i vertici rimanenti dovrebbero essere contabilizzati dal "3n".
 Quindi la variabile n rappresenta il numero di quadrati e ogni quadrato ha 3 vertici non condivisi che sono suoi e non appartengono a nessun altro quadrato, allora il numero totale di questi vertici non condivisi è dato da 3n.
 A questo dobbiamo aggiungere 1 per il vertice condiviso, per un totale di 3n + 1 vertici in tutto, che è la formula che abbiamo indovinato.

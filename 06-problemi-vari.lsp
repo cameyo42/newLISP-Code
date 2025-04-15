@@ -8312,8 +8312,8 @@ Dati due numeri interi a e b esistono solo due numeri interi q e r che soddisfan
 
   a = q*b + r  con 0 <= r < b
 
-q prende il nome di “quoziente” della divisione di a per b
-r prende il nome di “resto” della divisione di a per b
+q prende il nome di "quoziente" della divisione di a per b
+r prende il nome di "resto" della divisione di a per b
 
 Definizione: equazioni diofantee di primo grado
 ------------------------------------------------

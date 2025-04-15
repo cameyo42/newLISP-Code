@@ -1714,7 +1714,7 @@ In questo modo possiamo avere un help sulle funzioni scritte dall'utente.
 Numeri sfenici
 --------------
 
-Sono chiamati “sfenici” (dal greco σφήν, cuneo) i numeri naturali che sono il prodotto di tre primi distinti.
+Sono chiamati "sfenici" (dal greco σφήν, cuneo) i numeri naturali che sono il prodotto di tre primi distinti.
 
 I numeri sfenici minori di 500 sono:
  30, 42, 66, 70, 78, 102, 105, 110, 114, 130, 138, 154, 165, 170, 174, 182,

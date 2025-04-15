@@ -4153,7 +4153,7 @@ The matter is further simplified by the fact that newLISP is an already mature a
 SUMMING UP
 Although newLISP is not as complete, nor possibly as fast and efficient as its cousins Common LISP and Scheme, the overall impression that it has left me was positive to say the least. It is very clean, unobtrusive, and it does allow you to get things done with relative ease. It is well suited for scripting and some web development, and the enthusiasm displayed by its authors is entirely deserved. It also has a small, but helpful and enjoyable community, not to mention the CAPTCHA on their forums being absolutely unbeatable.
 
-newLISP does have a handful of downsides. The GUI server is somewhat arcane to deal with (although it's an otherwise sufficient solution given its ease of use and portability), and an IDE with a few additional functions, like some extra set of debugging features and some basic project management functions would make a good start for a wislist. The modules are fairly broad but some of them are rather superficial, so anything extremely serious is likely to imply some extra work on your side. However, one could always point out that newLISP wasn't meant for anything “extremely serious” — but it can incidentally do a lot of “extremely serious work”, some of it being displayed on newLISP's homepage under the Apps section.
+newLISP does have a handful of downsides. The GUI server is somewhat arcane to deal with (although it's an otherwise sufficient solution given its ease of use and portability), and an IDE with a few additional functions, like some extra set of debugging features and some basic project management functions would make a good start for a wislist. The modules are fairly broad but some of them are rather superficial, so anything extremely serious is likely to imply some extra work on your side. However, one could always point out that newLISP wasn't meant for anything "extremely serious" — but it can incidentally do a lot of "extremely serious work", some of it being displayed on newLISP's homepage under the Apps section.
 
 Whether this is a better option than another LISP dialect (or another programming language, for that matter) will obviously depend on a lot of issues. Despite some optimistic claims, I am rather reluctant recommending newLISP for scientific or statistical applications, and I haven't tried using it as an environment for full-blown application development. Nevertheless, I would wholeheartedly recommend that you try having a look at it before writing your next Python script. You never know how much you may like it.
 
@@ -6279,7 +6279,7 @@ Lista delle funzioni:
 "A computer is a stupid machine with the ability to do incredibly smart things, while computer programmers are smart people with the ability to do incredibly stupid things. They are, in short, a perfect match."
 - anonymous
 
-"Another effective technique is to explain your code to someone else. This will often cause you to explain the bug to yourself. Sometimes it takes no more than a few sentences, followed by an embarrassed “Never mind, I see what's wrong. Sorry to bother you.” This works remarkably well: you can even use non-programmers as listeners. One university computer center kept a teddy bear near the help desk. Students with mysterious bugs were required to explain them to the bear before they could speak to a human counselor."
+"Another effective technique is to explain your code to someone else. This will often cause you to explain the bug to yourself. Sometimes it takes no more than a few sentences, followed by an embarrassed "Never mind, I see what's wrong. Sorry to bother you." This works remarkably well: you can even use non-programmers as listeners. One university computer center kept a teddy bear near the help desk. Students with mysterious bugs were required to explain them to the bear before they could speak to a human counselor."
 - Brian Kernighan
 
 "Don't comment bad code ‐ rewrite it."
@@ -6405,7 +6405,7 @@ Kelsey Hightower
 "Necessity is the Mother of Invention, Play is its Father."
 - unknown
 
-"You are not a Bayesian homunculus whose reasoning is “corrupted” by cognitive biases. You just are cognitive biases."
+"You are not a Bayesian homunculus whose reasoning is "corrupted" by cognitive biases. You just are cognitive biases."
 - Luke Muehlhauser
 
 "Simple is:

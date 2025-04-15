@@ -1972,5 +1972,98 @@ Vediamo per quali numeri abbiamo il massimo e il minimo scostamento tra il valor
 ;-> Errore massimo: 5.221950932354477 per il Numero: 9699690
 ;-> 52094.829
 
+
+-----------------------
+Numeri Belli (Beatiful)
+-----------------------
+
+Un numero intero positivo si dice "Bello" (Beatiful) se il prodotto delle sue cifre è divisibile per la somma delle sue cifre.
+
+Sequenza OEIS A038367:
+Numbers n with property that (product of digits of n) is divisible by (sum of digits of n).
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 22, 30, 36, 40, 44, 50, 60, 63, 66,
+  70, 80, 88, 90, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+  120, 123, 130, 132, 138, 140, 145, 150, 154, 159, 160, 167, 170, 176,
+  180, 183, 189, 190, 195, 198, 200, 201, 202, 203, ...
+
+(define (digit-prod num)
+"Calculates the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10))
+        )
+    out)))
+
+(define (digit-sum num)
+"Calculates the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+(define (bello? num) (zero? (% (digit-prod num) (digit-sum num))))
+
+(filter bello? (sequence 1 203))
+;-> (1 2 3 4 5 6 7 8 9 10 20 22 30 36 40 44 50 60 63 66
+;->  70 80 88 90 100 101 102 103 104 105 106 107 108 109 110
+;->  120 123 130 132 138 140 145 150 154 159 160 167 170 176
+;->  180 183 189 190 195 198 200 201 202 203)
+
+
+-------------
+Numeri Radice
+-------------
+
+Un numero intero positivo si dice "Radice" se la somma ripetuta delle cifre del prodotto delle sue cifre è uguale alla somma ripetuta delle cifre della somma delle sue cifre.
+
+Esempi:
+Numero = 36
+Prodotto delle cifre = 18
+Somma ripetuta di 18 = 9
+Somma delle cifre = 9
+Somma ripetuta di 9 = 9
+Quindi 36 è un numero radice.
+
+Numero = 26
+Prodotto delle cifre = 12
+Somma ripetuta di 12 = 3
+Somma delle cifre = 8
+Somma ripetuta di 8 = 8
+Quindi 26 non è un numero radice.
+
+(define (digit-root num)
+"Calculates the repeated sum of the digits of an integer"
+    (+ 1 (% (- (abs num) 1) 9)))
+
+(digit-root 10)
+
+(define (radice? num)
+  (let ( (sum 0) (prod 1) (tmp num) )
+    (while (!= num 0)
+      (setq prod (* prod (% num 10)))
+      (setq sum (+ sum (% num 10)))
+      (setq num (/ num 10))
+    )
+    (= (digit-root sum) (digit-root prod))))
+
+(filter radice? (sequence 1 500))
+;-> (1 2 3 4 5 6 7 8 9 22 36 58 63 85 99 123 132 156 165 189 198 213 231 246
+;->  264 279 297 312 321 333 348 357 369 375 384 396 426 438 459 462 483 495)
+
+Nota: questa sequenza non esiste su OEIS.
+
+(map digit-sum  (filter radice? (sequence 1 500)))
+;-> (1 2 3 4 5 6 7 8 9 4 9 13 9 13 18 6 6 12 12 18 18 6 6 12 12 18 18
+;->  6 6 9 15 15 18 15 15 18 12 15 18 12 15 18)
+
+(map digit-prod (filter radice? (sequence 1 500)))
+;-> (1 2 3 4 5 6 7 8 9 4 18 40 18 40 81 6 6 30 30 72 72 6 6 48 48 126
+;->  126 6 6 27 96 105 162 105 96 162 48 96 180 48 96 180)
+
 ============================================================================
 

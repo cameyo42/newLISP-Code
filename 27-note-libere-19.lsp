@@ -1369,7 +1369,7 @@ Il modello è costituito da una griglia bidimensionale di celle ciascuna delle q
 Se una cella contiene più di una certa quantità di granelli di sabbia diventa "instabile" e invia un granello di sabbia a ciascuna delle celle vicine.
 Se una qualsiasi di queste celle vicine supera la soglia anch'essa diventa instabile e distribuisce granelli di sabbia alle celle vicine e così via con il processo di "distribuzione" che può continuare a lungo.
 
-La caratteristica notevole del modello abeliano dei cumuli di sabbia è che indipendentemente dalle condizioni iniziali il sistema alla fine raggiunge uno stato di “criticità auto-organizzata”, in cui piccole perturbazioni possono innescare valanghe su larga scala che dissipano rapidamente l'energia e ripristinano il sistema ad uno stato critico.
+La caratteristica notevole del modello abeliano dei cumuli di sabbia è che indipendentemente dalle condizioni iniziali il sistema alla fine raggiunge uno stato di "criticità auto-organizzata", in cui piccole perturbazioni possono innescare valanghe su larga scala che dissipano rapidamente l'energia e ripristinano il sistema ad uno stato critico.
 Questa proprietà ha reso il modello utile per studiare un''ampia gamma di fenomeni in fisica matematica e informatica tra cui la dinamica dei terremoti il flusso del traffico e la teoria dell'informazione.
 
 Per simulare il modello utilizziamo una matrice bidimensionale per rappresentare il mucchio di sabbia.

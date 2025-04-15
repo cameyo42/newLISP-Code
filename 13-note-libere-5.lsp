@@ -5132,7 +5132,7 @@ Invece, lanciando un dado il valore atteso vale:
 La linearità dell'aspettativa dice fondamentalmente che il valore atteso di una somma di variabili casuali è uguale alla somma delle aspettative individuali. La sua importanza è fondamentale per l'area degli algoritmi randomizzati e dei metodi probabilistici. La sua forza principale consiste sul fatto che:
 
   a) è applicabile per somme di qualsiasi variabile casuale (indipendente o meno), e
-  b) spesso consente semplici argomenti “locali” invece di quelli “globali”.
+  b) spesso consente semplici argomenti "locali" invece di quelli "globali".
 
          n
   E[X] = ∑ E[x(i)]
@@ -10619,7 +10619,7 @@ Su questo numero, chiamato "numero della bestia" o "numero dell'Anticristo" o "n
 (apply + (sequence 1 36))
 ;-> 666
 
-2) I numeri che sono la somma dei primi N interi consecutivi, vengono detti "Numeri Triangolari"”: 666 è un numero triangolare esprimibile come somma di due quadrati esatti di due numeri triangolari:
+2) I numeri che sono la somma dei primi N interi consecutivi, vengono detti "Numeri Triangolari": 666 è un numero triangolare esprimibile come somma di due quadrati esatti di due numeri triangolari:
 
 666 = 15² + 21² (infatti 15² + 21² = 225 + 441 = 666)
 
