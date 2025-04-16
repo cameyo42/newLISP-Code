@@ -5,7 +5,7 @@
               A Collection of Dice Problems
            with solutions and useful appendices
              (a work continually in progress)
-            version July 3, 2022 (76 problems)
+             version July 3, 2022 (76 problems)
             version July 7, 2024 (79 problems)
             version March 25, 2025 (80 problems)
 
@@ -33,15 +33,15 @@ Here, I try solve the problems (and/or verify the results) with simulations (if 
 
 2. Dice Sums (29..47)
 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
-+  +  +  +  +  +  +  +  +  +  +  +     +  +  +  +  +
++  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
 3. Non-standard Dice (48..58)
 48 49 50 51 52 53 54 55 56 57 58
-+  +  +  +  +  +  +  +  +     +
++  +  +  +  +  +  +  +  +  +  +
 
 4. Game with Dice (59..80)
 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80
-+  +  +  +  +  +  +  +  +  +  +  +  +     +  +  +  +  +  +  +  + 
++  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
 Note: Number of iterations (minimum) = 1e6 (if possible)
 
@@ -216,7 +216,10 @@ Probability for d2:
     out))
 (define (rand-lst lst) (lst (rand (length lst))))
 (define (prime? num) (if (< num 2) nil (= 1 (length (factor num)))))
+(define (lcm_ a b) (/ (* a b) (gcd a b)))
+(define-macro (lcm) (apply lcm_ (map eval (args)) 2))
 ;; eof
+
 
 ==========================
  1. Standard Dice (1..28)
@@ -1702,7 +1705,7 @@ Problem 27
 Suppose we roll n s-sided dice. Let a(i) be the number of times face i appears.
 What is the expected value of Prod[i=1,s]a(i) ?
 
-Solution:
+Solution =
 
   E = (s!/s^s)*binom(n s)
 
@@ -1767,7 +1770,7 @@ Problem 28
 What is the probability that, if we roll two dice, the product of the faces will start with the digit '1'?
 What if we roll three dice, or, ten dice? What is going on?
 
-Solution:
+Solution = 
 
 The probability of the product of two dice starting with the digit '1' is
 1/3 = 0.333333...
@@ -1787,7 +1790,7 @@ Here's a table with the probabilities for various numbers of dice:
 
 For (n -> Inf) the probabilities -> log10(2) = 0.3010299956639811...
 
-This is an example of what is often call Benford’s Law, that certain distributions of numbers tend to
+This is an example of what is often call Benford's Law, that certain distributions of numbers tend to
 have a probability of a leading '1' digit of around log10(2).
 
 (define (p28 n iter)
@@ -2514,9 +2517,136 @@ For x -> infinite, p(x) -> 2/7 = 0.2857142857142857...
 ;-> 1000 0.285877
 ;-> 46318.398
 
-
 ----------
 Problem 40
+----------
+A die is rolled and summed repeatedly until the sum is 100 or more.
+What is the most likely last roll?
+What if we roll two dice at time? Three, etc.?
+(Problem suggested by Dimitris Konomis).
+
+Solution =
+
+When rolling a single die, the most likely final roll is six.
+
+With n dice we have the following result:
+
+   n    Last roll
+   1    6   
+   2    7   
+   3   12  
+   4   15  
+   5   18  
+   6   22  
+   7   25  
+   8   29  
+   9   32  
+  10   36 
+  11   39 
+  12   43 
+  13   46 
+  14   50 
+  15   53 
+  16   57 
+  17   60 
+  18   64 
+  19   67 
+  20   71
+
+(define (p40-1 iter)
+  (let ( (total-last (array 7 '(0))) (sum 0) )
+    (for (i 1 iter)
+      (setq sum 0)
+      (while (< sum 100)
+        (setq val (die6))
+        (++ sum val)
+      )
+      (++ (total-last val))
+    )
+    (println total-last)
+    (find (apply max total-last) (array-list total-last))))
+
+(p40-1 1e6)
+;-> (0 47719 95309 142355 191137 237685 285795)
+;-> 6
+
+(define (p40-2 dice iter)
+  (let ( (total-last (array (+ (* dice 6) 1) '(0))) (sum 0) )
+    (for (i 1 iter)
+      (setq sum 0)
+      (while (< sum 100)
+        (setq val (dice6 dice))
+        (++ sum val)
+      )
+      (++ (total-last val))
+    )
+    (println total-last)
+    (find (apply max total-last) (array-list total-last))))
+
+(p40-2 2 1e6)
+;-> (0 0 7947 23766 47616 79392 119410 166647 158864 142599 119187 87356 47216)
+;-> 7
+
+(p40-2 3 1e6)
+;-> (0 0 0 1336 5323 13085 26396 46482 74102 98903 119235 130635
+;->  132500 120085 92803 66325 42450 22438 7902)
+;-> 12
+
+(p40-2 4 1e6)
+;-> (0 0 0 0 229 1085 3367 7657 15737 28076 44207 63109 82638 100822
+;->  112443 115667 110301 97305 78876 58466 38346 23325 11912 5110 1322)
+;-> 15
+
+; comments the line: (println total-last)
+
+(for (d 1 20) (println d { } (p40-2 d 1e6)))
+;-> 1 6        ok 
+;-> 2 7        ok 
+;-> 3 12       ok 
+;-> 4 15       ok 
+;-> 5 18       ok 
+;-> 6 22       ok 
+;-> 7 25       ok 
+;-> 8 29       ok 
+;-> 9 33       error
+;-> 10 36      ok 
+;-> 11 39      ok 
+;-> 12 42      error 
+;-> 13 47      error 
+;-> 14 51      error 
+;-> 15 54      error 
+;-> 16 56      error 
+;-> 17 60      ok 
+;-> 18 63      error 
+;-> 19 67      ok 
+;-> 20 70      error
+
+(time (for (d 1 20) (println d { } (p40-2 d 1e7))))
+;-> 1 6       6
+;-> 2 7       7
+;-> 3 12     12
+;-> 4 15     15
+;-> 5 18     18
+;-> 6 22     22
+;-> 7 26     error
+;-> 8 28     error
+;-> 9 33     error
+;-> 10 36    36
+;-> 11 39    39
+;-> 12 42    error
+;-> 13 47    error
+;-> 14 51    error
+;-> 15 54    error
+;-> 16 56    error
+;-> 17 60    60
+;-> 18 63    error
+;-> 19 66    error
+;-> 20 70    error
+;-> 463990.809
+
+
+----------
+Problem 41
 ----------
 
 A die is rolled and summed repeatedly.
@@ -2533,7 +2663,7 @@ For x -> infinite, p(x,x+1,x+2,x+3) = 6/7 = 0.8571428...
 For x -> infinite, p(x,x+1,x+2,x+3,x+4) = 20/21 = 0.9523809...
 For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 
-(define (p40 x gap iter)
+(define (p41 x gap iter)
   (local (sum success cur-sum stop)
     (setq sum 0)
     (for (i 1 iter)
@@ -2552,7 +2682,7 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
     (div sum iter)))
 
 (x, x+1)
-(time (for (x 1 20) (println x { } (p40 x 1 1e6))))
+(time (for (x 1 20) (println x { } (p41 x 1 1e6))))
 ;->  1 0.332811
 ;->  2 0.38873
 ;->  3 0.453138
@@ -2575,12 +2705,12 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 20 0.525442
 ;-> 18010.568
 
-(time (println 1000 { } (p40 1000 1 1e6)))
+(time (println 1000 { } (p41 1000 1 1e6)))
 ;-> 1000 0.523654
 ;-> 56682.654
 
 (x, x+1, x+2)
-(time (for (x 1 20) (println x { } (p40 x 2 1e6))))
+(time (for (x 1 20) (println x { } (p41 x 2 1e6))))
 ;->  1 0.500194
 ;->  2 0.582479
 ;->  3 0.680495
@@ -2602,12 +2732,12 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 19 0.713592
 ;-> 20 0.714175
 ;-> 17893.32
-(time (println 1000 { } (p40 1000 2 1e6)))
+(time (println 1000 { } (p41 1000 2 1e6)))
 ;-> 1000 0.713795
 ;-> 56830.675
 
 (x, x+1, x+2, x+3)
-(time (for (x 1 20) (println x { } (p40 x 3 1e6))))
+(time (for (x 1 20) (println x { } (p41 x 3 1e6))))
 ;->  1 0.666952
 ;->  2 0.778021
 ;->  3 0.907369
@@ -2629,12 +2759,12 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 19 0.856979
 ;-> 20 0.857325
 ;-> 17783.638
-(time (println 1000 { } (p40 1000 3 1e6)))
+(time (println 1000 { } (p41 1000 3 1e6)))
 ;-> 1000 0.856998
 ;-> 56763.018
 
 (x, x+1, x+2, x+3, x+4)
-(time (for (x 1 20) (println x { } (p40 x 4 1e6))))
+(time (for (x 1 20) (println x { } (p41 x 4 1e6))))
 ;->  1 0.833231
 ;->  2 0.972125
 ;->  3 0.967781
@@ -2656,13 +2786,13 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 19 0.952328
 ;-> 20 0.952618
 ;-> 17658.901
-(time (println 1000 { } (p40 1000 4 1e6)))
+(time (println 1000 { } (p41 1000 4 1e6)))
 ;-> 1000 0.952544
 ;-> 56576.821
 
 (x, x+1, x+2, x+3, x+4, x+5)
-(time (for (x 1 20) (println x { } (p40 x 5 1e6))))
-(time (println 1000 { } (p40 1000 5 1e6)))
+(time (for (x 1 20) (println x { } (p41 x 5 1e6))))
+(time (println 1000 { } (p41 1000 5 1e6)))
 ;->  1 1
 ;->  2 1
 ;->  3 1
@@ -2685,13 +2815,6 @@ For x > 0, p(x,x+1,x+2,x+3,x+4,x+5) = 1
 ;-> 20 1
 ;-> 17597.076
 
-----------
-Problem 41
-----------
-A die is rolled and summed repeatedly.
-Let x be a positive integer.
-What is the probability that the sum will ever be x or x+1?
-What is the probability that the sum will ever be x, x+1, or x+2? Etc.?
 
 ----------
 Problem 42
@@ -3409,11 +3532,6 @@ Convert probabilities to relative dice:
 (replace 9223372036854775807 o2 1)
 ;-> (7 1 4 1 7 7 1 4 1 7)
 
-(define (lcm_ a b) (/ (* a b) (gcd a b)))
-(define-macro (lcm)
-"Calculates the lcm of two or more number"
-  (apply lcm_ (map eval (args)) 2))
-
 (setq l1 (apply lcm o1))
 ;-> 2520
 (setq l2 (apply lcm o2))
@@ -3675,6 +3793,54 @@ Problem 57
 What if we want to make a die that when rolled twice and summed only yields primes?
 If we want all the faces to be different, we cannot do that.
 But, what if we roll twice, sum and add one?
+
+Solution =
+
+We cannot just sum, since we'd get even sums when we roll the same face twice, so unless all faces
+were 1, this fails.
+
+We could just start with 1, and add the smallest face such that all sums plus one are prime.
+
+(define (p57 n lst)
+  (local (conta candidate)
+    ;(setq lst '(1))
+    (setq conta (length lst))
+    (setq candidate (+ (last lst) 1))
+    (until (= conta n)
+      (setq stop nil)
+      (push candidate lst -1)
+      ; generates and checks all couples
+      (for (i 0 (- (length lst) 1) 1 stop)
+        (for (j i (- (length lst) 1) 1 stop)
+          (if (not (prime? (+ (lst i) (lst j) 1))) (setq stop true))
+        )
+      )
+      (if stop 
+          (pop lst -1)
+          (++ conta))
+      (++ candidate)
+    )
+    lst))
+
+(p57 6 '(1))
+;-> (1 3 9 69 429 4089)
+
+(p57 6 '(1 5))
+;-> (1 5 11 35 95 221)
+
+(p57 6 '(3 9))
+;-> (3 9 33 63 273 303)
+
+(time (println (p57 8 '(1))))
+;-> (1 3 9 69 429 4089 86529 513099)
+;-> 2000.282
+
+(time (println (p57 9 '(1))))
+;-> 4719.318
+
+(time (println (p57 10 '(1))))
+;-> (1 3 9 69 429 4089 86529 513099 913569 7914339)
+;-> 80483.61
 
 
 ----------
@@ -4652,6 +4818,9 @@ Solution =
 ;-> 30 7.490728
 ;-> 20895.358
 
+(p71 100 1e6)
+;-> 1.000065
+
 Nota: Considering also the score of the opponent, a good strategy is to set M at each turn with the formula
   M = 21 + round((PuntiB - PuntiA)/8)
 
@@ -4664,6 +4833,32 @@ Problem 72
 More Pig.
 Suppose in a game of Pig, a player decides to just go for it and try to roll 100 points on their first turn.
 What is the probability that they will succeed?
+
+Solution = p = 0.0101969827004188....
+
+(define (p72 iter)
+  (local (success cur-sum stop val)
+    (setq success 0)
+    (for (i 1 iter)
+      (setq cur-sum 0)
+      (setq stop nil)
+      (until stop
+        (setq val (die6))
+        (cond ((= val 1)
+                (setq cur-sum 0)
+                (setq stop true))
+              (true
+                (++ cur-sum val))
+        )
+        ;strategy
+        (when (>= cur-sum 100) (++ success) (setq stop true))
+      )
+    )
+    (div success iter)))
+
+(time (println (p72 1e7)))
+;-> 0.0101788
+;-> 11235.439
 
 
 ----------
@@ -4952,9 +5147,107 @@ The optimal strategy is: roll again if the score is 5 or less, and stick otherwi
     )
     (div sum iter)))
 
-(time (println (p74 1e7)))
+(time (println (p78 1e7)))
 ;-> (6.9979525)
 ;-> 5213.654000000001
+
+Solution =
+
+The optimal strategy is: roll again if the score is 5 or less, and stick otherwise.
+
+Per k = 10:
+
+       40817
+  E = ------- = 6.99879972565157
+        5832
+
+  k  s E(0)                       E(0) approx.
+  1  1 1/6                        0.166666
+  2  1 1/2                        0.5
+  3  1 1                          1
+  4  2 7/4                        1.75
+  5  2 49/18                      2.722222
+  6  3 49/12                      4.083333
+  7  4 3017/648                   4.655864
+  8  5 20629/3888                 5.305813
+  9  5 46991/7776                 6.043081
+ 10  6 40817/5832                 6.998800
+ 11  7 84035/10368                8.105228
+ 12  8 7695859/839808             9.163831
+ 13  9 101039827/10077696         10.026084
+ 14 10 55084715/5038848           10.932006
+ 15 11 4307852885/362797056       11.874002
+ 16 12 13976066993/1088391168     12.841033
+ 17 13 60156375517/4353564672     13.817729
+ 18 14 1131329591/76527504        14.783307
+ 19 15 7388908661401/470184984576 15.714897
+ 20 15 2611098542647/156728328192 16.660029
+ 50 45 .../...                    46.666667
+100 95 .../...                    96.666667
+
+The calculations suggest that the expected score approaches k − 10/3 as k goes to infinity.
+
+k --> top
+s+1 --> base
+
+(define (p78-aux top base iter)
+  (setq total 0)
+  (for (i 1 iter)
+    (setq score 0)
+    (setq stop nil)
+    (until stop
+      (++ score (die6))
+      ;(println "score: " score)
+      (if (> score base) (setq stop true))
+    )
+    ;(print "score out: " score) (read-line)
+    (if (<= score top) (++ total score))
+  )
+  (div total iter))
+
+(p78-aux 10 5 1e5)
+;-> 7.00943
+
+(define (p78 iter top)
+  (setq max-value 0)
+  (for (b 0 top)
+    (setq val (p77-aux top b iter))
+    ;(print b { } val) (read-line)
+    (when (> val max-value)
+      (setq max-value val)
+      (setq base b)))
+  (list top base max-value))
+
+(time (println (map (curry p78 1e5) (sequence 1 20))))
+;-> ((1 0 0.16534)
+;->  (2 0 0.49952)
+;->  (3 0 0.99974)
+;->  (4 1 1.75285)
+;->  (5 2 2.72391)
+;->  (6 2 4.08863)
+;->  (7 3 4.67012)
+;->  (8 4 5.29413)
+;->  (9 5 6.04536)
+;->  (10 5 6.99632)
+;->  (11 6 8.101509999999999)
+;->  (12 7 9.17095)
+;->  (13 8 10.01804)
+;->  (14 9 10.92527)
+;->  (15 10 11.88542)
+;->  (16 11 12.8383)
+;->  (17 12 13.8043)
+;->  (18 13 14.79318)
+;->  (19 14 15.68907)
+;->  (20 14 16.65286))
+;-> 12800.259
+
+(time (println (p78 1e5 50)))
+;-> (50 44 46.66873)
+;-> 6626.716
+
+(time (println (p78 1e5 100)))
+;-> (100 94 96.66309)
+;-> 23363.554
 
 
 ----------
@@ -4972,7 +5265,7 @@ We should roll unless the sum is 24 or 25 or greater than 33.
 
   E = 13.21711859042473...
 
-(define (p75 iter)
+(define (p79 iter)
   (local (sum cur-sum stop val)
     (setq sum 0)
     (for (i 1 iter)
@@ -4988,9 +5281,85 @@ We should roll unless the sum is 24 or 25 or greater than 33.
     )
     (div sum iter)))
 
-(time (println (p75 1e7)))
+(time (println (p79 1e7)))
 ;-> 13.2154769
 ;-> 17725.157
+
+Solution =
+
+  Multiple  Stop if                                        Expected value
+   6        n >= 19                                        7.221451623108286812
+   7        n >= 15                                        8.585032818442838864
+   8        n = 18 or n >= 26                              10.12982919499704393
+   9        n = 21, 22 or n >= 30                          11.67916132417996147
+  10        n = 24, 25, or n >= 34                         13.21711859042473150
+  11        n = 27, 28 or n >= 38                          14.72823564563309959
+  12        n = 30, 31 or n >= 42                          16.27534383168068736
+  13        n = 33, 35, 35 or n >= 46                      17.90549414976900364
+  14        n = 36, 37, 38 or n >= 50                      19.43362157318550401
+  15        n = 39, 40, 41 or n >= 54                      20.97094434047380285
+  16        n = 42, 43, 44, 58, 59, 60, 61, 62 or n >= 74  22.51571524339529867
+  17        n = 45, 46, 47, 62, 63, 64, 65, 66 or n >= 79  24.07230800164414883
+  18        n = 48, 49, 50, 66, 67, 68, 69, 70 or n >= 84  25.64211352850069779
+  19        n = 51, 52, 53, 70, 71, 72, 73, 74 or n >= 89  27.21360753502956739
+  20        n = 54, 55, 56, 74, 75, 76, 77, 78 or n >= 94  28.75912955252540060
+
+For 2 ≤ m ≤ 5, it is probably best to attack each one separately, which perhaps I will do some other
+time.
+
+(define (p79-aux multiple iter)
+  (local (out total-sum sum)
+    (setq out '())
+    (for (threshold 1 (* multiple 5))
+      (setq total-sum 0)
+      (for (i 1 iter)
+        (setq sum 0)
+        (setq stop nil)
+        (until stop
+          (++ sum (die6))
+          (cond ((zero? (% sum multiple))
+                  (setq sum 0) (setq stop true))
+                ((>= sum threshold)
+                  (setq stop true)))
+        )
+        (++ total-sum sum)
+      )
+      (push (list (div total-sum iter) threshold multiple) out -1)
+    )
+    (slice (sort out >) 0 5)))
+
+(time (println (p79-aux 10 1e5)))
+;-> ((13.07064 24 10) (13.00089 34 10) (12.81273 25 10)
+;->  (12.66506 35 10) (12.6185 33 10))
+;-> 5775.614
+
+(define (p79 iter)
+  (let (all '())
+    (for (m 2 20) (push (p78-aux m iter) all -1))
+    all))
+
+(time (println (p79 1e5)))
+;-> (((1.84292 4 2) (1.84069 5 2) (1.75314 2 2) (1.74801 6 2) (1.74427 3 2))
+;->  ((3.22765 6 3) (3.22516 7 3) (3.22291 8 3) (3.22208 9 3)  (3.19883 10 3))
+;->  ((4.84863 10 4) (4.64453 11 4) (4.62431 8 4) (4.60458 9 4) (4.56584 7 4))
+;->  ((6.09159 14 5) (6.0139 13 5) (5.87152 19 5) (5.81888 12 5) (5.79181 9 5))
+;->  ((7.26643 19 6) (7.20874 18 6) (7.16395 17 6) (7.14499 20 6) (7.09515 16 6))
+;->  ((8.63397 15 7) (8.62815 21 7) (8.60365 17 7) (8.57667 20 7) (8.56742 14 7))
+;->  ((10.11247 18 8) (10.07894 26 8) (9.99337 20 8) (9.954359 19 8) (9.8894 27 8))
+;->  ((11.65506 21 9) (11.53859 30 9) (11.43899 22 9) (11.27933 31 9) (11.26477 23 9))
+;->  ((13.07495 24 10) (13.03332 34 10) (12.83548 25 10) (12.63882 35 10) (12.63565 26 10))
+;->  ((14.57754 27 11) (14.46419 38 11) (14.19757 39 11) (14.16201 28 11) (14.1185 26 11))
+;->  ((16.10793 30 12) (15.96609 42 12) (15.76574 31 12) (15.57844 29 12) (15.53497 41 12))
+;->  ((17.81304 33 13) (17.31731 46 13) (17.2768 34 13) (17.27075 32 13) (17.09088 45 13))
+;->  ((19.2301 36 14) (18.87064 50 14) (18.66517 37 14) (18.63103 35 14) (18.48454 49 14))
+;->  ((20.73613 39 15) (20.34628 38 15) (20.31207 54 15) (20.17826 40 15) (19.92924 53 15))
+;->  ((22.22996 42 16) (21.94507 58 16) (21.81567 41 16) (21.55064 43 16) (21.38942 57 16))
+;->  ((23.78885 45 17) (23.29691 44 17) (23.21664 46 17) (23.19335 62 17) (22.97474 61 17))
+;->  ((25.28714 48 18) (24.9625 47 18) (24.72711 66 18) (24.61202 49 18) (24.29813 46 18))
+;->  ((26.89535 51 19) (26.37129 50 19) (25.97682 70 19) (25.9735 52 19) (25.75297 69 19))
+;->  ((28.33066 54 20) (28.02455 53 20) (27.70042 74 20) (27.55503 52 20) (27.50127 55 20)))
+;-> 156308.517
+
 
 
 ----------
@@ -5022,7 +5391,7 @@ Expected value = 45.25
     (for (i 1 iter)
       (setq a (die6))
       (setq b (die6))
-      (if (< a soglia) 
+      (if (< a soglia)
         (++ sum (+ (* 10 b) a))
         (++ sum (+ (* 10 a) b)))
     )
@@ -5114,18 +5483,6 @@ Se il secondo tiro è 4, 5 o 6, mettilo nella cifra più grande disponibile.
 ;-> 504.0430185
 ;-> 72580.145
 
-***************************************************************
-
-----------
-Problem 76
-----------
-Suppose we play a game with a die in which we use two rolls of the die to create a two-digit number.
-The player rolls the die once and decides which of the two digits they want that roll to represent.
-Then, the player rolls a second time and this determines the other digit.
-For instance, the player might roll a 5, and decide this should be the "tens" digit, and then roll a 6, so their resulting number is 56.
-What strategy should be used to create the largest number on average?
-What about the three digit version of the game?
-
 Solution =
 
 2 rolls
@@ -5141,7 +5498,7 @@ If the second roll is 4, 5, or 6, place it in the largest available digit.
 
   E = 504
 
-(define (p76-1 iter)
+(define (p80-1 iter)
   (local (sum cur-sum val)
     (setq sum 0)
     (for (i 1 iter)
@@ -5158,11 +5515,11 @@ If the second roll is 4, 5, or 6, place it in the largest available digit.
     )
     (div sum iter)))
 
-(time (println (p76-1 1e7)))
+(time (println (p80-1 1e7)))
 ;-> 45.2536001
 ;-> 3915.429
 
-(define (p76-2 iter)
+(define (p80-2 iter)
   (local (sum cur-sum val d100 d10 d1)
     (setq sum 0)
     (for (i 1 iter)
@@ -5194,205 +5551,9 @@ If the second roll is 4, 5, or 6, place it in the largest available digit.
     )
     (div sum iter)))
 
-(time (println (p76-2 1e7)))
+(time (println (p80-2 1e7)))
 ;-> 504.0006572
 ;-> 8746.623
-
-
-----------
-Problem 77
-----------
-Suppose we roll a single die, repeatedly if we like, and sum.
-We can stop at any point, and the sum becomes our score, however, if we exceed 10, our score is zero.
-What should our strategy be to maximize the expected value of our score?
-What is the expected score with this optimal strategy?
-What about limits besides 10?
-
-Solution =
-
-The optimal strategy is: roll again if the score is 5 or less, and stick otherwise.
-
-Per k = 10:
-
-       40817
-  E = ------- = 6.99879972565157
-        5832
-
-  k  s E(0)                       E(0) approx.
-  1  1 1/6                        0.166666
-  2  1 1/2                        0.5
-  3  1 1                          1
-  4  2 7/4                        1.75
-  5  2 49/18                      2.722222
-  6  3 49/12                      4.083333
-  7  4 3017/648                   4.655864
-  8  5 20629/3888                 5.305813
-  9  5 46991/7776                 6.043081
- 10  6 40817/5832                 6.998800
- 11  7 84035/10368                8.105228
- 12  8 7695859/839808             9.163831
- 13  9 101039827/10077696         10.026084
- 14 10 55084715/5038848           10.932006
- 15 11 4307852885/362797056       11.874002
- 16 12 13976066993/1088391168     12.841033
- 17 13 60156375517/4353564672     13.817729
- 18 14 1131329591/76527504        14.783307
- 19 15 7388908661401/470184984576 15.714897
- 20 15 2611098542647/156728328192 16.660029
- 50 45 .../...                    46.666667
-100 95 .../...                    96.666667
-
-The calculations suggest that the expected score approaches k − 10/3 as k goes to infinity.
-
-k --> top
-s+1 --> base
-
-(define (p77-aux top base iter)
-  (setq total 0)
-  (for (i 1 iter)
-    (setq score 0)
-    (setq stop nil)
-    (until stop
-      (++ score (die6))
-      ;(println "score: " score)
-      (if (> score base) (setq stop true))
-    )
-    ;(print "score out: " score) (read-line)
-    (if (<= score top) (++ total score))
-  )
-  (div total iter))
-
-(p77-aux 10 5 1e5)
-;-> 7.00943
-
-(define (p77 iter top)
-  (setq max-value 0)
-  (for (b 0 top)
-    (setq val (p77-aux top b iter))
-    ;(print b { } val) (read-line)
-    (when (> val max-value)
-      (setq max-value val)
-      (setq base b)))
-  (list top base max-value))
-
-(time (println (map (curry p77 1e5) (sequence 1 20))))
-;-> ((1 0 0.16534)
-;->  (2 0 0.49952)
-;->  (3 0 0.99974)
-;->  (4 1 1.75285)
-;->  (5 2 2.72391)
-;->  (6 2 4.08863)
-;->  (7 3 4.67012)
-;->  (8 4 5.29413)
-;->  (9 5 6.04536)
-;->  (10 5 6.99632)
-;->  (11 6 8.101509999999999)
-;->  (12 7 9.17095)
-;->  (13 8 10.01804)
-;->  (14 9 10.92527)
-;->  (15 10 11.88542)
-;->  (16 11 12.8383)
-;->  (17 12 13.8043)
-;->  (18 13 14.79318)
-;->  (19 14 15.68907)
-;->  (20 14 16.65286))
-;-> 12800.259
-
-(time (println (p77 1e5 50)))
-;-> (50 44 46.66873)
-;-> 6626.716
-
-(time (println (p77 1e5 100)))
-;-> (100 94 96.66309)
-;-> 23363.554
-
-
-----------
-Problem 78
-----------
-Suppose we play a game with a die where we roll and sum our rolls.
-We can stop any time, and the sum is our score.
-However, if our sum is ever a multiple of 10, our score is zero, and our game is over.
-What strategy will yield the greatest expected score?
-What about the same game played with values other than 10?
-
-Solution = 
-
-  Multiple  Stop if                                        Expected value
-   6        n >= 19                                        7.221451623108286812
-   7        n >= 15                                        8.585032818442838864
-   8        n = 18 or n >= 26                              10.12982919499704393
-   9        n = 21, 22 or n >= 30                          11.67916132417996147
-  10        n = 24, 25, or n >= 34                         13.21711859042473150
-  11        n = 27, 28 or n >= 38                          14.72823564563309959
-  12        n = 30, 31 or n >= 42                          16.27534383168068736
-  13        n = 33, 35, 35 or n >= 46                      17.90549414976900364
-  14        n = 36, 37, 38 or n >= 50                      19.43362157318550401
-  15        n = 39, 40, 41 or n >= 54                      20.97094434047380285
-  16        n = 42, 43, 44, 58, 59, 60, 61, 62 or n >= 74  22.51571524339529867
-  17        n = 45, 46, 47, 62, 63, 64, 65, 66 or n >= 79  24.07230800164414883
-  18        n = 48, 49, 50, 66, 67, 68, 69, 70 or n >= 84  25.64211352850069779
-  19        n = 51, 52, 53, 70, 71, 72, 73, 74 or n >= 89  27.21360753502956739
-  20        n = 54, 55, 56, 74, 75, 76, 77, 78 or n >= 94  28.75912955252540060
-For 2 ≤ m ≤ 5, it is probably best to attack each one separately, which perhaps I will do some other
-time.
-
-(define (p78-aux multiple iter)
-  (local (out total-sum sum)
-    (setq out '())
-    (for (threshold 1 (* multiple 5))
-      (setq total-sum 0)
-      (for (i 1 iter)
-        (setq sum 0)
-        (setq stop nil)
-        (until stop
-          (++ sum (die6))
-          (cond ((zero? (% sum multiple))
-                  (setq sum 0) (setq stop true))
-                ((>= sum threshold)
-                  (setq stop true)))
-        )
-        (++ total-sum sum)
-      )
-      (push (list (div total-sum iter) threshold multiple) out -1)
-    )
-    (slice (sort out >) 0 5)))
-
-(time (println (p78-aux 10 1e5)))
-;-> ((13.07064 24 10) (13.00089 34 10) (12.81273 25 10)
-;->  (12.66506 35 10) (12.6185 33 10))
-;-> 5775.614
-
-(define (p78 iter)
-  (let (all '())
-    (for (m 2 20) (push (p78-aux m iter) all -1))
-    all))
-
-(time (println (p78 1e5)))
-;-> (((1.84292 4 2) (1.84069 5 2) (1.75314 2 2) (1.74801 6 2) (1.74427 3 2))
-;->  ((3.22765 6 3) (3.22516 7 3) (3.22291 8 3) (3.22208 9 3)  (3.19883 10 3))
-;->  ((4.84863 10 4) (4.64453 11 4) (4.62431 8 4) (4.60458 9 4) (4.56584 7 4))
-;->  ((6.09159 14 5) (6.0139 13 5) (5.87152 19 5) (5.81888 12 5) (5.79181 9 5))
-;->  ((7.26643 19 6) (7.20874 18 6) (7.16395 17 6) (7.14499 20 6) (7.09515 16 6))
-;->  ((8.63397 15 7) (8.62815 21 7) (8.60365 17 7) (8.57667 20 7) (8.56742 14 7))
-;->  ((10.11247 18 8) (10.07894 26 8) (9.99337 20 8) (9.954359 19 8) (9.8894 27 8))
-;->  ((11.65506 21 9) (11.53859 30 9) (11.43899 22 9) (11.27933 31 9) (11.26477 23 9))
-;->  ((13.07495 24 10) (13.03332 34 10) (12.83548 25 10) (12.63882 35 10) (12.63565 26 10))
-;->  ((14.57754 27 11) (14.46419 38 11) (14.19757 39 11) (14.16201 28 11) (14.1185 26 11))
-;->  ((16.10793 30 12) (15.96609 42 12) (15.76574 31 12) (15.57844 29 12) (15.53497 41 12))
-;->  ((17.81304 33 13) (17.31731 46 13) (17.2768 34 13) (17.27075 32 13) (17.09088 45 13))
-;->  ((19.2301 36 14) (18.87064 50 14) (18.66517 37 14) (18.63103 35 14) (18.48454 49 14))
-;->  ((20.73613 39 15) (20.34628 38 15) (20.31207 54 15) (20.17826 40 15) (19.92924 53 15))
-;->  ((22.22996 42 16) (21.94507 58 16) (21.81567 41 16) (21.55064 43 16) (21.38942 57 16))
-;->  ((23.78885 45 17) (23.29691 44 17) (23.21664 46 17) (23.19335 62 17) (22.97474 61 17))
-;->  ((25.28714 48 18) (24.9625 47 18) (24.72711 66 18) (24.61202 49 18) (24.29813 46 18))
-;->  ((26.89535 51 19) (26.37129 50 19) (25.97682 70 19) (25.9735 52 19) (25.75297 69 19))
-;->  ((28.33066 54 20) (28.02455 53 20) (27.70042 74 20) (27.55503 52 20) (27.50127 55 20)))
-;-> 156308.517
-
-
-
-
 
 =============================================================================
 
