@@ -5805,6 +5805,8 @@ Proviamo:
 ;-> 5611771
 ;-> 0
 
+Vedi anche "Numeri con k cifre diverse" su "Note libere 29".
+
 
 --------------------------------------
 Distanza tra numeri primi in una lista

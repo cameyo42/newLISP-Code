@@ -2065,5 +2065,161 @@ Nota: questa sequenza non esiste su OEIS.
 ;-> (1 2 3 4 5 6 7 8 9 4 18 40 18 40 81 6 6 30 30 72 72 6 6 48 48 126
 ;->  126 6 6 27 96 105 162 105 96 162 48 96 180 48 96 180)
 
+
+--------------------------
+Numeri con k cifre diverse
+--------------------------
+
+Quanti sono i numeri con k cifre diverse?
+
+Il numero di numeri con k cifre diverse (cioè tutte le cifre devono essere distinte) si calcola considerando alcune regole fondamentali:
+
+- Le cifre disponibili sono 10 da '0' a '9' (0 1 2 3 4 5 6 7 8 9).
+- Un numero non può iniziare con 0, quindi bisogna escludere i numeri con lo zero come prima cifra.
+
+Per 'k' cifre distinte:
+
+- Se 'k = 1', ci sono 9 numeri: da 1 a 9.
+- Se 'k > 1', il primo posto (la cifra più significativa) può essere una delle cifre da 1 a 9: 9 scelte.  
+  Poi si sceglie una cifra diversa per il secondo posto: 9 scelte (incluso 0 ma escludendo la prima cifra),  
+  poi 8 per il terzo, 7 per il quarto, ecc.
+
+Quindi per k cifre diverse (k <= 10), il totale è:
+
+  9 * P(9, k - 1)
+
+dove P(9, k - 1) è la permutazione di (k-1) cifre tra 9 possibili (dopo aver fissato la prima cifra diversa da 0).
+
+  f(n) = 9 * (10 - 1) * (10 - 2) * ... * (10 - n + 1)
+       = 9 * (9) * (8) * ... * (10 - n + 1)
+
+Oppure, usando la notazione delle permutazioni:
+
+  f(n) = 9 * P(9, n - 1) = 9 * (9! / (9 - (n - 1))!)
+
+Esempi:
+
+- k = 1: 9 numeri (1–9)
+- k = 2: 9 * 9 = 81 (es. 10, 12, ..., 98)
+- k = 3: 9 * 9 * 8 = 648
+- k = 4: 9 * 9 * 8 * 7 = 4536
+
+(define (fact-i num)
+"Calculates the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+Funzione che calcola quanti numeri esistono con k cifre diverse:
+
+(define (numeri k)
+  (cond
+    ((> k 10) 0)
+    ((= k 1) 9)
+    (true (* 9 (/ (fact-i 9) (fact-i (- 10 k)))))))
+
+Proviamo:
+
+(map numeri (sequence 0 12))
+;-> (0 9 81 648 4536 27216 136080 544320 1632960 3265920 3265920 0 0)
+
+Nota: il numero di numeri con 9 cifre diverse è uguale a quello con 10 cifre diverse (3265920).
+
+Inoltre risulta che:
+
+  Numeri con k cifre tutte diverse (senza zeri iniziali) = 
+  Tutte le permutazioni di k cifre prese tra le 10 'meno' quante di quelle iniziano con 0
+
+Infatti:
+- Le permutazioni delle combinazioni: P(10, k) = 10! / (10 - k)!
+- Di queste, quante hanno '0' come prima cifra?  
+  - Fissiamo 0 come prima cifra e restano (k - 1) cifre da scegliere tra le altre 9  
+  - P(9, k - 1) = 9! / (9 - (k - 1))!
+
+  Numeri con k cifre diverse (validi) = P(10, k) - P(9, k - 1)
+
+Che è equivalente all'espressione: (* 9 (/ (fact-i 9) (fact-i (- 10 k))))
+Infatti:
+- Sceglie una prima cifra diversa da 0: 9 scelte
+- Poi permuta le rimanenti: P(9, k-1)
+
+Scriviamo una funzione che genera la lista di tutti i numeri diversi con k cifre.
+
+(define (comb k lst (r '()))
+"Generates all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+(define (perm lst)
+"Generates all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+      )
+    )
+    out))
+
+Funzione che genera la lista di tutti i numeri diversi con k cifre:
+
+(define (lista-numeri k)
+  (let (out '())
+    (dolist (c (comb k '(0 1 2 3 4 5 6 7 8 9)))
+      (dolist (p (perm c))
+        (if (!= (first p) 0)
+            (push (int (join (map string p))) out -1))))
+    out))
+
+Proviamo:
+
+(lista-numeri 2)
+;-> (10 20 30 40 50 60 70 80 90 12 21 13 31 14 41 15 51 16 61 17 71 18
+;->  81 19 91 23 32 24 42 25 52 26 62 27 72 28 82 29 92 34 43 35 53 36
+;->  63 37 73 38 83 39 93 45 54 46 64 47 74 48 84 49 94 56 65 57 75 58
+;->  85 59 95 67 76 68 86 69 96 78 87 79 97 89 98)
+(length  (lista-numeri 2))
+;-> 81
+
+(sort (lista-numeri 3))
+;-> (102 103 104 105 106 107 108 109 120 123 124 125 126 127 128 129 130
+;->  132 134 135 136 137 138 139 140 142 143 145 146 147 148 149 150 152
+;->  153 154 156 157 158 159 160 162 163 164 165 167 168 169 170 172 173
+;->  ...
+;->  947 948 950 951 952 953 954 956 957 958 960 961 962 963 964 965 967
+;->  968 970 971 972 973 974 975 976 978 980 981 982 983 984 985 986 987)
+(length (lista-numeri 3))
+;-> 648
+(length (unique (lista-numeri 3)))
+;-> 648
+
+(time (println (map length (map lista-numeri (sequence 1 10)))))
+;-> (9 81 648 4536 27216 136080 544320 1632960 3265920 3265920)
+;-> 35989.719
+
+Vedi anche "Conteggio dei numeri con cifre tutte diverse" su "Note libere 26".
+
 ============================================================================
 

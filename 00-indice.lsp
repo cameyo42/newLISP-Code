@@ -284,7 +284,7 @@ ROSETTA CODE
   Il problema di Giuseppe (Josephus Problem)
   ROT-13
   Sudoku
-  Chess960
+  Chess960 (Freestyle)
   Percorso del cavallo
   Teorema cinese dei resti
   Numeri attraenti
@@ -2891,6 +2891,7 @@ NOTE LIBERE 29
   Teorema di Hardy-Ramanujan
   Numeri Belli (Beatiful)
   Numeri Radice
+  Numeri con k cifre diverse
 
 PROBLEMI SUI DADI
 =================

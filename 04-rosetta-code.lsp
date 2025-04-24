@@ -8279,9 +8279,9 @@ Sudoku 2:
 ;-> 265.557
 
 
---------
-CHESS960
---------
+--------------------
+CHESS960 (FREESTYLE)
+--------------------
 
 Chess960 è una variante degli scacchi creata dal campione del mondo Bobby Fischer. Questa variante non richiede un materiale diverso, ma si basa su una posizione iniziale casuale, con alcuni vincoli:
 
@@ -8358,6 +8358,39 @@ Controlliamo la correttezza della funzione generando n posizioni e controllando 
 ;-> nil
 
 Sembra tutto corretto.
+
+Esistono posizioni favorevoli al Bianco?
+----------------------------------------
+Negli Scacchi960 (o Fischer Random) esistono posizioni iniziali che offrono un vantaggio più marcato al Bianco rispetto agli scacchi classici.
+Questo è dovuto al fatto che, in alcune configurazioni, il Bianco può minacciare immediatamente pedoni o pezzi non difesi del Nero già dalla prima mossa.
+Ad esempio, in certe disposizioni, il Bianco può attaccare un pedone non protetto del Nero al primo turno, mentre negli scacchi standard ci vogliono almeno due mosse per farlo.
+
+Esempi di posizioni iniziali favorevoli al Bianco
+-------------------------------------------------
+Analisi effettuate con motori come Stockfish hanno identificato alcune posizioni iniziali con un vantaggio significativo per il Bianco:
+
+- BBNNRKRQ: valutazione di +0.57 a favore del Bianco.
+- NNRKQRBB: +0.52.
+- NNRBKQBR: +0.50.
+- QBBRKRNN: +0.50.
+
+In queste configurazioni, il Bianco può esercitare una pressione immediata, costringendo il Nero a difendersi con precisione sin dalle prime mosse.
+
+Esistono posizioni favorevoli al Nero?
+--------------------------------------
+Nelle configurazioni standard di Scacchi960, dove le posizioni iniziali sono speculari, non sono state identificate posizioni che offrano un vantaggio al Nero.
+Tuttavia, in varianti asimmetriche come il "Double Fischer Random Chess" (DFRC), dove le posizioni iniziali non sono speculari, sono state trovate configurazioni con vantaggi significativi per uno dei due colori.
+Ad esempio, una posizione iniziale con valutazione di +3.59 per il Bianco e un'altra con -2.43 per il Nero sono state identificate.
+
+Equilibrio statistico
+---------------------
+Analisi su milioni di partite di Scacchi960 suggeriscono che, in media, il Bianco vince circa il 49% delle partite, mentre il Nero il 47%, con il restante 4% di patte.
+Questi dati indicano che, sebbene alcune posizioni possano offrire vantaggi iniziali, il gioco rimane sostanzialmente equilibrato.
+
+Conclusione
+-----------
+Sebbene alcune posizioni iniziali in Scacchi960 possano offrire un vantaggio al Bianco, il design della variante mira a ridurre la dipendenza dalla memorizzazione delle aperture e a promuovere la creatività e l'equilibrio nel gioco.
+Per garantire l'equità, soprattutto in tornei ufficiali, è prassi comune giocare due partite con la stessa posizione iniziale, alternando i colori tra i giocatori.
 
 
 --------------------
