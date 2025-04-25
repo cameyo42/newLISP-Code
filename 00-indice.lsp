@@ -2892,6 +2892,10 @@ NOTE LIBERE 29
   Numeri Belli (Beatiful)
   Numeri Radice
   Numeri con k cifre diverse
+  Problema di Brocard-Ramanujan (Numeri di Brown)
+  Text to DNA
+  Sequenza di numeri naturali infiniti
+  Sum of Modulo Sums
 
 PROBLEMI SUI DADI
 =================

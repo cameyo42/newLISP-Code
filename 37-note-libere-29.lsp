@@ -2221,5 +2221,280 @@ Proviamo:
 
 Vedi anche "Conteggio dei numeri con cifre tutte diverse" su "Note libere 26".
 
+
+-----------------------------------------------
+Problema di Brocard-Ramanujan (Numeri di Brown)
+-----------------------------------------------
+
+Il problema di Brocard consiste nel risolvere la seguente equazione diofantea:
+
+ n! + 1 = m^2
+
+Cioè trovare per quali interi n, l'espressione n! + 1 è un quadrato perfetto.
+Si congettura che ciò avvenga solo per n uguale a 4, 5 o 7.
+In altre parole, non è noto se esistano altre soluzioni (n, m) dell'equazione diofantea a parte le coppie (4, 5), (5, 11) e (7, 71) che vengono chiamate numeri di Brown.
+Henri Brocard (1876) e Srinivasa Ramanujan (1913).
+
+Sequenza OEIS A146968:
+Brocard's problem: positive integers n such that n!+1 = m^2.
+  4, 5, 7
+No other terms below 10^9.
+
+Generalizzazione:
+  n! + k = m^2
+
+(define (fact-i num)
+"Calculates the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (a (bigint num))
+    (while (> (* a a) num)
+      (setq a (/ (+ a (/ num a)) 2))
+    )
+    (= (* a a) num)))
+
+(define (brocard limite)
+  (for (num 1 limite)
+    (if (square? (+ (fact-i num) 1)) 
+      (println num { } (sqrt (+ (fact-i num) 1))))))
+
+(brocard 100)
+;-> 4 5
+;-> 5 11
+;-> 7 71
+
+(time (brocard 1e3))
+;-> 4 5
+;-> 5 11
+;-> 7 71
+;-> 204881.11
+
+(define (brocard+ limite-n limite-k)
+  (for (num 1 limite-n)
+    (for (k 1 limite-k)
+      (if (square? (+ (fact-i num) k))
+      (println num { } k { } (sqrt (+ (fact-i num) k)))))))
+
+(brocard+ 100 100)
+;-> 1 3 2
+;-> 1 8 3
+;-> 1 15 4
+;-> 1 24 5
+;-> 1 35 6
+;-> 1 48 7
+;-> 1 63 8
+;-> 1 80 9
+;-> 1 99 10
+;-> 2 2 2
+;-> 2 7 3
+;-> 2 14 4
+;-> 2 23 5
+;-> ...
+;-> 4 40 8
+;-> 4 57 9
+;-> 4 76 10
+;-> 4 97 11
+;-> 5 1 11
+;-> 5 24 12
+;-> 5 49 13
+;-> 5 76 14
+;-> 6 9 27
+;-> 6 64 28
+;-> 7 1 71
+;-> 8 81 201
+
+
+-----------
+Text to DNA
+-----------
+
+Una sequenza di DNA è una successione di lettere che rappresentano la struttura primaria di una molecola di DNA, con la capacità di veicolare informazione.
+Le lettere sono A, C, G e T e rappresentano le quattro basi nucleotidi adenina, citosina, guanina e timina.
+
+https://codegolf.stackexchange.com/questions/79169/golf-text-into-dna
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Convertire un testo ASCII in una sequenza DNA con il seguente algoritmo:
+
+1) Convertire i caratteri del testo in codici ASCII 
+(esempio: codegolf -> (99 111 100 101 103 111 108 102))
+
+2) Unire i codici ASCII
+99111100101103111108102
+
+3) Convertire in binario
+10100111111001101001011010001000011001101011011110000110010111111011000000110
+
+4) Aggiungere uno 0 alla fine per ottenere un numero pari di caratteri
+101001111110011010010110100010000110011010110111100001100101111110110000001100
+
+5) Sostituire 00 con A, 01 con C, 10 con G e 11 con T
+GGCTTGCGGCCGGAGACGCGGTCTGACGCCTTGTAAATA
+
+Esempi:
+  codegolf --> GGCTTGCGGCCGGAGACGCGGTCTGACGCCTTGTAAATA
+  ppcg     --> GGCTAATTGTCGCACTT
+  }        --> TTGG
+
+Sostituzioni:
+00 -> A (Adenine, Adenina)
+01 -> C (Cytosine Citosina)
+10 -> G (Guanine, Guanina)
+11 -> T (Thymine, Timina)
+
+(define (bits-i num)
+"Convert a decimal integer (big integer) to binary string"
+  (setq max-int (pow 2 62)) ; put this outside when doing a lot of calls
+  (define (prep s) (string (dup "0" (- 62 (length s))) s))
+  (if (<= num max-int) (bits (int num))
+      (string (bits-i (/ num max-int))
+              (prep (bits (int (% num max-int)))))))
+
+Funzione che converte un testo in una sequenza DNA:
+
+(define (text-dna str)
+  (local (a1 a2 a3 a4 a5)
+    ; Calcolo codici ASCII
+    (setq a1 (map char (explode str)))
+    ; Calcolo unione dei codici ASCII
+    ; eval-string crea un big integer da una stringa
+    ; che rappresenta un numero big integer (anche senza L)
+    (setq a2 (eval-string (join (map string a1))))
+    ; Conversione in binario
+    (setq a3 (dec-binL a2))
+    ; Pad '0' per numeri dispari
+    (if (even? (length a3))
+        (setq a4 a3)
+        (setq a4 (push "0" a3 -1)))
+    ; Sostituzioni con caratteri DNA
+    (setq a5 (explode a4 2))
+    (replace "00" a5 "A")
+    (replace "01" a5 "C")
+    (replace "10" a5 "G")
+    (replace "11" a5 "T")
+    (join a5)))
+
+Proviamo:
+
+(text-dna "codegolf")
+;-> "GGCTTGCGGCCGGAGACGCGGTCTGACGCCTTGTAAATA"
+(text-dna "ppcg")
+;-> "GGCTAATTGTCGCACTT"
+(text-dna "}")
+;-> "TTGG"
+
+
+------------------------------------
+Sequenza di numeri naturali infiniti
+------------------------------------
+
+Una sequenza di numeri naturali infiniti è una sequenza che contiene ogni numero naturale infinite volte.
+Scrivere la funzione più breve che stampa tutti i numeri naturali da 1 a N per tutti gli N che appartengono ai Numeri Naturali.
+
+Esempio 1:
+1
+1 2
+1 2 3
+1 2 3 4
+1 2 3 4 5
+1 2 3 4 5 6
+1 2 3 4 5 6 7
+...
+
+Esempio 2:
+1 1 2 1 2 3 1 2 3 4 1 2 3 4 5 1 2 3 4 5 6 1 2 3 4 5 6 7 ...
+
+Versione con limite (k):
+
+(define (seq1 k)
+  (for (i 1 k) (for (j 1 i) (print j { }))))
+
+(seq1 5)
+;-> 1 1 2 1 2 3 1 2 3 4 1 2 3 4 5
+
+Versione infinita (read-line):
+
+(define (seq2 i)
+  (until nil (inc i) (for (j 1 i) (print j { })) (read-line)))
+
+(seq2)
+;-> 1
+;-> 1 2
+;-> 1 2 3
+;-> 1 2 3 4
+;-> 1 2 3 4 5
+;-> 1 2 3 4 5 6
+;-> ...
+
+Versione infinita compatta (56 caratteri):
+(define(f i)(until nil(inc i)(for(j 1 i)(print j { }))))
+
+(f)
+;-> 1 1 2 1 2 3 1 2 3 4 1 2 3 4 5 1 2 3 4 5 6 1 2 3 4 5 6 7 ...
+
+
+------------------
+Sum of Modulo Sums
+------------------
+
+https://codegolf.stackexchange.com/questions/102685/sum-of-modulo-sums
+
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Given an integer n > 9, for each possible insertion between digits in that integer, insert an addition + and evaluate.
+Then, take the original number modulo those results.
+Output the sum total of these operations.
+
+An example with n = 47852:
+
+47852 % (4785+2) = 4769
+47852 % (478+52) =  152
+47852 % (47+852) =  205
+47852 % (4+7852) =  716
+                  -----
+                   5842
+
+Funzione che divide un numero in coppie per ogni indice (1..len(n) - 1):
+
+(define (divide-numero n)
+  (let ( (s (string n)) (len (length (string n))) (out '()) )
+    (for (i 1 (- len 1))
+      (push (list (int (slice s 0 i) 0 10) (int (slice s i) 0 10)) out))
+    out))
+
+(divide-numero 12345)
+;-> ((1234 5) (123 45) (12 345) (1 2345))
+
+(divide-numero 1200345)
+;-> ((120034 5) (12003 45) (1200 345) (120 345) (12 345) (1 200345))
+
+(define (modsum n)
+  (letn ( (s (string n)) (len (length s)) (out 0) )
+    (for (i 1 (- len 1))
+      (++ out (% n (+ (int (slice s 0 i) 0 10) (int (slice s i) 0 10)))))
+    out))
+
+Proviamo:
+
+(modsum 47852)
+;-> 5842
+(modsum 13)
+;-> 1
+(modsum 111)
+;-> 6
+(modsum 12345)
+;-> 2097
+(modsum 54321)
+;-> 8331
+(modsum 3729105472)
+;-> 505598476
+
 ============================================================================
 
