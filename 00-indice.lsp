@@ -2896,6 +2896,7 @@ NOTE LIBERE 29
   Text to DNA
   Sequenza di numeri naturali infiniti
   Sum of Modulo Sums
+  Bit manipulation
 
 PROBLEMI SUI DADI
 =================
@@ -2943,7 +2944,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (324 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (327 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

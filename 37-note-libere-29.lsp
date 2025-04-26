@@ -2496,5 +2496,286 @@ Proviamo:
 (modsum 3729105472)
 ;-> 505598476
 
+
+----------------
+Bit manipulation
+----------------
+
+newLISP mette a disposizione i seguenti operatori per le operazioni sui bit dei numeri interi:
+
+Shift Left, Shift Right
+-----------------------
+<<, >>
+syntax: (<< int-1 int-2 [int-3 ... ])
+syntax: (>> int-1 int-2 [int-3 ... ])
+syntax: (<< int-1)
+syntax: (>> int-1)
+
+The number int-1 is arithmetically shifted to the left or right by the number of bits given as int-2, then shifted by int-3 and so on.
+For example, 64-bit integers may be shifted up to 63 positions.
+When shifting right, the most significant bit is duplicated (arithmetic shift):
+
+(>> 0x8000000000000000 1)  ;->  0xC000000000000000  ; not 0x0400000000000000!
+
+(<< 1 3)      ;->   8
+(<< 1 2 1)    ;->   8
+(>> 1024 10)  ;->   1
+(>> 160 2 2)  ;->  10
+
+(<< 3)        ;->   6
+(>> 8)        ;->   4
+
+When int-1 is the only argument << and >> shift by one bit.
+
+Bitwise AND
+-----------
+&
+syntax: (& int-1 int-2 [int-3 ... ])
+A bitwise and operation is performed on the number in int-1 with the number in int-2, then successively with int-3, etc.
+
+(& 0xAABB 0x000F)  ;->  11  ; which is 0xB
+
+Bitwise OR
+----------
+|
+syntax: (| int-1 int-2 [int-3 ... ])
+A bitwise or operation is performed on the number in int-1 with the number in int-2, then successively with int-3, etc.
+
+(| 0x10 0x80 2 1)  ;-> 147
+
+Bitwise XOR
+-----------
+^
+syntax: (^ int-1 int-2 [int-3 ... ])
+A bitwise xor operation is performed on the number in int-1 with the number in int-2, then successively with int-3, etc.
+
+(^ 0xAA 0x55)  ;-> 255
+
+Bitwise NOT
+-----------
+~
+syntax: (~ int)
+A bitwise not operation is performed on the number in int, reversing all of the bits.
+
+(format "%X" (~ 0xFFFFFFAA))  ;-> "55"
+(~ 0xFFFFFFFF)                ;-> 0
+
+Vediamo tre funzioni per la manipolazione dei bit di un numero intero:
+
+- (get-bit   num idx) Recupera il valore del bit all'indice idx di num
+- (set-bit   num idx) Imposta a 1 il bit all'indice idx di num
+- (clear-bit num idx) Imposta a 0 il bit all'indice idx di num
+
+Esempio:
+  Numero intero = 142
+  Numero binario = "10001110"
+  Indice: 7 6 5 4 3 2 1 0
+  Bit:    1 0 0 0 1 1 1 0
+
+Funzione che restituisce il bit all'indice idx di un numero intero num:
+
+(define (get-bit num idx)
+  (if (zero? (& num (<< 1 idx))) 0 1))
+
+(bits 142)
+;-> "10001110"
+
+(map (fn(x) (get-bit 142 x)) (sequence 8 0))
+;-> (0 1 0 0 0 1 1 1 0)
+
+Funzione che imposta a 1 il bit all'indice idx di un numero intero num:
+
+(define (set-bit num idx) (| num (<< 1 idx)))
+
+(bits 142)
+;-> "10001110"
+
+(set-bit 142 0)
+;-> 143
+(bits 143)
+;-> "10001111"
+
+(set-bit 142 6)
+;-> 206
+(bits 206)
+;-> "11001110"
+
+Funzione che imposta a 0 il bit all'indice idx di un numero intero num:
+
+(define (clear-bit num idx)
+  (let (mask (~ (<< 1 idx)))
+    (& num mask)))
+
+(bits 142)
+;-> "10001110"
+(clear-bit 142 1)
+;-> 140
+(bits 140)
+;-> 10001100
+(clear-bit 142 7)
+;-> 14
+(bits 14)
+;-> "1110"
+
+Ecco una lista sintetica del comportamento degli operatori bitwise sui numeri interi (considerando sempre interi con segno, come in newLISP e molti linguaggi C-like):
+
+Operatori bitwise in forma simbolica
+------------------------------------
+| Operatore | Nome               | Effetto su un intero positivo N               | Esempio     |
+|-----------|--------------------|-----------------------------------------------|-------------|
+| ~N        | NOT bitwise        | -(N + 1)                                      | ~5 = -6     |
+| &         | AND bitwise        | Bit a 1 solo se entrambi hanno il bit a 1     | 5 & 3 = 1   |
+| |         | OR bitwise         | Bit a 1 se almeno uno ha il bit a 1           | 5 | 3 = 7   |
+| ^         | XOR bitwise        | Bit a 1 se uno solo dei due ha il bit a 1     | 5 ^ 3 = 6   |
+| << N      | shift left         | Moltiplica per 2^N                            | 3 << 1 = 6  |
+| >> N      | shift right arit.  | Divide per 2^N (tronca verso zero)            | 6 >> 1 = 3  |
+
+Dettagli ed equivalenze matematiche
+-----------------------------------
+1. NOT (~N)
+   - Operazione: inverte tutti i bit.
+   - Equivalente a: ~N = -(N + 1)
+   - Esempio: ~7 = -8, ~0 = -1
+
+2. AND (A & B)
+   - Bit per bit: 1 solo se entrambi i bit sono 1.
+   - Esempio: 6 & 3 = 2 (in binario: 110 & 011 = 010)
+
+3. OR (A | B)
+   - Bit per bit: 1 se almeno uno è 1.
+   - Esempio: 6 | 3 = 7 (in binario: 110 | 011 = 111)
+
+4. XOR (A ^ B)
+   - Bit per bit: 1 se i bit sono diversi.
+   - Esempio: 6 ^ 3 = 5 (in binario: 110 ^ 011 = 101)
+
+5. Shift sinistro (A << N)
+   - Equivalente a: A * 2^N
+   - Esempio: 2 << 3 = 16 (perché 2 * 2^3 = 16)
+
+6. Shift destro (A >> N) (aritmetico)
+   - Equivalente a: floor(A / 2^N) per A >= 0
+   - Esempio: 17 >> 2 = 4 (perché 17 / 4 = 4.25, troncato)
+
+Alcune formule comode
+---------------------
+- (<< 1 N) = 2 * N
+- (>> 1 N) = floor(N / 2)
+- (<< 2 N) = 4 * N = N * 2^2
+- (<< N 1) = 2^N (se N è il numero da shiftare, non lo shift)
+
+Nota: in newLISP (<< 2 3) significa "shiftare 2 di 3 bit a sinistra", quindi 2 << 3 = 16, che è 2^4, non 2^3.
+
+Riassunto per numeri positivi
+-----------------------------
+- ~N       --> cambia segno e aggiunge 1 negativo
+- << N     --> moltiplica per 2^N
+- >> N     --> divide per 2^N
+- << 1     --> per 2
+- >> 1     --> diviso 2
+- << k     --> N * 2^k
+- (<< 1 k) --> 2^k
+- (<< 2 k) --> 2 * 2^k = 2^{k+1}
+
+Ecco una tabella con il comportamento degli operatori bitwise per numeri negativi (con segno, a complemento a due, come in newLISP o C).
+
+Tabella operatori bitwise con N negativo
+----------------------------------------
+Assumiamo N = -X, con X > 0
+
+| Operatore  | Significato          | Descrizione (N negativo)                         | Esempio         |
+|------------|----------------------|--------------------------------------------------|-----------------|
+| ~N         | NOT bitwise          | ~(-X) = X - 1                                    | ~(-5) = 4       |
+| &          | AND bitwise          | Bit per bit tra negativi e/o positivi            | (-6) & 3 = 2    |
+| |          | OR bitwise           | Bit per bit tra negativi e/o positivi            | (-6) \| 3 = -5  |
+| ^          | XOR bitwise          | Bit per bit tra negativi e/o positivi            | (-6) ^ 3 = -7   |
+| N << k     | shift sinistro       | (-X) << k = -X * 2^k                             | (-3) << 2 = -12 |
+| N >> k     | shift destro arit.   | (-X) >> k = floor(-X / 2^k) con segno mantenuto  | (-9) >> 1 = -5  |
+
+Approfondimenti
+---------------
+1. NOT (~N) con N negativo:
+- Inverte tutti i bit → risultato positivo.
+- ~(-X) = X - 1
+- Esempio:
+  - ~(-8) = 7
+  - ~(-1) = 0
+
+2. Shift sinistro (<<):
+- Anche su negativi, moltiplica per 2^k, segno incluso.
+- Esempio: (-3) << 2 = -12
+
+3. Shift destro (>>):
+- In aritmetico mantiene il segno (in newLISP).
+- Si comporta come divisione intera "floor verso -∞"
+- Esempi:
+  - (-9) >> 1 = -5  (perché -9 / 2 = -4.5 → floor(-4.5) = -5)
+  - (-4) >> 1 = -2
+
+Riassunto per N negativo
+------------------------
+| Operatore | Risultato                                 |
+|-----------|-------------------------------------------|
+| ~N        | -N - 1                                    |
+| << k      | N * 2^k                                   |
+| >> k      | floor(N / 2^k)                            |
+| A & B     | confronta bit per bit (complemento a due) |
+| A | B     | confronta bit per bit                     |
+| A ^ B     | confronta bit per bit                     |
+
+Facciamo gli esempi per:
+
+- ~(-5)
+- (-5) >> 1
+
+Esempio 1 — Calcolare ~(-5) in binario
+--------------------------------------
+1. Partiamo da 5 in binario su 8 bit: 00000101
+
+2. Scriviamo -5 in complemento a due:
+   - Prima invertiamo i bit:   11111010
+   - Poi aggiungiamo 1:        11111011
+   Quindi -5 è:                11111011
+
+3. Ora applichiamo il bitwise NOT (~):
+   Invertiamo tutti i bit di -5: ~11111011 = 00000100
+
+4. 00000100 in decimale è 4.
+
+Quindi:
+
+~(-5) = 4
+
+Esempio 2 — Calcolare (-5) >> 1 in binario
+------------------------------------------
+1. Partiamo di nuovo da -5, che è: 11111011
+
+2. Facciamo uno shift a destra aritmetico (>> 1):
+   - Manteniamo il bit di segno (quindi il primo bit resta 1)
+   - Shiftiamo tutto verso destra di 1:
+     Prima: 11111011
+     Dopo:  11111101
+
+3. 11111101 in complemento a due è:
+   - Invertiamo i bit: 00000010
+   - Aggiungiamo 1:    00000011
+   Quindi il valore è -3.
+
+Però ATTENZIONE: lo shift aritmetico in newLISP/C fa il floor verso il basso.
+Facciamo il conto:
+
+-5 / 2 = -2.5 --> floor(-2.5) = -3
+
+Quindi:
+
+(-5) >> 1 = -3
+
+Riepilogo finale
+----------------
+| Espressione | Risultato | Binario intermedio |
+|-------------|-----------|--------------------|
+| ~(-5)       | 4         | 00000100           |
+| (-5) >> 1   | -3        | 11111101           |
+
 ============================================================================
 
