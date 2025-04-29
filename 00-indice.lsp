@@ -2897,6 +2897,11 @@ NOTE LIBERE 29
   Sequenza di numeri naturali infiniti
   Sum of Modulo Sums
   Bit manipulation
+  Bit manipulation (Funzioni)
+  Big-endian e Little-endian
+  Addizione di due numeri binari (stringa)
+  Maggiore e minore di tre interi (senza operatori di comparazione)
+  Addizione di due interi (check for overflow)
 
 PROBLEMI SUI DADI
 =================
@@ -2944,7 +2949,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (327 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (328 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

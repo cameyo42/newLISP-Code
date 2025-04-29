@@ -2560,11 +2560,12 @@ A bitwise not operation is performed on the number in int, reversing all of the 
 (format "%X" (~ 0xFFFFFFAA))  ;-> "55"
 (~ 0xFFFFFFFF)                ;-> 0
 
-Vediamo tre funzioni per la manipolazione dei bit di un numero intero:
+Vediamo quattro funzioni per la manipolazione dei bit di un numero intero:
 
-- (get-bit   num idx) Recupera il valore del bit all'indice idx di num
-- (set-bit   num idx) Imposta a 1 il bit all'indice idx di num
-- (clear-bit num idx) Imposta a 0 il bit all'indice idx di num
+- (get-bit    num idx) Recupera il valore del bit all'indice idx di num
+- (set-bit    num idx) Imposta a 1 il bit all'indice idx di num
+- (clear-bit  num idx) Imposta a 0 il bit all'indice idx di num
+- (toggle-bit num idx) Inverte il bit all'indice idx di num
 
 Esempio:
   Numero intero = 142
@@ -2616,6 +2617,18 @@ Funzione che imposta a 0 il bit all'indice idx di un numero intero num:
 ;-> 14
 (bits 14)
 ;-> "1110"
+
+Funzione che inverte il bit all'indice idx di un numero intero num:
+
+(define (toggle-bit num idx)
+  (^ num (<< 1 idx)))
+
+(bits 45)
+;-> "101101"
+(toggle-bit 45 3)
+;-> 37
+(bits 37)
+;-> "100101"
 
 Ecco una lista sintetica del comportamento degli operatori bitwise sui numeri interi (considerando sempre interi con segno, come in newLISP e molti linguaggi C-like):
 
@@ -2776,6 +2789,594 @@ Riepilogo finale
 |-------------|-----------|--------------------|
 | ~(-5)       | 4         | 00000100           |
 | (-5) >> 1   | -3        | 11111101           |
+
+
+---------------------------
+Bit manipulation (Funzioni)
+---------------------------
+
+Elenco delle funzioni implementate:
+
+ 1) Calcolare il bit più basso (LSB) di un numero
+ 2) Azzerare il bit più basso (LSB) di un numero
+ 3) Calcolare il bit più alto (MSB) di un numero
+ 4) Azzerare il bit più alto (MSB) di un numero
+ 5) Verificare se un numero è una potenza di due
+ 6) Verificare se un numero ha tutti i bit settati
+ 7) Verificare se un numero ha i bit alternati
+ 8) Verificare se due numeri hanno segno opposto
+ 9) Scambiare i valori di due numeri
+10) Verificare se due numeri sono uguali
+11) Algoritmo di Euclide per Massimo Comun Divisore (GCD)
+12) Copia tra due numeri di bit-set in un intervallo
+
+Nota: il parametro (num) delle funzioni deve essere un numero intero positivo.
+
+1) Calcolare il bit più basso (LSB) di un numero
+------------------------------------------------
+Questo si ottiene usando l'espressione 'X &(-X)'.
+Vediamolo con un esempio: Sia X = 00101100.
+Quindi ~X(complemento a 1) sarà '11010011' e il complemento a 2 sarà (~X+1 o -X), ovvero '11010100'.
+Quindi, se eseguiamo l'operazione 'AND' del numero originale 'X' con il suo complemento a 2, che è '-X', otteniamo il bit più basso:
+
+    00101100
+  & 11010100
+  -----------
+    00000100
+
+(define (lsb num) (& num (- num)))
+
+(lsb 36)
+;-> 4
+(bits 36)
+;-> "100100"
+(bits 4)
+;-> "100"
+
+2) Azzerare il bit più basso (LSB) di un numero
+-----------------------------------------------
+Con la seguente funzione imposto a 0 il LSB di un numero intero:
+
+(define (clear-lsb) (& num (- num 1)))
+
+(clear-lsb 312)
+;-> 304
+(bits 312)
+;-> "100111000"
+(bits 304)
+;-> "100110000"
+
+3) Calcolare il bit più alto (MSB) di un numero
+-----------------------------------------------
+Convertiamo in newlisp la seguente funzione in C che calcola il MSB di un numero intero.
+
+int MSB(int n)
+{
+  // Below steps set bits after MSB (including MSB)
+  // Suppose n is 273 (binary is 100010001).
+  // It does following: 100010001 | 010001000 = 110011001
+  n |= n >> 1;
+
+  // This makes sure 4 bits (From MSB and including MSB) are set.
+  // It does following: 110011001 | 001100110 = 111111111
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+
+  // The naive approach would increment n by 1,
+  // so only the MSB+1 bit will be set.
+  // So now n theoretically becomes 1000000000.
+  // All the would remain is a single bit right shift:
+  //    n = n + 1;
+  //    return (n >> 1);
+  //
+  // ... however, this could overflow the type.
+  // To avoid overflow, we must retain the value
+  // of the bit that could overflow:
+  //     n & (1 << ((sizeof(n) * CHAR_BIT)-1))
+  // and OR its value with the naive approach:
+  //     ((n + 1) >> 1)
+  n = ((n + 1) >> 1) |
+      (n & (1 << ((sizeof(n) * CHAR_BIT)-1)));
+  return n;
+}
+
+(define (msb num)
+  (let (INT_SIZE 64)
+    (setq num (| num (>> num 1)))
+    (setq num (| num (>> num 2)))
+    (setq num (| num (>> num 4)))
+    (setq num (| num (>> num 8)))
+    (setq num (| num (>> num 16)))
+    (setq num (| (>> (add num 1) 1)
+              (& num (<< 1 (- INT_SIZE 1)))))
+    num))
+
+(msb 21)
+;-> 16
+(bits 21)
+;-> "10101"
+(bits 16)
+;-> "10000"
+
+(msb 273)
+;-> 256
+(bits 273)
+;-> "100010001"
+(bits 256)
+;-> "100000000"
+
+(msb 1001)
+;-> 512
+(bits 1001)
+;-> "1111101001"
+(bits 512)
+;-> "1000000000"
+
+4) Azzerare il bit più alto (MSB) di un numero
+----------------------------------------------
+Per azzerare il MSB (Most Significant Bit) di un numero, occorre:
+- Trovare qual è il bit più alto impostato a 1.
+- Creare una maschera che ha 0 in quella posizione e 1 negli altri.
+- Fare l'operazione AND tra il numero e la maschera.
+
+Quale funzione è quella corretta?
+
+(define (clear-msb num)
+  (let ( (n num) (msb 1) )
+    (while (> n 1)
+      (setq n (>> n 1))
+      (setq msb (<< msb 1)))
+    (& num (- msb 1))))
+
+Come funziona?
+Partiamo da:
+  n = num
+  msb = 1
+Ciclo:
+  Finché n > 1:
+    n = n >> 1 → sposti i bit verso destra (scali verso il bit più significativo).
+    msb = msb << 1 → sposti il bit "acceso" a sinistra per inseguire il MSB.
+Fine ciclo:
+  Ora msb contiene solo il bit corrispondente al MSB di num.
+Maschera:
+  msb - 1 genera una maschera con tutti 1 sotto il MSB.
+Risultato:
+  Calcolare (& num (- msb 1)) per togliere il MSB.
+
+(clear-msb 312)
+;-> 56
+(bits 312)
+;-> "100111000"
+(bits 56)
+;-> "111000"
+
+(clear-msb 30)
+;-> 14
+(bits 30)
+;-> "11110"
+(bits 14)
+;-> "1110"
+
+Anche la seguente funzione azzera il MSB:
+
+(define (clear-msb2 num)
+  (& num (^ (<< 1 (- (length (bits num)) 1)) -1)))
+
+Come funziona?
+
+- (bits num)
+   --> converte num in stringa binaria ("100111000" per 312).
+- (length (bits num))
+   --> conta il numero di cifre binarie (senza zeri iniziali).
+- (- (length (bits num)) 1)
+   --> posizione dello zero-based MSB (tipo posizione massima).
+- (<< 1 ...)
+   --> costruisce un numero con solo il MSB acceso.
+- (^ ... -1)
+  --> fa il NOT bitwise: tutti 1 tranne il MSB.
+- (& num ...)
+   --> applica la maschera per azzera il MSB.
+
+(clear-msb2 312)
+;-> 56
+(clear-msb2 30)
+;-> 14
+
+5) Verificare se un numero è una potenza di due
+-----------------------------------------------
+Notiamo che se n è una potenza di 2, allora la sua rappresentazione binaria ha esattamente un bit impostato a 1, e n-1 avrà tutti i bit a destra di quel bit impostati a 1.
+Quindi, n & (n-1) sarà sempre 0 per le potenze di 2 (tranne che per num=0).
+
+(define (power2? num)
+ (and (> num 0) (zero? (& num (- num 1)))))
+ (num > 0) and ((num & (num - 1)) == 0))
+
+(filter power2? (sequence 1 100))
+;-> (1 2 4 8 16 32 64)
+
+6) Verificare se un numero ha tutti i bit settati
+-------------------------------------------------
+Un numero ha tutti i bit a 1 se risulta: (((n + 1) & n) == 0)
+
+Esempi:
+  num = 88       --> 1011000
+  (num + 1) = 89 --> 1011001
+  (& 88 89) = 88 --> 1011000 (non ha tutti i bit a 1)
+     1011001
+   & 1011000
+   ---------
+     1011000
+
+  num = 63  --> 111111
+  (num + 1) = 64 --> 1000000
+  (& 63 64) = 0
+
+(define (allbitset? num) (zero? (& (+ num 1) num)))
+
+(filter allbitset? (sequence 1 100))
+;-> (1 3 7 15 31 63)
+(map bits '(1 3 7 15 31 63))
+;-> ("1" "11" "111" "1111" "11111" "111111")
+
+7) Verificare se un numero ha i bit alternati
+---------------------------------------------
+Il numero 42 ha bit alternati:
+(bits 42)
+;-> "101010"
+Il numero 5 ha bit alternati:
+(bits 5)
+;-> "101"
+
+Il numero 12 non ha bit alternati:
+(bits 12)
+;-> "1100"
+
+Algoritmo
+- Calcolare l'XOR bit a bit (XOR indicato con ^) di n e (n >> 1).
+- Se n ha uno schema alternato, l'operazione n ^ (n >> 1) produrrà un numero con tutti i bit impostati a 1.
+
+(define (allbitset? num) (zero? (& (+ num 1) num)))
+
+(define (alternatebitorder? num) (allbitset? (^ num (>> num 1))))
+
+(int "101010" 0 2)
+;-> 42
+(int "10101" 0 2)
+;-> 21
+
+(int "111111" 0 2)
+;-> 63
+(int "101110" 0 2)
+;-> 46
+
+(filter alternatebitorder? (sequence 1 100))
+;-> (1 2 5 10 21 42 85)
+(map bits '(1 2 5 10 21 42 85))
+;-> ("1" "10" "101" "1010" "10101" "101010" "1010101")
+
+8) Verificare se due numeri hanno segno opposto
+-----------------------------------------------
+L'operazione XOR (^) tra due numeri con segni opposti avrà sempre il bit più a sinistra (il bit di segno) impostato su 1.
+Ciò significa che se (a ^ b) < 0, allora a e b hanno segni opposti.
+
+(define (opposite-sign? n1 n2) (< (^ n1 n2) 0))
+
+(opposite-sign? 2 3)
+;-> nil
+(opposite-sign? -2 -3)
+;-> nil
+(opposite-sign? -2 3)
+;-> true
+(opposite-sign? 2 -3)
+;-> true
+
+9) Scambiare i valori di due numeri
+-----------------------------------
+Usiamo le proprietà dello XOR:
+
+a = a ^ b: Memorizza lo XOR di 'a' e 'b' in 'a'.
+           Ora, 'a' contiene il risultato di (a ^ b).
+b = a ^ b: Esegue lo XOR bit a bit del nuovo valore di 'a' con 'b' per ottenere il valore originale di 'a'.
+           Questo ci dà, b = (a ^ b) ^ b = a.
+a = a ^ b: Esegue lo XOR del nuovo valore di 'a' con il nuovo valore di 'b' (che è l'originale a) per ottenere il valore originale di b.
+           Questo ci dà, a = (a ^ b) ^ a = b.
+
+(define (exchange n1 n2)
+  (setq n1 (^ n1 n2))
+  (setq n2 (^ n1 n2))
+  (setq n1 (^ n1 n2))
+  (list n1 n2))
+
+(exchange -20 10)
+;-> (10 -20)
+
+10) Verificare se due numeri sono uguali
+----------------------------------------
+Lo XOR di due numeri è 0 se i numeri sono uguali, altrimenti è diverso da zero.
+
+(define (equal n1 n2) (zero? (^ n1 n2)))
+
+(equal 2 4)
+;-> nil
+
+(equal 3 3)
+;-> true
+
+
+11) Algoritmo di Euclide per Massimo Comun Divisore (GCD)
+---------------------------------------------------------
+Funzione standard per il calcolo del GCD con l'algoritmo di Euclide:
+
+(define (gcd-e a b)
+  (if (zero? a) b
+      (gcd (% b a) a)))
+
+Utilizzando gli operatori bitwise:
+- possiamo trovare x/2 usando x>>1.
+- possiamo verificare se x è pari o dispari usando x&1.
+
+gcd(a, b) = 2*gcd(a/2, b/2) se sia a che b sono pari.
+gcd(a, b) = gcd(a/2, b) se a è pari e b è dispari.
+gcd(a, b) = gcd(a, b/2) se a è dispari e b è pari.
+
+(define (gcd-bit a b)
+  (cond
+    ((or (zero? b) (= a b)) a)
+    ((zero? a) b)
+    ; If both a and b are even, divide both a and b by 2.
+    ; And multiply the result with 2
+    ((and (zero? (& a 1)) (zero? (& b 1)))
+      (<< (gcd-bit (>> a 1) (>> b 1)) 1))
+    ; If a is even and b is odd, divide a by 2
+    ((and (zero? (& a 1)) (!= (& b 1) 0))
+      (gcd-bit (>> a 1) b))
+    ; If a is odd and b is even, divide b by 2
+    ((and (!= (& a 1) 0) (zero? (& b 1)))
+      (gcd-bit a (>> b 1)))
+    ; If both are odd, then apply normal subtraction algorithm.
+    ; Note that odd-odd case always converts odd-even case after one recursion
+    (true
+      (if (> a b) (gcd-bit (- a b) b) (gcd-bit a (- b a))))))
+
+(gcd-bit 28 120)
+;-> 4
+
+Test di correttezza:
+
+(define (test iter)
+  (setq a (+ (rand 1e5) 1))
+  (setq b (+ (rand 1e5) 1))
+  (if (> b a) (swap a b))
+  (if (!= (gcd-bit a b) (gcd a b))
+      (println "Errore: " a { } b { } (gcd-bit a b) { } (gcd a b))))
+
+12) Copia tra due numeri di bit-set in un intervallo
+----------------------------------------------------
+Dati due numeri x e y e un intervallo [l, r] in cui 1 <= l, r <= 64, scrivere una funzione che copia i bit di y che valgono 1 (bit-set) nell'intervallo da l a r compresi e li copia in x.
+
+Esempio:
+
+x = 102 --> "1100110"
+y = 56  -->  "111000"
+                   5 3
+l = 3, r = 5 --> "111000" --> "110"
+
+Copia su x dei bit a 1 di y nell'intervallo:
+
+ 1100110 
+   110  
+---------
+ 1111110 --> 126
+
+(int "1111110" 0 2)
+;-> 126
+
+(define (copy-bits x y l r)
+  (cond ((or (< l 1) (> r 64)) x)
+        (true
+          ; get the length of the mask
+          (setq masklen (int (- (<< 1 (+ r 1 (- l))) 1)))
+          ; Shift the mask to the required position
+          ; "&" with y to get the set bits at between
+          ; l ad r in y
+          (setq mask (& (<< masklen (- l 1)) y))
+          (setq x (| x mask)))))
+
+Proviamo:
+
+(copy-bits 102 56 4 6)
+;-> 126
+
+(copy-bits 10 13 2 3)
+;-> 14
+
+
+--------------------------
+Big-endian e Little-endian
+--------------------------
+
+Cosa significa Endianness?
+--------------------------
+La parola "Endianness" si riferisce all'ordine in cui i byte sono disposti in memoria.
+L'endianness si presenta in due forme principali: Big-endian (BE) e Little-endian (LE).
+I computer memorizzano i byte in una di queste due forme:
+
+Big-endian (BE): Memorizza per primo il byte più significativo (il "big end").
+Ciò significa che il primo byte (all'indirizzo di memoria più basso) è il più grande, il che ha più senso per chi legge da sinistra a destra.
+
+Little-endian (LE): Memorizza per primo il byte meno significativo (il "little end").
+Ciò significa che il primo byte (all'indirizzo di memoria più basso) è il più piccolo, il che ha più senso per chi legge da destra a sinistra.
+
+Cos'è il Big-endian (BE)?
+-------------------------
+In un sistema big-endian, il byte più significativo (MSB) viene memorizzato all'indirizzo di memoria più basso. Ciò significa che il "big end" (la parte più significativa del dato) viene memorizzato per primo.
+Ad esempio, un intero a 32 bit 0x12345678 verrebbe memorizzato in memoria come segue in un sistema big-endian:
+
+Indirizzo: 00   01   02   03
+Dati:         12   34   56    78
+Qui, 0x12 è il byte più significativo, posizionato all'indirizzo più basso (00), seguito da 0x34, 0x56 e 0x78 all'indirizzo più alto (03).
+
+Cos'è il Little-endian?
+-----------------------
+Un sistema little-endian memorizza il byte meno significativo (LSB) all'indirizzo di memoria più basso. Il "little end" (la parte meno significativa dei dati) viene prima. Per lo stesso intero a 32 bit 0x12345678, un sistema little-endian lo memorizzerebbe come:
+
+Indirizzo: 00   01   02   03
+Dati:         78   56   34   12
+Qui, 0x78 è il byte meno significativo, posizionato all'indirizzo più basso (00), seguito da 0x56, 0x34 e 0x12 all'indirizzo più alto (03).
+
+Significato del byte più significativo (MSbyte) in Little e Big Endian
+----------------------------------------------------------------------
+Per chiarire meglio il concetto di endianness vediamo il concetto di byte più significativo (MSbyte).
+Consideriamo il numero decimale 2984.
+Cambiando la cifra da 4 a 5, il numero aumenta di 1, mentre cambiando la cifra da 2 a 3, il numero aumenta di 1000.
+Questo concetto si applica anche a byte e bit.
+
+Byte più significativo (MSbyte): il byte che contiene il valore di posizione più alto.
+Byte meno significativo (LSbyte): il byte che contiene il valore di posizione più basso.
+
+Nel formato big-endian, l'MSbyte viene memorizzato per primo.
+Nel formato little-endian, l'MSbyte viene memorizzato per ultimo.
+
+Quando l'endianness potrebbe essere un problema?
+------------------------------------------------
+L'endianness deve essere presa in considerazione quando sistemi con ordini di byte diversi devono comunicare o condividere dati.
+
+
+----------------------------------------
+Addizione di due numeri binari (stringa)
+----------------------------------------
+
+(define (add-binary s1 s2)
+  ; Trim Leading Zeros
+  (setq s1 (trim s1 "0" ""))
+  (setq s2 (trim s2 "0" ""))
+  (setq n (length s1))
+  (setq m (length s2))
+  ; Swap the strings if s1 is of smaller length
+  (when (< n m)
+    (swap n m)
+    (swap s1 s2))
+  (setq j (- m 1))
+  (setq carry 0)
+  (setq out "")
+  ; Traverse both strings from the end
+  (for (i (- n 1) 0 -1)
+    (setq bit1 (int (s1 i)))
+    (setq bit-sum (+ bit1 carry))
+    ; If there are remaining bits in s2, then add them to the bitSum
+    (when (>= j 0)
+            # Current bit of s2
+            (setq bit2 (int (s2 j)))
+            (setq bit-sum (+ bit-sum bit2))
+            (-- j))
+    ; Calculate the out bit and update carry
+    (setq bit (% bit-sum 2))
+    (setq carry (/ bit-sum 2))
+    ; Update the current bit in out
+    (push (string bit) out)
+  )
+  ; If there's any carry left, prepend it to the out
+  (if (> carry 0) (push "1" out))
+  out)
+
+Proviamo:
+
+13 + 7 = 20  --> "1101" + "111" = "10100"
+(add-binary "01101" "00111")
+;-> 10100
+(int "01101" 0 2)
+;-> 13
+(int "00111" 0 2)
+;-> 7
+(int "10100" 0 2)
+;-> 20
+
+Test di correttezza con 1e5 addizioni:
+
+(for (i 1 1e5)
+  (setq s1 (bits (rand 1e6)))
+  (setq s2 (bits (rand 1e6)))
+  (when (!= (int (add-binary s1 s2) 0 2) (+ (int s1 0 2) (int s2 0 2)))
+    (println "Errore: " s1 { } s2)
+    (println (int (add-binary s1 s2) 0 2) { } (+ (int s1 0 2) (int s2 0 2)))))
+;-> nil
+
+
+-----------------------------------------------------------------
+Maggiore e minore di tre interi (senza operatori di comparazione)
+-----------------------------------------------------------------
+
+Trovare il più grande e il più piccolo di tre numeri interi positivi a, b e c senza utilizzare operatori di comparazione.
+
+Algoritmo (numero maggiore)
+Sottrarre 1 da tutti i numeri fino a che l'ultimo di loro diventa 0.
+Il numero di sottrazioni rappresenta il numero maggiore.
+
+(define (maggiore a b c)
+  (let (conta 0)
+    (while (or (> a 0) (> b 0) (> c 0))
+      (-- a) (-- b) (-- c)
+      (++ conta))
+    conta))
+
+(maggiore 3 6 2)
+;-> 6
+
+Algoritmo (numero minore)
+Sottrarre 1 da tutti i numeri fino a che uno di loro diventa 0.
+Il numero di sottrazioni rappresenta il numero minore.
+
+(define (minore a b c)
+  (let (conta 0)
+    (while (and (> a 0) (> b 0) (> c 0))
+      (-- a) (-- b) (-- c)
+      (++ conta))
+    conta))
+
+(minore 3 6 2)
+;-> 2
+
+
+--------------------------------------------
+Addizione di due interi (check for overflow)
+--------------------------------------------
+
+Scrivere una funzione che addiziona due numeri interi e rileva l'overflow durante l'addizione.
+Se la somma non causa un overflow, restituire la loro somma.
+In caso contrario, restituire nil (overflow).
+
+Il ragionamento è che l'overflow può verificarsi solo se entrambi i numeri hanno lo stesso segno, ma la somma ha segno opposto.
+Infatti nella tipica rappresentazione di numeri interi, il superamento del limite massimo o minimo causa un effetto di wraparound, invertendo il segno.
+Verificando se si verifica questa inversione di segno, possiamo determinare con precisione l'overflow e restituire un indicatore di errore.
+
+(setq MAX-INT  9223372036854775807)
+(setq MIN-INT -9223372036854775808)
+
+(+ MAX-INT 1)
+;-> -9223372036854775808
+
+(+ MIN-INT -1)
+;-> 9223372036854775807
+
+(define (add-overflow a b)
+  (let (sum (+ a b))
+    (if (or (and (> a 0) (> b 0) (< sum 0))
+            (and (< a 0) (< b 0) (> sum 0)))
+      nil
+      sum)))
+
+(add-overflow MAX-INT 1)
+;-> nil
+(add-overflow MIN-INT -1)
+;-> nil
+
+(add-overflow 9223372036854775800 7)
+;-> 9223372036854775807
+
+(add-overflow -9223372036854775800 -8)
+;-> -9223372036854775808
 
 ============================================================================
 
