@@ -2899,9 +2899,11 @@ NOTE LIBERE 29
   Bit manipulation
   Bit manipulation (Funzioni)
   Big-endian e Little-endian
+  Int32 e Int64 (IEEE 754)
   Addizione di due numeri binari (stringa)
   Maggiore e minore di tre interi (senza operatori di comparazione)
   Addizione di due interi (check for overflow)
+  Fabbisogno calorico
 
 PROBLEMI SUI DADI
 =================

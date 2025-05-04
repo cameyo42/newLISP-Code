@@ -92,20 +92,20 @@ Il numero di Khinchin è una costante matematica che ha la proprietà di essere 
 Questa costante, chiamata K0, è stata dimostrata da Aleksandr Yakovlevich Khinchin.
 
 In formule, per ogni numero reale x:
-                     1   
+                     1
   x = a0 + ----------------------
-                        1 
+                        1
            a1 + -----------------
                           1
                 a2 + ------------
                              1
                      a3 + -------
-                     ...  
-               
+                     ...
+
 E' quasi sempre vero che:
 
   lim(a1*a2*a3*...)^(1/n) = K0
-  n->Inf  
+  n->Inf
 
 Il suo valore è:
 
@@ -122,7 +122,7 @@ Decimal expansion of Khinchin's constant.
 
 Esistono diverse formule per calcolare questa costante, useremo la seguente:
 
-                                1 
+                                1
   K0 = Prod[i=1..Inf] (1 + -----------)^(log2(i))
                             i*(i + 2)
 
@@ -137,7 +137,7 @@ Esistono diverse formule per calcolare questa costante, useremo la seguente:
 Proviamo:
 
 (time (println (map khinchin '(1e2 1e3 1e4 1e5 1e6 1e7 1e8))))
-;-> (2.479449507190302 
+;-> (2.479449507190302
 ;->  2.655030716354817
 ;->  2.681499686663015
 ;->  2.684967264898293
@@ -160,7 +160,7 @@ Il numero di Somos
 Il numero di Somos è una constante definita come espressione di infinite radici quadrate annidate:
 Questa costante, chiamata S (sigma), è stata definita Michael Somos.
 
-  S = sqrt(1 * sqrt(2 * sqrt(3 * sqrt(4 * ...)))) = 
+  S = sqrt(1 * sqrt(2 * sqrt(3 * sqrt(4 * ...)))) =
     = 1.6616879496335941212958...
 
 Sequenza OEIS A112302:
@@ -173,7 +173,7 @@ Decimal expansion of quadratic recurrence constant sqrt(1 * sqrt(2 * sqrt(3 * sq
 
 Esistono diverse formule per calcolare questa costante, useremo la seguente:
 
-                           1 
+                           1
   S = Prod[k=1..Inf] (1 + ---)^(1/2^k)
                            k
 
@@ -204,8 +204,8 @@ Pipistrello intorno alla Luna
 Stampare il giro di un pipistrello intorno alla Luna.
 
 Pipistrello =  ^o^
-Luna = 
-         mmm 
+Luna =
+         mmm
        mmmmmmm
       mmmmmmmmm
        mmmmmmm
@@ -213,7 +213,7 @@ Luna =
 
 Giro del pipistrello:
 
-     ^o^        
+     ^o^
      mmm            mmm^o^         mmm            mmm            mmm
    mmmmmmm        mmmmmmm        mmmmmmm^o^     mmmmmmm        mmmmmmm
   mmmmmmmmm      mmmmmmmmm      mmmmmmmmm      mmmmmmmmm^o^   mmmmmmmmm
@@ -243,7 +243,7 @@ Giro del pipistrello:
     (setq spaceL '(6 3 1 0 1 3 6))
     (for (pos 0 6)
       (for (i 0 6)
-        (if (= i pos) 
+        (if (= i pos)
           (setq bat "^o^")
           (setq bat ""))
         (println (append (dup " " (spaceR i)) (dup "m" (emme i)) bat))
@@ -251,7 +251,7 @@ Giro del pipistrello:
     )
     (for (pos 1 6)
       (for (i 6 0)
-        (if (= i pos) 
+        (if (= i pos)
           (setq bat "^o^")
           (setq bat "   "))
         (println (append (dup " " (spaceL i)) bat (dup "m" (emme i))))
@@ -324,7 +324,7 @@ Dove:
 - x e y sono i risultati dei due dadi,
 - x' è la faccia opposta di x ,
 - y' è la faccia opposta di y ,
-- Per un dado standard: x' = 7 - x , y' = 7 - y 
+- Per un dado standard: x' = 7 - x , y' = 7 - y
 
 Quindi:
 
@@ -340,14 +340,14 @@ Ora calcoliamo:
 
 Calcoliamo i singoli termini:
 
-  1 * 6 = 6 
-  2 * 5 = 10 
-  3 * 4 = 12 
-  4 * 3 = 12 
-  5 * 2 = 10 
-  6 * 1 = 6 
+  1 * 6 = 6
+  2 * 5 = 10
+  3 * 4 = 12
+  4 * 3 = 12
+  5 * 2 = 10
+  6 * 1 = 6
 
-  Somma: 6 + 10 + 12 + 12 + 10 + 6 = 56 
+  Somma: 6 + 10 + 12 + 12 + 10 + 6 = 56
 
 Quindi:
 
@@ -542,10 +542,10 @@ Le coordinate dei vertici di questa regione sono approssimativamente:
 
 Per calcolare tutti i vertici del poligono definito dalle quattro disuguaglianze lineari nel piano cartesiano, possiamo seguire questi passaggi:
 
-1. Rappresentare le disuguaglianze come equazioni: 
+1. Rappresentare le disuguaglianze come equazioni:
 Ogni disuguaglianza può essere scritta come un'equazione di una retta.
 
-2. Calcolare le intersezioni tra le rette: 
+2. Calcolare le intersezioni tra le rette:
 Risolvere i sistemi di equazioni corrispondenti alle coppie di rette per trovare i punti di intersezione.
 
 3. Verificare l'appartenenza dei punti alla regione definita dalle disuguaglianze:
@@ -593,7 +593,7 @@ Funzione che calcola i vertici del poligono convesso:
                           (list g h i)
                           (list j k l)))
         (vertici '()))
-        
+
     (for (i 0 2)
       (for (j (add i 1) 3)
         (letn (
@@ -612,8 +612,8 @@ Esempio 1:
   -x <= 0 --> x >= 0
   -y <= 0 --> y >= 0
 
-(set 'a 1 'b 0 'c 3) 
-(set 'd 0 'e 1 'f 3) 
+(set 'a 1 'b 0 'c 3)
+(set 'd 0 'e 1 'f 3)
 (set 'g -1 'h 0 'i 0)
 (set 'j 0 'k -1 'l 0)
 
@@ -954,7 +954,7 @@ Quindi gli strati che rimangono sono:
 
   biscotti-confezionati = (N - strati-rimasti)/3
 
-Sequenza OEIS A110657: 
+Sequenza OEIS A110657:
 a(n) = A028242(A028242(n)) (strati rimasti).
   0, 1, 2, 0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6, 4, 5, 6, 7, 5,
   6, 7, 8, 6, 7, 8, 9, 7, 8, 9, 10, 8, 9, 10, 11, 9, 10, 11, 12, 10, 11,
@@ -993,7 +993,7 @@ https://www.youtube.com/watch?v=hpiILbMkF9w
 (define (draw-circle cx cy r)
   (let ( (pts '()) (x 0) (y (- r)) (p (- r)) )
     (while (< x (- y))
-      (if (> p 0) 
+      (if (> p 0)
         (begin (++ y) (setq p (+ p (* 2 (+ x y)) 1)))
         ;else
         (setq p (+ p (* 2 x) 1))
@@ -1477,7 +1477,7 @@ Proviamo a generare alcune figure in un unica immagine:
 
 (setq linea1 (line 10 10 200 200))
 (setq linea2 (line 150 150 25 25))
-(setq quad (append (line 10 250 50 250) (line 50 250 50 350) 
+(setq quad (append (line 10 250 50 250) (line 50 250 50 350)
                    (line 50 350 10 350) (line 10 350 10 250)))
 (setq cerchio (circle 100 100 100))
 (setq ellisse (ellipse 80 50 250 100))
@@ -1736,7 +1736,7 @@ Implementazione della formula:
 Proviamo:
 
 (map (fn(x) (list x (calcola-pi x))) '(1 5 10 20 30 40 50 60))
-;-> ((1 2.666666666666667) 
+;-> ((1 2.666666666666667)
 ;->  (5 3.121500721500722)
 ;->  (10 3.141106021601377)
 ;->  (20 3.141592298740339)
@@ -2080,8 +2080,8 @@ Il numero di numeri con k cifre diverse (cioè tutte le cifre devono essere dist
 Per 'k' cifre distinte:
 
 - Se 'k = 1', ci sono 9 numeri: da 1 a 9.
-- Se 'k > 1', il primo posto (la cifra più significativa) può essere una delle cifre da 1 a 9: 9 scelte.  
-  Poi si sceglie una cifra diversa per il secondo posto: 9 scelte (incluso 0 ma escludendo la prima cifra),  
+- Se 'k > 1', il primo posto (la cifra più significativa) può essere una delle cifre da 1 a 9: 9 scelte.
+  Poi si sceglie una cifra diversa per il secondo posto: 9 scelte (incluso 0 ma escludendo la prima cifra),
   poi 8 per il terzo, 7 per il quarto, ecc.
 
 Quindi per k cifre diverse (k <= 10), il totale è:
@@ -2129,13 +2129,13 @@ Nota: il numero di numeri con 9 cifre diverse è uguale a quello con 10 cifre di
 
 Inoltre risulta che:
 
-  Numeri con k cifre tutte diverse (senza zeri iniziali) = 
+  Numeri con k cifre tutte diverse (senza zeri iniziali) =
   Tutte le permutazioni di k cifre prese tra le 10 'meno' quante di quelle iniziano con 0
 
 Infatti:
 - Le permutazioni delle combinazioni: P(10, k) = 10! / (10 - k)!
-- Di queste, quante hanno '0' come prima cifra?  
-  - Fissiamo 0 come prima cifra e restano (k - 1) cifre da scegliere tra le altre 9  
+- Di queste, quante hanno '0' come prima cifra?
+  - Fissiamo 0 come prima cifra e restano (k - 1) cifre da scegliere tra le altre 9
   - P(9, k - 1) = 9! / (9 - (k - 1))!
 
   Numeri con k cifre diverse (validi) = P(10, k) - P(9, k - 1)
@@ -2261,7 +2261,7 @@ Generalizzazione:
 
 (define (brocard limite)
   (for (num 1 limite)
-    (if (square? (+ (fact-i num) 1)) 
+    (if (square? (+ (fact-i num) 1))
       (println num { } (sqrt (+ (fact-i num) 1))))))
 
 (brocard 100)
@@ -2323,7 +2323,7 @@ Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC 
 
 Convertire un testo ASCII in una sequenza DNA con il seguente algoritmo:
 
-1) Convertire i caratteri del testo in codici ASCII 
+1) Convertire i caratteri del testo in codici ASCII
 (esempio: codegolf -> (99 111 100 101 103 111 108 102))
 
 2) Unire i codici ASCII
@@ -2809,6 +2809,8 @@ Elenco delle funzioni implementate:
 10) Verificare se due numeri sono uguali
 11) Algoritmo di Euclide per Massimo Comun Divisore (GCD)
 12) Copia tra due numeri di bit-set in un intervallo
+13) Verificare se la rappresentazione binaria di un numero è palindroma
+14) Rotazione di bit
 
 Nota: il parametro (num) delle funzioni deve essere un numero intero positivo.
 
@@ -3165,8 +3167,8 @@ l = 3, r = 5 --> "111000" --> "110"
 
 Copia su x dei bit a 1 di y nell'intervallo:
 
- 1100110 
-   110  
+ 1100110
+   110
 ---------
  1111110 --> 126
 
@@ -3191,6 +3193,91 @@ Proviamo:
 
 (copy-bits 10 13 2 3)
 ;-> 14
+
+13) Verificare se la rappresentazione binaria di un numero è palindroma
+
+(define (binario-palindromo? num)
+  (setq out true)
+  ; Find the number of bits
+  (setq len (+ (int (log num 2)) 1))
+  (setq l 0)
+  (setq r (- len 1))
+  (while (and (< l r) out)
+    ;Compare bits at positions l and r
+    (when (!= (& (>> num l) 1) (& (>> num r) 1))
+          (setq out nil))
+    (++ l)
+    (-- r)
+  )
+  out)
+
+(binario-palindromo? 9)
+;-> true
+(binario-palindromo? 10)
+;-> nil
+
+(filter binario-palindromo? (sequence 1 100))
+;-> (1 3 5 7 9 15 17 21 27 31 33 45 51 63 65 73 85 93 99)
+
+(map bits '(1 3 5 7 9 15 17 21 27 31 33 45 51 63 65 73 85 93 99))
+;-> ("1" "11" "101" "111" "1001" "1111" "10001" "10101"
+;->  "11011" "11111" "100001" "101101" "110011" "111111"
+;->  "1000001" "1001001" "1010101" "1011101" "1100011")
+
+14) Rotazione di bit
+--------------------
+Una rotazione (o spostamento circolare) è un'operazione simile allo spostamento, con la differenza che i bit che escono da un'estremità vengono rimessi all'altra estremità.
+Nella rotazione sinistra, i bit che escono dall'estremità sinistra vengono rimessi all'estremità destra.
+Nella rotazione destra, i bit che escono dall'estremità destra vengono rimessi all'estremità sinistra.
+
+Nota:
+(setq MAX-INT 9223372036854775807)
+(bits MAX-INT)
+;-> "111111111111111111111111111111111111111111111111111111111111111"
+(length (bits MAX-INT))
+;-> 63
+
+(setq MIN-INT -9223372036854775808)
+(bits MIN-INT)
+;-> "1000000000000000000000000000000000000000000000000000000000000000"
+(length (bits MIN-INT))
+;-> 64
+
+(define (rotate-left num d)
+    # Rotation of 63 is same as rotation of 0
+    (setq d (% d 63))
+    # Picking the rightmost (63 - d) bits
+    (setq mask (~ (- (<< 1 (- 63 d)) 1)))
+    (setq shift (& num mask))
+    # Moving the remaining bits to their new location
+    (setq num (<< num d))
+    # Adding removed bits at leftmost end
+    (setq num (+ num (>> shift (- 63 d))))
+    # Ensuring 63-bit constraint
+    (& num  (- (<< 1 63) 1)))
+
+(define (rotate-right num d)
+    # Rotation of 63 is same as rotation of 0
+    (setq d (% d 63))
+    # Picking the leftmost d bits
+    (setq mask (- (<< 1 d) 1))
+    (setq shift (& num mask))
+    # Moving the remaining bits to their new location
+    (setq num (>> num d))
+    # Adding removed bits at rightmost end
+    (setq num (+ num (<< shift (- 63 d))))
+    # Ensuring 63-bit constraint
+    (& num (- (<< 1 63) 1)))
+
+(define (test n d)
+  (list (rotate-left n d) (rotate-right n d)))
+
+(test 28 2)
+;-> (112 7)
+(test 29 2)
+;-> (116 2305843009213693959)
+(test 11 10)
+;-> (11264 99079191802150912)
 
 
 --------------------------
@@ -3242,6 +3329,30 @@ Nel formato little-endian, l'MSbyte viene memorizzato per ultimo.
 Quando l'endianness potrebbe essere un problema?
 ------------------------------------------------
 L'endianness deve essere presa in considerazione quando sistemi con ordini di byte diversi devono comunicare o condividere dati.
+
+
+------------------------
+Int32 e Int64 (IEEE 754)
+------------------------
+
+La rappresentazione IEEE 754 a 64 bit (double precision) differisce da quella a 32 bit (single precision) nei seguenti punti chiave:
+
+Struttura del numero IEEE 754
+-----------------------------
+Tipo       Bit Totali   Segno   Esponente   Mantissa (o significando)
+---------------------------------------------------------------------
+Float 32   32           1       8           23
+Float 64   64           1       11          52
+
+Differenze principali
+---------------------
+Aspetto          32 bit (float)       64 bit (double)
+-----------------------------------------------------
+Bit di segno     1                    1
+Bit esponente    8 (bias 127)         11 (bias 1023)
+Bit mantissa     23                   52
+Bias             127                  1023
+Precisione       ~7 cifre decimali    ~15-17 cifre decimali
 
 
 ----------------------------------------
@@ -3377,6 +3488,131 @@ Verificando se si verifica questa inversione di segno, possiamo determinare con 
 
 (add-overflow -9223372036854775800 -8)
 ;-> -9223372036854775808
+
+
+-------------------
+Fabbisogno calorico
+-------------------
+
+Equazioni di Harris-Benedict
+----------------------------
+Una delle formule più comuni per calcolare il fabbisogno calorico è la formula di Harris-Benedict, che tiene conto dei parametri peso corporeo, altezza, età, sesso e livello di attività fisica.
+
+1) Calcolo del metabolismo basale
+Iniziamo calcolando il metabolismo basale (per uomini e donne):
+
+MB(uomini) = 66.4730 + (13.7516 * peso in kg) + (5.0033 * altezza in cm) – (6.7550 * età in anni)
+MB(donne)  = 655.0955 + (9.5634 * peso in kg) + (1.8496 * altezza in cm) – (4.6756 * età in anni)
+
+Le formule restituiscono un valore in kcal (kilo-calorie).
+
+2) Calcolo del livello di attività fisica
+Adesso considerariamo il livello di attività fisica, moltiplicando il metabolismo basale per un coefficiente che rappresenta il grado di attività:
+
+Sedentari: MB * 1.45
+attività svolte da seduti o in piedi senza spostamenti, spostamenti con veicoli a motore.
+
+Leggermente attivi: MB * 1.60
+attività con spostamento del corpo per tempo non troppo lungo. Attività fisica 3-5 volte a settimana per 1 ora.
+
+Attivi: MB * 1.75
+attività con movimento di tutto il corpo ogni giorno per diverse ore o attività sportive svolte tutti i giorni per 2 ore.
+
+Molto attivi: MB * 2.10
+sportivi agonisti, attività sportive tutti i giorni per più di 2 ore, attività con movimento di tutto il corpo e impiego di intensa attività muscolare.
+
+Questi valori si riferiscono in particolare a persone di età inferiore a 60 anni.
+
+A seconda dell’obiettivo da raggiungere, si possono aggiungere o sottrarre calorie dal risultato:
+- per mantenere il peso: mantenere il fabbisogno calorico come calcolato
+- per dimagrire: ridurre il fabbisogno calorico totale del 10-25%
+- per aumentare la massa muscolare: aumentare il fabbisogno calorico del 10-20%
+
+(define (calorico peso altezza eta attivita genere)
+  (local (mb fb)
+    (cond ((or (= genere "M") (= genere 'M))
+            (setq mb (add 66.4730 (mul 13.7516 peso) (mul 5.0033 altezza) (mul -6.7550 eta)))
+            (setq fb (mul mb attivita))
+            (println "Maschio"))
+          (true
+            (setq mb (add 655.0955 (mul 9.5634 peso) (mul 1.8496 altezza) (mul -4.6756 eta)))
+            (setq fb (mul mb attivita))
+            (println "Femmina")))
+    (println "Metabolismo basale: " (int mb))
+    (println "Fabbisogno calorico: " (int fb)) '>))
+
+Proviamo:
+
+(calorico 74 180 42 1.6 'M)
+;-> Maschio
+;-> Metabolismo basale: 1700
+;-> Fabbisogno calorico: 2721
+
+(calorico 74 180 42 1.6 'F)
+;-> Femmina
+;-> Metabolismo basale: 1499
+;-> Fabbisogno calorico: 2398
+
+Equazioni di Harris-Benedict riviste da Roza e Shizgal (1984)
+-------------------------------------------------------------
+MB(uomini) = (13.397 * peso in kg) + (4.799 * altezza in cm) – (5.677 * età in anni) + 88.362
+MB(donne)  = (9.247 * peso in kg) + (3.098 * altezza in cm) – (4.330 * età in anni) + 447.593
+
+L'intervallo di confidenza al 95% per gli uomini è di +/-213 kcal/giorno e di +/-201 kcal/giorno per le donne.
+
+Equazioni di Harris-Benedict riviste da Mifflin e St Jeor (1990)
+----------------------------------------------------------------
+MB(uomini) = (10 * peso in kg) + (6.25 * altezza in cm) – (5 * età in anni) + 5
+MB(donne)  = (10 * peso in kg) + (6.25 * altezza in cm) – (5 * età in anni) – 161
+
+Funzione che calcola il fabbisogno calorico con tutti e tre i metodi:
+
+(define (calorico peso altezza eta attivita genere)
+  (local (mb fb)
+    (cond ((or (= genere "M") (= genere 'M))
+            (setq mb1 (add 66.4730 (mul 13.7516 peso) (mul 5.0033 altezza) (mul -6.755 eta)))
+            (setq mb2 (add 88.362 (mul 13.397 peso) (mul 4.799 altezza) (mul -5.677 eta)))
+            (setq mb3 (add 5 (mul 10 peso) (mul 6.25 altezza) (mul -5 eta)))
+            (setq fb1 (mul mb1 attivita))
+            (setq fb2 (mul mb2 attivita))
+            (setq fb3 (mul mb3 attivita))
+            (println "Maschio"))
+          (true
+            (setq mb1 (add 655.0955 (mul 9.5634 peso) (mul 1.8496 altezza) (mul -4.6756 eta)))
+            (setq mb2 (add 447.593 (mul 9.247 peso) (mul 3.098 altezza) (mul -4.330 eta)))
+            (setq mb3 (add (- 161) (mul 10 peso) (mul 6.25 altezza) (mul -5 eta)))
+            (setq fb1 (mul mb1 attivita))
+            (setq fb2 (mul mb2 attivita))
+            (setq fb3 (mul mb3 attivita))
+            (println "Femmina")))
+    (println "Metabolismo basale (1): " (int mb1))
+    (println "Metabolismo basale (2): " (int mb2))
+    (println "Metabolismo basale (3): " (int mb3))
+    (println "Fabbisogno calorico (1): " (int fb1))
+    (println "Fabbisogno calorico (2): " (int fb2))
+    (println "Fabbisogno calorico (3): " (int fb3)) '>))
+
+Proviamo:
+(calorico 74 180 42 1.6 'M)
+;-> Maschio
+;-> Metabolismo basale (1): 1700
+;-> Metabolismo basale (2): 1705
+;-> Metabolismo basale (3): 1660
+;-> Fabbisogno calorico (1): 2721
+;-> Fabbisogno calorico (2): 2728
+;-> Fabbisogno calorico (3): 2656
+
+(calorico 74 180 42 1.6 'F)
+;-> Femmina
+;-> Metabolismo basale (1): 1499
+;-> Metabolismo basale (2): 1507
+;-> Metabolismo basale (3): 1494
+;-> Fabbisogno calorico (1): 2398
+;-> Fabbisogno calorico (2): 2412
+;-> Fabbisogno calorico (3): 2390
+
+Nota: Il valore calcolato dalle formule è solo una stima del "fabbisogno calorico".
+Per un calcolo preciso occorre rivolgersi ad uno specialista che terrà conto di molti altri fattori (indice di massa grassa, condizioni di salute, ecc.)
 
 ============================================================================
 
