@@ -3614,5 +3614,229 @@ Proviamo:
 Nota: Il valore calcolato dalle formule è solo una stima del "fabbisogno calorico".
 Per un calcolo preciso occorre rivolgersi ad uno specialista che terrà conto di molti altri fattori (indice di massa grassa, condizioni di salute, ecc.)
 
+
+---------------------------------
+Somma di numeri con bit invertiti
+---------------------------------
+
+Dato un numero N determinare la seguente somma:
+1) Inizialmente la somma vale N
+2) Considerare la rappresentazione binaria di N
+3) Aggiungere alla somma tutti i numeri che si ottengono invertendo un bit di N
+
+Esempio:
+  N = 21
+  Somma = 21
+  N(base 2) = 10101
+  Cominciando dal bit di destra:
+    Inversione bit 0: 10101 --> 10100 = 20
+    Inversione bit 1: 10101 --> 10111 = 23
+    Inversione bit 2: 10101 --> 10001 = 17
+    Inversione bit 3: 10101 --> 11101 = 29
+    Inversione bit 4: 10101 --> 00101 = 5
+  Somma = 21 + 20 + 23 + 17 + 29 + 5 = 115 
+
+Metodo 1 (stringa binaria)
+--------------------------
+
+(define (somma1 num)
+  (letn ( (sum num) (binary (bits num)) (len (length binary)) )
+    ;(println "  " num { } binary)
+    (for (idx 0 (- len 1))
+      (setq tmp binary)
+      ; flip idx-th bit, (flip 48 <--> 49, "0" --> "1")
+      (setf (tmp idx) (char (- (+ 49 48) (char (tmp idx)))))
+      ;(println idx { } (int tmp 0 2) { } tmp)
+      (setq sum (+ sum (int tmp 0 2)))
+    )
+    sum))
+
+Proviamo:
+
+(somma1 21)
+;-> 115
+
+(map somma1 (sequence 0 30))
+;-> (1 1 5 6 15 17 19 21 39 42 45 48 51 54 57 60 95 99 103 107 111 115
+;->  119 123 127 131 135 139 143 147 151)
+
+Metodo 2 (bit manipulation)
+---------------------------
+Funzione che inverte il bit all'indice idx di un numero intero num:
+
+(define (toggle-bit num idx) (^ num (<< 1 idx)))
+
+(define (somma2 num)
+  (let ( (sum num) (len (length (bits num))) )
+    ;(println "  " num { } (bits num))
+    (for (idx 0 (- len 1))
+      ;(setq sum (+ sum (toggle-bit num idx)))
+      (setq sum (+ sum (^ num (<< 1 idx))))
+      ;(println idx { } (^ num (<< 1 idx)) { } (bits (^ num (<< 1 idx))))
+    )
+  sum))
+
+Proviamo:
+
+(somma2 21)
+;-> 115
+
+(map somma2 (sequence 0 50))
+;-> (1 1 5 6 15 17 19 21 39 42 45 48 51 54 57 60 95 99 103 107 111 115
+;->  119 123 127 131 135 139 143 147 151)
+
+Test di correttezza:
+
+(= (map somma1 (sequence 0 1e5)) (map somma2 (sequence 0 1e5)))
+;-> true
+
+Test di velocità:
+
+(time (map somma1 (sequence 1 1e4)))
+;-> 109.379
+(time (map somma1 (sequence 1 1e5)))
+;-> 1250.04
+
+(time (map somma2 (sequence 1 1e4)))
+;-> 15.621
+(time (map somma2 (sequence 1 1e5)))
+;-> 156.483
+
+La seconda funzione è circa 8 volte più veloce.
+
+Metodo 3 (matematica)
+---------------------
+Analizziamo la sequenza:
+
+(setq S (map somma2 (sequence 0 256)))
+;-> (1 1 5 6 15 17 19 21 39 42 45 48 51 54 57 60 95 99 103 107 111 115
+;->  119 123 127 131 135 139 143 147 151 155 223 228 233 238 243 248 253
+;->  258 263 268 273 278 283 288 293 298 303 308 313 318 323 328 333 338
+;->  343 348 353 358 363 368 373 378 511 517 523 529 535 541 547 553 559
+;->  565 571 577 583 589 595 601 607 613 619 625 631 637 643 649 655 661
+;->  667 673 679 685 691 697 703 709 715 721 727 733 739 745 751 757 763
+;->  769 775 781 787 793 799 805 811 817 823 829 835 841 847 853 859 865
+;->  871 877 883 889 1151 1158 1165 1172 1179 1186 1193 1200 1207 1214
+;->  1221 1228 1235 1242 1249 1256 1263 1270 1277 1284 1291 1298 1305
+;->  1312 1319 1326 1333 1340 1347 1354 1361 1368 1375 1382 1389 1396
+;->  1403 1410 1417 1424 1431 1438 1445 1452 1459 1466 1473 1480 1487
+;->  1494 1501 1508 1515 1522 1529 1536 1543 1550 1557 1564 1571 1578
+;->  1585 1592 1599 1606 1613 1620 1627 1634 1641 1648 1655 1662 1669
+;->  1676 1683 1690 1697 1704 1711 1718 1725 1732 1739 1746 1753 1760
+;->  1767 1774 1781 1788 1795 1802 1809 1816 1823 1830 1837 1844 1851
+;->  1858 1865 1872 1879 1886 1893 1900 1907 1914 1921 1928 1935 1942
+;->  1949 1956 1963 1970 1977 1984 1991 1998 2005 2012 2019 2026 2033
+;->  2040 2559)
+
+Calcoliamo la differenza tra elementi consecutivi della sequenza S(i) - S(i-1):
+
+(setq diff (map - (rest S) (chop S)))
+;-> (0 4 1 9 2 2 2 18 3 3 3 3 3 3 3 35 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 68
+;->  5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 133
+;->  6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+;->  6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 262 7
+;->  7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+;->  7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+;->  7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+;->  7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 519)
+
+Senza considerare i primi quattro termini della sequenzxa (0 4 1 9), le ripetizioni di numeri uguali hanno le seguenti lunghezze:
+
+(count '(2 3 4 5 6 7) diff)
+;-> (3 7 16 31 63 127)
+Il 4 ha 16 occorrenze perchè conta anche quello alla posizione 1.
+
+  2 2 2 --> lunghezza = 3
+  3 3 3 3 3 3 3 ---> lunghezza = 7
+  4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 ---> lunghezza = 15
+  6 6 6 6 6 6 6 ... 6 6 6 6 6 6 ---> lunghezza = 31
+  7 7 7 7 7 7 7 ... 7 7 7 7 7 7 ---> lunghezza = 63
+
+Partendo con k = 2, queste lunghezze valgono: 2^k - 1
+
+I numeri 'diversi' che compaiono dopo le sequenze di numeri ripetuti valgono:
+
+  18 35 68 133 262 519 ...
+
+Notiamo che questi numeri valgono: 2^(w+1) + w - 1) (dove w = k + 1)
+
+(define (cur-val w) (+ (pow 2 (+ w 1)) w -1))
+(map cur-val (sequence 3 8))
+;-> (18 35 68 133 262 519)
+
+A questo punto siamo in grado di definire una funzione che calcola i primi n numeri di S(n).
+
+Prima scriviamo la funzione che calcola i primi n numeri della sequenza delle differenze D(i):
+
+(define (D n)
+  (local (diff idx k duplica cur)
+    ; funzione che calcola elemento 'diverso'
+    (define (cur-val k) (+ (pow 2 (+ k 1)) k -1))
+    ; sequenza iniziale
+    (setq diff '(0 4 1 9))
+    ; indice iniziale
+    (setq idx 4)
+    ; blocco iniziale
+    (setq k 2)
+    ; valore iniziale da duplicare
+    (setq duplica 2)
+    ; ciclo per creare la sequenza D(n)
+    (while (< idx n)
+      ; elementi duplicati da aggiungere
+      (setq cur (dup duplica (- (pow 2 k) 1)))
+      ; aggiunge elementi duplicati alla sequenza
+      (extend diff cur)
+      ; calcola e aggiunge elemento 'diverso'
+      (push (cur-val (+ k 1)) diff -1)
+      ; aggiorna indici e valori per il prossimo inserimento
+      (setq idx (+ idx (pow 2 (- k 1))))
+      (++ k)
+      (++ duplica)
+    )
+    ; seleziona solo i primi n elementi di D(n)
+    (slice diff 0 n)))
+
+(D 30)
+;-> (0 4 1 9 2 2 2 18 3 3 3 3 3 3 3 35 4 4 4 4 4 4 4 4 4 4 4 4 4 4)
+
+Adesso scriviamo la funzione che calcola i primi n numeri della sequenza S(i):
+
+(define (S n)
+  (local (base seq diff)
+    ; elemento/numero di partenza
+    (setq base 1)
+    ; sequenza di partenza
+    (setq seq '(1))
+    ; calcola sequenza delle differenze D(n)
+    (setq diff (D n))
+    ; crea S(n) tramite somma cumulativa
+    (dolist (el diff)
+      (setq base (+ base el))
+      (push base seq -1)
+    )
+    seq))
+
+Proviamo:
+
+(S 30)
+;-> (1 1 5 6 15 17 19 21 39 42 45 48 51 54 57 60 95 99 103 107 111 115 119
+;->  123 127 131 135 139 143 147 151)
+
+Test di correttezza:
+
+(= (map somma2 (sequence 0 1e5)) (S 1e5))
+;-> true
+
+Test di velocità:
+
+(time (map somma2 (sequence 0 1e5)) 10)
+;-> 1640.848
+(time (S 1e5) 10)
+;-> 156.154
+
+La funzione con il metodo matematico è 10 volte più veloce.
+
+Nota: questa sequenza non esiste in OEIS.
+
 ============================================================================
 

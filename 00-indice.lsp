@@ -2904,6 +2904,7 @@ NOTE LIBERE 29
   Maggiore e minore di tre interi (senza operatori di comparazione)
   Addizione di due interi (check for overflow)
   Fabbisogno calorico
+  Somma di numeri con bit invertiti
 
 PROBLEMI SUI DADI
 =================
