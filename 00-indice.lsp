@@ -2908,6 +2908,7 @@ NOTE LIBERE 29
   Numeri con una cifra diversa da zero
   newLISP e BC (Basic Calculator)
   Numero massimo e minimo con gli stessi bit
+  Coppie e singoli
 
 PROBLEMI SUI DADI
 =================

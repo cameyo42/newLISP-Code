@@ -4206,5 +4206,54 @@ Proviamo:
 ;->  39 33 35 35 39 35 39 39 47 33 35 35 39 35 39 39 47 35
 ;->  39 39 47 39 47 47 63 64 65 65 67 65 67 67 71 65)
 
+
+----------------
+Coppie e singoli
+----------------
+
+Data una lista di numeri interi, determinare tutte le coppie e tutti gli elementi singoli.
+
+Esempio:
+  lista = 1 1 2 2 2 5 4 5 4 3
+  coppie = (1 1) (2 2) (4 4) (5 5)
+  singoli = (2 3)
+
+(define (coppie-singoli lst)
+  (local (pair single unici link num rep)
+    (setq pair '())
+    (setq single '())
+    ; crea la lista dei numeri unici
+    (setq unici (unique lst))
+    ; crea una lista con coppie (numero ripetizioni)
+    (setq link (sort (map list unici (count unici lst))))
+    (dolist (el link)
+      (setq num (el 0))
+      (setq rep (el 1))
+      (cond
+        ((= rep 1)
+          ; una sola ripetizione --> aggiunge il numero a single
+          (push num single -1))
+        ((even? rep)
+          ; ripetizioni pari --> aggiunge ripetizioni/2 coppie a pair
+          (extend pair (dup (list num num) (/ rep 2))))
+        ((odd? rep)
+          ; ripetizioni dispari --> aggiunge ripetizioni/2 coppie a pair e
+          (extend pair (dup (list num num) (/ rep 2)))
+          ; aggiunge il numero a single
+          (push num single -1))))
+    (list pair single)))
+
+Proviamo:
+
+(setq a '(1 1 2 2 2 5 4 5 4 3))
+(coppie-singoli a)
+;-> (((1 1) (2 2) (4 4) (5 5)) (2 3))
+(coppie-singoli '(1 1 2 2))
+;-> (((1 1) (2 2)) ())
+(coppie-singoli '(1 2 3))
+;-> (() (1 2 3))
+(coppie-singoli '())
+;-> (() ())
+
 ============================================================================
 
