@@ -3838,5 +3838,373 @@ La funzione con il metodo matematico è 10 volte più veloce.
 
 Nota: questa sequenza non esiste in OEIS.
 
+
+------------------------------------
+Numeri con una cifra diversa da zero
+------------------------------------
+
+Scrivere una funzione che calcola la sequenza di numeri che contengono solo una cifra diversa da zero.
+
+Sequenza OEIS A037124:
+Numbers that contain only one nonzero digit.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+  200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000,
+  6000, 7000, 8000, 9000, 10000, 20000, 30000, 40000, 50000, 60000, 70000,
+  80000, 90000, 100000, ...
+
+Formula: a(n) = (((n - 1) mod 9) + 1) * 10^floor((n - 1)/9)
+
+(define (** num power)
+"Calculates the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (A n)
+  (* (+ 1L (% (- n 1) 9)) (** 10 (/ (- n 1) 9))))
+
+Proviamo:
+
+(map A (sequence 1 50))
+;-> (1L 2L 3L 4L 5L 6L 7L 8L 9L 10L 20L 30L 40L 50L 60L 70L 80L 90L 100L
+;->  200L 300L 400L 500L 600L 700L 800L 900L 1000L 2000L 3000L 4000L 5000L
+;->  6000L 7000L 8000L 9000L 10000L 20000L 30000L 40000L 50000L 60000L 70000L
+;->  80000L 90000L 100000L 200000L 300000L 400000L 500000L)
+
+
+-------------------------------
+newLISP e BC (Basic Calculator)
+-------------------------------
+
+bc sta per "basic calculator" (calcolatrice di base), è "un linguaggio di calcolo a precisione arbitraria" con una sintassi simile al linguaggio di programmazione C.
+bc è in genere utilizzato come linguaggio di scripting matematico.
+Un tipico utilizzo interattivo consiste nel digitare il comando bc su un prompt dei comandi e inserire un'espressione matematica, come (1 + 3) * 2, che restituirà 8.
+Sebbene bc possa funzionare con una precisione arbitraria, in realtà imposta di default zero cifre dopo la virgola, quindi l'espressione 2/3 restituisce 0 (i risultati vengono troncati, non arrotondati).
+L'opzione -l di bc imposta la scala predefinita (precisione) a 20 e aggiunge diverse funzioni matematiche aggiuntive al linguaggio.
+
+Per interrompere un calcolo in esecuzione (perché sta impiegando più tempo del previsto), premere Ctrl C.
+Per uscire e uscire da bc, digitare il comando quit o premere Ctrl D.
+
+Nota: per windows occorre scaricare il programma da
+https://gnuwin32.sourceforge.net/packages/bc.htm
+
+Informazioni utili su bc:
+http://www.phodd.net/gnu-bc/
+http://www.numbertheory.org/gnubc/bc_programs.html
+https://org.coloradomesa.edu/~mapierce2/bc/
+https://github.com/mikepierce/GNU-bc-Functions
+https://embedeo.org/ws/command_line/bc_dc_calculator_windows/
+
+Opzioni della linea di comando
+------------------------------
+bc accetta le seguenti opzioni dalla riga di comando:
+
+  -h, --help
+  Print the usage and exit.
+  -l, --mathlib
+  Define the standard math library (scale = 20).
+  -w, --warn
+  Give warnings for extensions to POSIX bc.
+  -s, --standard
+  Process exactly the POSIX bc language.
+  -q, --quiet
+  Do not print the normal GNU bc welcome.
+  -v, --version
+  Print the version number and copyright and quit.
+
+Libreria matematica (Math library)
+-----------------------------------
+Oltre al supporto per operazioni aritmetiche di base come addizione, moltiplicazione, elevamento a potenza di interi, ecc., l'unica funzione matematica integrata in bc è sqrt().
+Caricando la libreria matematica di bc con l'opzione -l vengono definite le seguenti funzioni aggiuntive:
+
+  s(x), the sine of x, for x in radians.
+  c(x), the cosine of x, for x in radians.
+  a(x), the arctangent of x, for x in radians.
+  l(x), the natural logarithm of x.
+  e(x), the exponential function of raising e to the value x.
+  j(n,x), the bessel function of integer order n of x.
+
+Funzioni di base
+----------------
+Possiamo scrivere delle funzioni matematiche in un file (es. functions.bc) da poter caricare al lancio di bc:
+
+  bc -l functions.bc
+
+################
+# functions.bc #
+################
+
+#################################
+# Helpful Constants and Functions
+#################################
+
+pi=4*a(1)
+ex=e(1)
+define sgn(x) { if(x>0) return 1; if(x<0) return -1; }
+define abs(x) { return sgn(x)*x }
+define heavyside(x) { return (x>0) }
+
+# Return the integer-part of a number (not the floor)
+define int(x) { auto s; s=scale; scale=0; x/=1; scale=s; return x; }
+
+###########################
+# Logarithms & Exponentials
+###########################
+
+define ln(x) { return l(x) }
+define log(x) { return l(x)/l(10) }
+define logb(x,b) { return l(x)/l(b) }
+define pow(x,n) { return e(n*l(x)) }
+
+##############
+# Trigonometry
+##############
+
+define rad2deg(x) { return x*(45/a(1)) }
+define deg2rad(x) { return x*(a(1)/45) }
+
+define cos(x) { return c(x) }
+define sin(x) { return s(x) }
+define tan(x) { return s(x)/c(x) }
+define sec(x) { return 1/c(x) }
+define csc(x) { return 1/s(x) }
+define cot(x) { return c(x)/s(x) }
+define arccos(x) {
+    pi = 4*a(1)
+    if(x == 1) return 0
+    if(x == -1) return pi 
+    return pi/2-a(x/sqrt(1-(x^2)))
+}
+define arcsin(x) { 
+    pi = 4*a(1)
+    if(x == 1) return pi/2
+    if(x == -1) return -pi/2
+    return sgn(x)*a(sqrt((1/(1-(x^2)))-1))
+}
+define arctan(x) { return a(x) }
+define atan2(y,x) { 
+    pi = 4*a(1)
+    if(x == 0) return sgn(y)*pi/2
+    if(x < 0) {
+        if(y < 0)
+            return a(y/x)-pi
+        return a(y/x)+pi
+    }
+    return a(y/x)
+}
+define arcsec(x) { return arccos(1/x) }
+define arccsc(x) { return arcsin(1/x) }
+define arccot(x) { return (4*a(1))/2-a(x) }
+
+define cosh(x) { return (e(x)+e(-x))/2 }
+define sinh(x) { return (e(x)-e(-x))/2 }
+define tanh(x) { return sinh(x)/cosh(x) }
+define sech(x) { return 1/cosh(x) }
+define csch(x) { return 1/sinh(x) }
+define coth(x) { return 1/tanh(x) }
+
+define arcosh(x) { return ln(x+sqrt(x^2-1)) }
+define arsinh(x) { return ln(x+sqrt(x^2+1)) }
+define artanh(x) { return (1/2)*ln((1+x)/(1-x))}
+define arsech(x) { return arcosh(1/x) }
+define arcsch(x) { return arsinh(1/x) }
+define arcoth(x) { return artanh(1/x) }
+
+bc per Windows
+--------------
+Oltre a GNU bc, per Windows è anche possibile scaricare il file bc-1.07.1-win32-embedeo-02.zip (~135 KB) da:
+https://embedeo.org/ws/command_line/bc_dc_calculator_windows/
+Contiene i binari predefiniti di GNU bc e dc, eseguibili direttamente su Windows.
+È quindi possibile decomprimere il file e aggiungere il percorso della sottodirectory bin alla variabile PATH.
+L'utilizzo di bc in modalità interattiva su Windows è molto simile all'esempio precedente.
+Esempio di uso di bc in modalità non interattiva:
+D:\test\bc>set MYVAR=2048
+
+D:\test\bc>echo %MYVAR%
+2048
+
+D:\test\bc>echo sqrt (%MYVAR% / 2)  | bc -l
+32.00000000000000000000
+
+D:\test\bc>echo 100 + 22 / 7 > tmp.txt
+
+D:\test\bc>type tmp.txt
+100 + 22 / 7
+
+D:\test\bc>bc -l < tmp.txt
+103.14285714285714285714
+
+Utilizzo di bc con newLISP
+--------------------------
+Prerequisiti:
+1) Installazione di bc
+2) Percorso di bc.exe nel PATH oppure bc.exe nella cartella di lavoro corrente di newLISP.
+
+bc non accetta un espressione nella riga di comando, ma prende un file di testo.
+Quindi possiamo creare un file con i comandi che devono essere eseguiti da bc.
+
+Esempio (test.bc):
+
+# file: test.bc
+# line comment
+# set input and output base to 10 (A=10)
+obase=ibase=A
+# simple operation
+3 + 4
+# set precision (at start scale = 0)
+scale=50
+# simple operation
+10345 / 232844
+scale=20
+# define a user function
+define phi() {return((1+sqrt(5))/2)} ; phi = phi()
+# call user function
+phi;
+# set a variable
+conta = 0
+# print a variable
+print "conta = ", a
+# quit bc
+quit
+
+Cambiamo la cartella di lavoro di newLISP:
+
+(change-dir "f:\\Lisp-Scheme\\BC")
+;-> true
+
+Eseguiamo il programma bc con il nostro file:
+
+(exec "bc.exe -l test.bc")
+;-> ("7" ".04442888801085705450859803129992613080002061466045"
+;->  "1.61803398874989484820" "conta = 0")
+
+I risultati (di tipo stringa) vengono restituiti come lista.
+
+
+------------------------------------------
+Numero massimo e minimo con gli stessi bit
+------------------------------------------
+
+Dato un numero N determinare il numero piu grande e il numero più piccolo che ha lo stesso numero di bit a 1 e a 0 di N.
+
+Il numero più grande con lo stesso numero di bit a 1 (e 0) di N si ottiene spostando tutti i bit a 1 verso le posizioni più significative (a sinistra).
+
+Il numero più piccolo con lo stesso numero di bit a 1 (e 0) di N si ottiene spostando tutti i bit a 1 verso le posizioni più significative (a destra).
+
+Algoritmo:
+1) Usiamo (bits N) per convertire N in una stringa binaria (es. N=22 --> "10110").
+2) Usiamo (find-all "1") per trovare tutte le occorrenze di "1", poi (length) per contare 'ones' quanti sono i bit a 1.
+3) 'len' è la lunghezza della rappresentazione binaria di N.
+4) Costruiamo un numero con 'ones' bit a 1: (pow 2 ones) - 1, (es. 7 per 3 bit a 1 (111).
+5) Per trovare il numero massimo:
+   Poi lo shiftiamo verso sinistra per mettere gli 1 nelle posizioni più alte (es. 11100 --> N = 28).
+6) Per trovare il numero minimo:
+(pow 2 ones) - 1 genera il numero con 'ones' bit a 1 tutti a destra (es. 00111 --> N = 7).
+
+(define (max-same-bits n)
+  (letn ( (binary (bits n))
+          (ones (length (find-all "1" binary)))
+          (len (length binary)) )
+    (<< (- (pow 2 ones) 1) (- len ones))))
+
+Proviamo:
+
+(max-same-bits 22)
+;-> 28
+(bits 22)
+;-> 10110
+(bits 28)
+;-> "11100"
+
+(max-same-bits 111)
+;-> 126
+(bits 111)
+;-> "1101111"
+(bits 126)
+;-> "1111110"
+
+(max-same-bits 7)
+;-> 7
+
+(map max-same-bits (sequence 0 55))
+;-> (0 1 2 3 4 6 6 7 8 12 12 14 12 14 14 15 16 24 24 28
+;->  24 28 28 30 24 28 28 30 28 30 30 31 32 48 48 56 48 56
+;->  56 60 48 56 56 60 56 60 60 62 48 56 56 60 56 60 60 62)
+
+Sequenza OEIS A073138:
+Largest number having in its binary representation the same number of 0's and 1's as n.
+  0, 1, 2, 3, 4, 6, 6, 7, 8, 12, 12, 14, 12, 14, 14, 15, 16, 24, 24, 28,
+  24, 28, 28, 30, 24, 28, 28, 30, 28, 30, 30, 31, 32, 48, 48, 56, 48, 56,
+  56, 60, 48, 56, 56, 60, 56, 60, 60, 62, 48, 56, 56, 60, 56, 60, 60, 62,
+  56, 60, 60, 62, 60, 62, 62, 63, 64, 96, 96, 112, 96, 112, 112, ...
+
+(define (min-same-bits n)
+  (letn ( (binary (bits n))
+          (ones (length (find-all "1" binary)))
+          (len (length binary)) )
+    (- (pow 2 ones) 1)))
+
+Proviamo:
+
+(min-same-bits 22)
+;-> 7
+(bits 22)
+;-> "10110"
+(bits 7)
+;-> "111"
+
+(min-same-bits 12)
+;-> 3
+(bits 12)
+;-> "1100"
+(bits 3)
+;-> "11"
+
+(map min-same-bits (sequence 0 55))
+;-> (0 1 1 3 1 3 3 7 1 3 3 7 3 7 7 15 1 3 3 7 3 7 7 15 3 7 7 15 7 15 15 31
+;->  1 3 3 7 3 7 7 15 3 7 7 15 7 15 15 31 3 7 7 15 7 15 15 31)
+
+Sequenza OEIS A073137:
+a(n) is the least number whose binary representation has the same number of 0's and 1's as n.
+  0, 1, 2, 3, 4, 5, 5, 7, 8, 9, 9, 11, 9, 11, 11, 15, 16, 17, 17, 19, 17,
+  19, 19, 23, 17, 19, 19, 23, 19, 23, 23, 31, 32, 33, 33, 35, 33, 35, 35,
+  39, 33, 35, 35, 39, 35, 39, 39, 47, 33, 35, 35, 39, 35, 39, 39, 47, 35,
+  39, 39, 47, 39, 47, 47, 63, 64, 65, 65, 67, 65, 67, 67, 71, 65, ...
+
+Come si nota la sequenza OEIS è diversa da quella generata dalla funzione "min-same-bits", questo perchè la sequenza OEIS calcola il numero più piccolo che abbia lo stesso numero di 0 e 1 nella rappresentazione binaria di N, ma il numero deve avere lo stesso numero totale di bit della rappresentazione di N.
+Esempio:
+N = 12 = "1100", 2 zero e 2 uno --> minimo = "1001" = 9 (4 bit).
+La funzione (min-same-bits 12) invece restituisce 3 = "11" (2 bit).
+
+Trovare il numero più piccolo con lo stesso numero di bit 0 e 1 (nella stessa lunghezza binaria di N), assicurandosi che il primo bit sia 1 (cioè, nessuno zero iniziale), e con gli altri 1 spostati più a destra possibile.
+
+Funzione che calcola correttamente la sequenza OEIS:
+
+(define (minimo N)
+  (if (zero? N) 0
+    (letn ( (bin (bits N)) ; binario di N
+            (len (length bin)) ; lunghezza binario di N
+            (zeros (length (find-all "0" bin))) ; numero di 0
+            (unos (- len zeros)) ; numero di 1
+            ; crea la stringa binaria minima della stessa lunghezza
+            (binary (string "1" (dup "0" zeros) (dup "1" (- unos 1)))) )
+      (int binary 0 2))))
+
+Proviamo:
+
+(minimo 12)
+;-> 9
+(bits 12)
+;-> "1100"
+(bits 9)
+;-> "1001"
+
+(map minimo (sequence 0 72))
+;-> (0 1 2 3 4 5 5 7 8 9 9 11 9 11 11 15 16 17 17 19 17
+;->  19 19 23 17 19 19 23 19 23 23 31 32 33 33 35 33 35 35
+;->  39 33 35 35 39 35 39 39 47 33 35 35 39 35 39 39 47 35
+;->  39 39 47 39 47 47 63 64 65 65 67 65 67 67 71 65)
+
 ============================================================================
 

@@ -2905,6 +2905,9 @@ NOTE LIBERE 29
   Addizione di due interi (check for overflow)
   Fabbisogno calorico
   Somma di numeri con bit invertiti
+  Numeri con una cifra diversa da zero
+  newLISP e BC (Basic Calculator)
+  Numero massimo e minimo con gli stessi bit
 
 PROBLEMI SUI DADI
 =================
