@@ -4255,5 +4255,204 @@ Proviamo:
 (coppie-singoli '())
 ;-> (() ())
 
+
+------------------------
+Numeri binari palindromi
+------------------------
+
+Scrivere una funzione che restituisce la sequenza dei numeri binari palindromi.
+
+Sequenza OEIS A006995:
+Binary palindromes: numbers whose binary expansion is palindromic.
+  0, 1, 3, 5, 7, 9, 15, 17, 21, 27, 31, 33, 45, 51, 63, 65, 73, 85, 93,
+  99, 107, 119, 127, 129, 153, 165, 189, 195, 219, 231, 255, 257, 273,
+  297, 313, 325, 341, 365, 381, 387, 403, 427, 443, 455, 471, 495, 511,
+  513, 561, 585, 633, 645, 693, 717, 765, 771, 819, 843, ...
+
+Funzione che restituisce la sequenza dei numeri binari palindromi:
+
+(define (bin-pal limite binary)
+  (let ( (out '()) (num-pali 0) (num 0) (bin "") )
+    (until (= num-pali limite)
+      (setq bin (bits num))
+      ;(when (= bin (reverse (bits num))) ; slower
+      (when (= bin (reverse (copy bin)))
+        (if binary 
+            (push bin out -1)
+            (push num out -1))
+        (++ num-pali))
+      (++ num))
+    out))
+
+Proviamo:
+
+(bin-pal 58)
+;-> (0 1 3 5 7 9 15 17 21 27 31 33 45 51 63 65 73 85 93
+;->  99 107 119 127 129 153 165 189 195 219 231 255 257 273
+;->  297 313 325 341 365 381 387 403 427 443 455 471 495 511
+;->  513 561 585 633 645 693 717 765 771 819 843)
+
+(bin-pal 58 true)
+;-> ("0" "1" "11" "101" "111" "1001" "1111" "10001" "10101" "11011"
+;->  "11111" "100001" "101101" "110011" "111111" "1000001" "1001001"
+;->  "1010101" "1011101" "1100011" "1101011" "1110111" "1111111"
+;->  "10000001" "10011001" "10100101" "10111101" "11000011" "11011011"
+;->  "11100111" "11111111" "100000001" "100010001" "100101001" "100111001"
+;->  "101000101" "101010101" "101101101" "101111101" "110000011" "110010011"
+;->  "110101011" "110111011" "111000111" "111010111" "111101111" "111111111"
+;->  "1000000001" "1000110001" "1001001001" "1001111001" "1010000101"
+;->  "1010110101" "1011001101" "1011111101" "1100000011" "1100110011"
+;->  "1101001011")
+
+La funzione è molto lenta.
+(time (bin-pal 1e4))
+;-> 6578.668
+
+Un altro metodo per trovare i primi n numeri palindromi binari è quello di costruire i palindromi dal primo all'n-esimo come stringhe.
+
+L'algoritmo usato si basa su una "generazione incrementale" dei numeri binari palindromi tramite una coda (queue).
+L'idea è di partire da un palindromo semplice ("11") e costruirne di nuovi inserendo cifre nel mezzo delle stringhe già palindrome, mantenendo sempre la simmetria.
+
+1. Caso base: il primo palindromo binario è "1", corrispondente al numero decimale 1.
+
+2. Coda: iniziamo con ("11") e ogni ciclo rimuove un elemento dalla fine della lista e inserisce nuovi palindromi all'inizio, simulando una coda FIFO.
+
+3. Generazione dei nuovi palindromi:
+   - Se la lunghezza è pari, si inserisce "0" e "1" al centro della stringa per generare due nuovi palindromi.
+   - Se la lunghezza è dispari, si duplica il carattere centrale per ottenere un nuovo palindromo.
+
+4. Ripetere finché non abbiamo generato l'n-esimo palindromo.
+
+Funzione che restituisce i primi n numeri binari palindromi:
+
+(define (bin-pal2 n)
+  (cond
+    ; Casi base: 0 e 1 (il primo palindromo è "1")
+    ((= n 0) '(0))
+    ((= n 1) '(0 1))
+    ; Casi n > 1:
+    (true
+    (local (q len curr midChar result trovato left right mid out)
+      (setq out '(0 1)) ; Lista delle soluzioni (binari palindromi)
+      (setq n (- n 1))  ; Decrementa n perché abbiamo già gestito il primo
+      (setq q '("11"))  ; Inizia con il primo palindromo di lunghezza 2
+      (setq trovato nil)
+      ; Continua finché non trova l'n-esimo palindromo
+      (while (and (not trovato) (> (length q) 0))
+        (setq curr (pop q -1)) ; Estrae il prossimo palindromo dalla fine della coda
+        (push (int curr 0 2) out -1) ; Inserisce il palindromo corrente nelle soluzioni
+        (setq n (- n 1))
+        (if (= n 0)
+            ; Se è il palindromo cercato, converte in numero decimale
+            (begin
+              (setq result (int curr 0 2))
+              (setq trovato true))
+            ; Altrimenti genera nuovi palindromi da inserire in coda
+            (begin
+              (setq len (length curr))
+              (setq left (slice curr 0 (/ len 2))) ; Parte sinistra
+              (setq right (slice curr (/ len 2)))  ; Parte destra
+              (if (= (mod len 2) 0)
+                  ; Se lunghezza pari: inserisce "0" e "1" al centro
+                  (begin
+                    (push (string left "0" right) q 0)
+                    (push (string left "1" right) q 0))
+                  ; Se lunghezza dispari: duplica il carattere centrale
+                  (begin
+                    (setq mid (slice curr (/ len 2) 1))
+                    (push (string left mid right) q 0))))))
+        out))))
+
+Proviamo:
+
+(bin-pal2 58)
+;-> (0 1 3 5 7 9 15 17 21 27 31 33 45 51 63 65 73 85 93
+;->  99 107 119 127 129 153 165 189 195 219 231 255 257 273
+;->  297 313 325 341 365 381 387 403 427 443 455 471 495 511
+;->  513 561 585 633 645 693 717 765 771 819 843 891)
+
+(time (bin-pal2 1e4))
+;-> 100.228
+(time (bin-pal2 1e5))
+;-> 9858.858
+
+
+-------------------------------------------------------------------------
+Somma, differenza, prodotto di numeri massimi e minimi con gli stessi bit
+-------------------------------------------------------------------------
+
+Dato un numero N determinare la differenza, la somma e il prodotto del numero più grande e del più piccolo che in rappresentazione binaria ha lo stesso numero di 0 e 1 di n.
+
+Sequenza OEIS A073139:
+Difference between the largest and smallest number having in binary representation the same number of 0's and 1's as n.
+  0, 0, 0, 0, 0, 1, 1, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 7, 7, 9, 7, 9, 9,
+  7, 7, 9, 9, 7, 9, 7, 7, 0, 0, 15, 15, 21, 15, 21, 21, 21, 15, 21, 21,
+  21, 21, 21, 21, 15, 15, 21, 21, 21, 21, 21, 21, 15, 21, 21, 21, 15,
+  21, 15, 15, 0, 0, 31, 31, 45, 31, 45, 45, 49, 31, 45, 45, 49, 45, 49,
+  49, 45, 31, ...
+
+Sequenza OEIS A073140:
+Sum of the largest and smallest number having in binary representation the same number of 0's and 1's as n.
+  0, 2, 4, 6, 8, 11, 11, 14, 16, 21, 21, 25, 21, 25, 25, 30, 32, 41, 41,
+  47, 41, 47, 47, 53, 41, 47, 47, 53, 47, 53, 53, 62, 64, 81, 81, 91, 81
+  , 91, 91, 99, 81, 91, 91, 99, 91, 99, 99, 109, 81, 91, 91, 99, 91, 99,
+  99, 109, 91, 99, 99, 109, 99, 109, 109, 126, 128, 161, 161, 179, ...
+
+Sequenza OEIS A073141:
+Product of the largest and smallest number having in binary representation the same number of 0's and 1's as n.
+  0, 1, 4, 9, 16, 30, 30, 49, 64, 108, 108, 154, 108, 154, 154, 225,
+  256, 408, 408, 532, 408, 532, 532, 690, 408, 532, 532, 690, 532, 690,
+  690, 961, 1024, 1584, 1584, 1960, 1584, 1960, 1960, 2340, 1584, 1960,
+  1960, 2340, 1960, 2340, 2340, 2914, 1584, 1960, ...
+
+(define (max-same-bits n)
+  (letn ( (binary (bits n))
+          (ones (length (find-all "1" binary)))
+          (len (length binary)) )
+    (<< (- (pow 2 ones) 1) (- len ones))))
+
+(define (min-same-bits n)
+  (if (zero? n) 0
+    (letn ( (bin (bits n)) ; binario di n
+            (len (length bin)) ; lunghezza binario di n
+            (zeros (length (find-all "0" bin))) ; numero di 0
+            (unos (- len zeros)) ; numero di 1
+            ; crea la stringa binaria minima della stessa lunghezza
+            (binary (string "1" (dup "0" zeros) (dup "1" (- unos 1)))) )
+      (int binary 0 2))))
+
+(define (A num tipo)
+  (let (seq (sequence 0 num))
+   (cond ((= tipo 0) ; differenza
+           (map - (map max-same-bits seq)
+                  (map min-same-bits seq)))
+        ((= tipo 1) ; somma
+           (map + (map max-same-bits seq)
+                  (map min-same-bits seq)))
+        ((= tipo 2) ; prodotto
+           (map * (map max-same-bits seq)
+                  (map min-same-bits seq))))))
+
+Proviamo:
+
+(A 65 0)
+;-> (0 0 0 0 0 1 1 0 0 3 3 3 3 3 3 0 0 7 7 9 7 9 9 7 7 9 9 7 9 7 7 0 0
+;->  15 15 21 15 21 21 21 15 21 21 21 21 21 21 15 15 21 21 21 21 21 21
+;->  15 21 21 21 15 21 15 15 0 0 31)
+
+(A 65 1)
+;-> (0 2 4 6 8 11 11 14 16 21 21 25 21 25 25 30 32 41 41 47 41 47 47 53
+;->  41 47 47 53 47 53 53 62 64 81 81 91 81 91 91 99 81 91 91 99 91 99
+;->  99 109 81 91 91 99 91 99 99 109 91 99 99 109 99 109 109 126 128 161)
+
+(A 65 2)
+;-> (0 1 4 9 16 30 30 49 64 108 108 154 108 154 154 225 256 408 408 532
+;->  408 532 532 690 408 532 532 690 532 690 690 961 1024 1584 1584 1960
+;->  1584 1960 1960 2340 1584 1960 1960 2340 1960 2340 2340 2914 1584
+;->  1960 1960 2340 1960 2340 2340 2914 1960 2340 2340 2914 2340 2914
+;->  2914 3969 4096 6240)
+
+Vedi anche "Numero massimo e minimo con gli stessi bit" su "Note libere 29".
+
 ============================================================================
 

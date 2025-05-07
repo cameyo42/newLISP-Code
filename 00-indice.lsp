@@ -2909,6 +2909,8 @@ NOTE LIBERE 29
   newLISP e BC (Basic Calculator)
   Numero massimo e minimo con gli stessi bit
   Coppie e singoli
+  Numeri binari palindromi
+  Somma, differenza, prodotto di numeri massimi e minimi con gli stessi bit
 
 PROBLEMI SUI DADI
 =================
