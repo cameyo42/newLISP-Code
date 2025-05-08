@@ -2911,6 +2911,10 @@ NOTE LIBERE 29
   Coppie e singoli
   Numeri binari palindromi
   Somma, differenza, prodotto di numeri massimi e minimi con gli stessi bit
+  Padding di liste e stringhe binarie
+  Lista della spesa
+  Distanza dalla più grande potenza di 2 minore o uguale a un numero
+  Confronto tra gli elementi di N liste
 
 PROBLEMI SUI DADI
 =================

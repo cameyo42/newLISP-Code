@@ -6116,6 +6116,13 @@ Iniziamo con i numeri pandigitali (10):
   )
 )
 
+(pan10a? 1325476980)
+;-> true
+(pan10a? 125476980)
+;-> nil
+(pan10a? 131116980)
+;-> nil
+
 (define (pan10b? n)
   (cond ((or (< n 1023456789) (> n 9876543210) (!= 0 (% n 9))) nil)
         (true
@@ -6130,6 +6137,13 @@ Iniziamo con i numeri pandigitali (10):
         )
   )
 )
+
+(pan10b? 1325476980)
+;-> true
+(pan10b? 125476980)
+;-> nil
+(pan10b? 131116980)
+;-> nil
 
 Primo numero pandigitale (10):     1023456789
 Millesimo numero pandigitale (10): 1024658793

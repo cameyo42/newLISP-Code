@@ -2923,8 +2923,6 @@ Per azzerare il MSB (Most Significant Bit) di un numero, occorre:
 - Creare una maschera che ha 0 in quella posizione e 1 negli altri.
 - Fare l'operazione AND tra il numero e la maschera.
 
-Quale funzione è quella corretta?
-
 (define (clear-msb num)
   (let ( (n num) (msb 1) )
     (while (> n 1)
@@ -2938,8 +2936,8 @@ Partiamo da:
   msb = 1
 Ciclo:
   Finché n > 1:
-    n = n >> 1 → sposti i bit verso destra (scali verso il bit più significativo).
-    msb = msb << 1 → sposti il bit "acceso" a sinistra per inseguire il MSB.
+    n = n >> 1 → sposta i bit verso destra (scala verso il bit più significativo).
+    msb = msb << 1 → sposta il bit "acceso" a sinistra per inseguire il MSB.
 Fine ciclo:
   Ora msb contiene solo il bit corrispondente al MSB di num.
 Maschera:
@@ -4453,6 +4451,190 @@ Proviamo:
 ;->  2914 3969 4096 6240)
 
 Vedi anche "Numero massimo e minimo con gli stessi bit" su "Note libere 29".
+
+
+-----------------------------------
+Padding di liste e stringhe binarie
+-----------------------------------
+
+Data una lista o una stringa binaria e un numero di bit B, scrivere una funzione che restituisce una lista con B elementi.
+Se la lista è più corta di B, allora occorre aggiungere a sinistra tanti 0 quanti ne sono necessari per avere una lista/stringa con B bit.
+Se la lista è più lunga di B, allora prendere B elementi a destra della lista/stringa.
+
+Esempi:
+
+  lista binaria (1 1 0)
+  bit = 8
+  Output = (0 0 0 0 0 1 1 0)
+
+  stringa binaria = "101011"
+  bit = 8 
+  output = "00101011"
+  
+  stringa binaria = "110010"  
+  bit = 4
+  output = "0010"
+
+(define (pad-binary binary bit)
+  (let (len (length binary))
+    (cond ((= len bit) binary)
+          ((> len bit) (slice binary (- bit) bit))
+          (true
+            (if (list? binary)
+                (extend (dup 0 (- bit len)) binary)
+                (extend (dup "0" (- bit len)) binary))))))
+
+Proviamo:
+
+(pad-binary '(1 1 0 1) 8)
+;-> (0 0 0 0 1 1 0 1)
+(pad-binary '(1 1 0 1) 4)
+;-> (1 1 0 1)
+(pad-binary '(1 1 0 1) 2)
+;-> (0 1)
+
+(pad-binary "1101" 8)
+;-> "00001101"
+(pad-binary "1101" 4)
+;-> "1101"
+(pad-binary "1101" 2)
+;-> "01"
+
+(length (pad-binary '(1 0 1) 32))
+;-> (0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1)
+(length (pad-binary '(1 0 1) 32))
+;-> 32
+
+Per le stringhe possiamo usare anche la funzione "format":
+
+(setq fmt (string "%0" 16 "s"))
+(format fmt "010101")
+;-> "0000000000010101"
+
+(define (pad-binary-string binary bit) (format (string "%0" bit "s") binary))
+
+(pad-binary-string "101010111" 16)
+;-> "0000000101010111"
+
+Vediamo la velocità delle funzioni:
+
+(time (pad-binary "01010101010101010101011111111" 64) 1e6)
+;-> 510.126
+(time (pad-binary-string "01010101010101010101011111111" 64) 1e6)
+;-> 1259.932
+
+La funzione che usa "format" è più lenta.
+
+
+-----------------
+Lista della spesa
+-----------------
+
+Data una lista della spesa determinare il costo totale.
+Vediamo un esempio di lista della spesa:
+
+  Oggetto     Quantità     Prezzo unitario
+  Mele        10           1
+  Carne       2            15
+  Gelato      4            2
+  Vino        5            10
+
+Lista della spesa = (Mele 10 1) (Carne 2 15) (Gelato 4 2) (Vino 5 10)
+
+(define (costo lst)
+  (apply add (map (fn(x) (mul (x 1) (x 2))) lst)))
+
+(setq a '(('Mele 10 1) ('Carne 2 15) ('Gelato 4 2) ('Vino 5 10)))
+(costo a)
+;-> 98
+
+Componiamo le due liste Quantità e Prezzo: q = (10 2 4 5) e p = (1 15 2 10).
+Adesso la soluzione è il prodotto scalare delle due liste:
+
+  q(0)*p(0) + q(1)*p(1) + ... + q(n-1)*p(n-1)
+
+(define (dot-product x y)
+"Calculates the dot-product of two list/array of arbitrary length"
+  (apply add (map mul x y)))
+
+(dot-product '(10 2 4 5) '(1 15 2 10))
+;-> 98
+
+
+------------------------------------------------------------------
+Distanza dalla più grande potenza di 2 minore o uguale a un numero
+------------------------------------------------------------------
+
+Per determinare la distanza dalla più grande potenza di 2 minore o uguale a un numero possiamo scrivi n in binario, cambiare la prima cifra in zero e poi riconvertirlo in decimale.
+
+Sequenza OEIS A053645:
+Distance to largest power of 2 less than or equal to n.
+Write n in binary, change the first digit to zero, and convert back to decimal.
+  0, 0, 1, 0, 1, 2, 3, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7,
+  8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+  12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+  29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+  17, 18, 19, 20, ...
+
+MSB = Most Significative Bit
+
+Funzione che resetta il MSB di un numero (bit operation):
+
+(define (clear-msb num)
+  (let ( (n num) (msb 1) )
+    (while (> n 1)
+      (setq n (>> n 1))
+      (setq msb (<< msb 1)))
+    (& num (- msb 1))))
+
+(map clear-msb (sequence 1 64))
+;-> (0 0 1 0 1 2 3 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+;->  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+;->  26 27 28 29 30 31 0)
+
+Funzione che resetta il MSB di un numero (matematica):
+
+(define (a n) (- n (pow 2 (floor (log n 2)))))
+
+(map a (sequence 1 64))
+;-> (0 0 1 0 1 2 3 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+;->  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+;->  26 27 28 29 30 31 0)
+
+
+-------------------------------------
+Confronto tra gli elementi di N liste
+-------------------------------------
+
+Date N liste con K numeri interi, costruire una lista con il metodo seguente:
+
+- Considera le N-ple di numeri con lo stesso indice.
+- Per ogni N-pla:
+- se tutti i numeri hanno lo stesso valore,
+    allora il valore corrente è la somma di tutti i numeri
+    altrimenti il valore corrente è il massimo di tutti i numeri
+
+Esempio:
+ Lista 1 = (1 6 5 9 2 2 3)
+ Lista 2 = (2 5 1 7 2 8 1)
+ Lista 3 = (9 6 4 7 2 2 2)
+ Output  = (9 6 5 9 6 8 3)
+
+(define (confronta)
+  (map (fn(x) (if (apply = x) (apply + x) (apply max x))) 
+       (transpose (apply list (args)))))
+
+Proviamo:
+
+(setq a '(1 6 5 9 2 2 3))
+(setq b '(2 5 1 7 2 8 1))
+(setq c '(9 6 4 7 2 2 2))
+
+(confronta a b c)
+;-> (9 6 5 9 6 8 3)
+
+(confronta a b)
+;-> (2 6 5 9 4 8 3)
 
 ============================================================================
 
