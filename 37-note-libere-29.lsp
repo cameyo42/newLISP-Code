@@ -4636,5 +4636,137 @@ Proviamo:
 (confronta a b)
 ;-> (2 6 5 9 4 8 3)
 
+
+---------
+Chisanbop
+---------
+
+Il Chisanbop è un metodo semplice per contare da zero a novantanove con due mani, inventato da Sung Jin Pai e rivisitato da suo figlio Hang Young Pai.
+Per comporre i numeri, si sollevano zero, uno o più cifre e si sommano i loro valori.
+Il pollice sinistro vale cinquanta. Le altre dita della sinistra valgono dieci.
+Il pollice destro vale cinque. Le altre dita della destra valgono uno.
+Le dita più vicine al pollice della mano si sollevano prima delle altre della stessa mano.
+
+  Mano sinistra        Mano destra
+
+  10 10 10 10 50       5  1  1  1  1
+   |  |  |  |  |       |  |  |  |  |
+   |  |  |  |  |       |  |  |  |  |
+   n  a  m  i  p       p  i  m  a  n
+
+  p = pollice
+  i = indice
+  m = medio
+  a = anulare
+  n = mignolo
+
+Esempio
+N = 18 ---> (SX i) (DX p i m a)
+N = 26  ---> (SX m i)   (DX p i)
+
+Scrivere una funzione che prende un numero intero e restituisce la lista delle dita necessarie per rappresentare quel numero mano sinistra e mano destra).
+
+Utilizziamo un approccio greedy (avido), cioè proviamo a a costruire la somma aggiungendo i numeri più grandi possibili dalla lista, scartando quelli che farebbero superare N.
+Inoltre, poiché i valori sono limitati in quantità, è necessario tenere traccia degli elementi ancora disponibili.
+
+Rappresentiamo tutte le dita con una lista: (50 10 10 10 10 5 1 1 1 1)
+I primi 5 valori sono la mano sinistra.
+Gli ultimi 5 valori sono la mano destra.
+La relativa lista delle dita vale: ("p" "i" "m" "a" "n" "p" "i" "m" "a" "n")
+
+(define (chisanbop N)
+  (let ( (sorted '(50 10 10 10 10 5 1 1 1 1))
+         (finger '("p" "i" "m" "a" "n" "p" "i" "m" "a" "n"))
+         (somma 0)
+         (valori '())
+         (hands '())
+         (sx '())
+         (dx '())
+       )
+    ; approccio greedy
+    (dolist (x sorted)
+      (if (<= (+ somma x) N)
+        (begin
+          ; prendiamo il valore corrente
+          (push x valori -1)
+          ; prendiamo l'indice del valore corrente
+          (push $idx hands -1)
+          (setq somma (+ somma x)))))
+    ; se abbiamo creato il numero N...
+    (when (= somma N)
+        ; seleziona gli indici della mano sinistra
+        (setq sx (filter (fn(x) (< x 5)) hands))
+        ; seleziona gli indici della mano sinistra
+        (setq dx (filter (fn(x) (>= x 5)) hands))
+        ; seleziona le dita della mano sinistra
+        (setq sx (select finger sx))
+        ; seleziona le dita della mano destra
+        (setq dx (select finger dx)))
+    (list sx dx)))
+
+Proviamo:
+
+(chisanbop 26)
+;-> (("i" "m") ("p" "i"))
+(chisanbop 99)
+;-> (("p" "i" "m" "a" "n") ("p" "i" "m" "a" "n"))
+(chisanbop 0)
+;-> (() ())
+
+(for (i 0 99) (print i { } (chisanbop i)) (read-line))
+;-> 1 (() ("i"))
+;-> 2 (() ("i" "m"))
+;-> 3 (() ("i" "m" "a"))
+;-> 4 (() ("i" "m" "a" "n"))
+;-> 5 (() ("p"))
+;-> 6 (() ("p" "i"))
+;-> 7 (() ("p" "i" "m"))
+;-> 8 (() ("p" "i" "m" "a"))
+;-> 9 (() ("p" "i" "m" "a" "n"))
+;-> 10 (("i") ())
+;-> 11 (("i") ("i"))
+;-> 12 (("i") ("i" "m"))
+;-> ...
+;-> 94 (("p" "i" "m" "a" "n") ("i" "m" "a" "n"))
+;-> 95 (("p" "i" "m" "a" "n") ("p"))
+;-> 96 (("p" "i" "m" "a" "n") ("p" "i"))
+;-> 97 (("p" "i" "m" "a" "n") ("p" "i" "m"))
+;-> 98 (("p" "i" "m" "a" "n") ("p" "i" "m" "a"))
+;-> 99 (("p" "i" "m" "a" "n") ("p" "i" "m" "a" "n"))
+
+Possiamo scrivere la funzione inversa che prende l'output della funzione "chisanbop" restituisce il numero che rappresenta.
+
+(define (pobnasihc lst)
+  (let ( (link-sx '(("n" 10) ("a" 10) ("m" 10) ("i" 10) ("p" 50)))
+         (link-dx '(("p" 5) ("i" 1) ("m" 1) ("a" 1) ("n" 1)))
+         (sx (lst 0))
+         (dx (lst 1))
+       )
+    (+ (apply + (map (fn(x) (lookup x link-sx)) sx))
+       (apply + (map (fn(x) (lookup x link-dx)) dx)))))
+
+Proviamo:
+
+(pobnasihc '(("i" "m") ("p" "i")))
+;-> 26
+(pobnasihc '(("p" "i" "m" "a" "n") ("p" "i" "m" "a" "n")))
+;-> 99
+(pobnasihc '(() ()))
+;-> 0
+
+(for (i 0 99)
+  (print i { } (chisanbop i) { } (pobnasihc (chisanbop i))) (read-line))
+;-> 0 (() ()) 0
+;-> 1 (() ("i")) 1
+;-> 2 (() ("i" "m")) 2
+;-> 3 (() ("i" "m" "a")) 3
+;-> 4 (() ("i" "m" "a" "n")) 4
+;-> 5 (() ("p")) 5
+;-> ...
+;-> 96 (("p" "i" "m" "a" "n") ("p" "i")) 96
+;-> 97 (("p" "i" "m" "a" "n") ("p" "i" "m")) 97
+;-> 98 (("p" "i" "m" "a" "n") ("p" "i" "m" "a")) 98
+;-> 99 (("p" "i" "m" "a" "n") ("p" "i" "m" "a" "n")) 99
+
 ============================================================================
 

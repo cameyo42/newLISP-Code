@@ -2915,6 +2915,7 @@ NOTE LIBERE 29
   Lista della spesa
   Distanza dalla più grande potenza di 2 minore o uguale a un numero
   Confronto tra gli elementi di N liste
+  Chisanbop
 
 PROBLEMI SUI DADI
 =================
