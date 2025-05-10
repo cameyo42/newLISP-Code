@@ -2708,7 +2708,7 @@ Assumiamo N = -X, con X > 0
 Approfondimenti
 ---------------
 1. NOT (~N) con N negativo:
-- Inverte tutti i bit → risultato positivo.
+- Inverte tutti i bit --> risultato positivo.
 - ~(-X) = X - 1
 - Esempio:
   - ~(-8) = 7
@@ -2722,7 +2722,7 @@ Approfondimenti
 - In aritmetico mantiene il segno (in newLISP).
 - Si comporta come divisione intera "floor verso -∞"
 - Esempi:
-  - (-9) >> 1 = -5  (perché -9 / 2 = -4.5 → floor(-4.5) = -5)
+  - (-9) >> 1 = -5  (perché -9 / 2 = -4.5 --> floor(-4.5) = -5)
   - (-4) >> 1 = -2
 
 Riassunto per N negativo
@@ -2936,8 +2936,8 @@ Partiamo da:
   msb = 1
 Ciclo:
   Finché n > 1:
-    n = n >> 1 → sposta i bit verso destra (scala verso il bit più significativo).
-    msb = msb << 1 → sposta il bit "acceso" a sinistra per inseguire il MSB.
+    n = n >> 1 --> sposta i bit verso destra (scala verso il bit più significativo).
+    msb = msb << 1 --> sposta il bit "acceso" a sinistra per inseguire il MSB.
 Fine ciclo:
   Ora msb contiene solo il bit corrispondente al MSB di num.
 Maschera:
@@ -3738,7 +3738,7 @@ Calcoliamo la differenza tra elementi consecutivi della sequenza S(i) - S(i-1):
 ;->  7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
 ;->  7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 519)
 
-Senza considerare i primi quattro termini della sequenzxa (0 4 1 9), le ripetizioni di numeri uguali hanno le seguenti lunghezze:
+Senza considerare i primi quattro termini della sequenza (0 4 1 9), le ripetizioni di numeri uguali hanno le seguenti lunghezze:
 
 (count '(2 3 4 5 6 7) diff)
 ;-> (3 7 16 31 63 127)
@@ -4767,6 +4767,270 @@ Proviamo:
 ;-> 97 (("p" "i" "m" "a" "n") ("p" "i" "m")) 97
 ;-> 98 (("p" "i" "m" "a" "n") ("p" "i" "m" "a")) 98
 ;-> 99 (("p" "i" "m" "a" "n") ("p" "i" "m" "a" "n")) 99
+
+
+----------------------------
+Primo primo che non divide N
+----------------------------
+
+Dato un numero intero positivo N, calcolare il primo primo che non divide N.
+(Il più piccolo primo è coprimo con N).
+
+Sequenza OEIS A053669:
+Smallest prime not dividing n.
+  2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5,
+  2, 3, 2, 3, 2, 7, 2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5,
+  2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 7, 2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5,
+  2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 5, 2, 3, 2, 3, 2, 7, 2, 3, 2, 3, 2, 5,
+  2, 3, 2, 3, 2, 5, 2, 3, 2, ...
+
+(define (primes-to num)
+"Generates all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(setq primi (primes-to 10000))
+
+(define (A num)
+  (let ( (sol nil) (solve nil) )
+    (dolist (p primi solve)
+      (if (!= (% (% num p) 7) 0)
+        (set 'solve true 'sol p)
+      )
+    )
+    sol))
+
+Proviamo:
+
+(A 0)
+;-> nil
+(A 1)
+;-> 2
+(A 6)
+(map A (sequence 1 101))
+;-> (2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 5
+;->  2 3 2 3 2 7 2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 5
+;->  2 3 2 3 2 5 2 3 2 3 2 7 2 3 2 3 2 5 2 3 2 3 2 5
+;->  2 3 2 3 2 5 2 3 2)
+
+
+------------------------------------
+Ordinamento basato sul numero di bit
+------------------------------------
+
+Costruire una lista ordinata in base al numero di bit a 1 di tutti i numeri a N bit.
+
+Funzione che conta il numero di bit a 1 del binario di un intero:
+
+(define (pop-count1 num)
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter)
+    )
+    counter))
+
+Per N bit abbiamo 2^N valori: da 0 a (2^N - 1).
+
+(define (ordina bit)
+  (let ( (coppie '()) (max-val (- (pow 2 bit) 1)) )
+    (for (i 0 max-val)
+      ; lista con elementi: (numero di 1, numero)
+      (push (list (pop-count1 i) i) coppie))
+    ; ordina ina base al numero di 1 e poi prende il numero
+    (map last (sort coppie))))
+
+Proviamo:
+
+(ordina 4))
+;-> (0 1 2 4 8 16 3 5 6 9 10 12 7 11 13 14 15)
+
+(ordina 8)
+;-> (0 1 2 4 8 16 32 64 128 3 5 6 9 10 12 17 18 20 24 33 34 36 40 48 65
+;->  66 68 72 80 96 129 130 132 136 144 160 192 7 11 13 14 19 21 22 25
+;->  26 28 35 37 38 41 42 44 49 50 52 56 67 69 70 73 74 76 81 82 84 88
+;->  97 98 100 104 112 131 133 134 137 138 140 145 146 148 152 161 162
+;->  164 168 176 193 194 196 200 208 224 15 23 27 29 30 39 43 45 46 51
+;->  53 54 57 58 60 71 75 77 78 83 85 86 89 90 92 99 101 102 105 106 108
+;->  113 114 116 120 135 139 141 142 147 149 150 153 154 156 163 165 166
+;->  169 170 172 177 178 180 184 195 197 198 201 202 204 209 210 212 216
+;->  225 226 228 232 240 31 47 55 59 61 62 79 87 91 93 94 103 107 109
+;->  110 115 117 118 121 122 124 143 151 155 157 158 167 171 173 174 179
+;->  181 182 185 186 188 199 203 205 206 211 213 214 217 218 220 227 229
+;->  230 233 234 236 241 242 244 248 63 95 111 119 123 125 126 159 175
+;->  183 187 189 190 207 215 219 221 222 231 235 237 238 243 245 246 249
+;->  250 252 127 191 223 239 247 251 253 254 255)
+
+(length (ordina 8))
+;-> 256
+(length (ordina 16))
+;-> 
+
+Vediamo la velocità della funzione:
+
+(time (ordina 20))
+;-> 1941.576
+(time (ordina 22))
+;-> 9565.949
+(time (ordina 24))
+;-> 42591.29
+
+(setq seq (sequence 2 22 2))
+(map list seq (map (fn(x) (time (ordina x))) seq))
+;-> ((2 0) (4 0) (6 0) (8 0) (10 0.998) (12 4.986) (14 20.182)
+;->  (16 91.2) (18 458.293) (20 2200.744) (22 9936.172))
+
+
+-------------------------------
+Somma numero e numero invertito
+-------------------------------
+
+Dato un numero intero N maggiore di 0, scrivere una funzione che crea i numeri (1..N) e (N..1) concatenando le cifre e poi li somma.
+
+Esempi:
+N = 5
+numero1 (1..5) = 12345
+numero2 (5..1) = 54321
+
+N = 11
+numero1 (1..11) = 1234567891011
+numero2 (11..1) = 1110987654321
+somma = 1234567891011 + 1110987654321 = 2345555545332
+
+Sequenza OEIS A078262:
+Sum of the forward and reverse concatenations of 1 to n.
+  2, 33, 444, 5555, 66666, 777777, 8888888, 99999999, 1111111110,
+  23333333231, 2345555545332, 244567776755433, 25466789897765534,
+  2647689001998775635, 274869910212099785736, 28497092031222200795837,
+  2950719304132232301805938, ...
+
+Dobbiamo trattare i numeri come big-integer.
+
+(define (string-int str)
+"Convert a numeric string to big-integer"
+  (let (num 0L)
+    (cond ((= (str 0) "-")
+            (pop str)
+            (dolist (el (explode str)) (setq num (+ (* num 10) (int el))))
+            (* num -1))
+          (true
+            (dolist (el (explode str)) (setq num (+ (* num 10) (int el))))))))
+
+(define (somma n)
+  (let ( (n1 (string-int (join (map string (sequence 1 n)))))
+         (n2 (string-int (join (map string (sequence n 1))))) )
+    (+ n1 n2)))
+
+Proviamo:
+
+(somma 5)
+;-> 66666L
+
+(somma 11)
+;-> 2345555545332L
+
+(map somma (sequence 1 18))
+;-> (2L 33L 444L 5555L 66666L 777777L 8888888L 99999999L 1111111110L
+;->  23333333231L 2345555545332L 244567776755433L 25466789897765534L
+;->  2647689001998775635L 274869910212099785736L 28497092031222200795837L
+;->  2950719304132232301805938L 305172940514233242402816039L)
+
+
+-----------------------------------------------------------------
+Convergenza della somma di prodotti digitali consecutivi ripetuti
+-----------------------------------------------------------------
+
+Dato un intero positivo N (es. 122344666889) applicare il seguente algoritmo:
+1) Separare in sequenze di cifre consecutive:
+   (1 22 3 44 666 88 9)
+2) Eseguire il prodotto numerico di ogni sequenza:
+   (1 2*2 3 4*4 6*6*6 8*8 9) = (1 4 3 16 216 64 9)
+3) Sommare tutti i numeri ottenuti:
+   1 + 4 + 3 + 16 + 216 + 64 + 9 = 313
+4) Ripetere da 1) finché il risultato non converge a un singolo numero:
+   122344666889
+   313
+   7
+5) Restituire l'ultimo numero: 7
+
+(define (split-sum num)
+  (local (palo conta out)
+    (setq lst (map int (explode (string num))))
+    ; controllo se ultimo elemento è 'nil' (da L di big-integer)
+    (if (nil? (last lst)) (pop lst -1))
+    (setq out '())
+    (setq palo (first lst))
+    (setq prodotto 1L)
+    (dolist (el lst)
+      ; se l'elemento è uguale al precedente moltiplichiamo
+      (if (= el palo) (setq prodotto (* prodotto palo))
+          ; altrimenti aggiorniamo il risultato
+          (begin (push prodotto out -1)
+                  (setq palo el)
+                  (setq prodotto (bigint palo))
+          )
+      )
+    )
+    ; aggiungiamo l'ultimo valore
+    (push prodotto out -1)
+    ; controllo se ultimo elemento è 'nil' (da L di big-integer)
+    (if (nil? (last out)) (pop out -1))
+    ;(println out)
+    (apply + out)))
+
+Proviamo:
+
+(split-sum 122344666889)
+;-> 313L
+(split-sum 313)
+;-> 7L
+(split-sum 7)
+;-> 7L
+
+(split-sum 12345678911234567899)
+;-> 162
+(split-sum 99999999999999999999)
+;-> 12157665459056928801L
+(split-sum 199999999999999999999)
+;-> 12157665459056928802L
+
+(define (converge num)
+  (while (> (length num) 1)
+    (setq num (string (split-sum num)))
+    (if (= "L" (last num)) (pop num -1))
+    (println num)
+  )
+  (int num 0 10) '>)
+
+Proviamo:
+
+(converge 122344666889)
+;-> 313
+;-> 7
+(converge 99999999999999999999)
+;-> 12157665459056928801
+;-> 162
+;-> 9
+(converge 199999999999999999999)
+12157665459056928802
+;-> 163
+;-> 10
+;-> 1
+(converge 12345678901234567890)
+;-> 90
+;-> 9
+(converge 11111111)
+;-> 1
+(converge "111222333444555666777888999000")
+;-> 2025
+;-> 9
 
 ============================================================================
 

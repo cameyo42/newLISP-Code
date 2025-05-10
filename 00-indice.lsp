@@ -2916,6 +2916,10 @@ NOTE LIBERE 29
   Distanza dalla più grande potenza di 2 minore o uguale a un numero
   Confronto tra gli elementi di N liste
   Chisanbop
+  Primo primo che non divide N
+  Ordinamento basato sul numero di bit
+  Somma numero e numero invertito
+  Convergenza della somma di prodotti digitali consecutivi ripetuti
 
 PROBLEMI SUI DADI
 =================
