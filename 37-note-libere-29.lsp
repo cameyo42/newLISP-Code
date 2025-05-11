@@ -5042,5 +5042,135 @@ Proviamo:
 ;-> 2025
 ;-> 9
 
+
+-------------------------------
+Coppie di dadi con somma uguale
+-------------------------------
+
+Lanciando quattro dadi (con numeri da 1 a 6), calcolare la probabilità di poter suddividere i dadi in due coppie in cui ciascuna coppia abbia la stessa somma?
+
+
+Metodo con simulazione
+-----------------------
+
+(define (equal-sum? lst)
+  (or (= (+ (lst 0) (lst 1)) (+ (lst 2) (lst 3)))
+      (= (+ (lst 0) (lst 2)) (+ (lst 1) (lst 3)))
+      (= (+ (lst 0) (lst 3)) (+ (lst 1) (lst 2)))))
+
+(equal-sum? '(1 2 3 4))
+;-> true
+(equal-sum? '(5 1 3 4))
+;-> nil
+
+(define (dice-lst n) (map (curry + 1) (rand 6 n)))
+
+(dice-lst 4)
+;-> (3 3 6 5)
+
+(define (simula limite)
+  (let (conta 0)
+    (for (i 1 limite)
+      (if (equal-sum? (dice-lst 4)) (++ conta)))
+    (div conta limite)))
+
+Proviamo:
+
+(simula 1e4)
+;-> 0.2603
+(simula 1e5)
+;-> 0.26107
+(simula 1e6)
+;-> 0.259072
+(simula 1e7)
+;-> 0.2592237
+
+Metodo con calcolo esaustivo
+----------------------------
+Lanciando 4 dadi possiamo avere 6x6x6x6 = 1296 risultati diversi.
+Calcoliamo tutti risultati e vediamo quanti soddisfano la condizione.
+Quindi la probabilità vale:
+
+          numero casi positivi
+  prob = ----------------------
+                 1296 (tutti i casi)
+
+Funzione che calcola tutti i risultati possibili del lancio di 4 dadi:
+
+(define (calcola)
+  (let (out '())
+    (for (i 1 6)
+      (for (j 1 6)
+        (for (k 1 6)
+          (for (l 1 6)
+            (push (list i j k l) out))))) out))
+
+(length (calcola))
+;-> 1296
+
+Funzione che calcola la probabilità esatta:
+
+(define (prob)
+  (let ( (conta 0) (lanci (calcola)) )
+    (dolist (el lanci)
+      (if (equal-sum? el) (++ conta)))
+      (println conta)
+    (div conta (length lanci))))
+
+(prob)
+;-> 336
+;-> 0.2592592592592592
+
+Si puo dimostrare che i casi favorevoli sono così suddivisi:
+
+1) {a, a, a, a}: 4 dadi uguali = 6 casi
+2) {a, a, a, b}: 3 dadi uguali e 1 diverso = nessun caso
+3) {a, a, b, c}: 2 dadi uguali e 2 diversi = 72 casi
+4) {a, a, b, b}: 2 dadi uguali e 2 dadi uguali = 90 casi
+5) {a, b, c, d}: 4 dadi diversi = 168 casi
+
+  6 + 72 + 90 + 38 = 336
+
+  prob  = 336/1296 = 7/27 = 0.2592592592592592
+
+
+-------------------
+Mancini e destrorsi
+-------------------
+
+Ci sono 100 persone in una stanza.
+Il 99% delle persone è mancino.
+Quante persone mancine devono uscire dalla stanza affinché ci sia il 98% di mancini?
+
+Bisogna risolvere la seguente espressione:
+
+  (99 - x) : (100 - x) = 98 : 100
+
+Passaggi:
+  (99 - x)/(100 - x) = 98/100
+  100*(99 - x)/(100 - x) = 98
+  100*(99 - x) = 98*(100 - x)
+  9900 - 100x = 9800 - 98x
+  9900 - 9800 = 100x - 98x
+  100 = 2x --> x = 50
+
+Risolviamo il problema con una funzione:
+
+(define (solve)
+  (setq found nil)
+  (setq lh 99)
+  (setq rh 1)
+  (for (i 1 99 1 found)
+    (-- lh)
+    (when (= 0.98 (div lh (+ lh rh)))
+      (println (- 99 lh))
+      (setq found true))
+  )
+  (println (string lh) "/" (string (+ lh rh)) " = " (div lh (+ lh rh))) '>)
+
+(solve)
+;-> 50
+;-> 49/50 = 0.98
+
 ============================================================================
 

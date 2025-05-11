@@ -2920,6 +2920,8 @@ NOTE LIBERE 29
   Ordinamento basato sul numero di bit
   Somma numero e numero invertito
   Convergenza della somma di prodotti digitali consecutivi ripetuti
+  Coppie di dadi con somma uguale
+  Mancini e destrorsi
 
 PROBLEMI SUI DADI
 =================
