@@ -5152,7 +5152,7 @@ Passaggi:
   100*(99 - x) = 98*(100 - x)
   9900 - 100x = 9800 - 98x
   9900 - 9800 = 100x - 98x
-  100 = 2x --> x = 50
+  100 = 2x --> x = 100/2 = 50
 
 Risolviamo il problema con una funzione:
 
@@ -5171,6 +5171,119 @@ Risolviamo il problema con una funzione:
 (solve)
 ;-> 50
 ;-> 49/50 = 0.98
+
+
+-------------------------
+Merge di k liste ordinate
+-------------------------
+
+Data una lista di liste ordinate in modo crescente, scrivere una funzione che unisce (merge) le liste in un unica lista ordinata.
+
+Per fare il merge di k liste ordinate in modo efficiente, l'approccio classico è usare una min-heap (coda di priorità) per tenere traccia del minimo corrente tra le teste di ciascuna lista. 
+Questo riduce la complessità a O(N*log(k)) dove N è il numero totale di elementi.
+
+In newLISP, possiamo simulare una coda di priorità con una lista (più lenta di un heap vero, ma funziona bene per k piccoli).
+
+(define (merge-k-liste liste)
+  (let ((risultato '())
+        (heap '()))
+    ;; inizializza il "heap" con il primo elemento di ciascuna lista
+    (for (i 0 (- (length liste) 1))
+      (if (liste i)
+          (push (list (liste i 0) i 0) heap -1))) ; (valore, indice-lista, indice-interno)
+    ;; ciclo principale
+    (while heap
+      ;; trova il minimo
+      (set 'heap (sort heap (fn (a b) (< (a 0) (b 0)))))
+      (let ((minimo (pop heap)))
+        (push (minimo 0) risultato -1)
+        ;; se la lista da cui proveniva ha altri elementi, aggiungi il successivo
+        (let ((i (minimo 1))
+              (j (minimo 2)))
+          (if (< (+ j 1) (length (liste i)))
+              (push (list ((liste i) (+ j 1)) i (+ j 1)) heap -1)))))
+    risultato))
+
+Proviamo:
+
+(merge-k-liste '((1 4 7) (2 5 8) (3 6 9)))
+;-> (1 2 3 4 5 6 7 8 9)
+(merge-k-liste '((1 4 5) (1 3 4) (2 6)))
+;-> (1 1 2 3 4 4 5 6)
+(merge-k-liste '((1 4) (1 3 4) (2 6)))
+;-> (1 1 2 3 4 4 6)
+(merge-k-liste '((1 4) () (2 6)))
+;-> (1 2 4 6)
+
+Vediamo un metodo con le primitive di newLISP (molto più corto):
+
+(define (merge-k lst) (sort (flat lst)))
+
+(merge-k '((1 4 7) (2 5 8) (3 6 9)))
+;-> (1 2 3 4 5 6 7 8 9)
+(merge-k '((1 4 5) (1 3 4) (2 6)))
+;-> (1 1 2 3 4 4 5 6)
+(merge-k '((1 4) (1 3 4) (2 6)))
+;-> (1 1 2 3 4 4 6)
+(merge-k '((1 4) () (2 6)))
+;-> (1 2 4 6)
+
+
+Test di correttezza:
+
+(silent 
+  (setq a (sort (rand 100 10000)))
+  (setq b (sort (rand 50 10000)))
+  (setq c (sort (rand 150 10000)))
+  (setq all (list a b c)))
+
+(= (merge-k all) (merge-k-liste all))
+;-> true
+
+Test di velocità:
+
+(time (merge-k-liste all))
+;-> 5750.289
+(time (merge-k all))
+;-> 4.998
+
+In questo caso le funzioni primitive sono estremamente più veloci dell'algoritmo più efficiente.
+
+
+------------------------------------------
+Compressione/Espansione di liste di interi
+------------------------------------------
+
+Data una lista di interi non negativi, generare una lista in cui lista(k) è il numero di volte in cui il numero k appare nella lista data.
+
+Esempio:
+lista = (1 1 3 5 5 0 4 0)
+output = (2 2 0 1 1 2)  -->  2 zero, 2 uno, 0 due, 1 tre, 1 quattro, 2 cinque
+
+(define (comprime lst)
+  (letn ( (max-val (apply max lst))
+          (seq (sequence 0 max-val)) )
+    (count seq lst)))
+
+(comprime '(1 1 3 5 5 0 4 0))
+;-> (2 2 0 1 1 2)
+
+Adesso scriviamo la funzione inversa.
+
+(define (espande lst)
+  (let (out '())
+    (dolist (el lst)
+      (extend out (dup $idx el)))))
+
+(espande '(2 2 0 1 1 2))
+;-> (0 0 1 1 3 4 5 5)
+
+Test di correttezza:
+
+(silent (setq t (rand 100 100000)))
+(setq c (comprime t))
+(= (espande c) (sort t))
+;-> true
 
 ============================================================================
 

@@ -3731,7 +3731,7 @@ Dato un numero N, esistono k coprimi di N minori di N.
 La sequenza è la seguente:
 
   a(0) = 0
-  a(1) = 2
+  a(1) = 1
   a(n) = numero di coprimi di n fino a (n-1)
 
 (define (coprimi? a b) (= (gcd a b) 1))
@@ -3753,13 +3753,13 @@ La sequenza è la seguente:
 ;-> 4
 
 (define (seq limite)
-  (let (out '(0 2))
+  (let (out '(0 1))
     (for (i 2 limite)
       (push (conta-coprimi i) out -1))
     out))
 
 (seq 20)
-;-> (0 2 1 2 2 4 2 6 4 6 4 10 4 12 6 8 8 16 6 18 8)
+;-> (1 2 1 2 2 4 2 6 4 6 4 10 4 12 6 8 8 16 6 18 8)
 
 
 -------------

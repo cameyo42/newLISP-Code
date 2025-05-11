@@ -2922,6 +2922,8 @@ NOTE LIBERE 29
   Convergenza della somma di prodotti digitali consecutivi ripetuti
   Coppie di dadi con somma uguale
   Mancini e destrorsi
+  Merge di k liste ordinate
+  Compressione/Espansione di liste di interi
 
 PROBLEMI SUI DADI
 =================
