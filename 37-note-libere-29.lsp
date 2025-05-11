@@ -2959,7 +2959,7 @@ Risultato:
 (bits 14)
 ;-> "1110"
 
-Anche la seguente funzione azzera il MSB:
+Anche la seguente funzione azzera il MSB (ed è più veloce):
 
 (define (clear-msb2 num)
   (& num (^ (<< 1 (- (length (bits num)) 1)) -1)))
@@ -2983,6 +2983,16 @@ Come funziona?
 ;-> 56
 (clear-msb2 30)
 ;-> 14
+
+Test di correttezza:
+(= (map clear-msb nums) (map clear-msb2 nums))
+
+Test di velocità:
+(setq nums (rand 1e6 1e3))
+(time (map clear-msb nums) 1e3)
+;-> 1859.41
+(time (map clear-msb2 nums) 1e3)
+;-> 310.998
 
 5) Verificare se un numero è una potenza di due
 -----------------------------------------------
