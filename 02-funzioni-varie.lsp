@@ -7426,7 +7426,8 @@ Oppure controllando se il test "maggiori di zero" è uguale per entrambi i numer
 Suddivisione di una lista
 -------------------------
 
-Una funzione per dividere una lista in sotto-liste: data una lista di input da dividere e una lista di lunghezze delle sotto-liste, restituire una lista di sotto-liste che hanno le lunghezze richieste. Ad esempio: dividendo la lista (1 2 2 3 3 3) in sotto-liste di lunghezze (1 2 3) restituire la lista delle sotto-liste ((1) (2 2) (3 3 3)).
+Una funzione per dividere una lista in sotto-liste: data una lista di input da dividere e una lista di lunghezze delle sotto-liste, restituire una lista di sotto-liste che hanno le lunghezze richieste.
+Ad esempio: dividendo la lista (1 2 2 3 3 3) in sotto-liste di lunghezze (1 2 3) restituire la lista delle sotto-liste ((1) (2 2) (3 3 3)).
 Gli eventuali elementi aggiuntivi finali della lista di input vengono ignorati.
 Gli eventuali elementi mancanti alla fine della lista di input vengono ignorati.
 
@@ -7482,12 +7483,43 @@ Adesso possiamo scrivere la funzione finale:
 (subdivide lst d)
 ;-> ((a) (b c) (d e f) (g h i j))
 
+Vediamo una funzione simile che ha un comportamento diverso quando la lista delle lunghezze contiene valori non conformi con gli elementi della prima lista.
+
+(define (list-break lst lst-len)
+  (local (out tmp)
+    (setq out '())
+    (dolist (el lst-len)
+      (setq tmp '())
+      (for (x 1 el)
+        (push (pop lst) tmp -1)
+      )
+      (push tmp out -1)
+    )
+  out))
+
+(setq lst '(a b c d e f))
+(list-break '(a b c d e f) '(2 1 2))
+;-> ((a b) (c) (d e))
+(list-break '(a b c d) '(5))
+;-> ((a b c d nil))
+(list-break '(a b c d) '(2))
+;-> ((a b))
+(list-break '(a b c d) '(1 2 3))
+;-> ((a) (b c) (d nil nil))
+(list-break '(a b c d e f g h i j) '(1 2 3 4))
+;-> ((a) (b c) (d e f) (g h i j))
+(list-break '(a b c d e f g h i j) '(1 2 3 8))
+;-> ((a) (b c) (d e f) (g h i j nil nil nil nil))
+(list-break '(a b c d e f g h i j) '(1 2 3 8 5))
+;-> ((a) (b c) (d e f) (g h i j nil nil nil nil) (nil nil nil nil nil))
+
 
 -------------------
 Stampo di un numero
 -------------------
 
-Questa funzione conta le occorrenze di ogni cifra di un numero. Il risultato è un numero intero da una a dieci cifre che chiameremo "stampo". La n-esima cifra del risultato rappresenta quante volte la cifra "n" si ripete nel numero dato.
+Questa funzione conta le occorrenze di ogni cifra di un numero.
+Il risultato è un numero intero da una a dieci cifre che chiameremo "stampo". La n-esima cifra del risultato rappresenta quante volte la cifra "n" si ripete nel numero dato.
 
 Esempio: (number-stamp 121232) = 1320
 perché "3" appare una volta (1) , "2" tre volte (3), "1" due volte (2) e "0" zero volte (0).

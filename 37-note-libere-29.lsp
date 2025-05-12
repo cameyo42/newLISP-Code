@@ -5285,5 +5285,52 @@ Test di correttezza:
 (= (espande c) (sort t))
 ;-> true
 
+
+-------------------------------
+Gioco degli zeri in una stringa
+-------------------------------
+
+Due persone si sfidano al seguente gioco:
+- Si parte da una stringa S formata solo da cifre (0..9).
+- Il turno del primo giocatore consiste nel togliere una sottostringa da S che contiene un numero "dispari" di zeri (0).
+- Il turno del secondo giocatore consiste nel togliere una sottostringa da S che contiene un numero "pari" di zeri (0).
+- Il primo giocatore che non può effettuare mosse ha perso.
+
+Ulteriori regole:
+- La sottostringa S non può essere vuota (no "").
+- Il numero 0 è pari.
+
+Data una stringa iniziale è possibile determinare il vincitore supponendo che entrambi giochino in modo ottimale?
+
+Chiamiamo P1 e P2 il primo e il secondo giocatore.
+Sia k il numero di zeri in S, abbiamo i seguenti casi:
+1) Se k = 0, allora vince P2 poiché P1 non ha zeri da scegliere.
+2. Se k % 2 = 1 (k è dispari), P1 vince poiché può scegliere l'intera stringa.
+3. Se k % 2 = 0 (k è pari), P1 vince poiché può scegliere (k - 1) zeri, allora P2 sceglierà una sottostringa contenente 0 zeri, con il risultato che P1 sceglierà l'intera stringa rimanente, oppure P2 non potrà scegliere affatto (l'ultimo zero).
+
+(define (winner str)
+  (let (zeri (length (find-all "0" str)))
+    (if (= zeri 0) 'P2
+        (even? zeri) 'P1
+        (odd? zeri) 'P1)))
+
+(winner "12345")
+;-> P2
+(winner "12030405")
+;-> P1
+(winner "102030405")
+;-> P1
+
+In modo breve:
+
+(define (winner str) (if (find "0" str) 'P1 'P2))
+
+(winner "12345")
+;-> P2
+(winner "12030405")
+;-> P1
+(winner "102030405")
+;-> P1
+
 ============================================================================
 

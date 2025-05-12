@@ -2924,6 +2924,7 @@ NOTE LIBERE 29
   Mancini e destrorsi
   Merge di k liste ordinate
   Compressione/Espansione di liste di interi
+  Gioco degli zeri in una stringa
 
 PROBLEMI SUI DADI
 =================
