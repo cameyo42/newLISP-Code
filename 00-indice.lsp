@@ -2925,6 +2925,7 @@ NOTE LIBERE 29
   Merge di k liste ordinate
   Compressione/Espansione di liste di interi
   Gioco degli zeri in una stringa
+  Random walk 1D
 
 PROBLEMI SUI DADI
 =================

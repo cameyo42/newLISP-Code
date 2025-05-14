@@ -1674,7 +1674,7 @@ Le seguenti espressioni creano la lista delle frquenzze della lista "res":
 (setq f (array 11 '(0)))
 (dolist (el res)
   (println el)
-  (++ (f (- el 1)))
+  (++ (f el))
 )
 
 f
@@ -1693,7 +1693,7 @@ La seguente funzione disegna l'istogramma, se il parametro "calc" vale true, all
         (setq f-lst (array unici '(0)))
         ; calcolo dei valori delle frequenze
         (dolist (el lst)
-          (++ (f-lst (- el 1)))
+          (++ (f-lst el))
         )
       )
       ;else
@@ -1735,6 +1735,55 @@ La seguente funzione disegna l'istogramma, se il parametro "calc" vale true, all
 ;->   8 ***************   80
 ;->   9 ****************   84
 ;->  10 ********************  108
+
+Nota: la funzione è corretta solo per liste che contengono tutti i numeri da 0 a N.
+
+(histogram '(1 2 3) 10 true)
+;-> ERR: array index out of bounds in function ++ : 3
+;-> called from user function (histogram '(1 2 3) 10 true)
+
+(histogram '(0 1 2 3) 10 true)
+;-> 0 **********    1
+;-> 1 **********    1
+;-> 2 **********    1
+;-> 3 **********    1
+
+Vediamo una funzione che disegna l'istogramma di una lista con qualsiasi numero di valori interi:
+
+(define (histogram lst hmax)
+"Print the histogram of a list of integer numbers"
+  (local (valori len-max-val unici ind-val val-ind f-lst hm scala linee fmt)
+    ; lista ordinata dei valori unici
+    (setq valori (sort (unique lst)))
+    ; lunghezza del numero massimo (fmt)
+    (setq len-max-val (length (apply max valori)))
+    ; calcola quanti numeri diversi ci sono nella lista
+    (setq unici (length valori))
+    ; lista: (indice valore)
+    (setq ind-val (map list (sequence 0 (- unici 1)) valori))
+    ; lista: (valore indice)
+    (setq val-ind (map list valori (sequence 0 (- unici 1))))
+    ; crea la lista delle frequenze
+    (setq f-lst (array unici '(0)))
+    ; calcolo dei valori delle frequenze
+    (dolist (el lst) (++ (f-lst (lookup el val-ind))))
+    ; valore massimo delle frequenze
+    (setq hm (apply max f-lst))
+    ; fattore di scala
+    (setq scala (div hm hmax))
+    ; calcolo delle lunghezze delle colonne dell'istogramma
+    (setq linee (map (fn (x) (round (div x scala))) f-lst))
+    ; stampa dell'istogramma (orizzontale)
+    (dolist (el linee)
+      (setq fmt (string "%" (+ len-max-val 1) "d %s %4d"))
+      (println (format fmt (lookup $idx ind-val) (dup "*" el) (f-lst $idx)))
+    )'>))
+
+(histogram '(3 3 3 56 56 56 56 -4 -4 -55 -55 -55) 8)
+;-> -55 ******    3
+;->  -4 ****    2
+;->   3 ******    3
+;->  56 ********    4
 
 
 --------------------

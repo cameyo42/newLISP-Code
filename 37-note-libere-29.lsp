@@ -5332,5 +5332,470 @@ In modo breve:
 (winner "102030405")
 ;-> P1
 
+
+--------------
+Random walk 1D
+--------------
+
+Un punto parte da una posizione w (della linea degli interi (-inf ... -3 -2 -1 0 1 2 3... +inf)) e si muove in modo casuale e con probabilità uguali a sinistra (-1) o a destra (+1) della linea.
+Calcolare il numero di passi atteso affinchè il punto visiti due punti x e y posti lungo la linea.
+I punti w, x e y sono tutti diversi.
+
+Esempi:
+
+1) w interno all'intervallo (x..y)
+w = 0, x = -3, y = 4
+
+        x       w           y
+... -4 -3 -2 -1 0 +1 +2 +3 +4 ...
+
+2) w esterno all'intervallo (x..y)
+w = -2, x = 1, y = 3
+
+           w       x     y
+... -4 -3 -2 -1 0 +1 +2 +3 +4 ...
+
+Dati gli interi 'w', 'x' e 'y' (tutti distinti), qual è il numero previsto di passi prima che una passeggiata casuale simmetrica (passo +/-1 con uguale probabilità) che inizia da 'w' visiti sia 'x' che 'y'?
+
+Poniamo
+  a = min(x, y) ('a' si trova a sinistra di 'b')
+  b = max(x, y) ('b' di trova a destra di 'a')
+
+Il punto parte da 'w' e deve visitare sia 'a' che 'b'.
+
+Caso 1: w interno all'intervallo (a..b)  -->  a < w < b
+
+Il numero di passi previsti per raggiungere entrambi i punti finali di un intervallo (partendo dal suo interno) vale:
+
+  E(w,a,b) = (b - a)^2 - (w - a)*(b - w)
+
+w=2, a = 0, b = 4, :
+
+E = (4 - 0)^2 - (2 - 0)(4 - 2) = 16 - 2×2 = 12
+
+Caso 2: w esterno all'intervallo (a..b)  -->  (w < a) oppure (w > b)
+
+Ipotesi
+1. Raggiungiamo prima l'estremità più vicina (diciamo 'a').
+2. Quindi, da 'a', andiamo al punto 'b'.
+Questo richiede **linearità delle aspettative** e conoscenza dei risultati attesi.
+
+Passi attesi per andare da 'a' o 'b' a 'w':
+  E(w -> a o b) = (a - w)(b - w)
+
+Dopo aver raggiunto 'a', i passi attesi per andare da 'a' a 'b':
+
+  E(a -> b) = (b - a)^2
+
+Il totale di passi attesi vale:
+
+  E(w, a, b) = (a - w)(b - w) + (b - a)^2, per w < a
+
+  E(w, a, b) = (w - a)(w - b) + (b - a)^2, per w > b (simmetria)
+
+(define (E w x y)
+  (let ((a (min x y))
+        (b (max x y)))
+    (if (and (> w a) (< w b))
+        (- (* (- b a) (- b a)) (* (- w a) (- b w)))
+        (+ (* (abs (- w a)) (abs (- w b))) (* (- b a) (- b a))))))
+
+Proviamo:
+
+caso: (a < w < b)
+(E 2 0 4)
+;-> 12
+
+caso: (w < a)
+(E -3 0 5)
+;-> 49
+
+caso: (w > b)
+(E 8 0 5)
+;-> 49
+
+Funzione che simula una passeggiata:
+
+(define (passi w x y)
+  (let ( (pos w) (steps 0)
+         (a-visit nil) (b-visit nil)
+         (a (min x y)) (b (max x y)) )
+    (until (and a-visit b-visit)
+      (setq pos (if (zero? (rand 2)) (++ pos) (-- pos)))
+      (++ steps)
+      (if (= pos a) (setq a-visit true))
+      (if (= pos b) (setq b-visit true))
+    )
+    steps))
+
+(passi 2 0 4)
+;-> 20
+(passi 2 0 4)
+;-> 22
+
+Adesso possiamo stimare il valore atteso calcolando la media di più prove:
+
+(define (media-passi w x y limite)
+  (let (totale 0)
+    (for (i 1 limite)
+      (++ totale (passi w x y)))
+    (div totale limite)))
+
+Proviamo:
+
+(media-passi 2 0 4 100)
+;-> 10117.66
+
+Forse ci vuole un pò di tempo...
+(media-passi 2 0 4 1000) ; 
+;-> 52663.136
+
+Il risultato è molto diverso da quello calcolato matematicamente (12).
+
+Simulazione vs Matematica
+-------------------------
+Il calcolo matematico dell'aspettativa fornisce la media reale.
+Comunque la media simulata può essere fortemente distorta se:
+1) Non si simulano abbastanza prove.
+2) Non si pone un limite ai valori anomali estremi (outlier).
+In questo caso si parla di distribuzioni "heavy-tailed".
+
+Vediamo i valori dei passi di tutte le simulazioni:
+
+(define (crea-passi w x y limite)
+  (let (out '())
+    (for (i 1 limite)
+      (push (passi w x y) out))
+    out))
+
+(crea-passi 2 0 4 100)
+;-> (36 20 1190 38 270 20 16 8 12 46 176 8 42 22 80 22 20 10522
+;->  22 30 12 376 486 128 6 444 18 14 60 22 6 8 28 10 12 6 8 20
+;->  30 346 18 34 52 34 60 124 24 10 102 26 1428 12 92 64 28 84
+;->  230 64 80 58 52 12 114 22 96 10 24 14 46 34 46 30 3736 30 
+;->  872 34 4712 10 32 14 400 74 20 12 20 58 358 14 20 40 34 68
+;->  384 66 1160 298208 14 72 40 38)
+
+I numeri grandi 1190, 10522, 4712, 298208 sono dovuti al fatto che il punto si è allontanato molto dai punti x e y, quindi ha bisogno di molti passi per ritornare.
+Questo comporta che il calcolo della media simulata non produce risultati corretti.
+
+Per tenere conto degli outlier dovremmo eliminarli dalla lista dei passi, ma questo è molto difficile perchè il limite di taglio superiore dipende dai valori w, x e y.
+
+Un altro metodo consiste nel calcolare altri parametri statistici oltre alla media aritmetica.
+
+Nelle distribuzioni heavi-tailed come questa, che misura il tempo di cammino casuale 1D per raggiungere due punti, la moda (ovvero il numero di passi più frequente osservato) spesso fornisce un valore più tipico o rappresentativo della media (che può essere distorta da rare passeggiate molto lunghe).
+La Media è sensibile ai valori anomali, mentre la Moda, che rappresenta il numero di passi più probabile (tipico) è più stabile.
+
+Utilizzando la Moda ci si chiede:
+"Quanti passi saranno necessari nella maggior parte dei casi?"
+
+Funzione che calcola la Media di una lista di numeri:
+
+(define (media lst)
+  (div (apply add lst) (length lst)))
+
+Funzione che calcola la Mediana di una lista di numeri:
+
+(define (mediana lst)
+  (let (len (length lst))
+    (sort lst)
+    (if (odd? len)
+        (lst (/ len 2))
+        (div (add (lst (- (/ len 2) 1)) (lst (/ len 2))) 2))))
+
+Funzione che calcola la Moda di una lista di numeri:
+
+(define (moda lst)
+  (letn ((uniq (unique lst))
+        (conta (count uniq lst)))
+    (uniq (find (apply max conta) conta))))
+
+Funzione simula un dato numero di passeggiate e poi calcola la Media, la Mediana e la Moda:
+
+(define (lista-passi w x y limite)
+  (let (out '())
+    (for (i 1 limite)
+      (push (passi w x y) out))
+    (println "media: " (media out))
+    (println "mediana: " (mediana out))
+    (println "moda: " (moda out))
+    (println "E: " (E w x y)) '>))
+
+Proviamo:
+
+(lista-passi 2 0 4 10)
+;-> media: 500.6
+;-> mediana: 45
+;-> moda: 6
+;-> E: 12
+(lista-passi 2 0 4 100)
+;-> media: 1062.48
+;-> mediana: 32
+;-> moda: 12
+;-> E: 12
+
+(lista-passi -3 0 5 10)
+;-> media: 3170.2
+;-> mediana: 115
+;-> moda: 46
+;-> E: 49
+
+(lista-passi -3 0 5 100)
+;-> media: 28843.78
+;-> mediana: 122
+;-> moda: 50
+;-> E: 49
+
+Sembra che la Moda produca risposte in linea con i risultati matematici.
+
+Comunque gli outlier continuano a generare un problema: rallentano enormemente il tempo di esecuzione della simulazione.
+
+(time (lista-passi -3 0 5 1000))
+;-> media: 65637.664
+;-> mediana: 122
+;-> moda: 20
+;-> E: 49
+;-> 12719.725
+
+Il problema aumenta con l'aumento del numero di prove e con l'aumentare della distanza tra w, x e y.
+
+(time (lista-passi 5 -10 10 100))
+;-> media: 11370010.34
+;-> mediana: 722
+;-> moda: 399
+;-> E: 325
+;-> 219817.51
+
+Proviamo ad utilizzare il seguente criterio per gestire gli outlier:
+- eliminare i valori che sono maggiori di K volte il valore atteso E(w x y).
+
+Riscriviamo la funzione "passi" (poniamo K=5):
+
+(define (passiK w x y)
+  (let ( (pos w) (steps 0)
+         (a-visit nil) (b-visit nil)
+         (a (min x y)) (b (max x y))
+         (soglia (* 5 (E w x y))) )
+    (until (or (and a-visit b-visit) (> steps soglia))
+      (setq pos (if (zero? (rand 2)) (++ pos) (-- pos)))
+      (++ steps)
+      (if (= pos a) (setq a-visit true))
+      (if (= pos b) (setq b-visit true))
+    )
+    ; inserisce nil al posto del valore di un outlier
+    (if (> steps soglia) nil steps)))
+
+Riscriviamo la funzione "lista-passi":
+
+(define (lista-passiK w x y limite)
+  (let (out '())
+    (for (i 1 limite)
+      (push (passiK w x y) out))
+    ; elimina i nil (outlier)
+    (setq out (clean nil? out))
+    (println "media: " (media out))
+    (println "mediana: " (mediana out))
+    (println "moda: " (moda out))
+    (println "E: " (E w x y)) '>))
+
+Proviamo:
+
+(lista-passiK 2 0 4 1e4)
+;-> media: 23.27149627623561
+;-> mediana: 20
+;-> moda: 10
+;-> E: 12
+
+(lista-passiK -3 0 5 1e4)
+;-> media: 80.06938507070043
+;-> mediana: 60
+;-> moda: 30
+;-> E: 49
+
+(time (lista-passiK 0 -10 10 1e5))
+;-> media: 569.7778715503418
+;-> mediana: 472
+;-> moda: 262
+;-> E: 300
+;-> 22078.061
+
+Per capire meglio come varia la distribuzione si potrebbe costruire un istogramma dei valori delle passeggiate.
+
+(define (histogram lst hmax)
+"Print the histogram of a list of integer numbers"
+  (local (valori len-max-val unici ind-val val-ind f-lst hm scala linee fmt)
+    ; lista ordinata dei valori unici
+    (setq valori (sort (unique lst)))
+    ; lunghezza del numero massimo (fmt)
+    (setq len-max-val (length (apply max valori)))
+    ; calcola quanti numeri diversi ci sono nella lista
+    (setq unici (length valori))
+    ; lista: (indice valore)
+    (setq ind-val (map list (sequence 0 (- unici 1)) valori))
+    ; lista: (valore indice)
+    (setq val-ind (map list valori (sequence 0 (- unici 1))))
+    ; crea la lista delle frequenze
+    (setq f-lst (array unici '(0)))
+    ; calcolo dei valori delle frequenze
+    (dolist (el lst) (++ (f-lst (lookup el val-ind))))
+    ; valore massimo delle frequenze
+    (setq hm (apply max f-lst))
+    ; fattore di scala
+    (setq scala (div hm hmax))
+    ; calcolo delle lunghezze delle colonne dell'istogramma
+    (setq linee (map (fn (x) (round (div x scala))) f-lst))
+    ; stampa dell'istogramma (orizzontale)
+    (dolist (el linee)
+      (setq fmt (string "%" (+ len-max-val 1) "d %s %4d"))
+      (println (format fmt (lookup $idx ind-val) (dup "*" el) (f-lst $idx)))
+    )'>))
+
+Proviamo con gli outlier (quindi molto lenta...forse):
+
+(define (lista-passi w x y limite)
+  (let (out '())
+    (for (i 1 limite)
+      (push (passi w x y) out))
+    (println "media: " (media out))
+    (println "mediana: " (mediana out))
+    (println "moda: " (moda out))
+    (println "E: " (E w x y))
+    out))
+
+(setq p (lista-passi 2 0 4 100))
+;-> media: 317.64
+;-> mediana: 47
+;-> moda: 16
+;-> E: 12
+;-> (144 380 196 58 78 48 708 46 106 34 54 736 22 128 68 6 62 10 460 20 32
+;->  1374 12 284 18 8 16 12 80 10 22 468 314 54 122 16 32 14 36 36 28 20 6
+;->  74 246 24 8 616 2322 14 30 3386 56 946 4098 22 294 24 230 10 102 2370
+;->  10 52 696 462 5274 6 36 200 10 22 20 38 14 16 88 156 640 72 16 16 94 
+;->  128 68 8 524 14 1484 12 18 20 16 102 8 14 12 50 86 12)
+
+(histogram p 60)
+;->     6 ******************************    3
+;->     8 ****************************************    4
+;->    10 **************************************************    5
+;->    12 **************************************************    5
+;->    14 **************************************************    5
+;->    16 ************************************************************    6
+;->    18 ********************    2
+;->    20 ****************************************    4
+;->    22 ****************************************    4
+;->    24 ********************    2
+;->    28 **********    1
+;->    30 **********    1
+;->    32 ********************    2
+;->    34 **********    1
+;->    36 ******************************    3
+;->    38 **********    1
+;->    46 **********    1
+;->    48 **********    1
+;->    50 **********    1
+;->    52 **********    1
+;->    54 ********************    2
+;->   ... 
+;->   736 **********    1
+;->   946 **********    1
+;->  1374 **********    1
+;->  1484 **********    1
+;->  2322 **********    1
+;->  2370 **********    1
+;->  3386 **********    1
+;->  4098 **********    1
+;->  5274 **********    1
+
+(setq p (lista-passi -3 0 5 1000))
+;-> media: 10489.458
+;-> mediana: 134
+;-> moda: 32
+;-> E: 49
+;-> (3432 164 208 10856 42 36 ...)
+
+(histogram p 60)
+;->        8 *************    5
+;->       10 *****************************   11
+;->       12 *********************    8
+;->       14 *****************************   11
+;->       16 ***********************************************   18
+;->       18 *******************************   12
+;->       20 ***************************************   15
+;->       22 *********************    8
+;->       24 *****************************   11
+;->       26 ****************************************************   20
+;->       28 *************************************   14
+;->       30 **************************************************   19
+;->       32 ************************************************************   23
+;->       34 ******************************************   16
+;->       36 **********************************   13
+;->       38 *****************************   11
+;->       40 *********************    8
+;->       42 *****************************   11
+;->       44 *********************************************************   22
+;->       46 *****************************   11
+;->       48 **************************   10
+;->       50 ******************    7
+;->       52 **************************   10
+;->       54 **************************   10
+;->       56 ***********************    9
+;->       58 **********    4
+;->       60 ***************************************   15
+;->      ...
+;->   670076 ***    1
+;->  1016888 ***    1
+;->  1256318 ***    1
+;->  1298484 ***    1
+;->  2160690 ***    1
+
+Proviamo senza gli outlier:
+
+(define (lista-passiK w x y limite)
+  (let (out '())
+    (for (i 1 limite)
+      (push (passiK w x y) out))
+    ; elimina i nil (outlier)
+    (setq out (clean nil? out))
+    (println "media: " (media out))
+    (println "mediana: " (mediana out))
+    (println "moda: " (moda out))
+    (println "E: " (E w x y))
+    out))
+
+(silent (setq p (lista-passiK 2 0 4 1e4)))
+;-> media: 23.38477157360406
+;-> mediana: 20
+;-> moda: 10
+;-> E: 12
+(histogram p 60)
+;->   6 *************************************  296
+;->   8 **********************************************************  465
+;->  10 ************************************************************  485
+;->  12 *********************************************************  461
+;->  14 **********************************************************  466
+;->  16 **********************************************  368
+;->  18 *****************************************  330
+;->  20 ***************************************  316
+;->  22 *************************************  299
+;->  24 *********************************  264
+;->  26 **************************  214
+;->  28 **************************  208
+;->  30 ***********************  185
+;->  32 ******************  147
+;->  34 *******************  156
+;->  36 ******************  148
+;->  38 ***************  124
+;->  40 *************  104
+;->  42 **************  114
+;->  44 ***************  121
+;->  46 ***********   91
+;->  48 ************   99
+;->  50 **********   77
+;->  52 ***********   88
+;->  54 ***********   87
+;->  56 ********   66
+;->  58 ********   68
+;->  60 ********   63
+
 ============================================================================
 
