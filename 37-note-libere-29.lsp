@@ -5797,5 +5797,140 @@ Proviamo senza gli outlier:
 ;->  58 ********   68
 ;->  60 ********   63
 
+
+-----------------------------------------------------
+Elementi che formano gruppi con determinate proprietà
+-----------------------------------------------------
+
+Abbiamo una lista con N proprietà (es. (A B C D E)).
+
+Abbiamo K elementi ognuno con una lista delle proprietà possedute:
+  elemento(1) = (A D)
+  elemento(2) = (C)
+  ...
+  elemento(k) = (A B C)
+
+Determinare tutti i gruppi con il minor numero di elementi che insieme hanno tutte le N proprietà della lista iniziale.
+
+Esempio
+    proprieta = (D E C)
+  elemento(1) = (A C)
+  elemento(2) = (C)
+  elemento(3) = (D E)
+  elemento(4) = (B C)
+
+Gruppi con il minor numero di elementi (2) che soddisfano tutte le proprieta:
+
+  gruppo 1 --> ((A C) (D E)) 2 elementi (1 e 4)
+  gruppo 2 --> ((C) (D E))   2 elementi (2 e 3)
+  gruppo 3 --> ((D E) (B C)) 2 elementi (3 e 4)
+
+Funzione che calcola tutti i sottoinsiemi di una lista:
+(Numero elementi del 'powerset' di una lista con N elementi = 2^N)
+
+(define (powerset lst)
+  (if (empty? lst)
+      (list '())
+      (let ((element (first lst))
+            (p (powerset (rest lst))))
+        (append (map (fn (subset) (cons element subset)) p) p))))
+
+(powerset '(1 2 3))
+;-> ((1 2 3) (1 2) (1 3) (1) (2 3) (2) (3) ())
+
+Fuznione che calcola tutti i gruppi con il minor numero di elementi che insieme hanno tutte le proprietà richieste:
+
+(define (gruppi-minimi pro ele)
+  (local (gruppi gruppi-ok numero-elementi minimo indici sol)
+    ; calcolo di tutti i sottoinsiemi possibili
+    (setq gruppi (powerset ele))
+    ; calcolo di tutti i gruppi di elementi che soddisfano la proprieta
+    (setq gruppi-ok '())
+    (dolist (g gruppi)
+      ; verifica che l'unione del gruppo copra tutte le proprietà richieste
+      (if (= (difference pro (flat g)) '())
+          (push g gruppi-ok -1)
+      )
+    )
+    ;(println gruppi-ok)
+    (cond ((= gruppi-ok '()) '()) ; nessuna soluzione
+          ; calcolo dei gruppi con il minor numero di elementi
+          (true
+            ; lista dei numeri di elementi di gruppi-ok
+            (setq numero-elementi (map length gruppi-ok))
+            ; valore minimo di elementi
+            (setq minimo (apply min numero-elementi))
+            ; calcolo degli indici degli elementi con valore minimo
+            (setq indici (ref-all minimo numero-elementi))
+            ; elementi del gruppo-ok che hanno il minor numero di elementi
+            (setq sol (select gruppi-ok (flat indici)))
+            sol))))
+
+Proviamo:
+
+(setq elementi '((A C) (C) (D E) (B C)))
+(setq proprieta '(D E C))
+(gruppi-minimi proprieta elementi)
+;-> (((A C) (D E)) ((C) (D E)) ((D E) (B C)))
+
+(setq proprieta '(A B C D E))
+(gruppi-minimi proprieta elementi)
+;-> (((A C) (D E) (B C)))
+
+(setq proprieta '(A B C))
+(gruppi-minimi proprieta elementi)
+;-> (((A C) (B C)))
+
+(setq proprieta '(F))
+(gruppi-minimi proprieta elementi)
+;-> ()
+
+Con questo stesso metodo possiamo selezionare i gruppi che hanno la somma minore delle proprieta richieste.
+
+(define (gruppi-peso-minimo pro ele)
+  (local (gruppi gruppi-ok pesi minimo indici sol)
+    (setq gruppi (powerset ele))
+    (setq gruppi-ok '())
+    ; trova tutti i gruppi validi
+    (dolist (g gruppi)
+      (if (= (difference pro (flat g)) '())
+          (push g gruppi-ok -1)))
+    (cond
+      ((= gruppi-ok '()) '())
+      (true
+        ; somma del numero di proprietà per ogni gruppo
+        (setq pesi (map (fn (g) (length (flat g))) gruppi-ok))
+        (setq minimo (apply min pesi))
+        (setq indici (ref-all minimo pesi))
+        (select gruppi-ok (flat indici))))))
+
+Proviamo:
+
+(setq elementi '((A C) (C) (D E) (B C)))
+(setq proprieta '(D E C))
+(gruppi-peso-minimo proprieta elementi)
+;-> (((C) (D E)))
+
+(setq proprieta '(A B C D E))
+(gruppi-peso-minimo proprieta elementi)
+;-> (((A C) (D E) (B C)))
+
+(setq proprieta '(A B C))
+(gruppi-peso-minimo proprieta elementi)
+;-> (((A C) (B C)))
+
+(setq proprieta '(F))
+(gruppi-peso-minimo proprieta elementi)
+;-> ()
+
+(setq elementi '((A C) (B C) (A) (B)))
+(setq proprieta '(A B))
+(gruppi-minimi proprieta elementi)
+;-> (((A C) (B C)) ((A C) (B)) ((B C) (A)) ((A) (B)))
+(gruppi-peso-minimo proprieta elementi)
+;-> (((A) (B)))
+
+Nota: funziona direttamente con liste di simboli, interi o stringhe.
+
 ============================================================================
 

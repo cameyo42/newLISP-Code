@@ -2926,6 +2926,7 @@ NOTE LIBERE 29
   Compressione/Espansione di liste di interi
   Gioco degli zeri in una stringa
   Random walk 1D
+  Elementi che formano gruppi con determinate proprietà
 
 PROBLEMI SUI DADI
 =================
