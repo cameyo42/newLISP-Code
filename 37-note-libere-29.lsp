@@ -5932,5 +5932,210 @@ Proviamo:
 
 Nota: funziona direttamente con liste di simboli, interi o stringhe.
 
+
+--------------------------
+Tre monete per ogni prezzo
+--------------------------
+
+In un paese lontano esistono solo 3 tipi di monete:
+1) moneta che vale da 1 a 7
+2) moneta che vale 3
+3) Moneta che vale 5
+
+Inoltre esistono le seguenti regole:
+a) tutto quello che costa da 1 a 7 deve essere pagato con la moneta 1)
+b) tutto quello che costa più di 7 deve essere pagato con le monete 2) e 3)
+
+Con queste regole possiamo pagare qualunque prezzo da 1 a infinito?
+
+Fino a 7 paghiamo con la moneta 1).
+Sappiamo come pagare 8 = 5 + 3.
+Sappiamo come pagare 9 = 3 + 3 + 3
+Aggiungendo un altro 3, troviamo come pagare 12 = 9 + 3 = 3 + 3 + 3 + 3.
+Continuiamo la tabella:
+Sapendo come pagare 10 = 5 + 5, troviamo come pagare 13 = 10 + 3 = 5 + 5 + 3
+Sapendo come pagare 11 = 5 + 3 + 3, sappiamo come pagare 14 = 11 + 3 = 5 + 3 + 3 + 3.
+E possiamo continuare ulteriormente: sapendo come pagare 12, possiamo pagare 12 + 3 = 15, e così via.
+Questo copre tutti i numeri interi, quindi con queste tre monete è possibile pagare qualsiasi prezzo.
+
+Traduciamo il ragionamento in una funzione ricorsiva.
+
+(define (monete prezzo)
+  (cond ((<= prezzo 7) (list prezzo))
+        ((= prezzo 8) '(5 3))
+        ((= prezzo 9) '(3 3 3))
+        ((= prezzo 10) '(5 5))
+        (true
+          (setq coins (monete (- prezzo 3)))
+          (setq coins (append coins '(3)))
+          coins)))
+
+Proviamo:
+
+(monete 3)
+;-> (3)
+(monete 10)
+;-> (5 5)
+(monete 13)
+;-> (5 5 3)
+(monete 30)
+;-> (3 3 3 3 3 3 3 3 3 3)
+(monete 200)
+;-> (5 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+;->  3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3)
+(apply + (monete 200))
+;-> 200
+
+Le funzioni ricorsive consumano lo stack...
+
+(monete 10000)
+;-> ERR: call or result stack overflow in function cond : <=
+;-> called from user function (monete (- prezzo 3))
+
+Possiamo scrivere anche una funzione iterativa che risolve il problema.
+In questo caso il ragionamento è leggermente diverso:
+Per ogni prezzo si paga solo 5 finché il resto non è pagabile con monete da 3, cioè il resto è un multiplo di 3.
+
+(define (monete-i prezzo)
+  (let (coins '())
+    (cond ((<= prezzo 7) (list prezzo))
+          (true
+            (while (!= (% prezzo 3) 0)
+              (push 5 coins -1)
+              (-- prezzo 5)
+            )
+            (extend coins (dup 3 (/ prezzo 3)))))))
+
+Proviamo:
+
+(monete-i 3)
+;-> (3)
+(monete-i 10)
+;-> (5 5)
+(monete-i 13)
+;-> (5 5 3)
+(monete-i 30)
+;-> (3 3 3 3 3 3 3 3 3 3)
+(monete-i 200)
+;-> (5 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+;->  3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3)
+(apply + (monete-i 200))
+;-> 200
+
+La versione iterativa è molto veloce e non ha problemi con lo stack:
+
+(time (monete-i 1e7))
+;-> 140.17
+
+(apply + (monete-i 10000))
+;-> 10000
+
+Test di correttezza:
+
+(define (test limite)
+  (for (i 8 limite)
+    (if (not (= i (apply + (monete i)) (apply + (monete-i i))))
+      (println i { } (apply + (monete i)) { } (apply + (monete-i i))))))
+
+(test 1e3)
+;-> nil
+
+
+-----------------------------------------------------------
+Superstringa comune più corta (Shortest Common Superstring)
+-----------------------------------------------------------
+
+Dato una lista S di stringhe, restituirei la stringa più piccola che contiene ciascuna stringa in S come sottostringa.
+
+Questo è un problema chiamato Superstringa Comune più Corta (Shortest Common Superstring - SCS).
+Il problema SCS esatto è NP-hard, ma per input di piccole dimensioni (come <= 10 stringhe), possiamo risolverlo con la forza bruta:
+
+Algoritmo:
+- Eliminare tutte le stringhe che sono sottostringhe di altre, poiché non influenzano il risultato finale.
+- Calcolare tutte le permutazioni di S.
+- Per ogni permutazione, unire le stringhe in modo greedy utilizzando la massima sovrapposizione possibile.
+- Restituire il risultato più corto.
+
+(define (perm lst)
+"Generates all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+      )
+    )
+    out))
+
+;; Rimuove dalla lista tutte le stringhe che sono sottostringhe di altre
+(define (remove-substrings lst)
+  (let (result '())
+    (dolist (s lst)
+      ;; Aggiunge 's' solo se non è contenuta in nessun'altra stringa della lista
+      (unless (exists (fn (t) (and (!= s t) (find s t))) lst)
+        (push s result -1))) ; Inserisce alla fine per mantenere l'ordine
+    result))
+
+;; Calcola la lunghezza massima dell'overlap tra la fine di 'a' e l'inizio di 'b'
+(define (overlap a b)
+  (let ((maxi 0) (len (min (length a) (length b))))
+    (for (i 1 len)
+      (if (= (slice a (- (length a) i)) (slice b 0 i))
+          (setq maxi i)))
+    maxi))
+
+;; Unisce le stringhe 'a' e 'b' sfruttando l'overlap massimo
+(define (merge a b)
+  (let ((o (overlap a b)))
+    (string a (slice b o)))) ; Aggiunge solo la parte non sovrapposta di 'b'
+
+;; Calcola la superstringa più corta che contiene tutte le stringhe nella lista
+(define (shortest-superstring lst)
+  (setq lst (remove-substrings lst)) ; Rimuove le stringhe ridondanti
+  (let ((min-str nil)
+        (min-len 1e6))
+    (dolist (p (perm lst)) ; Prova tutte le permutazioni delle stringhe
+      (let ((merged (first p)))
+        ;; Unisce le stringhe nell'ordine della permutazione
+        (if (> (length p) 1)
+            (for (i 1 (- (length p) 1))
+              (setq merged (merge merged (p i)))))
+        ;; Aggiorna il risultato se la stringa corrente è più corta
+        (when (< (length merged) min-len)
+          (setq min-str merged)
+          (setq min-len (length merged)))))
+    min-str)) ; Restituisce la superstringa più corta trovata
+
+Proviamo:
+
+(shortest-superstring '("potato" "gota" "ta"))
+;-> "potatogota"
+(shortest-superstring '("abc" "bcd" "cde"))
+;-> "abcde"
+(shortest-superstring '("a" "ab" "abc"))
+;-> "abc"
+(shortest-superstring '("x" "xy" "xyz"))
+;-> "xyz"
+(shortest-superstring '("abcd"))
+;-> "abcd"
+(shortest-superstring '("catg" "ctaagt" "gcta" "ttca" "atgcatc"))
+;-> "gctaagttcatgcatc"
+
 ============================================================================
 

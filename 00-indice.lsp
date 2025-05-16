@@ -2927,6 +2927,8 @@ NOTE LIBERE 29
   Gioco degli zeri in una stringa
   Random walk 1D
   Elementi che formano gruppi con determinate proprietà
+  Tre monete per ogni prezzo
+  Superstringa comune più corta (Shortest Common Superstring)
 
 PROBLEMI SUI DADI
 =================
