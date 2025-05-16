@@ -4147,7 +4147,7 @@ Esempio:
 ;-> 2.39925202
 
 Elenco delle funzioni del modulo "stats.lsp":
----------------------
+---------------------------------------------
 
 General uni-variate and bi-variate statistics
 ---------------------------------------------

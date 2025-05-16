@@ -5172,6 +5172,10 @@ Risolviamo il problema con una funzione:
 ;-> 50
 ;-> 49/50 = 0.98
 
+Altro metodo:
+Esiste un (1) solo destro che alla fine rappresenta il 2%.
+Se il 2% vale 1, allora il 98% (i mancini) vale 49.
+
 
 -------------------------
 Merge di k liste ordinate

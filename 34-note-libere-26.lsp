@@ -1259,6 +1259,24 @@ def _fib(n):
 ;->  (55 89) (89 144) (144 233) (233 377) (377 610) (610 987) (987 1597)
 ;->  (1597 2584) (2584 4181) (4181 6765) (6765 10946))
 
+Formula:
+
+  F(n) = Sum[i=0..(n-1)]F(i) - F(n-1)
+
+(define (fibs n)
+  (cond
+    ((= n 0) '(0L))
+    ((= n 1) '(0L 1L))
+    (true
+      (let (fibo '(0L 1L))
+        (for (i 2 (+ n 2))
+          (push (- (apply + fibo) (fibo (- i 1))) fibo -1))
+        (slice fibo 2)))))
+
+(fibs 20)
+;-> (0L 1L 1L 2L 3L 5L 8L 13L 21L 34L 55L 89L 144L
+;->  233L 377L 610L 987L 1597L 2584L 4181L 6765L)
+
 Formula di Binet:
 
   F(n) = (phi^n - psi^n)/sqrt(5)

@@ -3977,7 +3977,9 @@ Possiamo scrivere due funzioni che utilizzano la primitiva "stats" per calcolare
 (variance dat)
 ;-> 0.5116129
 
-L'algoritmo cha abbiamo usato per il calcolo della varianza è numericamente stabile se N è piccolo. Tuttavia, i suoi risultati possono dipendere non commutativamente dall'ordinamento dei dati e possono dare scarsi risultati per molti dati a causa degli errori di arrotondamento che si accumulano nelle somme. Tecniche quali la somma compensata possono essere usate per ridurre questo errore.
+L'algoritmo cha abbiamo usato per il calcolo della varianza è numericamente stabile se N è piccolo.
+Tuttavia, i suoi risultati possono dipendere non commutativamente dall'ordinamento dei dati e possono dare scarsi risultati per molti dati a causa degli errori di arrotondamento che si accumulano nelle somme.
+Tecniche quali la somma compensata possono essere usate per ridurre questo errore.
 Vediamo la versione dell'algoritmo base con somma compensata:
 
 (define (varianza-compensata lst tipo)
