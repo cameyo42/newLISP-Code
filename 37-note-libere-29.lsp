@@ -6141,5 +6141,149 @@ Proviamo:
 (shortest-superstring '("catg" "ctaagt" "gcta" "ttca" "atgcatc"))
 ;-> "gctaagttcatgcatc"
 
+
+-------------------
+Segmenti e quadrati
+-------------------
+
+Data una lista di lunghezze di segmenti, determinare se è possibile costruire un quadrato utilizzando tutti i segmenti.
+In caso positivo restituire i segmenti che compongono i 4 lati
+
+Esempio:
+  segmenti = (1 2 1 2 2)
+  Output = true
+  Spiegazione: possiamo costruire un quadrato di lato 2, con un lato pari a 1+1
+
+Condizioni necessarie (ma non sufficienti):
+1) il numero dei segmenti è almeno 4
+2) la somma delle lunghezze dei segmenti è divisibile per 4
+3) nessun segmento ha lunghezza superiore alla somma delle lunghezze diviso 4
+
+Se queste 3 condizioni sono tutte vere, allora dobbiamo calcolare e verificare tutte le possibili combinazioni di segmenti per vedere quale produce un quadrato.
+
+Algoritmo
+Se le 3 condizioni sono tutte vere:
+  Calcolare il valore del lato del quadrato (L).
+  Ciclo finchè:
+    Cerca nella lista dei segmenti i segmenti che sommano a L.
+    Se questi segmenti esistono:
+      Aggiungere questi segmenti alla soluzione
+      Togliere questi segmenti dalla lista
+    Altrimenti non è possibile formare un quadrato.
+  Verificare se la soluzione è valida.
+Altrimenti non è possibile formare un quadrato.
+
+(define (sum-num-from-list numbers num)
+"Find numbers in a list that add to a given number"
+  (let ( (dp (array (+ num 1) (dup nil (+ num 1))))
+         (used-numbers (array (+ num 1) (dup nil (+ num 1)))) )
+    (setf (dp 0) true)
+    (dolist (el numbers)
+      (for (i num 0 -1)
+        (if (and (>= i el) (dp (- i el)))
+          (begin
+            (setf (dp i) true)
+            (if (not (used-numbers i))
+              (if (used-numbers (- i el))
+                (setf (used-numbers i) (append (used-numbers (- i el)) (list el)))
+                (setf (used-numbers i) (list el))))))))
+    (used-numbers num)))
+
+Funzione che trova (se esiste) un quadrato utilizzando tutti i segmenti:
+
+(define (quadrato lst)
+  (setq quad '())
+  (setq num-seg (length lst)) ; numero di segmenti
+  (setq somma (apply + lst))
+  (setq max-seg (apply max lst))
+  (cond
+      ((< num-seg 4) nil) ; numero di lati minore di 4
+      ((!= (% somma 4) 0) nil) ; somma lunghezze non divisibile per 4
+      ((> max-seg (/ somma 4)) nil) ; segmento massimo maggiore del lato
+      (true
+        (setq continua true)
+        (setq lato (/ somma 4))
+        (setq num-lati 0)
+        (while (and continua (< num-lati 4))
+          (setq cur-lato (sum-num-from-list lst lato))
+          (if cur-lato 
+            (begin
+              ;(println "cur-lato = " cur-lato)
+              (push cur-lato quad -1)
+              (++ num-lati)
+              ;(println "num-lati = " num-lati)
+              (dolist (el cur-lato) (pop lst (find el lst)))
+              ;(print "list = " lst)
+              ;(read-line)
+            )
+            (begin
+              (setq continua nil)))
+        )
+        (if continua quad nil))))
+
+Proviamo:
+
+(setq a '(1 2 1 2 2))
+(setq b '(1 2 1 2 2 1 3 1 1 1 1))
+(setq c '(3 3 3 3 4))
+(setq d '(2 3 3 3 5))
+(quadrato a)
+;-> ((2) (1 1) (2) (2))
+(quadrato b)
+;-> ((1 2 1) (2 2) (1 3) (1 1 1 1))
+(quadrato c)
+;-> nil
+(quadrato d)
+;-> nil
+
+(define (test num-test num-seg max-seg)
+  (local (quadrati seg q)
+    (setq quadrati '())
+    (for (i 1 num-test)
+      (setq seg (map (curry + 1) (rand max-seg num-seg)))
+      (if (setq q (quadrato seg)) (push q quadrati))
+    )
+    (dolist (quad quadrati)
+      (println quad)
+      (println (map (fn(x) (apply + x)) quad))
+    )))
+
+(test 50 20 100)
+;-> ((17 16 18 13) (16 18 12 2 16) (13 14 8 13 16) (4 3 9 14 18 16))
+;-> (64 64 64 64)
+;-> ((8 3 21 11 4) (2 2 16 13 14) (7 20 20) (1 8 3 5 4 14 12))
+;-> (47 47 47 47)
+;-> ((1 20 16 16) (13 5 18 17) (5 5 21 15 6 1) (9 9 1 10 18 6))
+;-> (53 53 53 53)
+;-> ((12 13 12 25) (12 15 9 4 9 8 5) (24 14 2 22) (7 3 9 18 25))
+;-> (62 62 62 62)
+;-> ((27 25 17) (18 26 1 24) (7 21 12 5 24) (9 4 9 10 14 3 15 5))
+;-> (69 69 69 69)
+;-> ((20 17 26) (19 2 2 13 1 26) (6 15 7 8 27) (15 25 5 2 5 11))
+;-> (63 63 63 63)
+;-> ((41 37 9 38 6) (41 25 33 32) (36 1 27 41 26) (35 16 26 29 19 6))
+;-> (131 131 131 131)
+;-> ((37 28 31 9 10 36) (48 32 23 30 18) (40 38 26 47) (14 48 45 43 1))
+;-> (151 151 151 151)
+
+Test di velocità:
+(time (test 100 100 100))
+;-> 870.227
+(time (test 100 200 100))
+;-> 5380.002
+(time (test 100 200 200))
+;-> 9839.932
+(time (test 200 200 200))
+;-> 15979.059
+(time (test 100 500 100))
+;-> 45719.749
+
+Il parametro che influenza di più la velocità della funzione è il numero di segmenti della lista.
+
+
+(time (test 100 1000 100))
+
+
+
 ============================================================================
 

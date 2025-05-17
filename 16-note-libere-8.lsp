@@ -3188,7 +3188,7 @@ Nota: la lista vuota () appartiene sempre al powerset di qualunque lista.
 
 Vediamo diversi funzioni per calcolare il powerset di una lista (o vettore).
 
-Metodo 1 (iterativo)
+Metodo 1 (ricorsivo)
 --------------------
 
 (define (powerset1 lst)
@@ -3209,14 +3209,15 @@ Metodo 2 (ricorsivo)
       (list '())
       (let ((element (first lst))
             (p (powerset2 (rest lst))))
-        (append (map (fn (subset) (cons element subset)) p) p) )))
+        (extend (map (fn (subset) (cons element subset)) p) p) )))
 
 (powerset2 '(1 2 3))
 ;-> ((1 2 3) (1 2) (1 3) (1) (2 3) (2) (3) ())
 
 Metodo 3 (iterativo)
 --------------------
-Ci sono in totale 2^n sottoliste. Usiamo un ciclo da 0 a 2^n – 1 e, per ogni numero, scegliamo tutti gli elementi della lista che corrispondono a 1 nella rappresentazione binaria del numero corrente.
+Ci sono in totale 2^n sottoliste.
+Usiamo un ciclo da 0 a 2^n – 1 e, per ogni numero, scegliamo tutti gli elementi della lista che corrispondono a 1 nella rappresentazione binaria del numero corrente.
 
 (define (powerset3 lst)
   (local (out len limit counter tmp)
@@ -3261,7 +3262,8 @@ Contatore (i)     Sottolista
 
 Metodo 4 (iterativo)
 --------------------
-Questa funzione prende come parametro il numero di elementi e genera il powerset della lista (0..n-1). Ad esempio se il numero vale 3, allora la funzione calcola il powerset della lista (0 1 2).
+Questa funzione prende come parametro il numero di elementi e genera il powerset della lista (0..n-1).
+Ad esempio se il numero vale 3, allora la funzione calcola il powerset della lista (0 1 2).
 
 (define (powerset4 num)
   (local (out conta buf ind n_1 stop tmp)

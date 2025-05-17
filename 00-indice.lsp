@@ -2929,6 +2929,7 @@ NOTE LIBERE 29
   Elementi che formano gruppi con determinate proprietà
   Tre monete per ogni prezzo
   Superstringa comune più corta (Shortest Common Superstring)
+  Segmenti e quadrati
 
 PROBLEMI SUI DADI
 =================
@@ -2976,7 +2977,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (334 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (344 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
