@@ -2930,6 +2930,7 @@ NOTE LIBERE 29
   Tre monete per ogni prezzo
   Superstringa comune più corta (Shortest Common Superstring)
   Segmenti e quadrati
+  Coppie di elementi con la stessa somma
 
 PROBLEMI SUI DADI
 =================

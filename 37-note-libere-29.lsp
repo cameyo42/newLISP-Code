@@ -6281,9 +6281,76 @@ Test di velocità:
 Il parametro che influenza di più la velocità della funzione è il numero di segmenti della lista.
 
 
-(time (test 100 1000 100))
+--------------------------------------
+Coppie di elementi con la stessa somma
+--------------------------------------
 
+Data una lista di N interi, determinare il numero massimo di coppie di numeri che sommano a K.
+Ogni numero può essere usato solo una volta.
 
+Algoritmo
+- Usiamo un dizionario (lista associativa) per contare le occorrenze di ciascun numero.
+- Per ogni numero x, cerchiamo se esiste il complemento y = K - x.
+- Calcoliamo il numero di coppie possibili tra x e y, assicurandoci di non contare due volte e di non usare più elementi del necessario.
+
+(define (max-coppie lst K)
+  (local (out unici conteggio coppie y nx ny)
+    ;; Lista delle coppie trovate, inizialmente vuota
+    (setq out '())
+    ;; Estrae i valori unici dalla lista di input
+    (setq unici (unique lst))
+    ;; Costruisce una lista associativa con il numero di occorrenze di ciascun elemento
+    ;; Esempio: se lst = (1 1 2 3 3), allora conteggio = ((1 2) (2 1) (3 2))
+    (setq conteggio (map list unici (count unici lst)))
+    ;; Inizializza il contatore del numero totale di coppie trovate
+    (setq coppie 0)
+    ;; Per ogni numero x nella lista dei valori unici
+    (dolist (x unici)
+      ;; Calcola il valore complementare y tale che x + y = K
+      (setq y (- K x))
+      ;; Ottiene il numero di occorrenze correnti di x e y
+      (setq nx (lookup x conteggio))
+      (setq ny (lookup y conteggio))
+      ;; Due casi principali:
+      (cond
+        ;; Caso 1: x == y (es. K = 4 e x = 2, quindi 2+2=4)
+        ((= x y)
+          ;; Si possono formare al massimo (nx div 2) coppie (x x)
+          (setq q (/ nx 2))
+          (++ coppie q)
+          ;; Aggiunge q coppie (x x) alla lista `out`
+          (for (i 1 q) (push (list x x) out -1))
+          ;; Azzera il conteggio di x perché è stato usato tutto
+          (setf (lookup x conteggio) 0))
+        ;; Caso 2: x ≠ y e entrambi ancora disponibili
+        ((and ny (> nx 0) (> ny 0))
+          ;; Si possono formare min(nx, ny) coppie (x y)
+          (setq m (min nx ny))
+          (++ coppie m)
+          ;; Aggiunge m coppie (x y) alla lista `out`
+          (for (i 1 m) (push (list x y) out -1))
+          ;; Aggiorna le occorrenze di x e y, riducendole di m
+          (setf (lookup x conteggio) (- $it m))
+          (setf (lookup y conteggio) (- $it m)))))
+    ;; Restituisce la lista delle coppie trovate
+    out))
+
+Proviamo:
+
+(max-coppie '(1 2 3 4 3 2 1) 4)
+;-> ((1 3) (1 3) (2 2))
+
+(max-coppie '(1 5 7 -1 5) 6)
+;-> ((1 5) (7 -1))
+
+(max-coppie '(1 1 1 1) 2)
+;-> ((1 1) (1 1))
+
+(max-coppie '(1 1 1 1) 3)
+;-> ()
+
+(max-coppie '(5 6 7 8) 4)
+;-> ()
 
 ============================================================================
 
