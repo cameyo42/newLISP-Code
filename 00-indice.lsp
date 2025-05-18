@@ -2931,6 +2931,7 @@ NOTE LIBERE 29
   Superstringa comune più corta (Shortest Common Superstring)
   Segmenti e quadrati
   Coppie di elementi con la stessa somma
+  Modificare/Aggiornare una lista associativa (pop-assoc)
 
 PROBLEMI SUI DADI
 =================
