@@ -2336,7 +2336,8 @@ Esempi:
   D(27) = D(3)*9 + D(9)*3 = 9 + 18 = 27
   D(30) = D(5)(6) + D(6)(5) = 6 + 5 * 5 = 31.
 
-Sequenza OEIS A003415 (0..n):
+Sequenza OEIS A003415:
+a(n) = n' = arithmetic derivative of n: a(0) = a(1) = 0, a(prime) = 1, a(m*n) = m*a(n) + n*a(m).
   0, 0, 1, 1, 4, 1, 5, 1, 12, 6, 7, 1, 16, 1, 9, 8, 32, 1, 21, 1, 24,
   10, 13, 1, 44, 10, 15, 27, 32, 1, 31, 1, 80, 14, 19, 12, 60, 1, 21,
   16, 68, 1, 41, 1, 48, 39, 25, 1, 112, 14, 45, 20, 56, 1, 81, 16, 92,
@@ -2361,23 +2362,24 @@ Sequenza OEIS A003415 (0..n):
 Funzione cha calcola la derivata aritmetica di un numero intero:
 
 (define (derive num)
-  (cond ((< num 0) (- (derive (- num))))
-        ; se num è uguale a 0 o 1, allora restituisce 0
-        ((< num 2) 0)
-        (true
-          (setq fattori (factor-group num))
-          ; se num è primo restituisce 1
-          (if (and (= (length fattori) 1) (= (fattori 0 1) 1))
-              1
-              ;else
-              ; altrimenti clcola la derivata aritmetica
-              (begin
-                (setq sum 0)
-                (dolist (f fattori)
-                  (setq sum (+ sum (/ (* num (f 1)) (f 0))))
+  (local (fattori sum)
+    (cond ((< num 0) (- (derive (- num))))
+          ; se num è uguale a 0 o 1, allora restituisce 0
+          ((< num 2) 0)
+          (true
+            (setq fattori (factor-group num))
+            ; se num è primo restituisce 1
+            (if (and (= (length fattori) 1) (= (fattori 0 1) 1))
+                1
+                ;else
+                ; altrimenti calcola la derivata aritmetica
+                (begin
+                  (setq sum 0)
+                  (dolist (f fattori)
+                    (setq sum (+ sum (/ (* num (f 1)) (f 0))))
+                  )
                 )
-              )
-          ))))
+            )))))
 
 Facciamo alcune prove:
 
@@ -2418,6 +2420,8 @@ Calcoliamo le derivate dei numeri da -99 a 100:
 ;->  (1 156 1 39 55 80 18 71 1 176)
 ;->  (108 43 1 124 22 45 32 140 1 123)
 ;->  (20 96 34 49 24 272 1 77 75 140))
+
+Vedi anche "Numeri primi e derivata aritmetica" su "Note libere 29".
 
 
 ----------------------------------------------------

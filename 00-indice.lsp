@@ -2933,6 +2933,8 @@ NOTE LIBERE 29
   Coppie di elementi con la stessa somma
   Modificare/Aggiornare una lista associativa (pop-assoc)
   Separazione di cifre numeriche
+  Prodotti di quattro primi
+  Numeri primi e derivata aritmetica
 
 PROBLEMI SUI DADI
 =================
@@ -2980,7 +2982,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (344 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (345 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

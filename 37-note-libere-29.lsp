@@ -6575,6 +6575,8 @@ Funzione che separa le cifre in italiano:
     ; rimuove lo spazio " " finale
     (trim out "" " ")))
 
+Proviamo:
+
 (separa-it "unotrequattroseicinquenoveottosettezero")
 ;-> "uno tre quattro sei cinque nove otto sette zero"
 
@@ -6611,8 +6613,120 @@ Funzione che separa le cifre in inglese:
     ; rimuove lo spazio " " finale
     (trim out "" " ")))
 
+Proviamo:
+
 (separa-en "zeroonetwothreefourfivesixseveneightnine")
 ;-> "zero one two three four five six seven eight nine"
+
+
+-------------------------
+Prodotti di quattro primi
+-------------------------
+
+Calcolare la sequenza dei numeri che sono il prodotto di quattro numeri primi distinti.
+
+Sequenza OEIS A046386:
+Products of exactly four distinct primes.
+  210, 330, 390, 462, 510, 546, 570, 690, 714, 770, 798, 858, 870, 910,
+  930, 966, 1110, 1122, 1155, 1190, 1218, 1230, 1254, 1290, 1302, 1326,
+  1330, 1365, 1410, 1430, 1482, 1518, 1554, 1590, 1610, 1722, 1770, 1785,
+  1794, 1806, 1830, 1870, 1914, 1938, 1974, ...
+
+Usiamo la funzione "factor" e "unique".
+
+(define (seq limite)
+  (let ( (fattori '()) (out '(210)) )
+    ; (2 * 3 * 5 * 7 = 210)
+    (for (num 211 limite)
+      (setq fattori (factor num))
+      (if (and (= (length fattori) 4) (= (length (unique fattori)) 4))
+          (push num out -1)))
+    out))
+
+Proviamo:
+
+(seq 2000)
+;-> (210 330 390 462 510 546 570 690 714 770 798 858 870 910
+;->  930 966 1110 1122 1155 1190 1218 1230 1254 1290 1302 1326
+;->  1330 1365 1410 1430 1482 1518 1554 1590 1610 1722 1770 1785
+;->  1794 1806 1830 1870 1914 1938 1974 1995)
+
+
+----------------------------------
+Numeri primi e derivata aritmetica
+----------------------------------
+
+Calcolare la sequenza dei numeri n per i quali (n' + n) e (n' - n) sono entrambi primi, essendo n' la derivata aritmetica di n.
+
+Sequenza OEIS A229272:
+Numbers n for which n' + n and n' - n are both prime, n' being the arithmetic derivative of n.
+  210, 330, 390, 690, 798, 966, 1110, 1230, 2190, 2310, 2730, 3270,
+  4110, 4530, 4890, 5430, 6090, 6270, 6810, 6990, 7230, 7890, 8310,
+  8490, 9030, 9210, 9282, 10470, 10590, 10770, 12090, 12210, 12270,
+  12570, 12810, 12930, 13110, 13830, 14070, 17070, 17094, 17310, ...
+
+La derivata aritmetica D(n) è definita come segue:
+
+Per n >= 0:
+  D(0) = D(1) = 0.
+  D(p) = 1 per ogni numero primo p.
+  D(mn) = D(m)*n + m*D(n) per ogni m,n in N. (regola di Leibniz per le derivate).
+
+Per n < 0:
+  D(n) = -D(-n)
+
+Funzione che calcola la derivata aritmetica di un numero intero n:
+
+(define (derivative num)
+  (local (fattori sum)
+    (cond 
+      ; calcola la derivata di un numero negativo
+      ((< num 0) (- (derive (- num))))
+      ; se num è uguale a 0 o 1, allora restituisce 0
+      ((< num 2) 0)
+      (true
+        ; calcolo dei fattori primi raggruppati
+        (setq fattori (factor-group num))
+        ; se num è primo restituisce 1
+        (if (and (= (length fattori) 1) (= (fattori 0 1) 1))
+            1
+            ; altrimenti calcola la derivata aritmetica
+            (begin
+              (setq sum 0)
+              (dolist (f fattori)
+                (setq sum (+ sum (/ (* num (f 1)) (f 0)))))))))))
+
+(map derivative (sequence 0 50))
+;-> (0 0 1 1 4 1 5 1 12 6 7 1 16 1 9 8 32 1 21 1 24
+;->  10 13 1 44 10 15 27 32 1 31 1 80 14 19 12 60 1 21
+;->  16 68 1 41 1 48 39 25 1 112 14 45)
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (seq limite)
+  (setq out '())
+  (for (num 210 limite)
+    (setq dn (derivative num))
+    ;(println num { } dn)
+    ;(println (+ dn num) { } (- dn num))
+    ;(print (prime? (+ dn num)) { } (prime? (- dn num)))
+    ;(read-line)
+    (if (and (prime? (+ dn num)) (prime? (- dn num)))
+        (push num out -1)))
+  out)
+
+Proviamo:
+
+(seq 17500)
+;-> (210 330 390 690 798 966 1110 1230 2190 2310 2730 3270
+;->  4110 4530 4890 5430 6090 6270 6810 6990 7230 7890 8310
+;->  8490 9030 9210 9282 10470 10590 10770 12090 12210 12270
+;->  12570 12810 12930 13110 13830 14070 17070 17094 17310 17490)
+
+Vedi anche "Derivata aritmetica" su "Note libere 5".
 
 ============================================================================
 
