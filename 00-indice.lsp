@@ -2932,6 +2932,7 @@ NOTE LIBERE 29
   Segmenti e quadrati
   Coppie di elementi con la stessa somma
   Modificare/Aggiornare una lista associativa (pop-assoc)
+  Separazione di cifre numeriche
 
 PROBLEMI SUI DADI
 =================

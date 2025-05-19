@@ -1277,6 +1277,22 @@ Formula:
 ;-> (0L 1L 1L 2L 3L 5L 8L 13L 21L 34L 55L 89L 144L
 ;->  233L 377L 610L 987L 1597L 2584L 4181L 6765L)
 
+Fibonacci ricorsivo continuo:
+
+(define (fiboR)
+  (define (f i j)
+    (print i) (read-line)
+    (f j (+ i j)))
+  (f 1L 1L))
+
+(fiboR)
+;-> 1L
+;-> 1L
+;-> 2L
+;-> 3L
+;-> 5L
+;-> ...
+
 Formula di Binet:
 
   F(n) = (phi^n - psi^n)/sqrt(5)

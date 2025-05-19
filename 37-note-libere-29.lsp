@@ -6532,5 +6532,87 @@ L
 L
 ;-> ((a (b 1))))
 
+
+------------------------------
+Separazione di cifre numeriche
+------------------------------
+
+Considera una stringa composta da diversi nomi di cifre senza spazi tra loro.
+Per esempio, "unonoveottotre".
+Scrivere una funzione che restituisce una stringa con le cifre separate da spazio.
+Nell'esempio l'output sarebbe "uno nove otto tre".
+La stringa di cifre è sempre "ben formata".
+
+(setq it '("zero" "uno" "due" "tre" "quattro" "cinque" "sei" "sette" "otto" "nove"))
+(setq start (map first it))
+;-> ("z" "u" "d" "t" "q" "c" "s" "s" "o" "n")
+(setq coppie (map list start it))
+;-> (("z" "zero") ("u" "uno") ("d" "due") ("t" "tre")
+;->  ("q" "quattro") ("c" "cinque") ("s" "sei")
+;->  ("s" "sette") ("o" "otto") ("n" "nove"))
+
+Funzione che separa le cifre in italiano:
+
+(define (separa-it str)
+  (local (it start coppie out idx base cifra)
+    (setq it '("zero" "uno" "due" "tre" "quattro" "cinque" "sei" "sette" "otto" "nove"))
+    (setq start (map first it))
+    (setq coppie (map list start it))
+    (setq out "")
+    (setq idx 0)
+    (while (< idx (length str))
+      (setq base (str idx))
+      (setq cifra (lookup base coppie))
+      ; gestione casi con cifre con la stessa iniziale
+      (when (= base "s")
+        (if (= (str (+ idx 2)) "i")
+          (setq cifra "sei")
+          (setq cifra "sette")))
+      ;(print idx { } base { } cifra)  (read-line)
+      (extend out cifra " ")
+      (++ idx (length cifra))
+    )
+    ; rimuove lo spazio " " finale
+    (trim out "" " ")))
+
+(separa-it "unotrequattroseicinquenoveottosettezero")
+;-> "uno tre quattro sei cinque nove otto sette zero"
+
+Funzione che separa le cifre in inglese:
+
+(define (separa-en str)
+  (local (en start coppie out idx base cifra)
+    (setq en '("zero" "one" "two" "three" "four" "five" "six" "seven" "eight" "nine"))
+    (setq start (map first en))
+    (setq coppie (map list start en))
+    (setq out "")
+    (setq idx 0)
+    (while (< idx (length str))
+      (setq base (str idx))
+      (setq cifra (lookup base coppie))
+      ; gestione casi con cifre con la stessa iniziale
+      (cond ((= base "t")
+              (if (= (str (+ idx 1)) "w")
+                  (setq cifra "two")
+                  (setq cifra "three")))
+            ((= base "f")
+              (if (= (str (+ idx 1)) "o")
+                  (setq cifra "four")
+                  (setq cifra "five")))
+            ((= base "s")
+              (if (= (str (+ idx 1)) "i")
+                  (setq cifra "six")
+                  (setq cifra "seven")))
+      )
+      ;(print idx { } base { } cifra)  (read-line)
+      (extend out cifra " ")
+      (++ idx (length cifra))
+    )
+    ; rimuove lo spazio " " finale
+    (trim out "" " ")))
+
+(separa-en "zeroonetwothreefourfivesixseveneightnine")
+;-> "zero one two three four five six seven eight nine"
+
 ============================================================================
 
