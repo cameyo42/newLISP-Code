@@ -2937,6 +2937,7 @@ NOTE LIBERE 29
   Numeri primi e derivata aritmetica
   Somma di numeri interi senza + e -
   Somma di due numeri interi con operatori bitwise
+  Somma con un determinato numero di interi
 
 PROBLEMI SUI DADI
 =================

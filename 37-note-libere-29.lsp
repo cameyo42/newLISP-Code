@@ -6919,5 +6919,224 @@ Proviamo:
 (somma32 -1000000000 2)
 ;-> -999999998
 
+
+-----------------------------------------
+Somma con un determinato numero di interi
+-----------------------------------------
+
+Dati in ingresso (tutti numeri interi positivi):
+1) Somma Totale (S)
+2) Numero di Interi (N)
+3) Limite Inferiore (A)
+4) Limite Superiore (B)
+
+Scrivere una funzione che restituisce (se esistono) N interi casuali, ciascuno compreso tra il limite inferiore (A) e il limite superiore (B), la cui somma vale Somma Totale (S).
+Se questo non è possibile, allora la funzione restituisce la lista vuota.
+
+Ad esempio, l'input di (8 3 2 4) ha i seguenti sei output validi:
+
+  (2 3 3)
+  (3 2 3)
+  (3 3 2)
+  (2 2 4)
+  (2 4 2)
+  (4 2 2)
+
+Una soluzione esiste sicuramente se e solo se risultano vere:
+1) LimiteInferiore * NumeroInteri <= SommaTotale  -->  N*A <= S
+2) LimiteSuperiore * NumeroInteri >= SommaTotale  -->  N*B >= S
+
+Spiegazione:
+- N*A è la somma minima possibile, ottenuta quando tutti i numeri sono uguali al limite inferiore A.
+- N*B è la somma massima possibile, ottenuta quando tutti i numeri sono uguali al limite superiore B.
+- Se S non rientra in questo intervallo, non è possibile trovare $N$ numeri nell’intervallo [A, B] la cui somma sia S.
+- Se invece S rientra nell’intervallo chiuso [N*A, N*B], allora esiste almeno una combinazione di N interi in [A, B] che somma esattamente a S.
+
+Esempio:
+ Input: (S=8, N=3, A=2, B=4):
+ Somma minima: $3 \cdot 2 = 6$
+ Somma massima: $3 \cdot 4 = 12$
+Poiché 6 <= 8 <= 12, una (anzi più di una) soluzione esiste.
+Dunque, le due disuguaglianze sono condizione necessaria e sufficiente per l’esistenza di almeno una soluzione.
+
+Algoritmo:
+Generiamo N interi nell'intervallo [A...B] e poi verifichiamo se sommano a S.
+
+(define (solve s n a b)
+  (let ( (out '()) (found nil) (numeri '()) )
+    (when (and (<= (* a n) s) (>= (* b n) s))
+      (setq found nil)
+      (until found
+        (setq numeri '())
+        (for (i 1 n)
+          (push (+ a (rand (+ (- b a) 1))) numeri)
+        )
+        (when (= s (apply + numeri))
+          (setq out numeri)
+          (setq found true))
+      ))
+    out))
+
+Proviamo:
+
+(solve 8 3 2 4)
+;-> (4 2 2)
+(solve 8 3 2 4)
+;-> (3 2 3)
+(solve 8 3 2 4)
+;-> (2 4 2)
+
+(solve 15 3 2 4)
+;-> '()
+
+Possiamo anche calcolare tutte le soluzioni (senza contare le permutazioni delle stesse).
+Per fare questo generiamo tutte le combinazioni con ripetizione di N numeri in [A,B], ordinati in modo non decrescente, e selezioniamo solo quelle la cui somma è S.
+
+(define (tutte-soluzioni s n a b)
+  ; Lista che conterrà tutte le soluzioni valide trovate
+  (let (out '())
+    ; Funzione ricorsiva che costruisce una soluzione parziale
+    ; - parziale: la combinazione corrente costruita finora
+    ; - somma: la somma corrente della combinazione
+    ; - inizio: valore minimo che possiamo aggiungere
+    ;           (per mantenere ordine non decrescente)
+    (define (cerca parziale somma inizio)
+      ; Se la somma corrente non supera S, possiamo continuare
+      (when (<= somma s)
+        ; Se abbiamo scelto N elementi
+        (if (= (length parziale) n)
+            ; Se la somma è esattamente S,
+            ; aggiungiamo la combinazione al risultato (out)
+            (when (= somma s)
+              (push parziale out -1))
+            ; Altrimenti, continuiamo ad aggiungere numeri tra 'inizio' e 'b'
+            (for (i inizio b)
+              (cerca (append parziale (list i)) (+ somma i) i)))))
+    ; Avviamo la ricerca con combinazione vuota, somma 0 e valore minimo 'a'
+    (cerca '() 0 a)
+    ; Restituiamo tutte le soluzioni trovate
+    out))
+
+Proviamo:
+
+(tutte-soluzioni 8 3 1 8)
+;-> ((1 1 6) (1 2 5) (1 3 4) (2 2 4) (2 3 3))
+(tutte-soluzioni 20 3 1 20)
+;-> ((1 1 18) (1 2 17) (1 3 16) (1 4 15) (1 5 14) (1 6 13) (1 7 12)
+;->  (1 8 11) (1 9 10) (2 2 16) (2 3 15) (2 4 14) (2 5 13) (2 6 12)
+;->  (2 7 11) (2 8 10) (2 9 9) (3 3 14) (3 4 13) (3 5 12) (3 6 11)
+;->  (3 7 10) (3 8 9) (4 4 12) (4 5 11) (4 6 10) (4 7 9) (4 8 8)
+;->  (5 5 10) (5 6 9) (5 7 8) (6 6 8) (6 7 7))
+
+(length (tutte-soluzioni 20 3 1 20))
+;-> 33
+
+Scriviamo la stessa funzione con "memoization".
+
+(define-macro (memoize mem-func func)
+"Memoize a function"
+  (set (sym mem-func mem-func)
+    (letex (f func c mem-func)
+      (lambda ()
+        (or (context c (string (args)))
+        (context c (string (args)) (apply f (args))))))))
+
+(memoize tutte-soluzioniM
+  (lambda (s n a b)
+  (let (risultati '())
+    (define (cerca parziale somma inizio)
+      (when (<= somma s)
+        (if (= (length parziale) n)
+            (when (= somma s)
+              (push parziale risultati -1))
+            (for (i inizio b)
+              (cerca (append parziale (list i)) (+ somma i) i)))))
+    (cerca '() 0 a)
+    risultati)))
+
+Proviamo:
+
+(tutte-soluzioniM 8 3 1 8)
+;-> ((1 1 6) (1 2 5) (1 3 4) (2 2 4) (2 3 3))
+(tutte-soluzioniM 20 3 1 20)
+;-> ((1 1 18) (1 2 17) (1 3 16) (1 4 15) (1 5 14) (1 6 13) (1 7 12)
+;->  (1 8 11) (1 9 10) (2 2 16) (2 3 15) (2 4 14) (2 5 13) (2 6 12)
+;->  (2 7 11) (2 8 10) (2 9 9) (3 3 14) (3 4 13) (3 5 12) (3 6 11)
+;->  (3 7 10) (3 8 9) (4 4 12) (4 5 11) (4 6 10) (4 7 9) (4 8 8)
+;->  (5 5 10) (5 6 9) (5 7 8) (6 6 8) (6 7 7))
+
+(length (tutte-soluzioniM 20 3 1 20))
+;-> 33
+
+(tutte-soluzioniM 11 2 4 7)
+;-> ((4 7) (5 6))
+(tutte-soluzioniM  8 3 2 11)
+;-> ((2 2 4) (2 3 3))
+(tutte-soluzioniM 13 2 4 8)
+;-> ((5 8) (6 7))
+(tutte-soluzioniM 16 2 4 8)
+;-> ((8 8))
+(tutte-soluzioniM 16 2 4 10)
+;-> ((6 10) (7 9) (8 8))
+(tutte-soluzioniM 16 4 4 10)
+;-> ((4 4 4 4))
+
+Verifica dei risultati:
+
+(= (tutte-soluzioni 20 3 1 20) (tutte-soluzioniM 20 3 1 20))
+;-> true
+
+Test di velocità:
+
+(time (tutte-soluzioni 20 3 1 20) 1000)
+;-> 281.189
+(time (tutte-soluzioniM 20 3 1 20) 1000)
+;-> 0
+
+La velocità della funzione dipende fortemente da N:
+
+(time (println (length (tutte-soluzioniM 100 3 1 100))))
+;-> 833
+;-> 34.974
+(time (println (length (tutte-soluzioniM 100 4 1 100))))
+;-> 7153
+;-> 1760.508
+(time (println (length (tutte-soluzioniM 100 5 1 100))))
+;-> 38225
+;-> 98312.823
+
+Vediamo una funzione che genera tutte le combinazioni con ripetizione delle permutazioni (cioè considera distinte (2 3 3), (3 2 3) e (3 3 2)).
+
+(define (tutte-soluzioni-con-permutazioni s n a b)
+  ; Lista per raccogliere le soluzioni valide
+  (let (out '())
+    ; Funzione ricorsiva per costruire una soluzione
+    ; - parziale: la combinazione costruita finora
+    ; - somma: la somma parziale
+    (define (cerca parziale somma)
+      ; Se abbiamo scelto N numeri...
+      (if (= (length parziale) n)
+          ; ... e la loro somma è S, aggiungiamo la combinazione ad out
+          (when (= somma s)
+            (push parziale out -1))
+          ; Altrimenti, proviamo ogni numero da A a B
+          (for (i a b)
+            ; ottimizzazione: non continuare se superiamo S
+            (when (<= (+ somma i) s)  
+              (cerca (append parziale (list i)) (+ somma i))))))
+    ; Avvia la ricerca con combinazione vuota e somma 0
+    (cerca '() 0)
+    ; Ritorna tutte le combinazioni con permutazioni
+    out))
+
+Differenze rispetto a 'tutte-soluzioni':
+- Non si impone monotonicità, non c'è controllo sull'ordine degli elementi: tutte le permutazioni sono generate.
+- La ricorsione esplora tutti i possibili rami con vincoli di somma e lunghezza.
+
+Calcoliamo tutte le 6 permutazioni valide di interi tra 2 e 4 che sommano a 8:
+
+(tutte-soluzioni-con-permutazioni 8 3 2 4)
+;-> ((2 2 4) (2 3 3) (2 4 2) (3 2 3) (3 3 2) (4 2 2))
+
 ============================================================================
 
