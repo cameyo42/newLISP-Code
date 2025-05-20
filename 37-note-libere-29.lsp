@@ -6675,6 +6675,13 @@ Per n >= 0:
 Per n < 0:
   D(n) = -D(-n)
 
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
 Funzione che calcola la derivata aritmetica di un numero intero n:
 
 (define (derivative num)
@@ -6707,16 +6714,13 @@ Funzione che calcola la derivata aritmetica di un numero intero n:
        (= 1 (length (factor num)))))
 
 (define (seq limite)
-  (setq out '())
-  (for (num 210 limite)
-    (setq dn (derivative num))
-    ;(println num { } dn)
-    ;(println (+ dn num) { } (- dn num))
-    ;(print (prime? (+ dn num)) { } (prime? (- dn num)))
-    ;(read-line)
-    (if (and (prime? (+ dn num)) (prime? (- dn num)))
-        (push num out -1)))
-  out)
+  (local (out dn)
+    (setq out '())
+    (for (num 2 limite)
+      (setq dn (derivative num))
+      (if (and (prime? (+ dn num)) (prime? (- dn num)))
+          (push num out -1)))
+    out))
 
 Proviamo:
 
@@ -6726,7 +6730,194 @@ Proviamo:
 ;->  8490 9030 9210 9282 10470 10590 10770 12090 12210 12270
 ;->  12570 12810 12930 13110 13830 14070 17070 17094 17310 17490)
 
+Altre due sequenze OEIS sulle derivate aritmetiche:
+
+Sequenza OEIS A241859:
+1st Arithmetic derivative of numbers with prime arithmetic derivative (A157037).
+  5, 7, 13, 31, 19, 41, 31, 61, 59, 71, 43, 71, 101, 61, 101, 73, 113,
+  103, 151, 131, 103, 109, 191, 131, 167, 211, 151, 151, 139, 241, 167,
+  191, 151, 227, 271, 199, 191, 181, 311, 269, 193, 167, 433, 199, 211,
+  269, 311, 293, 281, 229, 191, 263, 401, 241, 251, ...
+
+(define (seq1 limite)
+    (let ( (out '()) (dn nil) )
+      (for (num 2 limite)
+        (if (prime? (setq dn (derivative num)))
+            (push dn out -1)))
+      out))
+
+(seq1 500)
+;-> (5 7 13 31 19 41 31 61 59 71 43 71 101 61 101 73 113
+;->  103 151 131 103 109 191 131 167 211 151 151 139 241 167
+;->  191 151 227 271 199 191 181 311 269 193 167 433 199 211
+;->  269 311 293 281 229 191 263 401 241 251 311 421)
+
+Sequenza OEIS A157037:
+Numbers with prime arithmetic derivative A003415.
+  6, 10, 22, 30, 34, 42, 58, 66, 70, 78, 82, 105, 114, 118, 130, 142,
+  154, 165, 174, 182, 202, 214, 222, 231, 238, 246, 255, 273, 274, 282,
+  285, 286, 298, 310, 318, 345, 357, 358, 366, 370, 382, 385, 390, 394,
+  399, 418, 430, 434, 442, 454, 455, 465, 474, 478, ...
+
+(define (seq2 limite)
+    (let ( (out '()) (dn nil) )
+      (for (num 2 limite)
+        (setq dn (derivative num))
+        (when (prime? dn)
+              (if (= (derivative dn) 1)
+                  (push num out -1))))
+      out))
+
+(seq2 500)
+;-> (6 10 22 30 34 42 58 66 70 78 82 105 114 118 130 142
+;->  154 165 174 182 202 214 222 231 238 246 255 273 274 282
+;->  285 286 298 310 318 345 357 358 366 370 382 385 390 394
+;->  399 418 430 434 442 454 455 465 474 478 483 494 498)
+
+(map derivative '(6 10 22 30 34 42 58 66 70))
+;-> (5 7 13 31 19 41 31 61 59)
+
 Vedi anche "Derivata aritmetica" su "Note libere 5".
+
+
+----------------------------------
+Somma di numeri interi senza + e -
+----------------------------------
+
+Dati due numeri interi scrivere una funzione che somma i due numeri senza utilizzare gli operatori '+' e '-'.
+
+Algoritmo:
+1) Rappresentare ogni numero con un certo numero di elementi in una lista.
+   (Esempio: 3 -> (x x x), -2 -> (y y))
+2) Creare due liste concatenando:
+   a) le liste delle rappresentazioni dei numeri positivi (pos)
+   b) le liste delle rappresentazioni dei numeri negativi (neg)
+3) Finchè la lista più corta non termina:
+     Eliminare coppie di elementi dalle due liste pos e neg (uno per ogni lista).
+4) Contare la lunghezza totale della lista rimasta e aggiustare il segno.
+
+Questo metodo funziona bene solo per numeri piccoli.
+
+(define (somma-interi lst)
+  (local (pos neg len-pos len-neg)
+    (setq pos '())
+    (setq neg '())
+    ; crea le list pos e neg
+    (dolist (el lst)
+      (cond ((> el 0) (extend pos (dup 'p el)))
+            ((< el 0) (extend neg (dup 'n (- el))))))
+    (setq len-pos (length pos))
+    (setq len-neg (length neg))
+    ; toglie coppie di elementi dalle liste pos e neg (uno per ogni lista)
+    (cond ((>= len-pos len-neg) ; risultato poitivo
+            (while neg (pop neg) (pop pos))
+            (length pos))
+          ((< len-pos len-neg) ; risultato negativo
+            (while pos (pop pos) (pop neg))
+            (- (length neg))))))
+
+Proviamo:
+
+(setq nums '(-33 5 2 -3 9 -4 2))
+(somma-interi nums)
+;-> -22
+
+(setq nums '(0 0 0))
+(somma-interi nums)
+;-> 0
+
+(somma-interi '(123456 123456 123456))
+;-> 370368
+
+(time (somma-interi (rand 100 1e6)))
+;-> 2078.142
+
+Nota: a + b = a * 2 - (a - b)
+
+
+------------------------------------------------
+Somma di due numeri interi con operatori bitwise
+------------------------------------------------
+
+Funzione che somma di due numeri interi a 64 bit con operatori bitwise:
+
+(define (somma64 a b)
+  (local (mask max-num carry))
+  ;; Maschera per limitare i numeri a 64 bit (tutti 1 su 64 bit)
+  (setq mask 0xFFFFFFFFFFFFFFFF)
+  ;; Valore massimo rappresentabile come intero positivo a 64 bit (2^63 - 1)
+  (setq max-num  0x7FFFFFFFFFFFFFFF)
+  ;; Loop finché ci sono riporti da sommare
+  (while (!= b 0)
+    ;; Calcola i bit da riportare: 1 solo dove entrambi i bit sono 1
+    (setq carry (& a b))
+    ;; Somma senza riporti usando XOR (1 solo se uno dei due bit è 1)
+    (setq a (^ a b))
+    ;; Riporto: spostato a sinistra di 1 per sommarlo nella posizione successiva
+    (setq b (<< carry 1))
+    ;; Mantieni i valori entro 64 bit
+    (setq a (& a mask))
+    (setq b (& b mask))
+  )
+  ;; Se il risultato è maggiore del massimo positivo, è un numero negativo
+  ;; in complemento a due: lo convertiamo esplicitamente
+  (if (> a max-num)
+      (- a 0x10000000000000000) ; 2^64 = 0x100...000
+      a))
+
+Spiegazione:
+Parte          Descrizione
+- mask         Serve a mascherare tutti i bit tranne i primi 64, simulando overflow.
+- max-num      Usato per capire se il numero risultante è negativo in complemento a due.
+- carry        Riporti da aggiungere al turno successivo.
+- ^ a b        Somma senza riporto (bitwise XOR).
+- << carry 1   Sposta i riporti per sommarli nella posizione successiva.
+- a > max-num  Se a supera max-num, significa che è un negativo rappresentato in complemento a due.
+
+Proviamo:
+
+(somma64 9223372036854775806 1)
+;-> 9223372036854775807  ;(max positivo 64 bit)
+(somma64 9223372036854775807 1)
+;-> -9223372036854775808 ;(overflow, minimo negativo)
+(somma64 -1 -2)
+;-> -3
+(somma64 0 0)
+;-> 0
+(somma64 -1000000000000000 2)
+;-> -999999999999998
+
+Funzione che somma di due numeri interi a 32 bit con operatori bitwise:
+
+(define (somma32 a b)
+  (local (mask max-num)
+    (setq mask 0xFFFFFFFF) ; maschera a 32 bit
+    (setq max-num 0x7FFFFFFF)  ; massimo intero positivo su 32 bit (2^31 - 1)
+    (while (!= b 0)
+      (let ((carry (& a b)))
+        (setq a (^ a b))
+        (setq b (<< carry 1))
+        (setq a (& a mask)) ; mantieni 32 bit
+        (setq b (& b mask))
+      )
+    )
+    ; se il risultato supera il massimo, è un numero negativo
+    (if (> a max-num)
+        (- a 0x100000000)
+        a)))
+
+Proviamo:
+
+(somma32 2147483646 1)
+;-> 2147483647 ;(max positivo 32 bit)
+(somma32 2147483647 1)
+;-> -2147483648 ;(overflow, minimo negativo)
+(somma32 -1 -2)
+;-> -3
+(somma32 0 0)
+;-> 0
+(somma32 -1000000000 2)
+;-> -999999998
 
 ============================================================================
 

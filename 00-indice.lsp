@@ -2935,6 +2935,8 @@ NOTE LIBERE 29
   Separazione di cifre numeriche
   Prodotti di quattro primi
   Numeri primi e derivata aritmetica
+  Somma di numeri interi senza + e -
+  Somma di due numeri interi con operatori bitwise
 
 PROBLEMI SUI DADI
 =================
