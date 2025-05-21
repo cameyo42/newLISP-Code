@@ -4582,6 +4582,7 @@ Vediamo la velocità delle funzioni:
 Le funzioni più veloci sono quelle che usano una lista di interi (0 e 1) come rappresentazione del numero binario.
 
 Vedi anche "Inversione dei valori di un matrice binaria (0 -> 1), (1 -> 0)" su "Note libere 11".
+Vedi anche "Inversione dei bit di un numero intero" su "Note libere 29".
 
 
 ---------------------

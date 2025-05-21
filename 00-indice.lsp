@@ -2938,6 +2938,12 @@ NOTE LIBERE 29
   Somma di numeri interi senza + e -
   Somma di due numeri interi con operatori bitwise
   Somma con un determinato numero di interi
+  Numeri eco
+  Il primo più grande e quello più piccolo che divide un numero
+  Inversione dei bit di un numero intero
+  Numeri con lunghezza binaria prima
+  0+1+2+...+n in lunar arithmetic in base 2 written in base 10
+  Sequenza 20250521
 
 PROBLEMI SUI DADI
 =================

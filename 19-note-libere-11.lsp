@@ -3287,6 +3287,7 @@ Quarta funzione:
 La funzione "set-ref-all" è veloce ed elegante.
 
 Vedi anche "Inversione dei bit di un numero binario" su "Note libere 28".
+Vedi anche "Inversione dei bit di un numero intero" su "Note libere 29".
 
 
 --------------------------------

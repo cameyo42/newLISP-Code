@@ -7138,5 +7138,299 @@ Calcoliamo tutte le 6 permutazioni valide di interi tra 2 e 4 che sommano a 8:
 (tutte-soluzioni-con-permutazioni 8 3 2 4)
 ;-> ((2 2 4) (2 3 3) (2 4 2) (3 2 3) (3 3 2) (4 2 2))
 
+
+----------
+Numeri eco
+----------
+
+I numeri eco (echo) sono numeri interi positivi k tali che il più grande fattore primo di k-1 sia un suffisso di k.
+Sono chiamati così perché k-1 lascia un'eco nella rappresentazione decimale di k.
+
+Esempio:
+k = 4971 è un numero eco perché k-1 = 4970 = 2*5*7*71 e k termina con 71
+
+Sequenza OEIS A383896:
+Echo numbers: positive integers k such that the largest prime factor of k-1 is a suffix of k.
+  13, 57, 73, 111, 127, 163, 193, 197, 313, 323, 337, 419, 433, 687,
+  757, 817, 847, 897, 929, 931, 973, 1037, 1153, 1177, 1211, 1641,
+  2017, 2311, 2593, 2623, 2647, 2913, 3073, 3137, 3659, 3661, 3829,
+  4031, 4117, 4213, 4453, 4483, 4537, 4673, 4737, 4971, 5377, 5741, ...
+
+Nessun termine può essere pari, poiché se k fosse pari, allora k-1 sarebbe dispari e avrebbe solo fattori primi dispari, nessuno dei quali potrebbe essere un suffisso di k.
+
+(define (eco num)
+  (ends-with (string num) (string (last (factor (- num 1))))))
+
+(filter eco (sequence 3 5741 2))
+;-> (13 57 73 111 127 163 193 197 313 323 337 419 433 687
+;->  757 817 847 897 929 931 973 1037 1153 1177 1211 1641
+;->  2017 2311 2593 2623 2647 2913 3073 3137 3659 3661 3829
+;->  4031 4117 4213 4453 4483 4537 4673 4737 4971 5377 5741)
+
+
+-------------------------------------------------------------
+Il primo più grande e quello più piccolo che divide un numero
+-------------------------------------------------------------
+
+Dato un numero N determinare il primo più grande che divide N.
+
+Sequenza OEIS A006530:
+Gpf(n): greatest prime dividing n, for n >= 2 (a(1)=1).
+  1, 2, 3, 2, 5, 3, 7, 2, 3, 5, 11, 3, 13, 7, 5, 2, 17, 3, 19, 5, 7,
+  11, 23, 3, 5, 13, 3, 7, 29, 5, 31, 2, 11, 17, 7, 3, 37, 19, 13, 5,
+  41, 7, 43, 11, 5, 23, 47, 3, 7, 5, 17, 13, 53, 3, 11, 7, 19, 29, 59,
+  5, 61, 31, 7, 2, 13, 11, 67, 17, 23, 7, 71, 3, 73, 37, 5, 19, 11,
+  13, 79, 5, 3, 41, 83, 7, 17, 43, ...
+
+(define (gpf num)
+  (if (= num 1) 1
+  ;else
+    (last (factor num))))
+
+(map gpf (sequence 1 60))
+;-> (1 2 3 2 5 3 7 2 3 5 11 3 13 7 5 2 17 3 19 5 7
+;->  11 23 3 5 13 3 7 29 5 31 2 11 17 7 3 37 19 13 5
+;->  41 7 43 11 5 23 47 3 7 5 17 13 53 3 11 7 19 29 59 5)
+
+Sequenza OEIS A020639:
+Lpf(n): least prime dividing n (when n > 1), a(1) = 1.
+Or, smallest prime factor of n, or smallest prime divisor of n.
+  1, 2, 3, 2, 5, 2, 7, 2, 3, 2, 11, 2, 13, 2, 3, 2, 17, 2, 19, 2, 3, 2,
+  23, 2, 5, 2, 3, 2, 29, 2, 31, 2, 3, 2, 5, 2, 37, 2, 3, 2, 41, 2, 43,
+  2, 3, 2, 47, 2, 7, 2, 3, 2, 53, 2, 5, 2, 3, 2, 59, 2, 61, 2, 3, 2, 5,
+  2, 67, 2, 3, 2, 71, 2, 73, 2, 3, 2, 7, 2, 79, 2, 3, 2, 83, 2, 5, 2, 3,
+  2, 89, 2, 7, 2, 3, 2, 5, 2, 97, ...
+
+(define (lpf num)
+  (if (= num 1) 1
+  ;else
+    (first (factor num))))
+
+(map lpf (sequence 1 65))
+;-> (1 2 3 2 5 2 7 2 3 2 11 2 13 2 3 2 17 2 19 2 3 2
+;->  23 2 5 2 3 2 29 2 31 2 3 2 5 2 37 2 3 2 41 2 43
+;->  2 3 2 47 2 7 2 3 2 53 2 5 2 3 2 59 2 61 2 3 2 5)
+
+
+--------------------------------------
+Inversione dei bit di un numero intero
+--------------------------------------
+
+Per invertire i bit di un numero intero (0 -> 1, 1 -> 0), possiamo usare l'operatore bitwise NOT "~".
+
+Per esempio:
+(setq num 21)
+(bits num)
+;-> "10101"
+(setq flipped-num (~ num))
+;-> -22
+(bits -22)
+;-> "1111111111111111111111111111111111111111111111111111111111101010"
+
+Nota: ~num = = -num - 1 = -(num + 1)
+
+A volte abbiamo bisogno di un'inversione bit a bit personalizzata che influenzi solo i bit attivi del numero, dal bit 1 meno significativo a destra (LSB) fino al bit 1 più significativo a sinistra (MSB).
+Per esempio:
+  num = 21
+  binario(21) = 10101
+  flipped-num = 01010 = 1010 = 10
+Vogliamo invertire solo i bit che rappresentano il numero 21 (10101).
+
+Funzione che inverte solo i bit attivi di un numero:
+
+(define (flip-bits num)
+  (letn ( (len (length (bits num))) ; numero di bit significativi
+          (mask (- (<< 1 len) 1)) ) ; crea una maschera di 1 (lunghezza = len)
+    (^ num mask)))                  ; inverte solo i bit significativi
+
+Proviamo:
+
+(flip-bits 21)
+;-> 10
+(bits 21)
+;-> "10101"
+(bits 10)
+;-> 1010
+
+Come funziona:
+- (bit num): restituisce la rappresentazione in bit di num come una lista di 0 e 1, a partire dal più significativo.
+- len: è la lunghezza di quella lista (ovvero, il numero di bit in formato binario).
+- mask: è un numero come 11111 (binario), generato spostando di 1 a sinistra di len, quindi sottraendo 1.
+- (^ num mask): con XOR invertiamo esattamente quei bit.
+
+Vedi anche "Inversione dei valori di un matrice binaria (0 -> 1), (1 -> 0)" su "Note libere 11".
+Vedi anche "Inversione dei bit di un numero binario" su "Note libere 28".
+
+
+----------------------------------
+Numeri con lunghezza binaria prima
+----------------------------------
+
+Calcolare la sequenza dei numeri con un numero primo di cifre binarie.
+
+Esempi:
+num = 12 --> 1100 --> length(1100) = 4 --> non è primo
+num =  7 --> 111  --> length(111) = 3  --> è primo
+
+Sequenza OEIS A380788:
+Numbers with a prime number of binary digits.
+  2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+  29, 30, 31, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+  78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
+  95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, ...
+
+(define (check? num)
+  (prime? (length (bits num))))
+
+(filter check? (sequence 1 106))
+;-> (2 3 4 5 6 7 16 17 18 19 20 21 22 23 24 25 26 27 28
+;->  29 30 31 64 65 66 67 68 69 70 71 72 73 74 75 76 77
+;->  78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94
+;->  95 96 97 98 99 100 101 102 103 104 105 106)
+
+Calcolare la sequenza dei numeri con un numero primo di cifre binarie a 1.
+
+Esempi:
+num = 2 --> 1 --> (1) --> non è primo
+num = 7 --> 111 --> (3) --> è primo
+
+Sequenza OEIS A052294:
+Pernicious: numbers with a prime number of 1's in their binary expansion.
+  3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 17, 18, 19, 20, 21, 22, 24, 25,
+  26, 28, 31, 33, 34, 35, 36, 37, 38, 40, 41, 42, 44, 47, 48, 49, 50,
+  52, 55, 56, 59, 61, 62, 65, 66, 67, 68, 69, 70, 72, 73, 74, 76, 79,
+  80, 81, 82, 84, 87, 88, 91, 93, 94, 96, 97, 98, 100, ...
+
+(define (check1? num)
+  (prime? (length (find-all "1" (bits num)))))
+
+(filter check1? (sequence 1 100))
+;-> (3 5 6 7 9 10 11 12 13 14 17 18 19 20 21 22 24 25
+;->  26 28 31 33 34 35 36 37 38 40 41 42 44 47 48 49 50
+;->  52 55 56 59 61 62 65 66 67 68 69 70 72 73 74 76 79
+;->  80 81 82 84 87 88 91 93 94 96 97 98 100)
+
+Calcolare la sequenza dei numeri con un numero primo di cifre binarie a 0.
+
+Esempi:
+num = 12 --> 1100 --> (0 0) = 2 --> è primo
+num =  5 --> 101  --> (0) = 1   --> non è primo
+
+(bits 5)
+Sequenza OEIS A144754:
+Integers that have a prime number of 0's in their binary expansion.
+  4, 8, 9, 10, 12, 17, 18, 19, 20, 21, 22, 24, 25, 26, 28, 32, 35, 37,
+  38, 39, 41, 42, 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 56, 57, 58,
+  60, 65, 66, 68, 71, 72, 75, 77, 78, 79, 80, 83, 85, 86, 87, 89, 90,
+  91, 92, 93, 94, 96, 99, 101, 102, 103, 105, 106, 107, 108, 109, 110, ...
+
+(define (check2? num)
+  (prime? (length (find-all "0" (bits num)))))
+
+(filter check2? (sequence 1 110))
+;-> (4 8 9 10 12 17 18 19 20 21 22 24 25 26 28 32 35 37
+;->  38 39 41 42 43 44 45 46 49 50 51 52 53 54 56 57 58
+;->  60 65 66 68 71 72 75 77 78 79 80 83 85 86 87 89 90
+;->  91 92 93 94 96 99 101 102 103 105 106 107 108 109 110)
+
+
+------------------------------------------------------------
+0+1+2+...+n in lunar arithmetic in base 2 written in base 10
+------------------------------------------------------------
+
+Sequenza OEIS A003817:
+a(0) = 0, a(n) = a(n-1) OR n.
+  0, 1, 3, 3, 7, 7, 7, 7, 15, 15, 15, 15, 15, 15, 15, 15, 31, 31, 31,
+  31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 63, 63, 63, 63,
+  63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63,
+  63, 63, 63, 63, 63, 63, 63, 63, 63, ...
+
+(define (seq1 limite)
+  (let (out '(0))
+    (for (num 1 (- limite 1))
+      (push (| (out -1) num) out -1))))
+
+(seq1 100)
+;-> (0 1 3 3 7 7 7 7 15 15 15 15 15 15 15 15 31 31 31 31 31 31 31 31 31
+;->  31 31 31 31 31 31 31 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63
+;->  63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 127 127 127 127
+;->  127 127 127 127 127 127 127 127 127 127 127 127 127 127 127 127 127
+;->  127 127 127 127 127 127 127 127 127 127 127 127 127 127 127)
+
+Nota: (| a(n-1) n) == (+ n (flip-bits n))
+  n = 4
+  a(n-1) = 3
+  (| 3 4) = 7
+
+  n = 4
+  (+ 4 (flip-bits 4)) = 7
+
+(define (flip-bits num)
+  (letn ( (len (length (bits num)))
+          (mask (- (<< 1 len) 1)) )
+    (^ num mask)))
+
+(define (seq2 limite)
+  (let (out '(0))
+    (for (num 1 (- limite 1))
+      (push (+ num (flip-bits num)) out -1))))
+
+(seq2 100)
+;-> (0 1 3 3 7 7 7 7 15 15 15 15 15 15 15 15 31 31 31 31 31 31 31 31 31
+;->  31 31 31 31 31 31 31 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63
+;->  63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 63 127 127 127 127
+;->  127 127 127 127 127 127 127 127 127 127 127 127 127 127 127 127 127
+;->  127 127 127 127 127 127 127 127 127 127 127 127 127 127 127)
+
+Test di correttezza:
+
+(= (seq1 1e5) (seq2 1e5))
+;-> true
+
+Test di velocità:
+
+(time (seq1 1e6))
+;-> 71.839
+(time (seq2 1e6))
+;-> 333.124
+
+
+-----------------
+Sequenza 20250521
+-----------------
+
+Calcolare la sequenza che si ottiene con il seguente algoritmo (esempio):
+
+1) N = 18 (numero da verificare)
+2) B1 = binario(N) = 10010
+3) B2 = flip-bit(B1) = 01101
+4) M = decimale(01101) = 13
+5) T = M + N = 13 + 18 = 31
+6) Se T è un numero primo, allora il numero N è nella sequenza.
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (flip-bits num)
+  (letn ( (len (length (bits num)))
+          (mask (- (<< 1 len) 1)) )
+    (^ num mask)))
+
+(define (test? num)
+  (prime? (+ num (flip-bits num))))
+
+Proviamo:
+
+(filter test? (sequence 1 4100))
+;-> (2 3 4 5 6 7 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 64 65
+;->  66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87
+;->  88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107
+;->  108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124
+;->  125 126 127 4096 4097 4098 4099 4100)
+
+Nota: questa sequenza non esiste in OEIS.
+
 ============================================================================
 
