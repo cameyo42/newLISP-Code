@@ -6318,7 +6318,7 @@ Algoritmo
           ;; Si possono formare al massimo (nx div 2) coppie (x x)
           (setq q (/ nx 2))
           (++ coppie q)
-          ;; Aggiunge q coppie (x x) alla lista `out`
+          ;; Aggiunge q coppie (x x) alla lista 'out'
           (for (i 1 q) (push (list x x) out -1))
           ;; Azzera il conteggio di x perché è stato usato tutto
           (setf (lookup x conteggio) 0))
@@ -6327,7 +6327,7 @@ Algoritmo
           ;; Si possono formare min(nx, ny) coppie (x y)
           (setq m (min nx ny))
           (++ coppie m)
-          ;; Aggiunge m coppie (x y) alla lista `out`
+          ;; Aggiunge m coppie (x y) alla lista 'out'
           (for (i 1 m) (push (list x y) out -1))
           ;; Aggiorna le occorrenze di x e y, riducendole di m
           (setf (lookup x conteggio) (- $it m))
@@ -7432,5 +7432,62 @@ Proviamo:
 
 Nota: questa sequenza non esiste in OEIS.
 
+
+-----------------------------
+N davanti ad una potenza di 2
+-----------------------------
+
+Dato un numero N trovare la potenza di k, tale che 2^k inizia con N.
+
+Esempi:
+  N = 3
+  2^5 = (3)2, quindi per N = 3, k = 5.
+  
+  N = 21
+  2^31 = (21)47483648, quindi per N = 21, k = 31.
+
+Sequenza OEIS A018856:
+2^a(n) is the smallest power of 2 beginning with n.
+  0, 1, 5, 2, 9, 6, 46, 3, 53, 10, 50, 7, 17, 47, 77, 4, 34, 54, 84,
+  11, 31, 51, 61, 81, 8, 18, 38, 48, 68, 78, 98, 5, 25, 35, 45, 55,
+  75, 85, 95, 12, 22, 32, 42, 145, 52, 62, 72, 82, 92, 102, 9, 19,
+  29, 39, 142, 49, 59, 162, 69, 79, 89, 192, 99, 6, 16, 119, 26, ...
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (trova n max-pow)
+  (let ( (out '()) (n (string n)) (found nil) )
+    (for (i 0 max-pow 1 found)
+      (when (starts-with (string (** 2 i)) n)
+          (setq found true)
+          (push (list i (int n 0 10)) out -1)))
+    out))
+
+(setq t50 (map (fn(x) (trova x 200)) (sequence 1 50)))
+;-> (((0 1)) ((1 2)) ((5 3)) ((2 4)) ((9 5)) ((6 6)) ((46 7)) ((3 8))
+;->  ((53 9)) ((10 10)) ((50 11)) ((7 12)) ((17 13)) ((47 14)) ((77 15))
+;->  ((4 16)) ((34 17)) ((54 18)) ((84 19)) ((11 20)) ((31 21)) ((51 22))
+;->  ((61 23)) ((81 24)) ((8 25)) ((18 26)) ((38 27)) ((48 28)) ((68 29))
+;->  ((78 30)) ((98 31)) ((5 32)) ((25 33)) ((35 34)) ((45 35)) ((55 36))
+;->  ((75 37)) ((85 38)) ((95 39)) ((12 40)) ((22 41)) ((32 42)) ((42 43))
+;->  ((145 44)) ((52 45)) ((62 46)) ((72 47)) ((82 48)) ((92 49)) ((102 50)))
+
+(length t50)
+;-> 50
+
+Per ogni coppia (x y) vale: 2^x = y....
+Per la coppia (31 21) vale:
+(** 2 31)
+;-> 2147483648L
+
+(map (fn(x) (x 0 0)) t50)
+;-> (0 1 5 2 9 6 46 3 53 10 50 7 17 47 77 4 34 54 84
+;->  11 31 51 61 81 8 18 38 48 68 78 98 5 25 35 45 55
+;->  75 85 95 12 22 32 42 145 52 62 72 82 92 102)
 ============================================================================
 

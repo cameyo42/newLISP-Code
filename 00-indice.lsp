@@ -2944,6 +2944,12 @@ NOTE LIBERE 29
   Numeri con lunghezza binaria prima
   0+1+2+...+n in lunar arithmetic in base 2 written in base 10
   Sequenza 20250521
+  N davanti ad una potenza di 2
+
+NOTE LIBERE 30
+==============
+  Aritmetica Lunare
+
 
 PROBLEMI SUI DADI
 =================

@@ -4237,6 +4237,17 @@ Nota: potrebbe esistere più di una configurazione possibile per un quadrato lat
 ;->  (3 4 5 6 7 8 9 10 11 12 1 2)
 ;->  (2 3 4 5 6 7 8 9 10 11 12 1))
 
+Versione stile lisp:
+
+(define (latino n)
+  (map (fn(x) (rotate (sequence 1 n) x)) (sequence 0 (- n 1))))
+
+(latino 5)
+;-> ((1 2 3 4 5) (5 1 2 3 4) (4 5 1 2 3) (3 4 5 1 2) (2 3 4 5 1))
+
+(= (latino 100) (latin 100))
+;-> true
+
 
 --------------
 Numeri sublimi
