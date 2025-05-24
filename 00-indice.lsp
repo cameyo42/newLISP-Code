@@ -2949,7 +2949,8 @@ NOTE LIBERE 29
 NOTE LIBERE 30
 ==============
   Aritmetica Lunare
-
+  Valutazione di una lista di numeri e operatori
+  Permutazioni incrociate di due liste
 
 PROBLEMI SUI DADI
 =================

@@ -357,5 +357,359 @@ Questo perchè a differenza dell'aritmetica terrestre, la moltiplicazione lunare
 (lunar-mul 21 34)
 ;-> 221
 
+Fattoriali lunari
+-----------------
+
+Sequenza OEIS A189788:
+Base-10 lunar factorials: a(n) = (lunar) Product_{i=1..n} i.
+  9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 110, 1110, 11110, 111110, 1111110,
+  11111110, 111111110, 1111111110, 11111111110, 111111111100,
+  1111111111100, 11111111111100, 111111111111100, 1111111111111100,
+  11111111111111100, 111111111111111100, 1111111111111111100,
+  11111111111111111100, 111111111111111111100, 1111111111111111111000, ...
+
+Calcoliamo il fattoriale lunare usando la moltiplicazione lunare.
+(solo per risultati fino al massimo di Int64)
+
+(define (lunar-fattoriale n)
+  (if (zero? n) 9
+      ;else
+      (let (out 1)
+        (for (x 1 n) (setq out (lunar-mul out x))))))
+
+(lunar-fattoriale 20)
+;-> 111111111100
+
+(define (lunar-fattoriale2 n)
+  (if (zero? n) 9
+      (= 1 n) 1
+      (apply lumul (sequence 1 n))))
+
+(lunar-fattoriale2 20)
+;-> 111111111100
+
+(= (map lunar-fattoriale (sequence 0 25))
+   (map lunar-fattoriale2 (sequence 0 25)))
+;-> true
+
+(map lunar-fattoriale (sequence 0 25))
+;-> (9 1 1 1 1 1 1 1 1 1 10 110 1110 11110 111110 1111110
+;->  11111110 111111110 1111111110 11111111110 111111111100
+;->  1111111111100 11111111111100 111111111111100 1111111111111100
+;->  11111111111111100)
+
+
+----------------------------------------------
+Valutazione di una lista di numeri e operatori
+----------------------------------------------
+
+Alle scuole elementari il maestro proponeva spesso esercizi del tipo:
+- Partiamo con il numero 9.
+- Poi sommiamo 7.
+- Poi togliamo 2.
+- Poi dividiamo per 2.
+- Poi moltiplichiamo per 3.
+- Risultato?
+
+Possiamo rappresentare l'esercizio con una lista: (9 + 7 - 2 / 2 * 3)
+Poi applichiamo gli operatori da sinistra a destra (senza alcuna precedenza degli operatori):
+(9 + 7 - 2 / 2 * 3) = (16 - 2 / 2 * 3) = (14 / 2 * 3) = (7 * 3) = 21
+
+Scriviamo una funzione che calcola l'espressione rappresentata da una lista di questo tipo.
+Utilizziamo gli operatori "+", "-", "*", "/", "%" e "^".
+
+(define (calcola lst parziali)
+  (local (val coppie out)
+    ; valore di partenza
+    (setq val (pop lst))
+    ; lista dei valori parziali
+    (setq out (list val))
+    ; divide la lista in coppie (operatore numero)
+    (setq coppie (explode lst 2))
+    ; ciclo per applicare le coppie al valore corrente
+    (dolist (el coppie)
+      (if (= (el 0) '^) ; caso della potenza
+          (setq val (pow val (el 1)))
+          ; tutti gli altri casi
+          (setq val ((eval (el 0)) val (el 1))))
+      (push val out -1)
+    )
+    ; soluzione
+    (if parziali out val)))
+
+Proviamo:
+
+(calcola '(9 + 7 - 2 / 2 * 3))
+;-> 21
+(calcola '(9 + 7 - 2 / 2 * 3) true)
+;-> (9 16 14 7 21)
+
+(calcola '(3 + 4 % 5 * 2))
+;-> 4
+(calcola '(3 + 4 % 5 * 2) true)
+;-> (3 7 2 4)
+
+(calcola '(-3 + 4 % 5 * -2) true)
+;-> (-3 1 1 -2)
+
+Scriviamo una funzione che genera un problema (lista) di questo tipo.
+Parametri:
+numeri = quanti numeri utilizzare
+min-val = valore minimo dei numeri
+max-val = valore massiomo dei numeri
+ops = lista degli operatori utilizzabili
+
+(define (genera numeri min-val max-val ops)
+       ; valore di partenza
+  (let (out (list (+ min-val (rand (+ (- max-val min-val) 1)))))
+    (for (i 2 numeri)
+      ; operatore
+      (push (ops (rand (length ops))) out -1)
+      ; numero
+      (push (+ min-val (rand (+ (- max-val min-val) 1))) out -1))
+    out))
+
+Proviamo:
+
+(setq eq (genera 6 2 10 '(+ - *)))
+;-> (5 + 8 + 2 * 4 + 7 * 9)
+(calcola eq true)
+;-> 603
+;-> (5 13 15 60 67 603)
+
+(for (i 1 5)
+  (setq eq (genera 6 2 10 '(+ - * / %)))
+  (println eq { } (calcola eq true)))
+;-> (8 / 6 + 5 - 8 - 5 - 7) (8 1 6 -2 -7 -14)
+;-> (6 / 3 * 10 / 10 + 5 + 10) (6 2 20 2 7 17)
+;-> (6 % 2 / 2 * 10 + 10 - 4) (6 0 0 0 10 6)
+;-> (8 * 3 / 7 * 6 * 7 % 9) (8 24 3 18 126 0)
+;-> (7 / 7 - 3 / 6 % 4 + 7) (7 1 -2 0 0 7)
+
+
+------------------------------------
+Permutazioni incrociate di due liste
+------------------------------------
+
+Date due liste (es. numeri e lettere), vogliamo creare una lista con le seguenti caratteristiche:
+1) Gli elementi di numeri e lettere sono permutati separatamente.
+2) Vengono alternati in output: numero, lettera, numero, lettera, ...
+3) Se una lista finisce, si utilizzano i suoi elementi ciclicamente.
+4) Nessun elemento può essere adiacente a un altro della stessa lista originale.
+
+Esempi:
+  numeri = (1 2 3)
+  lettere = (a b)
+  output =
+  (1 a 2 b 3 a) (1 b 2 a 3 b) (2 a 1 b 3 a) (2 b 1 a 3 b) (3 a 1 b 2 a)
+  (3 b 1 a 2 b) (1 a 3 b 2 a) (1 b 3 a 2 b) (2 a 3 b 1 a) (2 b 3 a 1 b)
+  (3 a 2 b 1 a) (3 b 2 a 1 b)
+
+  numeri = (1 2)
+  lettere = (a b c)
+  output =
+  (1 a 2 b 1 c) (1 b 2 a 1 c) (1 c 2 a 1 b) (1 a 2 c 1 b) (1 b 2 c 1 a)
+  (1 c 2 b 1 a) (2 a 1 b 2 c) (2 b 1 a 2 c) (2 c 1 a 2 b) (2 a 1 c 2 b)
+  (2 b 1 c 2 a) (2 c 1 b 2 a))
+
+  numeri = (1 2 3)
+  lettere = (a b c)
+  output =
+  (1 a 2 b 3 c) (1 b 2 a 3 c) (1 c 2 a 3 b) (1 a 2 c 3 b) (1 b 2 c 3 a)
+  (1 c 2 b 3 a) (2 a 1 b 3 c) (2 b 1 a 3 c) (2 c 1 a 3 b) (2 a 1 c 3 b)
+  (2 b 1 c 3 a) (2 c 1 b 3 a) (3 a 1 b 2 c) (3 b 1 a 2 c) (3 c 1 a 2 b)
+  (3 a 1 c 2 b) (3 b 1 c 2 a) (3 c 1 b 2 a) (1 a 3 b 2 c) (1 b 3 a 2 c)
+  (1 c 3 a 2 b) (1 a 3 c 2 b) (1 b 3 c 2 a) (1 c 3 b 2 a) (2 a 3 b 1 c)
+  (2 b 3 a 1 c) (2 c 3 a 1 b) (2 a 3 c 1 b) (2 b 3 c 1 a) (2 c 3 b 1 a)
+  (3 a 2 b 1 c) (3 b 2 a 1 c) (3 c 2 a 1 b) (3 a 2 c 1 b) (3 b 2 c 1 a)
+  (3 c 2 b 1 a)
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+      )
+    )
+    out))
+
+Se vogliamo che gli elementi della seconda lista (es. lettere) vengano ripetuti dobbiamo usare la funzione "perm-rep" (permutazioni con ripetizione) nel ciclo 'for' annidato (questo crea un maggior numero di risultati).
+
+(define (perm-rep k lst)
+"Generate all permutations of k elements with repetition from a list of items"
+  (if (zero? k) '(())
+      (flat (map (lambda (p) (map (lambda (e) (cons e p)) lst))
+                         (perm-rep (- k 1) lst)) 1)))
+
+;; Ripete ciclicamente la lista 'lst' fino alla lunghezza 'k'.
+;; Es: (allunga '(1 2 3) 5) → (1 2 3 1 2)
+(define (allunga lst k)
+  ;; Duplica la lista per quante volte serve, poi la taglia a lunghezza k
+  (slice (extend lst (flat (dup lst (/ k (length lst))))) 0 k))
+
+;; Genera tutte le combinazioni in cui elementi di lst1 e lst2 si alternano.
+;; Se le liste hanno lunghezza diversa, la più corta viene allungata ciclicamente.
+;; Se 'all' è true, usa permutazioni con ripetizione per la seconda lista.
+(define (cross-perm lst1 lst2 all)
+  (setq out '())                     ; lista dei risultati
+  (setq len1 (length lst1))
+  (setq len2 (length lst2))
+  (setq more1 nil)                  ; indica se lst1 è più lunga
+  (setq more2 nil)                  ; indica se lst2 è più lunga
+  ;; Determina quale lista va estesa ciclicamente
+  (if (> len1 len2) (setq more2 true))
+  (if (< len1 len2) (setq more1 true))
+  ;; Permutazioni della prima lista
+  (setq permute1 (perm lst1))
+  ;; Permutazioni della seconda lista (con o senza ripetizione)
+  (if all
+      (setq permute2 (perm-rep (length lst2) lst2))  ; con ripetizione
+      (setq permute2 (perm lst2)))                   ; senza ripetizione
+  ;; Combina ogni coppia di permutazioni
+  (dolist (p1 permute1)
+    (dolist (p2 permute2)
+      ;; Allunga la lista più corta per poter alternare gli elementi
+      (cond (more1 (setq p1 (allunga p1 len2)))
+            (more2 (setq p2 (allunga p2 len1))))
+      ;; Intercala p1 e p2: (map list p1 p2) produce ((x1 y1) (x2 y2) ...)
+      ;; 'flat' la rende (x1 y1 x2 y2 ...)
+      (push (flat (map list p1 p2)) out -1)))
+  ;; Se con ripetizione, elimina i duplicati
+  (if all (unique out) out))
+
+Proviamo:
+(cross-perm '(1 2 3) '(a b))
+;-> ((1 a 2 b 3 a) (1 b 2 a 3 b) (2 a 1 b 3 a) (2 b 1 a 3 b) (3 a 1 b 2 a)
+;->  (3 b 1 a 2 b) (1 a 3 b 2 a) (1 b 3 a 2 b) (2 a 3 b 1 a) (2 b 3 a 1 b)
+;->  (3 a 2 b 1 a) (3 b 2 a 1 b))
+
+(cross-perm '(1 2) '(a b c))
+;-> ((1 a 2 b 1 c) (1 b 2 a 1 c) (1 c 2 a 1 b) (1 a 2 c 1 b) (1 b 2 c 1 a)
+;->  (1 c 2 b 1 a) (2 a 1 b 2 c) (2 b 1 a 2 c) (2 c 1 a 2 b) (2 a 1 c 2 b)
+;->  (2 b 1 c 2 a) (2 c 1 b 2 a))
+
+(cross-perm '(1 2 3) '(a b c))
+;-> ((1 a 2 b 3 c) (1 b 2 a 3 c) (1 c 2 a 3 b) (1 a 2 c 3 b) (1 b 2 c 3 a)
+;->  (1 c 2 b 3 a) (2 a 1 b 3 c) (2 b 1 a 3 c) (2 c 1 a 3 b) (2 a 1 c 3 b)
+;->  (2 b 1 c 3 a) (2 c 1 b 3 a) (3 a 1 b 2 c) (3 b 1 a 2 c) (3 c 1 a 2 b)
+;->  (3 a 1 c 2 b) (3 b 1 c 2 a) (3 c 1 b 2 a) (1 a 3 b 2 c) (1 b 3 a 2 c)
+;->  (1 c 3 a 2 b) (1 a 3 c 2 b) (1 b 3 c 2 a) (1 c 3 b 2 a) (2 a 3 b 1 c)
+;->  (2 b 3 a 1 c) (2 c 3 a 1 b) (2 a 3 c 1 b) (2 b 3 c 1 a) (2 c 3 b 1 a)
+;->  (3 a 2 b 1 c) (3 b 2 a 1 c) (3 c 2 a 1 b) (3 a 2 c 1 b) (3 b 2 c 1 a)
+;->  (3 c 2 b 1 a))
+
+(cross-perm '(1 2) '(a b))
+;-> ((1 a 2 b) (1 b 2 a) (2 a 1 b) (2 b 1 a))
+
+(cross-perm '(1 2) '(a b) true)
+;-> ((1 a 2 a) (1 b 2 a) (1 a 2 b) (1 b 2 b)
+;->  (2 a 1 a) (2 b 1 a) (2 a 1 b) (2 b 1 b))
+
+Costruiamo un generatore che emette una combinazione ad ogni chiamata.
+
+Generatore Lazy (closure) (non funziona):
+
+;; Generatore lazy di permutazioni incrociate
+(define (crossing-generator lst1 lst2 all)
+  (letn (
+    (len1 (length lst1))
+    (len2 (length lst2))
+    (more1 (< len1 len2))
+    (more2 (> len1 len2))
+    (permute1 (perm lst1))
+    (permute2 (if all (perm-rep len2) lst2) (perm lst2)))
+    (i 0) ; indice permute1
+    (j 0) ; indice permute2
+  )
+  ;; restituisce una funzione generatrice
+  (lambda ()
+    (if (and (>= i (length permute1)) (>= j (length permute2)))
+        nil
+        (begin
+          (when (>= j (length permute2)) (setq j 0) (++ i))
+          (if (>= i (length permute1))
+              nil
+              (let (
+                (p1 (permute1 i))
+                (p2 (permute2 j))
+              )
+                (if more1 (setq p1 (allunga p1 len2)))
+                (if more2 (setq p2 (allunga p2 len1)))
+                (++ j)
+                (flat (map list p1 p2)))))))))
+
+(setq g (crossing-generator '(1 2) '(a b) nil))
+(g) ;-> (1 a 2 b)
+(g) ;-> (1 b 2 a)
+(g) ;-> (2 a 1 b)
+(g) ;-> (2 b 1 a)
+(g) ;-> nil  ; fine delle combinazioni
+
+La funzione utilizza una 'closure' per mantenere lo stato corrente... ma in newLISP la 'closure' non esiste, quindi bisogna usare i contesti (context) per simulare una 'closure'.
+
+Generatore Lazy (contesti):
+
+(context 'CrossGen)
+;; setup
+(define (setup lst1 lst2 all)
+  (setq len1 (length lst1))
+  (setq len2 (length lst2))
+  (setq more1 (< len1 len2))
+  (setq more2 (> len1 len2))
+  (setq permute1 (MAIN:perm lst1))
+  (setq permute2 (if all (MAIN:perm-rep len2 lst2) (MAIN:perm lst2)))
+  (setq i 0)
+  (setq j 0))
+;; next value
+(define (next)
+  (if (and (>= i (length permute1)) (>= j (length permute2)))
+      nil
+      (begin
+        (when (>= j (length permute2)) (setq j 0) (inc i))
+        (if (>= i (length permute1))
+            nil
+            (let (
+              (p1 (permute1 i))
+              (p2 (permute2 j)))
+              (if more1 (setq p1 (MAIN:allunga p1 len2)))
+              (if more2 (setq p2 (MAIN:allunga p2 len1)))
+              (inc j)
+              (flat (map list p1 p2)))))))
+(context MAIN)
+
+Proviamo:
+
+(CrossGen:setup '(1 2) '(a b) nil)
+;-> 0
+(CrossGen:next)
+;-> (1 a 2 b)
+(CrossGen:next)
+;-> (1 b 2 a)
+(CrossGen:next)
+;-> (2 a 1 b)
+(CrossGen:next)
+;-> (2 b 1 a)
+(CrossGen:next)
+;-> nil ; fine
+
+
 ============================================================================
 

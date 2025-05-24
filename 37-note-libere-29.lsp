@@ -5049,7 +5049,6 @@ Coppie di dadi con somma uguale
 
 Lanciando quattro dadi (con numeri da 1 a 6), calcolare la probabilità di poter suddividere i dadi in due coppie in cui ciascuna coppia abbia la stessa somma?
 
-
 Metodo con simulazione
 -----------------------
 
@@ -6444,95 +6443,6 @@ L
 Vedi anche "Raggruppare i valori di una lista associativa che hanno la stessa chiave" su "Note libere 13".
 
 
--------------------------------------------------------
-Modificare/Aggiornare una lista associativa (pop-assoc)
--------------------------------------------------------
-
-Lista associativa (chiave valore) (key value):
-
-(setq a '((1 3) (2 2) (3 4)))
-
-Modifica di un valore associato ad una chiave (lookup)
-------------------------------------------------------
-
-1) sostituzione del valore
-Usare: (setf (lookup key assoc-list) new-value)
-(setf (lookup 2 a) 222)
-;-> 222
-a
-;-> ((1 3) (2 222) (3 4))
-
-2) modifica del valore ($it)
-Usare: (setf (lookup key assoc-list) $it)
-($it si riferisce al valore associato alla chiave)
-(setf (lookup 3 a) (* $it 2))
-;-> 8
-a
-;-> ((1 3) (2 222) (3 8))
-
-Modifica di una coppia (chiave valore) (assoc)
-----------------------------------------------
-
-Usare: (setf (assoc key assoc-list) (list key new-value))
-(setq (assoc 1 a) (list 10 10))
-;-> (10 10)
-a
-;-> ((10 10) (2 222) (3 8))
-
-oppure
-
-Usare: (setf (assoc key assoc-list) $it)
-($it si riferisce al valore associato alla coppia (chiave valore))
-(setf (assoc 3 a) (list ($it 1) ($it 0)))
-;-> (8 3)
-a
-;-> ((10 10) (2 222) (8 3))
-
-Inserimento di una coppia (chiave valore)
------------------------------------------
-
-Usare: (push new-pair assoc-list [idx])
-(push '(21 42) a -1)
-;-> ((10 10) (2 222) (8 3) (21 42))
-
-Eliminazione di una coppia (chiave valore)
-------------------------------------------
-
-**********************
->>>funzione POP-ASSOC
-**********************
-sintassi: (pop-assoc exp-key list-assoc)
-sintassi: (pop-assoc list-keys list-assoc)
-
-Rimuove un'associazione a cui fa riferimento la chiave in exp-key dalla lista delle associazioni in list-assoc e restituisce l'espressione estratta.
-
-;; associazione semplice
-(set 'L '((a 1) (b 2) (c 3)))
-(pop-assoc 'b L)
-;-> (b 2)
-L
-;-> ((a 1) (c 3))
-
-;; associazione annidata
-(set 'L '((a (b 1) (c (d 2)))))
-(pop-assoc 'a L)
-;-> (a (b 1) (c (d 2)))
-L
-;-> ()
-
-(set 'L '((a (b 1) (c (d 2)))))
-(pop-assoc '(a b) L)
-;-> (b 1)
-L
-;-> ((a (c (d 2))))
-
-(set 'L '((a (b 1) (c (d 2)))))
-(pop-assoc '(a c) L)
-;-> (c (d 2))
-L
-;-> ((a (b 1))))
-
-
 ------------------------------
 Separazione di cifre numeriche
 ------------------------------
@@ -7240,6 +7150,7 @@ Funzione che inverte solo i bit attivi di un numero:
 
 (define (flip-bits num)
   (letn ( (len (length (bits num))) ; numero di bit significativi
+          ; mask = (2^len - 1)
           (mask (- (<< 1 len) 1)) ) ; crea una maschera di 1 (lunghezza = len)
     (^ num mask)))                  ; inverte solo i bit significativi
 
@@ -7439,6 +7350,10 @@ N davanti ad una potenza di 2
 
 Dato un numero N trovare la potenza di k, tale che 2^k inizia con N.
 
+Matematicamente risulta:
+per ogni n > 0, esiste una potenza di 2 che inizia con n.
+Questo segue dal fatto che log10(2) è un numero irrazionale.
+
 Esempi:
   N = 3
   2^5 = (3)2, quindi per N = 3, k = 5.
@@ -7489,5 +7404,7 @@ Per la coppia (31 21) vale:
 ;-> (0 1 5 2 9 6 46 3 53 10 50 7 17 47 77 4 34 54 84
 ;->  11 31 51 61 81 8 18 38 48 68 78 98 5 25 35 45 55
 ;->  75 85 95 12 22 32 42 145 52 62 72 82 92 102)
+
+
 ============================================================================
 
