@@ -2932,7 +2932,7 @@ NOTE LIBERE 29
   Segmenti e quadrati
   Coppie di elementi con la stessa somma
   Modificare/Aggiornare una lista associativa (pop-assoc)
-  Separazione di cifre numeriche
+  Separazione di nomi di cifre numeriche
   Prodotti di quattro primi
   Numeri primi e derivata aritmetica
   Somma di numeri interi senza + e -
@@ -2998,7 +2998,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (345 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (349 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

@@ -524,6 +524,14 @@ Esempi:
   (3 a 2 b 1 c) (3 b 2 a 1 c) (3 c 2 a 1 b) (3 a 2 c 1 b) (3 b 2 c 1 a)
   (3 c 2 b 1 a)
 
+Nota:
+(map list '(1 2 3) '(a b c))
+;-> ((1 a) (2 b) (3 c))
+(map list '(1 2) '(a b c))
+;-> ((1 a) (2 b))
+(map list '(1 2 3) '(a b))
+;-> ((1 a) (2 b) (3))
+
 (define (perm lst)
 "Generate all permutations without repeating from a list of items"
   (local (i indici out)
@@ -560,7 +568,7 @@ Se vogliamo che gli elementi della seconda lista (es. lettere) vengano ripetuti 
                          (perm-rep (- k 1) lst)) 1)))
 
 ;; Ripete ciclicamente la lista 'lst' fino alla lunghezza 'k'.
-;; Es: (allunga '(1 2 3) 5) → (1 2 3 1 2)
+;; Es: (allunga '(1 2 3) 5) -> (1 2 3 1 2)
 (define (allunga lst k)
   ;; Duplica la lista per quante volte serve, poi la taglia a lunghezza k
   (slice (extend lst (flat (dup lst (/ k (length lst))))) 0 k))
@@ -569,31 +577,32 @@ Se vogliamo che gli elementi della seconda lista (es. lettere) vengano ripetuti 
 ;; Se le liste hanno lunghezza diversa, la più corta viene allungata ciclicamente.
 ;; Se 'all' è true, usa permutazioni con ripetizione per la seconda lista.
 (define (cross-perm lst1 lst2 all)
-  (setq out '())                     ; lista dei risultati
-  (setq len1 (length lst1))
-  (setq len2 (length lst2))
-  (setq more1 nil)                  ; indica se lst1 è più lunga
-  (setq more2 nil)                  ; indica se lst2 è più lunga
-  ;; Determina quale lista va estesa ciclicamente
-  (if (> len1 len2) (setq more2 true))
-  (if (< len1 len2) (setq more1 true))
-  ;; Permutazioni della prima lista
-  (setq permute1 (perm lst1))
-  ;; Permutazioni della seconda lista (con o senza ripetizione)
-  (if all
-      (setq permute2 (perm-rep (length lst2) lst2))  ; con ripetizione
-      (setq permute2 (perm lst2)))                   ; senza ripetizione
-  ;; Combina ogni coppia di permutazioni
-  (dolist (p1 permute1)
-    (dolist (p2 permute2)
-      ;; Allunga la lista più corta per poter alternare gli elementi
-      (cond (more1 (setq p1 (allunga p1 len2)))
-            (more2 (setq p2 (allunga p2 len1))))
-      ;; Intercala p1 e p2: (map list p1 p2) produce ((x1 y1) (x2 y2) ...)
-      ;; 'flat' la rende (x1 y1 x2 y2 ...)
-      (push (flat (map list p1 p2)) out -1)))
-  ;; Se con ripetizione, elimina i duplicati
-  (if all (unique out) out))
+  (local (out len1 len2 more more2 permute1 permute2)
+    (setq out '())                     ; lista dei risultati
+    (setq len1 (length lst1))
+    (setq len2 (length lst2))
+    (setq more1 nil)                  ; indica se lst1 è più lunga
+    (setq more2 nil)                  ; indica se lst2 è più lunga
+    ;; Determina quale lista va estesa ciclicamente
+    (if (> len1 len2) (setq more2 true))
+    (if (< len1 len2) (setq more1 true))
+    ;; Permutazioni della prima lista
+    (setq permute1 (perm lst1))
+    ;; Permutazioni della seconda lista (con o senza ripetizione)
+    (if all
+        (setq permute2 (perm-rep (length lst2) lst2))  ; con ripetizione
+        (setq permute2 (perm lst2)))                   ; senza ripetizione
+    ;; Combina ogni coppia di permutazioni
+    (dolist (p1 permute1)
+      (dolist (p2 permute2)
+        ;; Allunga la lista più corta per poter alternare gli elementi
+        (cond (more1 (setq p1 (allunga p1 len2)))
+              (more2 (setq p2 (allunga p2 len1))))
+        ;; Intercala p1 e p2: (map list p1 p2) produce ((x1 y1) (x2 y2) ...)
+        ;; 'flat' la rende (x1 y1 x2 y2 ...)
+        (push (flat (map list p1 p2)) out -1)))
+    ;; Se con ripetizione, elimina i duplicati
+    (if all (unique out) out)))
 
 Proviamo:
 (cross-perm '(1 2 3) '(a b))

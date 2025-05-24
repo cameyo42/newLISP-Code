@@ -6443,9 +6443,9 @@ L
 Vedi anche "Raggruppare i valori di una lista associativa che hanno la stessa chiave" su "Note libere 13".
 
 
-------------------------------
-Separazione di cifre numeriche
-------------------------------
+--------------------------------------
+Separazione di nomi di cifre numeriche
+--------------------------------------
 
 Considera una stringa composta da diversi nomi di cifre senza spazi tra loro.
 Per esempio, "unonoveottotre".
