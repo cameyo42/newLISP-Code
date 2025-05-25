@@ -720,5 +720,262 @@ Proviamo:
 ;-> nil ; fine
 
 
+------------------------------------------------------
+Ricostruzione di equazioni con addizioni e sottrazioni
+------------------------------------------------------
+
+Abbiamo un'equazione di addizioni e sottrazioni come "3 +- 2 +- 4 +- 1 = 4".
+Determinare, se esiste, una sequenza di + e - che la renda aritmeticamente corretta.
+Ad esempio, (-  +  -) risolve il nostro caso: "3 - 2 + 4 - 1 = 4".
+Alcuni casi non hanno soluzioni (es. "3 +- 5 = 7").
+Alcuni casi hanno più soluzioni (es. "1 +- 2 +- 4 +- 3 +- 1 = 1", sia (- + - +) che (+ - + -) sono valide).
+
+Rappresentiamo l'equazione come una lista:
+
+(setq lst '(3 1 4 2 0 4))
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+      )
+    )
+    out))
+
+Funzione che prova ricostruire un'equazione di addizioni e sottrazioni:
+
+(define (piumeno lst)
+  (local (result termini oper len ops start tot out)
+    (setq out nil)
+    ; Il risultato è l'ultimo elemento della lista
+    (setq result (pop lst -1))
+    ; Il resto della lista sono i termini dell'equazione
+    (setq termini lst)
+    (setq oper '(+ -))
+    (setq len (length lst))
+    ; Creazione lista degli operatori
+    ; Ripetizione ciclica di (+ -) fino alla lunghezza della lista dei termini -1
+    (setq oper (slice (extend oper (flat (dup oper (/ len 2)))) 0 (- len 1)))
+    ; Creazione delle permutazioni uniche della lista degli operatori
+    (setq ops (unique (perm oper)))
+    ; valore iniziale dell'equazione
+    (setq start (pop lst))
+    ; ciclo per ogni permutazione degli operatori
+    (dolist (op ops)
+      ; applica gli operatori correnti ai termini della lista
+      (setq tot start)
+      (dolist (el lst)
+        (setq tot ((eval (op $idx)) tot el)))
+      ; verifica se l'equazione corrente produce il risultato corretto
+      (when (= tot result)
+        ; stampa l'equazione corretta
+        (setq out true)
+        (println (flat (map list termini op)) " = " result))
+    )
+    out))
+
+Proviamo:
+
+(piumeno lst)
+;-> (3 - 1 + 4 - 2 + 0) = 4
+(piumeno '(1 2 3 4 1 1))
+;-> (1 + 2 + 3 - 4 - 1) = 1
+;-> (1 - 2 - 3 + 4 + 1) = 1
+(piumeno '(1 2 3 4 1 12))
+;-> nil
+
+Proviamo le equazioni:
+
+  1 +- 2 +- 3 +- ... n = n
+  con 1 <= n <= 10
+
+(for (n 1 10)
+  (println n)
+  (setq lst (sequence 1 n))
+  (push n lst -1)
+  (piumeno lst)
+)
+;-> 1
+;-> (1) = 1
+;-> 2
+;-> 3
+;-> 4
+;-> (1 + 2 - 3 + 4) = 4
+;-> 5
+;-> (1 - 2 - 3 + 4 + 5) = 5
+;-> 6
+;-> 7
+;-> 8
+;-> (1 - 2 + 3 + 4 - 5 + 6 - 7 + 8) = 8
+;-> (1 + 2 - 3 - 4 + 5 + 6 - 7 + 8) = 8
+;-> (1 + 2 - 3 + 4 - 5 - 6 + 7 + 8) = 8
+;-> (1 - 2 + 3 - 4 + 5 + 6 + 7 - 8) = 8
+;-> 9
+;-> (1 - 2 - 3 - 4 + 5 + 6 + 7 + 8 - 9) = 9
+;-> (1 - 2 + 3 - 4 - 5 + 6 - 7 + 8 + 9) = 9
+;-> (1 - 2 - 3 + 4 + 5 - 6 - 7 + 8 + 9) = 9
+;-> (1 + 2 - 3 - 4 - 5 - 6 + 7 + 8 + 9) = 9
+;-> (1 - 2 - 3 + 4 - 5 + 6 + 7 - 8 + 9) = 9
+;-> 10
+
+
+-----------------------
+Sequenza di Lichtenberg
+-----------------------
+
+Calolare la sequenza dei numeri senza cifre binarie consecutive uguali.
+La sequenza contiene la rappresentazione decimale dei numeri binari nella forma: 10101..., dove l'n-esimo termine ha n bit.
+La sequenza inizia con i seguenti numeri:
+
+ n   binario     num
+ 0   0       ->  0
+ 1   1       ->  1
+ 2   10      ->  2
+ 3   101     ->  5
+ 4   1010    ->  10
+ 5   10101   ->  21
+ 6   101010  ->  42
+
+Sequenza OEIS A000975:
+a(2n) = 2*a(2n-1), a(2n+1) = 2*a(2n)+1 (also a(n) is the n-th number without consecutive equal binary digits).
+  0, 1, 2, 5, 10, 21, 42, 85, 170, 341, 682, 1365, 2730, 5461, 10922,
+  21845, 43690, 87381, 174762, 349525, 699050, 1398101, 2796202,
+  5592405, 11184810, 22369621, 44739242, 89478485, 178956970, 357913941,
+  715827882, 1431655765, 2863311530, 5726623061, 11453246122, ...
+
+Formula: a(n) = a(n-1) + 2*a(n-2) + 1
+
+Formula ricorsiva:
+
+(define (a n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        ((= n 2) 2)
+        (true
+          (+ (a (- n 1)) (* 2 (a (- n 2))) 1))))
+
+(map a (sequence 0 34))
+
+Formula dynamic programming (botton-up):
+
+(define (b n)
+  (cond ((zero? n) 0)
+        ((= n 1) 1)
+        (true
+          (setq dp (array (+ n 1) '(0)))
+          (setf (dp 0) 0)
+          (setf (dp 1) 1)
+          (for (i 2 n)
+            (setq val (+ (dp (- i 1)) (* 2 (dp (- i 2))) 1))
+            (setf (dp i) val)))
+          dp))
+
+(b 34)
+;-> (0 1 2 5 10 21 42 85 170 341 682 1365 2730 5461 10922
+;->  21845 43690 87381 174762 349525 699050 1398101 2796202
+;->  5592405 11184810 22369621 44739242 89478485 178956970 357913941
+;->  715827882 1431655765 2863311530 5726623061 11453246122)
+
+Costruzione numero binario:
+
+(define (c n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        ((= n 2) 2)
+        (true
+          (if (even? n)
+            (int (dup "10" (/ n 2)) 0 2)
+            (int (push "1" (dup "01" (/ n 2))) 0 2)))))
+
+(map c (sequence 1 34))
+;-> (0 1 2 5 10 21 42 85 170 341 682 1365 2730 5461 10922
+;->  21845 43690 87381 174762 349525 699050 1398101 2796202
+;->  5592405 11184810 22369621 44739242 89478485 178956970 357913941
+;->  715827882 1431655765 2863311530 5726623061 11453246122)
+
+Test di velocità:
+
+(time (b 35) 1e5)
+;-> 712.028
+
+(setq nums (sequence 0 35))
+(time (map c nums) 1e5)
+;-> 1949.712
+
+Per calcolare un solo termine della sequenza è meglio usare la funzione "c".
+Per calcolare N termini della sequenza è meglio usare la funzione "b".
+
+
+----------------------
+Sequenza di Jacobsthal
+----------------------
+
+Sequenza OEIS A001045:
+Jacobsthal sequence (or Jacobsthal numbers): a(n) = a(n-1) + 2*a(n-2), with a(0) = 0, a(1) = 1
+Also a(n) = nearest integer to 2^n/3.
+  0, 1, 1, 3, 5, 11, 21, 43, 85, 171, 341, 683, 1365, 2731, 5461,
+  10923, 21845, 43691, 87381, 174763, 349525, 699051, 1398101, 2796203,
+  5592405, 11184811, 22369621, 44739243, 89478485, 178956971, 357913941,
+  715827883, 1431655765, 2863311531, 5726623061, 11453246123, ...
+
+Formula : a(n) = (2^n - (-1)^n)/3
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (a n) (/ (- (** 2 n) (** -1 n)) 3))
+
+(map a (sequence 0 33))
+;-> (0L 1L 1L 3L 5L 11L 21L 43L 85L 171L 341L 683L 1365L 2731L 5461L
+;->  10923L 21845L 43691L 87381L 174763L 349525L 699051L 1398101L 2796203L
+;->  5592405L 11184811L 22369621L 44739243L 89478485L 178956971L 357913941L
+;->  715827883L 1431655765L 2863311531L 5726623061L)
+
+
+------------------
+Stringhe elastiche
+------------------
+
+Per "elasticizzare" una stringa S bisogna generare una stringa in cui l'n-esimo carattere viene ripetuto n volte.
+In altre parole:
+il primo carattere viene ripetuto una volta,
+il secondo carattere viene ripetuto due volte,
+il terzo carattere viene ripetuto tre volte e così via.
+
+Scrivere la funzione più corta possibile che "elasticizza" una stringa.
+
+Prima funzione (75 caratteri):
+(define(e1 s)(let(o "")(dostring(ch s)(extend o(dup(char ch)(+ $idx 1))))))
+(e1 "abcde")
+;-> "abbcccddddeeeee"
+
+Seconda funzione (78 caratteri):
+(define(e2 s)(join(map(fn(x)(dup(s x)(+ $idx 1)))(sequence 0(-(length s)1)))))
+(e2 "abcde")
+;-> "abbcccddddeeeee"
+
 ============================================================================
 

@@ -2951,6 +2951,10 @@ NOTE LIBERE 30
   Aritmetica Lunare
   Valutazione di una lista di numeri e operatori
   Permutazioni incrociate di due liste
+  Ricostruzione di equazioni con addizioni e sottrazioni
+  Sequenza di Lichtenberg
+  Sequenza di Jacobsthal
+  Stringhe elastiche
 
 PROBLEMI SUI DADI
 =================
