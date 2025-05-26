@@ -965,17 +965,253 @@ il primo carattere viene ripetuto una volta,
 il secondo carattere viene ripetuto due volte,
 il terzo carattere viene ripetuto tre volte e così via.
 
-Scrivere la funzione più corta possibile che "elasticizza" una stringa.
+Esempio:
+str = "abcde"
+output = "abbcccddddeeeee"
+
+Scrivere una funzione (più corta possibile) che "elasticizza" una stringa.
 
 Prima funzione (75 caratteri):
 (define(e1 s)(let(o "")(dostring(ch s)(extend o(dup(char ch)(+ $idx 1))))))
 (e1 "abcde")
 ;-> "abbcccddddeeeee"
+(e1 "abracadabra")
+;-> "abbrrraaaacccccaaaaaadddddddaaaaaaaabbbbbbbbbrrrrrrrrrraaaaaaaaaaa"
 
 Seconda funzione (78 caratteri):
 (define(e2 s)(join(map(fn(x)(dup(s x)(+ $idx 1)))(sequence 0(-(length s)1)))))
 (e2 "abcde")
 ;-> "abbcccddddeeeee"
+(e1 "abracadabra")
+;-> "abbrrraaaacccccaaaaaadddddddaaaaaaaabbbbbbbbbrrrrrrrrrraaaaaaaaaaa"
+
+
+-------------------
+Stirare una stringa
+-------------------
+
+Data una stringa S l'operazione di "stiramento" consiste nel generare una stringa in cui:
+per ogni carattere, ripeterlo N volte l'N-esima volta che appare.
+In altre parole, per ogni carattere:
+usare il carattere quando appare la prima volta
+raddoppiare il carattere quando appare la seconda volta
+triplicare il carattere quando appare la terza volta e cosi via.
+
+Esempio:
+str = "bonobo"
+output = "bonoobbooo"
+
+Scrivere una funzione che "stira" una stringa.
+
+(define (stira str)
+  (local (lst unici link out rip)
+    (setq out "")
+    ; lista di caratteri della stringa
+    (setq lst (explode str))
+    ; caratteri unici della lista/stringa
+    (setq unici (unique lst))
+    ; lista associativa: (carattere occorrenze)
+    (setq link (map list unici (count unici lst)))
+    ; ciclo dalla fine della lista/stringa
+    ; crea la stringa partendo dall'ultimo carattere
+    (for (i (- (length lst) 1) 0 -1)
+      ; trova il numero di occorrenze del carattere corrente
+      ; nella lista associativa
+      (setq rip (lookup (lst i) link))
+      ; estende la stringa soluzione ripetendo il carattere corrente
+      ; tante volte quante le occorrenze
+      (extend out (dup (lst i) rip))
+      ; diminuisce di 1 le occorrenze del carattere corrente
+      (setf (lookup (lst i) link) (- $it 1)))
+    ; inverte la stringa soluzione
+    (reverse out)))
+
+Proviamo:
+
+(stira "bonobo")
+;-> "bonoobbooo"
+(stira "abracadabra")
+;-> "abraacaaadaaaabbrraaaaa"
+(stira "mamma")
+;-> "mammmmmaa"
+
+
+------------------------------------------------
+Numerazione ordinale degli elementi di una lista
+------------------------------------------------
+
+Data una lista di interi, costruire una nuova lista in cui ogni elemento è sostituito da un intero compreso tra 0 e K - 1, dove K è il numero di elementi distinti presenti nella lista originale.
+Gli interi da 0 a K - 1 rappresentano un ordinamento crescente degli elementi unici della lista originale.
+In particolare:
+- Il numero più piccolo viene sostituito da 0.
+- Il secondo più piccolo da 1.
+- E così via, fino al più grande che viene sostituito da K - 1.
+
+Elementi uguali nella lista originale verranno sostituiti dallo stesso valore nella nuova lista.
+
+Esempio:
+  lista = (14 13 10 11 11 13 12)
+  output = (4 3 0 1 1 3 2)
+Spiegazione:
+  lista ordinata = (10 11 11 12 13 14)
+  numeri unici = K = 5 ; 10 11 12 13 14
+  interi da 0 a 4 (K-1) = (0 1 2 3 4)
+  associazione = (10 0) (11 1) (12 2) (13 3) (14 4)
+
+Funzione che numera gli elementi di una lista in modo ordinale:
+
+(define (numera-ordinali lst)
+  (local (unici mappa)
+    ; unique trova i valori distinti.
+    ; sort li ordina in modo crescente.
+    (setq unici (sort (unique lst)))
+    ; map list e sequence creano la corrispondenza
+    ; tra ogni valore e il suo indice.
+    (setq mappa (map list unici (sequence 0 (- (length unici) 1))))
+    ; map con lookup applica la trasformazione a tutta la lista originale
+    (map (fn (x) (lookup x mappa)) lst)))
+
+Proviamo:
+
+(setq lst '(14 13 10 11 11 13 12))
+(numera-ordinali lst)
+;-> (4 3 0 1 1 3 2)
+
+(numera-ordinali '(100 3 5 67 3))
+;-> (3 0 1 2 0)
+
+
+---------------------------------
+Primi con numero primo di bit a 1
+---------------------------------
+
+Calcolare la sequenza di numeri primi che hanno un numero primo di bit a 1 nella loro rappresentazione binaria.
+
+Sequenza OEIS A081092:
+Primes having a prime number of 1's in their binary representation.
+  3, 5, 7, 11, 13, 17, 19, 31, 37, 41, 47, 59, 61, 67, 73, 79, 97, 103,
+  107, 109, 127, 131, 137, 151, 157, 167, 173, 179, 181, 191, 193, 199,
+  211, 223, 227, 229, 233, 239, 241, 251, 257, 271, 283, 307, 313, 331,
+  367, 379, 397, 409, 419, 421, 431, 433, 439, 443, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primo-1? num)
+  (and (prime? num) (prime? (length (find-all "1" (bits num))))))
+
+(filter primo-1? (sequence 2 443))
+;-> (3 5 7 11 13 17 19 31 37 41 47 59 61 67 73 79 97 103
+;->  107 109 127 131 137 151 157 167 173 179 181 191 193 199
+;->  211 223 227 229 233 239 241 251 257 271 283 307 313 331
+;->  367 379 397 409 419 421 431 433 439 443)
+
+
+-------------------
+Primi con N bit a 1
+-------------------
+
+Calcolare la sequenza dei numeri primi più piccoli con peso di Hamming n (vale a dire, con esattamente n 1 quando scritti in binario).
+
+Sequenza OEIS A061712:
+Smallest prime with Hamming weight n (i.e., with exactly n 1's when written in binary).
+  2, 3, 7, 23, 31, 311, 127, 383, 991, 2039, 3583, 6143, 8191, 73727,
+  63487, 129023, 131071, 522239, 524287, 1966079, 4128767, 16250879,
+  14680063, 33546239, 67108351, 201064447, 260046847, 536739839,
+  1073479679, 5335154687, 2147483647, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Funzione che calcola i primi 25 numeri della sequenza:
+(non è possibile calcolare i numeri primi > 1e8 in tempo ragionevole)
+
+(define (seq25)
+  (local (out primi n found)
+    (setq out '())
+    ; lista di primi
+    (setq primi (primes-to 1e8))
+    ; indice corrente della sequenza
+    (setq n 1)
+    ; ciclo per trovare k elementi della sequenza
+    (for (k 1 25)
+      (setq found nil)
+      (dolist (p primi found)
+        ; se il primo corrente ha n bit?
+        (when (= (length (find-all "1" (bits p))) n)
+              ; lo inserisce nella sequenza
+              (push p out -1)
+              ; aumenta l'indice della sequenza
+              (++ n)
+              ; e esce dal ciclo 'dolist'
+              (setq found true))
+      )
+    )
+    out))
+
+(time (setq seq (seq25)))
+;-> 40055.704
+seq
+;-> (2 3 7 23 31 311 127 383 991 2039 3583 6143 8191 73727
+;->  63487 129023 131071 522239 524287 1966079 4128767 16250879
+;->  14680063 33546239 67108351)
+(length seq)
+;-> 25
+
+
+----------------------------------------------------
+Primi con numero di bit a 1 uguale all'n-esimo primo
+----------------------------------------------------
+
+Calcolare la sequenza di numeri dove:
+a(n) è il più piccolo numero primo tale che il numero di 1 nella sua espansione binaria è uguale al numero primo n-esimo.
+
+Sequenza OEIS A081093:
+a(n) is the smallest prime such that the number of 1's in its binary expansion is equal to the n-th prime.
+  3, 7, 31, 127, 3583, 8191, 131071, 524287, 14680063, 1073479679,
+  2147483647, 266287972351, 4260607557631, 17591112302591,
+  246290604621823, 17996806323437567, 1152917106560335871,
+  2305843009213693951, ...
+
+Formula:
+
+a(n) = A061712(A000040(n))
+
+(setq A061712 '(0 2 3 7 23 31 311 127 383 991 2039 3583 6143 8191 73727
+                63487 129023 131071 522239 524287 1966079 4128767 16250879
+                14680063 33546239 67108351))
+
+(setq A000040 '(0 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47
+                53 59 61 67 71 73 79 83 89 97))
+
+Nota: inseriamo 0 all'inizio delle due liste perchè la formula è 1-index-based.
+
+(define (a n) (A061712 (A000040 n)))
+
+Proviamo:
+
+(map a (sequence 1 9))
+;-> (3 7 31 127 3583 8191 131071 524287 14680063)
+
+Nota: il nono intero (23) indirizza al 23-esimo elemento di A061712 (14680063).
+Il decimo intero indirizza il 29-esimo elemento di A061712 (che non abbiamo calcolato).
+Vedi "Primi con N bit a 1" su "Note libere 30."
 
 ============================================================================
 

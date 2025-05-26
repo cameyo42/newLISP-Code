@@ -2955,6 +2955,11 @@ NOTE LIBERE 30
   Sequenza di Lichtenberg
   Sequenza di Jacobsthal
   Stringhe elastiche
+  Stirare una stringa
+  Numerazione ordinale degli elementi di una lista
+  Primi con numero primo di bit a 1
+  Primi con N bit a 1
+  Primi con numero di bit a 1 uguale all'n-esimo primo
 
 PROBLEMI SUI DADI
 =================
