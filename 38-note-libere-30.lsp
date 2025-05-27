@@ -1213,5 +1213,146 @@ Nota: il nono intero (23) indirizza al 23-esimo elemento di A061712 (14680063).
 Il decimo intero indirizza il 29-esimo elemento di A061712 (che non abbiamo calcolato).
 Vedi "Primi con N bit a 1" su "Note libere 30."
 
+
+--------------
+Debug infinito
+--------------
+
+Il programmatore GOTO sta analizzando un programma da correggere.
+Il programma ha solo un bug.
+Per ogni bug che risolve, GOTO inserisce 3 nuovi bug...
+Alla fine della giornata GOTO ha eliminato 15 bug.
+Quanti bug ha introdotto nel programma?
+
+All'inizio il programma ha un solo bug.
+Dopo la correzione il programma ha 3 bug (2 in più).
+Adesso con 3 bug, risolvendone uno e aggiungendone 2, abbiamo 5 bug (2 in più).
+Con 5 bug, risolvendone uno e aggiungendone 2, abbiamo 7 bug (2 in più).
+...
+
+Notiamo che dopo ogni correzione i bug aumentano di 2 (invariante):
+
+  bug-presenti = 1 + 2 * bug-risolti
+
+Scriviamo una funzione per simulare il processo:
+"total-bugs" restituisce il numero totale di bug presenti nel programma partendo da "start" bug iniziali, aggiungendo "added" bug ogni volta che eliminiamo un bug e avendo, alla fine, eliminato "solved" bug in tutto.
+
+(define (total-bugs start added solved)
+       ; numero di bug iniziali
+  (let (total start)
+    ; ciclo per ogni bug eliminato
+    (for (i 1 solved)
+      (-- total)
+      (++ total added))
+    total))
+
+Proviamo:
+
+(total-bugs 1 3 15)
+;-> 31
+(total-bugs 1 1 15)
+;-> 1
+(total-bugs 1 0 5)
+;-> -4 
+Il programma funzionerà anche aggiungendo 4 bug :-)
+
+
+------------------------
+Ordinare un'enciclopedia
+------------------------
+
+Abbiamo un'enciclopedia in 10 volumi numerati da 1 a 10.
+I volumi sono disposti in uno scaffale di una libreria e non sono in ordine.
+Dobbiamo ordinare i volumi scambiando la posizione di due volumi.
+Quindi un passo consiste nello scambiare di posto i volumi "i" e "j".
+Quale configurazione iniziale di volumi comporta il maggior numero di passi per ordinarli?
+
+Possiamo affermare che ogni posizione di partenza è ordinabile con 9 passi al massimo.
+
+Consideriamo per semplicità i numeri da 0 a 9.
+
+Iniziamo con una posizione di partenza in cui nessun numero occupa il proprio indice:
+  4 7 5 3 8 9 2 1 0 6
+Come primo passo cerchiamo il numero 0 e lo scambiamo con il numero che si trova alla posizione 0.
+  0 7 5 3 8 9 2 1 4 6
+Come secondo passo cerchiamo il numero 1 e lo scambiamo con il numero che si trova alla posizione 1.
+  0 1 5 3 8 9 2 7 4 6
+...
+Come nono passo cerchiamo il numero 8 e lo scambiamo con il numero che si trova alla posizione 8.
+  0 1 2 3 4 5 6 7 8 9
+A questo punto il numero 9 deve per forza trovarsi alla posizione 9, perchè i numeri da 0 a 8 si trovano nelle posizioni da 0 a 8, quindi resta solo la posizione 9 per il numero 9 (principio dei cassetti - pigeonhole principle).
+
+Comunque esistono delle posizioni iniziale che possono essere ordinate in un numero di passi minore di 9.
+Basta pensare alla posizione già ordinata in partenza che richiede 0 passi.
+
+(define (passi lst show)
+  (local (sorted step i j)
+    (setq sorted '(0 1 2 3 4 5 6 7 8 9))
+    (setq step 0)
+    (setq i 0)
+    (until (= lst sorted)
+      (setq j (find i lst))
+      (when (!= i j)
+        (swap (lst i) (lst j))
+        (++ step)
+        (if show (println step { } lst))
+      )
+      (++ i)
+    )
+    step))
+
+Facciamo alcune prove:
+
+(passi '(4 7 5 3 8 9 2 1 0 6) true)
+;-> 1 (0 7 5 3 8 9 2 1 4 6)
+;-> 2 (0 1 5 3 8 9 2 7 4 6)
+;-> 3 (0 1 2 3 8 9 5 7 4 6)
+;-> 4 (0 1 2 3 4 9 5 7 8 6)
+;-> 5 (0 1 2 3 4 5 9 7 8 6)
+;-> 6 (0 1 2 3 4 5 6 7 8 9)
+;-> 6
+(passi '(2 0 3 5 8 1 6 7 4 9) true)
+;-> 1 (0 2 3 5 8 1 6 7 4 9)
+;-> 2 (0 1 3 5 8 2 6 7 4 9)
+;-> 3 (0 1 2 5 8 3 6 7 4 9)
+;-> 4 (0 1 2 3 8 5 6 7 4 9)
+;-> 5 (0 1 2 3 4 5 6 7 8 9)
+;-> 5
+
+Dopo diverse prove si scopre che il numero di passi vale come minimo il numero di numeri che si trovano a destra del proprio indice nella posizione iniziale.
+
+Per esempio:
+  lista =  2 0 3 5 8 1 6 7 4 9
+  indici = 0 1 2 3 4 5 6 7 8 9
+  2 si trova a sinistra dell'indice 2
+  0 si trova a destra dell'indice 0
+  3 si trova a sinistra dell'indice 3
+  5 si trova a sinistra dell'indice 5
+  8 si trova a sinistra dell'indice 5
+  1 si trova a destra dell'indice 1
+  6 si trova allo stesso indice
+  7 si trova allo stesso indice
+  4 si trova a destra dell'indice 4
+  9 si trova allo stesso indice
+
+Intuitivamente questo significa che tutti i numeri a destra devono essere spostati a sinistra.
+I rimanenti numeri devono essere spostati a destra o rimanere al proprio posto.
+Quindi i passi per ordinare devono essere almeno quanti sono i numeri a destra.
+
+La configurazione iniziale con il massimo numero di numeri a destra dell'indice vale:
+  (9 0 1 2 3 4 5 6 7 8)
+in cui 9 numeri (0..8) sono a destra dell'indice.
+
+(passi '(9 0 1 2 3 4 5 6 7 8) true)
+;-> 1 (0 9 1 2 3 4 5 6 7 8)
+;-> 2 (0 1 9 2 3 4 5 6 7 8)
+;-> 3 (0 1 2 9 3 4 5 6 7 8)
+;-> 4 (0 1 2 3 9 4 5 6 7 8)
+;-> 5 (0 1 2 3 4 9 5 6 7 8)
+;-> 6 (0 1 2 3 4 5 9 6 7 8)
+;-> 7 (0 1 2 3 4 5 6 9 7 8)
+;-> 8 (0 1 2 3 4 5 6 7 9 8)
+;-> 9 (0 1 2 3 4 5 6 7 8 9)
+
 ============================================================================
 

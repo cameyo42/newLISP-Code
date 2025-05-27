@@ -2960,6 +2960,8 @@ NOTE LIBERE 30
   Primi con numero primo di bit a 1
   Primi con N bit a 1
   Primi con numero di bit a 1 uguale all'n-esimo primo
+  Debug infinito
+  Ordinare un'enciclopedia
 
 PROBLEMI SUI DADI
 =================
