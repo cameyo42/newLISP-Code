@@ -2962,6 +2962,10 @@ NOTE LIBERE 30
   Primi con numero di bit a 1 uguale all'n-esimo primo
   Debug infinito
   Ordinare un'enciclopedia
+  Numeri primi magnanimi
+  Primi palindromi
+  Prodotti di cifre primi
+  Numeri con tutte coppie di primi
 
 PROBLEMI SUI DADI
 =================

@@ -1354,5 +1354,215 @@ in cui 9 numeri (0..8) sono a destra dell'indice.
 ;-> 8 (0 1 2 3 4 5 6 7 9 8)
 ;-> 9 (0 1 2 3 4 5 6 7 8 9)
 
+
+----------------------
+Numeri primi magnanimi
+----------------------
+
+I numeri primi magnanimi sono numeri primi la cui proprietà è che inserendo un "+" in qualsiasi punto tra due cifre si ottiene una somma che è prima.
+
+Esempio:
+  numero primo = 2267
+  2+267 = 269 è primo
+  22+67 = 89 è primo
+  226+7 = 233 è primo
+  Quindi 2267 è un numero primo magnanimo.
+
+Sequenza OEIS A089392:
+Magnanimous primes: primes with the property that inserting a "+" in any place between two digits yields a sum which is prime.
+  2, 3, 5, 7, 11, 23, 29, 41, 43, 47, 61, 67, 83, 89, 101, 227, 229,
+  281, 401, 443, 449, 467, 601, 607, 647, 661, 683, 809, 821, 863, 881,
+  2221, 2267, 2281, 2447, 4001, 4027, 4229, 4463, 4643, 6007, 6067, 6803,
+  8009, 8221, 8821, 20261, 24407, 26881, 28429, 40427, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che verifica se un numero è primo magnanimo:
+
+(define (magna? num)
+  (local (str len magna)
+    (setq str (string num))
+    (setq len (length str))
+    ; il numero deve essere primo
+    (setq magna (prime? num))
+    (setq i 1)
+    ; ciclo per sommare ogni coppia di numeri
+    ; ottenuti con l'inserimento del "+"
+    (while (and (<= i (- len 1)) magna)
+      ; primo numero
+      (setq a (int (slice str 0 i) 0 10))
+      ; secondo numero
+      (setq b (int (slice str i) 0 10))
+      ; verifica se la somma è prima
+      (if (not (prime? (+ a b))) (setq magna nil))
+      ;(println a { } b)
+      (++ i)
+    )
+    magna))
+
+Proviamo:
+
+(magna? 2267)
+;-> true
+
+(filter magna? (sequence 1 50000))
+;-> (2 3 5 7 11 23 29 41 43 47 61 67 83 89 101 227 229
+;->  281 401 443 449 467 601 607 647 661 683 809 821 863 881
+;->  2221 2267 2281 2447 4001 4027 4229 4463 4643 6007 6067 6803
+;->  8009 8221 8821 20261 24407 26881 28429 40427 40483 42209)
+
+
+----------------
+Primi palindromi
+----------------
+
+Calcolare la sequenza dei numeri primi palindromi.
+
+Sequenza OEIS A002385:
+Palindromic primes: prime numbers whose decimal expansion is a palindrome.
+  2, 3, 5, 7, 11, 101, 131, 151, 181, 191, 313, 353, 373, 383, 727, 757,
+  787, 797, 919, 929, 10301, 10501, 10601, 11311, 11411, 12421, 12721,
+  12821, 13331, 13831, 13931, 14341, 14741, 15451, 15551, 16061, 16361,
+  16561, 16661, 17471, 17971, 18181, 18481, 19391, 19891, 19991, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(setq num 121213)
+(= (string num) (reverse (string num)))
+
+(define (palindrome? obj)
+"Check if a list or a string or a number is palindrome"
+  (if (integer? obj)
+      (let (str (string obj)) (= str (reverse (copy str))))
+      (= obj (reverse (copy obj)))))
+
+(filter (fn(x) (and (prime? x) (palindrome? x))) (sequence 1 20000))
+;-> (2 3 5 7 11 101 131 151 181 191 313 353 373 383 727 757
+;->  787 797 919 929 10301 10501 10601 11311 11411 12421 12721
+;->  12821 13331 13831 13931 14341 14741 15451 15551 16061 16361
+;->  16561 16661 17471 17971 18181 18481 19391 19891 19991)
+
+Scriviamo una funzione ottimizzata per vedere la differenza di velocità.
+
+(define (primi-pali limite)
+  (let (out '(2))
+    (for (num 3 limite 2)
+      (if (and (= 1 (length (factor num)))
+              (= (string num) (reverse (string num))))
+          (push num out -1)))
+    out))
+
+Vediamo i tempi di esecuzione:
+
+(time (filter (fn(x) (and (prime? x) (palindrome? x))) (sequence 1 1e6)))
+;-> 935.261
+
+(time (primi-pali 1e6))
+;-> 559.621
+
+(silent (setq nums (sequence 1 1e6)))
+(time (filter (fn(x) (and (prime? x) (palindrome? x))) nums))
+;-> 918.699
+
+
+-----------------------
+Prodotti di cifre primi
+-----------------------
+
+Calcolare la sequenza dei numeri in cui il prodotto delle cifre è un numero primo.
+
+Sequenza OEIS A028842:
+Product of digits of n is a prime.
+  2, 3, 5, 7, 12, 13, 15, 17, 21, 31, 51, 71, 112, 113, 115, 117, 121,
+  131, 151, 171, 211, 311, 511, 711, 1112, 1113, 1115, 1117, 1121, 1131,
+  1151, 1171, 1211, 1311, 1511, 1711, 2111, 3111, 5111, 7111, 11112,
+  11113, 11115, 11117, 11121, 11131, 11151, ...
+
+(define (digit-prod num)
+"Calculate the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10))
+        )
+    out)))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(filter (fn(x) (prime? (digit-prod x))) (sequence 2 12000))
+;-> (2 3 5 7 12 13 15 17 21 31 51 71 112 113 115 117 121
+;->  131 151 171 211 311 511 711 1112 1113 1115 1117 1121 1131
+;->  1151 1171 1211 1311 1511 1711 2111 3111 5111 7111 11112
+;->  11113 11115 11117 11121 11131 11151 11171 11211 11311 11511 11711)
+
+
+--------------------------------
+Numeri con tutte coppie di primi
+--------------------------------
+
+Calcolare la sequenza dei numeri la cui somma è un numero primo per ogni coppia di cifre.
+
+Sequenza OEIS A221699:
+Numbers with property that each sum any pair of digits is prime.
+  11, 12, 14, 16, 20, 21, 23, 25, 29, 30, 32, 34, 38, 41, 43, 47, 49,
+  50, 52, 56, 58, 61, 65, 67, 70, 74, 76, 83, 85, 89, 92, 94, 98, 111,
+  112, 114, 116, 121, 141, 161, 203, 205, 211, 230, 250, 302, 320, 411,
+  502, 520, 611, 1111, 1112, 1114, 1116, 1121, 1141, 1161, ...
+
+(define (couples lst all)
+"Generate all the couples of a list"
+  (let (out '())
+    (if all
+      (for (i 0 (- (length lst) 1))
+        (for (j i (- (length lst) 1))
+            (push (list (lst i) (lst j)) out -1)))
+      ;else
+      (for (i 0 (- (length lst) 2))
+        (for (j (+ i 1) (- (length lst) 1))
+            (push (list (lst i) (lst j)) out -1))))
+    out))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che verifica se un numero appartiene alla sequenza:
+
+(define (check? num)
+  (if (< num 10)
+      nil
+      (for-all (fn(x) (prime? (+ (x 0) (x 1)))) (couples (int-list num)))))
+
+Proviamo:
+
+(check? 65)
+;-> true
+
+(filter check? (sequence 1 1200))
+;-> (11 12 14 16 20 21 23 25 29 30 32 34 38 41 43 47 49
+;->  50 52 56 58 61 65 67 70 74 76 83 85 89 92 94 98 111
+;->  112 114 116 121 141 161 203 205 211 230 250 302 320 411
+;->  502 520 611 1111 1112 1114 1116 1121 1141 1161)
+
 ============================================================================
 
