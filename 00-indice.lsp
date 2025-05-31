@@ -2966,6 +2966,8 @@ NOTE LIBERE 30
   Primi palindromi
   Prodotti di cifre primi
   Numeri con tutte coppie di primi
+  Numero di 1 nella rappresentazione binaria dell'n-esimo numero primo
+  Contare le occorrenze correnti
 
 PROBLEMI SUI DADI
 =================

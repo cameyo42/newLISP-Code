@@ -1564,5 +1564,103 @@ Proviamo:
 ;->  112 114 116 121 141 161 203 205 211 230 250 302 320 411
 ;->  502 520 611 1111 1112 1114 1116 1121 1141 1161)
 
+
+--------------------------------------------------------------------
+Numero di 1 nella rappresentazione binaria dell'n-esimo numero primo
+--------------------------------------------------------------------
+
+Sequenza OEIS A014499:
+Number of 1's in binary representation of n-th prime.
+  1, 2, 2, 3, 3, 3, 2, 3, 4, 4, 5, 3, 3, 4, 5, 4, 5, 5, 3, 4, 3, 5, 4,
+  4, 3, 4, 5, 5, 5, 4, 7, 3, 3, 4, 4, 5, 5, 4, 5, 5, 5, 5, 7, 3, 4, 5,
+  5, 7, 5, 5, 5, 7, 5, 7, 2, 4, 4, 5, 4, 4, 5, 4, 5, 6, 5, 6, 5, 4, 6,
+  6, 4, 6, 7, 6, 7, 8, 4, 5, 4, 5, 5, 5, 7, 5, 7, 7, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (bit1-count num)
+"Count the bit 1 of an integer"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter)
+    )
+    counter))
+
+(define (seq limite)
+  (let (out '())
+    (for (num 2 limite)
+      (if (prime? num) (push (bit1-count num) out -1)))
+    out))
+
+(seq 500)
+;-> (1 2 2 3 3 3 2 3 4 4 5 3 3 4 5 4 5 5 3 4 3 5 4
+;->  4 3 4 5 5 5 4 7 3 3 4 4 5 5 4 5 5 5 5 7 3 4 5
+;->  5 7 5 5 5 7 5 7 2 4 4 5 4 4 5 4 5 6 5 6 5 4 6
+;->  6 4 6 7 6 7 8 4 5 4 5 5 5 7 5 7 7 4 5 6 7 6 8 7 7 7)
+
+
+------------------------------
+Contare le occorrenze correnti
+------------------------------
+
+Data una lista di numeri interi esaminare ogni numero e sostituirlo con il suo numero di occorrenze fino a quel momento.
+Esempio:
+  lista = (1 3 5 1 2 2 5 6)
+  numero = 1 ---> occorrenze 1
+  numero = 3 ---> occorrenze 1
+  numero = 5 ---> occorrenze 1
+  numero = 1 ---> occorrenze 2
+  numero = 2 ---> occorrenze 1
+  numero = 2 ---> occorrenze 2
+  numero = 5 ---> occorrenze 1
+  numero = 6 ---> occorrenze 1
+  output = (1 1 1 2 1 2 1 1)
+
+
+Versione 1 (slice):
+
+(define (conta lst)
+  (let (out '())
+    (dolist (el lst)
+      ; conta le occorrenze del numero corrente fino al numero corrente
+      ;(push (count (list el) (slice lst 0 (+ $idx 1))) out -1))
+      ; versione più veloce 
+      (push (length (ref-all el (slice lst 0 (+ $idx 1)))) out -1))
+    (flat out)))
+
+(setq lst '(1 3 5 1 2 2 5 6))
+(conta lst)
+;-> (1 1 1 2 1 2 2 1)
+
+Versione 2 (lista temporanea):
+
+(define (conta2 lst)
+  (let (out '())
+    (setq tmp '())
+    (dolist (el lst)
+      (push el tmp -1)
+      (push (length (ref-all el tmp)) out -1))
+    (flat out)))
+
+(conta2 lst)
+;-> (1 1 1 2 1 2 2 1)
+
+Test di correttezza:
+
+(setq t (rand 100 100))
+(= (conta t) (conta2 t))
+;-> true
+
+Test di velocità:
+
+(time (conta t) 1e4)
+;-> 843.773
+(time (conta2 t) 1e4)
+;-> 532.603
+
 ============================================================================
 
