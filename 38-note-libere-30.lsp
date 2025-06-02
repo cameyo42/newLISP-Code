@@ -1662,5 +1662,493 @@ Test di velocità:
 (time (conta2 t) 1e4)
 ;-> 532.603
 
+
+--------------------------------
+Programmazione non discriminante
+--------------------------------
+
+Una stringa è chiamata "non discriminante" se ciascuno dei caratteri della stringa appare lo stesso numero di volte e almeno due volte.
+
+Esempi
+"aa1a21132233" è non discriminante perché ciascuno dei caratteri , "a", "1", "2" e " 3" appare tre volte.
+"abbaabb" non è non discriminante perché "b" appare 4 volte e "a" 3 volte.
+"abc" non è non discriminante perché i caratteri non appaiono almeno due volte.
+
+Scrivere una funzione non discriminante che restituisca true se una data stringa è non discriminante e un valore nil altrimenti.
+Inoltre, passando alla funzione la funzione stessa (il proprio codice sorgente) devee restituire true.
+
+Come sorgente del programma utilizziaamo la rappresentazione interna di newLISP.
+Per esempio:
+
+(define (test a b) (+ a b))
+test
+"(lambda (a b) (+ a b))" ; stringa da valutare
+
+Funzione non discriminante:
+
+(define (d s)
+  (letn ( (l (explode s))
+          (u (unique l))
+          (c (flat (count u l))) )
+    (setq x "")
+    (setq y "")
+    (setq z "0000000000000000000000000000011111111111111111111111111111=============================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>bbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiimmmmmmmmmmmmmmmmmmmmmmmmmmmmmzzzzzzzzzzzzzzzzzzzzzzzzzzzzzooooooooooooooooooooooooooooxxxxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyyyyyyyydddddddddddddddddddddddddddpppppppppppppppppppppppppppccccccccccccccccccccccccccnnnnnnnnnnnnnnnnnnnnnnnnnnqqqqqqqqqqqqqqqqqqqqqqqqqqaaaaaaaaaaaaaaaaaaaaaaaaasssssssssssssssssssssssssuuuuuuuuuuuuuuuuuuuuuuuuu\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"tttttttttttttttttttttttteeeeeeeeeeeeeeeeeeeeeeellllllllllllllllllllll(((((((((((())))))))))))\\\\\\")
+    (and (apply = c) (> (c 0) 1))))
+
+Proviamo:
+
+(d "aa1a21132233")
+;-> true
+(d "abbaabb")
+;-> nil
+(d "abc")
+;-> nil
+(d (string d))
+;-> true
+
+Vediamo la rappresentazione interna della funzione:
+
+d
+(lambda (s)
+ (letn ((l (explode s)) (u (unique l)) (c (flat (count u l))))
+  (setq x "")
+  (setq y "")
+  (setq z "0000000000000000000000000000011111111111111111111111111111=============================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>bbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiimmmmmmmmmmmmmmmmmmmmmmmmmmmmmzzzzzzzzzzzzzzzzzzzzzzzzzzzzzooooooooooooooooooooooooooooxxxxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyyyyyyyydddddddddddddddddddddddddddpppppppppppppppppppppppppppccccccccccccccccccccccccccnnnnnnnnnnnnnnnnnnnnnnnnnnqqqqqqqqqqqqqqqqqqqqqqqqqqaaaaaaaaaaaaaaaaaaaaaaaaasssssssssssssssssssssssssuuuuuuuuuuuuuuuuuuuuuuuuu\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"tttttttttttttttttttttttteeeeeeeeeeeeeeeeeeeeeeellllllllllllllllllllll(((((((((((())))))))))))\\\\\\")
+  (and (apply = c) (> (c 0) 1))))
+
+Vediamo come è stata costruita la funzione:
+
+1) Funzione iniziale che verifica le stringhe non discriminanti
+
+(define (d s)
+  (letn ( (l (explode s))
+          (u (unique l))
+          (c (flat (count u l))) )
+    (and (apply = c) (> (c 0) 1))))
+
+2) Aggiungiamo tre espressioni di assegnazione a stringhe vuote che serviranno per ospitare i caratteri che mancano per far si che la funzione stessa sia non discriminante.
+
+(define (d s)
+  (letn ( (l (explode s))
+          (u (unique l))
+          (c (flat (count u l))) )
+    (setq x "")
+    (setq y "")
+    (setq z "")
+    (and (apply = c) (> (c 0) 1))))
+
+3) Crezione della lista dei caratteri mancanti:
+(setq p (explode (string d)))
+(setq u (unique p))
+(setq ch (sort (map list (count u p) u)))
+;-> ((1 "0") (1 "1") (1 "=") (1 ">") (1 "b") (1 "f") (1 "i") (1 "m")
+;->  (1 "z") (2 "o") (2 "x") (2 "y") (3 "d") (3 "p") (4 "c") (4 "n")
+;->  (4 "q") (5 "a") (5 "s") (5 "u") (6 "\"") (6 "t") (7 "e") (8 "l")
+;->  (18 "(") (18 ")") (30 " "))
+
+4) Creazione della stringa con tutti i caratteri mancanti:
+
+(setq out '())
+(dolist (el ch) (push (dup (el 1) (- 30 (el 0))) out -1))
+(join out)
+"000000...((())))))))))))"
+
+5) Assegnazione della stringa alla variabile "z":
+
+(define (d s)
+  (letn ( (l (explode s))
+          (u (unique l))
+          (c (flat (count u l))) )
+    (setq x "")
+    (setq y "")
+    (setq z "0000000000000000000000000000011111111111111111111111111111=============================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>bbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiimmmmmmmmmmmmmmmmmmmmmmmmmmmmmzzzzzzzzzzzzzzzzzzzzzzzzzzzzzooooooooooooooooooooooooooooxxxxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyyyyyyyyyyyyyydddddddddddddddddddddddddddpppppppppppppppppppppppppppccccccccccccccccccccccccccnnnnnnnnnnnnnnnnnnnnnnnnnnqqqqqqqqqqqqqqqqqqqqqqqqqqaaaaaaaaaaaaaaaaaaaaaaaaasssssssssssssssssssssssssuuuuuuuuuuuuuuuuuuuuuuuuu\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"tttttttttttttttttttttttteeeeeeeeeeeeeeeeeeeeeeellllllllllllllllllllll(((((((((((())))))))))))\\\\\\")
+    (and (apply = c) (> (c 0) 1))))
+
+6) Adesso la funzione è non discriminante
+
+(d (string d))
+;-> true
+
+Nota: non abbiamo utilizzato le variabili "x" e "y", ma toglierle renderebbe la funzione discriminante.
+
+
+-------------------------------------------------
+Media massima di sottoliste con elementi contigui
+-------------------------------------------------
+
+Data una lista di interi e un intero K, determinare, tra tutte le sottoliste di lunghezza K, quella che ha la media massima.
+Esempio:
+lista = (1 3 6 4 -3 9 4)
+K = 3
+output = 
+
+(setq lst '(1 3 6 4 -3 9 4))
+
+(define (media-massima lst k)
+  (local (out media-max len sublst media)
+    (setq out '())
+    (setq media-max -1e99)
+    (setq len (length lst))
+    (for (i 0 (- len k))
+      (setq sublst (slice lst i k))
+      (setq media (div (apply add sublst) k))
+      ;(println media { } sublst)
+      (when (> media media-max)
+        (setq media-max media)
+        (setq out sublst)))
+    (list media-max out)))
+
+Proviamo:
+
+(media-massima lst 3)
+;-> (4.333333333333333 (3 6 4))
+
+(media-massima lst 1)
+;-> (9 (9))
+
+
+-----------------------------------------------------------------------------
+Percorso minimo (BFS) e massimo (DFS) in un labirinto (shortest/longest path)
+-----------------------------------------------------------------------------
+
+Consideriamo un labirinto rappresentato da una matrice binaria MxN in cui 0 è un passaggio e 1 è un muro.
+
+Percorso minimo (shortest path)
+-------------------------------
+Per trovare il percorso più breve da un punto A ad un punto B, l'algoritmo migliore dipende da alcuni fattori (ad esempio, costi uniformi, dimensione del labirinto), ma nel caso tipico di costo uniforme, la scelta migliore e più semplice è la Ricerca in ampiezza (BFS - Breadth First Search):
+- Funziona perfettamente su griglie non pesate.
+- Garantisce il percorso più breve in termini di numero di passi.
+- Semplice da implementare.
+- Utilizza una coda per esplorare tutti i nodi alla stessa distanza prima di andare in profondità.
+
+Complessità temporale:
+O(M × N) dove M e N sono le dimensioni del labirinto.
+
+Algoritmo BFS (Breadth First Search)
+------------------------------------
+L'algoritmo BFS (Breadth-First Search) è una ricerca in ampiezza: esplora prima tutte le celle vicine (a distanza 1), poi quelle a distanza 2, poi 3, ecc.
+In pratica: avanza "a onde" e garantisce di trovare il cammino più breve in numero di passi.
+
+Passaggi principali:
+
+1. Inizializzazione
+   - Crea una coda ('queue') e ci inserisce la cella 'start' con il cammino iniziale.
+   - Crea una matrice 'visited' per ricordare quali celle sono già state esplorate.
+2. Loop principale
+   - Finché la coda non è vuota:
+     - Estrai il primo elemento: '(cella corrente, cammino corrente)'
+     - Se la cella è il 'goal', restituisci il cammino -> è il più corto!
+     - Altrimenti, esplora tutte le celle adiacenti (nord, sud, est, ovest — o diagonali se abilitate):
+       - Se la cella è valida (dentro i limiti, non è un muro, non è già visitata):
+         - Segnala come visitata
+         - Inserisci in coda: nuova cella + cammino aggiornato
+3. Se la coda si svuota senza raggiungere il goal
+   - Non esiste nessun cammino -> restituisci 'nil'.
+
+Proprietà del BFS:
+- Trova il cammino più corto (se tutti i movimenti costano uguale).
+- Non esplora cammini inutili dopo aver trovato il più breve.
+- Funziona bene su griglie o grafi non pesati.
+
+Limitazioni:
+- Può richiedere molta memoria, perché deve tenere in coda tutte le celle da esplorare.
+- Non adatto se vuoi il cammino più lungo → serve DFS o tecniche diverse.
+
+Immagina che da 'start' si diffonda un'onda.
+Appena l’onda tocca 'goal', hai trovato il cammino più breve.
+Non serve continuare oltre.
+
+Funzione che implementa l'algoritmo BFS:
+
+(define (bfs maze start goal)
+  ; get number of rows in the maze
+  (letn ((rows (length maze))
+         ; get number of columns
+         (cols (length (maze 0)))
+         ; initialize BFS queue
+         (queue '())
+         ; visited matrix: nil = unvisited, true = visited
+         (visited (array-list (array rows cols '(nil))))
+         ; parent matrix: stores previous node to reconstruct path
+         (parent (array-list (array rows cols '(nil))))
+         ; 4 movement directions: right, down, left, up
+         (directions '((0 1) (1 0) (0 -1) (-1 0)))
+         ; 8 movement directions (including diagonals)
+         ;(directions '((0 1) (1 0) (0 -1) (-1 0) (1 1) (1 -1) (-1 1) (-1 -1)))
+         ; path will hold the final result (or remain nil)
+         (path nil)
+         (node nil)
+         (nx nil)
+         (ny nil)
+         (found nil))
+    ; enqueue the start position
+    (push start queue -1)
+    ; mark start as visited
+    (setf (visited (start 0) (start 1)) true)
+    ; main BFS loop: while queue not empty and goal not found
+    (while (and queue (not found))
+      ; dequeue next node to explore
+      (setq node (pop queue))
+      ; check if goal has been reached
+      (if (= node goal)
+          (begin
+            ; initialize backtracking from goal
+            (setq cursor node)
+            (setq path '())
+            ; build path by walking back through parent matrix
+            (while cursor
+              (push cursor path)
+              (setq cursor (parent (cursor 0) (cursor 1))))
+            ; reverse the path so it goes from start to goal
+            (setq path (reverse path))
+            ; signal that path is found to break loop
+            (set 'found true)))
+      ; explore all 4 neighboring cells
+      (dolist (dir directions)
+        ; compute new x and y positions
+        (setq nx (+ (node 0) (dir 0)))
+        (setq ny (+ (node 1) (dir 1)))
+        ; check bounds, free cell (0), and unvisited
+        (if (and (>= nx 0) (< nx rows)
+                 (>= ny 0) (< ny cols)
+                 (= ((maze nx) ny) 0)
+                 (not (visited nx ny)))
+            (begin
+              ; mark cell as visited
+              (setf (visited nx ny) true)
+              ; record parent to reconstruct path later
+              (setf (parent nx ny) node)
+              ; enqueue neighbor for future exploration
+              (push (list nx ny) queue -1)))))
+    ; return full path if found, or nil if no path exists
+    path))
+
+Proviamo:
+
+(setq maze '((0 0 0 1)
+             (1 0 1 0)
+             (0 0 0 0)
+             (1 1 1 0)))
+(setq start '(0 0))
+(setq goal  '(3 3))
+(bfs maze start goal)
+;-> ((3 3) (2 3) (2 2) (2 1) (1 1) (0 1) (0 0))
+
+(setq maze '((0 0 0 0 0 0)
+             (1 1 1 1 1 0)
+             (0 0 0 0 0 0)
+             (0 0 0 0 0 0)
+             (0 0 0 0 0 0)
+             (0 0 0 0 0 0)))
+(setq start '(5 0))
+(setq goal  '(0 0))
+(bfs maze start goal)
+;-> ((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (1 5) (2 5) (3 5) (4 5) (5 5)
+;->  (5 4) (5 3) (5 2) (5 1) (5 0))
+
+(setq maze '((0 0 0 0 0 0)
+             (1 1 1 1 1 1)
+             (0 0 0 0 0 0)
+             (0 0 0 0 0 0)
+             (0 0 0 0 0 0)
+             (0 0 0 0 0 0)))
+(setq start '(0 3))
+(setq goal  '(3 2))
+(bfs maze start goal)
+;-> nil
+
+Questa funzione considera il movimento in quattro direzioni:
+
+4 Direzioni
+-----------
+(0 1)   ; right
+(1 0)   ; down
+(0 -1)  ; left
+(-1 0)  ; up
+(directions '((0 1) (1 0) (0 -1) (-1 0)))
+
+Per considerare il movimento in otto direzioni:
+
+8 Direzioni
+-----------
+(0 1)   ; right
+(1 0)   ; down
+(0 -1)  ; left
+(-1 0)  ; up
+(1 1)    ; down-right
+(1 -1)   ; down-left
+(-1 1)   ; up-right
+(-1 -1)  ; up-left
+(directions '((0 1) (1 0) (0 -1) (-1 0) (1 1) (1 -1) (-1 1) (-1 -1)))
+
+Percorso massimo (longest path)
+-------------------------------
+Trovare il cammino semplice più lungo (senza nodi ripetuti) tra due punti in una griglia o in un grafo generico è molto più difficile che trovare il cammino più breve.
+Perché?
+- Il problema del cammino più breve è risolvibile in modo efficiente con BFS o Dijkstra perché quando raggiungiamo il punto finale siamo sicuri di avere il percorso ottimale.
+- Il problema del cammino semplice più lungo è NP-hard nei grafi generici (incluse le griglie con ostacoli).
+Ciò significa che non esi conosce un algoritmo efficiente per trovare sempre il cammino più lungo in tempo polinomiale.
+
+Un possibile approccio per trovare il percorso più lungo da A a B è quello di utilizzare un algoritmo DFS con backtracking che esplora tutti i percorsi senza rivisitare i nodi, tenendo traccia del più lungo trovato finora. Questo metodo è esponenziale e pratico solo per labirinti di piccole dimensioni.
+
+Trovare il cammino più lungo possibile (senza passare due volte dallo stesso punto) da una cella 'start' a una cella 'goal' in una griglia ('maze') con:
+- 0 = spazio libero
+- 1 = muro
+
+Algoritmo DFS (Depth First Search)
+----------------------------------
+Il DFS visita profondamente (in profondità) un cammino possibile, continuando finché può avanzare.
+Quando non ci sono più mosse valide, torna indietro (backtracking) e prova altre direzioni.
+
+Passaggi principali:
+
+1. Partenza
+   - Si parte da una cella '(x y)' e si costruisce una lista 'path' con il cammino attuale.
+2. Controlli
+   - Se la cella è:
+     - Fuori dai bordi del labirinto
+     - Un muro
+     - Già visitata
+       allora si scarta.
+3. Visita
+   - Si segna la cella come visitata per non ripassarci.
+   - Si aggiunge la cella a 'path'.
+4. Obiettivo raggiunto
+   - Se '(x y)' è il 'goal', si confronta 'path' con il cammino più lungo trovato finora.
+   - Se è più lungo, si salva come nuovo massimo.
+5. Espansione
+   - Si prova ogni direzione possibile (anche diagonali, se incluse).
+   - Per ogni direzione, si chiama ricorsivamente DFS sulla nuova cella vicina.
+6. Backtracking
+   - Dopo aver esplorato tutte le direzioni, si inverte la cella (da visitata a non visitata).
+   - Questo permette ad altri cammini di passarci.
+
+Vantaggi:
+- Trova tutti i cammini possibili, scegliendo quello più lungo.
+- È adatto per problemi dove bisogna esplorare tutte le soluzioni (es. labirinti, puzzle).
+
+Limitazioni:
+- DFS può essere lento su labirinti grandi o con molti cammini.
+- Il numero di cammini cresce esponenzialmente: può diventare pesante in tempo/memoria.
+
+Il DFS prova un cammino (es. tutto a destra), poi torna indietro e prova altre vie. Alla fine conserva il cammino più lungo che raggiunge il Goal.
+
+Differenze BFS/DFS
+------------------
+| Aspetto          | BFS                            | DFS                        |
+| ---------------- | ------------------------------ | -------------------------- |
+| Obiettivo tipico | Cammino più corto              | Cammino più lungo          |
+| Strategia        | Ampiezza (livello per livello) | Profondità (fino in fondo) |
+| Struttura        | Coda                           | Stack (o ricorsione)       |
+| Visita celle     | Distanza crescente             | Arbitraria                 |
+
+Funzione che implementa l'algoritmo DFS:
+
+(define (dfs maze start goal)
+  ; get number of rows in the maze
+  (letn ((rows (length maze))
+         ; get number of columns in the maze
+         (cols (length (maze 0)))
+         ; create a visited matrix initialized to nil
+         (visited (array-list (array rows cols '(nil))))
+         ; 4 movement directions: right, down, left, up
+         (directions '((0 1) (1 0) (0 -1) (-1 0)))
+         ; 8 movement directions (including diagonals)
+         ;(directions '((0 1) (1 0) (0 -1) (-1 0) (1 1) (1 -1) (-1 1) (-1 -1)))
+         ; store the longest path found
+         (longest-path '())
+         ; store the length of the longest path
+         (max-length 0))
+    ; define the recursive DFS function
+    (define (dfs-recursive x y path)
+      ; check boundaries, walls or visited cells: stop if invalid
+      (if (or (< x 0) (>= x rows) (< y 0) (>= y cols)
+              (= ((maze x) y) 1)
+              (visited x y))
+          nil
+          (begin
+            ; mark current cell visited
+            (setf (visited x y) true)
+            ; extend current path with this cell
+            (letn ((new-path (cons (list x y) path)))
+              ; if goal reached, update longest path if longer
+              (if (and (= x (goal 0)) (= y (goal 1)))
+                  (when (> (length new-path) max-length)
+                    (set 'max-length (length new-path))
+                    (set 'longest-path (reverse new-path)))
+                  ; else continue DFS on all neighbors
+                  (dolist (dir directions)
+                    (dfs-recursive (+ x (dir 0)) (+ y (dir 1)) new-path))))
+            ; backtrack: unmark current cell visited
+            (setf (visited x y) nil))))
+    ; start DFS from the start position with empty path
+    (dfs-recursive (start 0) (start 1) '())
+    ; return the longest path found or nil if none
+    (if (> max-length 0) longest-path nil)))
+
+Funzione che stampa la matrice (maze) con il percorso (path):
+
+(define (show maze path)
+  (local (rows cols solved)
+    ; rows of maze
+    (setq rows (length maze))
+    ; cols of maze
+    (setq cols (length (maze 0)))
+    ; copy of maze
+    (setq solved maze)
+    ; Add solution path (".") to solved maze
+    (dolist (el path) (setf (solved (el 0) (el 1)) "."))
+    ; print solved maze with solution path
+    (for (i 0 (- rows 1))
+      (for (j 0 (- cols 1))
+        (print " " (solved i j)))
+      (println)) '>))
+
+Proviamo:
+
+(set 'maze '((0 0 0 1)
+             (1 0 1 0)
+             (0 0 0 0)
+             (1 1 1 0)))
+(set 'start '(0 0))
+(set 'goal '(3 3))
+(dfs maze start goal)
+;-> ((0 0) (0 1) (1 1) (2 1) (2 2) (2 3) (3 3))
+
+(setq maze '((0 0 1 1 1 1)
+             (1 0 0 1 1 1)
+             (1 1 0 0 1 1)
+             (1 1 1 0 0 1)
+             (1 1 1 1 0 0)
+             (1 1 1 1 1 0)))
+(set 'start '(0 0))
+(set 'goal '(5 5))
+(dfs maze start goal)
+;-> ((0 0) (0 1) (1 1) (1 2) (2 2) (2 3) (3 3) (3 4) (4 4) (4 5) (5 5))
+(bfs maze start goal)
+;-> ((5 5) (4 5) (4 4) (3 4) (3 3) (2 3) (2 2) (1 2) (1 1) (0 1) (0 0))
+
+(setq maze '((0 0 0)
+             (0 0 0)
+             (0 0 0)))
+(set 'start '(0 0))
+(set 'goal '(2 2))
+
+(bfs maze start goal)
+;-> ((2 2) (1 2) (0 2) (0 1) (0 0))
+
+(show maze (bfs maze start goal))
+;->  . . .
+;->  0 0 .
+;->  0 0 .
+
+(dfs maze start goal)
+;-> ((0 0) (0 1) (0 2) (1 2) (1 1) (1 0) (2 0) (2 1) (2 2))
+
+(show maze (longest-path maze start goal))
+;->  . . .
+;->  . . .
+;->  . . .
+
 ============================================================================
 

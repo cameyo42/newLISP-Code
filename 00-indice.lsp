@@ -2968,6 +2968,9 @@ NOTE LIBERE 30
   Numeri con tutte coppie di primi
   Numero di 1 nella rappresentazione binaria dell'n-esimo numero primo
   Contare le occorrenze correnti
+  Programmazione non discriminante
+  Media massima di sottoliste con elementi contigui
+  Percorso minimo (BFS) e massimo (DFS) in un labirinto (shortest/longest path)
 
 PROBLEMI SUI DADI
 =================
