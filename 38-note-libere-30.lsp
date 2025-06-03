@@ -2150,5 +2150,114 @@ Proviamo:
 ;->  . . .
 ;->  . . .
 
+
+------------------------------------------------
+British Mathematical Olympiad - 1996 - Problem 1
+------------------------------------------------
+
+British Mathematical Olympiad
+-----------------------------
+Round 1: Wednesday, 17th January 1996
+
+Problem 1:
+Consider the pair of four-digit positive integers (M,N) = (3600, 2500).
+Notice that M and N are both perfect squares, with equal digits in two places, and differing digits in the remaining
+two places. Moreover, when the digits differ, the digit in M is exactly one greater than the corresponding digit in N.
+Find all pairs of four-digit positive integers (M,N) with these properties.
+
+Condizioni:
+
+1) M e N quadrati perfetti
+2) 2 cifre di M sono uguali a 2 cifre di N
+3) Le cifre diverse di M (es. a b) sono maggiori di 1 delle corrispondenti cifre di N (es. a-1 b-1)
+
+(setq a 3600)
+(setq b 2500)
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (isq (int (sqrt num)))
+    (= num (* isq isq))))
+
+(setq sq '())
+(for (num 1000 9999) (if (square? num) (push num sq -1)))
+sq
+;-> (1024 1089 1156 1225 1296 1369 1444 1521 1600 1681 1764 1849 1936 2025
+;->  2116 2209 2304 2401 2500 2601 2704 2809 2916 3025 3136 3249 3364 3481
+;->  3600 3721 3844 3969 4096 4225 4356 4489 4624 4761 4900 5041 5184 5329
+;->  5476 5625 5776 5929 6084 6241 6400 6561 6724 6889 7056 7225 7396 7569
+;->  7744 7921 8100 8281 8464 8649 8836 9025 9216 9409 9604 9801)
+(length sq)
+;-> 68
+
+Funzione che trova tutte le coppie:
+
+(define (find-pairs)
+  (setq coppie '())
+  ; calcolo di tutti i numeri quadrati di quattro cifre
+  (setq sq '())
+  (for (num 1000 9999) (if (square? num) (push num sq -1)))
+  (setq len-sq (length sq))
+  ; ciclo per ogni coppia di numeri della lista di quadrati
+  (for (i 0 (- len-sq 2))
+    (for (j (+ i 1) (- len-sq 1))
+      (setq a (sq i))
+      (setq b (sq j))
+      ; confronto tra le cifre
+      (setq sa (explode (string a)))
+      (setq sb (explode (string b)))
+      ; calcolo delle cifre differenti
+      (setq da (map int (difference sa sb true)))
+      (setq db (map int (difference sb sa true)))
+      ;(print a { } b { } da { } db) (read-line)
+      ; entrambe le differenze devono valere 2
+      (when (and (= (length da) 2) (= (length db) 2))
+        ; controllo se le cifre differenti sono maggiori/minori di 1 tra loro
+        (if (or (and (= (da 0) (+ (db 0) 1)) (= (da 1) (+ (db 1) 1)))
+                (and (= (da 0) (- (db 0) 1)) (= (da 1) (- (db 1) 1))))
+            (push (list a b) coppie -1)))
+    )
+  )
+  coppie)
+
+(find-pairs)
+;-> ((1296 9025) (1521 2500) (2500 3600) (2916 9025)
+;->  (3969 8836) (4624 5625) (7396 8649) (9025 9216))
+
+
+------------------------------------------------
+British Mathematical Olympiad - 1996 - Problem 4
+------------------------------------------------
+
+British Mathematical Olympiad
+Round 1: Wednesday, 17th January 1996
+
+Problem 4:
+For any real number x, let [x] denote the greatest integer which is less than or equal to x.
+Define:
+
+  q(n) = floor(n / floor(sqrt(n))) for n = 1, 2, 3,...
+
+Determine all positive integers n for which q(n) > q(n + 1).
+
+Solution: a(n) > a(n+1) iff n = m^2 - 1 with m >= 2
+
+Sequenza OEIS A079643:
+a(n) = floor(n/floor(sqrt(n))).
+  1, 2, 3, 2, 2, 3, 3, 4, 3, 3, 3, 4, 4, 4, 5, 4, 4, 4, 4, 5, 5, 5, 5, 6,
+  5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8,
+  7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 9, 8, 8, 8, 8, 8, 8, 8, 8, 9,
+  9, 9, 9, 9, 9, 9, 9, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10,
+  10, 10, 10, 10, 11, ...
+
+(define (a n) (/ n (int (sqrt n))))
+
+(map a (sequence 1 99))
+;-> (1 2 3 2 2 3 3 4 3 3 3 4 4 4 5 4 4 4 4 5 5 5 5 6
+;->  5 5 5 5 5 6 6 6 6 6 7 6 6 6 6 6 6 7 7 7 7 7 7 8
+;->  7 7 7 7 7 7 7 8 8 8 8 8 8 8 9 8 8 8 8 8 8 8 8 9
+;->  9 9 9 9 9 9 9 10 9 9 9 9 9 9 9 9 9 10 10 10 10 10
+;->  10 10 10 10 11)
+
 ============================================================================
 

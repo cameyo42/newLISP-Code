@@ -2971,6 +2971,8 @@ NOTE LIBERE 30
   Programmazione non discriminante
   Media massima di sottoliste con elementi contigui
   Percorso minimo (BFS) e massimo (DFS) in un labirinto (shortest/longest path)
+  British Mathematical Olympiad - 1996 - Problem 1
+  British Mathematical Olympiad - 1996 - Problem 4
 
 PROBLEMI SUI DADI
 =================
