@@ -2973,6 +2973,7 @@ NOTE LIBERE 30
   Percorso minimo (BFS) e massimo (DFS) in un labirinto (shortest/longest path)
   British Mathematical Olympiad - 1996 - Problem 1
   British Mathematical Olympiad - 1996 - Problem 4
+  Liste visitabili
 
 PROBLEMI SUI DADI
 =================

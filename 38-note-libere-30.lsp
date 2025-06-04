@@ -2259,5 +2259,293 @@ a(n) = floor(n/floor(sqrt(n))).
 ;->  9 9 9 9 9 9 9 10 9 9 9 9 9 9 9 9 9 10 10 10 10 10
 ;->  10 10 10 10 11)
 
+
+----------------
+Liste visitabili
+----------------
+
+Abbiamo una lista di numeri interi positivi.
+L'obiettivo è visitare ogni indice della lista una volta (e una sola volta).
+Partendo da un elemento, dobbiamo esaminare il valore memorizzato in quell'elemento e poi spostarsi di altrettanti spazi a sinistra o a destra (se è possibile farlo entro i limiti della lista).
+Se è possibile visitare tutti gli elementi in questo modo, restituiamo 'true', altrimenti 'nil'.
+Regole
+- Possiamo iniziare da qualsiasi indice.
+- Possiamo visitare ogni elemento una sola volta.
+- Un elemento è "visitato" una volta che ci si è arrivati (ovvero: passare sopra un elemento non conta come visitarlo).
+- Non è necessario spostarsi dall'elemento visitato per ultimo.
+
+Algoritmo
+Per ogni indice iniziale possibile:
+  Effettuare una visita in profondità (DFS) (o in ampiezza (BFS)).
+  Tenere traccia dei nodi visitati.
+  Se riusciamo a visitare tutti gli indici esattamente una volta, restituiamo true.
+  Se nessun indice iniziale porta a una visita completa, restituiamo nil.
+
+Funzione che verifica se una lista è visitabile:
+
+(define (visita-possibile? lst)
+  ; Usiamo variabili locali: 'trovato' per indicare se una soluzione è stata trovata,
+  ; 'visitati' per memorizzare gli indici visitati durante la ricerca.
+  (local (trovato visitati)
+    ; Definizione interna della funzione ricorsiva DFS (visita in profondità).
+    ; Si sposta da un indice 'pos' a sinistra o a destra secondo il valore presente nella lista.
+    (define (dfs pos)
+      ; Se l'indice è fuori dai limiti oppure già visitato, interrompiamo la ricorsione.
+      (if (or (< pos 0) (>= pos (length lst)) (ref pos visitati))
+          nil
+          (begin
+            ; Aggiungiamo l'indice corrente alla lista dei visitati.
+            (push pos visitati)
+            (let ((val (lst pos))) ; Prendiamo il valore corrente dalla lista.
+              ; Proviamo a muoverci sia in avanti che indietro ricorsivamente.
+              (dfs (+ pos val))
+              (dfs (- pos val))))))
+    ; Inizializziamo 'trovato' a nil. Verrà impostato a true se troviamo una partenza valida.
+    (setq trovato nil)
+    ; Cicliamo su tutti gli indici della lista come possibili punti di partenza.
+    ; Il ciclo si interrompe se 'trovato' diventa true (grazie al quarto parametro di 'for').
+    (for (i 0 (- (length lst) 1) 1 trovato)
+      ; Reinizializziamo 'visitati' a ogni nuova partenza.
+      (setq visitati '())
+      ; Lanciamo la DFS a partire dall'indice corrente.
+      (dfs i)
+      ; Se la lunghezza della lista dei visitati corrisponde alla lunghezza della lista,
+      ; significa che siamo riusciti a visitare ogni indice una sola volta.
+      (when (= (length visitati) (length lst))
+        (setq trovato true) ; Abbiamo trovato una soluzione valida.
+        (println "Partenza valida da indice: " i)
+        (println "Percorso: " visitati)))
+    ; La funzione restituisce true se abbiamo trovato un percorso valido, altrimenti nil.
+    trovato))
+
+Proviamo:
+
+(visita-possibile? '(1 1 1 1))
+;-> Partenza valida da indice: 0
+;-> Percorso: (3 2 1 0)
+;-> true
+(visita-possibile? '(2 1 2 1))
+;-> nil
+(visita-possibile? '(4 2 6 1 3))
+;-> Partenza valida da indice: 0
+;-> Percorso: (2 3 1 4 0)
+;-> true
+(visita-possibile? '(6 4 3 2 1))
+;-> nil
+(visita-possibile? '(10))
+;-> Partenza valida da indice: 0
+;-> Percorso: (0)
+;-> true
+(visita-possibile? '(1 2))
+;-> Partenza valida da indice: 0
+;-> Percorso: (1 0)
+;-> true
+(visita-possibile? '(2 3))
+;-> nil
+
+(setq test1 '(98 21 27 18 20 62 29 24 37 84 3 5 13 53 55 84 34 75 39 53 17
+   59 10 37 22 33 21 51 23 66 9 31 32 9 98 13 38 31 16 31 21 8 23 22 40 1
+   50 15 28 7 13 33 39 48 17 26 39 19 24 52 59 26 58 35 9 32 64 44 28 19
+   24 6 13 30 16 48 21 62 1 70 3 48 30 8 48 1 60 2 78 48 22 32 81 59 41 19
+   84 26 68 85))
+(visita-possibile? test1)
+;-> Partenza valida da indice: 0
+;-> Percorso: (44 45 8 93 9 79 78 27 75 83 80 21 3 20 48 35 6 37 54 38 57 18
+;->            51 28 63 50 16 11 92 17 56 49 41 89 87 61 40 68 90 74 36 84
+;->            34 31 7 59 91 52 82 58 25 12 96 46 24 4 62 47 26 86 85 72 19
+;->            42 33 81 55 76 95 29 2 66 13 10 88 69 14 99 15 77 71 97 65
+;->            43 73 64 32 22 1 60 23 67 5 53 94 70 39 30 98 0)
+;-> true
+
+(setq test2 '(37 6 77 74 48 75 11 14 11 1 71 78 23 65 44 67 10 65 2 6
+   14 19 8 26 4 14 71 35 38 16 66 5 12 10 29 55 5 61 14 11 43 35 17 34
+   44 22 23 1 16 47 4 43 39 49 22 19 1 56 10 41 48 58 37 5 58 10 20 40
+   25 6 28 13 23 14 8 44 9 26 6 65 12 34 65 30 28 85 64 26 50 81 25 21
+   81 24 34 81 25 52 25 94))
+(visita-possibile? test2)
+;-> nil
+
+La funzione è efficiente quanto basta per liste di dimensioni contenute.
+Può essere estesa per restituire tutti i percorsi validi.
+
+Riscriviamo ora la DFS in modo iterativo usando uno stack esplicito, come alternativa alla ricorsione.
+
+(define (vis-pos? lst)
+  (local (trovato visitati stack)
+    ; Funzione DFS iterativa che esplora partendo dall'indice 'start'
+    (define (dfs-iterativa start)
+      (setq visitati '())          ; Lista degli indici visitati
+      (setq stack (list start))    ; Stack iniziale con il punto di partenza
+      ; Finché ci sono elementi nello stack...
+      (while stack
+        (let ((pos (pop stack)))   ; Prendiamo il prossimo nodo da esplorare
+          (unless (or (< pos 0) (>= pos (length lst)) (ref pos visitati))
+            (push pos visitati)    ; Aggiungiamo ai visitati
+            (let ((val (lst pos)))
+              ; Aggiungiamo le due possibili direzioni allo stack
+              (push (+ pos val) stack)
+              (push (- pos val) stack))))))
+    (setq trovato nil)
+    ; Provare tutte le possibili partenze
+    (for (i 0 (- (length lst) 1) 1 trovato)
+      (dfs-iterativa i)
+      (when (= (length visitati) (length lst))
+        (setq trovato true)
+        (println "Partenza valida da indice: " i)
+        (println "Percorso: " visitati)))
+    trovato))
+
+Proviamo:
+
+(vis-pos? '(1 1 1 1))
+;-> true
+(vis-pos? '(2 1 2 1))
+;-> nil
+(vis-pos? '(4 2 6 1 3))
+;-> true
+(vis-pos? '(6 4 3 2 1))
+;-> nil
+(vis-pos? '(10))
+;-> true
+(vis-pos? '(1 2))
+;-> true
+(vis-pos? '(2 3))
+;-> nil
+(vis-pos? test1)
+;-> true
+(vis-pos? test1)
+;-> true
+
+Test di velocità:
+
+(time (visita-possibile? test1) 100)
+;-> 385.317
+(time (vis-pos? test1) 100)
+;-> 400.901
+
+(time (visita-possibile? test2) 100)
+;-> 1056.837
+(time (vis-pos? test2) 100)
+;-> 1286.47
+
+La funzione ricorsiva è leggermente più veloce, ma la versione iterativa può gestire liste più grandi perchè non ha il problema dello stack-overflow.
+
+Versione ricorsiva (senza commenti):
+
+(define (visita-possibile? lst)
+  (local (trovato visitati)
+    (define (dfs pos)
+      (if (or (< pos 0) (>= pos (length lst)) (ref pos visitati))
+          nil
+          (begin
+            (push pos visitati)
+            (let ((val (lst pos)))
+              (dfs (+ pos val))
+              (dfs (- pos val))))))
+    (setq trovato nil)
+    (for (i 0 (- (length lst) 1) 1 trovato)
+      (setq visitati '())
+      (dfs i)
+      (when (= (length visitati) (length lst))
+        (setq trovato true)
+        (println "Partenza valida da indice: " i)
+        (println "Percorso: " visitati)))
+    trovato))
+
+Versione iterativa (senza commenti):
+
+(define (vis-pos? lst)
+  (local (trovato visitati stack)
+    (define (dfs-iterativa start)
+      (setq visitati '())
+      (setq stack (list start))
+      (while stack
+        (let ((pos (pop stack)))
+          (unless (or (< pos 0) (>= pos (length lst)) (ref pos visitati))
+            (push pos visitati)
+            (let ((val (lst pos)))
+              (push (+ pos val) stack)
+              (push (- pos val) stack))))))
+    (setq trovato nil)
+    (for (i 0 (- (length lst) 1) 1 trovato)
+      (dfs-iterativa i)
+      (when (= (length visitati) (length lst))
+        (setq trovato true)
+        (println "Partenza valida da indice: " i)
+        (println "Percorso: " visitati)))
+    trovato))
+
+Quando la lista da verificare è visitabile le nostre due funzioni (ricorsiva e iterativa) restituiscono il percorso come una lista di tutti gli indici visitati.
+Comunque questi indici non sono nell'ordine con cui vengono visitati.
+Per ottenere il percorso esatto dobbiamo tenere traccia dell’ordine con cui arriviamo agli indici.
+
+(define (visitabile? lst)
+  (local (trovato visitati stack percorso)
+    (define (dfs-iterativa start)
+      (setq visitati '())
+      (setq percorso '())
+      (setq stack (list start))
+      (while stack
+        (let ((pos (pop stack)))
+          (unless (or (< pos 0) (>= pos (length lst)) (ref pos visitati))
+            (push pos visitati)
+            (push pos percorso -1) ; aggiungiamo in ordine di visita
+            (let ((val (lst pos)))
+              (push (+ pos val) stack)
+              (push (- pos val) stack))))))
+    (setq trovato nil)
+    (for (i 0 (- (length lst) 1) 1 trovato)
+      (dfs-iterativa i)
+      (when (= (length visitati) (length lst))
+        (setq trovato true)
+        (println "Partenza valida da indice: " i)
+        (println "Percorso ordinato: " percorso)))
+    trovato))
+
+(visitabile? '(1 1 1 1))
+;-> Partenza valida da indice: 0
+;-> Percorso ordinato: (0 1 2 3)
+;-> true
+(visitabile? '(2 1 2 1))
+;-> nil
+(visitabile? '(4 2 6 1 3))
+;-> Partenza valida da indice: 0
+;-> Percorso ordinato: (0 4 1 3 2)
+;-> true
+(visitabile? '(6 4 3 2 1))
+;-> nil
+(visitabile? '(10))
+;-> Partenza valida da indice: 0
+;-> Percorso ordinato: (0)
+;-> true
+(visitabile? '(1 2))
+;-> Partenza valida da indice: 0
+;-> Percorso ordinato: (0 1)
+;-> true
+(visitabile? '(2 3))
+;-> nil
+
+(setq test1 '(98 21 27 18 20 62 29 24 37 84 3 5 13 53 55 84 34 75 39 53 17
+   59 10 37 22 33 21 51 23 66 9 31 32 9 98 13 38 31 16 31 21 8 23 22 40 1
+   50 15 28 7 13 33 39 48 17 26 39 19 24 52 59 26 58 35 9 32 64 44 28 19
+   24 6 13 30 16 48 21 62 1 70 3 48 30 8 48 1 60 2 78 48 22 32 81 59 41 19
+   84 26 68 85))
+(visitabile? test1)
+;-> Percorso ordinato: (0 98 30 21 80 77 15 99 14 69 50 37 6 35 22 12 25
+;->                     58 34 82 52 13 66 2 29 95 76 55 81 33 24 46 96 42
+;->                     19 72 59 7 31 62 4 85 84 36 74 90 68 40 61 87 89
+;->                     41 49 56 17 92 11 16 86 26 5 67 23 60 1 47 32 64
+;->                     73 43 65 97 71 91 48 20 3 63 28 51 18 57 38 54 88
+;->                     10 83 75 27 78 79 9 93 39 8 45 44 70 94 53)
+;-> true
+
+(setq test2 '(37 6 77 74 48 75 11 14 11 1 71 78 23 65 44 67 10 65 2 6
+   14 19 8 26 4 14 71 35 38 16 66 5 12 10 29 55 5 61 14 11 43 35 17 34
+   44 22 23 1 16 47 4 43 39 49 22 19 1 56 10 41 48 58 37 5 58 10 20 40
+   25 6 28 13 23 14 8 44 9 26 6 65 12 34 65 30 28 85 64 26 50 81 25 21
+   81 24 34 81 25 52 25 94))
+(visitabile? test2)
+;-> nil
+
 ============================================================================
 
