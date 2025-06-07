@@ -2547,5 +2547,206 @@ Per ottenere il percorso esatto dobbiamo tenere traccia dell’ordine con cui ar
 (visitabile? test2)
 ;-> nil
 
+
+------------------------------------------------
+Somma della parte sinistra e destra di una lista
+------------------------------------------------
+
+Data una lista di numeri interi scrivere una funzione che restituisce la somma dei numeri della metà sinistra e quella dei numeri della metà destra.
+Se la lista ha un numero dispari di elementi, allora l'elemento centrale va sommato con la parte destra.
+La funzione deve essere la più corta possibile.
+
+(define (sum-sx-dx lst)
+  (let (len (length lst))
+    (list (apply + (slice lst 0 (/ len 2)))
+          (apply + (slice lst (+ (/ len 2)))))))
+
+Funzione (92 caratteri):
+(define(s l)(let(x(length l))(list(apply +(slice l 0(/ x 2)))(apply +(slice l(+(/ x 2)))))))
+
+(setq lst '(5 3 6 2 1))
+(s lst)
+;-> (8 9)
+
+(setq lst '(1 2 3 4 5 6 7 8 9 10))
+(s lst)
+;-> (15 40)
+
+
+-----------------
+Periodo di Pisano
+-----------------
+
+La successione di Fibonacci modulo 2 è una successione periodica di periodo 3: 0, 1, 1, 0, 1, 1, ...
+Per qualsiasi numero intero n, la successione di Fibonacci modulo n è periodica e la lunghezza del ciclo periodico è detta Periodo di Pisano.
+
+Sequenza OEIS A001175:
+Pisano periods (or Pisano numbers): period of Fibonacci numbers mod n.
+  1, 3, 8, 6, 20, 24, 16, 12, 24, 60, 10, 24, 28, 48, 40, 24, 36, 24, 18,
+  60, 16, 30, 48, 24, 100, 84, 72, 48, 14, 120, 30, 48, 40, 36, 80, 24,
+  76, 18, 56, 60, 40, 48, 88, 30, 120, 48, 32, 24, 112, 300, 72, 84, 108,
+  72, 20, 48, 72, 42, 58, 120, 60, 30, 48, 96, 140, 120, 136, ...
+
+(define (fibo-lutz num)
+  (let ( (out '(0L 1L)) (x 1L) )
+    (extend out (series x (fn (y) (+ x (swap y x))) (- num 1)))))
+
+(define (pisano limite fibo-max)
+  (local (seq fibs idx)
+    (setq seq '(1))
+    ; calcolo di fibo-max numeri di Fibonacci
+    (setq fibs (fibo-lutz fibo-max))
+    ; per ogni numero da 2 a limite...
+    (for (num 2 limite)
+      ; cerca il periodo della successione di Fibonacci modulo num
+      (setq idx (find-repeat (map (fn(x) (% x num)) fibs) 2))
+      (if (> (length idx) 1)
+        (push (idx 1) seq -1)
+        (push nil seq -1)))
+    seq))
+
+(pisano 67 250)
+;-> (1 3 8 6 20 24 16 12 24 60 10 24 28 48 40 24 36 24 18
+;->  60 16 30 48 24 100 84 72 48 14 120 30 48 40 36 80 24
+;->  76 18 56 60 40 48 88 30 120 48 32 24 112 nil 72 84 108
+;->  72 20 48 72 42 58 120 60 30 48 96 140 120 136)
+In questo caso il valore 250 non è sufficiente come limite per il numero di numeri di Fibonacci.
+Questo significa che il periodo del valore nil è maggiore di 250.
+(ref nil (pisano 67 250))
+;-> (49)
+
+(pisano 67 350)
+;-> (1 3 8 6 20 24 16 12 24 60 10 24 28 48 40 24 36 24 18
+;->  60 16 30 48 24 100 84 72 48 14 120 30 48 40 36 80 24
+;->  76 18 56 60 40 48 88 30 120 48 32 24 112 300 72 84 108
+;->  72 20 48 72 42 58 120 60 30 48 96 140 120 136)
+
+Vediamo la funzione "find-repeat" che trova il periodo della successione di Fibonacci modulo n.
+
+(define (find-repeat lst distinct)
+  (if (apply = lst) ; tutti gli elementi della lista sono uguali
+      '(0)
+      (let ( (sublist '()) (found nil) )
+        ;; Creiamo la sublist finchè non troviamo due numeri distinti
+        (dolist (el lst found)
+          ;; Aggiungiamo ogni numero alla sublist
+          (push el sublist -1)
+          ;; Fermiamoci quando abbiamo due distinti
+          (if (= (length (unique sublist)) distinct)
+              (setq found true))
+        )
+        ;(println sublist)
+        ;; Cerchiamo la sublist nella lista completa
+        (filter (fn (i) (= sublist (i (length sublist) lst)))
+                (flat (ref-all (sublist 0) lst))))))
+
+Come funziona:
+- Costruisce una sublist dinamicamente finché trova distinct numeri diversi.
+(nel nostro caso per la successione di Fibonacci modulon sono sufficienti due numeri diversi)
+- Cerca la sublist nella lista con filter, identificando tutte le occorrenze.
+(vedi funzione "index-seq" su yo.lsp)
+- Restituisce gli indici delle ripetizioni.
+(nel nostro caso prendiamo il secondo indice (se esiste, altrimenti non esiste periodo))
+
+(setq lst '(1 1 2 3 5 8 4 3 7 1 8 0 8 8 7 6 4 1 5 6 2 8 1 0 1 1 2 3 5 8))
+(find-repeat lst 2)
+;-> (0 24)
+La lista comincia a ripetere gli stessi numeri iniziali alla posizione 24:
+... 1 1 2 3 5 8.
+(lst 24)
+;-> 1
+
+(find-repeat '(1 2 1 2 1 2) 2)
+;-> (0 2 4)
+(find-repeat '(1 2 1 2 1 2) 3)
+;-> (0)
+(find-repeat '(1 2 1 2 1 2 1 2 1 2) 3)
+;-> (0)
+(find-repeat '(2 2 2 2 2) 2)
+;-> (0)
+
+Data una lista di numeri (per esempio):
+(setq lst '(1 1 2 3 5 8 4 3 7 1 8 0 8 8 7 6 4 1 5 6 2 8 1 0 1 1 2 3 5 8))
+(map (fn(x) (% x 2)) (map fibo-i (sequence 1 300)))
+(map (fn(x) (% x 3)) (map fibo-i (sequence 1 20)))
+
+(setq u '(1 1 1 1 1))
+(apply = u)
+;-> true
+
+Soluzione finale:
+
+Come funziona:
+- Costruisce una sublist dinamicamente finché trova distinct numeri diversi.
+- Cerca la sublist nella lista con filter, identificando tutte le occorrenze.
+- Restituisce gli indici delle ripetizioni.
+
+(define (find-repeat lst distinct)
+  (if (apply = lst)
+      '(0)
+      (let ( (sublist '()) (found nil) )
+        ;; Creiamo la sublist finchè non troviamo due numeri distinti
+        (dolist (el lst found)
+          ;; Aggiungiamo ogni numero alla sublist
+          (push el sublist -1)
+          ;; Fermiamoci quando abbiamo due distinti
+          (if (= (length (unique sublist)) distinct)
+              (setq found true))
+        )
+        ;(println sublist)
+        ;; Cerchiamo la sublist nella lista completa
+        (filter (fn (i) (= sublist (i (length sublist) lst)))
+                (flat (ref-all (sublist 0) lst))))))
+
+(setq lst '(1 1 2 3 5 8 4 3 7 1 8 0 8 8 7 6 4 1 5 6 2 8 1 0 1 1 2 3 5 8))
+(find-repeat lst 2)
+;-> (0 24)
+(find-repeat '(1 2 1 2 1 2) 2)
+;-> (0 2 4)
+(find-repeat '(1 2 1 2 1 2) 3)
+;-> (0)
+(find-repeat '(2 2 2 2 2) 2)
+;-> (0)
+
+Possiamo migliorarla per fare in modo che la sublist si possa costruire a partire dall'indice x invece che l'indice 0. In questo modo potremmo cercare ripetizioni anche che non iniziano dal primo elemento.
+Permettere alla sublist di essere costruita da un indice qualsiasi anziché da 0 rende la funzione più flessibile, in modo che possiamo trovare ripetizioni ovunque nella lista.
+Possiamo introdurre un parametro start-index per specificare da dove iniziare la costruzione della sublist.
+La logica rimarrebbe simile, ma anziché partire sempre dall'inizio, considererebbe un punto arbitrario.
+Un possibile schema:
+- Inizia la costruzione della sublist dall'indice start-index.
+- Aggiungi gli elementi fino a quando trovi distinct numeri diversi.
+- Usa index-seq per trovare le ripetizioni della sequenza.
+
+(define (find-repeat lst start-index distinct)
+  (if (apply = lst)
+      '(0)
+      (let ( (sublist '()) (found nil) )
+        ;; Creiamo la sublist a partire da start-index
+        (dolist (el (slice lst start-index) found)
+          ;; Aggiungiamo ogni numero alla sublist
+          (push el sublist -1)
+          ;; Fermiamoci quando abbiamo il numero desiderato di distinti
+          (if (= (length (unique sublist)) distinct)
+              (setq found true))
+        )
+        ;(println sublist)
+        ;; Cerchiamo la sublist nella lista completa
+        (filter (fn (i) (= sublist (i (length sublist) lst)))
+                (flat (ref-all (sublist 0) lst))))))
+
+(setq lst '(1 1 2 3 5 8 4 3 7 1 8 0 8 8 7 6 4 1 5 6 2 8 1 0 1 1 2 3 5 8))
+(find-repeat lst 3 2)  ;; Cerca ripetizioni partendo dall'indice 5
+;-> (3 27)
+(lst 27)
+;-> 3
+
+Cosa cambia in questa versione?
+ start-index: specifica l’indice da cui iniziare la ricerca.
+ Slicing della lista: La sublist viene costruita da start-index, non da 0.
+ Stesso metodo di ricerca: Usa index-seq per trovare la ripetizione.
+Ora possiamo trovare ripetizioni in qualsiasi posizione della lista.
+
+Nota: le ripetizioni vengono calcolate con 'distinct' numeri, quindi per alcune successioni potrebbero essere necessarie diverse prove prima di individuare il perido corretto.
+
 ============================================================================
 

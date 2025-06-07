@@ -6549,6 +6549,7 @@ Usiamo la funzione "factor" e "unique".
     ; (2 * 3 * 5 * 7 = 210)
     (for (num 211 limite)
       (setq fattori (factor num))
+      ; il numero deve avere 4 fattori primi unici
       (if (and (= (length fattori) 4) (= (length (unique fattori)) 4))
           (push num out -1)))
     out))

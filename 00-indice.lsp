@@ -2974,6 +2974,8 @@ NOTE LIBERE 30
   British Mathematical Olympiad - 1996 - Problem 1
   British Mathematical Olympiad - 1996 - Problem 4
   Liste visitabili
+  Somma della parte sinistra e destra di una lista
+  Periodo di Pisano
 
 PROBLEMI SUI DADI
 =================
