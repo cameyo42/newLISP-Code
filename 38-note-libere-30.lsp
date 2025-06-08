@@ -2621,6 +2621,8 @@ Questo significa che il periodo del valore nil è maggiore di 250.
 ;->  76 18 56 60 40 48 88 30 120 48 32 24 112 300 72 84 108
 ;->  72 20 48 72 42 58 120 60 30 48 96 140 120 136)
 
+Potremmo scrivere: fibo-max = limite^2 (vedi Nota al termine.)
+
 Vediamo la funzione "find-repeat" che trova il periodo della successione di Fibonacci modulo n.
 
 (define (find-repeat lst distinct)
@@ -2747,6 +2749,113 @@ Cosa cambia in questa versione?
 Ora possiamo trovare ripetizioni in qualsiasi posizione della lista.
 
 Nota: le ripetizioni vengono calcolate con 'distinct' numeri, quindi per alcune successioni potrebbero essere necessarie diverse prove prima di individuare il perido corretto.
+
+Nota: Successioni modulo m hanno sempre periodo finito (al massimo m^k per successioni di ordine k).
+Per "successioni di ordine k" si intendono le successioni ricorrenti lineari di ordine k, dove ogni termine dipende dai k termini precedenti.
+Definizione formale:
+Una successione ricorrente lineare di ordine k è definita da una relazione del tipo:
+
+  a(n) = c1·a(n-1) + c2·a(n-2) + ... + ck·a(n-k)
+  dove:
+  - c1, c2, ..., ck sono coefficienti costanti
+  - k è l'ordine della ricorrenza
+  - Servono k condizioni iniziali: a(0), a(1), ..., a(k-1)
+
+Esempi:
+
+Ordine 1: a(n) = c·a(n-1)
+Esempio: a(n) = 2·a(n-1) con a(0) = 1
+Risultato: 1, 2, 4, 8, 16, ...
+
+Ordine 2: a(n) = c1·a(n-1) + c2·a(n-2)
+Esempio: Fibonacci -> a(n) = a(n-1) + a(n-2) con a(0)=0, a(1)=1
+Risultato: 0, 1, 1, 2, 3, 5, 8, 13, ...
+
+Ordine 3: a(n) = c1·a(n-1) + c2·a(n-2) + c3·a(n-3)
+Esempio: Tribonacci -> a(n) = a(n-1) + a(n-2) + a(n-3)
+
+Quando consideriamo una successione ricorrente di ordine k modulo m, lo "stato" della successione in ogni momento è determinato da k valori consecutivi.
+Poiché ogni valore può assumere al massimo m valori diversi (da 0 a m-1), ci sono al massimo m^k stati possibili.
+Questo significa che il periodo della successione non può superare m^k, perché dopo al massimo m^k passi dovremo necessariamente ripetere uno stato già visto, e da quel momento la successione diventa periodica.
+L'ordine k determina quindi un limite superiore teorico per la lunghezza del periodo quando lavoriamo in aritmetica modulare.
+
+
+----------------------
+Stringhe ASCII casuali
+----------------------
+
+Scrivere una funzione che genera una stringa casuale che può essere composta dai seguenti caratteri:
+1) minuscole (a..z)
+2) maiuscole (A..Z)
+3) numeri (0..9)
+Tutti i caratteri devono avere la stessa probabilità di essere selezionati.
+La funzione deve essere la più corta possibile.
+
+(char "a")
+;-> 97
+(char "z")
+;-> 122
+(char "A")
+;-> 65
+(char "Z")
+;-> 90
+(char "0")
+;-> 48
+(char "9")
+;-> 57
+
+Creazione della lista dei codici ASCII dei caratteri da utilizzare:
+(setq codici (flat (map sequence '(48 65 97) '(57 90 122))))
+;-> (48 49 50 51 52 53 54 55 56 57 65 66 67 68 69 70 71 72 73 74 75 76
+;->  77 78 79 80 81 82 83 84 85 86 87 88 89 90 97 98 99 100 101 102 103
+;->  104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120
+;->  121 122)
+
+Creazione della lista dei caratteri ASCII da utilizzare:
+(setq ch (map char codici))
+;-> ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "G"
+;->  "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X"
+;->  "Y" "Z" "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o"
+;->  "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z")
+
+Creazione della stringa finale:
+(join (slice (randomize ch) 0 6))
+;-> "noXd1u"
+
+Funzione unica:
+(define (s n) (join (slice (randomize 
+              (map char (flat (map sequence '(48 65 97) '(57 90 122))))) 0 n)))
+
+Funzione finale (94 caratteri):
+(define(s n)(join(slice(randomize(map char(flat(map sequence '(48 65 97)'(57 90 122)))))0 n)))
+
+Proviamo:
+
+(s 0)
+;-> ""
+(s 10)
+;-> "EmOsAkfuHb"
+(s 6)
+;-> "0MeNS4"
+
+Verifichiamo che i caratteri hanno tutti la stessa probabilità.
+
+(define (test max-len iter)
+  (let ( (chars '()) (unici '()) )
+    (for (i 1 iter)
+      (extend chars (explode (s (+ (rand max-len) 1))))
+    )
+    (setq unici (unique chars))
+    (sort (map list (count unici chars) unici))))
+
+(time (println (test 10 1e6)))
+;-> ((88157 "8") (88183 "6") (88206 "q") (88271 "r") (88302 "O") (88358 "h")
+;->  (88368 "0") (88423 "m") (88428 "u") (88447 "W") (88448 "Z") (88458 "D")
+;->  ...
+;->  (89048 "Q") (89056 "z") (89091 "x") (89145 "v") (89480 "b"))
+;-> 25568.785
+
+Vedi anche "Generatore di stringhe casuali" su "Funzioni varie".
 
 ============================================================================
 

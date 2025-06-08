@@ -3303,10 +3303,10 @@ Vedi anche "Numero di partite nel Tic-Tac-Toe" su "Note libere 5".
 
 
 -------------------------------------
-Funzione da interi e interi gaussiani
+Funzione da interi a interi gaussiani
 -------------------------------------
 
-Definiamo una funzione suriettiva che va dal dominio dagli interi positivi al codominio agli interi gaussiani.
+Definiamo una funzione suriettiva che va dal dominio dagli interi positivi al codominio degli interi gaussiani.
 Gli interi gaussiani sono numeri complessi in cui la parte reale e quella immaginaria sono numeri interi.
 Una funzione f: X->Y è suriettiva se per ogni y in Y, esiste x in X tale che f(x) = y.
 In altre parole, una funzione è suriettiva se ogni elemento del codominio Y è mappato da almeno un elemento del dominio X.

@@ -2319,7 +2319,7 @@ NOTE LIBERE 22
   Il metodo middle-square per generare numeri casuali
   Programma autoriavviante dopo N secondi
   Posizioni valide del tic-tac-toe
-  Funzione da interi e interi gaussiani
+  Funzione da interi a interi gaussiani
   Numeri Xenodromi
   Sequenza di Rudin-Shapiro
   Calendario a due cubi
@@ -2976,6 +2976,7 @@ NOTE LIBERE 30
   Liste visitabili
   Somma della parte sinistra e destra di una lista
   Periodo di Pisano
+  Stringhe ASCII casuali
 
 PROBLEMI SUI DADI
 =================

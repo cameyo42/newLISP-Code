@@ -2102,15 +2102,15 @@ N.B. Il numero 42 deve essere calcolato in qualche modo (numeri casuali, qualunq
 
 (define (quarantadue)
   (letn ( (start (time-of-day))
-          (end (+ start 7500)) )
+          (end (+ start (+ 2500 (rand 2500)))) )
         (until (< end (time-of-day))
-          (if (!= val 42)
+          (if (!= val (char "*"))
               (setq val (apply amb (sequence 0 100)))))
-        (if (= val 42) val nil)))
+        (if (= val (char "*")) val nil)))
 
 (time (println (quarantadue)))
 ;-> 42
-;-> 7500.211
+;-> 3132.01
 
 
 ---------------------

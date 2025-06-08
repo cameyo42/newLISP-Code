@@ -5241,6 +5241,8 @@ c4) tre consonanti diverse (5%)
 
 Inoltre sarebbe interessante modificare o definire altre regole di costruzione.
 
+Vedi anche "Stringhe ASCII casuali" su "Note libere 30".
+
 
 --------------------
 Inverso di un numero
