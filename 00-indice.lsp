@@ -2978,6 +2978,8 @@ NOTE LIBERE 30
   Periodo di Pisano
   Stringhe ASCII casuali
   Interi Alessandrini
+  Timer 555
+  Timer 555 e Claude AI
 
 PROBLEMI SUI DADI
 =================

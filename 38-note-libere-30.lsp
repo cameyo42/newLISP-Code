@@ -3019,5 +3019,324 @@ Esempio:
    - n = p * q * r
 Questo genera tutti gli interi alessandrini generati da quel particolare valore di p.
 
+
+---------
+Timer 555
+---------
+
+Astable mode
+------------
+An Astable Circuit has no stable state - hence the name "astable". The output continually switches state between high and low without without any intervention from the user, called a 'square' wave. This type of circuit could be used to give a mechanism intermittent motion by switching a motor on and off at regular intervals. It can also be used to flash lamps and LEDs, and is useful as a 'clock' pulse for other digital ICs and circuits.
+
+Astable 555 Square Wave Calculator
+----------------------------------
+In an astable circuit, the output continually switches state between high and low without any intervention from the user.
+The duration of the high and low states are based on what values you choose for R1, R2 and C1.
+
+The formulas used are:
+Time High (secs) = 0.693 * (R1 + R2) * C
+Time Low (secs) = 0.693 * R2 * C
+Frequency (hertz) = 1.44 / ((R1 + R2 + R2) * C)
+Duty Cycle Percentage = (Th / (Th + Tl)) * 100
+R1, R2 --> Ohms
+C --> Farads
+
+Circuit:
+
+  +Vcc --------+-------------+-----+--------------
+               |             |     |
+               @             |     |
+            R1 @             |     |
+               @       +----------------+
+               |       |     4     8    |
+               +-------| 7              |
+               |       |                |
+               @       |     (555)      |
+            R2 @    +--| 6            3 |----- Output
+               @    |  |                |
+               |    |  |                |
+               +----+--| 2              |
+               |       |     1     5    |
+               |       +----------------+
+               |             |     |
+          C  =====           |     |
+             =====           |    ===  0.1 nF
+               |             |    === 
+               |             |     |
+               |             |     |
+    0V --------+-------------+-----+--------------
+
+Output:
+
+    +----+        +----+        +----+        +----+        +----+
+    |    |        |    |        |    |        |    |        |    |
+    |    |        |    |        |    |        |    |        |    |
+----+    +--------+    +--------+    +--------+    +--------+    +----
+
+Time High (secs) = 0.693 * (R1 + R2) * C
+Time Low (secs) = 0.693 * R2 * C
+Frequency (hertz) = 1.44 / ((R1 + R2 + R2) * C)
+Duty Cycle Percentage = (Th / (Th + Tl)) * 100
+
+(define (t555 r1 r2 c)
+  (letn ( (th (mul 0.693 (add r1 r2) c))
+          (tl (mul 0.693 r2 c))
+          (freq (div 1.44 (mul (add r1 r2 r2) c)))
+          (duty (mul (div th (add th tl)) 100)))
+     (println "Time High (secs) = " th)
+     (println "Time Low (secs) = " tl)
+     (println "Frequency (hertz) = " freq)
+     (println "Duty Cycle Percentage = " duty) '>))
+
+(t555  10000 5000 0.00005)
+;-> Time High (secs) = 0.5197500000000001
+;-> Time Low (secs) = 0.17325
+;-> Frequency (hertz) = 1.44
+;-> Duty Cycle Percentage = 75
+
+
+---------------------
+Timer 555 e Claude AI
+---------------------
+
+9 giugno 2025
+
+******
+UTENTE
+******
+In un circuito elettronico l'uscita cambia continuamente stato tra alto e basso senza alcun intervento da parte dell'utente.
+La durata degli stati alto e basso si basa sui valori scelti per R1, R2 e C.
+Le formule sono le seguenti:
+  Time High (secs) = 0.693 * (R1 + R2) * C
+  Time Low (secs) = 0.693 * R2 * C
+  Frequency (hertz) = 1.44 / ((R1 + R2 + R2) * C)
+  Duty Cycle Percentage = (Th / (Th + Tl)) * 100
+Come scegliere R1, R2 e C partendo da valori predefiniti di:
+Time High, Time Low e Frequency?
+
+******
+CLAUDE
+******
+Il circuito che descrivi è un oscillatore astabile, tipicamente realizzato con un timer 555.
+Per calcolare i valori dei componenti R1, R2 e C partendo dai valori desiderati di Time High, Time Low e Frequency, devi risolvere il sistema di equazioni in modo inverso.
+
+Ecco il procedimento:
+
+## Metodo di calcolo
+1. Scegli prima il valore del condensatore C
+- Inizia scegliendo un valore standard per C (es: 1µF, 10µF, 100nF)
+- Valori tipici: da 1nF a 1000µF a seconda della frequenza desiderata
+2. Calcola R2 dal Time Low
+R2 = Time Low / (0.693 × C)
+3. Calcola R1 dal Time High
+R1 = (Time High / (0.693 × C)) - R2
+
+## Verifica dei risultati
+Una volta calcolati i valori, verifica che:
+- R1 > 0 (altrimenti il Time High è troppo piccolo rispetto al Time Low)
+- I valori di R1 e R2 siano pratici (tipicamente tra 1kΩ e 1MΩ)
+- La frequenza risultante sia quella desiderata usando: f = 1.44 / ((R1 + 2×R2) × C)
+
+## Esempio pratico
+Se vuoi:
+- Time High = 1ms
+- Time Low = 0.5ms  
+- C = 100nF
+
+Calcoli:
+- R2 = 0.0005 / (0.693 × 100×10⁻⁹) = 7.2kΩ
+- R1 = (0.001 / (0.693 × 100×10⁻⁹)) - 7.2kΩ = 7.6kΩ
+
+Nota importante: Se R1 risulta negativo, significa che il Time High desiderato è troppo piccolo rispetto al Time Low. In questo caso devi aumentare il Time High o diminuire il Time Low, oppure usare un condensatore più piccolo.
+
+******
+UTENTE
+******
+Puoi scrivere un programma in newlisp che prende Time High e Time Low e calcola R1, R2 e C rispettando i vincoli che hai elencato?
+
+******
+CLAUDE
+******
+Ho creato un programma completo in NewLISP che calcola i componenti per un oscillatore astabile 555. 
+Il programma include:
+
+## Caratteristiche principali:
+1. **Calcolo automatico**: Prova diversi valori standard di condensatori e trova la combinazione ottimale
+2. **Valori standard**: Usa valori commerciali reali per resistenze e condensatori
+3. **Verifica vincoli**: Controlla che R1 > 0 e che i valori siano nel range pratico (1kΩ - 1MΩ)
+4. **Ottimizzazione**: Trova la soluzione con il minimo errore rispetto ai valori desiderati
+5. **Formattazione intelligente**: Mostra i valori con le unità appropriate (µF, nF, kΩ, MΩ)
+
+## Modalità d'uso:
+- **Modalità interattiva**: Inserisci i tuoi valori di Time High e Time Low
+- **Esempi predefiniti**: Tre esempi pratici (LED lampeggiante, oscillatore audio, clock digitale)
+- **Uso come libreria**: Chiama direttamente `(calculate-555-components t-high t-low)`
+
+Il programma mostra sia i valori calcolati teoricamente che quelli standard più vicini, insieme agli errori percentuali, così puoi valutare se la precisione è accettabile per la tua applicazione.
+
+Per eseguirlo, salva il codice in un file (es. `timer555.lsp`) e lancialo con `newlisp timer555.lsp`.
+
+#!/usr/bin/env newlisp
+; Calcolatore per oscillatore astabile 555 Timer
+; Calcola R1, R2 e C partendo da Time High e Time Low
+
+; Valori standard per condensatori (in Farad)
+(setq standard-capacitors '(1e-12 10e-12 100e-12 1e-9 10e-9 100e-9 1e-6 10e-6 100e-6 1e-3))
+
+; Valori standard per resistenze (in Ohm)
+(setq standard-resistors '(1000 1200 1500 1800 2200 2700 3300 3900 4700 5600 6800 8200
+                          10000 12000 15000 18000 22000 27000 33000 39000 47000 56000 68000 82000
+                          100000 120000 150000 180000 220000 270000 330000 390000 470000 560000 680000 820000
+                          1000000))
+
+; Funzione per trovare il valore standard più vicino
+(define (find-closest-standard value standards)
+  (let ((min-diff 1e12) (closest 0))
+    (dolist (std standards)
+      (let ((diff (abs (sub value std))))
+        (if (< diff min-diff)
+            (begin
+              (setq min-diff diff)
+              (setq closest std)))))
+    closest))
+
+; Funzione per formattare i valori con unità appropriate
+(define (format-capacitor c)
+  (cond
+    ((>= c 1e-3) (format "%.1f mF" (div c 1e-3)))
+    ((>= c 1e-6) (format "%.1f µF" (div c 1e-6)))
+    ((>= c 1e-9) (format "%.0f nF" (div c 1e-9)))
+    (true (format "%.0f pF" (div c 1e-12)))))
+
+(define (format-resistor r)
+  (cond
+    ((>= r 1000000) (format "%.1f MΩ" (div r 1000000)))
+    ((>= r 1000) (format "%.1f kΩ" (div r 1000)))
+    (true (format "%.0f Ω" r))))
+
+; Funzione principale di calcolo
+(define (calculate-555-components t-high t-low)
+  (println "=== CALCOLATORE 555 TIMER ASTABILE ===")
+  (println (format "Time High: %.3f ms" (mul t-high 1000)))
+  (println (format "Time Low:  %.3f ms" (mul t-low 1000)))
+  (println (format "Periodo:   %.3f ms" (mul (add t-high t-low) 1000)))
+  (println (format "Frequenza: %.2f Hz" (div 1 (add t-high t-low))))
+  (println (format "Duty Cycle: %.1f%%" (mul (div t-high (add t-high t-low)) 100)))
+  (println)
+  ; Prova diversi valori di condensatore
+  (let ((best-solution nil) (best-score 1e12))
+    (dolist (c standard-capacitors)
+      (let ((r2-calc (div t-low (mul 0.693 c)))
+            (r1-calc (sub (div t-high (mul 0.693 c)) (div t-low (mul 0.693 c)))))
+        ; Verifica vincoli
+        (if (and (> r1-calc 0)
+                 (>= r1-calc 1000) (<= r1-calc 1000000)
+                 (>= r2-calc 1000) (<= r2-calc 1000000))
+            (begin
+              ; Trova resistenze standard più vicine
+              (let ((r1-std (find-closest-standard r1-calc standard-resistors))
+                    (r2-std (find-closest-standard r2-calc standard-resistors)))
+                ; Calcola errori con valori standard
+                (let ((t-high-actual (mul 0.693 (mul (add r1-std r2-std) c)))
+                      (t-low-actual (mul 0.693 (mul r2-std c))))
+                  (let ((error-high (abs (div (sub t-high-actual t-high) t-high)))
+                        (error-low (abs (div (sub t-low-actual t-low) t-low))))
+                    (let ((total-error (add error-high error-low)))
+                      (if (< total-error best-score)
+                          (begin
+                            (setq best-score total-error)
+                            (setq best-solution (list c r1-std r2-std r1-calc r2-calc
+                                                    t-high-actual t-low-actual error-high error-low))))))))))))
+    ; Mostra risultati
+    (if best-solution
+        (begin
+          (let ((c (nth 0 best-solution))
+                (r1-std (nth 1 best-solution))
+                (r2-std (nth 2 best-solution))
+                (r1-calc (nth 3 best-solution))
+                (r2-calc (nth 4 best-solution))
+                (t-high-actual (nth 5 best-solution))
+                (t-low-actual (nth 6 best-solution))
+                (error-high (nth 7 best-solution))
+                (error-low (nth 8 best-solution)))
+            (println "SOLUZIONE OTTIMALE:")
+            (println (format "C:  %s" (format-capacitor c)))
+            (println (format "R1: %s (calcolato: %s)" (format-resistor r1-std) (format-resistor r1-calc)))
+            (println (format "R2: %s (calcolato: %s)" (format-resistor r2-std) (format-resistor r2-calc)))
+            (println)
+            (println "PRESTAZIONI CON VALORI STANDARD:")
+            (let ((freq-actual (div 1.44 (mul (add r1-std (mul 2 r2-std)) c)))
+                  (duty-actual (mul (div t-high-actual (add t-high-actual t-low-actual)) 100)))
+              (println (format "Time High: %.3f ms (errore: %.1f%%)"
+                              (mul t-high-actual 1000) (mul error-high 100)))
+              (println (format "Time Low:  %.3f ms (errore: %.1f%%)"
+                              (mul t-low-actual 1000) (mul error-low 100)))
+              (println (format "Frequenza: %.2f Hz" freq-actual))
+              (println (format "Duty Cycle: %.1f%%" duty-actual)))))
+        (println "ERRORE: Impossibile trovare una soluzione valida con i vincoli specificati!"))))
+
+; Funzione di test con esempi
+(define (test-examples)
+  (println "=== ESEMPI DI CALCOLO ===")
+  (println)
+  ; Esempio 1: LED lampeggiante lento
+  (println "ESEMPIO 1: LED lampeggiante (1Hz)")
+  (calculate-555-components 0.7 0.3)
+  (println)
+  ; Esempio 2: Oscillatore audio
+  (println "ESEMPIO 2: Oscillatore audio (1kHz)")
+  (calculate-555-components 0.0007 0.0003)
+  (println)
+  ; Esempio 3: Clock digitale
+  (println "ESEMPIO 3: Clock digitale (10kHz)")
+  (calculate-555-components 0.00007 0.00003)
+  (println))
+; Funzione interattiva
+(define (interactive-mode)
+  (println "=== MODALITÀ INTERATTIVA ===")
+  (print "Inserisci Time High (secondi): ")
+  (let ((t-high (float (read-line))))
+    (print "Inserisci Time Low (secondi): ")
+    (let ((t-low (float (read-line))))
+      (if (and (> t-high 0) (> t-low 0))
+          (calculate-555-components t-high t-low)
+          (println "ERRORE: I valori devono essere positivi!")))))
+; Programma principale
+(define (main)
+  (println "CALCOLATORE COMPONENTI 555 TIMER")
+  (println "================================")
+  (println)
+  (println "Scegli un'opzione:")
+  (println "1) Modalità interattiva")
+  (println "2) Esempi predefiniti")
+  (print "Scelta (1-2): ")
+  (let ((choice (read-line)))
+    (cond
+      ((= choice "1") (interactive-mode))
+      ((= choice "2") (test-examples))
+      (true (println "Scelta non valida!")))))
+
+; Avvia il programma
+(main)
+
+; Per uso come libreria, puoi chiamare direttamente:
+; (calculate-555-components 0.001 0.0005)  ; 1ms high, 0.5ms low
+(calculate-555-components 0.00007 0.00003)
+
+******
+UTENTE
+******
+Funziona perfettamente.
+
+******
+CLAUDE
+******
+Perfetto! Sono contento che il programma funzioni bene per te.
+Il calcolatore dovrebbe aiutarti a trovare rapidamente i valori dei componenti per il tuo oscillatore 555, tenendo conto sia dei vincoli tecnici che dei valori standard disponibili in commercio.
+Se in futuro dovessi aver bisogno di modifiche o estensioni (come aggiungere altri valori standard di componenti, o calcolare parametri aggiuntivi come la corrente assorbita), sarà facile adattare il codice.
+Buona progettazione con i tuoi circuiti 555!
+
+Non male!!!
+
 ============================================================================
 
