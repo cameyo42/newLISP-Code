@@ -1822,7 +1822,7 @@ Per trovare il percorso più breve da un punto A ad un punto B, l'algoritmo migl
 - Utilizza una coda per esplorare tutti i nodi alla stessa distanza prima di andare in profondità.
 
 Complessità temporale:
-O(M × N) dove M e N sono le dimensioni del labirinto.
+O(M*N) dove M e N sono le dimensioni del labirinto.
 
 Algoritmo BFS (Breadth First Search)
 ------------------------------------
@@ -2856,6 +2856,168 @@ Verifichiamo che i caratteri hanno tutti la stessa probabilità.
 ;-> 25568.785
 
 Vedi anche "Generatore di stringhe casuali" su "Funzioni varie".
+
+
+-------------------
+Interi Alessandrini
+-------------------
+
+Chiameremo un intero positivo A "Intero Alessandrino" se esistono interi p, q, r tali che:
+
+  A = p * q * r
+e
+  1/A = 1/p + 1/q + 1/r.
+
+Ad esempio, 630 è un intero alessandrino (p = 5, q = −7, r = −18).
+
+Sequenza OEIS A147811:
+Alexandrian integers: numbers of the form n=pqr such that 1/n = 1/p - 1/q - 1/r for some integers p,q,r.
+  6, 42, 120, 156, 420, 630, 930, 1428, 1806, 2016, 2184, 3192, 4950,
+  5256, 8190, 8364, 8970, 10296, 10998, 12210, 17556, 19110, 21114,
+  23994, 24492, 28050, 32640, 33306, 34362, 37506, 39270, 44310,
+  52326, 57684, 57840, 70686, 74256, 79800, 83076, ...
+
+Algoritmo
+I numeri sono nella forma p*(p + d)*(p + (p^2 1)/d), dove d si estende sui divisori di (p^2 + 1) e p si estende su tutti gli interi positivi.
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+Funzione che calcola un dato numero di numeri Alessandrini:
+
+(define (alex nums)
+  (local (out p2 divisori a)
+    (setq out '())
+    ; ciclo per ogni numero positivo p
+    (for (p 1 nums)
+      ; (p^2 + 1)
+      (setq p2 (+ (* p p) 1))
+      ; divisori di (p^2 + 1)
+      (setq divisori (divisors p2))
+      ; ciclo per ogni divisore di p corrente
+      (dolist (d divisori)
+        ; calcolo numero alessandrino
+        (setq a (* p (+ p d) (+ p (/ p2 d))))
+        ;(print p { } d { } a) (read-line)
+        (push a out)))
+    ; I numeri alessandrini non vengono calcolati in ordine.
+    ; Anzi, alcuni numeri vengono ripetuti più volte.
+    ; Il metodo calcola più numeri del necessario,
+    ; quindi dobbiamo selezionare solo quelli fino a 'nums'.
+    (slice (sort (unique out)) 0 nums)))
+
+(setq oeis '(6 42 120 156 420 630 930 1428 1806 2016 2184 3192 4950
+             5256 8190 8364 8970 10296 10998 12210 17556 19110 21114
+             23994 24492 28050 32640 33306 34362 37506 39270 44310
+             52326 57684 57840 70686 74256 79800 83076))
+(length oeis)
+;-> 39
+
+(= (alex 39) oeis)
+;-> true
+
+(time (alex 1e4))
+;-> 164.667
+
+Nota: (alex 1e4) produce tutti risultati corretti (confrontati con OEIS).
+
+Per calcolare grandi numeri occorre utilizzare i big-integer.
+
+Funzione che calcola un dato numero di numeri Alessandrini (big-integer):
+
+(define (alex-i nums)
+  (local (ale p p2)
+    (setq ale '())
+    (setq p 1L)
+    (while (< p nums)
+      (setq p2 (+ (* p p) 1L))
+      (dolist (d (divisors p2))
+        (push (* p (+ p d) (+ p (/ p2 d))) ale))
+      (++ p))
+    (slice (sort (unique ale)) 0 nums)))
+
+Proviamo:
+
+(alex-i 39)
+;-> (6L 42L 120L 156L 420L 630L 930L 1428L 1806L 2016L 2184L 3192L 4950L
+;->  5256L 8190L 8364L 8970L 10296L 10998L 12210L 17556L 19110L 21114L
+;->  23994L 24492L 28050L 32640L 33306L 34362L 37506L 39270L 44310L
+;->  52326L 57684L 57840L 70686L 74256L 79800L 83076L)
+
+(= (alex-i 39) oeis)
+;-> true
+
+(= (alex-i 1e4) (alex 1e4))
+;-> true
+
+(= (setq ai (alex-i 1e5)) (setq a (alex 1e5)))
+;-> nil
+(ai 0)
+;-> 6
+(a 0)
+;-> -9223028910164634526
+
+(time (alex-i 1e4))
+;-> 225.293
+(time (alex-i 1e5))
+;-> 6563.964
+
+(time (setq t (alex-i 500000)))
+;-> 86341.745
+(t 0)
+;-> 6L
+(t -1)
+;-> 628833933090L
+
+Possiamo calcolare p, q e r partendo da p e d.
+Dalla formula fornita nella sequenza OEIS A147811, abbiamo:
+- q = p + d
+- r = p + (p^2 + 1)/d
+- n = p * q * r
+dove:
+- p è un intero positivo qualsiasi
+- d è un divisore di (p^2 + 1)
+
+Esempio:
+N = 630
+- Se p = 5, allora p^2 + 1 = 26
+- I divisori di 26 sono: 1, 2, 13, 26
+- Con d = 2: q = 5 + 2 = 7, r = 5 + 26/2 = 18
+- Quindi n = 5 * 7 * 18 = 630
+
+Tuttavia, per ottenere i valori nell'esempio (p = 5, q = -7, r = -18), si deve considerare che la formula può essere adattata con segni appropriati per soddisfare la condizione con alcuni valori negativi.
+Esempio:
+1. Scegliamo un valore di p
+2. Calcoliamo p^2 + 1
+3. Troviamo tutti i divisori di (p^2 + 1)
+4. Per ogni divisore d, calcoliamo:
+   - q = p + d
+   - r = p + (p^2 + 1)/d
+   - n = p * q * r
+Questo genera tutti gli interi alessandrini generati da quel particolare valore di p.
 
 ============================================================================
 

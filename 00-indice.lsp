@@ -2977,6 +2977,7 @@ NOTE LIBERE 30
   Somma della parte sinistra e destra di una lista
   Periodo di Pisano
   Stringhe ASCII casuali
+  Interi Alessandrini
 
 PROBLEMI SUI DADI
 =================
