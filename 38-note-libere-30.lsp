@@ -3338,5 +3338,363 @@ Buona progettazione con i tuoi circuiti 555!
 
 Non male!!!
 
+
+-------------------------
+Sequenze Onda di ordine k
+-------------------------
+
+La sequenza Onda di ordine k=3 è la seguente:
+
+Valore onda:     1  2    3    2  1  2    3    2  1
+                 - --- ----- --- - --- ----- --- -
+Numero sequenza: 1 2 2 3 3 3 4 4 5 6 6 7 7 7 8 8 9
+
+Analizziamo la sequenza descritta:
+- I valori dell'onda seguono il pattern: 1, 2, 3, 2, 1, 2, 3, 2, 1, ...
+- Ogni numero x appare un numero di volte pari al valore dell'onda corrispondente
+- La sequenza risultante è: 1, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 7, 7, 8, 8, 9, ...
+
+In altre parole, i numeri della sequenza crescono sempre. 
+E' il numero di ripetizioni che forma un'onda da 1 a k e da k a 1.
+
+Definizione matematica:
+
+Per una sequenza Onda di ordine k, possiamo definire:
+
+1) Funzione Onda W(i)
+   Per la posizione i-esima (i ≥ 1):
+
+   W(i) = k - |((i-1) mod (2k-2)) - (k-1)|
+
+   Per k=3:
+   - Il periodo dell'onda è 2k-2 = 4
+   - W(i) = 3 - |((i-1) mod 4) - 2|
+
+2) Sequenza S(n) 
+   L'n-esimo termine della sequenza è dato da:
+
+   S(n) = min{x : Σ(i=1 to x) W(i) ≥ n}
+
+   In altre parole, S(n) è il più piccolo intero x tale che la somma dei primi x valori dell'onda sia almeno n.
+
+Verifica per k=3:
+- W(1) = 1, W(2) = 2, W(3) = 3, W(4) = 2, W(5) = 1, W(6) = 2, ...
+- S(1) = 1 (primo 1)
+- S(2) = S(3) = 2 (due 2)
+- S(4) = S(5) = S(6) = 3 (tre 3)
+- S(7) = S(8) = 4 (due 4)
+- E così via...
+
+Formula alternativa ricorsiva
+-----------------------------
+Se definiamo T(x) come il numero totale di elementi fino al numero x:
+
+T(x) = Σ(i=1 to x) W(i)
+
+Allora: S(n) = x se e solo se T(x-1) < n ≤ T(x)
+
+Nota: la sequenza Onda di ordine 1 ha tutti i numeri pari a 1.
+
+; Funzione per calcolare il valore dell'onda alla posizione i
+; per una sequenza di ordine k
+(define (wave-value i k)
+  (- k (abs (- (% (- i 1) (- (* 2 k) 2)) (- k 1)))))
+
+; Funzione per calcolare S(n) - l'n-esimo termine della sequenza Onda
+; Metodo iterativo efficiente
+(define (wave-sequence n k)
+  (let ((x 1) (total 0))
+    (while (< total n)
+      (setq total (+ total (wave-value x k)))
+      (if (< total n) (++ x)))
+    x))
+
+; Funzione per calcolare S(n) - l'n-esimo termine della sequenza Onda
+; Funzione alternativa più diretta usando somma cumulativa
+(define (wave-sequence-alt n k)
+  (let ((x 1) (sum 0))
+    (while true
+      (setq sum (+ sum (wave-value x k)))
+      (if (>= sum n) (break))
+      (++ x))
+    x))
+
+; Funzione per generare i primi n termini della sequenza
+(define (generate-wave-sequence n k)
+  (if (= k 1)
+    (dup 1 n)
+    (map (lambda (i) (wave-sequence i k)) (sequence 1 n))))
+
+; Funzione per visualizzare la sequenza con i valori dell'onda
+(define (display-wave-pattern n k)
+  (println "Sequenza Onda di ordine k=" k)
+  (if (= k 1)
+    (begin
+      (println "Valore onda: " (dup 1 n))
+      (println "Sequenza S:  " (dup 1 n)))
+    (begin
+      (println "Valore onda: " (map (lambda (i) (wave-value i k)) (sequence 1 n)))
+      (println "Sequenza S:  " (generate-wave-sequence (apply + (map (lambda (i) (wave-value i k)) (sequence 1 n))) k)))))
+
+; Funzione di test per la verifica dei risultati
+(define (test)
+  ; Test con k=3 come nell'esempio
+  (println "Test con k=3:")
+  (println "Primi 20 termini: " (generate-wave-sequence 20 3))
+  (println)
+  ; Verifica con alcuni valori specifici
+  (println "Verifica:")
+  (println "S(1) = " (wave-sequence 1 3))
+  (println "S(2) = " (wave-sequence 2 3))
+  (println "S(3) = " (wave-sequence 3 3))
+  (println "S(4) = " (wave-sequence 4 3))
+  (println "S(9) = " (wave-sequence 9 3))
+  (println "S(17) = " (wave-sequence 17 3))
+  (println)
+  ; Visualizza il pattern per k=3
+  (display-wave-pattern 10 3)
+  ; Test con altri valori di k
+  (println "\nTest con k=1:")
+  (println "Primi 10 termini: " (generate-wave-sequence 10 1))
+  (println "\nTest con k=2:")
+  (println "Primi 15 termini: " (generate-wave-sequence 15 2))
+  (println "\nTest con k=4:")
+  (println "Primi 15 termini: " (generate-wave-sequence 15 4))
+'>)
+
+; Esegue la funzione di test
+(test)
+
+; Test ulteriori
+(generate-wave-sequence 20 2)
+;-> (1 2 2 3 4 4 5 6 6 7 8 8 9 10 10 11 12 12 13 14)
+(generate-wave-sequence 20 5)
+;-> (1 2 2 3 3 3 4 4 4 4 5 5 5 5 5 6 6 6 6 7)
+(generate-wave-sequence 20 10)
+;-> (1 2 2 3 3 3 4 4 4 4 5 5 5 5 5 6 6 6 6 6)
+
+
+--------------------------
+Intersezione di intervalli
+--------------------------
+
+Data una lista di coppie di interi (L R) (intervallo di numeri da L a R), contare il numero di coppie univoche che si intersecano.
+Una coppia (L1 R1) interseca la coppia (L2 R2) se L1 <= L2 <= R1 o L2 <= L1 <= R2.
+Inoltre risulta sempre: L <= R per una singola coppia.
+
+Metodo Brute-Force
+------------------
+
+Algoritmo
+Controllo di ogni coppia di intervalli
+
+; Funzione che verifica se due coppie si intersecano
+(define (cross? c1 c2)
+  (or (and (<= (c1 0) (c2 0)) (<= (c2 0) (c1 1)))
+      (and (<= (c2 0) (c1 0)) (<= (c1 0) (c2 1)))))
+
+(cross? '(1 2) '(3 4))
+;-> nil
+(cross? '(1 5) '(5 7))
+;-> true
+
+; Funzione che calcola il numero di coppie univoche che si intersecano
+(define (num-cross lst)
+  (let ( (conta 0) (pairs '()) )
+    (for (i 0 (- (length lst) 2))
+      (for (j (+ i 1) (- (length lst) 1))
+          (if (cross? (lst i) (lst j)) (++ conta))))
+    conta))
+
+(num-cross '((1 2) (5 6) (1 5) (4 7)))
+;-> 4
+
+; Funzione che calcola le coppie univoche che si intersecano
+(define (calc-cross lst)
+  (let (pairs '())
+    (for (i 0 (- (length lst) 2))
+      (for (j (+ i 1) (- (length lst) 1))
+          (if (cross? (lst i) (lst j)) (push (list (lst i) (lst j)) pairs -1))))
+    pairs))
+
+(calc-cross '((1 2) (5 6) (1 5) (4 7)))
+;-> (((1 2) (1 5)) ((5 6) (1 5)) ((5 6) (4 7)) ((1 5) (4 7)))
+
+La complessità temporale della funzione Brute-Force vale O(n^2).
+
+Metodo Sweep-Line
+-----------------
+
+Funzionamento dell'algoritmo Sweep-Line:
+1. Ordinare gli intervalli per punto di inizio ('sort')
+2. Mantenere una lista 'end-points' dei punti finali degli intervalli già processati
+3. Per ogni nuovo intervallo:
+   - Rimuovere dalla lista i punti finali che non possono più intersecare ('filter')
+   - Contare tutti gli intervalli rimanenti (che si intersecano)
+   - Aggiungere il nuovo punto finale e mantenere la lista ordinata
+
+La complessità temporale della funzione Sweep-Line vale O(n^2*log(n)) nel caso peggiore a causa del 'sort' ripetuto degli 'end-points'.
+
+; Funzione per contare le coppie di intervalli che si intersecano
+; usando l'algoritmo sweep line
+(define (count-intersecting-pairs intervals)
+  (let ((counts 0)
+        (end-points '())
+        (sorted-intervals (sort intervals)))
+    ; Processa ogni intervallo in ordine
+    (dolist (interval sorted-intervals)
+      (let ((L (first interval))
+            (R (last interval)))
+        ; Rimuovi i punti finali che non possono più intersecare
+        ; (quelli con R_prev < L)
+        (setq end-points
+              (filter (lambda (end) (>= end L)) end-points))
+        ; Tutti gli intervalli rimanenti si intersecano con quello corrente
+        (setq counts (+ counts (length end-points)))
+        ; Aggiungi il punto finale corrente e mantieni ordinato
+        (push R end-points)
+        (setq end-points (sort end-points))))
+    counts))
+
+; Funzione ausiliaria per verificare se due intervalli si intersecano
+(define (intersect? interval1 interval2)
+  (let ((L1 (first interval1))
+        (R1 (last interval1))
+        (L2 (first interval2))
+        (R2 (last interval2)))
+    (<= (max L1 L2) (min R1 R2))))
+
+; Implementazione brute force per confronto
+(define (count-intersecting-pairs-bruteforce intervals)
+  (let ((counts 0)
+        (n (length intervals)))
+    (for (i 0 (- n 2))
+      (for (j (+ i 1) (- n 1))
+        (if (intersect? (nth i intervals) (nth j intervals))
+            (setq counts (+ counts 1)))))
+    counts))
+
+; Funzione di test
+(define (test-algorithms)
+  (println "Test degli algoritmi")
+  (println "====================")
+  ; Test case 1: intervalli semplici
+  (setq test1 '((1 3) (2 4) (5 7) (6 8)))
+  (println "Test 1: " test1)
+  (println "Sweep line: " (count-intersecting-pairs test1))
+  (println "Brute force: " (count-intersecting-pairs-bruteforce test1))
+  (println)
+  ; Test case 2: nessuna intersezione
+  (setq test2 '((1 2) (3 4) (5 6) (7 8)))
+  (println "Test 2: " test2)
+  (println "Sweep line: " (count-intersecting-pairs test2))
+  (println "Brute force: " (count-intersecting-pairs-bruteforce test2))
+  (println)
+  ; Test case 3: tutti si intersecano
+  (setq test3 '((1 10) (2 8) (3 6) (4 5)))
+  (println "Test 3: " test3)
+  (println "Sweep line: " (count-intersecting-pairs test3))
+  (println "Brute force: " (count-intersecting-pairs-bruteforce test3))
+  (println)
+  ; Test case 4: caso più complesso
+  (setq test4 '((1 4) (2 6) (3 5) (7 9) (8 10) (11 12)))
+  (println "Test 4: " test4)
+  (println "Sweep line: " (count-intersecting-pairs test4))
+  (println "Brute force: " (count-intersecting-pairs-bruteforce test4))
+  (println))
+
+; Funzione per generare test casuali
+(define (random-intervals n max-val)
+  (let ((intervals '()))
+    (dotimes (i n)
+      (let ((L (rand max-val))
+            (R (+ (rand max-val) 1)))
+        (if (> L R) (swap L R))
+        (push (list L R) intervals)))
+    intervals))
+
+; Test di performance
+(define (performance-test)
+  (println "Test di performance")
+  (println "===================")
+  ; Dataset piccolo
+  (setq small-test (random-intervals 100 10000))
+  (println "\nTest con 100 intervalli casuali...")
+  (println "Sweep Line: " 
+    (time (setq result-sweep-small (count-intersecting-pairs small-test))))
+  (println "Brute force: "
+    (time (setq result-brute-small (count-intersecting-pairs-bruteforce small-test))))
+  (println "Sweep line: " result-sweep-small)
+  (println "Brute force: " result-brute-small)
+  (println "Risultati corrispondenti: " (= result-sweep-small result-brute-small))
+  ; Dataset grande
+  (setq large-test (random-intervals 1000 10000))
+  (println "Test con 1000 intervalli casuali...")
+  (println "Sweep Line: " 
+    (time (setq result-sweep (count-intersecting-pairs large-test))))
+  (println "Brute force: "
+    (time (setq result-brute (count-intersecting-pairs-bruteforce large-test))))
+  (println "Sweep line result: " result-sweep)
+  (println "Brute force: " result-brute)
+  (println "Risultati corrispondenti: " (= result-sweep result-brute)))
+
+; Esempio di utilizzo
+(define (main)
+  (println "Algoritmi Brute-Force e Sweep-Line per Intervalli Intersecanti")
+  (println "==============================================================")
+  (println)
+  ; Esegui i test
+  (test-algorithms)
+  (performance-test)
+  ; Esempio pratico
+  (println "\nEsempio pratico:")
+  (setq my-intervals '((1 5) (2 7) (3 4) (6 9) (8 10)))
+  (println "Intervalli: " my-intervals)
+  (println "Numero di coppie intersecanti: "
+           (count-intersecting-pairs my-intervals)) '>)
+
+; Esegue il programma
+(main)
+;-> Algoritmi Brute-Force e Sweep-Line per Intervalli Intersecanti
+;-> ==============================================================
+;-> 
+;-> Test degli algoritmi
+;-> ====================
+;-> Test 1: ((1 3) (2 4) (5 7) (6 8))
+;-> Sweep line: 2
+;-> Brute force: 2
+;-> 
+;-> Test 2: ((1 2) (3 4) (5 6) (7 8))
+;-> Sweep line: 0
+;-> Brute force: 0
+;-> 
+;-> Test 3: ((1 10) (2 8) (3 6) (4 5))
+;-> Sweep line: 6
+;-> Brute force: 6
+;-> 
+;-> Test 4: ((1 4) (2 6) (3 5) (7 9) (8 10) (11 12))
+;-> Sweep line: 4
+;-> Brute force: 4
+;-> 
+;-> Test di performance
+;-> ===================
+;-> 
+;-> Test con 100 intervalli casuali...
+;-> Sweep Line: 0.997
+;-> Brute force: 2.992
+;-> Sweep line: 3206
+;-> Brute force: 3206
+;-> Risultati corrispondenti: true
+;-> Test con 1000 intervalli casuali...
+;-> Sweep Line: 63.33
+;-> Brute force: 1621.466
+;-> Sweep line result: 326688
+;-> Brute force: 326688
+;-> Risultati corrispondenti: true
+;-> 
+;-> Esempio pratico:
+;-> Intervalli: ((1 5) (2 7) (3 4) (6 9) (8 10))
+;-> Numero di coppie intersecanti: 5
+
 ============================================================================
 

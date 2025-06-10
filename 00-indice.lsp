@@ -2980,6 +2980,8 @@ NOTE LIBERE 30
   Interi Alessandrini
   Timer 555
   Timer 555 e Claude AI
+  Sequenze Onda di ordine k
+  Intersezione di intervalli
 
 PROBLEMI SUI DADI
 =================
