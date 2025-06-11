@@ -2982,6 +2982,7 @@ NOTE LIBERE 30
   Timer 555 e Claude AI
   Sequenze Onda di ordine k
   Intersezione di intervalli
+  Algoritmo A*
 
 PROBLEMI SUI DADI
 =================

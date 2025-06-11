@@ -2150,6 +2150,8 @@ Proviamo:
 ;->  . . .
 ;->  . . .
 
+Vedi anche "Algoritmo A*" su "Note libere 30".
+
 
 ------------------------------------------------
 British Mathematical Olympiad - 1996 - Problem 1
@@ -3170,11 +3172,11 @@ Il programma include:
 ## Modalità d'uso:
 - **Modalità interattiva**: Inserisci i tuoi valori di Time High e Time Low
 - **Esempi predefiniti**: Tre esempi pratici (LED lampeggiante, oscillatore audio, clock digitale)
-- **Uso come libreria**: Chiama direttamente `(calculate-555-components t-high t-low)`
+- **Uso come libreria**: Chiama direttamente '(calculate-555-components t-high t-low)'
 
 Il programma mostra sia i valori calcolati teoricamente che quelli standard più vicini, insieme agli errori percentuali, così puoi valutare se la precisione è accettabile per la tua applicazione.
 
-Per eseguirlo, salva il codice in un file (es. `timer555.lsp`) e lancialo con `newlisp timer555.lsp`.
+Per eseguirlo, salva il codice in un file (es. 'timer555.lsp') e lancialo con 'newlisp timer555.lsp'.
 
 #!/usr/bin/env newlisp
 ; Calcolatore per oscillatore astabile 555 Timer
@@ -3695,6 +3697,319 @@ La complessità temporale della funzione Sweep-Line vale O(n^2*log(n)) nel caso 
 ;-> Esempio pratico:
 ;-> Intervalli: ((1 5) (2 7) (3 4) (6 9) (8 10))
 ;-> Numero di coppie intersecanti: 5
+
+
+------------
+Algoritmo A*
+------------
+
+Ecco una descrizione generale dell'algoritmo A*:
+
+Scopo
+-----
+Trova il percorso ottimale tra due nodi in un grafo con costo minimo.
+
+Componenti Chiave
+-----------------
+1. Funzione di Costo:
+   - g(n) = costo reale dal nodo iniziale al nodo n
+   - h(n) = stima euristica dal nodo n al nodo finale (es. distanza di Manhattan)
+   - f(n) = g(n) + h(n) = costo totale stimato
+2. Liste:
+   - open_list: Nodi da esplorare (ordinati per f(n))
+   - closed_list: Nodi già esplorati
+
+Pseudo-codice
+-------------
+function A*(start, goal)
+    open_list := {start}  # Nodi da esplorare
+    closed_list := {}     # Nodi già esplorati
+    start.g := 0
+    start.f := h(start, goal)
+
+    while open_list non è vuota
+        current := nodo in open_list con f minimo
+        
+        if current == goal
+            return ricostruisci_percorso(current)
+        
+        rimuovi current da open_list
+        aggiungi current a closed_list
+
+        for each neighbor of current
+            if neighbor in closed_list
+                skip
+            
+            tentative_g := current.g + costo(current, neighbor)
+            
+            if neighbor not in open_list OR tentative_g < neighbor.g
+                neighbor.parent := current
+                neighbor.g := tentative_g
+                neighbor.f := neighbor.g + h(neighbor, goal)
+                
+                if neighbor not in open_list
+                    aggiungi neighbor a open_list
+    
+    return fallimento  # Nessun percorso trovato
+end function
+
+function ricostruisci_percorso(node)
+    percorso := []
+    while node != null
+        aggiungi node a percorso
+        node := node.parent
+    return inverti(percorso)
+end function
+
+Spiegazione
+-----------
+1. Inizializzazione:
+   - Aggiungi il nodo di partenza a open_list con g = 0 e f = h(start).
+2. Ciclo Principale:
+   - Estrai il nodo current con f minimo (più promettente).
+   - Se current è il goal, ricostruisci il percorso all'indietro tramite i parent.
+   - Espandi i vicini di current:
+     - Ignora i nodi già esplorati (closed_list).
+     - Calcola un nuovo g provvisorio per ogni vicino.
+     - Se il nuovo g è migliore, aggiorna il vicino e aggiungilo a open_list.
+3. Terminazione:
+   - Se open_list è vuota e il goal non è raggiunto → nessun percorso.
+
+Esempi di Euristiche
+--------------------
+- Griglia 2D (movimenti ortogonali):  
+  h(n) = |x1 - x2| + |y1 - y2| (Distanza di Manhattan)
+  
+- Griglia 2D (movimenti diagonali):  
+  h(n) = max(|x1 - x2|, |y1 - y2|) (Distanza di Chebyshev)
+
+Proprietà
+---------
+Ottimale: Trova sempre il percorso più breve se:  
+   - h(n) è ammissibile (non sovrastima il costo reale).  
+   - h(n) è consistente (soddisfa la disuguaglianza triangolare).  
+
+Efficiente
+----------
+Più veloce di Dijkstra grazie all'euristica (h(n) guida la ricerca).  
+
+Complessità
+-----------
+- Tempo: O(b^d) (dove b = fattore di diramazione, d = profondità della soluzione).  
+- Spazio: O(b^d) (memorizza tutti i nodi espansi).  
+
+Confronto con altri Algoritmi
+-----------------------------
+| Algoritmo   | Euristica | Ottimalità | Usi Tipici           |
+|-------------|-----------|------------|----------------------|
+| A*          | Si        | Si         | Pathfinding, AI      |
+| Dijkstra    | No        | Si         | Reti, costo uniforme |
+| BFS         | No        | Si         | Grafi non pesati     |
+
+Implementazione
+---------------
+Algoritmo A* per trovare il percorso ottimale in una griglia MxN con 0 (celle libere) e 1 (celle occupate).
+
+; Funzione che stampa la griglia con il percorso
+(define (show maze path)
+  (local (rows cols solved)
+    ; rows of maze
+    (setq rows (length maze))
+    ; cols of maze
+    (setq cols (length (maze 0)))
+    ; copy of maze
+    (setq solved maze)
+    ; Add solution path (".") to solved maze
+    (dolist (el path) (setf (solved (el 0) (el 1)) "."))
+    ; print solved maze with solution path
+    (for (i 0 (- rows 1))
+      (for (j 0 (- cols 1))
+        (print " " (solved i j)))
+      (println)) '>))
+
+; Funzione che cerca un elemento in una lista di coppie
+(define (in-list? x y lst)
+  (exists (lambda (item) (and (= (item 0) x) (= (item 1) y))) lst))
+
+; Estrae il percorso
+(define (extract-path node)
+  (if (null? (node 4))
+      ; Inverte x e y --> output: riga e colonna
+      (list (list (node 1) (node 0)))
+      ; Inverte x e y --> output: riga e colonna
+      (append (extract-path (node 4)) 
+              (list (list (node 1) (node 0))))))
+;; Estrae il percorso (con la logica colonna e riga)
+;(define (extract-path node)
+;  (if (null? (node 4))
+;      (list (list (node 0) (node 1)))
+;      (append (extract-path (node 4)) 
+;              (list (list (node 0) (node 1))))))
+
+; Verifica cella valida
+(define (valid-cell? grid x y)
+  (and (>= x 0) (>= y 0)
+       (< x (length (grid 0)))
+       (< y (length grid))
+       (= 0 (grid y x))))
+
+; Distanza di Manhattan
+(define (manhattan x1 y1 x2 y2)
+  (+ (abs (- x1 x2)) (abs (- y1 y2))))
+
+; Algoritmo A* principale
+(define (a-star grid start end)
+  ; Scambia x e y delle coordinate di 'start' --> colonna, riga
+  (setq start (list (start 1) (start 0)))
+  ; Scambia x e y delle coordinate di 'end' --> colonna, riga
+  (setq end (list (end 1) (end 0)))
+  ; Blocco principale con gestione errori
+  (catch
+    ; Inizializzazione variabili
+    (let (
+          ; Lista aperta: nodi da esplorare, inizializzata con nodo di partenza
+          ; Formato: (x y g h parent)
+          ; g = costo percorso da start, h = euristica a end
+          (open-list (list (list (start 0) (start 1)
+                               0
+                               (manhattan (start 0) (start 1) (end 0) (end 1))
+                               nil)))
+          ; Lista chiusa: nodi già esplorati (solo coordinate x,y)
+          (closed-list '())
+          ; Direzioni possibili: su, giù, sinistra, destra (4 movimenti)
+          (directions '((-1 0) (1 0) (0 -1) (0 1))))
+    ; Ciclo principale: continua finché ci sono nodi da esplorare
+    (while open-list
+      ; 1. Seleziona nodo con f(min) = g + h minimo
+      (setq current (first
+                    (sort open-list
+                          (lambda (a b)
+                            (< (+ (a 2) (a 3)) (+ (b 2) (b 3)))))))
+      (setq open-list (rest open-list)) ; Rimuovi nodo corrente da open-list
+      ; 2. Verifica se siamo arrivati a destinazione
+      (when (and (= (current 0) (end 0))
+                (= (current 1) (end 1)))
+        (throw (extract-path current))) ; Restituisci percorso
+      ; 3. Aggiungi nodo corrente alla lista chiusa (solo coordinate)
+      (push (list (current 0) (current 1)) closed-list -1)
+      ; 4. Espandi i vicini
+      (dolist (dir directions)
+        (let (
+              ; Calcola coordinate del vicino
+              (nx (+ (current 0) (dir 0)))
+              (ny (+ (current 1) (dir 1))))
+          ; Verifica:
+          ; - La cella è nella griglia?
+          ; - È percorribile (0)?
+          ; - Non è già stata esplorata?
+          (when (and (valid-cell? grid nx ny)
+                    (not (in-list? nx ny closed-list)))
+            (let (
+                  ; Calcola costo g (costo corrente + 1 passo)
+                  (g (+ (current 2) 1))
+                  ; Calcola euristica h (distanza da end)
+                  (h (manhattan nx ny (end 0) (end 1)))
+                  ; Cerca se il nodo è già in open-list
+                  (existing-node
+                   (find (lambda (n)
+                          (and (= (n 0) nx) (= (n 1) ny)))
+                         open-list)))
+              ; Se il nodo esiste già...
+              (if existing-node
+                  ; ...e questo percorso ha un g migliore, aggiornalo
+                  (when (< g (existing-node 2))
+                    (setf (existing-node 2) g) ; Nuovo costo g
+                    (setf (existing-node 4) current)) ; Aggiorna parent
+                ; Altrimenti aggiungi nuovo nodo a open-list
+                (push (list nx ny g h current) open-list -1)))))))
+    ; Se open-list è vuota e non ha trovato end: nessun percorso
+    nil)))
+
+Proviamo:
+
+Esempio 1:
+(setq grid '((0 0 0 0 0)
+             (1 1 1 1 0)
+             (0 0 0 0 0)
+             (0 1 1 0 1)
+             (0 0 0 0 0)))
+(setq start '(0 0))
+(setq end '(4 4))
+(a-star grid start end)
+;-> ((0 0) (0 1) (0 2) (0 3) (0 4) (1 4) (2 4) (2 3) (3 3) (4 3) (4 4))
+(show grid (a-star grid start end))
+;-> . . . . .
+;-> 1 1 1 1 .
+;-> 0 0 0 . .
+;-> 0 1 1 . 1
+;-> 0 0 0 . .
+
+Esempio 2:
+(setq grid '((0 0 0 0 0)
+             (1 1 1 1 0)
+             (0 0 0 0 0)
+             (0 1 1 0 1)
+             (0 0 0 0 0)))
+(setq start '(0 4))
+(setq end '(4 0))
+(a-star grid start end)
+;-> ((0 4) (1 4) (2 4) (2 3) (3 3) (4 3) (4 2) (4 1) (4 0))
+(show grid (a-star grid start end))
+;-> 0 0 0 0 .
+;-> 1 1 1 1 .
+;-> 0 0 0 . .
+;-> 0 1 1 . 1
+;-> . . . . 0
+
+Esempio 3 (griglia senza percorso possibile):
+(setq grid '((0 0 0 0 0)
+             (1 1 1 1 1)
+             (1 0 0 0 0)
+             (1 1 1 0 1)
+             (1 1 1 0 0)))
+(setq start '(0 0))
+(setq end '(4 4))
+(a-star grid start end)
+;-> nil
+
+Esempio 4:
+(setq grid '((0 0 0 0 0)
+             (0 1 1 1 0)
+             (0 0 0 0 0)
+             (1 1 0 1 1)
+             (0 0 0 0 0)))
+(setq start '(0 0))
+(setq end '(4 4))
+(a-star grid start end)
+;-> ((0 0) (1 0) (2 0) (2 1) (2 2) (3 2) (4 2) (4 3) (4 4))
+(show grid (a-star grid start end))
+;-> . 0 0 0 0
+;-> . 1 1 1 0
+;-> . . . 0 0
+;-> 1 1 . 1 1
+;-> 0 0 . . .
+
+Esempio 5:
+(setq grid '((0 0 0 0 0 0 1)
+             (1 1 1 1 1 0 1)
+             (0 0 0 0 0 0 1)
+             (0 1 1 1 1 1 1)
+             (0 0 0 0 0 0 1)
+             (0 0 0 0 0 0 0)))
+(setq start '(0 0))
+(setq end '(5 6))
+(a-star grid start end)
+;-> ((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (1 5) (2 5) (2 4) (2 3) (2 2)
+;->  (2 1) (2 0) (3 0) (4 0) (5 0) (5 1) (5 2) (5 3) (5 4) (5 5) (5 6))
+(show grid (a-star grid start end))
+;-> . . . . . . 1
+;-> 1 1 1 1 1 . 1
+;-> . . . . . . 1
+;-> . 1 1 1 1 1 1
+;-> . 0 0 0 0 0 1
+;-> . . . . . . .
+
+Vedi anche "Percorso minimo (BFS) e massimo (DFS) in un labirinto (shortest/longest path)" su "Note libere 30".
 
 ============================================================================
 
