@@ -4011,5 +4011,430 @@ Esempio 5:
 
 Vedi anche "Percorso minimo (BFS) e massimo (DFS) in un labirinto (shortest/longest path)" su "Note libere 30".
 
+
+--------------------------------------
+Funzione autoreplicante con incremento
+--------------------------------------
+
+Scrivere una funzione 'fun' che genera la funzione fun1.
+La funzione 'fun1' genera la funzione 'fun2'.
+La funzione 'fun2' genera la funzione 'fun3'.
+...e così via.
+Tutte le funzioni devono avere lo stesso codice (a parte il nome).
+Le funzioni devono essere eseguite in sequenza: fun, fun1, fun2, fun3, ...
+
+; Inizializzazione della versione (non necessaria la prima volta che si esegue la sequenza delle funzioni)
+; (setq version 0)
+
+; Funzione autoreplicante con incremento
+(define (fun) (set (sym (string "fun" (inc version))) fun))
+;-> (lambda () (set (sym (string "fun" (inc version))) fun))
+
+Proviamo:
+
+(fun)
+(fun1)
+(fun2)
+(fun3)
+(= fun fun1 fun2 fun3 fun4)
+;-> true
+
+
+--------------------
+Cifrario di Playfair
+--------------------
+
+https://en.wikipedia.org/wiki/Playfair_cipher
+
+; Cifrario di Playfair
+; Funzione per rimuovere caratteri duplicati da una stringa
+(define (remove-duplicates input-str)
+  (local (output-str seen-chars current-char)
+    (setq output-str "")
+    (setq seen-chars '())
+    (dostring (idx input-str)
+      (setq current-char (upper-case (char idx)))
+      (if (and (>= idx 65) (<= idx 90) ; Solo lettere A-Z
+               (not (member current-char seen-chars)))
+          (begin
+            (push current-char seen-chars)
+            (extend output-str current-char))))
+    output-str))
+
+; Funzione per creare la matrice 5x5 dalla chiave
+(define (create-matrix cipher-key)
+  (local (alphabet clean-key playfair-matrix row col current-char)
+    (setq alphabet "ABCDEFGHIKLMNOPQRSTUVWXYZ") ; Senza J
+    (setq clean-key (remove-duplicates cipher-key))
+    (setq playfair-matrix (array 5 5))
+    ; Aggiungi lettere rimanenti dell'alfabeto
+    (dostring (idx alphabet)
+      (setq current-char (char idx))
+      (if (not (find current-char clean-key))
+          (extend clean-key current-char)))
+    ; Riempi la matrice 5x5
+    (for (row 0 4)
+      (for (col 0 4)
+        (setf (playfair-matrix row col) (clean-key (+ (* row 5) col)))))
+    playfair-matrix))
+
+; Funzione per trovare la posizione di un carattere nella matrice
+(define (find-position search-matrix search-char)
+  (local (position-result row col)
+    (setq position-result '())
+    (for (row 0 4)
+      (for (col 0 4)
+        (if (= (search-matrix row col) search-char)
+            (setq position-result (list row col)))))
+    position-result))
+
+; Funzione per preparare il testo (rimuove spazi, converte J in I, etc.)
+(define (prepare-text input-text)
+  (local (clean-text final-text current-char pair1 pair2 temp-list loop-idx)
+    (setq clean-text "")
+    (dostring (idx (upper-case input-text))
+      (setq current-char (char idx))
+      (cond
+        ((= current-char "J") (extend clean-text "I"))
+        ((and (>= idx 65) (<= idx 90)) (extend clean-text current-char))))
+    ; Converti in lista per processare le coppie
+    (setq temp-list (explode clean-text))
+    (setq final-text "")
+    ; Processa le coppie
+    (setq loop-idx 0)
+    (while (< loop-idx (length temp-list))
+      (setq pair1 (temp-list loop-idx))
+      (if (< (+ loop-idx 1) (length temp-list))
+          (begin
+            (setq pair2 (temp-list (+ loop-idx 1)))
+            (if (= pair1 pair2)
+                (begin
+                  (extend final-text pair1 "X")
+                  (setq loop-idx (+ loop-idx 1)))
+                (begin
+                  (extend final-text pair1 pair2)
+                  (setq loop-idx (+ loop-idx 2)))))
+          (begin
+            (extend final-text pair1 "X")
+            (setq loop-idx (+ loop-idx 1)))))
+    final-text))
+
+; Funzione per cifrare una coppia di caratteri
+(define (encrypt-pair cipher-matrix char1 char2)
+  (local (pos1 pos2 row1 col1 row2 col2)
+    (setq pos1 (find-position cipher-matrix char1))
+    (setq pos2 (find-position cipher-matrix char2))
+    (setq row1 (first pos1))
+    (setq col1 (last pos1))
+    (setq row2 (first pos2))
+    (setq col2 (last pos2))
+    (cond
+      ; Stessa riga - sposta a destra
+      ((= row1 row2)
+       (list (cipher-matrix row1 (% (+ col1 1) 5))
+             (cipher-matrix row2 (% (+ col2 1) 5))))
+      ; Stessa colonna - sposta in basso  
+      ((= col1 col2)
+       (list (cipher-matrix (% (+ row1 1) 5) col1)
+             (cipher-matrix (% (+ row2 1) 5) col2)))
+      ; Rettangolo - scambia colonne
+      (true
+       (list (cipher-matrix row1 col2)
+             (cipher-matrix row2 col1))))))
+
+; Funzione per decifrare una coppia di caratteri
+(define (decrypt-pair cipher-matrix char1 char2)
+  (local (pos1 pos2 row1 col1 row2 col2)
+    (setq pos1 (find-position cipher-matrix char1))
+    (setq pos2 (find-position cipher-matrix char2))
+    (setq row1 (first pos1))
+    (setq col1 (last pos1))
+    (setq row2 (first pos2))
+    (setq col2 (last pos2))
+    (cond
+      ; Stessa riga - sposta a sinistra
+      ((= row1 row2)
+       (list (cipher-matrix row1 (% (+ col1 4) 5)) ; +4 equivale a -1 mod 5
+             (cipher-matrix row2 (% (+ col2 4) 5))))
+      ; Stessa colonna - sposta in alto
+      ((= col1 col2)
+       (list (cipher-matrix (% (+ row1 4) 5) col1) ; +4 equivale a -1 mod 5
+             (cipher-matrix (% (+ row2 4) 5) col2)))
+      ; Rettangolo - scambia colonne
+      (true
+       (list (cipher-matrix row1 col2)
+             (cipher-matrix row2 col1))))))
+
+; Funzione principale per cifrare
+(define (playfair-encrypt plain-text cipher-key)
+  (local (cipher-matrix prepared-text result-text idx encrypted-pair)
+    (setq cipher-matrix (create-matrix cipher-key))
+    (setq prepared-text (prepare-text plain-text))
+    (setq result-text "")
+    (for (idx 0 (- (length prepared-text) 1) 2)
+      (setq encrypted-pair (encrypt-pair cipher-matrix 
+                                        (prepared-text idx) 
+                                        (prepared-text (+ idx 1))))
+      (extend result-text (first encrypted-pair) (last encrypted-pair)))
+    result-text))
+
+; Funzione principale per decifrare
+(define (playfair-decrypt cipher-text cipher-key)
+  (local (cipher-matrix result-text idx decrypted-pair)
+    (setq cipher-matrix (create-matrix cipher-key))
+    (setq result-text "")
+    (for (idx 0 (- (length cipher-text) 1) 2)
+      (setq decrypted-pair (decrypt-pair cipher-matrix 
+                                        (cipher-text idx) 
+                                        (cipher-text (+ idx 1))))
+      (extend result-text (first decrypted-pair) (last decrypted-pair)))
+    result-text))
+
+; Funzione per ripulire il testo decifrato (rimuove X aggiunte)
+; valida solo quando plain-text (input-str) non contiene "X"
+(define (clean-decrypted-text decrypted-text)
+  (let (result-text "")
+    (dostring (ch decrypted-text)
+      (if (!= (char ch) "X")
+          (extend result-text (char ch))))
+    result-text))
+
+; Funzione completa per decifrare e ripulire
+(define (playfair-decrypt-clean cipher-text cipher-key)
+  (local (decrypted-text)
+    (setq decrypted-text (playfair-decrypt cipher-text cipher-key))
+    (clean-decrypted-text decrypted-text)))
+
+; Funzione per stampare la matrice Playfair
+(define (print-matrix display-matrix)
+  (local (row col)
+    (println "Matrice Playfair:")
+    (for (row 0 4)
+      (for (col 0 4)
+        (print (display-matrix row col) " "))
+      (println)) '>))
+
+Proviamo:
+
+; Esempi (senza "X" nel testo)
+(setq test-key "PLAYFAIR")
+(setq test-plaintext "HELLO WORLD")
+(setq test-matrix (create-matrix test-key))
+(print-matrix test-matrix)
+;-> Matrice Playfair:
+;-> P L A Y F
+;-> I R B C D
+;-> E G H K M
+;-> N O Q S T
+;-> U V W X Z
+(setq test-prepared (prepare-text test-plaintext))
+;-> "HELXLOWORLDX"
+(setq test-encrypted (playfair-encrypt test-plaintext test-key))
+;-> "KGYVRVVQGRCZ"
+(setq test-decrypted (playfair-decrypt test-encrypted test-key))
+;-> "HELXLOWORLDX"
+(setq test-cleaned (clean-decrypted-text test-decrypted))
+;-> "HELLOWORLD"
+
+(setq test-key "PLAYFAIR")
+(setq test-plaintext "NEWLISP IS GREAT NO CROSS")
+(setq test-matrix (create-matrix test-key))
+(print-matrix test-matrix)
+;-> Matrice Playfair:
+;-> P L A Y F
+;-> I R B C D
+;-> E G H K M
+;-> N O Q S T
+;-> U V W X Z
+(setq test-prepared (prepare-text test-plaintext))
+;-> "NEWLISPISGREATNOCROSSX"
+(setq test-encrypted (playfair-encrypt test-plaintext test-key))
+;-> "UNVACNIEOKIGFQOQDBQTXY"
+(setq test-decrypted (playfair-decrypt test-encrypted test-key))
+;-> "NEWLISPISGREATNOCROSSX"
+(setq test-cleaned (clean-decrypted-text test-decrypted))
+;-> "NEWLISPISGREATNOCROSS"
+
+(setq test-key2 "MONARCHY")
+(setq test-text2 "ATTACKATDAWN")
+(setq test-matrix2 (create-matrix test-key2))
+(print-matrix test-matrix2)
+;-> Matrice Playfair:
+;-> M O N A R
+;-> C H Y B D
+;-> E F G I K
+;-> L P Q S T
+;-> U V W X Z
+(setq test-enc2 (playfair-encrypt test-text2 test-key2))
+;-> "RSSRDERSBRNY"
+(setq test-dec2 (playfair-decrypt test-enc2 test-key2))
+;-> "ATTACKATDAWN"
+(setq test-clean2 (clean-decrypted-text test-dec2))
+;-> "ATTACKATDAWN"
+
+
+------------------------------------------------
+Ricerca del k-esimo elemento che ha N occorrenze
+------------------------------------------------
+
+Data una lista di interi, scrivere una funzione che, dati due interi K e N, restituisce l'indice della K-esima occorrenza dell'intero che, per primo, ha N occorrenze nella lista.
+Risulta sempre 1 <= K <= N.
+
+Esempio:
+lista = (2 5 3 7 9 4 2 6 7 7 3 0 1 2 3))
+N = 3
+K = 2
+Il primo elemento che ha 3 (N=3) occorrenze è il 7.
+Il secondo (K=2) 7 ha indice pari a 8.
+
+Algoritmo con le primitive di newLISP:
+
+(setq lst '(2 5 3 7 9 4 2 6 7 7 3 0 1 2 3))
+(setq n 3)
+(setq k 2)
+; Crea la lista dei valori unici della lista data
+(setq unici (unique lst))
+;-> (2 5 3 7 9 4 6 0 1)
+; Crea la lista degli interi che hanno almeno n occorrenze
+(setq multipli (filter (fn(x) (>= (length (ref-all x lst)) n)) unici))
+;-> (2 3 7)
+; Crea la lista dei primi n indici di ogni intero che ha almeno n occorrenze
+(setq all-index (map (fn(x) (slice (flat (ref-all x lst)) 0 n)) multipli))
+;-> ((0 6 13) (2 10 14) (3 8 9))
+; Crea la lista dei primi n indici di ogni intero che ha almeno n occorrenze
+(setq all-index (map (fn(x) (slice x 0 n)) all-index))
+; Seleziona la lista degli indici che ha indice minore all'ultimo posto,
+; questo significa che il numero è il promo a comparire k volte
+(setq indici (first (sort all-index (fn (a b) (<= (a -1) (b -1))))))
+;-> (3 8 9)
+; Prendiamo il (k-1)-esimo indice della sottolista selezionata
+(indici (- k 1))
+;-> 8
+(lst 8)
+;-> 7
+
+Funzione (primitive):
+
+(define (trova k n lst)
+  ; l'indice del primo numero che ha almeno una ripetizione è quello
+  ; del primo numero della lista, cioè 0
+  (if (and (= k 1) (= n 1))
+    0
+    (local (unici multipli all-index indici)
+      (setq unici (unique lst))
+      ; Crea la lista degli interi che hanno almeno n occorrenze
+      (setq multipli (filter (fn(x) (>= (length (ref-all x lst)) n)) unici))
+      ; Se esistono interi che hanno almeno n occorrenze...
+      (if multipli
+        (begin
+          ; Crea la lista dei primi n indici di ogni intero
+          ; che ha almeno n occorrenze
+          (setq all-index (map
+                (fn(x) (slice (flat (ref-all x lst)) 0 n)) multipli))
+          ; Seleziona la sottolista degli indici
+          ; che ha indice minore all'ultimo posto.
+          ; Questo significa che il numero individuato dalla sottolista
+          ; è il primo a comparire k volte
+          (setq indici (first
+                (sort all-index (fn (a b) (<= (a -1) (b -1))))))
+          ; Prendiamo il (k-1)-esimo indice della sottolista selezionata
+          (indici (- k 1)))
+        nil))))
+
+Proviamo:
+
+(setq lst '(2 5 3 7 9 4 2 6 7 7 3 0 1 2 3))
+(trova 2 3 lst)
+;-> 8
+
+(setq w '(6 1 2 3 3 4 4 5))
+(trova 1 2 w)
+;-> 3
+(trova 2 2 w)
+;-> 4
+(trova 1 1 w)
+;-> 0
+(trova 1 3 w)
+;-> nil
+
+Funzione iterativa:
+
+(define (trova-itera k n lst)
+  (local (conteggi posizioni trovato finito)
+    ; Inizializza la lista associativa per i conteggi
+    (setq conteggi '())
+    ; Inizializza la lista associativa per le posizioni
+    (setq posizioni '())
+    ; Flag per tenere traccia se abbiamo trovato il primo elemento con n occorrenze
+    (setq trovato nil)
+    (setq finito nil)
+    ; Scorri la lista con un ciclo for
+    (for (i 0 (- (length lst) 1))
+      (when (not finito)
+        (let ((x (lst i)))
+          ; Aggiorna il conteggio dell'elemento x
+          (if (not (assoc x conteggi))
+              (push (list x 1) conteggi -1) ; prima occorrenza
+              (setf (assoc x conteggi) (list x (+ 1 ((assoc x conteggi) 1))))) ; incrementa
+          ; Aggiorna la lista delle posizioni di x
+          (if (not (assoc x posizioni))
+              (push (list x (list i)) posizioni -1) ; prima posizione
+              (setf (assoc x posizioni)
+                    (list x (append ((assoc x posizioni) 1) (list i))))) ; aggiungi nuova posizione
+          ; Se x ha raggiunto n occorrenze ed è il primo a farlo, salvalo
+          (if (= ((assoc x conteggi) 1) n)
+              (begin
+                (setq trovato x)
+                (setq finito true)))))) ; ferma il ciclo
+    ; Se abbiamo trovato un intero con n occorrenze, restituisci l’indice della k-esima
+    (if trovato
+        (((assoc trovato posizioni) 1) (- k 1))
+        nil))) ; altrimenti restituisci nil
+
+Proviamo:
+
+(setq lst '(2 5 3 7 9 4 2 6 7 7 3 0 1 2 3))
+(trova-itera 2 3 lst)
+;-> 8
+
+(setq w '(6 1 2 3 3 4 4 5))
+(trova-itera 1 2 w)
+;-> 3
+(trova-itera 2 2 w)
+;-> 4
+(trova-itera 1 1 w)
+;-> 0
+(trova-itera 1 3 w)
+;-> nil
+
+Test di correttezza:
+
+(for (i 1 1000)
+  (setq test (rand 100 10000))
+  (setq n (+ 2 (rand 5)))
+  (setq k (+ 2 (rand 5)))
+  (if (> k n) (swap k n))
+  (when (!= (trova k n test) (trova-itera k n test))
+    (println k { } n) (setq err test) (read-line)))
+;-> nil
+
+Test di velocità:
+
+(setq test1 (rand 10 100))
+(time (trova 2 3 test1) 1e4)
+;-> 420.092
+(time (trova-itera 2 3 test1) 1e4)
+;-> 94.32
+
+(silent (setq test2 (rand 100 1e5)))
+(time (println (trova 5 10 test2)))
+;-> 297
+;-> 181.185
+(time (println (trova-itera 5 10 test2)))
+;-> 297
+;-> 9.768
+
+La funzione iterativa è molto più veloce.
+
 ============================================================================
 

@@ -2983,6 +2983,9 @@ NOTE LIBERE 30
   Sequenze Onda di ordine k
   Intersezione di intervalli
   Algoritmo A*
+  Funzione autoreplicante con incremento
+  Cifrario di Playfair
+  Ricerca del k-esimo elemento che ha N occorrenze
 
 PROBLEMI SUI DADI
 =================
