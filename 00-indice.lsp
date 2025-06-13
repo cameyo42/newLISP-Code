@@ -71,7 +71,7 @@ newLISP IN GENERALE
     Esempi sull'utilizzo dei moduli
   Hash-Map e dizionari
   CAR e CDR in newLISP
-  Espressioni regolari
+  Espressioni regolari (regex)
   Macro
   FOOP - Programmazione funzionale orientata agli oggetti
   XML e S-espressioni
@@ -2985,7 +2985,8 @@ NOTE LIBERE 30
   Algoritmo A*
   Funzione autoreplicante con incremento
   Cifrario di Playfair
-  Ricerca del k-esimo elemento che ha N occorrenze
+  Ricerca del k-esimo indice del primo elemento che ha N occorrenze
+  Espressioni regolari (Basi ed Esempi)
 
 PROBLEMI SUI DADI
 =================

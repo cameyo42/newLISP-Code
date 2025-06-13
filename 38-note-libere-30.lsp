@@ -4273,9 +4273,9 @@ Proviamo:
 ;-> "ATTACKATDAWN"
 
 
-------------------------------------------------
-Ricerca del k-esimo elemento che ha N occorrenze
-------------------------------------------------
+-----------------------------------------------------------------
+Ricerca del k-esimo indice del primo elemento che ha N occorrenze
+-----------------------------------------------------------------
 
 Data una lista di interi, scrivere una funzione che, dati due interi K e N, restituisce l'indice della K-esima occorrenza dell'intero che, per primo, ha N occorrenze nella lista.
 Risulta sempre 1 <= K <= N.
@@ -4435,6 +4435,355 @@ Test di velocità:
 ;-> 9.768
 
 La funzione iterativa è molto più veloce.
+
+
+-------------------------------------
+Espressioni regolari (Basi ed Esempi)
+-------------------------------------
+
+Basi fondamentali
+-----------------
+
+### 1. "abc"
+Matcha esattamente la stringa "abc".
+(regex "abc" "xxabcxx")
+;-> ("abc" 2 3)
+
+### 2. "a.c"
+Il . rappresenta un solo carattere qualsiasi.
+Matcha "abc", "a7c", "a_c"
+Non matcha "ac" (manca un carattere in mezzo)
+
+### 3. "ab*c"
+Il * significa zero o più ripetizioni.
+Matcha: "ac", "abc", "abbc", "abbbbbc"
+
+### 4. "ab+c"
+Il + significa una o più ripetizioni.
+Matcha: "abc", "abbc"
+Non matcha: "ac" (manca almeno una b)
+
+### 5. "ab?c"
+Il ? significa zero o una ripetizione.
+Matcha: "ac", "abc"
+Non matcha: "abbc"
+
+Classi di caratteri
+-------------------
+
+### 6. "a[xyz]b"
+Cerca "a", uno tra x, y, z, poi "b".
+Matcha: "axb", "ayb"
+Non matcha: "acb"
+
+### 7. "a[^xyz]b"
+Il ^ dentro [] nega: matcha qualsiasi tranne x, y, z.
+Matcha: "acb", "a9b"
+Non matcha: "axb"
+
+### 8. "[0-9]+" oppure "\d+" (in PCRE)
+Matcha una o più cifre.
+Matcha: "123", "7"
+
+### 9. "[A-Za-z]+"
+Matcha una o più lettere ASCII (maiuscole o minuscole).
+
+Ancore e gruppi
+---------------
+
+### 10. "^abc"
+Il ^ (fuori dalle []) significa inizio stringa.
+Matcha "abc" solo se è all'inizio
+Non matcha "xabc"
+
+### 11. "abc$"
+Il $ significa fine stringa.
+Matcha: "xxabc" solo se "abc" è alla fine
+
+### 12. "(abc)+"
+Parentesi tonde definiscono un gruppo, che può essere ripetuto.
+Matcha: "abcabc" -> il gruppo "abc" appare due volte
+
+Quantificatori avanzati
+-----------------------
+
+### 13. "a.{3}b"
+Matcha una a, seguita da esattamente 3 caratteri qualsiasi, poi una b.
+Matcha: "aXYZb"
+Non matcha: "aXXb"
+
+### 14. "a.{2,5}b"
+Matcha da 2 a 5 caratteri qualsiasi tra a e b.
+Matcha: "a12b", "aABCDEb"
+Non matcha: "ab", "a123456b"
+
+Lookahead e lookbehind (in parte disponibili in PCRE)
+-----------------------------------------------------
+NB: newLISP supporta alcuni lookahead, ma non lookbehind.
+
+### 15. "A(?=[0-9]{2})"
+Matcha "A" solo se è seguita da 2 cifre, ma non le include nel match.
+Su "A12" --> matcha "A"
+Su "AB" --> no match
+
+### 16. "A[0-9A-Za-z]{1,10}B"
+Matcha una stringa che inizia con A, segue 1-10 caratteri alfanumerici, termina con B.
+"A1B", "A123abcB", "Aabcdef123B"
+
+### 17. "(?<![A-Z])ABC(?![A-Z])"
+Matcha solo "ABC" che NON è preceduto o seguito da lettere maiuscole.
+NB: Questo richiede full lookbehind/lookahead, non supportato in tutte le versioni.
+
+### 18. "A[0-9]*B"
+Matcha da A a B, con solo cifre (anche zero) in mezzo.
+"AB", "A12345B"
+"AabcB"
+
+### 19. "\\bword\\b"
+Matcha "word" come parola isolata (usa \b per word boundary).
+"a word in a sentence"
+non matcha "password" o "sword"
+NB: In newLISP: usa "\\b" perché \ va escapato.
+
+### 20. "(\\d{3})-(\\d{2})-(\\d{4})"
+Matcha codici tipo codice fiscale USA: "123-45-6789"
+- \d{3} --> 3 cifre
+- \d{2} --> 2 cifre
+- \d{4} --> 4 cifre
+
+Suggerimenti per newLISP
+------------------------
+- Usa sempre doppi backslash per escape ("\\d" invece di "\d")
+- Per match singoli, usa (regex pattern str 64 start-pos)
+- Per match multipli, usa (regex-all pattern str)
+- Per match multipli (overlap), usa (regex-all pattern str true)
+
+(define (regex-all regexp str all)
+"Find all occurrences of a regex in a string"
+  (let ( (out '()) (idx 0) (res nil))
+    (setq res (regex regexp str 64 idx))
+    (while res
+      (push res out -1)
+      (if all
+          (setq idx (+ (res 1) 1))        ; contiguos pattern (overlap)
+          (setq idx (+ (res 1) (res 2)))) ; no contiguos pattern
+      (setq res (regex regexp str 64 idx)))
+    out))
+
+Esempi di base e intermedi
+--------------------------
+
+; Match esatto
+(print (regex-all "abc" "xyzabc123abcxyz"))  
+;--> (("abc" 3 3) ("abc" 9 3))
+
+; Punto: qualsiasi carattere singolo
+(print (regex-all "a.c" "abc a7c acc adc a_c"))  
+;--> (("abc" 0 3) ("a7c" 4 3) ("acc" 8 3) ("adc" 12 3) ("a_c" 16 3))
+
+; A seguita da zero o più B, poi C
+(print (regex-all "AB*C" "AC ABC ABBBC ABBC"))  
+;--> (("AC" 0 2) ("ABC" 3 3) ("ABBBC" 7 5) ("ABBC" 13 4))
+
+; Una o più cifre
+(print (regex-all "[0-9]+" "abc123xyz007and42"))  
+;--> (("123" 3 3) ("007" 9 3) ("42" 15 2))
+
+; Lettere minuscole/maiuscole
+(print (regex-all "[a-z]+" "ABC def GHI jkl"))  
+;--> (("def" 4 3) ("jkl" 12 3))
+
+; Una lettera seguita da una cifra
+(print (regex-all "[A-Za-z][0-9]" "a1 b2 C3 d4 x9"))  
+;--> (("a1" 0 2) ("b2" 3 2) ("C3" 6 2) ("d4" 9 2) ("x9" 12 2))
+
+Quantificatori specifici
+------------------------
+
+; Esattamente 3 lettere
+(print (regex-all "[A-Za-z]{3}" "abc ab defg XYZ QWERTY"))  
+;--> (("abc" 0 3) ("def" 7 3) ("XYZ" 12 3))
+
+; Da 2 a 4 cifre
+(print (regex-all "[0-9]{2,4}" "1 12 123 1234 12345"))  
+;--> (("12" 2 2) ("123" 5 3) ("1234" 9 4) ("1234" 14 4))
+
+; Almeno una lettera seguita da un numero
+(print (regex-all "[A-Za-z]+[0-9]+" "a1 abc123 xyz999 q"))  
+;--> (("a1" 0 2) ("abc123" 3 6) ("xyz999" 10 6))
+
+Ancore: inizio e fine stringa
+----------------------------=
+
+; Inizio stringa
+(print (regex-all "^abc" "abc abcabc abc"))  
+;--> (("abc" 0 3))
+
+; Fine stringa
+(print (regex-all "abc$" "xyz abc abcabcabc"))  
+;--> (("abc" 14 3))
+
+Caratteri negativi, intervalli, gruppi
+--------------------------------------
+
+; Tutto tranne le vocali
+(print (regex-all "[^aeiou]+" "hello world"))  
+;--> (("h" 0 1) ("ll" 2 2) (" w" 4 2) ("rld" 7 3))
+
+; Gruppi ripetuti
+(print (regex-all "(ab)+" "abababab ab ab abba"))  
+;--> (("abababab" 0 8) ("ab" 9 2) ("ab" 12 2))
+
+; Gruppi misti: lettere e cifre tra A e B (1-5 char)
+(print (regex-all "A[0-9a-zA-Z]{1,5}B" "A1B A123B Aab12B A123456B"))  
+;--> (("A1B" 0 3) ("A123B" 4 5) ("Aab12B" 10 6))
+
+Combinazioni avanzate
+---------------------
+
+; A seguito da lettere o cifre (1-10), poi B
+(setq teststr "A1B A123B Aabcdef123B A1234567890B AXB")
+(print (regex-all "A[0-9A-Za-z]{1,10}B" teststr))
+;--> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11) ("A1234567890B" 22 12) ("AXB" 39 3))
+
+; Solo cifre tra A e B (min 2 cifre)
+(print (regex-all "A[0-9]{2,}B" "A1B A12B A1234B AXB A0000B"))  
+;--> (("A12B" 4 4) ("A1234B" 9 6) ("A0000B" 22 6))
+
+Ulteriori esempi
+----------------
+
+Cerca "AAA"
+-----------
+(setq a "AAAaBAAAABcADccAAAB")
+(regex "[A]{3}" a)
+;-> ("AAA" 0 3)
+(regex-all "[A]{3}" a)
+;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 15 3))
+(regex-all "[A]{3}" a true)
+;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 6 3) ("AAA" 15 3))
+
+Cerca "AAA" senza "A" prima e senza "A" dopo
+--------------------------------------------
+(regex "(?<!A)[A]{3}(?!A)" a)
+;-> ("AAA" 0 3)
+
+Spiegazione:
+"(?<!A)[A]{3}(?!A)" sta usando lookbehind e lookahead negativi, cioè:
+- (?<!A) -> assicura che prima della tripla "A" non ci sia una "A",
+- [A]{3} -> cattura esattamente tre lettere A,
+- (?!A)  -> assicura che dopo la tripla "A" non ci sia una "A".
+Quindi la regex seleziona solo le triple "AAA" che non sono precedute né seguite da un'altra A.
+Se volessi solo triple "AAA" non precedute da A, ma ti va bene che siano seguite da un'altra A, potresti usare solo:
+"(?<!A)[A]{3}"
+O viceversa, per escludere solo quelle seguite da un'altra A:
+"[A]{3}(?!A)"
+
+Cerca "A...B", cioè "A" qualunque numero di caratteri e "B"
+-----------------------------------------------------------
+(regex "A.*?B" a)
+;-> ("AAAaB" 0 5)
+
+Spiegazione:
+- "A" -> match della lettera A iniziale
+- .*? -> match di qualunque numero di caratteri (in modo non avido):
+- .   -> qualunque carattere (tranne newline)
+- *   -> 0 o più volte
+- ?   -> quantificatore non-greedy (fermati al primo B possibile)
+- "B" -> match della lettera B finale
+
+(regex-all "A.*?B" a)
+;-> (("AAAaB" 0 5) ("AAAAB" 5 5) ("ADccAAAB" 11 8))
+(regex-all "A.*?B" a true)
+;-> (("AAAaB" 0 5) ("AAaB" 1 4) ("AaB" 2 3) ("AAAAB" 5 5) ("AAAB" 6 4)
+;->  ("AAB" 7 3) ("AB" 8 2) ("ADccAAAB" 11 8) ("AAAB" 15 4) ("AAB" 16 3)
+;->  ("AB" 17 2))
+
+Perché usare .*? invece di .*?
+Se usi "A.*B" (senza ?), otterresti un match avido, cioè prende da prima A fino all’ultima B:
+(regex "A.*B" a)
+;-> ("AAAaBAAAABcADccAAAB" 0 19)
+Invece con "A.*?B" prendi il primo match possibile per ogni B, uno alla volta: è quello che normalmente vuoi.
+
+Se vogliamo cercare "A", seguite da almeno un carattere qualunque, e che terminano con "B":
+(regex "A.+?B" a)
+;-> ("AAAaB" 0 5)
+
+Spiegazione:
+"A"   -> match della A iniziale
+".+?" -> almeno un carattere (non greedy):
+"."   -> qualsiasi carattere
+"+"   -> uno o più (a differenza di "*" che include anche zero)
+"?"   -> non greedy, quindi si ferma alla prima B possibile
+"B"   -> match della B finale
+
+(regex-all "A.+?B" a)
+;-> (("AAAaB" 0 5) ("AAAAB" 5 5) ("ADccAAAB" 11 8))
+(regex-all "A.+?B" a true)
+;-> (("AAAaB" 0 5) ("AAaB" 1 4) ("AaB" 2 3) ("AAAAB" 5 5) ("AAAB" 6 4)
+;->  ("AAB" 7 3) ("ABcADccAAAB" 8 11) ("ADccAAAB" 11 8) ("AAAB" 15 4)
+;->  ("AAB" 16 3))
+
+Se vogliamo cercare "A", qualunque carattere, "B", qualunque carattere "A":
+(setq a "AAAaBAAAABcADccAAAB")
+(regex "A.*?B.*?A" a)
+
+Spiegazione:
+"A"   -> match della A iniziale
+".+?" -> almeno un carattere (non greedy):
+"B"   -> match della B in mezzo
+".+?" -> almeno un carattere (non greedy):
+"A"   -> match della A finale
+
+"."   -> qualsiasi carattere
+"+"   -> uno o più (a differenza di "*" che include anche zero)
+"?"   -> non greedy, quindi si ferma al primo match possibile
+
+(regex-all "A.*?B.*?A" a)
+;-> (("AAAaBA" 0 6) ("AAABcA" 6 6))
+(regex-all "A.*?B.*?A" a true)
+;-> (("AAAaBA" 0 6) ("AAaBA" 1 5) ("AaBA" 2 4) ("AAAABcA" 5 7)
+;->  ("AAABcA" 6 6) ("AABcA" 7 5) ("ABcA" 8 4))
+
+Cerca "A...B", cioè "A" qualunque numero di cifre (anche 0) e "B"
+-----------------------------------------------------------------
+(setq b "A123B AXB A00B AB A9B A9999B")
+(regex "A[0-9]*B")
+;-> (("A123B" 0 5) ("A00B" 8 4) ("AB" 12 2) ("A9B" 14 3) ("A9999B" 17 6))
+(setq b "A123BAXBA00BABA9BA9999B")
+;-> (("A123B" 0 5) ("A00B" 8 4) ("AB" 12 2) ("A9B" 14 3) ("A9999B" 17 6))
+
+Spiegazione:
+- "A"      -> match della lettera A
+- "[0-9]*" -> zero o più cifre (cioè 0, 1, ..., 9)
+- "B"      -> match della lettera B
+
+(regex-all "A[0-9]*B" b)
+;-> (("A123B" 0 5) ("A00B" 8 4) ("AB" 12 2) ("A9B" 14 3) ("A9999B" 17 6))
+(regex-all "A[0-9]*B" b true)
+;-> (("A123B" 0 5) ("A00B" 8 4) ("AB" 12 2) ("A9B" 14 3) ("A9999B" 17 6))
+
+Cerca "A", da almeno 1 a 10 caratteri alfanumerici ([0-9A-Za-z]) e "B"
+----------------------------------------------------------------------
+(setq c "A1B A123B Aabcdef123B A1234567890B A-B AXB AB")
+(regex "A[0-9A-Za-z]{1,10}B" c)
+;-> ("A1B" 0 3)
+Spiegazione:
+- "A" → inizio con A
+- "[0-9A-Za-z]{1,10}" → da 1 a 10 caratteri alfanumerici
+- "B" → termina con B
+
+(regex-all "A[0-9A-Za-z]{1,10}B" c)
+;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
+;->  ("A1234567890B" 22 12) ("AXB" 39 3))
+(regex-all "A[0-9A-Za-z]{1,10}B" c true)
+;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
+;->  ("A1234567890B" 22 12) ("AXB" 39 3))
+
+Per includere anche "_"  possiamo usare usare:
+(regex-all "A[0-9A-Za-z_]{1,10}B" c)
+;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
+;->  ("A1234567890B" 22 12) ("AXB" 39 3))
 
 ============================================================================
 

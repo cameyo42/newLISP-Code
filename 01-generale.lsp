@@ -6846,9 +6846,9 @@ Proviamo alcune di queste le funzioni:
 Vedere anche "Generalizzazione di CAR e CDR" su "Note libere 17".
 
 
-======================
- ESPRESSIONI REGOLARI
-======================
+=============================
+ ESPRESSIONI REGOLARI (REGEX)
+=============================
 
 Le espressioni regolari (regex o regexp) sono estremamente utili per estrarre informazioni da qualsiasi testo cercando una o più corrispondenze di un modello (pattern) di ricerca specifico (ovvero una sequenza specifica di caratteri ASCII o unicode).
 I campi di applicazione sono convalida di dati, analisi/sostituzione di stringhe, trasformazione di dati in altri formati, web scraping, syntax highlighting, ecc.
