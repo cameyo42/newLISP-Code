@@ -2989,6 +2989,8 @@ NOTE LIBERE 30
   Espressioni regolari (Basi ed Esempi)
   Serie di Taylor (Seno e Coseno)
   Interi senza la prima cifra
+  Cheryl's Birthday
+  Interi prodotto di n numeri primi
 
 PROBLEMI SUI DADI
 =================

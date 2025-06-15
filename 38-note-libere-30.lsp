@@ -4785,6 +4785,27 @@ Per includere anche "_"  possiamo usare usare:
 ;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
 ;->  ("A1234567890B" 22 12) ("AXB" 39 3))
 
+------------------------------------------------
+regex-all: versione alternativa fornita da "rrq"
+------------------------------------------------
+---
+rrq
+---
+I suppose one might use find-all for that. Though, find-all doesn't provide the character index, and it doesn't provide the match overlap variant. It wouldn't be terribly hard to patch the source to make find-all offer the index (eg as $index) similar to the match count.
+
+However, one can use collect and a small helper function to get the following alternative solution:
+
+(define (regex-all EXPR STR OPT ALL)
+  (let ((i 0)
+        (move-i (fn (X) (setq i (+ (X 1) (if ALL 1 (X -1)))) X)))
+  (collect (if (regex EXPR STR OPT i) (move-i $it)))))
+
+(setq a "AAAaBAAAABcADccAAAB")
+(regex-all "[A]{3}" a 0)
+;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 15 3))
+(regex-all "[A]{3}" a 0 true)
+;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 6 3) ("AAA" 15 3))
+
 
 -------------------------------
 Serie di Taylor (Seno e Coseno)
@@ -5124,6 +5145,307 @@ Test di velocità:
 ;-> 1019.944
 
 Nota: la sequenza dei valori di k non esiste in OEIS.
+
+
+-----------------
+Cheryl's Birthday
+----------------- 
+
+Vediamo un famoso problema di logica, chiamato "Cheryl's Birthday".
+
+Inglese:
+Albert and Bernard just became friends with Cheryl, and they want to know when her birthday is.
+Cheryl gave them a list of ten possible dates:
+ May 15, May 16, May 19
+ June 17, June 18
+ July 14, July 16
+ August 14, August 15, August 17
+Cheryl then tells Albert the month of birth, and Bernard the day (of the month) of birth.
+ 1) Albert: I don't know when Cheryl's birthday is, but I know that Bernard does not know too.
+ 2) Bernard: At first I don't know when Cheryl's birthday is, but I know now.
+ 3) Albert: Then I also know when Cheryl's birthday is.
+
+Italiano:
+Albert e Bernard hanno appena fatto amicizia con Cheryl e vogliono sapere quando è il suo compleanno.
+Cheryl ha dato loro una lista di dieci possibili date:
+15 maggio, 16 maggio, 19 maggio
+17 giugno, 18 giugno
+14 luglio, 16 luglio
+14 agosto, 15 agosto, 17 agosto
+Cheryl poi dice ad Albert il mese di nascita e a Bernard il giorno (del mese) di nascita.
+1) Albert: Non so quando è il compleanno di Cheryl, ma so che nemmeno Bernard lo sa.
+2) Bernard: All'inizio non sapevo quando fosse il compleanno di Cheryl, ma ora lo so.
+3) Albert: Allora so anche quando è il compleanno di Cheryl.
+
+Si tratta di una sfida di deduzione logica in cui ogni affermazione fornisce informazioni implicite.
+
+Soluzione
+---------
+
+1) Dati iniziali:
+Le 10 possibili date sono:
+- May 15, 16, 19
+- June 17, 18
+- July 14, 16
+- August 14, 15, 17
+Cheryl:
+- dice il mese ad Albert,
+- dice il giorno a Bernard.
+
+2) Frase 1: Albert dice:
+  "I don't know when Cheryl's birthday is, but I know that Bernard does not know too."
+- Albert conosce solo il mese, quindi non può conoscere la data precisa.
+- Ma sa che anche Bernard, che conosce solo il giorno, non può sapere la data precisa.
+Questo è importante. 
+Significa che il mese che Albert conosce non può contenere alcun giorno unico — cioè, non può contenere giorni che appaiono solo una volta nella lista.
+
+3) Cerchiamo i giorni unici:
+- Giorno 18 -> solo June 18
+- Giorno 19 -> solo May 19
+Se Albert avesse avuto May, avrebbe potuto pensare che il giorno potesse essere 19, che è unico, e quindi Bernard avrebbe potuto sapere.
+Ma Albert è certo che Bernard non sa, quindi il mese non può essere né May né June, perché contengono giorni unici (May 19 e June 18).
+
+4) Eliminiamo:
+- May 15, May 16, May 19
+- June 17, June 18
+
+5) Rimangono:
+- July 14, July 16
+- August 14, August 15, August 17
+
+6) Frase 2: Bernard dice:
+  "At first I didn't know when Cheryl's birthday is, but now I know."
+- Bernard conosce il giorno.
+- All'inizio non poteva saperlo (quindi non era 18 o 19), ma ora sì.
+- Quindi il giorno che ha deve essere unico tra le date rimaste.
+
+7) Le date rimaste:
+- July 14, 16
+- August 14, 15, 17
+
+8) Frequenza dei giorni:
+- 14 -> appare 2 volte --> (July 14, August 14)
+- 16 -> 1 volta        --> (July 16)
+- 15 -> 1 volta        --> (August 15)
+- 17 -> 1 volta        --> (August 17)
+
+Se Bernard ha sentito 14, non saprebbe ancora.
+Ma dice "adesso so", quindi deve avere 16, 15, o 17.
+
+9) Eliminiamo le date con giorno 14:
+- July 14
+- August 14
+
+10) Rimangono:
+- July 16
+- August 15
+- August 17
+
+11) Frase 3: Albert dice:
+  "Then I also know when Cheryl's birthday is."
+- Albert conosce solo il mese, ma ora dice di sapere la data esatta.
+Quindi, il mese che Albert conosce deve avere una sola data tra le rimanenti.
+Le date rimaste:
+- July 16
+- August 15
+- August 17
+Vediamo:
+- July -> solo July 16
+- August -> due opzioni: August 15, August 17
+Quindi, se Albert avesse ricevuto August, non saprebbe.
+Ma Albert dice di sapere --> Albert ha July --> la data è July 16.
+
+La data di compleanno di Cheryl è: July 16.
+
+Riassunto del ragionamento:
+a) Albert capisce che Bernard non può sapere, quindi elimina mesi con giorni unici -> rimangono solo July e August.
+b) Bernard ora dice di sapere -> quindi il giorno è unico tra i rimanenti -> rimangono July 16, August 15, August 17.
+c) Albert dice di sapere -> quindi il mese dev’essere quello con una sola opzione rimasta -> July.
+d) Unica data possibile: July 16.
+
+Simulazione del ragionamento con newLISP:
+
+; Cheryl's Birthday - risoluzione logica in newLISP
+
+; Lista iniziale delle possibili date fornite da Cheryl
+(setq tutte-le-date
+  '((May 15) (May 16) (May 19)
+    (June 17) (June 18)
+    (July 14) (July 16)
+    (August 14) (August 15) (August 17)))
+
+; Funzione per contare la frequenza dei giorni (parte comune a più step)
+(define (giorni-frequenti data)
+  (letn ((freq '()))
+    (dolist (d data)
+      (let ((g (d 1)))
+        (if (lookup g freq)
+            (setf (lookup g freq) (+ 1 (lookup g freq)))
+            (push (list g 1) freq -1))))
+    freq))
+
+; ------------------------------------------
+; STEP 1 - Albert sa solo il mese,
+; ma dice: "So che Bernard non può sapere la data."
+; Quindi il mese che Albert ha ricevuto NON deve contenere giorni unici.
+; ------------------------------------------
+
+; Calcola le frequenze di tutti i giorni nelle date originali
+(setq frequenze (giorni-frequenti tutte-le-date))
+;-> ((15 2) (16 2) (19 1) (17 2) (18 1) (14 2))
+
+; Estrai tutti i giorni dalle date
+(setq tutti-i-giorni (map (fn (d) (d 1)) tutte-le-date))
+;-> (15 16 19 17 18 14 16 14 15 17)
+
+; Trova i giorni unici (che appaiono una sola volta)
+(setq giorni-unici
+  (filter (fn (g) (= (lookup g frequenze) 1)) tutti-i-giorni))
+;-> (19 18)
+
+; Trova i mesi che contengono almeno un giorno unico -> da escludere
+(setq mesi-da-escludere
+  (unique (map first
+               (filter (fn (d) (member (d 1) giorni-unici)) tutte-le-date))))
+;-> (May June)
+
+; Filtra tutte le date rimuovendo i mesi da escludere (May, June)
+(setq date-step1
+  (filter (fn (d) (not (member (d 0) mesi-da-escludere))) tutte-le-date))
+;-> ((July 14) (July 16) (August 14) (August 15) (August 17))
+
+; ------------------------------------------
+; STEP 2 - Bernard dice: "Ora so la data"
+; Quindi il giorno che ha ricevuto deve essere unico tra le date rimaste
+; ------------------------------------------
+
+; Calcola frequenze dei giorni nelle date rimaste
+(setq frequenze2 (giorni-frequenti date-step1))
+;-> ((14 2) (16 1) (15 1) (17 1))
+
+; Filtra le date con giorno a frequenza 1 -> quelle che Bernard può conoscere
+(setq date-step2
+  (filter (fn (d) (= (lookup (d 1) frequenze2) 1)) date-step1))
+;-> ((July 16) (August 15) (August 17))
+
+; ------------------------------------------
+; STEP 3 - Albert dice: "Ora so la data"
+; Il mese che ha ricevuto deve comparire una sola volta tra le date rimaste
+; ------------------------------------------
+
+; Estrai i mesi dalle date dello step 2
+(setq mesi (map first date-step2))
+;-> (July August August)
+
+; Calcola la frequenza dei mesi rimanenti
+(setq frequenze-mesi
+  (letn ((f '()))
+    (dolist (m mesi)
+      (if (lookup m f)
+          (setf (lookup m f) (+ 1 (lookup m f)))
+          (push (list m 1) f -1)))
+    f))
+;-> ((July 1) (August 2))
+
+; Filtra la data finale: quella il cui mese ha frequenza 1
+(setq data-finale
+  (filter (fn (d) (= (lookup (d 0) frequenze-mesi) 1)) date-step2))
+;-> ((July 16))
+
+
+---------------------------------
+Interi prodotto di n numeri primi
+---------------------------------
+
+Prodotti di esattamente k numeri primi distinti, per k = 1 a 6:
+A000040, A006881, A007304, A046386, A046387, A067885.
+
+(define (seq-primi k limite)
+  (local (out fattori)
+    (setq out '())
+    (for (num 2 limite)
+      (setq fattori (factor num))
+      (if (and (= k (length fattori)) (= fattori (unique fattori)))
+          (push num out -1)))
+    out))
+
+Sequenza OEIS A000040:
+The prime numbers.
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
+  67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137,
+  139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211,
+  223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, ...
+
+(seq-primi 1 271)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61
+;->  67 71 73 79 83 89 97 101 103 107 109 113 127 131 137
+;->  139 149 151 157 163 167 173 179 181 191 193 197 199 211
+;->  223 227 229 233 239 241 251 257 263 269 271)
+
+Sequenza OEIS A006881:
+Squarefree semiprimes: Numbers that are the product of two distinct primes.
+  6, 10, 14, 15, 21, 22, 26, 33, 34, 35, 38, 39, 46, 51, 55, 57, 58, 62,
+  65, 69, 74, 77, 82, 85, 86, 87, 91, 93, 94, 95, 106, 111, 115, 118,
+  119, 122, 123, 129, 133, 134, 141, 142, 143, 145, 146, 155, 158, 159
+  , 161, 166, 177, 178, 183, 185, 187, 194, 201, 202, 203, 205, ...
+
+(seq-primi 2 205)
+;-> (6 10 14 15 21 22 26 33 34 35 38 39 46 51 55 57 58 62
+;->  65 69 74 77 82 85 86 87 91 93 94 95 106 111 115 118 
+;->  119 122 123 129 133 134 141 142 143 145 146 155 158 159
+;->  161 166 177 178 183 185 187 194 201 202 203 205)
+
+Sequenza OEIS A007304:
+Sphenic numbers: products of 3 distinct primes.
+  30, 42, 66, 70, 78, 102, 105, 110, 114, 130, 138, 154, 165, 170, 174,
+  182, 186, 190, 195, 222, 230, 231, 238, 246, 255, 258, 266, 273, 282,
+  285, 286, 290, 310, 318, 322, 345, 354, 357, 366, 370, 374, 385, 399,
+  402, 406, 410, 418, 426, 429, 430, 434, 435, 438, ...
+
+(seq-primi 3 438)
+;-> (30 42 66 70 78 102 105 110 114 130 138 154 165 170 174 182 186 190
+;->  195 222 230 231 238 246 255 258 266 273 282 285 286 290 310 318 322
+;->  345 354 357 366 370 374 385 399 402 406 410 418 426 429 430 434 435
+;->  438)
+
+Sequenza OEIS A046386:
+Products of exactly four distinct primes.
+  210, 330, 390, 462, 510, 546, 570, 690, 714, 770, 798, 858, 870, 910,
+  930, 966, 1110, 1122, 1155, 1190, 1218, 1230, 1254, 1290, 1302, 1326,
+  1330, 1365, 1410, 1430, 1482, 1518, 1554, 1590, 1610, 1722, 1770, 1785,
+  1794, 1806, 1830, 1870, 1914, 1938, 1974, ...
+
+(seq-primi 4 1974)
+;-> (210 330 390 462 510 546 570 690 714 770 798 858 870 910
+;->  930 966 1110 1122 1155 1190 1218 1230 1254 1290 1302 1326
+;->  1330 1365 1410 1430 1482 1518 1554 1590 1610 1722 1770 1785
+;->  1794 1806 1830 1870 1914 1938 1974)
+
+Sequenza OEIS A046387:
+Products of exactly 5 distinct primes.
+  2310, 2730, 3570, 3990, 4290, 4830, 5610, 6006, 6090, 6270, 6510,
+  6630, 7410, 7590, 7770, 7854, 8610, 8778, 8970, 9030, 9282, 9570,
+  9690, 9870, 10010, 10230, 10374, 10626, 11130, 11310, 11730, 12090,
+  12210, 12390, 12558, 12810, 13090, 13110, ...
+
+(seq-primi 5 13110)
+;-> (2310 2730 3570 3990 4290 4830 5610 6006 6090 6270 6510
+;->  6630 7410 7590 7770 7854 8610 8778 8970 9030 9282 9570
+;->  9690 9870 10010 10230 10374 10626 11130 11310 11730 12090
+;->  12210 12390 12558 12810 13090 13110)
+
+Sequenza OEIS A067885:
+Products of exactly 6 distinct primes.
+  30030, 39270, 43890, 46410, 51870, 53130, 62790, 66990, 67830, 71610,
+  72930, 79170, 81510, 82110, 84630, 85470, 91770, 94710, 98670, 99330,
+  101010, 102102, 103530, 106590, 108570, 110670, 111930, 114114, 115710,
+  117390, 122430, 123690, 124410, 125970, 128310, ...
+
+(seq-primi 6 128310)
+;-> (30030 39270 43890 46410 51870 53130 62790 66990 67830 71610
+;->  72930 79170 81510 82110 84630 85470 91770 94710 98670 99330
+;->  101010 102102 103530 106590 108570 110670 111930 114114 115710
+;->  117390 122430 123690 124410 125970 128310)
 
 ============================================================================
 
