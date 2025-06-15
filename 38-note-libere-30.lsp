@@ -4785,5 +4785,345 @@ Per includere anche "_"  possiamo usare usare:
 ;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
 ;->  ("A1234567890B" 22 12) ("AXB" 39 3))
 
+
+-------------------------------
+Serie di Taylor (Seno e Coseno)
+-------------------------------
+
+Espansione in Serie di Taylor per il coseno:
+
+            1     x^2     x^4     x^6            (-1)^k * x^(2*k)
+  cos(x) = --- - ----- + ----- - ----- + ... + --------------------
+            0!     2!      4!      6!                (2*k)!
+
+Espansione in Serie di Taylor per il seno:
+
+            x     x^3     x^5     x^7             (-1)^k * x^(2k+1)
+  sin(x) = --- - ----- + ----- - ----- + ... +  ---------------------
+            1!     3!      5!      7!                  (2k+1)!
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (seno x n)
+  (let (sum 0)
+    (dotimes (k n)
+      (setq sum (add sum
+        (div (mul (** -1 k) (pow x (+ k k 1))) (fact-i (+ k k 1))))))))
+
+(define (coseno x n)
+  (let (sum 0)
+    (dotimes (k n)
+      (setq sum (add sum
+        (div (mul (** -1 k) (pow x (+ k k))) (fact-i (+ k k))))))))
+
+Vediamo per quali angoli si commette l'errore massimo tra le funzioni "seno/coseno" e le primitive "sin/cos":
+
+(define (test step k)
+  (local (pi max-err-s max-err-c angle-s angle-c s1 s2 c1 c2 diff-s diff-c)
+    (setq pi 3.1415926535897931)
+    (setq max-err-s 0)
+    (setq max-err-c 0)
+    (for (i 0 pi step)
+      (setq s1 (cos i))
+      (setq s2 (coseno i k))
+      (setq diff-s (abs (sub s2 s1)))
+      (setq c1 (sin i))
+      (setq c2 (seno i k))
+      (setq diff-c (abs (sub c2 c1)))
+      (when (> diff-c max-err-c)
+        (setq max-err-c diff-c)
+        (setq angle-c i))
+      (when (> diff-s max-err-s)
+        (setq max-err-s diff-s)
+        (setq angle-s i))
+    )
+    (list (list diff-s angle-s) (list diff-c angle-c))))
+
+Proviamo:
+
+(test 0.125 5)
+;-> ((0.02275837671642078 3.125) (0.006537611038475215 3.125))
+(test 0.125 10)
+;-> ((3.175125273813251e-009 3.125) (4.733472849793863e-010 3.125))
+(test 0.125 12)
+;-> ((1.194822019101594e-012 3.125) (1.493145884712277e-013 3.125))
+(test 0.125 15)
+;-> ((2.220446049250313e-016 2.5) (1.665334536937735e-016 1.75))
+
+(test 0.0001 5)
+;-> ((0.02397081882343244 3.1415) (0.006923049402274626 3.1415))
+(test 0.0001 10)
+;-> ((3.527002911951627e-009 3.1415) (5.285909193127958e-010 3.1415))
+(test 0.0001 12)
+;-> ((1.354916179252541e-012 3.1415) (1.696848634909556e-013 3.1412))
+(test 0.0001 15)
+;-> ((3.33066907387547e-016 2.9466) (8.084624549681285e-016 3.0557))
+
+L'errore aumenta quando l'angolo si avvicina al valore di pi greco.
+
+(println pi { } (abs (sub (sin pi) (seno pi 15))))
+;-> 3.141592653589793 2.237171498414462e-016
+(println pi { } (abs (sub (cos pi) (coseno pi 15))))
+;-> 3.141592653589793 2.220446049250313e-016
+
+
+---------------------------
+Interi senza la prima cifra
+---------------------------
+
+Trovare un intero che diventa k volte più piccolo quando viene rimossa la sua prima cifra (e diventa x)
+
+  numero = (abc...) = k * (bc...), dove a, b, c, ... sono le cifre del numero
+
+Esempio:
+  numero = 7125
+  k = 57
+  numero senza prima cifra = (bc...) = x = 125
+  125*57 = 7125
+
+Algoritmo (forza bruta)
+-----------------------
+1) Per ogni numero n in un certo intervallo (es. da 10 a 999999):
+2) Rimuovere la prima cifra per ottenere x.
+3) Calcolare k = n / x (se x ≠ 0 e n mod x = 0).
+4) Verificare se k * x == n.
+
+(define (rimuovi-prima-cifra n)
+  (int (slice (string n) 1) 0 10))
+
+(define (trova-numeri max-val show)
+  (let (soluzioni '())
+    (for (n 10 max-val)
+      (let ((x (rimuovi-prima-cifra n)))
+        (when (and (!= x 0) (= (% n x) 0))
+          (let ((k (/ n x)))
+            (if show (println n " = " x " * " k))
+            (push (list k (list n x k)) soluzioni -1)))))
+    soluzioni))
+
+Proviamo:
+
+(trova-numeri 50 true)
+;-> 11 = 1 * 11
+;-> 12 = 2 * 6
+;-> 15 = 5 * 3
+;-> 21 = 1 * 21
+;-> 22 = 2 * 11
+;-> 24 = 4 * 6
+;-> 25 = 5 * 5
+;-> 31 = 1 * 31
+;-> 32 = 2 * 16
+;-> 33 = 3 * 11
+;-> 35 = 5 * 7
+;-> 36 = 6 * 6
+;-> 41 = 1 * 41
+;-> 42 = 2 * 21
+;-> 44 = 4 * 11
+;-> 45 = 5 * 9
+;-> 48 = 8 * 6
+;-> ((11 (11 1 11)) (6 (12 2 6)) (3 (15 5 3)) (21 (21 1 21)) (11 (22 2 11))
+;->  (6 (24 4 6)) (5 (25 5 5)) (31 (31 1 31)) (16 (32 2 16)) (11 (33 3 11))
+;->  (7 (35 5 7)) (6 (36 6 6)) (41 (41 1 41)) (21 (42 2 21)) (11 (44 4 11))
+;->  (9 (45 5 9)) (6 (48 8 6)))
+
+La funzione restituisce una lista con elementi del tipo: (k (n x k)).
+Notiamo che esistono soluzioni multiple per alcuni k (es. k=6).
+
+Quali sono i valori unici di k al crescere di n?
+------------------------------------------------
+
+Per esempio con n = 100 abbiamo:
+(setq k100 (sort (unique (map first (trova-numeri 100)))))
+;-> (3 5 6 7 9 11 13 15 16 17 19 21 26 31 36 41 46 51 61 71 81 91)
+
+Per n = 1e6 abbiamo:
+(setq k1e6 (sort (unique (map first (trova-numeri 1e6)))))
+;-> (3 5 6 7 9 11 13 15 16 17 19 21 25 26 29 31 33 36 37 41 46 49 51 57
+;->  61 65 71 73 76 81 91 97 101 113 121 126 129 141 145 151 161 176 181
+;->  193 201 225 226 241 251 257 281 289 301 321 351 361 376 401 451 481
+;->  501 561 601 626 641 701 721 751 801 876 901 961 1001 1121 1126 1201
+;->  1251 1281 1401 1441 1501 1601 1751 1801 1876 2001 2251 2401 2501
+;->  2801 3001 3126 3201 3501 3601 3751 4001 4376 4501 4801 5001 5601
+;->  5626 6001 6251 6401 7001 7201 7501 8001 8751 9001 9376 10001 11251
+;->  12001 12501 14001 15001 15626 16001 17501 18001 18751 20001 21876
+;->  22501 24001 25001 28001 28126 30001 31251 32001 35001 36001 37501
+;->  40001 43751 45001 50001 56251 60001 62501 70001 75001 80001 87501
+;->  90001 100001 112501 120001 125001 140001 150001 160001 175001 180001
+;->  200001 225001 250001 300001 350001 400001 450001 500001 600001 700001
+;->  800001 900001)
+
+Algoritmo (algebra + forza bruta)
+---------------------------------
+Dal punto di vista matematico:
+sia n un numero intero formato dalle cifre a, b, c, ..., dove a è la prima cifra, e x è il numero che si ottiene rimuovendo la prima cifra di n.
+Vogliamo trovare tutti i casi in cui:
+
+  n = k * x
+
+Possiamo esprimere 'n' come:
+
+  n = a * 10^(d-1) + x
+  dove 'd' è il numero di cifre di n, e 'a' in [1..9].
+
+Allora:
+
+  a * 10^(d-1) + x = k * x    -->
+  a * 10^(d-1) = (k - 1) * x  -->
+  x = (a * 10^(d-1))/(k - 1)
+
+Attenzione: non è necessario che x abbia d - 1 cifre.
+È sufficiente che rimuovendo la prima cifra di n si ottenga proprio x.
+
+Strategia per trovare la soluzione:
+1. Scegliere un numero di cifre d >= 2
+2. Scegliere a in [1..9]
+3. Per ogni divisore k - 1 di a*10^(d-1), calcolare x = (a * 10^(d-1))/(k - 1)
+4. Ricavare n = k * x e controllare se verifica la condizione.
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (rimuovi-prima-cifra n)
+  (int (slice (string n) 1) 0 10))
+
+Funzione che calcola le soluzioni per i numeri con d cifre:
+
+(define (solve-cifre d)
+  (let (risultati '())
+    ;; Prova tutte le possibili prime cifre (1..9)
+    (for (a 1 9)
+      ;; T è la parte "fissa" del numero n: a * 10^(d-1)
+      (let ((T (* a (pow 10 (- d 1)))))
+        ;; Per ogni divisore di T
+        (dolist (m (divisors T))
+          (letn (
+                 ;; x è il numero che deve essere moltiplicato per k per ottenere n
+                 (x (div T m))
+                 (k (+ m 1))
+                 (n (* k x))
+                )
+            ;; Se rimuovendo la prima cifra da n si ottiene x, è una soluzione valida
+            (when (= x (rimuovi-prima-cifra n))
+              ;; Cerca se k è già nella lista associativa dei risultati
+              (let ((entry (assoc k risultati)))
+                (if entry
+                  ;; Aggiunge (n x k) alla lista già presente per k
+                  ;; aggiorna valore associato con nuovo elemento (n x k)
+                  (setf (lookup k risultati) (append $it (list (list n x k))))
+                  ;; Altrimenti crea nuova voce per k nella lista associativa
+                  (push (list k (list (list n x k))) risultati -1))))))))
+    risultati))
+
+Proviamo:
+
+(solve-cifre 2)
+;-> ((3 ((15 5 3))) 
+;-> (6 ((12 2 6) (24 4 6) (36 6 6) (48 8 6)))
+;-> (11 ((11 1 11) (22 2 11) (33 3 11) (44 4 11) (55 5 11) (66 6 11) (77 7 11)
+;->      (88 8 11) (99 9 11)))
+;-> (5 ((25 5 5)))
+;-> (21 ((21 1 21) (42 2 21) (63 3 21) (84 4 21)))
+;-> (7 ((35 5 7)))
+;-> (16 ((32 2 16) (64 4 16) (96 6 16)))
+;-> (31 ((31 1 31) (62 2 31) (93 3 31)))
+;-> (9 ((45 5 9)))
+;-> (41 ((41 1 41) (82 2 41)))
+;-> (26 ((52 2 26)))
+;-> (51 ((51 1 51)))
+;-> (13 ((65 5 13)))
+;-> (61 ((61 1 61)))
+;-> (15 ((75 5 15)))
+;-> (36 ((72 2 36)))
+;-> (71 ((71 1 71)))
+;-> (17 ((85 5 17)))
+;-> (81 ((81 1 81)))
+;-> (19 ((95 5 19)))
+;-> (46 ((92 2 46)))
+;-> (91 ((91 1 91))))
+
+Verifichiamo i risultati:
+
+(setq k100 (sort (unique (map first (trova-numeri 100)))))
+(setq k100-2 (sort (unique (map first (solve-cifre 2)))))
+(= k100 k100-2)
+;-> true
+
+Per trovare le stesse soluzioni di "trova-numeri" per d > 2 dobbiamo unire le soluzioni di tutte le cifre da 2 al valore desiderato).
+
+Funzione che calcola le soluzioni per i numeri fino a d cifre:
+
+(define (find-number max-cifre)
+  (let (soluzioni (solve-cifre 2))
+    (if (> max-cifre 2)
+      (for (cifre 3 max-cifre)
+        (extend soluzioni (solve-cifre cifre)))
+    soluzioni)))
+
+Proviamo:
+
+(find-number 3)
+;-> ((3 ((15 5 3))) (6 ((12 2 6) (24 4 6) (36 6 6) (48 8 6)))
+;-> ...
+;->  (901 ((901 1 901))))
+
+Verifica della correttezza dei risultati delle funzioni:
+
+(setq k1e6 (sort (unique (map first (trova-numeri 1e6)))))
+(setq k1e6-2 (sort (unique (map first (find-number 6)))))
+(= k1e6 k1e6-2)
+;-> true
+
+Test di velocità:
+
+(time (setq k1e7 (sort (unique (map first (trova-numeri 1e7))))))
+;-> 7755.561
+(time (setq k1e7-2 (sort (unique (map first (find-number 7))))))
+;-> 20.239
+(= k1e7 k1e7-2)
+;-> true
+
+(time (println (length 
+      (setq k1e18-2 (sort (unique (map first (find-number 18))))))))
+;-> 1382
+;-> 1019.944
+
+Nota: la sequenza dei valori di k non esiste in OEIS.
+
 ============================================================================
 

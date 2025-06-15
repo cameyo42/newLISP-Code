@@ -2987,6 +2987,8 @@ NOTE LIBERE 30
   Cifrario di Playfair
   Ricerca del k-esimo indice del primo elemento che ha N occorrenze
   Espressioni regolari (Basi ed Esempi)
+  Serie di Taylor (Seno e Coseno)
+  Interi senza la prima cifra
 
 PROBLEMI SUI DADI
 =================
