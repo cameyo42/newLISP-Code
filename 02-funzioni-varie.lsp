@@ -4673,6 +4673,8 @@ Vediamo la differenza di velocità tra le due funzioni:
 (time (powerset-i '(1 2 3 4 5 6 7 8 9 10 15 16)) 1000)
 ;-> 3672.166
 
+Il numero di elementi dell'insieme potenza vale 2^n, dove n è il numero di elementi della lista.
+
 
 -----------------
 Terne pitagoriche

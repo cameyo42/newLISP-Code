@@ -4785,7 +4785,6 @@ Per includere anche "_"  possiamo usare usare:
 ;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
 ;->  ("A1234567890B" 22 12) ("AXB" 39 3))
 
-------------------------------------------------
 regex-all: versione alternativa fornita da "rrq"
 ------------------------------------------------
 ---
@@ -5446,6 +5445,129 @@ Products of exactly 6 distinct primes.
 ;->  72930 79170 81510 82110 84630 85470 91770 94710 98670 99330
 ;->  101010 102102 103530 106590 108570 110670 111930 114114 115710
 ;->  117390 122430 123690 124410 125970 128310)
+
+
+-----------------------------------------------
+Numeri prodotto di numeri di Fibonacci distinti
+-----------------------------------------------
+
+Calcolare la sequenza dei numeri che sono il prodotto di numeri di Fibonacci distinti.
+
+Sequenza OEIS A160009:
+Numbers that are the product of distinct Fibonacci numbers.
+  0, 1, 2, 3, 5, 6, 8, 10, 13, 15, 16, 21, 24, 26, 30, 34, 39, 40, 42, 48,
+  55, 63, 65, 68, 78, 80, 89, 102, 104, 105, 110, 120, 126, 130, 144, 165,
+  168, 170, 178, 195, 204, 208, 210, 233, 240, 267, 272, 273, 275, 288,
+  312, 315, 330, 336, 340, 377, 390, 432, 440, 442, 445, ...
+
+Esempio di calcolo per calcolare tutti i numeri inferiori a fibo(7) = 13:
+
+1) Calcoliamo i numeri di Fibonacci fino a 13:
+Fibonacci = (0 1 1 2 3 5 8 13)
+
+2) Togliamo lo 0 e il 13:
+Fibonacci = (1 1 2 3 5 8 13)
+
+3) Il 13 diventa il valore massimo della sequenza (tutti i numeri calcolati devono essere inferiori a 13).
+valore-massimo =  13
+
+4) Calcoliamo il power-set (insieme potenza) dei Fibonacci rimasti
+powerset(Fibonacci) = powerset(1 1 2 3 5 8 13) = moltiplicazioni = 
+((1 1 2 3 5 8) (1 1 2 3 5) (1 1 2 3 8) (1 1 2 3) (1 1 2 5 8) (1 1 2 5)
+ (1 1 2 8) (1 1 2) (1 1 3 5 8) (1 1 3 5) (1 1 3 8) (1 1 3) (1 1 5 8)
+ (1 1 5) (1 1 8) (1 1) (1 2 3 5 8) (1 2 3 5) (1 2 3 8) (1 2 3) (1 2 5 8)
+ (1 2 5) (1 2 8) (1 2) (1 3 5 8) (1 3 5) (1 3 8) (1 3) (1 5 8) (1 5) (1 8)
+ (1) (1 2 3 5 8) (1 2 3 5) (1 2 3 8) (1 2 3) (1 2 5 8) (1 2 5) (1 2 8)
+ (1 2) (1 3 5 8) (1 3 5) (1 3 8) (1 3) (1 5 8) (1 5) (1 8) (1) (2 3 5 8)
+ (2 3 5) (2 3 8) (2 3) (2 5 8) (2 5) (2 8) (2) (3 5 8) (3 5) (3 8) (3)
+ (5 8) (5) (8) ())
+ 
+5) Togliamo la lista vuota '() (ultimo elemento):
+((1 1 2 3 5 8) (1 1 2 3 5) (1 1 2 3 8) (1 1 2 3) (1 1 2 5 8) (1 1 2 5)
+ ...
+ (5 8) (5) (8))
+
+6) Adesso calcoliamo la moltiplicazione di ogni elemento della lista e inseriamo il valore nella sequenza solo se è inferiore al 13 (valore massimo):
+(6 10 2 3 5 8 1 6 10 2 3 5 8 1 6 10
+ 2 3 5 8 1 6 10 2 3 5 8)
+
+7) Per creare la sequenza basta prendere i valori unici della lista, ordinarli e inserire uno 0 all'inizio.
+(0 1 2 3 5 6 8 10)
+
+Nota: il numero di elementi dell'insieme potenza vale 2^n, dove n è il numero di elementi della lista.
+Quindi possiamo calcolare solo pochi numeri di Fibonacci.
+
+Per esempio, il 21-esimo numero di Fibonacci vale 10946.
+
+(define (fibo-lutz num)
+  (let ( (out '(0L 1L)) (x 1L) )
+    (extend out (series x (fn (y) (+ x (swap y x))) (- num 1)))))
+
+(define (powerset lst)
+"Generate all sublists of a list"
+  (if (empty? lst)
+      (list '())
+      (let ((element (first lst))
+            (p (powerset (rest lst))))
+         (extend (map (fn (subset) (cons element subset)) p) p) )))
+
+Funzione che calcola la sequenza dei numeri che sono il prodotto di numeri di Fibonacci distinti:
+(il parametro idx rappresenta l'indice del numero Fibonacci(idx))
+
+(define (seq idx)
+  (local (fibo valore-massimo mult out)
+    ; calcola la sequenza di Fibonacci fino all'indice idx
+    (setq fibo (fibo-lutz idx))
+    ; elimina lo 0 iniziale
+    (pop fibo)
+    ; calcola il valore massimo della sequenza
+    ; (ultimo numero della sequenza)
+    (setq valore-massimo (pop fibo -1))
+    ; calcola l'insieme potenza della lista 'fibo'
+    ; lista delle moltiplicazioni da calcolare
+    (setq mult (powerset fibo))
+    ; elimina la lista vuota '()
+    (pop mult -1)
+    (setq out '())
+    ; ciclo per calcolare ogni moltiplicazione
+    (dolist (el mult)
+      ; valore della moltiplicazione corrente
+      (setq val (apply * el))
+      ; inserisce il valore nella soluzione
+      ; solo se è inferiore al 'valore-massimo'
+      (if (< val valore-massimo) (push val out -1))
+    )
+    ; prende i valore unici, li ordina e inserisce uno 0 all'inizio
+    (push 0L (sort (unique out)))))
+
+Proviamo:
+
+(seq 10)
+;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L 42L 48L)
+
+(time (println (seq 21)))
+;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L 42L
+;->  48L 55L 63L 65L 68L 78L 80L 89L 102L 104L 105L 110L 120L 126L 130L
+;->  144L 165L 168L 170L 178L 195L 204L 208L 210L 233L 240L 267L 272L
+;->  273L 275L 288L 312L 315L 330L 336L 340L 377L 390L 432L 440L 442L
+;->  445L 466L 504L 510L 520L 534L 544L 546L 550L 610L 624L 630L 699L
+;->  712L 714L 715L 720L 754L 816L 819L 825L 840L 864L 880L 884L 890L
+;->  987L 1008L 1020L 1040L 1131L 1152L 1155L 1157L 1165L 1220L 1320L
+;->  1326L 1335L 1360L 1365L 1398L 1424L 1428L 1430L 1440L 1560L 1597L
+;->  1632L 1638L 1650L 1680L 1830L 1864L 1869L 1870L 1872L 1885L 1974L
+;->  2136L 2142L 2145L 2160L 2184L 2200L 2210L 2262L 2304L 2310L 2314L
+;->  2330L 2520L 2584L 2640L 2652L 2670L 2720L 2730L 2961L 3016L 3024L
+;->  3026L 3029L 3050L 3120L 3194L 3456L 3465L 3471L 3495L 3536L 3560L
+;->  3570L 3575L 3660L 3728L 3738L 3740L 3744L 3770L 4080L 4095L 4181L
+;->  4272L 4284L 4290L 4320L 4368L 4400L 4420L 4791L 4880L 4893L 4895L
+;->  4896L 4901L 4935L 5040L 5168L 5592L 5607L 5610L 5616L 5655L 5712L
+;->  5720L 5760L 5775L 5785L 5922L 6032L 6048L 6052L 6058L 6100L 6552L
+;->  6600L 6630L 6765L 6912L 6930L 6942L 6990L 7072L 7120L 7140L 7150L
+;->  7752L 7896L 7917L 7920L 7922L 7930L 7985L 8160L 8190L 8362L 9048L
+;->  9072L 9078L 9087L 9150L 9240L 9256L 9282L 9320L 9345L 9350L 9360L
+;->  9582L 9760L 9786L 9790L 9792L 9802L 9870L 10608L 10680L 10710L
+;->  10725L 10920L)
+;-> 7062.94
 
 ============================================================================
 

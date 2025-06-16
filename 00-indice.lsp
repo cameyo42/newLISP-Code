@@ -2991,6 +2991,7 @@ NOTE LIBERE 30
   Interi senza la prima cifra
   Cheryl's Birthday
   Interi prodotto di n numeri primi
+  Numeri prodotto di numeri di Fibonacci distinti
 
 PROBLEMI SUI DADI
 =================

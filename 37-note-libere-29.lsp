@@ -3939,16 +3939,16 @@ Possiamo scrivere delle funzioni matematiche in un file (es. functions.bc) da po
 
   bc -l functions.bc
 
-################
-# functions.bc #
-################
+###########
+# func.bc #
+###########
 
 #################################
 # Helpful Constants and Functions
 #################################
 
 pi=4*a(1)
-ex=e(1)
+eu=e(1)
 define sgn(x) { if(x>0) return 1; if(x<0) return -1; }
 define abs(x) { return sgn(x)*x }
 define heavyside(x) { return (x>0) }
@@ -4018,6 +4018,9 @@ define artanh(x) { return (1/2)*ln((1+x)/(1-x))}
 define arsech(x) { return arcosh(1/x) }
 define arcsch(x) { return arsinh(1/x) }
 define arcoth(x) { return artanh(1/x) }
+
+Nota: il file "func.bc" si trova nella cartella "data".
+
 
 bc per Windows
 --------------
