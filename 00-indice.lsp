@@ -2862,7 +2862,7 @@ NOTE LIBERE 28
   Sequenze di caratteri
   La sequenza Inventory
   Numero plastico
-  
+
 NOTE LIBERE 29
 ==============
   Hello World
@@ -2991,7 +2991,10 @@ NOTE LIBERE 30
   Interi senza la prima cifra
   Cheryl's Birthday
   Interi prodotto di n numeri primi
-  Numeri prodotto di numeri di Fibonacci distinti
+  Breve ripasso sulle hash-map
+  Numeri prodotto di numeri di Fibonacci/Fattoriali distinti
+  Numeri prodotto di numeri di Fibonacci/Fattoriali multipli (Jordan-Polya)
+  Targhe alternate con cifre e lettere
 
 PROBLEMI SUI DADI
 =================

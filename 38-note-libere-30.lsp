@@ -5447,6 +5447,86 @@ Products of exactly 6 distinct primes.
 ;->  117390 122430 123690 124410 125970 128310)
 
 
+----------------------------
+Breve ripasso sulle hash-map
+----------------------------
+
+1) Creazione hash-map hh:
+(new Tree 'hh)
+;-> hh
+
+2) Contenuto della hash-map:
+(hh)
+;-> ()
+
+3) Inserimento chiave valore nella hash-map:
+(setq key 10)
+(setq value "a")
+(hh 10 "a")
+;-> "a"
+(hh)
+;-> (("10" "a"))
+(hh 20 "b")
+;-> "b"
+(hh)
+;-> (("10" "a") ("20" "b"))
+(hh 30 "c")
+;-> "c"
+(hh)
+;-> (("10" "a") ("20" "b") ("30" "c"))
+
+4) Cerca il valore associato ad una chiave:
+chiave esistente:
+(hh 10)
+;-> "a"
+chiave non esistente:
+(hh 5)
+;-> nil
+
+5) Elimina una coppia chiave-valore
+(hh 20 nil)
+(hh)
+;-> (("10" "a") ("30" "c"))
+
+6) Numero di elementi di una hash-map:
+(length (hh))
+;-> 2
+
+7) Verifica se una hash-map è vuota:
+(empty? (hh))
+;-> nil
+
+8) Inserisce una lista associativa in una hash-map:
+(hh '((1 2) (3 4)))
+;-> hh
+(hh)
+;-> (("1" 2) ("10" "a") ("3" 4) ("30" "c"))
+
+9) Verifica se un simbolo è una hash-map:
+  (and (context? (eval hh))
+       (not (list? (eval (sym (term hh) hh nil)))))
+;-> true
+
+10) Copia i valori di una hash-map in una lista associativa:
+(setq lst (hh))
+;-> (("1" 2) ("10" "a") ("3" 4) ("30" "c"))
+(list? lst)
+;-> true
+
+11) Elimina tutti i valori di una hash-map:
+(map delete (symbols hh))
+;-> (true true true treu nil)
+(hh)
+;-> ()
+
+12) Elimina una hash-map:
+(delete 'hh)
+;-> true
+(hh)
+;-> ERR: invalid function : (hh)
+
+
+============================================================
 -----------------------------------------------
 Numeri prodotto di numeri di Fibonacci distinti
 -----------------------------------------------
@@ -5472,7 +5552,7 @@ Fibonacci = (1 1 2 3 5 8 13)
 valore-massimo =  13
 
 4) Calcoliamo il power-set (insieme potenza) dei Fibonacci rimasti
-powerset(Fibonacci) = powerset(1 1 2 3 5 8 13) = moltiplicazioni = 
+powerset(Fibonacci) = powerset(1 1 2 3 5 8 13) = moltiplicazioni =
 ((1 1 2 3 5 8) (1 1 2 3 5) (1 1 2 3 8) (1 1 2 3) (1 1 2 5 8) (1 1 2 5)
  (1 1 2 8) (1 1 2) (1 1 3 5 8) (1 1 3 5) (1 1 3 8) (1 1 3) (1 1 5 8)
  (1 1 5) (1 1 8) (1 1) (1 2 3 5 8) (1 2 3 5) (1 2 3 8) (1 2 3) (1 2 5 8)
@@ -5481,7 +5561,7 @@ powerset(Fibonacci) = powerset(1 1 2 3 5 8 13) = moltiplicazioni =
  (1 2) (1 3 5 8) (1 3 5) (1 3 8) (1 3) (1 5 8) (1 5) (1 8) (1) (2 3 5 8)
  (2 3 5) (2 3 8) (2 3) (2 5 8) (2 5) (2 8) (2) (3 5 8) (3 5) (3 8) (3)
  (5 8) (5) (8) ())
- 
+
 5) Togliamo la lista vuota '() (ultimo elemento):
 ((1 1 2 3 5 8) (1 1 2 3 5) (1 1 2 3 8) (1 1 2 3) (1 1 2 5 8) (1 1 2 5)
  ...
@@ -5546,7 +5626,166 @@ Proviamo:
 ;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L 42L 48L)
 
 (time (println (seq 21)))
-;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L 42L
+;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L
+;->  42L 48L 55L 63L 65L 68L 78L 80L 89L 102L 104L 105L 110L 120L 126L
+;->  130L 144L 165L 168L 170L 178L 195L 204L 208L 210L 233L 240L 267L
+;->  272L 273L 275L 288L 312L 315L 330L 336L 340L 377L 390L 432L 440L
+;->  442L 445L 466L 504L 510L 520L 534L 544L 546L 550L 610L 624L 630L
+;->  699L 712L 714L 715L 720L 754L 816L 819L 825L 840L 864L 880L 884L
+;->  890L 987L 1008L 1020L 1040L 1131L 1152L 1155L 1157L 1165L 1220L 1320L
+;->  1326L 1335L 1360L 1365L 1398L 1424L 1428L 1430L 1440L 1560L 1597L
+;->  1632L 1638L 1650L 1680L 1830L 1864L 1869L 1870L 1872L 1885L 1974L
+;->  2136L 2142L 2145L 2160L 2184L 2200L 2210L 2262L 2304L 2310L 2314L
+;->  2330L 2520L 2584L 2640L 2652L 2670L 2720L 2730L 2961L 3016L 3024L
+;->  3026L 3029L 3050L 3120L 3194L 3456L 3465L 3471L 3495L 3536L 3560L
+;->  3570L 3575L 3660L 3728L 3738L 3740L 3744L 3770L 4080L 4095L 4181L
+;->  4272L 4284L 4290L 4320L 4368L 4400L 4420L 4791L 4880L 4893L 4895L
+;->  4896L 4901L 4935L 5040L 5168L 5592L 5607L 5610L 5616L 5655L 5712L
+;->  5720L 5760L 5775L 5785L 5922L 6032L 6048L 6052L 6058L 6100L 6552L
+;->  6600L 6630L 6765L 6912L 6930L 6942L 6990L 7072L 7120L 7140L 7150L
+;->  7752L 7896L 7917L 7920L 7922L 7930L 7985L 8160L 8190L 8362L 9048L
+;->  9072L 9078L 9087L 9150L 9240L 9256L 9282L 9320L 9345L 9350L 9360L
+;->  9582L 9760L 9786L 9790L 9792L 9802L 9870L 10608L 10680L 10710L 10725L
+;->  10920L)
+;-> 7062.94
+
+L'algoritmo è corretto, ma è molto lento perchè il calcolo dell'insieme potenza è molto oneroso.
+
+Possiamo utilizzare una "costruzione incrementale":
+1) Mantenere una lista dei prodotti generati finora.
+2) Per ogni nuovo numero di Fibonacci F, moltiplicare F per ogni prodotto esistente, e aggiungere il nuovo prodotto se è minore del valore massimo.
+3) Al termine prendere tutti i valori unici e ordinarli.
+
+(define (seq2 idx)
+  (local (fibo valore-massimo out nuovi tmp prodotto)
+    ; Calcola la sequenza di Fibonacci fino a idx
+    (setq fibo (fibo-lutz idx))
+    ; Rimuove lo 0 iniziale
+    (pop fibo)
+    ; Calcola il valore massimo ammesso
+    (setq valore-massimo (last fibo))
+    ; Inizializza con 1 la lista dei prodotti
+    (setq out '(1L))
+    ; Per ogni numero di Fibonacci f
+    (dolist (f fibo)
+      (setq nuovi '())
+      ; Moltiplica ogni valore già presente per f
+      (dolist (x out)
+        (setq prodotto (* f x))
+        ; Solo se minore di valore-massimo
+        (if (< prodotto valore-massimo)
+            (push prodotto nuovi -1)))
+      ; Aggiungi i nuovi prodotti
+      (extend out nuovi)
+    )
+    ; Prende i prodotti unici li ordina e aggiunge 0 all'inizio
+    (push 0L (sort (unique out)))))
+
+Proviamo:
+
+(seq2 10)
+;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L 42L 48L)
+
+(time (println (seq2 21)))
+;-> (0L 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L
+;->  42L 48L 55L 63L 65L 68L 78L 80L 89L 102L 104L 105L 110L 120L 126L
+;->  130L 144L 165L 168L 170L 178L 195L 204L 208L 210L 233L 240L 267L
+;->  272L 273L 275L 288L 312L 315L 330L 336L 340L 377L 390L 432L 440L
+;->  442L 445L 466L 504L 510L 520L 534L 544L 546L 550L 610L 624L 630L
+;->  699L 712L 714L 715L 720L 754L 816L 819L 825L 840L 864L 880L 884L
+;->  890L 987L 1008L 1020L 1040L 1131L 1152L 1155L 1157L 1165L 1220L 1320L
+;->  1326L 1335L 1360L 1365L 1398L 1424L 1428L 1430L 1440L 1560L 1597L
+;->  1632L 1638L 1650L 1680L 1830L 1864L 1869L 1870L 1872L 1885L 1974L
+;->  2136L 2142L 2145L 2160L 2184L 2200L 2210L 2262L 2304L 2310L 2314L
+;->  2330L 2520L 2584L 2640L 2652L 2670L 2720L 2730L 2961L 3016L 3024L
+;->  3026L 3029L 3050L 3120L 3194L 3456L 3465L 3471L 3495L 3536L 3560L
+;->  3570L 3575L 3660L 3728L 3738L 3740L 3744L 3770L 4080L 4095L 4181L
+;->  4272L 4284L 4290L 4320L 4368L 4400L 4420L 4791L 4880L 4893L 4895L
+;->  4896L 4901L 4935L 5040L 5168L 5592L 5607L 5610L 5616L 5655L 5712L
+;->  5720L 5760L 5775L 5785L 5922L 6032L 6048L 6052L 6058L 6100L 6552L
+;->  6600L 6630L 6765L 6912L 6930L 6942L 6990L 7072L 7120L 7140L 7150L
+;->  7752L 7896L 7917L 7920L 7922L 7930L 7985L 8160L 8190L 8362L 9048L
+;->  9072L 9078L 9087L 9150L 9240L 9256L 9282L 9320L 9345L 9350L 9360L
+;->  9582L 9760L 9786L 9790L 9792L 9802L 9870L 10608L 10680L 10710L 10725L
+;->  10920L)
+;-> 15.621
+
+Test di correttezza
+
+(= (seq 21) (seq2 21))
+;-> true
+
+Test di velocità
+
+(time (seq 21))
+;-> 7844.378
+(time (seq2 21))
+;-> 0
+
+Calcolare la sequenza dei numeri che sono il prodotto di numeri Fattoriali distinti.
+
+Sequenza OEIS A058295:
+Products of distinct factorials.
+  1, 2, 6, 12, 24, 48, 120, 144, 240, 288, 720, 1440, 2880, 4320, 5040,
+  5760, 8640, 10080, 17280, 30240, 34560, 40320, 60480, 80640, 86400,
+  103680, 120960, 172800, 207360, 241920, 362880, 483840, 518400, 604800,
+  725760, 967680, 1036800, 1209600, ...
+
+Generalizziamo la funzione "seq2" in modo che possa calcolare la sequenza dei numeri che sono il prodotto dei numeri di una lista data.
+
+(define (single-nums-product lst)
+  (local (valore-massimo out nuovi tmp prodotto)
+    ; Calcola il valore massimo ammesso
+    ; (ultimo valore della lista)
+    (setq valore-massimo (last lst))
+    ; Inizializza con 1 la lista dei prodotti
+    (setq out '(1L))
+    ; Per ogni numero della lista
+    (dolist (num lst)
+      ; Lista dei nuovi valori da aggiungere
+      (setq nuovi '())
+      ; Moltiplica ogni valore già presente per 'num'
+      (dolist (el out)
+        (setq prodotto (* num el))
+        ; Aggiunge il prodotto a 'nuovi' solo se minore di 'valore-massimo'
+        (if (< prodotto valore-massimo)
+            (push prodotto nuovi -1)))
+      ; Aggiunge la lista 'nuovi' alla lista dei prodotti 'out'
+      (extend out nuovi)
+    )
+    ; Prende i prodotti unici li ordina e aggiunge 0 all'inizio
+    (sort (unique out))))
+
+Per i numeri Fattoriali:
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(setq lst (map fact-i (sequence 1 10)))
+;-> (1L 2L 6L 24L 120L 720L 5040L 40320L 362880L 3628800L)
+(single-nums-product lst)
+;-> (1L 2L 6L 12L 24L 48L 120L 144L 240L 288L 720L 1440L 2880L 4320L 5040L
+;->  5760L 8640L 10080L 17280L 30240L 34560L 40320L 60480L 80640L 86400L
+;->  103680L 120960L 172800L 207360L 241920L 362880L 483840L 518400L 604800L
+;->  725760L 967680L 1036800L 1209600L 1451520L 1935360L 2073600L 2177280L)
+
+Per i numeri di Fibonacci:
+
+(define (fibo-lutz num)
+  (let ( (out '(0L 1L)) (x 1L) )
+    (extend out (series x (fn (y) (+ x (swap y x))) (- num 1)))))
+
+(setq lst (fibo-lutz 20))
+; togliamo lo 0 iniziale
+(pop lst)
+
+(push 0 (single-nums-product lst))
+;-> (0 1L 2L 3L 5L 6L 8L 10L 13L 15L 16L 21L 24L 26L 30L 34L 39L 40L 42L
 ;->  48L 55L 63L 65L 68L 78L 80L 89L 102L 104L 105L 110L 120L 126L 130L
 ;->  144L 165L 168L 170L 178L 195L 204L 208L 210L 233L 240L 267L 272L
 ;->  273L 275L 288L 312L 315L 330L 336L 340L 377L 390L 432L 440L 442L
@@ -5562,12 +5801,176 @@ Proviamo:
 ;->  4272L 4284L 4290L 4320L 4368L 4400L 4420L 4791L 4880L 4893L 4895L
 ;->  4896L 4901L 4935L 5040L 5168L 5592L 5607L 5610L 5616L 5655L 5712L
 ;->  5720L 5760L 5775L 5785L 5922L 6032L 6048L 6052L 6058L 6100L 6552L
-;->  6600L 6630L 6765L 6912L 6930L 6942L 6990L 7072L 7120L 7140L 7150L
-;->  7752L 7896L 7917L 7920L 7922L 7930L 7985L 8160L 8190L 8362L 9048L
-;->  9072L 9078L 9087L 9150L 9240L 9256L 9282L 9320L 9345L 9350L 9360L
-;->  9582L 9760L 9786L 9790L 9792L 9802L 9870L 10608L 10680L 10710L
-;->  10725L 10920L)
-;-> 7062.94
+;->  6600L 6630L)
+
+
+----------------------------------------------------------
+Numeri prodotto di numeri di Fibonacci/Fattoriali multipli
+----------------------------------------------------------
+
+Calcolare la sequenza dei numeri che sono il prodotto di numeri di Fibonacci.
+I numeri di Fibonacci possono essere multipli.
+
+Esempio: 8 = 2*2*2
+
+Sequenza OEIS A065108
+Positive numbers expressible as a product of Fibonacci numbers.
+  1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13, 15, 16, 18, 20, 21, 24, 25, 26,
+  27, 30, 32, 34, 36, 39, 40, 42, 45, 48, 50, 52, 54, 55, 60, 63, 64,
+  65, 68, 72, 75, 78, 80, 81, 84, 89, 90, 96, 100, 102, 104, 105, 108,
+  110, 117, 120, 125, 126, 128, 130, 135, 136, 144, 150, 156, 160, 162, ...
+
+Calcolare la sequenza dei numeri che sono il prodotto di Fattoriali.
+I numeri Fattoriali possono essere multipli.
+
+Sequenza OEIS A001013:
+Jordan-Polya numbers: products of factorial numbers A000142.
+  1, 2, 4, 6, 8, 12, 16, 24, 32, 36, 48, 64, 72, 96, 120, 128, 144, 192,
+  216, 240, 256, 288, 384, 432, 480, 512, 576, 720, 768, 864, 960, 1024,
+  1152, 1296, 1440, 1536, 1728, 1920, 2048, 2304, 2592, 2880, 3072, 3456,
+  3840, 4096, 4320, 4608, 5040, 5184, 5760, ...
+
+La funzione 'multiple-nums-product' costruisce in maniera incrementale (con BFS) tutti i numeri ottenibili come prodotti di elementi in lst, con ripetizioni ammesse, ma senza superare il valore massimo della lista.
+Caratteristiche
+- Incrementale: costruisce i prodotti a partire da 1 moltiplicando successivamente con gli elementi di lst.
+- Con ripetizioni: un numero può essere usato più volte nei prodotti.
+- Senza duplicati: usa una Tree come hash-map per evitare ridondanze.
+- BFS: assicura che i prodotti più piccoli vengano generati prima.
+
+Controllo limite: i prodotti che superano valore-massimo vengono scartati.
+
+(define (multiple-nums-product lst)
+  (local (valore-massimo queue out prodotto)
+    ; Imposta il limite massimo come l'ultimo elemento della lista
+    ; Nessun prodotto dovrà superare questo valore
+    (setq valore-massimo (last lst))
+    ; Crea una hash-map (struttura Tree) per registrare i valori già visitati
+    ; Funziona come un "set" per evitare duplicati e ricalcoli
+    (new Tree 'hash)
+    ; Inizializza la coda per la BFS con il valore iniziale 1
+    ; Rappresenta il prodotto neutro di partenza
+    (setq queue '(1L))
+    ; Lista dei risultati che verranno restituiti
+    ; Conterrà tutti i prodotti validi, ordinati e unici
+    (setq out '())
+    ; Inizia il ciclo principale (Breadth-First Search)
+    ; Finché ci sono elementi da esplorare nella coda
+    (while queue
+      ; Estrae un valore dalla coda
+      (setq x (pop queue))
+      ; Se non è stato ancora visitato
+      (if (not (hash x))
+        (begin
+          ; Marca il valore come visitato nella hash-map
+          (hash x true)
+          ; Aggiunge il valore corrente alla lista dei risultati
+          (push x out -1)
+          ; Genera i nuovi prodotti combinando x con ogni elemento della lista
+          (dolist (f lst)
+            (setq prodotto (* x f))
+            ; Se il prodotto è valido (entro il limite massimo)
+            ; lo aggiunge alla coda per ulteriori combinazioni future
+            (if (< prodotto valore-massimo)
+              (push prodotto queue -1))))))
+    ; Dopo la BFS, elimina la hash-map per liberare memoria
+    (delete 'hash)
+    ; Restituisce la lista dei prodotti validi, ordinati in modo crescente
+    (sort out)))
+
+Per i numeri di Fibonacci:
+
+(define (fibo-lutz num)
+  (let ( (out '(0L 1L)) (x 1L) )
+    (extend out (series x (fn (y) (+ x (swap y x))) (- num 1)))))
+
+(setq lst (fibo-lutz 13))
+;-> (0L 1L 1L 2L 3L 5L 8L 13L 21L 34L 55L 89L 144L 233L)
+; togliamo lo 0 iniziale
+(pop lst)
+
+(multiple-nums-product lst)
+;-> (1L 2L 3L 4L 5L 6L 8L 9L 10L 12L 13L 15L 16L 18L 20L 21L 24L 25L 26L
+;->  27L 30L 32L 34L 36L 39L 40L 42L 45L 48L 50L 52L 54L 55L 60L 63L 64L
+;->  65L 68L 72L 75L 78L 80L 81L 84L 89L 90L 96L 100L 102L 104L 105L 108L
+;->  110L 117L 120L 125L 126L 128L 130L 135L 136L 144L 150L 156L 160L 162L
+;->  165L 168L 169L 170L 178L 180L 189L 192L 195L 200L 204L 208L 210L 216L
+;->  220L 225L)
+
+Per i numeri fattoriali:
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(setq lst (map fact-i (sequence 1 7)))
+;-> (1L 2L 6L 24L 120L 720L 5040L)
+(multiple-nums-product lst)
+;-> (1L 2L 4L 6L 8L 12L 16L 24L 32L 36L 48L 64L 72L 96L 120L 128L 144L 192L
+;->  216L 240L 256L 288L 384L 432L 480L 512L 576L 720L 768L 864L 960L 1024L
+;->  1152L 1296L 1440L 1536L 1728L 1920L 2048L 2304L 2592L 2880L 3072L 3456L
+;->  3840L 4096L 4320L 4608L)
+
+
+------------------------------------
+Targhe alternate con cifre e lettere
+------------------------------------
+
+In un paese le targhe delle auto hanno 6 caratteri: 3 cifre e 3 lettere.
+Le cifre e le lettere devono essere alternate, quindi le targhe possono avere solo due tipi di configurazioni:
+1) LCLCLC
+2) CLCLCL
+Quante targhe diverse possono essere create?
+
+N = (0..9)  --> 10 simboli
+L = (A..Z)  --> 26 simboli
+
+Numero di configurazioni di tipo 1 (LCLCLC) = 10*26*10*26*10*26 = 17576000
+
+Numero di configurazioni di tipo 2 (CLCLCL) = 26*10*26*10*26*10 = 17576000
+
+Totale = 17576000 + 17576000 = 35152000
+
+(* 26 10 26 10 26 10)
+;-> 17576000
+(+ 17576000 17576000)
+;-> 35152000
+
+(char "A")
+;-> 65
+(char "Z")
+;-> 90
+
+(define (calcola)
+  (setq out '())
+  (setq conta 0)
+  (for (a 0 9)
+    (for (b 65 90)
+      (for (c 0 9)
+        (for (d 65 90)
+          (for (e 0 9)
+            (for (f 65 90)
+              ;(push (string a (char b) c (char d) e (char f)) out -1)
+              (++ conta)))))))
+  conta)
+
+(time (println (calcola)))
+;-> 17576000
+;-> 528.204
+
+; con push
+(time (println (calcola)))
+;-> 17576000
+;-> 20392.767
+
+(length out)
+;-> 17576000
+
+(out 1425000)
+;-> "0V0U7S"
 
 ============================================================================
 
