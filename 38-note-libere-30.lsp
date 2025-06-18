@@ -1855,7 +1855,7 @@ Limitazioni:
 - Non adatto se vuoi il cammino più lungo → serve DFS o tecniche diverse.
 
 Immagina che da 'start' si diffonda un'onda.
-Appena l’onda tocca 'goal', hai trovato il cammino più breve.
+Appena l'onda tocca 'goal', hai trovato il cammino più breve.
 Non serve continuare oltre.
 
 Funzione che implementa l'algoritmo BFS:
@@ -2479,7 +2479,7 @@ Versione iterativa (senza commenti):
 
 Quando la lista da verificare è visitabile le nostre due funzioni (ricorsiva e iterativa) restituiscono il percorso come una lista di tutti gli indici visitati.
 Comunque questi indici non sono nell'ordine con cui vengono visitati.
-Per ottenere il percorso esatto dobbiamo tenere traccia dell’ordine con cui arriviamo agli indici.
+Per ottenere il percorso esatto dobbiamo tenere traccia dell'ordine con cui arriviamo agli indici.
 
 (define (visitabile? lst)
   (local (trovato visitati stack percorso)
@@ -2745,7 +2745,7 @@ Un possibile schema:
 ;-> 3
 
 Cosa cambia in questa versione?
- start-index: specifica l’indice da cui iniziare la ricerca.
+ start-index: specifica l'indice da cui iniziare la ricerca.
  Slicing della lista: La sublist viene costruita da start-index, non da 0.
  Stesso metodo di ricerca: Usa index-seq per trovare la ripetizione.
 Ora possiamo trovare ripetizioni in qualsiasi posizione della lista.
@@ -4386,7 +4386,7 @@ Funzione iterativa:
               (begin
                 (setq trovato x)
                 (setq finito true)))))) ; ferma il ciclo
-    ; Se abbiamo trovato un intero con n occorrenze, restituisci l’indice della k-esima
+    ; Se abbiamo trovato un intero con n occorrenze, restituisci l'indice della k-esima
     (if trovato
         (((assoc trovato posizioni) 1) (- k 1))
         nil))) ; altrimenti restituisci nil
@@ -4700,7 +4700,7 @@ Spiegazione:
 ;->  ("AB" 17 2))
 
 Perché usare .*? invece di .*?
-Se usi "A.*B" (senza ?), otterresti un match avido, cioè prende da prima A fino all’ultima B:
+Se usi "A.*B" (senza ?), otterresti un match avido, cioè prende da prima A fino all'ultima B:
 (regex "A.*B" a)
 ;-> ("AAAaBAAAABcADccAAAB" 0 19)
 Invece con "A.*?B" prendi il primo match possibile per ogni B, uno alla volta: è quello che normalmente vuoi.
@@ -5259,7 +5259,7 @@ La data di compleanno di Cheryl è: July 16.
 Riassunto del ragionamento:
 a) Albert capisce che Bernard non può sapere, quindi elimina mesi con giorni unici -> rimangono solo July e August.
 b) Bernard ora dice di sapere -> quindi il giorno è unico tra i rimanenti -> rimangono July 16, August 15, August 17.
-c) Albert dice di sapere -> quindi il mese dev’essere quello con una sola opzione rimasta -> July.
+c) Albert dice di sapere -> quindi il mese dev'essere quello con una sola opzione rimasta -> July.
 d) Unica data possibile: July 16.
 
 Simulazione del ragionamento con newLISP:
@@ -5971,6 +5971,277 @@ Totale = 17576000 + 17576000 = 35152000
 
 (out 1425000)
 ;-> "0V0U7S"
+
+
+----------------
+Fuga dalla lista
+----------------
+
+Data una lista di numeri interi non negativi, determinare se è possibile fuggire dalla lista.
+La fuga consiste nel seguente processo:
+1) si parte dall'indice 0
+2) si prende il valore 'val' all'indice corrente
+3) ci spostiamo dall'indice corrente all'indice più avanti di 'val' posti
+4) se l'indice corrente supera la lunghezza della lista, allora siamo riusciti a fuggire,
+   altrimenti andare al passo 2).
+
+Esempio 1:
+  lista = (2 3 1 1 5))
+  movimenti =
+  1) da idx 0 mi muovo di 2 e vado a idx 2
+  2) da idx 2 mi muovo di 1 e vado a idx 3
+  3) da idx 3 mi muovo di 1 e vado a idx 4
+  4) da idx 4 mi muovo di 5 e riesco a fuggire dalla lista.
+
+Esempio 2:
+lista = (1 2 5 0))
+movimenti =
+1) da idx 0 mi muovo di 1 e vado a idx 1
+2) da idx 1 mi muovo di 2 e vado a idx 4
+3) da idx 4 mi muovo di 0 e vado a idx 4
+4) da idx 4 mi muovo di 0 e vado a idx 4 (loop)
+... 
+Non riesco a fuggire dalla lista perchè dal valore 0 non è possibile muoversi.
+
+Attenzione: controllare semplicemente l'esistenza di 0 non è sufficiente
+Esempio:
+lista = (1 2 0 4))
+movimenti =
+1) da idx 0 mi muovo di 1 e vado a idx 1
+2) da idx 1 mi muovo di 2 e vado a idx 3
+3) da idx 3 mi muovo di 4 e riesco a fuggire dalla lista.
+Siamo fuggiti anche se esiste uno 0 all'indice 2.
+
+(define (escape? lst)
+  (let ( (len (length lst)) (idx 0) (zero nil) )
+    (while (and (< idx len) (not zero))
+      (if (zero? (lst idx))
+          (setq zero true)
+          (setq idx (+ idx (lst idx)))))
+    (not zero)))
+
+Proviamo:
+
+(escape? '(2 3 1 1 5))
+;-> true
+(escape? '(1 2 5 0))
+;-> nil
+(escape? '(1 2 0 4))
+;-> true
+(escape? '(3 2 1 0 4))
+;-> nil
+
+
+---------------
+Numero di pesci
+---------------
+
+Calcolare il numero di pesci che si trovano in una stringa.
+1) ><>
+2) <><
+I pesci validi sono: ><> e <><
+Tutti i pesci si trovano su una sola linea.
+I pesci possono sovrapporsi 
+(es. ><><> contiene 2 pesci: ><> alle posizioni 0–2 e 2–4)
+
+Esempio:
+  La stringa "<><><>" contiene 4 pesci.
+  Caratteri: < > < > < >
+  Indice:    0 1 2 3 4 5
+  Se contiamo ogni tripla di 3 caratteri consecutivi:
+  Indici 0-2: <>< -> pesce 1
+  Indici 1-3: ><> -> pesce 2
+  Indici 2-4: <>< -> pesce 3
+  Indici 3-5: ><> -> pesce 4
+
+Fuunzione che conta i pesci in una stringa:
+
+(define (conta-pesci riga)
+  ; Inizializza le variabili:
+  ; - 'conta' è il numero di pesci trovati (inizialmente 0)
+  ; - 'chars' è la lista dei caratteri della stringa
+  ; - 'len' è la lunghezza della lista dei caratteri
+  (let ((conta 0)
+        (chars (explode riga))
+        (len (length (explode riga))))
+    ; Ciclo su ogni posizione da 0 fino a len - 2 inclusi
+    (for (i 0 (- len 2))
+      ; Estrae la sottolista di 3 caratteri consecutivi a partire da 'i'
+      (let ((tripla (slice chars i 3)))
+        ; Se la tripla è esattamente '><>' o '<><', incrementa il contatore
+        (if (or (= tripla (explode "><>"))
+                (= tripla (explode "<><")))
+          (inc conta))))
+    ; Restituisce il totale dei pesci trovati
+    conta))
+
+Proviamo:
+
+(conta-pesci " ><>" )
+;-> 1
+(conta-pesci " ><><> ")
+;-> 3 (sovrapposti)
+(conta-pesci " ><> ><><> ")
+;-> 4
+(conta-pesci "<><><>")
+;-> 4
+(conta-pesci " . . . ><><><> .")
+;-> 5
+(conta-pesci "><<><<><>")
+;-> 3
+(conta-pesci " ><><> > > <>")
+;-> 3
+
+
+-----------------------
+Tasso di disoccupazione
+-----------------------
+
+Il tasso di disoccupazione in un'economia si calcola dividendo il numero di persone in cerca di lavoro per la somma del numero di persone in cerca di lavoro e del numero di persone occupate.
+Se tutti gli individui in cerca di lavoro trovano un impiego in esattamente tre mesi e tutti gli occupati rimangono occupati per esattamente tre anni prima di licenziarsi e iniziare un'altra ricerca di lavoro, qual è il tasso di disoccupazione?
+Si supponga che la forza lavoro (somma del numero di persone in cerca di lavoro e di lavoratori occupati) sia sempre la stessa.
+
+Sia 'e' il numero di persone che passano dalla disoccupazione all'occupazione ogni mese e 'te' il numero di mesi in cui ciascuna persona è occupata.
+Quindi E = e*te è il numero di individui occupati in un dato momento.
+
+Inoltre, sia 'u' il numero di persone che passano dall'occupazione alla ricerca di lavoro ogni mese e 'tu' il numero di mesi che ciascuna persona trascorre alla ricerca di un lavoro.
+Quindi U = u*tu è il numero di individui disoccupati in un dato momento.
+
+Il tasso di disoccupazione si calcola con la formula:
+
+  Ru = U/(U+E)
+
+o per sostituzione
+
+  Ru = (u*tu/(u*tu + e*te))
+
+Ora, se un numero 'e' di persone trova lavoro in un mese qualsiasi e rimane al lavoro per 'te' mesi, allora lo stesso numero 'e' passa dall'occupazione alla ricerca di lavoro 'te' mesi dopo.
+Pertanto e=u e abbiamo:
+
+  Ru = tu/(te + tu)
+
+Per il nostro problema, te = 36 e tu = 3:
+
+  Ru = 3/(36 + 3)
+
+(div 3 39)
+;-> 0.07692307692307693
+
+Con una ricerca di lavoro di tre mesi e tre anni di lavoro per tutti gli individui, il tasso di disoccupazione è di circa il 7,69%.
+
+Scriviamo una funzione generica.
+
+(define (tasso tu te) (div tu (add tu te)))
+
+(tasso 3 36)
+;-> 0.07692307692307693
+
+te = 120, tu = 12
+(tasso 12 120)
+;-> 0.09090909090909091
+
+
+--------------
+Orari ordinati
+--------------
+
+Durante una giornata, quali orari hanno i numeri ordinati in modo strettamente crescente?
+Quali in ordine crescente?
+Quali in ordine strettamente decrescente?
+Quali in ordine decrescente?
+
+Esempi:
+  12:35 = 1 2 3 5 --> i numeri sono ordinati in modo strettamente crescente
+  01:12 = 0 1 1 2 --> i numeri non sono ordinati in modo strettamente crescente
+
+In un giorno ci sono 24 ore da 60 minuti l'una.
+Comunque le ore vanno da 0 a 23 e i minuti vanno da 0 a 59.
+Usiamo 4 cicli 'for' per generare tutti gli orari.
+Usiamo la funzione 'order-type' per verificare l'ordinamento dei numeri.
+
+(define (order-type lst)
+"Check the sort order of a list"
+  (cond ((apply =  lst) '= ) ;lista con elementi uguali
+        ((apply >  lst) '> ) ;lista strettamente decrescente
+        ((apply <  lst) '< ) ;lista strettamente crescente
+        ((apply >= lst) '>=) ;lista decrescente
+        ((apply <= lst) '<=) ;lista crescente
+        (true nil)))         ;lista non ordinata
+
+(define (trova tipo)
+  (local (out  orario ordine)
+    (setq out '())
+    (setq stop nil)
+    (for (ore-decine 0 2 1 stop)
+      (for (ore-unita 0 9 1 stop)
+        (for (minuti-decine 0 5 1 stop)
+          (for (minuti-unita 0 9 1 stop)
+            ; orario corrente
+            (setq orario (list ore-decine ore-unita minuti-decine minuti-unita))
+            ; tipo di ordinamento
+            (setq ordine (order-type orario))
+            ;(print orario { } ordine) (read-line)
+            (if (= orario '(2 4 0 0))
+                (setq stop true)
+                (if (= ordine tipo)) (push orario out -1))))))
+    out))
+
+Proviamo:
+
+Ordine strettamente crescente
+(trova '<)
+;-> ((0 1 2 3) (0 1 2 4) (0 1 2 5) (0 1 2 6) (0 1 2 7) (0 1 2 8) (0 1 2 9)
+;->  (0 1 3 4) (0 1 3 5) (0 1 3 6) (0 1 3 7) (0 1 3 8) (0 1 3 9) (0 1 4 5)
+;->  ...
+;->  (1 3 5 9) (1 4 5 6) (1 4 5 7) (1 4 5 8) (1 4 5 9) (2 3 4 5) (2 3 4 6)
+;->  (2 3 4 7) (2 3 4 8) (2 3 4 9) (2 3 5 6) (2 3 5 7) (2 3 5 8) (2 3 5 9))
+(length (trova '<))
+;-> 87
+
+Ordine crescente (senza i numeri tutti uguali)
+(trova '<=)
+;-> ((0 0 0 1) (0 0 0 2) (0 0 0 3) (0 0 0 4) (0 0 0 5) (0 0 0 6) (0 0 0 7)
+;->  (0 0 0 8) (0 0 0 9) (0 0 1 1) (0 0 1 2) (0 0 1 3) (0 0 1 4) (0 0 1 5) 
+;->  ...
+;->  (2 2 5 5) (2 2 5 6) (2 2 5 7) (2 2 5 8) (2 2 5 9) (2 3 3 3) (2 3 3 4)
+;->  (2 3 3 5) (2 3 3 6) (2 3 3 7) (2 3 3 8) (2 3 3 9) (2 3 4 4) (2 3 5 5))
+(length (trova '<=))
+;-> 189
+
+Ordine strettamente decrescente
+Non esiste nessun orario strattamente decrescente perchè il più piccolo vale (3 2 1 0) che non è un orario valido.
+(trova '>)
+;-> '()
+(length (trova '>))
+;-> 0
+
+Ordine decrescente (senza i numeri tutti uguali)
+(trova '>=)
+;-> ((1 0 0 0) (1 1 0 0) (1 1 1 0) (2 0 0 0) (2 1 0 0) (2 1 1 0) (2 1 1 1)
+;->  (2 2 0 0) (2 2 1 0) (2 2 1 1) (2 2 2 0) (2 2 2 1))
+(length (trova '>=))
+;-> 12
+
+Numeri tutti uguali
+(trova '=)
+;-> ((0 0 0 0) (1 1 1 1) (2 2 2 2))
+(length (trova '=))
+;-> 3
+
+Senza ordine:
+(trova nil)
+;-> ((0 0 1 0) (0 0 2 0) (0 0 2 1) (0 0 3 0) (0 0 3 1) (0 0 3 2) (0 0 4 0)
+;->  ...
+;->  (2 3 4 2) (2 3 4 3) (2 3 5 0) (2 3 5 1) (2 3 5 2) (2 3 5 3) (2 3 5 4))
+(length (trova nil))
+;-> 1149
+
+Verifichiamo di aver considerato tutti gli orari:
+
+(* 24 60)
+;-> 1440
+(+ 87 189 12 3 1149)
+;-> 1440
 
 ============================================================================
 

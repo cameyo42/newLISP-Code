@@ -3531,7 +3531,7 @@ sportivi agonisti, attività sportive tutti i giorni per più di 2 ore, attivit�
 
 Questi valori si riferiscono in particolare a persone di età inferiore a 60 anni.
 
-A seconda dell’obiettivo da raggiungere, si possono aggiungere o sottrarre calorie dal risultato:
+A seconda dell'obiettivo da raggiungere, si possono aggiungere o sottrarre calorie dal risultato:
 - per mantenere il peso: mantenere il fabbisogno calorico come calcolato
 - per dimagrire: ridurre il fabbisogno calorico totale del 10-25%
 - per aumentare la massa muscolare: aumentare il fabbisogno calorico del 10-20%
@@ -6863,15 +6863,15 @@ Una soluzione esiste sicuramente se e solo se risultano vere:
 Spiegazione:
 - N*A è la somma minima possibile, ottenuta quando tutti i numeri sono uguali al limite inferiore A.
 - N*B è la somma massima possibile, ottenuta quando tutti i numeri sono uguali al limite superiore B.
-- Se S non rientra in questo intervallo, non è possibile trovare $N$ numeri nell’intervallo [A, B] la cui somma sia S.
-- Se invece S rientra nell’intervallo chiuso [N*A, N*B], allora esiste almeno una combinazione di N interi in [A, B] che somma esattamente a S.
+- Se S non rientra in questo intervallo, non è possibile trovare $N$ numeri nell'intervallo [A, B] la cui somma sia S.
+- Se invece S rientra nell'intervallo chiuso [N*A, N*B], allora esiste almeno una combinazione di N interi in [A, B] che somma esattamente a S.
 
 Esempio:
  Input: (S=8, N=3, A=2, B=4):
  Somma minima: $3 \cdot 2 = 6$
  Somma massima: $3 \cdot 4 = 12$
 Poiché 6 <= 8 <= 12, una (anzi più di una) soluzione esiste.
-Dunque, le due disuguaglianze sono condizione necessaria e sufficiente per l’esistenza di almeno una soluzione.
+Dunque, le due disuguaglianze sono condizione necessaria e sufficiente per l'esistenza di almeno una soluzione.
 
 Algoritmo:
 Generiamo N interi nell'intervallo [A...B] e poi verifichiamo se sommano a S.

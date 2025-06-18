@@ -2995,6 +2995,10 @@ NOTE LIBERE 30
   Numeri prodotto di numeri di Fibonacci/Fattoriali distinti
   Numeri prodotto di numeri di Fibonacci/Fattoriali multipli (Jordan-Polya)
   Targhe alternate con cifre e lettere
+  Fuga dalla lista
+  Numero di pesci
+  Tasso di disoccupazione
+  Orari ordinati
 
 PROBLEMI SUI DADI
 =================
