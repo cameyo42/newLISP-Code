@@ -2999,6 +2999,8 @@ NOTE LIBERE 30
   Numero di pesci
   Tasso di disoccupazione
   Orari ordinati
+  Numeri di Euclid-Mullin
+  Numeri di Giuga
 
 PROBLEMI SUI DADI
 =================

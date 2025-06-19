@@ -3568,38 +3568,31 @@ a(n) = n' = arithmetic derivative of n: a(0) = a(1) = 0, a(prime) = 1, a(m*n) = 
 Un altra definizione della derivata aritmetica è la seguente:
 la derivata aritmetica di un numero intero x è uguale a x per la somma dei reciproci dei fattori primi di x.
 
-(define (prime? num)
-"Check if a number is prime"
-   (if (< num 2) nil
-       (= 1 (length (factor num)))))
-
-(define (der a)
-  (cond ((= a 0) 0)
-        ((= a 1) 0)
-        ((prime? a) a)
-        ((< a 0)
-         (- (mul (abs a) (apply add (map div (factor (abs a)))))))
-        (true
-            (mul a (apply add (map div (factor  a)))))))
-
+(define (derive num)
+  (local (fattori sum)
+    (cond ((< num 0) (- (derive (- num))))
+          ; se num è uguale a 0 o 1, allora restituisce 0
+          ((< num 2) 0)
+          (true
+            (setq fattori (factor-group num))
+            ; se num è primo restituisce 1
+            (if (and (= (length fattori) 1) (= (fattori 0 1) 1))
+                1
+                ;else
+                ; altrimenti calcola la derivata aritmetica
+                (begin
+                  (setq sum 0)
+                  (dolist (f fattori)
+                    (setq sum (+ sum (/ (* num (f 1)) (f 0))))
+                  )
+                ))))))
 Proviamo:
 
-(der 0)
-;-> 0
-(der 1)
-;-> 0
-(der 7)
-;-> 7
-(der 14)
-;-> 9
-(der -5)
-;-> -1
-(der 225)
-;-> 240
-(der 1111)
-;-> 112
-(der 299792458)
-;-> 196831491
+(map derive (sequence 0 78))
+;-> (0 0 1 1 4 1 5 1 12 6 7 1 16 1 9 8 32 1 21 1 24 10 13
+;->  1 44 10 15 27 32 1 31 1 80 14 19 12 60 1 21 16 68 1 41
+;->  1 48 39 25 1 112 14 45 20 56 1 81 16 92 22 31 1 92 1 33
+;->  51 192 18 61 1 72 26 59 1 156 1 39 55 80 18 71)
 
 Altro algoritmo:
 
@@ -3617,25 +3610,17 @@ Altro algoritmo:
     )
     out))
 
-Proviamo:
+(= (map derive (sequence 0 100)) (map deriva (sequence 0 100)))
+;-> true
 
-(deriva 1)
+(time (println (derive 299792458)))
+(time (println (derive 299792458)))
+;-> 196831491
 ;-> 0
-(deriva 7)
-;-> 1
-(deriva 14)
-;-> 9
-(deriva -5)
-;-> -1
-(deriva 8)
-;-> 12
-(deriva 225)
-;-> 240
-(deriva 1111)
-;-> 112
+
 (time (println (deriva 299792458)))
 ;-> 196831491
-;-> 34253.214
+;-> 33938.751
 
 
 -------------

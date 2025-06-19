@@ -6243,5 +6243,225 @@ Verifichiamo di aver considerato tutti gli orari:
 (+ 87 189 12 3 1149)
 ;-> 1440
 
+
+-----------------------
+Numeri di Euclid-Mullin
+-----------------------
+
+Sequenza OEIS A000945:
+Euclid-Mullin sequence: a(1) = 2, a(n+1) is smallest prime factor of 1 + Product_{k=1..n} a(k).
+  2, 3, 7, 43, 13, 53, 5, 6221671, 38709183810571, 139, 2801, 11,
+  17, 5471, 52662739, 23003, 30693651606209, 37, 1741, 1313797957,
+  887, 71, 7127, 109, 23, 97, 159227, 643679794963466223081509857,
+  103, 1079990819, 9539, 3143065813, 29, 3847, 89, 19, 577, 223,
+  139703, 457, 9649, 61, 4357, ...
+
+(define (em limite)
+  (local (MAX-INT overflow out num f val)
+    (setq MAX-INT 9223372036854775807)
+    (setq overflow nil)
+    (setq out '(2L))
+    (for (i 1 (- limite 1) 1 overflow)
+      (println "lista = " out)
+      (setq num (+ 1L (apply * out)))
+      (cond ((> num MAX-INT) 
+            (println "Overflow: " num)
+            (setq overflow true))
+            (true
+              (println "Numero da fattorizzare = " num)
+              (setq fattori (factor num))
+              (println "Fattori = " fattori)
+              (setq val (fattori 0))
+              (push val out -1)
+              (print "Fattore minimo = " val) (read-line))))
+    out))
+
+Proviamo:
+
+(em 10)
+;-> lista = (2L)
+;-> Numero da fattorizzare = 3L
+;-> Fattori = (3)
+;-> Fattore minimo = 3
+;-> lista = (2L 3)
+;-> Numero da fattorizzare = 7L
+;-> Fattori = (7)
+;-> Fattore minimo = 7
+;-> lista = (2L 3 7)
+;-> Numero da fattorizzare = 43L
+;-> Fattori = (43)
+;-> Fattore minimo = 43
+;-> lista = (2L 3 7 43)
+;-> Numero da fattorizzare = 1807L
+;-> Fattori = (13 139)
+;-> Fattore minimo = 13
+;-> lista = (2L 3 7 43 13)
+;-> Numero da fattorizzare = 23479L
+;-> Fattori = (53 443)
+;-> Fattore minimo = 53
+;-> lista = (2L 3 7 43 13 53)
+;-> Numero da fattorizzare = 1244335L
+;-> Fattori = (5 248867)
+;-> Fattore minimo = 5
+;-> lista = (2L 3 7 43 13 53 5)
+;-> Numero da fattorizzare = 6221671L
+;-> Fattori = (6221671)
+;-> Fattore minimo = 6221671
+;-> lista = (2L 3 7 43 13 53 5 6221671)
+;-> Numero da fattorizzare = 38709183810571L
+;-> Fattori = (38709183810571)
+;-> Fattore minimo = 38709183810571
+;-> lista = (2L 3 7 43 13 53 5 6221671 38709183810571)
+;-> Overflow: 1498400911280533294827535471L
+;-> (2L 3 7 43 13 53 5 6221671 38709183810571)
+
+Abbiamo raggiunto l'overflow.
+Possiamo calcolare solo 9 valori della sequenza perchè il prossimo numero da fattorizzare vale:
+
+  1498400911280533294827535471L
+
+e la funzione 'factor' non si applica ai big-integer.
+
+Possiamo utilizzare la funzione 'factor-i' che si applica anche ai big-integer.
+Comunque questa funzione è abbastanza lenta, anche perchè i numeri da fattorizzare raggiungono molto presto valori astronomici.
+Modifichiamo la funzione 'factor-i' per generare solo il primo fattore (oltre ai fattori 2, 3, 5 e 7).
+
+(define (factor-i num)
+"Factorize a big integer number (only one factors other than 2,3,5,7)"
+  (local (f k i dist out stop)
+    ; Distanze tra due elementi consecutivi della ruota (wheel)
+    (setq dist (array 48 '(2 4 2 4 6 2 6 4 2 4 6 6 2 6 4 2 6 4
+                           6 8 4 2 4 2 4 8 6 4 6 2 4 6 2 6 6 4
+                           2 4 6 2 6 4 2 4 2 10 2 10)))
+    (setq out '())
+    (while (zero? (% num 2)) (push '2L out -1) (setq num (/ num 2)))
+    (while (zero? (% num 3)) (push '3L out -1) (setq num (/ num 3)))
+    (while (zero? (% num 5)) (push '5L out -1) (setq num (/ num 5)))
+    (while (zero? (% num 7)) (push '7L out -1) (setq num (/ num 7)))
+    (setq k 11L i 0)
+    (setq stop nil)
+    (while (and (<= (* k k) num) (= stop nil))
+      (if (zero? (% num k))
+        (begin
+          (push k out -1)
+          (setq num (/ num k)))
+        (begin
+          (setq k (+ k (dist i)))
+          (if (< i 47) (++ i) (setq i 0)))
+      )
+      (if out (setq stop true))
+    )
+    (if (> num 1) (push (bigint num) out -1))
+    out))
+
+(define (em-i limite)
+  (local (overflow out num f val)
+    (setq overflow nil)
+    (setq out '(2L))
+    (for (i 1 (- limite 1))
+      (println "lista = " out)
+      (setq num (+ 1L (apply * out)))
+      (println "Numero da fattorizzare = " num)
+      (setq fattori (factor-i num))
+      (println "Fattori = " fattori)
+      (setq val (fattori 0))
+      (push val out -1)
+      (println "Fattore minimo = " val))
+      ;(read-line))
+    out))
+
+Proviamo:
+
+(time (println (em-i 10)))
+;-> ...
+;-> (2L 3L 7L 43L 13L 53L 5L 6221671L 38709183810571L 139L)
+;-> 690.193
+
+(time (println (em-i 16)))
+;-> (2L 3L 7L 43L 13L 53L 5L 6221671L 38709183810571L 139L 2801L 11L 17L 5471L 52662739L
+;->  23003L)
+;-> 7574.853
+
+Il prossimo numero da fattorizzare vale:
+
+  723023114226131400979589798874734076807875188379971L
+
+e dopo una notte di calcolo 'factor-i' ancora era in esecuzione...
+
+
+---------------
+Numeri di Giuga
+---------------
+
+Sequenza OEIS A007850:
+Giuga numbers: composite numbers n such that p divides n/p - 1 for every prime divisor p of n.
+  30, 858, 1722, 66198, 2214408306, 24423128562, 432749205173838,
+  14737133470010574, 550843391309130318, 244197000982499715087866346,
+  554079914617070801288578559178, 1910667181420507984555759916338506, ...
+
+Prima definizione
+Un numero di Giuga è un numero composto n tale che p divide n/p − 1 per ogni p, divisore primo di n.
+
+Fattorizzazione di un numero n: n = p1^r1 * p2^r2 * ... * pk^rk
+
+(define (giuga1? num)
+  (setq uf (unique (factor num)))
+  ; il numero deve essere composito (non primo)
+  (if (> (length uf) 1)
+    ; controllo che ogni fattore p divide n/p − 1
+    (for-all (fn(x) (zero? (% (- (/ num x) 1) x))) uf)
+    nil))
+
+(filter giuga1? (sequence 2 1e5 2))
+;-> (30 858 1722 66198)
+
+(time (filter giuga1? (sequence 2 1e6 2)))
+;-> 915.002
+(time (filter giuga1? (sequence 2 1e7 2)))
+;-> 12423.226
+
+Seconda definizione
+n è un numero di Giuga se e solo se n non è primo e n' = a*n 1 per qualche intero a > 0.
+n' è la derivata aritmetica di n.
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (derivative num)
+"Calculate the arithmetic derivative of an integer"
+  (local (fattori sum)
+    (cond 
+      ; calcola la derivata di un numero negativo
+      ((< num 0) (- (derive (- num))))
+      ; se num è uguale a 0 o 1, allora restituisce 0
+      ((< num 2) 0)
+      (true
+        ; calcolo dei fattori primi raggruppati
+        (setq fattori (factor-group num))
+        ; se num è primo restituisce 1
+        (if (and (= (length fattori) 1) (= (fattori 0 1) 1))
+            1
+            ; altrimenti calcola la derivata aritmetica
+            (begin
+              (setq sum 0)
+              (dolist (f fattori)
+                (setq sum (+ sum (/ (* num (f 1)) (f 0)))))))))))
+
+(define (giuga2? num)
+  (let (d (derivative num))
+    (and (!= d 1) (zero? (% (- d 1) num)))))
+
+(filter giuga2? (sequence 2 1e5 2))
+;-> (30 858 1722 66198)
+
+(time (filter giuga2? (sequence 2 1e6 2)))
+;-> 1621.252
+(time (filter giuga2? (sequence 2 1e7 2)))
+;-> 19702.354
+
 ============================================================================
 

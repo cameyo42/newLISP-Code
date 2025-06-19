@@ -2359,7 +2359,7 @@ a(n) = n' = arithmetic derivative of n: a(0) = a(1) = 0, a(prime) = 1, a(m*n) = 
 (factor-group 1)
 ;-> ((1 1))
 
-Funzione cha calcola la derivata aritmetica di un numero intero:
+Funzione che calcola la derivata aritmetica di un numero intero:
 
 (define (derive num)
   (local (fattori sum)
@@ -2409,8 +2409,8 @@ Calcoliamo le derivate dei numeri da -99 a 100:
 ;->  (-16 -21 -1 -60 -12 -19 -14 -80 -1 -31)
 ;->  (-1 -32 -27 -15 -10 -44 -1 -13 -10 -24)
 ;->  (-1 -21 -1 -32 -8 -9 -1 -16 -1 -7)
-;->  (-6 -12 -1 -5 -1 -4 -1 -1 0 0)
-;->  (0 1 1 4 1 5 1 12 6 7)
+;->  (-6 -12 -1 -5 -1 -4 -1 -1 0)
+;->  (0 0 1 1 4 1 5 1 12 6 7)
 ;->  (1 16 1 9 8 32 1 21 1 24)
 ;->  (10 13 1 44 10 15 27 32 1 31)
 ;->  (1 80 14 19 12 60 1 21 16 68)
