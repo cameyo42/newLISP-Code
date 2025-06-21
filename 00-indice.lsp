@@ -3003,6 +3003,10 @@ NOTE LIBERE 30
   Numeri di Giuga
   La donna del XIX secolo
   Match di X partite
+  Equazione camaleonte
+  La moltiplicazione misteriosa
+  Tutte le cifre formano 1/2
+  Tutte le cifre formano 999999
 
 PROBLEMI SUI DADI
 =================

@@ -5466,6 +5466,8 @@ Breve ripasso sulle hash-map
 ;-> "a"
 (hh)
 ;-> (("10" "a"))
+La chiave 10 viene convertita automaticamente in stringa "10" all'interno della hash-map.
+In newLISP, le chiavi nelle hash-map sono sempre stringhe.
 (hh 20 "b")
 ;-> "b"
 (hh)
@@ -5479,6 +5481,7 @@ Breve ripasso sulle hash-map
 chiave esistente:
 (hh 10)
 ;-> "a"
+Attenzione: cercare con 10 è lo stesso che con "10" in questo contesto, perché viene convertito implicitamente.
 chiave non esistente:
 (hh 5)
 ;-> nil
@@ -5501,6 +5504,8 @@ chiave non esistente:
 ;-> hh
 (hh)
 ;-> (("1" 2) ("10" "a") ("3" 4) ("30" "c"))
+Attenzione: questo può sovrascrivere chiavi esistenti se coincidono.
+Inoltre, le chiavi 1 e 3 saranno convertite in "1" e "3".
 
 9) Verifica se un simbolo è una hash-map:
   (and (context? (eval hh))
@@ -5515,7 +5520,7 @@ chiave non esistente:
 
 11) Elimina tutti i valori di una hash-map:
 (map delete (symbols hh))
-;-> (true true true treu nil)
+;-> (true true true true nil)
 (hh)
 ;-> ()
 
@@ -6601,10 +6606,10 @@ Per essere corretti bisogna considerare solo le sequenze di partite in cui A arr
 Questo può essere calcolato con una funzione ricorsiva.
 Sia P(a, b) la probabilità che A vinca il match a partire dalla situazione in cui ha già vinto 'a' partite e B ne ha vinte 'b'. 
 Allora:
-- Se a == N+1, A ha già vinto --> P(a, b) = 1
-- Se b == N+1, B ha già vinto --> P(a, b) = 0
-- Altrimenti:
-  P(a, b) = PA * P(a+1, b) + PB * P(a, b+1)
+  - Se a == N+1, A ha già vinto --> P(a, b) = 1
+  - Se b == N+1, B ha già vinto --> P(a, b) = 0
+  - Altrimenti:
+    P(a, b) = PA * P(a+1, b) + PB * P(a, b+1)
 Chiamando la funzione inizialmente con P(0, 0) si ottiene la probabilità finale.
 
 Usiamo una hash-map per evitare ricorsioni ridondanti.
@@ -6643,5 +6648,277 @@ Proviamo:
 (probabilita-vittoria 7 0.5)
 ;-> 0.5
 
+
+--------------------
+Equazione camaleonte
+--------------------
+
+L'espressione (1 + 1/n) * (n + 1) ha una proprietà interessante:
+sostituendo '*' con '+' l'equazione genera gli stessi valori per ogni n.
+In altre parole le due equazioni sono equivalenti.
+Infatti:
+
+  (1 + 1/n) * (n + 1) = n + 1 + 1 + 1/n = (1 + 1/n) + (n + 1)
+
+Inoltre:
+
+  (1 + 1/n) * (n + 1) = n + 1 + 1 + 1/n = (n + 2) + 1/n
+
+Funzione con il '*':
+(define (fun* n) (mul (add 1 (div n)) (+ n 1)))
+
+(map fun* (sequence 1 10))
+;-> (4 4.5 5.333333333333333 6.25 7.199999999999999 8.166666666666668
+;->  9.142857142857142 10.125 11.11111111111111 12.1)
+
+Funzione con il '+':
+(define (fun+ n) (add (add 1 (div n)) (+ n 1)))
+
+(map fun+ (sequence 1 10))
+;-> (4 4.5 5.333333333333333 6.25 7.2 8.166666666666666 9.142857142857142
+;->  10.125 11.11111111111111 12.1)
+
+Funzione con frazioni:
+(define (fun n) (list (+ (* n n) (* 2 n) 1) n))
+
+(map fun (sequence 1 10))
+;-> ((4 1) (9 2) (16 3) (25 4) (36 5) (49 6) (64 7) (81 8) (100 9) (121 10))
+(map (fn(x) (div (x 0) (x 1))) (map fun (sequence 1 10)))
+;-> (4 4.5 5.333333333333333 6.25 7.2 8.166666666666666 9.142857142857142
+;->  10.125 11.11111111111111 12.1)
+
+Un'altra equazione camaleonte è la seguente:
+
+  n * n/(n + 1) = (n − 1) + 1/(n + 1) = n − n/(n + 1)
+
+dove il segno '*' viene sostituito con il segno '-'.
+
+
+-----------------------------
+La moltiplicazione misteriosa
+-----------------------------
+
+Ecco un algoritmo per moltiplicare due numeri di due cifre ognuno:
+
+  Step 1: x + y = z
+  Step 2: Se z >= 100 eliminare la cifra delle centinaia
+  Step 3: Aggiungere due zeri al numero
+  Step 4: (100 – x) * (100 – y) = m
+  Step 5: Sommare i numeri di Step 3 e Step 4
+  Step 6: if (x + y) < 100, sottrarre 10000 dal risultato precedente
+
+Esempio 1:
+  x = 95, y = 97
+  (* 95 97)
+  ;-> 9215
+  Step 1: 95 + 97 = 192
+  Step 2: 92
+  Step 3: 9200
+  Step 4: (100 – 95) * (100 – 97) = 5 * 3 = 15
+  Step 5: 9200 + 15 = 9215
+  Step 6: non applicabile
+  Risultato = 9215
+
+Esempio 2:
+  x = 45, y = 42
+  (* 45 42)
+  ;-> 1890
+  Step 1: 45 + 42 = 87
+  Step 2: 87
+  Step 3: 8700
+  Step 4: (100 – 45) * (100 – 42) = 55 * 58 = 3190
+  Step 5: 8700 + 3190 = 11890
+  Step 6: 11890 - 10000 = 1890
+  Risultato = 1890
+
+Funzione che effettua la moltiplicazione di due numeri di 2 cifre:
+
+(define (boh x y)
+  (let (res (+ x y))
+    (if (> (length res) 2) (setq res (int (slice (string res) 1 2) 0 10)))
+    (setq res (int (string res "00") 0 10))
+    (setq m (* (- 100 x) (- 100 y)))
+    (if (>= (+ x y) 100)
+        (setq res (+ m res))
+        (setq res (- (+ m res) 10000)))))
+
+(boh 95 97)
+;-> 9215
+
+(boh 45 42)
+;-> 1890
+
+Test di correttezza:
+
+(for (x 10 99)
+  (for (y 10 99)
+    (when (!= (* x y) (boh x y))
+      (print x { } y { } (* x y) (boh x y))
+      (read-line))))
+;-> nil
+
+Matematicamente:
+
+  x = (100 − a)
+  y = (100 − b)
+  (dove 0 < a e b < 100).
+  Step 1: (100 − a) + (100 − b) = 200 − a − b
+  Step 2: Eliminare la cifra delle centinaia, ovvero sottrarre 100 dal numero:
+          (200 − a − b) − 100 = 100 − a − b
+  Step 3: Aggiungere due zeri, ovvero moltiplicare per 100:
+          (100 − a − b) * 100 = 10.000 − 100a − 100b
+  Step 4: a * b
+  Step 5: Sommare gli ultimi due risultati dei passaggi 3 e 4,
+          quindi eseguire la fattorizzazione:
+          10.000 − 100a − 100b + ab
+          = 100(100 − a) − (100b − ab)
+          = 100(100 − a) − b(100 − a)
+          = (100 − a)(100 − b).
+
+
+--------------------------
+Tutte le cifre formano 1/2
+--------------------------
+
+Usare tutte le cifre (1..9) una sola volta per formare una frazione che vale 1/2.
+
+Algoritmo
+Il risultato deve essere 1/2, quindi il numeratore ha 4 cifre e il denominatore ha 5 cifre.
+Calcoliamo tutte le permutazioni delle 9 cifre.
+Per ogni permutazione prendiamo:
+ numeratore = prime 4 cifre
+ denominatore = ultime 5 cifre
+ e verifichiamo se numeratore/denominatore vale 1/2.
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+Funzione che cerca le frazioni con 9 cifre che valgono 1/2:
+
+(define (meta)
+  (local (permute numer denom)
+    (setq permute (perm (sequence 1 9)))
+    (dolist (p permute)
+      (setq numer (list-int (slice p 0 4)))
+      (setq denom (list-int (slice p 4)))
+      (when (= (div numer denom) 0.5)
+          (println numer { } denom { } (div numer denom)))) '>))
+
+Proviamo:
+
+(meta)
+;-> 7293 14586 0.5
+;-> 7923 15846 0.5
+;-> 9273 18546 0.5
+;-> 7932 15864 0.5
+;-> 6792 13584 0.5
+;-> 7692 15384 0.5
+;-> 9267 18534 0.5
+;-> 6927 13854 0.5
+;-> 9327 18654 0.5
+;-> 7269 14538 0.5
+;-> 7329 14658 0.5
+;-> 6729 13458 0.5
+
+
+-----------------------------
+Tutte le cifre formano 999999
+-----------------------------
+
+Usare tutte le cifre (1..9) una sola volta per formare una addizione di due numeri che vale 999999.
+
+Algoritmo
+Il risultato deve essere 99999, quindi un addendo ha 4 cifre e l'altro ha 5 cifre.
+Calcoliamo tutte le permutazioni delle 9 cifre.
+Per ogni permutazione prendiamo:
+ addendo 1 = prime 4 cifre
+ addendo 2 = ultime 5 cifre
+ e verifichiamo se la loro somma vale 99999.
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            ;(println lst);
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+Funzione che cerca le addizioni di due numeri con 9 cifre che vale 99999:
+
+(define (meta)
+  (local (out permute x y)
+    (setq out '())
+    (setq permute (perm (sequence 1 9)))
+    (dolist (p permute)
+      (setq x (list-int (slice p 0 4)))
+      (setq y (list-int (slice p 4)))
+      ;(if (or (= x 1234) (= y 98765)) (begin (println x { } y) (read-line)))
+      ;(println x { } y) (read-line)
+      (when (= (+ x y) 99999)
+          (push (list x y (+ x y)) out))) out))
+
+Proviamo:
+
+(length (setq somme (meta)))
+;-> 384
+(somme 0)
+;-> (5238 94761 99999)
+
+  1234 +
+ 98765 =
+ -------
+ 99999
+
+(find '(1234 98765 99999) somme)
+;-> 294
+(somme 294)
+;-> (1234 98765 99999)
+
 ============================================================================
+
 
