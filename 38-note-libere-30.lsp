@@ -6463,5 +6463,185 @@ n' è la derivata aritmetica di n.
 (time (filter giuga2? (sequence 2 1e7 2)))
 ;-> 19702.354
 
+
+-----------------------
+La donna del XIX secolo
+-----------------------
+
+Una donna, nata nel diciannovesimo secolo, aveva X anni nell'anno:
+(3*X/2 - 5)^2.
+Quanti anni aveva nel 1860?
+
+(define (solve)
+  (for (eta 1 99)
+    (setq year (mul (sub (div (* eta 3) 2) 5) (sub (div (* eta 3) 2) 5)))
+    ;(println year { } eta)
+    (when (and (>= year 1800) (< year 1900) ; anno nel XIX secolo ?
+               (= (int year) year))         ; anno è intero ?
+      (println "Anno: " year ", Età: " eta)
+      (println "Anno: 1860" ", Età: " (+ eta (- 1860 year)))))'>)
+
+(solve)
+;-> Anno: 1849, Età: 32
+;-> Anno: 1860, Età: 43
+
+Nota: il problema può essere risolto anche matematicamente (algebra).
+
+
+------------------
+Match di X partite
+------------------
+
+Due giocatori A e B si sfidano ad un match di X partite (X dispari).
+Vince il match chi vince X/2 + 1 partite.
+In una singola partita:
+il giocatore A ha una probabilità di vincere pari a PA,
+il giocatore B ha una probabilità di vincere pari a PB.
+Risulta sempre PA >= PB.
+Somma delle probabilità: PA + PB = 1.
+
+Quanto vale la probabilità di vittoria del giocatore A?
+
+Scriviamo una funzione che simula il processo.
+
+(define (simula partite pa pb ga gb iterazioni)
+  (local (soldiA soldiB totA totB matchA matchB stop winA winB)
+    (setq soldiA 0) ; guadagno di A per ogni partita vinta
+    (setq soldiB 0) ; guadagno di B per ogni partita vinta
+    (setq totA 0)   ; totale partite vinte da A
+    (setq totB 0)   ; totale partite vinte da B
+    (setq matchA 0) ; totale match vinti da A
+    (setq matchB 0) ; totale match vinti da B
+    ; (soglia + 1 ) = numero di partite da vincere per aggiudicarsi un match
+    (setq soglia (/ partite 2))
+    ; ciclo che simula un match per un numero di volte pari a 'iterazioni'
+    (for (i 1 iterazioni)
+      (setq stop nil)
+      (setq winA 0) ; vittorie di A nel match corrente
+      (setq winB 0) ; vittorie di B nel match corrente
+      ; ciclo di partite per il match corrente
+      (for (p 1 partite 1 stop)
+        (if (<= (random) pb)
+            (begin (++ winB) (++ totB))  ; vince B
+            (begin (++ winA) (++ totA))) ; vince A
+        (cond ((> winA soglia) ; ha vinto A il match?
+                (setq stop true)
+                (++ matchA)
+                (++ soldiA ga)
+                (-- soldiB ga))
+              ((> winB soglia) ; ha vinto B il match?
+                (setq stop true)
+                (++ matchB)
+                (++ soldiB gb)
+                (-- soldiA gb)))
+      )
+    )
+    (println "Guadagno A: " soldiA)
+    (println "Guadagno B: "soldiB)
+    (println "Partite vinte da A: " totA)
+    (println "Partite vinte da B: " totB)
+    (println "Match vinti da A: " matchA)
+    (println "Match vinti da B: " matchB)
+    (println "% vittoria di A: " (div matchA iterazioni))
+    (println "% vittoria di B: " (div matchB iterazioni))
+    (println "Guadagno di A per ogni giocata: " (div soldiA iterazioni))
+    (println "Guadagno di B per ogni giocata: " (div soldiB iterazioni))
+    '>))
+
+Proviamo:
+
+Numero di partite = 7
+PA = 60% = 0.6 (probabilità di vittoria di A in una singola partita)
+PB = 40% = 0.4 (probabilità di vittoria di B in una singola partita)
+GA = 9$  (guadagno di A per ogni match vinto)
+GB = 15$ (guadagno di B per ogni match vinto)
+
+(simula 7 0.6 0.4 9 15 1e6)
+;-> Guadagno A: 2056248
+;-> Guadagno B: -2056248
+;-> Partite vinte da A: 3418480
+;-> Partite vinte da B: 2277377
+;-> Match vinti da A: 710677
+;-> Match vinti da B: 289323
+;-> % vittoria di A: 0.710677
+;-> % vittoria di B: 0.289323
+;-> Guadagno di A per ogni giocata: 2.056248
+;-> Guadagno di B per ogni giocata: -2.056248
+
+Numero di partite = 7
+PA = 50% = 0.5
+PB = 50% = 0.5
+GA = 1$
+GB = 1$
+
+(simula 7 0.5 0.5 1 1 1e6)
+;-> Guadagno A: 2084
+;-> Guadagno B: -2084
+;-> Partite vinte da A: 2908379
+;-> Partite vinte da B: 2902673
+;-> Match vinti da A: 501042
+;-> Match vinti da B: 498958
+;-> % vittoria di A: 0.501042
+;-> % vittoria di B: 0.498958
+;-> Guadagno di A per ogni giocata: 0.002084
+;-> Guadagno di B per ogni giocata: -0.002084
+
+Dal punto di vista matematico:
+N = (X-1)/2 -> numero massimo di partite che un giocatore può perdere (ne deve vincere N+1).
+A vince il match se vince almeno N+1 partite prima di B.
+La probabilità che A vinca il match è la somma delle probabilità di tutti i possibili scenari in cui A vince esattamente N+1, N+2, ..., X partite prima che B raggiunga N+1.
+
+Questo problema può essere risolto con una formula chiusa (in modo approssimato) o con una formula ricorsiva.
+
+Formula chiusa di una somma che rappresenta la probabilità che A vinca almeno N+1 partite in totale (approssimazione, corretta solo se si gioca sempre tutte le $X$ partite):
+
+P(A) = Sum[k=N+1,X](binom X k)*PA^k*PB^(X-k)
+
+Per essere corretti bisogna considerare solo le sequenze di partite in cui A arriva a N+1 vittorie prima di B.
+Questo può essere calcolato con una funzione ricorsiva.
+Sia P(a, b) la probabilità che A vinca il match a partire dalla situazione in cui ha già vinto 'a' partite e B ne ha vinte 'b'. 
+Allora:
+- Se a == N+1, A ha già vinto --> P(a, b) = 1
+- Se b == N+1, B ha già vinto --> P(a, b) = 0
+- Altrimenti:
+  P(a, b) = PA * P(a+1, b) + PB * P(a, b+1)
+Chiamando la funzione inizialmente con P(0, 0) si ottiene la probabilità finale.
+
+Usiamo una hash-map per evitare ricorsioni ridondanti.
+
+(define (tree? x)
+  (and (context? (eval x))
+       (not (list? (eval (sym (term x) x nil))))))
+
+(define (probabilita-vittoria X PA)
+  ; crea o azzera la hash-map memo
+  (if (not (tree? 'memo))
+      (new Tree 'memo)
+      (map delete (symbols memo)))
+  (letn ((PB (sub 1 PA))
+         (N (/ (- X 1) 2)))
+  ;f(a, b) restituisce la probabilità che A vinca il match partendo
+  ; dalla situazione in cui ha vinto 'a' partite e B ne ha vinte 'b'         
+    (define (f a b)
+      (let ((key (string a ":" b)))
+        ; aggiornamento hash-map
+        (or (memo key)
+            (memo key
+              (cond
+                ((= a (+ N 1)) 1) ; vince A
+                ((= b (+ N 1)) 0) ; vince B
+                (true
+                  (add (mul PA (f (+ a 1) b))
+                       (mul PB (f a (+ b 1))))))))))
+    (f 0 0)))
+
+Proviamo:
+
+(probabilita-vittoria 7 0.6)
+;-> 0.710208
+
+(probabilita-vittoria 7 0.5)
+;-> 0.5
+
 ============================================================================
 

@@ -3001,6 +3001,8 @@ NOTE LIBERE 30
   Orari ordinati
   Numeri di Euclid-Mullin
   Numeri di Giuga
+  La donna del XIX secolo
+  Match di X partite
 
 PROBLEMI SUI DADI
 =================
