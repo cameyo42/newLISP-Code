@@ -3007,6 +3007,10 @@ NOTE LIBERE 30
   La moltiplicazione misteriosa
   Tutte le cifre formano 1/2
   Tutte le cifre formano 999999
+  Rainbow flag
+  I viaggi nel tempo e il paradosso del Nonno
+  Lista con memoria
+  Liber Abaci - Fibonacci
 
 PROBLEMI SUI DADI
 =================
@@ -3050,7 +3054,7 @@ APPENDICI
   Considerazioni lungo il tragitto
 
 BIBLIOGRAFIA/WEB
-==================
+================
 
 YO LIBRARY
 ==========

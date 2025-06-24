@@ -942,7 +942,22 @@ Quadrati magici
 ---------------
 
 Un quadrato magico è una matrice quadrata NxN i cui numeri consistono in numeri consecutivi (da 1 a N) disposti in modo tale che la somma di ogni riga e colonna e di entrambe le diagonali siano uguali alla stessa somma (che è chiamata numero magico o costante magica).
+
 Il numero magico vale: n(n*n + 1)/2
+
+Sequenza OEIS A006003:
+a(n) = n*(n^2 + 1)/2.
+  0, 1, 5, 15, 34, 65, 111, 175, 260, 369, 505, 671, 870, 1105, 1379,
+  1695, 2056, 2465, 2925, 3439, 4010, 4641, 5335, 6095, 6924, 7825,
+  8801, 9855, 10990, 12209, 13515, 14911, 16400, 17985, 19669, 21455,
+  23346, 25345, 27455, 29679, 32020, 34481, 37065, 39775, ...
+
+(define (seq n) (/ (+ (* n n n) n) 2))
+(map seq (sequence 0 43))
+;-> (0 1 5 15 34 65 111 175 260 369 505 671 870 1105 1379
+;->  1695 2056 2465 2925 3439 4010 4641 5335 6095 6924 7825
+;->  8801 9855 10990 12209 13515 14911 16400 17985 19669 21455
+;->  23346 25345 27455 29679 32020 34481 37065 39775)
 
 Esistono tre tipi di quadrati magici (catalogati in base alla dimensione del lato)
 

@@ -6919,6 +6919,389 @@ Proviamo:
 (somme 294)
 ;-> (1234 98765 99999)
 
+
+------------
+Rainbow flag
+------------
+
+Creare l'immagine di una "pride flag" (Rainbow flag), vale a dire una bandiera a strisce di sei colori (dall'alto verso il basso):
+1) Rosso (E50000),
+2) Arancione (FF8D00),
+3) Giallo (FFEE00),
+4) Verde (028121),
+5) Blu (004CFF),
+6) Viola (770088).
+
+Funzione per definire il colore del testo:
+
+(define (foreground color)
+  (let (f (string "\027[38;5;" color "m"))
+    (print f)))
+
+Colori disponibili (testo):
+(for (i 0 255) (print (foreground i) i { }))
+
+Colori disponibili (testo e con colore pieno):
+
+(for (i 0 255)
+  (print (foreground i) "██" "(" (format "%03d" i) ") ")
+  (if (zero? (% i 10)) (println)))
+
+Colori scelti:
+  Rosso = 160
+  Arancione = 208
+  Giallo = 226
+  Verde = 2
+  Blu = 27
+  Viola = 5
+
+Funzione che disegna la bandiera Rainbow:
+
+(define (rainbow len)
+  (let (colori '(160 208 226 2 27 5))
+    (dolist (col colori) (print (foreground col) (dup "█" len)) (println))
+    (print (foreground 255)) '>))
+
+
+(rainbow 24)
+
+Vedi l'immagine "rainbow-flag" nella cartella "data".
+
+
+-------------------------------------------
+I viaggi nel tempo e il paradosso del Nonno
+-------------------------------------------
+
+È possibile vioaggiare nel tempo?
+
+Viaggi nel tempo "in avanti" (verso il futuro)
+----------------------------------------------
+Sì, sono possibili secondo la fisica attuale.
+La relatività ristretta di Einstein prevede che il tempo scorra più lentamente per chi si muove a velocità prossime a quella della luce.
+Questo effetto, chiamato 'dilatazione del tempo', è stato dimostrato sperimentalmente (es. orologi atomici su aerei o satelliti).
+Esempio: se viaggiassi su un'astronave al 99.9% della velocità della luce per pochi anni, al tuo ritorno sulla Terra sarebbero passati decenni o secoli.
+
+Attenzione
+----------
+Il viaggio nel tempo in avanti non significa 'duplicazione'.
+Viaggiando nel futuro non troviamo una copia di noi stessi, ma troviamo noi stessi nel futuro.
+Saremmo soltanto invecchiati di pochissiomo rispetto a quanto è passato nel mondo esterno.
+Esempio:
+Immaginiamo di entrare in un'astronave che viaggia al 99.999% della velocità della luce per quello che ci sembra 1 anno.
+Nel frattempo, sulla Terra, a causa della dilatazione del tempo (relatività ristretta), sono passati, diciamo, '50 anni'.
+Quando torniamo sulla Terra:
+- Abbiamo un anno in più (siamo noi, non una copia).
+- Sulla Terra tutto è cambiato: la maggior parte delle persone che conoscevamo sono morte, il mondo è diverso.
+- Ma non ci sarà un altro noi invecchiato di 50 anni. Non abbiamo mai vissuto quei 50 anni, li abbiamo 'saltati'.
+Il concetto di 'trovare una copia di me' è più legato a:
+- Cloni
+- Universi paralleli
+- Loop temporali (di tipo fantascientifico)
+Ma nei viaggi reali verso il futuro previsti dalla fisica, non esistono due versioni di noi che convivono nello stesso punto nel tempo.
+
+Viaggi nel tempo "all'indietro" (verso il passato)
+--------------------------------------------------
+La fisica attuale li considera controversi e teoricamente problematici.
+Alcune soluzioni delle equazioni di Einstein (es. wormhole, curve temporali chiuse) sembrano permettere viaggi nel passato, ma:
+- Servono condizioni estreme (energia negativa, materia esotica).
+- Si creano paradossi logici (es. paradosso del nonno).
+- Non c'è alcuna prova sperimentale né alcun modello realistico.
+Molti fisici ritengono che la meccanica quantistica o una teoria futura della gravità quantistica impedirà i viaggi nel passato, magari con una 'legge di protezione della causalità'.
+
+Il paradosso del Nonno
+----------------------
+Il 'paradosso del nonno' è uno dei più famosi dilemmi logici legati ai viaggi nel tempo verso il passato.
+Questo paradosso nasce se immaginiamo che una persona viaggi indietro nel tempo e 'uccida' suo nonno prima che questo abbia avuto figli (cioè prima che nasca il padre o la madre del viaggiatore stesso).
+
+Conseguenze
+-----------
+1. Viaggi indietro nel tempo.
+2. Uccidi tuo nonno prima che conosca tua nonna.
+3. Quindi tuo padre (o tua madre) non nascerà mai.
+4. Quindi tu non nascerai mai.
+5. Ma se tu non sei mai nato, non puoi essere tornato indietro nel tempo per uccidere tuo nonno.
+6. Ma se non l'hai ucciso, allora tuo padre è nato, e tu sei nato... quindi torni indietro nel tempo... e il ciclo ricomincia.
+
+Conclusioni
+-----------
+Abbiamo raggiunto una contraddizione logica: l'effetto (uccidere tuo nonno) impedisce la causa (la tua esistenza).
+Questo viola il 'principio di causalità', secondo cui le cause precedono gli effetti.
+
+Possibili soluzioni speculative
+-------------------------------
+Filosofi e fisici hanno proposto varie idee per "risolvere" o evitare il paradosso:
+1. Linea temporale unica e coerente
+   Tutto ciò che fai nel passato era già successo: magari provi a uccidere tuo nonno, ma qualcosa va storto ogni volta.
+   Quindi non puoi cambiare il passato (è la visione di Novikov).
+
+2. Universi paralleli (multiverso)
+   Quando torni indietro nel tempo e cambi qualcosa, crei una nuova linea temporale.
+   Uccidi un 'altro' nonno in un universo alternativo, ma non il tuo.
+   Tu resti vivo nel tuo universo originale.
+
+3. I viaggi nel passato sono impossibili
+   Il paradosso è la prova logica che non si può tornare indietro nel tempo.
+   Qualcosa, nella realtà o nella fisica, lo impedisce.
+
+
+-----------------
+Lista con memoria
+-----------------
+
+Data una lista di interi, dobbiamo effettuare alcune operazioni che modificano gli elementi della lista e al termine ricostruire la lista iniziale.
+
+L'idea è quella di creare una nuova lista "ALL" con gli indici e i valori della lista data.
+La lista ALL ha elementi del tipo:
+
+  (valore(i) (valore(i) i))
+
+Infatti i cambiamenti che riguardano gli elementi possono essere di due tipi:
+1) modifiche del valore dell'elemento
+2) modifiche della posizione dell'elemento nella lista.
+
+Non consideriamo modifiche della struttura dell'elemento.
+
+Vediamo un esempio:
+
+; lista originale
+(setq lst '(3 8 6 2 3))
+
+; lista con valori e indici ALL
+(setq ALL (map (fn(x) (list x (list x $idx))) lst))
+;-> ((3 (3 0)) (8 (8 1)) (6 (6 2)) (2 (2 3)) (3 (3 4)))
+
+Quando vogliamo modificare la lista dobbiamo agire sulla nuova lista 'ALL'.
+Cioè, dobbiamo modificare solo il primo valore di ogni elemento mantenendo la struttura.
+
+; mischiamo la lista
+(setq ALL (randomize ALL))
+;-> ((3 (3 0)) (2 (2 3)) (6 (6 2)) (3 (3 4)) (8 (8 1)))
+
+; raddoppiamo il valore degli elementi
+(dolist (el ALL) (setf (ALL $idx) (list (* (el 0) 2) (el 1))))
+ALL
+;-> ((6 (3 0)) (4 (2 3)) (12 (6 2)) (6 (3 4)) (16 (8 1)))
+
+; cambiamo i valori in base alle posizioni (val / ($idx + 1))
+(dolist (el ALL) (setf (ALL $idx) (list (/ (el 0) (+ $idx 1)) (el 1))))
+ALL
+;-> ((6 (3 0)) (2 (2 3)) (4 (6 2)) (1 (3 4)) (3 (8 1)))
+
+Funzione che ripristina la lista originale partendo dalla lista 'ALL':
+
+(define (revert alst)
+  (setq out (array (length alst) '(-1)))
+  (dolist (el alst)
+    (setf (out (el 1 1)) (list (el 1 0) (el 0)))
+  )
+  (array-list out))
+
+(revert ALL)
+;-> ((3 6) (8 3) (6 4) (2 2) (3 1))
+(3 6) --> 3 valore originale e 6 valore finale
+
+(map first (revert ALL))
+;-> (3 8 6 2 3)
+
+
+-----------------------
+Liber Abaci - Fibonacci
+-----------------------
+
+Il "Liber Abaci" di Leonardo Pisano, detto Fibonacci, pubblicato nel 1202 (e rivisto nel 1228), contiene numerosi problemi matematici.
+Secondo gli studiosi si stima che il libro presenti circa 230–260 problemi distinti.
+Questi problemi coprono un ampio spettro di argomenti, tra cui:
+- aritmetica commerciale (conversioni tra valute, pesi e misure),
+- proporzioni,
+- interessi,
+- problemi di miscele,
+- problemi di mercato,
+- numeri razionali e interi,
+- problemi algebrici e quadratici,
+- problemi con radici,
+- progressioni,
+- problemi ricreativi (incluso il celebre problema dei conigli -> sequenza di Fibonacci),
+- e problemi tratti dalla matematica araba e indiana.
+
+L'edizione critica e la traduzione inglese di L.E. Sigler (Liber Abaci, Springer, 2002) riporta 260 problemi numerati.
+
+I due viaggiatori
+-----------------
+Due uomini si mettono in cammino per un lungo viaggio a piedi.
+Il primo viaggiatore percorre ogni giorno 20 miglia.
+Il secondo ne percorre una il primo giorno due il secondo giorno tre il terzo giorno e così via aggiungendo sempre un miglio a quanto percorso il giorno precedente.
+Dopo quanti giorni il secondo viaggiatore raggiungerà il primo?
+
+La soluzione è semplice se si conosce la formula di Gauss per sommare i primi N numeri.
+La somma dei primi N numeri vale: N*(N + 1)/2
+Quindi dobbiamo risolvere la seguente equazione:
+
+  N*(N + 1)/2 = 20*N
+
+Ricaviamo N:
+
+  (N + 1)/2 = 20  --> N + 1 = 40  -->  N = 40 - 1 = 39
+
+Senza conoscere la formula usiamo una funzione:
+
+(define (giorni miglia)
+  (let ( (v1 0) (v2 0) (g 0) (uguale nil) )
+    (until uguale
+      (++ g)
+      (++ v1 miglia)
+      (++ v2 g)
+      (if (= v1 v2) (setq uguale true)))
+    g))
+
+Proviamo:
+
+(giorni 20)
+;-> 39
+(giorni 30)
+;-> 59
+      
+I guardiani dell'orto
+---------------------
+Un uomo entra in un orto con un cesto pieno di mele.
+Al primo guardiano ne dà metà più una e prosegue.
+Fa lo stesso con il secondo, il terzo... fino al settimo.
+Alla fine, gli rimane una sola mela nel cesto.
+Quante mele aveva all'inizio?
+
+Il problema si risolve partendo dalla fine.
+Non serve l'algebra simbolica moderna: basta ragionare a ritroso.
+Se all'ultimo (settimo) guardiano ha dato metà più una e gli è rimasta 1, allora prima di questo passaggio ne aveva:
+
+  x = 2 * (1 + 1) = 4
+
+Ripetendo il ragionamento all'indietro:
+
++--------------+----------------------+
+| Guardiano n° | Mele prima           |
++--------------+----------------------+
+| 7            | 4                    |
+| 6            | 2 * (4 + 1) = 10     |
+| 5            | 2 * (10 + 1) = 22    |
+| 4            | 2 * (22 + 1) = 46    |
+| 3            | 2 * (46 + 1) = 94    |
+| 2            | 2 * (94 + 1) = 190   |
+| 1            | 2 * (190 + 1) = 382  |
++--------------+----------------------+
+
+Quindi all'inizio l'uomo aveva 382 mele.
+
+Funzione ricorsiva:
+
+(define (mele-iniziali-r guardiani)
+  (if (= guardiani 0)
+      1
+      (* 2 (+ (mele-iniziali (- guardiani 1)) 1))))
+
+(mele-iniziali-r 7)
+;-> 382
+
+Funzione iterativa:
+
+(define (mele-iniziali-i guardiani)
+  (let (mele 1) ; parte da 1 mela dopo l'ultimo guardiano
+    (for (i 1 guardiani)
+      (setq mele (mul 2 (add mele 1))))
+    mele))
+    
+(mele-iniziali-i 7)
+;-> 382
+
+
+L'uomo e le monete - Metodo della Falsa Posizione (Lineare)
+----------------------------------------------------------
+Un uomo ha un certo numero di monete.
+Se ne regala la metà più 2, gli restano 10 monete.
+Quante monete aveva all'inizio?
+
+Algoritmo (Metodo della Falsa Posizione lineare)
+Se con un valore falso x1 si ottiene un risultato r1, ma il valore atteso è r, allora il valore corretto x è:
+ x = x1*(r/r1)
+
+1. Scegliere una quantità falsa
+  ipotesi = 10 monete
+2. Calcolare  secondo il problema
+- Ne dà la metà + 2 --> 5 + 2 = 7
+- Gliene restano: $10 - 7 = 3
+Ma nel problema dovrebbero restarne 10, non 3.
+3. Impostare la proporzione
+Con 10 monete restano 3
+Con ? monete devono restare 10
+monete reali = 10 *(10/3) = 33.33...
+Non può essere un numero frazionario (le monete devono essere intere).
+Quindi dobbiamo ritentare con un'altra ipotesi:
+ipotesi = 22 --> (11 + 2) = 13 --> restano (22 - 13) = 9 (troppo poco)
+Altra ipotesi:
+ipotesi = 24 --> 12 + 2 = 14 --> restano (24 - 14) = 10 (corretto)
+Quindi l'uomo aveva 24 monte.
+
+Questo metodo non richiede equazioni algebriche: si basa su tentativi guidati e proporzioni, quindi era accessibile ai mercanti del Medioevo, come Fibonacci intendeva.
+
+; Metodo della falsa posizione lineare
+; Regala metà + 2 e gli restano X --> quante monete aveva?
+(define (falsa-posizione ipotesi)
+  (letn ((regalate (add (div ipotesi 2) 2))
+         (restano (sub ipotesi regalate)))
+    restano))
+
+; Trova la quantità esatta cercando per tentativi
+(define (trova-monte target)
+  (let (trovato nil)
+    (for (x 1 100 1 trovato)
+      (if (= (falsa-posizione x) target) (setq trovato x))
+    )
+    trovato))
+
+(trova-monte 10)
+;-> 24
+
+Vediamo un esempio più avanzato con doppia falsa posizione che viene usata quando la relazione non è lineare.
+
+Il compratore di uccelli - Metodo della Doppia Falsa Posizione (Quadratica)
+---------------------------------------------------------------------------
+Un uomo compra uccelli: galline a 3 denari, colombi a 1 denaro, passeri a 1/2 denaro.
+Con 30 denari compra 30 uccelli.
+Quanti di ciascun tipo?
+
+Si fanno due ipotesi distinte x1, x2 e si calcolano i risultati corrispondenti r1, r2.
+Se il risultato reale è r, la soluzione si calcola per interpolazione lineare:
+
+            (r - r1) * (x2 - x1)
+  x = x1 + ----------------------
+                 (r2 - r1)
+
+- Totale uccelli: 30
+- Totale spesa: 30 denari
+- Prezzi: gallina(x) 3 denari, colombo(y) 1 denaro, passero(z) 1/2 denaro
+
+  x + y + z = 30
+  3x + y + (1/2)z = 30
+
+(define (costo x y)
+  (let ((z (sub 30 (add x y))))
+    (if (< z 0)
+        -1
+        (add (mul 3 x) y (div z 2)))))
+
+(define (uccelli)
+  (for (x 1 30)
+    (for (y 1 30)
+      (let ((z (sub 30 (add x y))))
+        (when (and (>= z 1)
+                   (= (costo x y) 30))
+          (println "galline=" x ", colombi=" y ", passeri=" z))))))
+
+(uccelli)
+;-> galline=1, colombi=25, passeri=4
+;-> galline=2, colombi=20, passeri=8
+;-> galline=3, colombi=15, passeri=12
+;-> galline=4, colombi=10, passeri=16
+;-> galline=5, colombi=5, passeri=20
+
 ============================================================================
 
 

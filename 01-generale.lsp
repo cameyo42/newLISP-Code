@@ -11268,7 +11268,7 @@ Espressione che stampa i 256 colori disponibili:
 (for (i 0 255) (print (foreground i) "█" "(" i ") "))
 
 (for (i 0 255)
-  (print (_fore i) "██" "(" (format "%03d" i) ") ")
+  (print (foreground i) "██" "(" (format "%03d" i) ") ")
   (if (zero? (% i 15)) (println)))
 
 Vedi "ANSI-colors.png" nella cartella "data".
