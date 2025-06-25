@@ -3011,6 +3011,9 @@ NOTE LIBERE 30
   I viaggi nel tempo e il paradosso del Nonno
   Lista con memoria
   Liber Abaci - Fibonacci
+  Countdown
+  Numeri abbondanti e difettivi
+  Numeri di Erdos-Nicolas
 
 PROBLEMI SUI DADI
 =================

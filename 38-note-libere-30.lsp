@@ -7211,6 +7211,13 @@ Funzione iterativa:
 (mele-iniziali-i 7)
 ;-> 382
 
+Funzione 'series':
+
+(define (mele-iniziali-s guardiani)
+  (series 1 (fn(mele) (* 2 (+ mele 1))) (+ guardiani 1)))
+
+(mele-iniziali-s 7)
+;-> (1 4 10 22 46 94 190 382)
 
 L'uomo e le monete - Metodo della Falsa Posizione (Lineare)
 ----------------------------------------------------------
@@ -7301,6 +7308,296 @@ Se il risultato reale è r, la soluzione si calcola per interpolazione lineare:
 ;-> galline=3, colombi=15, passeri=12
 ;-> galline=4, colombi=10, passeri=16
 ;-> galline=5, colombi=5, passeri=20
+
+Il leone, il leopardo e l'orso
+------------------------------
+Un leone, un leopardo e un orso mangiano insieme 100 libbre di carne.
+Il leone mangia quanto il leopardo e mezzo orso,
+l'orso mangia il doppio del leopardo.
+Quante libbre mangia ciascun animale?
+
+- L = carne mangiata dal leone
+- P = dal leopardo
+- O = dall'orso
+
+Sistema di equazioni:
+
+  L = P + (1/2)O     (1)
+  O = 2P             (2)
+  L + P + O = 100    (3)
+
+Soluzione del sistema
+
+Sostituire la (2) in (1):
+
+  L = P + (1/2)(2P) = P + P = 2P  -->  L = 2P   (4)
+
+Sostituire la (4) in (3):
+
+  L + P + O = 2P + P + 2P = 5P = 100
+
+Ricaviamo P:
+
+  P = 100/5 = 20.
+
+Calcoliamo L e O:
+
+  L = 2P = 2 * 20 = 40
+  O = 2P = 2 * 20 = 40
+
+Soluzione
+Leone = 40 libbre
+Leopardo = 20 libbre
+Orso = 40 libbre
+
+(define epsilon 1e-6)
+
+(define (≈ a b)
+  (< (abs (sub a b)) epsilon))
+
+(define (calcola step)
+  (for (L 1.0 100.0 step)
+    (for (P 1.0 100.0 step)
+      (let (O (sub 100 L P))
+        (when (and (≈ L (add P (div O 2)))  ; L = P + (1/2)O     (1)
+                   (≈ O (* 2 P))            ; O = 2P             (2)
+                   (≈ (add L P O) 100))     ; L + P + O = 100    (3)
+          (println (list L P O (add L P O))))))) '>)
+
+Proviamo:
+
+(calcola 1)
+;-> (40 20 40 100)
+
+(time (calcola 0.01))
+;-> (40 20 40 100)
+;-> 22814.998
+
+
+---------
+Countdown
+---------
+
+Scrivere una funzione che si comporta nel modo seguente:
+La prima volta che viene eseguita restituisce 10.
+La seconda volta che viene eseguita restituisce 9.
+...
+La decima volta che viene eseguita restituisce 1.
+L'undicesima decima volta che viene eseguita restituisce "Boom".
+Tutte le successive esecuzioni devono restituire nil.
+
+Soluzione con un generatore:
+
+(define (seq:setup val) (setq seq:val 11))
+
+(define (seq:seq)
+  (-- seq:val)
+  (cond ((zero? seq:val) 'Boom)
+        ((< seq:val 0) nil)
+        (true seq:val)))
+
+Proviamo:
+
+(seq:setup)
+;-> 10
+
+(seq)
+;-> 10
+(seq)
+;-> 9
+...
+(seq)
+;-> 1
+(seq)
+;-> Boom
+(seq)
+;-> nil
+
+(define (simboli contesto) (dotree (el contesto) (println el)))
+
+(simboli 'seq)
+;-> seq:seq
+;-> seq:setup
+;-> seq:val
+
+Con una funzione:
+
+(define (countdown)
+  (if-not _ (setq _ 11))
+  (-- _)
+  (cond ((= _ 0) 'Boom)
+        ((< _ 0) nil)
+        (true _)))
+
+(countdown)
+;-> 10
+(countdown)
+;-> 9
+...
+(countdown)
+;-> 1
+(countdown)
+;-> Boom
+(countdown)
+;-> nil
+
+Usare (setq _ nil) per il prossimo 'countdown'.
+
+Versione code-golf (78 caratteri):
+
+(define(c)(if-not _(setq _ 11))(-- _)(cond((= _ 0)'Boom)((< _ 0)nil)(true _)))
+
+
+-----------------------------
+Numeri abbondanti e difettivi
+-----------------------------
+
+1) Numeri abbondanti
+--------------------
+Un numero abbondante è un numero naturale minore della somma dei suoi divisori propri (cioè tutti i divisori tranne sé stesso).
+
+Sequenza OEIS A005101:
+Abundant numbers (sum of divisors of n exceeds 2n)
+  12, 18, 20, 24, 30, 36, 40, 42, 48, 54, 56, 60, 66, 70, 72, 78, 80, 84,
+  88, 90, 96, 100, 102, 104, 108, 112, 114, 120, 126, 132, 138, 140, 144,
+  150, 156, 160, 162, 168, 174, 176, 180, 186, 192, 196, 198, 200, 204,
+  208, 210, 216, 220, 222, 224, 228, 234, 240, 246, 252, 258, 260, 264,
+  270, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+Funzione che verifica se un numero è abbondante:
+
+(define (abbondante? num)
+  (< (+ num num) (apply + (divisors num))))
+
+(filter abbondante? (sequence 2 270))
+;-> (12 18 20 24 30 36 40 42 48 54 56 60 66 70 72 78 80 84
+;->  88 90 96 100 102 104 108 112 114 120 126 132 138 140 144
+;->  150 156 160 162 168 174 176 180 186 192 196 198 200 204
+;->  208 210 216 220 222 224 228 234 240 246 252 258 260 264 270)
+
+2) Numeri difettivi
+-------------------
+Un numero difettivo è un numero naturale maggire della somma dei suoi divisori propri (cioè tutti i divisori tranne sé stesso).
+
+Sequenza OEIS A005100:
+Deficient numbers: numbers k such that sigma(k) < 2k.
+  1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 21, 22, 23, 25,
+  26, 27, 29, 31, 32, 33, 34, 35, 37, 38, 39, 41, 43, 44, 45, 46, 47, 49,
+  50, 51, 52, 53, 55, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 71, 73,
+  74, 75, 76, 77, 79, 81, 82, 83, 85, 86, ...
+
+Funzione che verifica se un numero è difettivo:
+
+(define (difettivo? num)
+  (> (+ num num) (apply + (divisors num))))
+
+(filter difettivo? (sequence 1 86))
+;-> (1 2 3 4 5 7 8 9 10 11 13 14 15 16 17 19 21 22 23 25
+;->  26 27 29 31 32 33 34 35 37 38 39 41 43 44 45 46 47 49
+;->  50 51 52 53 55 57 58 59 61 62 63 64 65 67 68 69 71 73
+;->  74 75 76 77 79 81 82 83 85 86)
+
+
+-----------------------
+Numeri di Erdos-Nicolas
+-----------------------
+
+Un numero di Erdos-Nicolas è un numero che non è perfetto, ma che è uguale alla somma dei suoi primi k divisori per un certo k.
+In altre parole si tratta di numeri abbondanti i cui primi k divisori sommano al numero stesso.
+
+Sequenza OEIS A194472:
+Erdos-Nicolas numbers.
+Abundant numbers n such that the sum of the first k divisors is equal to n for some k.
+  24, 2016, 8190, 42336, 45864, 392448, 714240, 1571328, 61900800,
+  91963648, 211891200, 1931236608, 2013143040, 4428914688,
+  10200236032, 214204956672, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+Funzione che verifica se un numero è la somma dei primi k numeri di una lista di N elementi (k=0..(N-1)):
+
+(define (sum-to? num lst)
+  (let ( (somma 0) (stop nil) (out nil) )
+    (dolist (el lst stop)
+      (++ somma el)
+      (cond ((= somma num) (setq stop true) (setq out true))
+            ((> somma num) (setq stop true))))
+    out))
+
+(sum-to? 24 '(1 2 3 4 6 8))
+;-> true
+
+Funzione che verifica se un numero N è di Erdos-Nicolas:
+
+(define (erdos? n)
+  (let (divisori (divisors n))
+    (if (> (length divisori) 2)
+        (sum-to? n (slice divisori 0 -2))
+        nil)))
+
+Proviamo:
+
+(time (println (filter erdos1? (sequence 2 1e6))))
+;-> (24 2016 8190 42336 45864 392448 714240)
+;-> 11891.589
+
+Check dei valori della sequenza OEIS:
+
+(setq t '(24 2016 8190 42336 45864 392448 714240 1571328 61900800 
+          91963648 211891200 1931236608 2013143040 4428914688
+          10200236032 214204956672))
+(dolist (el t) (if (nil? (erdos? el)) (println el)))
+;-> nil
 
 ============================================================================
 
