@@ -7599,6 +7599,225 @@ Check dei valori della sequenza OEIS:
 (dolist (el t) (if (nil? (erdos? el)) (println el)))
 ;-> nil
 
+
+--------------------------------------
+Frequenza dei caratteri della funzione
+--------------------------------------
+
+Scrivere una funzione che prende un carattere e restituisce la frequenza del carattere nel sorgente della funzione.
+
+(define (freq ch)
+  (let (sorgente (source 'freq))
+    (div (length (find-all ch sorgente)) (length sorgente))))
+
+Proviamo:
+
+(freq " ")
+0.1440677966101695
+(freq "r")
+;-> 0.05084745762711865
+(freq "z")
+;-> 0
+(freq "\r")
+;-> 0.03389830508474576
+(freq "\n")
+;-> 0.03389830508474576
+
+Versione code-golf (69 caratteri):
+
+(define(f c)(let(s(source 'f))(div(length(find-all c s))(length s))))
+
+(f " ")
+;-> 0.1910112359550562
+(f "r")
+0.01123595505617978
+(f "z")
+;-> 0
+(f "\r")
+;-> 0.0449438202247191
+(f "\n")
+;-> 0.0449438202247191
+
+Nota:
+(source 'f)
+"(define (f c)\r\n  (let (s (source 'f)) \r\n   (div (length (find-all c s)) (length s))))\r\n\r\n"
+
+
+---------------------
+Lunghezza dei massimi
+---------------------
+
+Abbiamo una lista di numeri.
+Attraversiamo la lista e teniamo traccia dei valori massimi correnti.
+Esempio:
+  lista = (1 3 2 7 4 -8 4 2 5 9 8 4)
+  Il primo massimo è 1
+  Il secondo massimo è 3
+  Il secondo massimo è 7
+  Il secondo massimo è 9
+  output = (1 3 7 9)
+La lunghezza della lista di output vale 4.
+
+(define (lista-massimi lst)
+  (let (massimi (list (lst 0)))
+    (dolist (el lst) (if (> el (massimi -1)) (push el massimi -1)))
+    massimi))
+
+Proviamo:
+
+(lista-massimi '(1 3 2 7 4 -8 4 2 5 9 8 4))
+;-> (1 3 7 9)
+
+Adesso generiamo in modo casuale e uniforme K numeri tra 0 e (K - 1).
+Quanto è lunga in media la lista dei massimi dei numeri casuali?
+Ecco un programma che risolve il problema simulando il processo:
+
+(define (numero-massimi lst)
+  (let ( (nums 1) (massimo (lst 0)) )
+    (dolist (el lst) (when (> el massimo) (++ nums) (setq massimo el)))
+    nums))
+
+(numero-massimi '(1 3 2 7 4 -8 4 2 5 9 8 4))
+;-> 4
+
+(define (lunghezza-media iter items)
+  (setq totale 0)
+  (for (i 1 iter)
+    (++ totale (numero-massimi (rand items items))))
+  (div totale iter))
+
+Proviamo:
+
+(lunghezza-media 1e5 1)
+;-> 1
+(lunghezza-media 1e5 10)
+;-> 2.51434
+(lunghezza-media 1e5 100)
+;-> 4.73019
+(lunghezza-media 1e5 1000)
+;-> 7.03539
+(time (println (lunghezza-media 1e5 10000)))
+;-> 9.33079
+;-> 58504.909
+
+Test di correttezza:
+
+(for (i 1 1000)
+  (let (t (rand 1000 1000))
+    (if (!= (numero-massimi t) (length (lista-massimi t))) (println t))))
+;-> nil
+
+Formula matematica
+------------------
+Dal punto di vista matematico esiste una formula esatta che esprime l'attesa del numero di massimi (massimi correnti o "record") in una sequenza di numeri uniformemente distribuiti e indipendenti.
+
+Sia K la lunghezza della lista di numeri casuali distinti e generati in modo uniforme.
+La lunghezza attesa della lista dei massimi (cioè quante volte incontriamo un nuovo massimo durante la scansione della lista) è data dalla somma armonica:
+
+  E(K) = Sum[i=1,K](1/i)
+
+Questa è la K-esima armonica H(K).
+
+Per ogni posizione i nella lista (da 1 a K), la probabilità che il valore in quella posizione sia maggiore di tutti i precedenti vale 1/i.
+Infatti, tra i primi i valori, ognuno ha la stessa probabilità di essere il massimo.
+Quindi:
+
+ valore atteso = 1/1 + 1/2 + 1/3 + 1/4 + ... + 1/K
+
+(define (E k)
+  (let (out 0)
+    (for (i 1 k) (inc out (div i)))))
+
+Proviamo:
+
+(map E '(1 10 100 1000 10000))
+;-> (1 2.928968253968254 5.187377517639621 7.485470860550343 9.787606036044348)
+
+Questi valori sono molto simili ai dati simulati:
+
+(map (curry lunghezza-media 1e5) '(1 10 100 1000))
+;-> (1 2.51203 4.73161 7.0217)
+
+Comunque i dati simulati sono leggermente inferiori perchè la formula vale per numeri distinti, mentre (rand items items) può generare duplicati.
+Quindi se uso (rand items items) calcolo la lunghezza per k = lista-elementi-distinti (nota che k varia per ogni lista generata da (rand items items)).
+La formula teorica presume che i numeri siano:
+- tutti distinti (o comunque con probabilità nulla di uguaglianza),
+- generati indipendentemente da una distribuzione continua o permutazione casuale di (0..K-1).
+
+Per verificare la formula teorica modifichiamo la funzione 'lunghezza-media':
+
+(define (lunghezza-media2 iter items)
+  (setq totale 0)
+  (for (i 1 iter)
+    (++ totale (numero-massimi (randomize (sequence 0 (- items 1))))))
+  (div totale iter))
+
+(map (curry lunghezza-media2 1e5) '(1 10 100 1000))
+;-> (1 2.92788 5.1937 7.49791)
+
+(time (println (lunghezza-media2 1e5 10000)))
+
+Questi valori sono molto vicini ai valori calcolati con la formula.
+
+Formula asintotica
+------------------
+Quando K è grande, la somma armonica si approssima come:
+
+  E(K) ≈ ln(K) + gamma
+
+dove gamma = 0.577215664901532860606512090082402431042159335...
+è la costante di Eulero-Mascheroni.
+
+(define (Ebig k) (add (log k) 0.57721566490153286))
+
+(map Ebig '(10 100 1000 10000))
+;-> (2.879800757895579 5.182385850889625 7.48497094388367 9.787556036877717)
+
+
+------------------------------
+Quanto abbondanti o difettivi?
+------------------------------
+
+Sequenza della differenza tra 2n e la somma dei divisori di n.
+
+Sequenza OEIS A033879:
+Deficiency of n, or 2n - (sum of divisors of n).
+  1, 1, 2, 1, 4, 0, 6, 1, 5, 2, 10, -4, 12, 4, 6, 1, 16, -3, 18, -2, 10,
+  8, 22, -12, 19, 10, 14, 0, 28, -12, 30, 1, 18, 14, 22, -19, 36, 16, 22,
+  -10, 40, -12, 42, 4, 12, 20, 46, -28, 41, 7, 30, 6, 52, -12, 38, -8,
+  34, 26, 58, -48, 60, 28, 22, 1, 46, -12, 66, 10, 42, -4, 70, -51, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors-sum num)
+"Sum all the divisors of integer number"
+  (local (sum out)
+    (if (= num 1)
+        1
+        (begin
+          (setq out 1)
+          (setq lst (factor-group num))
+          (dolist (el lst)
+            (setq sum 0)
+            (for (i 0 (last el))
+              (setq sum (+ sum (pow (first el) i)))
+            )
+            (setq out (* out sum)))))))
+
+(define (tipo num)
+  (- (+ num num) (divisors-sum num)))
+
+(map tipo (sequence 1 72))
+;-> (1 1 2 1 4 0 6 1 5 2 10 -4 12 4 6 1 16 -3 18 -2 10
+;->  8 22 -12 19 10 14 0 28 -12 30 1 18 14 22 -19 36 16 22
+;->  -10 40 -12 42 4 12 20 46 -28 41 7 30 6 52 -12 38 -8
+;->  34 26 58 -48 60 28 22 1 46 -12 66 10 42 -4 70 -51)
+
 ============================================================================
 
 

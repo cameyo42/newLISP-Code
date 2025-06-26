@@ -3014,6 +3014,9 @@ NOTE LIBERE 30
   Countdown
   Numeri abbondanti e difettivi
   Numeri di Erdos-Nicolas
+  Frequenza dei caratteri della funzione
+  Lunghezza dei massimi
+  Quanto abbondanti o difettivi?
 
 PROBLEMI SUI DADI
 =================
