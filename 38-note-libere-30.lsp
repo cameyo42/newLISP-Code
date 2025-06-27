@@ -7818,6 +7818,194 @@ Deficiency of n, or 2n - (sum of divisors of n).
 ;->  -10 40 -12 42 4 12 20 46 -28 41 7 30 6 52 -12 38 -8
 ;->  34 26 58 -48 60 28 22 1 46 -12 66 10 42 -4 70 -51)
 
+
+---------------------------
+Potenze e prodotti di cifre
+---------------------------
+
+Nel 1724 Goldbach dimostrò che il prodotto di tre numeri interi consecutivi non è mai un quadrato.
+
+Possiamo scrivere una funzione per verificare questo risutato fino ad un dato numero.
+
+Funzione che verifica se un numero intero è un quadrato perfetto:
+
+(define (quadrato? n)
+  (letn ((x n)
+         (y (/ (+ 1L x) 2L))) ; inizializzazione
+    (while (< y x)
+      (setq x y)
+      (setq y (/ (+ (/ n y) y) 2L)))
+    (if (= (* x x) n) x nil)))
+
+Funzione che verifica il teorema di Goldbach fino ad un dato limite:
+(anche big-integer)
+
+(define (mult-3nums limite)
+  (local (val)
+  (for (i 1 (- limite 2))
+    (setq val (* 1L i (+ i 1) (+ i 2)))
+    ; (print i { } (+ i 1) { } (+ i 2) { } val) (read-line)
+    (if (quadrato? val) (println val)))))
+
+(time (println (mult-3nums 1e6)))
+;-> 14360.334
+
+Nel 1975 Erdos e Selfridge dimostrarono che il prodotto di due o più numeri interi consecutivi non è mai un quadrato o una potenza superiore.
+
+In questo caso possiamo verificare ben poco.
+Impossibile moltiplicare infiniti numeri.
+
+(define (power? num result)
+"Check (and find) if a number is a power of another number"
+  (local (a out)
+    (cond ((zero? num) nil)
+          ((= num 1)
+           (if (nil? result)
+               true
+               '(1 1)))
+          (true
+           (if (nil? result)
+               (> (apply gcd (factor-exponent num)) 1)
+               ; if result is true
+               (if (> (setq a (apply gcd (factor-exponent num))) 1)
+                   (list (ceil (pow num (div 1 a))) a)
+                   nil))))))
+; crea la lista degli esponenti dei termini della fattorizzazione di un numero
+(define (factor-exponent x)
+  (if (= x 1) '(1)
+    (letn (fattori (factor x)
+           unici (unique fattori))
+       (count unici fattori))))
+
+(power? (* 7 7 7 7 7 7 7 7 7))
+;-> true
+(power? (* 7 7 7 7 7 7 7 7 7) true)
+;-> (7 9)
+
+La funzione 'power?' non accetta biginteger (factor), quindi anche la 'mult-Knums' non funziona con i biginteger.
+
+(define (mult-Knums limite)
+  (catch
+  (let ( (val 1L) (MAX-INT 9223372036854775807) )
+    ; per ogni numero da 1 a limite...
+    (for (i 1 limite)
+      ;(println "i: " i)
+      ; per ogni numero di cifre da moltiplicare da 2 a limite...
+      (for (k 2 limite)
+        ;(println "k: " k)
+        (setq val 1L)
+        ; calcola il valore della moltiplicazione corrente
+        ; prendendo k cifre
+        (for (t 0 (- k 1))
+          (setq val (* val (+ i t)))
+          ;(print (+ i t) { })
+        )
+        ;(println)
+        ;(print "val: " val) (read-line)
+        ; Verifica overflow
+        (when (> val MAX-INT) 
+          (println "Overflow: " val " > " MAX-INT)
+          (throw val))
+        ; verifica se 'val' è una potenza di un qualche numero intero x
+        (if (power? val) (println val)))))))
+
+Proviamo: (togliere il commento ai 'print' per vedere il funzionamento)
+
+(mult-Knums 14)
+;-> nil
+
+(mult-Knums 15)
+;-> Overflow: 10103301395066880000L > 9223372036854775807
+;-> 10103301395066880000L
+
+
+------------------------------------------
+Convoluzione lineare discreta di due liste
+------------------------------------------
+
+La convoluzione lineare discreta di due liste (o vettori o sequenze) 'a' e 'b' è una nuova lista di lunghezza n + m - 1, i cui elementi c(k) sono dati da:
+
+  c(k) = Sum[i=0,(n-1)] (a(i)*b(k-i)
+
+  dove: a = a(0), a(1), ..., a(n-1)
+        b = b(0), b(1), ..., b(m-1)
+        b(k-i) vale 0 se (k - i) è fuori dal dominio di b (cioè < 0 o > m).
+
+Esempio:
+  a = (1 2 3)
+  b = (4 5)
+
+  c(0) = 1 * 4 = 4
+  c(1) = 1 * 5 + 2 * 4 = 5 + 8 = 13
+  c(2) = 2 * 5 + 3 * 4 = 10 + 12 = 22
+  c(3) = 3 * 5 = 15
+
+Algoritmo:
+- creare un array di zeri di lunghezza n+m−1,
+- scorrere tutti gli indici k,
+- sommare i prodotti a(i)*(b(k-i) se (k-i) è un indice valido per 'b'
+
+Funzione che calcola la convoluzione di due liste/sequenze:
+
+(define (convoluzione a b)
+  (letn ((n (length a))
+         (m (length b))
+         (c (array (add n m -1) '(0))))
+    (for (k 0 (sub (length c) 1))
+      (for (i 0 (sub n 1))
+        (let ((j (sub k i)))
+          (when (and (>= j 0) (< j m))
+            (inc (c k) (* (a i) (b j)))))))
+    c))
+
+Proviamo:
+
+(setq a '(1 2 3))
+(setq b '(4 5))
+(convoluzione a b)
+;-> (4 13 22 15)
+
+(convoluzione '(1 2 3 4) '(5 6 7 8))
+;-> (5 16 34 60 61 52 32)
+
+Nota: la convoluzione compare nella moltiplicazione lunga dei numeri.
+Consideriamo ogni lista come un numero e moltiplichiamoli tra loro:
+
+a = 1234
+b = 54678
+(* 1234 5678)
+;-> 7006652
+
+Prendiamo la lista della convoluzione di 'a' e 'b':
+
+(5 16 34 60 61 52 32)
+
+Disponiamola in scala partendo dall'ultimo numero e sommiamo i numeri:
+
+         32 +
+        52  +
+       61   +
+      60    +
+     34     +
+    16      +
+    5       =
+   ----------
+    7006652  --> Risultato della moltiplicazione di 'a' e 'b'.
+
+Funzione che moltiplica due liste con la convoluzione:
+
+(define (mult-conv a b)
+  (let c (reverse (convoluzione a b)))
+  (apply add (map (fn(x) (mul x (pow 10 $idx))) c)))
+
+(mult-conv '(1 2 3 4) '(5 6 7 8))
+;-> 7006652
+
+(* 123 45)
+;-> 5535
+(mult-conv '(1 2 3) '(4 5))
+;-> 5535
+
 ============================================================================
 
 

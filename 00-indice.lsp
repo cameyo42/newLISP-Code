@@ -3017,6 +3017,8 @@ NOTE LIBERE 30
   Frequenza dei caratteri della funzione
   Lunghezza dei massimi
   Quanto abbondanti o difettivi?
+  Potenze e prodotti di cifre
+  Convoluzione lineare discreta di due liste
 
 PROBLEMI SUI DADI
 =================
