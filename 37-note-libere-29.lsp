@@ -5375,9 +5375,9 @@ Il numero di passi previsti per raggiungere entrambi i punti finali di un interv
 
   E(w,a,b) = (b - a)^2 - (w - a)*(b - w)
 
-w=2, a = 0, b = 4, :
+  w = 2, a = 0, b = 4:
 
-E = (4 - 0)^2 - (2 - 0)(4 - 2) = 16 - 2×2 = 12
+  E = (4 - 0)^2 - (2 - 0)(4 - 2) = 16 - 2*2 = 12
 
 Caso 2: w esterno all'intervallo (a..b)  -->  (w < a) oppure (w > b)
 

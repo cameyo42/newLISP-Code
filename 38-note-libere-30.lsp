@@ -3129,15 +3129,15 @@ Ecco il procedimento:
 - Inizia scegliendo un valore standard per C (es: 1µF, 10µF, 100nF)
 - Valori tipici: da 1nF a 1000µF a seconda della frequenza desiderata
 2. Calcola R2 dal Time Low
-R2 = Time Low / (0.693 × C)
+R2 = Time Low / (0.693 * C)
 3. Calcola R1 dal Time High
-R1 = (Time High / (0.693 × C)) - R2
+R1 = (Time High / (0.693 * C)) - R2
 
 ## Verifica dei risultati
 Una volta calcolati i valori, verifica che:
 - R1 > 0 (altrimenti il Time High è troppo piccolo rispetto al Time Low)
 - I valori di R1 e R2 siano pratici (tipicamente tra 1kΩ e 1MΩ)
-- La frequenza risultante sia quella desiderata usando: f = 1.44 / ((R1 + 2×R2) × C)
+- La frequenza risultante sia quella desiderata usando: f = 1.44 / ((R1 + 2*R2) * C)
 
 ## Esempio pratico
 Se vuoi:
@@ -3146,8 +3146,8 @@ Se vuoi:
 - C = 100nF
 
 Calcoli:
-- R2 = 0.0005 / (0.693 × 100×10⁻⁹) = 7.2kΩ
-- R1 = (0.001 / (0.693 × 100×10⁻⁹)) - 7.2kΩ = 7.6kΩ
+- R2 = 0.0005 / (0.693 * 100*10⁻⁹) = 7.2kΩ
+- R1 = (0.001 / (0.693 * 100*10⁻⁹)) - 7.2kΩ = 7.6kΩ
 
 Nota importante: Se R1 risulta negativo, significa che il Time High desiderato è troppo piccolo rispetto al Time Low. In questo caso devi aumentare il Time High o diminuire il Time Low, oppure usare un condensatore più piccolo.
 
@@ -8005,6 +8005,263 @@ Funzione che moltiplica due liste con la convoluzione:
 ;-> 5535
 (mult-conv '(1 2 3) '(4 5))
 ;-> 5535
+
+
+------------------------------------------------
+Convoluzione e cross-correlazione di una matrice
+------------------------------------------------
+
+La "convoluzione" di una matrice consiste nell'applicare un "kernel" (o filtro) su ogni posizione della matrice per ottenere una nuova matrice trasformata.
+
+La "cross-correlazione" di una matrice consiste nell'applicare un "kernel" (o filtro) su ogni posizione della matrice per ottenere una nuova matrice trasformata.
+
+Queste tecniche sono usate in elaborazione di immagini e reti neurali convoluzionali (CNN).
+
+Differenza tra convoluzione e cross-correlazione
+------------------------------------------------
+Convoluzione: si ruota il kernel di 180 gradi (flip verticale + orizzontale) prima di applicarlo.
+Cross-correlazione: si applica il kernel così com'è, senza ruotarlo.
+
+Nelle librerie di deep learning (TensorFlow, PyTorch) la funzione chiamata 'convoluzione' è spesso una cross-correlazione, cioè si usa il kernel non ruotato.
+Questo perché spesso il kernel è imparato e il flip è inutile o controproducente.
+Perciò spesso la convoluzione è implementata come cross-correlazione per semplicità ed efficienza.
+
+Formula della convoluzione 2D
+-----------------------------
+Data una matrice di input I e un kernel K (di dimensioni più piccole, ad esempio 3*3), la convoluzione C è definita da:
+
+  C(i, j) = Sum[m=0,k(h)-1)]Sum[n=0,kw-1) K(m, n) * I(i + m - ch, j + n - cw)
+
+dove:
+  kh, kw: dimensioni del kernel,
+  ch = floor(kh/2), cw = floor(kw)/2: centro del kernel.
+
+### Esempio pratico (matrice 3*3 convoluta con kernel 3*3)
+
+Input I:
+  1 2 3
+  4 5 6
+  7 8 9
+
+Kernel K:
+  0 1 0
+  1 -4 1
+  0 1 0
+
+Per calcolare il valore convoluto al centro (1,1), si moltiplica elemento per elemento:
+
+  (0*1) + (1*2)  + (0*3) +
+  (1*4) + (-4*5) + (1*6) +
+  (0*7) + (1*8)  + (0*9) = 0 + 2 + 0 + 4 -20 + 6 + 0 + 8 + 0 = 0
+
+Quindi il valore centrale della matrice convoluta sarà 0.
+
+Tipi di bordi
+-------------
+Per gestire i bordi, ci sono varie strategie:
+
+1) Valid: niente padding, si lavora solo dove il kernel entra completamente.
+2) Same: si usa padding (es. con zeri) per mantenere la dimensione originale.
+3) Full: padding esteso, include tutte le posizioni possibili.
+
+Formula generale (comune a tutte le modalità)
+
+  C(i, j) = Sum[m=0,k(h)-1)]Sum[n=0,kw-1) K(m, n) * I(i + m - ch, j + n - cw)
+
+dove:
+  kh, kw: dimensioni del kernel,
+  ch = floor(kh/2), cw = floor(kw)/2: centro del kernel.
+
+1) Modalità valid (Solo dove il kernel "entra")
+  Output size: (h - kh + 1) × (w - kw + 1)
+  Indici validi: i = 0,...,h - kh; j = 0,...,w - kw
+  Nessun padding: il kernel resta sempre completamente dentro la matrice
+  I(i + m - ch, j + n - cw) accede solo a elementi interni
+  Output più piccolo
+
+2) Modalità same (Kernel centrato su ogni pixel)
+  Output size: h × w
+  Indici validi: i = 0,...,h - 1; j = 0,...,w - 1
+  Padding simmetrico: ph = floor(kh/2), pw = floor(kw/2)
+  La matrice viene estesa con zeri ai bordi per mantenere la dimensione
+  Output della stessa dimensione dell’input
+
+3) Modalità full (Include tutti i casi parziali)
+  Output size: (h + kh - 1) × (w + kw - 1)
+  Indici validi: i = 0,...,h + kh - 2; j = 0,...,w + kw - 2
+  Padding massimo: il kernel può uscire completamente dai bordi
+  I fuori dai limiti vengono considerati come 0 (zero-padding)
+  Output più grande dell’input
+
+Queste formule valgono sia per convoluzione che per correlazione, perché la differenza è solo nel kernel ruotato o meno, non nella dimensione dell'output.
+
+Implementazione
+---------------
+
+; Ruota una matrice 180 gradi (flip verticale e poi orizzontale)
+(define (flip-kernel k)
+  (map reverse (reverse k)))
+
+(define (pad-matrix matrix numpad val)
+"Insert and fills numpad rows and columns around a matrix m x n with a number or char or string"
+  (local (row col out)
+    (setq out '())
+    ; converte la matrice in lista?
+    (if (array? matrix) (setq matrix (array-list matrix)))
+    ; righe della nuova matrice
+    (setq row (+ (* 2 numpad) (length matrix)))
+    ; colonne della nuova matrice
+    (setq col (+ (* 2 numpad) (length (matrix 0))))
+    ; aggiunge numpad righe iniziali ad out
+    (for (i 1 numpad)
+      (push (dup val col true) out -1)
+    )
+    ; aggiunge le righe centrali ad out
+    (dolist (el matrix)
+      (setq cur (append (dup val numpad true) el (dup val numpad true)))
+      (push cur out -1)
+    )
+    ; aggiunge numpad righe finali ad out
+    (for (i 1 numpad)
+      (push (dup val col true) out -1)
+    )
+    out))
+
+; Funzione cross-correlazione 2D tra una matrice e un kernel, per modalità: "same", "valid", "full"
+(define (correlazione-2d mtx kernel mode)
+  (letn (
+         ; Dimensioni matrice e kernel
+         (h (length mtx))
+         (w (length (mtx 0)))
+         (kh (length kernel))
+         (kw (length (kernel 0)))
+         ; Padding: 0 = valid, metà kernel = same, max shift = full
+         (numpad (cond ((= mode "same") (max (div kh 2) (div kw 2)))
+                       ((= mode "full") (max (- kh 1) (- kw 1)))
+                       (true 0)))
+         ; Matrice con padding, se necessario
+         (pad-mtx (if (!= mode "valid")
+                      (pad-matrix mtx numpad 0)
+                      mtx))
+         (H (length pad-mtx))
+         (W (length (pad-mtx 0)))
+         ; Dimensioni dell'output
+         (out-h (- H kh -1))
+         (out-w (- W kw -1))
+         (out (array out-h out-w '(0))))
+    ; Scorri la matrice con kernel e calcola i prodotti scalari
+    (for (i 0 (- H kh))
+      (for (j 0 (- W kw))
+        (let (somma 0)
+          (for (m 0 (- kh 1))
+            (for (n 0 (- kw 1))
+              (setq somma (+ somma (* (kernel m n) (pad-mtx (+ i m) (+ j n)))))))
+          (setf (out i j) somma))))
+    out))
+
+; Funzione convoluzione 2D (kernel ruotato 180 gradi gradi)
+; su "same", "valid", "full"
+(define (convoluzione-2d mtx kernel mode)
+  ; Ruota il kernel (convoluzione vera)
+  (let ((k (flip-kernel kernel)))
+    (letn (
+           ; Dimensioni matrice e kernel
+           (h (length mtx))
+           (w (length (mtx 0)))
+           (kh (length k))
+           (kw (length (k 0)))
+           ; Padding calcolato come sopra
+           (numpad (cond ((= mode "same") (max (div kh 2) (div kw 2)))
+                         ((= mode "full") (max (- kh 1) (- kw 1)))
+                         (true 0)))
+           ; Padding della matrice
+           (pad-mtx (if (!= mode "valid")
+                        (pad-matrix mtx numpad 0)
+                        mtx))
+           (H (length pad-mtx))
+           (W (length (pad-mtx 0)))
+           ; Dimensioni dell'output
+           (out-h (- H kh -1))
+           (out-w (- W kw -1))
+           (out (array out-h out-w '(0))))
+      ; Stessa logica della correlazione, ma con kernel ruotato
+      (for (i 0 (- H kh))
+        (for (j 0 (- W kw))
+          (let (somma 0)
+            (for (m 0 (- kh 1))
+              (for (n 0 (- kw 1))
+                (setq somma (+ somma (* (k m n) (pad-mtx (+ i m) (+ j n)))))))
+            (setf (out i j) somma))))
+      out)))
+
+Proviamo:
+
+(setq mt '((1 2 3)
+           (4 5 6)
+           (7 8 9)))
+
+Con kernel simmetrico (risultati uguali):
+(setq kernel '((0 1 0)
+               (1 -4 1)
+               (0 1 0)))
+
+(correlazione-2d mt kernel "same")
+;-> ((2 1 -4) (-3 0 -7) (-16 -11 -22))
+(correlazione-2d mt kernel "valid")
+;-> ((0))
+(correlazione-2d mt kernel "full")
+;-> ((0 1 2 3 0) (1 2 1 -4 3) (4 -3 0 -7 6) (7 -16 -11 -22 9) (0 7 8 9 0))
+(convoluzione-2d mt kernel "same")
+;-> ((2 1 -4) (-3 0 -7) (-16 -11 -22))
+(convoluzione-2d mt kernel "valid")
+;-> ((0))
+(convoluzione-2d mt kernel "full")
+;-> ((0 1 2 3 0) (1 2 1 -4 3) (4 -3 0 -7 6) (7 -16 -11 -22 9) (0 7 8 9 0))
+
+Con kernel non simmetrico (risultati diversi):
+(setq kernel '((2 1 1)
+               (1 -4 1)
+               (3 1 4)))
+
+(correlazione-2d mt kernel "same")
+;-> ((22 37 11) (31 62 21) (-11 3 -12))
+(correlazione-2d mt kernel "valid")
+;-> ((62))
+(correlazione-2d mt kernel "full")
+;-> ((4 9 17 9 9) (17 22 37 11 21) (33 31 62 21 39)
+;->  (11 -11 3 -12 21) (7 15 31 25 18))
+(convoluzione-2d mt kernel "same")
+;-> ((12 17 1) (19 38 9) (-1 23 -2))
+(convoluzione-2d mt kernel "valid")
+;-> ((38))
+(convoluzione-2d mt kernel "full")
+;-> ((2 5 9 5 3) (9 12 17 1 9) (21 19 38 9 27)
+;->  (19 -1 23 -2 33) (21 31 63 41 36))
+
+Le funzioni correlazione-2d e convoluzione-2d funzionano correttamente anche per matrici rettangolari, sia per la matrice di input, che per il kernel:
+
+(setq mt '((1 2 3 4 5)
+           (6 7 8 9 10)
+           (11 12 13 14 15)))
+
+(setq kernel '((1 0)
+               (0 -1)))
+
+(correlazione-2d mt kernel "same")
+;-> ((-1 -2 -3 -4 -5 0) (-6 -6 -6 -6 -6 5)
+;->  (-11 -6 -6 -6 -6 10) (0 11 12 13 14 15))
+(correlazione-2d mt kernel "valid")
+;-> ((-6 -6 -6 -6) (-6 -6 -6 -6))
+(correlazione-2d mt kernel "full")
+;-> ((-1 -2 -3 -4 -5 0) (-6 -6 -6 -6 -6 5)
+;->  (-11 -6 -6 -6 -6 10) (0 11 12 13 14 15))
+
+(convoluzione-2d mt kernel "same")
+;-> ((1 2 3 4 5 0) (6 6 6 6 6 -5) (11 6 6 6 6 -10) (0 -11 -12 -13 -14 -15))
+(convoluzione-2d mt kernel "valid")
+;-> ((6 6 6 6) (6 6 6 6))
+(convoluzione-2d mt kernel "full")
+;-> ((1 2 3 4 5 0) (6 6 6 6 6 -5) (11 6 6 6 6 -10) (0 -11 -12 -13 -14 -15))
 
 ============================================================================
 

@@ -3019,6 +3019,7 @@ NOTE LIBERE 30
   Quanto abbondanti o difettivi?
   Potenze e prodotti di cifre
   Convoluzione lineare discreta di due liste
+  Convoluzione e cross-correlazione di una matrice
 
 PROBLEMI SUI DADI
 =================
