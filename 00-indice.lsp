@@ -3018,8 +3018,10 @@ NOTE LIBERE 30
   Lunghezza dei massimi
   Quanto abbondanti o difettivi?
   Potenze e prodotti di cifre
+  The Halting Problem
   Convoluzione lineare discreta di due liste
   Convoluzione e cross-correlazione di una matrice
+  Mappatura biunivoca tra interi e un numero variabile di bit
 
 PROBLEMI SUI DADI
 =================

@@ -4586,6 +4586,16 @@ Proviamo:
 (map w? '("h1" "h2" "h3" "h4" "h5" "h6" "h7" "h8"))
 ;-> (true nil true nil true nil true nil)
 
+Versione code-golf (59 caratteri):
+
+(define(c x)(if(zero?(%(+(char(x 0))(char(x 1)))2))"B""W"))
+
+(map c '("h1" "h2" "h3" "h4" "h5" "h6" "h7" "h8"))
+;-> ("W" "B" "W" "B" "W" "B" "W" "B")
+
+(map c '("c1" "c2" "c3" "c4" "c5" "c6" "c7" "c8"))
+;-> ("B" "W" "B" "W" "B" "W" "B" "W")
+
 
 ----------------
 Fibonacci (Lutz)

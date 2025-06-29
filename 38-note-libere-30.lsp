@@ -7642,6 +7642,18 @@ Nota:
 (source 'f)
 "(define (f c)\r\n  (let (s (source 'f)) \r\n   (div (length (find-all c s)) (length s))))\r\n\r\n"
 
+Per verificare se un dato carattere è contenuto nella funzione:
+
+(define (g c) (find c (source 'g)))
+
+Versione code-golf (32 caratteri):
+(define(g c)(find c(source 'g)))
+
+(g "s")
+;-> 26
+(g "k")
+;-> nil
+
 
 ---------------------
 Lunghezza dei massimi
@@ -7919,6 +7931,25 @@ Proviamo: (togliere il commento ai 'print' per vedere il funzionamento)
 ;-> 10103301395066880000L
 
 
+-------------------
+The Halting Problem
+-------------------
+
+Il problema dell'arresto è il problema di determinare, a partire dalla descrizione di un programma per computer arbitrario e da un input, se il programma terminerà l'esecuzione o continuerà a funzionare per sempre.
+Il problema dell'arresto è indecidibile, il che significa che non esiste un algoritmo generale che lo risolva per tutte le possibili coppie programma-input.
+
+Supponiamo che esista un programma H per computer che, prendendo come input un qualsiasi altro programma x (una sequenza di bit), possa stabilire, tramite elaborazione su una UTM (Universal Turing Machine), se l'esecuzione di x terminerà o meno in un tempo finito (halting problem) dando questa indicazione come output.
+Quindi, ad esempio, se UTM(H,x) produce 1 il programma valutato x termina la sua esecuzione in un tempo finito, al contrario se UTM(H,x) produce 0 il programma x continua la sua esecuzione all'infinito.
+
+Basta ora costruire un programma L, sulla stessa UTM, del tipo UTM(L,x) = se UTM(H,x) è 1 entra in loop (non terminare mai), altrimenti stop.
+Cosa accade se proviamo a dare come input L ad L? Ossia cosa significa UTM(L,L) e cosa produce?
+
+UTM(L,L) ferma la sua esecuzione se (come da definizione di L, sostituendo) UTM(H,L) è diverso da 1 ossia se (come da definizione di H, sostituendo) L non termina mai.
+Questa è una contraddizione, ne consegue falsa l'ipotesi iniziale che possa esistere H.
+
+Questa dimostrazione, fatta da Turing, evidenzia un problema che non è affrontabile dalla macchina di Turing stessa e quindi dalla computazione automatica (dai computer) in generale.
+
+
 ------------------------------------------
 Convoluzione lineare discreta di due liste
 ------------------------------------------
@@ -8097,7 +8128,6 @@ Queste formule valgono sia per convoluzione che per correlazione, perché la dif
 
 Implementazione
 ---------------
-
 ; Ruota una matrice 180 gradi (flip verticale e poi orizzontale)
 (define (flip-kernel k)
   (map reverse (reverse k)))
@@ -8262,6 +8292,44 @@ Le funzioni correlazione-2d e convoluzione-2d funzionano correttamente anche per
 ;-> ((6 6 6 6) (6 6 6 6))
 (convoluzione-2d mt kernel "full")
 ;-> ((1 2 3 4 5 0) (6 6 6 6 6 -5) (11 6 6 6 6 -10) (0 -11 -12 -13 -14 -15))
+
+
+-----------------------------------------------------------
+Mappatura biunivoca tra interi e un numero variabile di bit
+-----------------------------------------------------------
+
+Un numero variabile di bit è una lista/stringa di 0 o più bit.
+Quindi (0 1) oppure "01" è un numero variabile di bit, ma lo è anche () oppure ("").
+
+Scrivere una funzione che, dato un intero non negativo, restituisca un numero variabile di bit in modo che ogni intero abbia una mappatura biunivoca con un lista/stringa.
+La mappatura deve essere concettualmente biunivoca per tutti gli interi disponibili nel sistema.
+Una mappatura è biunivoca se:
+1) per ogni intero viene associato un unico numero variabile di bit 
+   e
+2) per ogni numero variabile di bit viene associato un unico intero
+
+Notare che la conversione intero <--> binario non è biunivoca.
+Per esempio:
+  binario(5) = "101"
+  intero("101") = 5, ma anche intero("0101") = 5
+
+Esistono infinite mappature di questo tipo. 
+Una possibile soluzione è la seguente:
+Incrementare l'input, quindi prendere la rappresentazione binaria con il primo simbolo rimosso.
+Poiché qualsiasi numero positivo inizia con 1 in binario, questo fornisce in modo univoco una rappresentazione binaria.
+In questo modo il numero 0 viene mappato con () o "" (e viceversa).
+
+; Converte da intero a numero variabile di bit
+(define (int-bb num) (slice (bits (+ num 1)) 1))
+
+(map int-bb (sequence 0 10))
+;-> ("" "0" "1" "00" "01" "10" "11" "000" "001" "010" "011")
+
+; Converte da numero variabile di bit a intero
+(define (bb-int str) (- (int (push "1" str) 0 2) 1))
+
+(map bb-int '("" "0" "1" "00" "01" "10" "11" "000" "001" "010" "011"))
+;-> (0 1 2 3 4 5 6 7 8 9 10)
 
 ============================================================================
 
