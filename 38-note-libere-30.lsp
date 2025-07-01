@@ -8331,6 +8331,320 @@ In questo modo il numero 0 viene mappato con () o "" (e viceversa).
 (map bb-int '("" "0" "1" "00" "01" "10" "11" "000" "001" "010" "011"))
 ;-> (0 1 2 3 4 5 6 7 8 9 10)
 
+
+-------------------
+Liste raggiungibili
+-------------------
+
+Abbiamo una lista di numeri interi.
+L'obiettivo è visitare raggiungere l'ultimo elemento partendo da un elemento qualunque (tranne l'ultimo).
+Partendo da un elemento, dobbiamo esaminare il valore memorizzato in quell'elemento e poi spostarsi di altrettanti posti a destra (se il numero è positivo) o a sinistra (se il numero è negativo).
+Se lo spostamento porta fuori della lista, allora si rientra dalla parte opposta.
+
+Esempio:
+ lista = (2 4 -1 5 -3)
+ movimenti partendo da indice 0:
+ indice = 0, numero = 2, mi sposto di 2 a destra
+ indice = 2, numero = -1, mi sposto di -1 a sinistra
+ indice = 1, numero = 4, mi sposto di 4 a destra (rientro da sinistra)
+ indice = 0, numero = 2, mi sposto di 2 a destra --> loop
+
+Considerazioni
+Se incontriamo uno 0 (non come ultimo elemento) non ci possiamo muovere.
+Se incontriamo due volte lo stesso numero/indice, allora siamo in un loop.
+Possono esistere più soluzioni.
+
+Scrivere una funzione verifica se è possibile raggiungere l'ultimo elemento di una lista data.
+In caso positivo restituire la lista degli indici di partenza, altrimenti restituire 'nil'.
+
+Funzione che verifica la condizione per l'indice dato:
+
+(define (almeno idx lst)
+  (local (len found loop visitati num new-idx)
+  ; numero elementi della lista
+  (setq len (length lst))
+  ; raggiunto ultimo elemento?
+  (setq found nil)
+  ; trovato loop?
+  (setq loop nil)
+  ; lista degli indici visitati
+  (setq visitati '())
+  ; inseriamo l'indice di partenza nella lista dei visitati
+  (push idx visitati)
+  ; numero di partenza
+  (setq num (lst idx))
+  ;(println "start: " idx { } num)
+  ; ciclo finche non raggiungiamo l'ultimo elemento o entriamo in un loop
+  (until (or found loop)
+    ; indice corrente
+    (setq new-idx (+ idx num))
+    ; controllo indice maggiore del numero di elementi
+    (if (>= new-idx len) (-- new-idx len))
+    ; controllo indice minore di 0
+    (if (< new-idx 0) (++ new-idx len))
+    ; controllo raggiungimento obiettivo (ultimo elemento?)
+    (if (= new-idx (- len 1)) (setq found true))
+    ; verifica se siamo entrati in un loop
+    ; cioè troviamo l'indice corrente nella lista dei visitati
+    (if (find new-idx visitati) 
+        (setq loop true)
+        ;else
+        (push new-idx visitati))
+    ; indice di partenza per il prossimo spostamento
+    (setq idx new-idx)
+    ; numero di partenza per il prossimo spostamento
+    (setq num (lst new-idx))
+    ;(print ": " idx { } num) (read-line)
+  )
+  found))
+
+Funzione che verifica la condizione per la lista data:
+
+(define (reach? lst)
+  (let ( (out '()) (len (length lst)) )
+    (for (i 0 (- len 2)) ; (no ultimo elemento)
+      ; raggiungiamo l'ultimo elemento dall'indice corrente?
+      (if (almeno i lst) (push i out -1)))
+    out))
+
+Proviamo:
+
+(reach? '(1 2 3 4 5))
+;-> ()
+
+(reach? '(4 3 2 1 0))
+;-> (0 1 2 3)
+
+
+---------------------
+Separazione di numeri
+---------------------
+
+Data una stringa contenente una sequenza di interi positivi consecutivi in ordine crescente (senza separatori) restituire una lista degli interi separati.
+Esempio:
+  stringa = "7891011"
+  output = (7 8 9 10 1)
+La lista di output deve sempre contenere almeno due elementi.
+
+(define (numeri str)
+  (local (len found out step cur-idx prev-num num ok pow10 next-len)
+    ; lunghezza della stringa di input
+    (setq len (length str))
+    ; flag che indica se è stata trovata una sequenza valida
+    (setq found nil)
+    ; proviamo tutte le possibili lunghezze iniziali, da 1 fino a metà della stringa
+    ; (non ha senso iniziare con una lunghezza maggiore, non ci sarebbero almeno 2 numeri)
+    (for (cifre 1 (/ len 2) 1 found)
+      ; inizializziamo la lista dei numeri trovati
+      (setq out '())
+      ; la lunghezza iniziale dei numeri da considerare
+      (setq step cifre)
+      ; partiamo dall'inizio della stringa
+      (setq cur-idx 0)
+      ; estraiamo il primo numero dalla stringa usando `step` cifre
+      (setq prev-num (int (slice str 0 step) 0 10))
+      ; aggiungiamo il primo numero alla lista
+      (push prev-num out -1)
+      ; aggiorniamo l'indice corrente
+      (setq cur-idx step)
+      ; impostiamo la variabile di controllo su true
+      (setq ok true)
+      ; ciclo principale: continuiamo a leggere numeri finché la condizione è valida
+      (while (and ok (< cur-idx len))
+        ; calcoliamo la potenza successiva di 10 per vedere se dobbiamo aumentare le cifre
+        (setq pow10 (pow 10 step))
+        ; se abbiamo raggiunto un numero come 9, 99, 999... aumentiamo `step`
+        ; (esempio: dopo 99 vogliamo leggere 3 cifre, cioè 100)
+        (if (= prev-num (- pow10 1)) (++ step))
+        ; se non c'è abbastanza spazio per un altro numero, usciamo dal ciclo
+        (if (> (+ cur-idx step) len)
+            (setq ok nil)
+            (begin
+              ; altrimenti leggiamo il prossimo numero di lunghezza `step`
+              (setq num (int (slice str cur-idx step) 0 10))
+              ; se il numero è consecutivo rispetto al precedente, lo aggiungiamo
+              (if (= num (+ prev-num 1))
+                  (begin
+                    (push num out -1)
+                    (setq prev-num num)
+                    (++ cur-idx step))
+                  ; altrimenti la sequenza è invalida
+                  (setq ok nil)))))
+      ; alla fine, verifichiamo se la concatenazione dei numeri ottenuti
+      ; ha lunghezza esattamente uguale a quella della stringa iniziale
+      ; questo evita che vengano ignorati caratteri alla fine
+      (setq next-len (length (join (map string out))))
+      ; se tutto è andato bene e la lunghezza combacia, abbiamo trovato la soluzione
+      (when (and ok (= next-len len))
+        (setq found true)))
+  ; restituiamo la lista trovata, oppure lista vuota se nessuna soluzione valida
+  (if found out '())))
+
+Proviamo:
+
+(numeri "1234")
+;-> (1 2 3 4)
+(numeri "7891011")
+;-> (7 8 9 10 11)
+(numeri "6667")
+;-> (66 67)
+(numeri "293031323334")
+;-> (29 30 31 32 33 34)
+(numeri "9991000")
+;-> (999 1000)
+(numeri "910911")
+;-> (910 911)
+(numeri "9899100")
+;-> (98 99 100)
+(numeri "9899100102")
+;-> ()
+
+La funzione 'numeri' cerca una sequenza in una stringa qualunque.
+Se sappiamo con certezza che ogni stringa in input rappresenta una sequenza consecutiva di interi positivi (senza separatori), possiamo semplificare notevolmente la funzione.
+Infatti basta individuare il primo numero giusto: da lì si ricostruisce l'intera sequenza.
+
+Algoritmo
+1. Provare tutte le possibili lunghezze iniziali (da 1 a length/2).
+2. Da ciascun possibile primo numero:
+   - Generare i numeri successivi.
+   - Concatenarli in una stringa.
+   - Fermarsi appena la stringa generata ha la stessa lunghezza dell'input.
+3. Se la stringa generata coincide con quella originale, si è trovata la sequenza corretta.
+4. Restituire la lista di interi generati.
+
+In questa versione non abbiamo bisogno di fare slicing o controllare se i numeri coincidono passo per passo:
+basta generare la sequenza a partire da un primo numero e confrontare le stringhe.
+
+(define (numbers str)
+  (local (len found out cifre primo num lista ricostruita)
+    ; Calcoliamo la lunghezza della stringa di input
+    (setq len (length str))
+    ; Inizializziamo un flag per sapere se abbiamo trovato la sequenza giusta
+    (setq found nil)
+    ; Proviamo tutte le possibili lunghezze per il primo numero,
+    ; da 1 fino a metà della lunghezza della stringa (almeno 2 numeri)
+    (for (cifre 1 (/ len 2) 1 found)
+      ; Prendiamo il primo numero dalla stringa, usando `cifre` caratteri
+      (setq primo (int (slice str 0 cifre) 0 10))
+      ; Costruiamo una lista a partire dal primo numero
+      ; e continuiamo ad aggiungere +1 finché la lunghezza totale
+      ; della stringa risultante (ricostruita) non eguaglia quella originale
+      (setq lista (list primo))
+      (setq ricostruita (string primo))
+      ; Generiamo i numeri successivi finché la stringa ricostruita è troppo corta
+      (while (< (length ricostruita) len)
+        (setq num (+ (last lista) 1))       ; numero successivo
+        (push num lista -1)                 ; aggiungilo in coda alla lista
+        (setq ricostruita (append ricostruita (string num))) ; aggiorna la stringa)
+      ; Quando la stringa ricostruita ha la stessa lunghezza della stringa iniziale
+      ; confrontiamole: se coincidono, abbiamo trovato la sequenza giusta
+      (when (= ricostruita str)
+        (setq found true)
+        (setq out lista))))
+  ; Ritorna la lista trovata (o lista vuota, ma non accade in questo scenario)
+  (if found out '())))
+
+Proviamo:
+
+(numbers "1234")
+;-> (1 2 3 4)
+(numbers "7891011")
+;-> (7 8 9 10 11)
+(numbers "6667")
+;-> (66 67)
+(numbers "293031323334")
+;-> (29 30 31 32 33 34)
+(numbers "9991000")
+;-> (999 1000)
+(numbers "910911")
+;-> (910 911)
+(numbers "9899100")
+;-> (98 99 100)
+(numbers "9899100102")
+;-> ()
+
+
+----------------------
+Due sequenze collegate
+----------------------
+
+Sequenza OEIS A006561:
+Number of intersections of diagonals in the interior of a regular n-gon.
+  0, 0, 0, 1, 5, 13, 35, 49, 126, 161, 330, 301, 715, 757, 1365, 1377,
+  2380, 1837, 3876, 3841, 5985, 5941, 8855, 7297, 12650, 12481, 17550,
+  17249, 23751, 16801, 31465, 30913, 40920, 40257, 52360, 46981, 66045,
+  64981, 82251, 80881, 101270, 84841, 123410, 121441, ...
+
+Formula:
+  Let delta(m,n) = 1 if m divides n, otherwise 0.
+  For n < 3, a(n) = 0
+  For n >= 3, a(n) = binomial(n,4)
+  + (-5*n^3 + 45*n^2 - 70*n + 24)*delta(2,n)/24
+  - (3*n/2)*delta(4,n) + (-45*n^2 + 262*n)*delta(6,n)/6 + 42*n*delta(12,n)
+  + 60*n*delta(18,n) + 35*n*delta(24,n) - 38*n*delta(30,n)
+  - 82*n*delta(42,n) - 330*n*delta(60,n) - 144*n*delta(84,n)
+  - 96*n*delta(90,n) - 144*n*delta(120,n) - 96*n*delta(210,n)
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num)
+            )
+          r))))
+
+(define (delta m n) (if (zero? (% n m)) 1 0))
+
+(define (seq1 n)
+  (if (< n 3) 0
+      ;else
+      (add (binom n 4)
+      (div (mul (add (mul -5 (mul n n n)) (mul 45 n n) (mul -70 n) 24)
+                (delta 2 n))
+           24)
+      (sub (mul (div (mul 3 n) 2) (delta 4 n)))
+      (div (mul (add (mul -45 n n) (mul 262 n)) (delta 6 n)) 6)
+      (mul 42 n (delta 12 n))
+      (mul 60 n (delta 18 n))
+      (mul 35 n (delta 24 n))
+      (sub (mul 38 n (delta 30 n)))
+      (sub (mul 82 n (delta 42 n)))
+      (sub (mul 330 n (delta 60 n)))
+      (sub (mul 144 n (delta 84 n)))
+      (sub (mul 96 n (delta 90 n)))
+      (sub (mul 144 n (delta 120 n)))
+      (sub (mul 96 n (delta 210 n))))))
+
+(map seq1 (sequence 1 44))
+;-> (0 0 0 1 5 13 35 49 126 161 330 301 715 757 1365 1377
+;->  2380 1837 3876 3841 5985 5941 8855 7297 12650 12481 17550
+;->  17249 23751 16801 31465 30913 40920 40257 52360 46981 66045
+;->  64981 82251 80881 101270 84841 123410 121441)
+
+Sequenza OEIS A007569:
+Number of nodes in regular n-gon with all diagonals drawn.
+  1, 2, 3, 5, 10, 19, 42, 57, 135, 171, 341, 313, 728, 771, 1380, 1393,
+  2397, 1855, 3895, 3861, 6006, 5963, 8878, 7321, 12675, 12507, 17577,
+  17277, 23780, 16831, 31496, 30945, 40953, 40291, 52395, 47017, 66082,
+  65019, 82290, 80921, 101311, 84883, 123453, 121485, ...
+
+Risulta che:
+
+  a(n) = A006561(n) + n  (quindi a(n) = A007569(n) - n)
+
+(define (seq2 n) (+ (seq1 n) n))
+
+(map seq2 (sequence 1 44))
+;-> (1 2 3 5 10 19 42 57 135 171 341 313 728 771 1380 1393
+;->  2397 1855 3895 3861 6006 5963 8878 7321 12675 12507 17577
+;->  17277 23780 16831 31496 30945 40953 40291 52395 47017 66082
+;->  65019 82290 80921 101311 84883 123453 121485)
+
 ============================================================================
 
 

@@ -3022,6 +3022,9 @@ NOTE LIBERE 30
   Convoluzione lineare discreta di due liste
   Convoluzione e cross-correlazione di una matrice
   Mappatura biunivoca tra interi e un numero variabile di bit
+  Liste raggiungibili
+  Separazione di numeri
+  Due sequenze collegate
 
 PROBLEMI SUI DADI
 =================

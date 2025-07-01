@@ -2888,7 +2888,6 @@ RINGRAZIAMENTI
 --------------
 
 Ai visitatori di linux.org.ru alcuni dei loro commenti sono stati molto interessanti.
-
 Alex dal forum di newLISP per i commenti sullo stile.
 
 
