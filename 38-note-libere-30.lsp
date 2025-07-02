@@ -8645,6 +8645,551 @@ Risulta che:
 ;->  17277 23780 16831 31496 30945 40953 40291 52395 47017 66082
 ;->  65019 82290 80921 101311 84883 123453 121485)
 
+
+---------------------------------
+Tipi di elezioni e metodi di voto
+---------------------------------
+
+Esistono numerosi **metodi di voto** e tipi  di elezioni, ciascuno con caratteristiche proprie.
+Ecco una classificazione dei principali, suddivisi per tipo di elezione (uninominale, plurinominale, proporzionale, ecc.):
+
+A) Uninominale (un solo vincitore)
+-------------------------------
+1. Uninominale secco (first-past-the-post)
+Vince il candidato con più voti, anche senza maggioranza assoluta.
+
+2. Ballottaggio (two-round system)
+Se nessuno supera il 50%, si tiene un secondo turno tra i primi due.
+
+3. Voto alternativo (Instant-runoff voting)
+L'elettore ordina i candidati per preferenza.
+Si eliminano i meno votati e si riallocano i voti finché uno supera il 50%.
+
+4. Condorcet
+Vince chi batterebbe ogni altro candidato in uno scontro diretto.
+
+5. Borda
+Si assegnano punteggi in base al rango dato a ciascun candidato.
+
+6. Approval voting
+Ogni elettore può "approvare" uno o più candidati
+Vince chi ha più approvazioni.
+
+7. Range voting (voto a punteggio)
+Ogni elettore assegna un punteggio a ciascun candidato (es. da 0 a 5)
+Vince chi totalizza più punti.
+
+8. Uninominale pesato
+Ogni voto ha un peso diverso. (es. peso per classe sociale, geografia, ecc.).
+Poco usato oggi per questioni di equità.
+
+B) Plurinominale (più candidati eletti)
+---------------------------------------
+1. Scrutinio di lista proporzionale
+I seggi sono assegnati in proporzione ai voti ricevuti da ciascuna lista.
+
+2. Sistema D'Hondt
+Metodo proporzionale che favorisce i partiti più grandi.
+
+3. Metodo Sainte-Lague
+Variante più equa del D'Hondt, leggermente più favorevole ai piccoli partiti.
+
+4. Metodo Hare-Niemeyer (quota di Hare)
+Divide i seggi in base a quozienti e resti (più proporzionale).
+
+5. Sistema di voto singolo trasferibile (STV)
+Gli elettori ordinano i candidati per preferenza.
+I voti in eccesso o eliminati vengono redistribuiti.
+
+6. Cumulative voting
+Gli elettori hanno più voti da distribuire come preferiscono anche tutti su uno stesso candidato.
+
+C) Sistemi misti
+----------------
+1. Mattarellum (Italia 1993-2005)
+Parte uninominale maggioritaria e parte proporzionale.
+
+2. Rosatellum (Italia dal 2017)
+Misto con soglie di sbarramento e quote maggioritarie e proporzionali.
+
+3. Sistema tedesco (MMP – Mixed Member Proportional)
+Uninominale e proporzionale collegati.
+La parte proporzionale "corregge" la distorsione dell'uninominale.
+
+D) Sistemi deliberativi / alternativi
+-------------------------------------
+1. Sorteggio (Demarchia)
+Selezione casuale dei rappresentanti (es. giurie popolari).
+
+2. Quadratic Voting
+Gli elettori hanno un numero fisso di crediti da spendere su opzioni diverse con costo quadratico.
+
+3. Voto per consenso (consensus voting)
+Mira al consenso unanime o quasi; usato in piccoli gruppi o assemblee deliberative.
+
+ANalizziamo il tipo di elezione "UNINOMINALE" e i relativi metodi di voto.
+
+1) Metodo uninominale secco (first-past-the-post)
+-------------------------------------------------
+- Ogni elettore vota una sola preferenza (il candidato preferito).
+- Vince il candidato che ottiene più voti.
+- In caso di parità, si sceglie casualmente tra i più votati.
+
+(define (uninominale-secco num-elettori candidati)
+  (local (preferenze conteggio vincitori max-voti stop)
+    (setq vincitori '())
+    ; genera voti casuali
+    (setq preferenze (map (fn (_) (candidati (rand (length candidati))))
+                          (sequence 1 num-elettori)))
+    ; conteggia i voti e li ordina in modo decrescente (voto candidato)
+    (setq conteggio (sort (map list (count candidati preferenze) candidati) >))
+    ; massimo numero di voti ottenuti
+    (setq max-voti (conteggio 0 0))
+    ; trova tutti i candidati con il massimo numero di voti
+    (setq stop nil)
+    (dolist (el conteggio stop)
+      (if (= (el 0 0) max-voti)
+          (push el vincitori -1)
+          (setq stop true)))
+    ; stampa risultati
+    (println "Preferenze: " preferenze)
+    (println "Conteggio: " conteggio)
+    (println "Vincitori possibili: " vincitori)
+    ; restituisce un vincitore casuale tra i vincitori possibili
+    (println "Vincitore: " ((randomize vincitori) 0)) '>))
+
+(uninominale-secco 15 '("A" "B" "C"))
+;-> ("A" "A" "A" "B" "C" "C" "C" "C" "B" "B" "C" "A" "B" "B" "B")
+;-> ((6 "B") (5 "C") (4 "A"))
+;-> Preferenze: ("A" "A" "A" "B" "C" "C" "C" "C" "B" "B" "C" "A" "B" "B" "B")
+;-> Conteggio: ((6 "B") (5 "C") (4 "A"))
+;-> Vincitori possibili: ((6 "B"))
+;-> Vincitore: ((6 "B"))
+
+2) Metodo del ballottaggio (two-round system)
+---------------------------------------------
+- Gli elettori votano il loro candidato preferito.
+- Se un candidato ha maggioranza assoluta (>50%) viene eletto.
+- Altrimenti si tiene un secondo turno tra i due candidati più votati, e si vota di nuovo tra loro.
+
+(define (ballottaggio num-elettori candidati)
+  (local (preferenze conteggio max-voti vincitore top2 second-turn voti2)
+    ; Primo turno: voti casuali
+    (setq preferenze (map (fn (_) (candidati (rand (length candidati)))) (sequence 1 num-elettori)))
+    (setq conteggio (sort (map list (count candidati preferenze) candidati) >))
+    (setq max-voti (conteggio 0 0))
+    ; stampa risultati primo turno
+    (println "Primo turno:")
+    (println "Preferenze: " preferenze)
+    (println "Conteggio: " conteggio)
+    ; se qualcuno ha > 50%, vince
+    (if (> max-voti (/ num-elettori 2))
+        (begin
+          (setq vincitore (conteggio 0))
+          (println "Vincitore al primo turno: " vincitore))
+        ; altrimenti secondo turno tra i due più votati
+        (begin
+          (setq top2 (map (fn (x) (x 1)) (slice conteggio 0 2)))
+          ; voti casuali tra i due finalisti
+          (setq voti2 (map (fn (_) (top2 (rand 2))) (sequence 1 num-elettori)))
+          (setq second-turn (sort (map list (count top2 voti2) top2) >))
+          ; stampa risultati secondo turno
+          (println "Secondo turno tra: " top2)
+          (println "Preferenze: " voti2)
+          (println "Conteggio: " second-turn)
+          ; vincitore del secondo turno
+          (setq vincitore (second-turn 0))
+          (println "Vincitore al secondo turno: " vincitore))) '>))
+
+(ballottaggio 15 '("A" "B" "C" "D"))
+;-> Primo turno:
+;-> Preferenze: ("A" "A" "B" "D" "A" "B" "B" "A" "B" "C" "C" "D" "B" "B" "D")
+;-> Conteggio: ((6 "B") (4 "A") (3 "D") (2 "C"))
+;-> Secondo turno tra: ("B" "A")
+;-> Preferenze: ("A" "A" "A" "B" "A" "A" "B" "B" "B" "B" "A" "B" "B" "B" "B")
+;-> Conteggio: ((9 "B") (6 "A"))
+;-> Vincitore al secondo turno: (9 "B")
+
+3) Metodo del voto alternativo (IRV – Instant Runoff Voting)
+------------------------------------------------------------
+- Ogni elettore esprime una classifica dei candidati (una lista ordinata).
+- Si esamina la prima preferenza di ciascun elettore.
+- Se un candidato ha > 50% dei voti, allora vince.
+- Altrimenti si elimina il candidato meno votato e si riallocano i voti alla prossima preferenza utile.
+- Si ripete finché uno vince.
+
+(define (voto-alternativo num-elettori candidati)
+  (local (preferenze eletti conteggio primo max-voti da-eliminare stop)
+    (setq eletti candidati)
+    ; genera ranking casuale per ogni elettore
+    (setq preferenze (map (fn (_) (randomize (copy candidati))) (sequence 1 num-elettori)))
+    (println "Preferenze iniziali:")
+    (dolist (p preferenze) (println p))
+    (setq stop nil)
+    (until stop
+      ; conta solo le prime preferenze tra i candidati ancora in gara
+      (setq primo (map (fn (p) (first (filter (fn (c) (ref c eletti)) p))) preferenze))
+      (setq conteggio (sort (map list (count eletti primo) eletti) >))
+      (setq max-voti (conteggio 0 0))
+      (println "Conteggio: " conteggio)
+      ; se qualcuno ha > 50%, vince
+      (if (> max-voti (/ num-elettori 2))
+          (begin
+            (println "Vincitore: " (conteggio 0))
+            ; interrompe il ciclo
+            (setq stop true))
+          ; altrimenti elimina il candidato meno votato
+          (begin
+            (setq da-eliminare (last conteggio))
+            (println "Eliminato: " da-eliminare)
+            (if eletti (pop eletti (find (da-eliminare 1) eletti)))))) '>))
+
+(voto-alternativo 15 '("A" "B" "C" "D"))
+;-> Preferenze iniziali:
+;-> ("C" "D" "B" "A")
+;-> ("D" "A" "C" "B")
+;-> ("B" "A" "C" "D")
+;-> ("D" "A" "B" "C")
+;-> ("A" "C" "D" "B")
+;-> ("C" "D" "A" "B")
+;-> ("C" "A" "D" "B")
+;-> ("D" "A" "C" "B")
+;-> ("D" "C" "B" "A")
+;-> ("A" "C" "B" "D")
+;-> ("D" "C" "B" "A")
+;-> ("D" "A" "C" "B")
+;-> ("A" "D" "C" "B")
+;-> ("C" "D" "B" "A")
+;-> ("B" "C" "D" "A")
+;-> Conteggio: ((6 "D") (4 "C") (3 "A") (2 "B"))
+;-> Eliminato: (2 "B")
+;-> ("A" "B" "C" "D")
+;-> Conteggio: ((6 "D") (5 "C") (4 "A"))
+;-> Eliminato: (4 "A")
+;-> ("A" "C" "D")
+;-> Conteggio: ((8 "C") (7 "D"))
+;-> Vincitore: (8 "C")
+
+4) Metodo Condorcet
+-------------------
+- Ogni elettore fornisce una classifica ordinata dei candidati (ranking).
+- Si confrontano tutte le coppie di candidati tra loro.
+- Un candidato vince una sfida a due se è preferito da più della metà degli elettori rispetto all’altro.
+- Il vincitore di Condorcet è colui che batte ogni altro candidato in uno scontro diretto.
+
+Nota:️ Se esiste un vincitore, allora è unico.
+Ma può non esistere (ciclo Condorcet: A batte B, B batte C, C batte A).
+
+(define (condorcet num-elettori candidati)
+  (local (preferenze matrice vincitore n)
+    (setq n (length candidati))
+    (setq matrice (array n n '(0)))
+    ; preferenze casuali
+    (setq preferenze (map (fn (_) (randomize (copy candidati))) (sequence 1 num-elettori)))
+    (println "Preferenze:")
+    (dolist (p preferenze) (println p))
+    ; confronti a due
+    (for (i 0 (- n 1))
+      (for (j 0 (- n 1))
+        (unless (= i j)
+          (setq ci (candidati i))
+          (setq cj (candidati j))
+          (setq conta 0)
+          (dolist (p preferenze)
+            (if (< (find ci p) (find cj p)) (inc conta)))
+          (if (> conta (/ num-elettori 2))
+              (setf (matrice i j) 1)))))
+    ; stampa matrice
+    (println "Matrice confronti (1 = vince confronto):")
+    (dolist (r matrice) (println r))
+    ; verifica se qualcuno batte tutti gli altri
+    (setq stop nil)
+    (for (i 0 (- n 1) 1 stop)
+      (when (= (apply + (matrice i)) (- n 1))
+        (setq vincitore (candidati i))
+        (println "Vincitore: " vincitore)
+        (setq stop true))) ; stop immediato
+    (unless vincitore (println "Nessun vincitore (ciclo)")) '>))
+
+(condorcet 15 '("A" "B" "C" "D"))
+;-> Preferenze:
+;-> ("C" "B" "A" "D")
+;-> ...
+;-> ("B" "D" "A" "C")
+;-> Matrice confronti (1 = vince confronto):
+;-> (0 0 0 0)
+;-> (1 0 1 1)
+;-> (1 0 0 0)
+;-> (1 0 1 0)
+;-> Vincitore Condorcet: B
+
+(condorcet 15 '("A" "B" "C" "D"))
+;-> Preferenze:
+;-> ("D" "A" "B" "C")
+;-> ("C" "D" "A" "B")
+;-> ("D" "B" "A" "C")
+;-> ("C" "B" "D" "A")
+;-> ("B" "A" "C" "D")
+;-> ("A" "C" "D" "B")
+;-> ("D" "A" "B" "C")
+;-> ("C" "B" "D" "A")
+;-> ("D" "A" "C" "B")
+;-> ("B" "A" "C" "D")
+;-> ("A" "C" "D" "B")
+;-> ("B" "A" "C" "D")
+;-> ("A" "D" "C" "B")
+;-> ("A" "C" "B" "D")
+;-> ("D" "B" "A" "C")
+;-> Matrice confronti (1 = vince confronto):
+;-> (0 1 1 0)
+;-> (0 0 0 0)
+;-> (0 1 0 1)
+;-> (1 1 0 0)
+;-> Nessun vincitore Condorcet (ciclo)
+
+Nota:
+La riga del vincitore Condorcet ha tutti 1 (vittorie) e un solo 0.
+Questo è esattamente il criterio per identificarlo: batte tutti gli altri uno‑a‑uno.
+Se invece non esiste un vincitore Condorcet, allora nessuna riga avrà tutti 1 e un solo 0.
+Si verifica la Condorcet paradox o ciclo, come A > B, B > C, C > A.
+In quei casi, esistono metodi avanzati (Schulze, Ranked Pairs, Copeland) che cercano di risolvere il ciclo in modi diversi.
+Condorcet è ideale quando si ha bisogno di un vincitore che sia più forte testa a testa rispetto a tutti gli altri.
+
+5) Metodo Borda
+---------------
+- Ogni elettore fornisce una classifica dei candidati.
+- Ad ogni posizione viene assegnato un punteggio:
+- Se ci sono n candidati, il primo in classifica ottiene n–1 punti, il secondo n–2, ..., l’ultimo 0.
+- Si sommano i punti di ogni candidato su tutti i voti.
+- Vince chi ha il punteggio totale più alto.
+
+(define (borda num-elettori candidati)
+  (local (preferenze punteggi n conteggio max-punti vincitori stop)
+    (setq n (length candidati))
+    (setq conteggio (array n '(0)))
+    (setq vincitori '())
+    ; preferenze casuali
+    (setq preferenze (map (fn (_) (randomize (copy candidati))) (sequence 1 num-elettori)))
+    (println "Preferenze:")
+    (dolist (p preferenze) (println p))
+    ; assegnazione punteggi
+    (dolist (p preferenze)
+      (for (i 0 (- n 1))
+        (++ (conteggio (find (p i) candidati)) (- n 1 i))))
+    ; coppie (punteggio candidato), ordinate
+    (setq punteggi (sort (map list conteggio candidati) >))
+    (setq max-punti (punteggi 0 0))
+    ; trova tutti i candidati con punteggio massimo
+    (setq stop nil)
+    (dolist (x punteggi stop)
+      (if (= (x 0) max-punti)
+          (push x vincitori -1)
+          (setq stop true)))
+    ; stampa risultati
+    (println "Punteggi: " punteggi)
+    (println "Vincitori possibili: " vincitori)
+    ; restituisce un vincitore casuale tra i vincitori possibili
+    (println "Vincitore: " ((randomize vincitori) 0)) '>))
+
+(borda 15 '("A" "B" "C" "D"))
+;-> Preferenze:
+;-> ("C" "A" "B" "D")
+;-> ("B" "C" "A" "D")
+;-> ("D" "B" "C" "A")
+;-> ("D" "C" "B" "A")
+;-> ("A" "D" "B" "C")
+;-> ("B" "D" "C" "A")
+;-> ("A" "B" "D" "C")
+;-> ("A" "B" "D" "C")
+;-> ("B" "C" "D" "A")
+;-> ("A" "C" "B" "D")
+;-> ("C" "A" "B" "D")
+;-> ("A" "C" "B" "D")
+;-> ("B" "C" "D" "A")
+;-> ("C" "A" "B" "D")
+;-> ("A" "D" "C" "B")
+;-> Punteggi: ((25 "B") (25 "A") (24 "C") (16 "D"))
+;-> Vincitori possibili: ((25 "B") (25 "A"))
+;-> Vincitore: (25 "A")
+
+Nota:
+Il metodo Borda può avere più vincitori in caso di punteggio uguale e non specifica un meccanismo di spareggio.
+Possibili soluzioni:
+- Sorteggio (aleatorio).
+- Spareggio Condorcet tra i pari merito.
+- Nuovo turno di voto solo tra i pari merito.
+- Regole extra (es. chi ha più primi posti).
+
+...
+
+6) Approval voting
+------------------
+- Ogni elettore approva o non approva ciascun candidato.
+- Non c’è classifica né voto unico: si può votare più candidati.
+- Vince il candidato con più approvazioni totali.
+
+È un sistema molto usato in ambiti scientifici o accademici, perché è semplice, evita il "male minore unico" e premia i candidati più accettabili da molti (non solo i più amati da pochi).
+
+(define (approval num-elettori candidati)
+  (local (approvazioni conteggio max-voti vincitori stop)
+    ; approvazioni simulate: ogni elettore approva un sottoinsieme casuale
+    (setq approvazioni
+          (map (fn (_) (filter (fn (_) (= (rand 2) 1)) candidati))
+               (sequence 1 num-elettori)))
+    ; conteggio per ogni candidato
+    (setq conteggio (sort (map list (count candidati (flat approvazioni)) candidati) >))
+    (setq max-voti (conteggio 0 0))
+    (setq vincitori '())
+    ; vincitori con massimo numero di approvazioni
+    (setq stop nil)
+    (dolist (el conteggio stop)
+      (if (= (el 0) max-voti)
+          (push el vincitori -1)
+          (setq stop true)))
+    ; stampa risultati
+    (println "Approvazioni:")
+    (dolist (a approvazioni) (println a))
+    (println "Conteggio: " conteggio)
+    (println "Vincitori possibili: " vincitori)
+    (println "Vincitore selezionato: " ((randomize vincitori) 0)) '>))
+
+(approval 15 '("A" "B" "C" "D"))
+;-> Approvazioni:
+;-> ("C")
+;-> ("B" "C" "D")
+;-> ("A" "D")
+;-> ("C" "D")
+;-> ("B" "D")
+;-> ("A" "B")
+;-> ("C" "D")
+;-> ("A" "B")
+;-> ("A" "D")
+;-> ("A" "C")
+;-> ("A" "B")
+;-> ("B" "C")
+;-> ("A" "B" "C")
+;-> ("B")
+;-> ("A" "B")
+;-> Conteggio: ((9 "B") (8 "A") (7 "C") (6 "D"))
+;-> Vincitori possibili: ((9 "B"))
+;-> Vincitore selezionato: (9 "B")
+
+7) Range voting (voto a punteggio)
+----------------------------------
+- Ogni elettore assegna un punteggio numerico a ciascun candidato, ad esempio da 0 a 5.
+- I punteggi per ogni candidato sono sommati.
+- Vince il candidato con il punteggio totale più alto.
+
+A differenza dell’approval voting (sì/no), il range voting permette sfumature di gradimento.
+
+(define (range-voting num-elettori candidati max-punteggio)
+  (local (punteggi voti conteggio max-vincitori stop)
+    ; genera punteggi casuali da 0 a max-punteggio per ogni candidato
+    (setq voti
+      (map (fn (_) (map (fn (_) (rand (+ 1 max-punteggio))) candidati))
+           (sequence 1 num-elettori)))
+    ; stampa le votazioni
+    (println "Voti (ogni riga = 1 elettore):")
+    (dolist (v voti) (println v))
+    ; somma dei punteggi per ogni candidato
+    (setq conteggio (map (fn (idx) (apply + (map (fn (v) (v idx)) voti)))
+                         (sequence 0 (- (length candidati) 1))))
+    (setq punteggi (sort (map list conteggio candidati) >))
+    (setq max-vincitori '())
+    (setq stop nil)
+    (setq max-val (punteggi 0 0))
+    ; trova vincitori con punteggio massimo
+    (dolist (p punteggi stop)
+      (if (= (p 0) max-val)
+          (push p max-vincitori -1)
+          (setq stop true)))
+    ; stampa risultati
+    (println "Punteggi totali: " punteggi)
+    (println "Vincitori possibili: " max-vincitori)
+    (println "Vincitore selezionato: " ((randomize max-vincitori) 0)) '>))
+
+(range-voting 15 '("A" "B" "C" "D") 5)
+;-> Voti (ogni riga = 1 elettore):
+;-> (3 4 4 4)
+;-> (2 0 2 5)
+;-> (0 3 3 2)
+;-> (0 5 5 3)
+;-> (2 2 2 5)
+;-> (1 2 1 5)
+;-> (1 4 3 1)
+;-> (4 5 2 3)
+;-> (5 0 5 3)
+;-> (0 3 1 5)
+;-> (3 3 1 5)
+;-> (0 0 4 1)
+;-> (5 1 2 0)
+;-> (4 5 4 3)
+;-> (4 1 0 0)
+;-> Punteggi totali: ((45 "D") (39 "C") (38 "B") (34 "A"))
+;-> Vincitori possibili: ((45 "D"))
+;-> Vincitore selezionato: (45 "D")
+
+8) Uninominale pesato
+---------------------
+- Ogni elettore vota un solo candidato (come nel metodo secco).
+- Ma ogni elettore ha associato un peso intero positivo, che rappresenta la sua "forza di voto".
+- Il voto vale quanto il peso: un voto con peso 3 vale triplo rispetto a uno con peso 1.
+- Vince chi riceve il maggior peso totale.
+
+(define (uninominale-pesato num-elettori candidati)
+  (local (preferenze pesi conteggio max-voto vincitori stop)
+    ; voti casuali: un solo candidato per elettore
+    (setq preferenze (map (fn (_) (candidati (rand (length candidati)))) (sequence 1 num-elettori)))
+    ; pesi casuali tra 1 e 5 (modificabile)
+    (setq pesi (map (fn (_) (+ 1 (rand 5))) (sequence 1 num-elettori)))
+    ; stampa voti e pesi
+    (println "Preferenze (con pesi):")
+    (for (i 0 (- num-elettori 1))
+      (println "[" i "]: " (preferenze i) " (peso " (pesi i) ")"))
+    ; calcolo pesi totali per ogni candidato
+    (setq conteggio
+      (sort
+        (map (fn (c)
+               (list (apply +
+                       (map (fn (i) (if (= (preferenze i) c) (pesi i) 0))
+                            (sequence 0 (- num-elettori 1))))
+                     c))
+             candidati)
+        >))
+    ; trova il massimo peso ottenuto
+    (setq max-voto (conteggio 0 0))
+    (setq vincitori '())
+    (setq stop nil)
+    (dolist (c conteggio stop)
+      (if (= (c 0) max-voto)
+          (push c vincitori -1)
+          (setq stop true)))
+    ; stampa risultati
+    (println "Conteggio pesato: " conteggio)
+    (println "Vincitori possibili: " vincitori)
+    (println "Vincitore selezionato: " ((randomize vincitori) 0)) '>))
+
+(uninominale-pesato 15 '("A" "B" "C" "D"))
+;-> Preferenze (con pesi):
+;-> [0]: A (peso 4)
+;-> [1]: D (peso 2)
+;-> [2]: D (peso 3)
+;-> [3]: A (peso 2)
+;-> [4]: A (peso 3)
+;-> [5]: C (peso 3)
+;-> [6]: A (peso 4)
+;-> [7]: A (peso 1)
+;-> [8]: B (peso 3)
+;-> [9]: D (peso 5)
+;-> [10]: C (peso 4)
+;-> [11]: C (peso 5)
+;-> [12]: A (peso 1)
+;-> [13]: B (peso 2)
+;-> [14]: A (peso 1)
+;-> Conteggio pesato: ((16 "A") (12 "C") (10 "D") (5 "B"))
+;-> Vincitori possibili: ((16 "A"))
+;-> Vincitore selezionato: (16 "A")
+
 ============================================================================
 
 

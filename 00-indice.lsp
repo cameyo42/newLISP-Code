@@ -3025,6 +3025,7 @@ NOTE LIBERE 30
   Liste raggiungibili
   Separazione di numeri
   Due sequenze collegate
+  Tipi di elezioni e metodi di voto
 
 PROBLEMI SUI DADI
 =================
