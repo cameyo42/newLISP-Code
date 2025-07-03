@@ -3026,6 +3026,8 @@ NOTE LIBERE 30
   Separazione di numeri
   Due sequenze collegate
   Tipi di elezioni e metodi di voto
+  Teorema di Arrow
+  Differenze di bit
 
 PROBLEMI SUI DADI
 =================

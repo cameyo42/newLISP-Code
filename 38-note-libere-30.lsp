@@ -1852,7 +1852,7 @@ Proprietà del BFS:
 
 Limitazioni:
 - Può richiedere molta memoria, perché deve tenere in coda tutte le celle da esplorare.
-- Non adatto se vuoi il cammino più lungo → serve DFS o tecniche diverse.
+- Non adatto se vuoi il cammino più lungo -> serve DFS o tecniche diverse.
 
 Immagina che da 'start' si diffonda un'onda.
 Appena l'onda tocca 'goal', hai trovato il cammino più breve.
@@ -3773,7 +3773,7 @@ Spiegazione
      - Calcola un nuovo g provvisorio per ogni vicino.
      - Se il nuovo g è migliore, aggiorna il vicino e aggiungilo a open_list.
 3. Terminazione:
-   - Se open_list è vuota e il goal non è raggiunto → nessun percorso.
+   - Se open_list è vuota e il goal non è raggiunto -> nessun percorso.
 
 Esempi di Euristiche
 --------------------
@@ -4769,9 +4769,9 @@ Cerca "A", da almeno 1 a 10 caratteri alfanumerici ([0-9A-Za-z]) e "B"
 (regex "A[0-9A-Za-z]{1,10}B" c)
 ;-> ("A1B" 0 3)
 Spiegazione:
-- "A" → inizio con A
-- "[0-9A-Za-z]{1,10}" → da 1 a 10 caratteri alfanumerici
-- "B" → termina con B
+- "A" -> inizio con A
+- "[0-9A-Za-z]{1,10}" -> da 1 a 10 caratteri alfanumerici
+- "B" -> termina con B
 
 (regex-all "A[0-9A-Za-z]{1,10}B" c)
 ;-> (("A1B" 0 3) ("A123B" 4 5) ("Aabcdef123B" 10 11)
@@ -8441,7 +8441,7 @@ La lista di output deve sempre contenere almeno due elementi.
       (setq step cifre)
       ; partiamo dall'inizio della stringa
       (setq cur-idx 0)
-      ; estraiamo il primo numero dalla stringa usando `step` cifre
+      ; estraiamo il primo numero dalla stringa usando 'step' cifre
       (setq prev-num (int (slice str 0 step) 0 10))
       ; aggiungiamo il primo numero alla lista
       (push prev-num out -1)
@@ -8453,14 +8453,14 @@ La lista di output deve sempre contenere almeno due elementi.
       (while (and ok (< cur-idx len))
         ; calcoliamo la potenza successiva di 10 per vedere se dobbiamo aumentare le cifre
         (setq pow10 (pow 10 step))
-        ; se abbiamo raggiunto un numero come 9, 99, 999... aumentiamo `step`
+        ; se abbiamo raggiunto un numero come 9, 99, 999... aumentiamo 'step'
         ; (esempio: dopo 99 vogliamo leggere 3 cifre, cioè 100)
         (if (= prev-num (- pow10 1)) (++ step))
         ; se non c'è abbastanza spazio per un altro numero, usciamo dal ciclo
         (if (> (+ cur-idx step) len)
             (setq ok nil)
             (begin
-              ; altrimenti leggiamo il prossimo numero di lunghezza `step`
+              ; altrimenti leggiamo il prossimo numero di lunghezza 'step'
               (setq num (int (slice str cur-idx step) 0 10))
               ; se il numero è consecutivo rispetto al precedente, lo aggiungiamo
               (if (= num (+ prev-num 1))
@@ -8524,7 +8524,7 @@ basta generare la sequenza a partire da un primo numero e confrontare le stringh
     ; Proviamo tutte le possibili lunghezze per il primo numero,
     ; da 1 fino a metà della lunghezza della stringa (almeno 2 numeri)
     (for (cifre 1 (/ len 2) 1 found)
-      ; Prendiamo il primo numero dalla stringa, usando `cifre` caratteri
+      ; Prendiamo il primo numero dalla stringa, usando 'cifre' caratteri
       (setq primo (int (slice str 0 cifre) 0 10))
       ; Costruiamo una lista a partire dal primo numero
       ; e continuiamo ad aggiungere +1 finché la lunghezza totale
@@ -8654,7 +8654,7 @@ Esistono numerosi **metodi di voto** e tipi  di elezioni, ciascuno con caratteri
 Ecco una classificazione dei principali, suddivisi per tipo di elezione (uninominale, plurinominale, proporzionale, ecc.):
 
 A) Uninominale (un solo vincitore)
--------------------------------
+----------------------------------
 1. Uninominale secco (first-past-the-post)
 Vince il candidato con più voti, anche senza maggioranza assoluta.
 
@@ -8682,6 +8682,12 @@ Vince chi totalizza più punti.
 8. Uninominale pesato
 Ogni voto ha un peso diverso. (es. peso per classe sociale, geografia, ecc.).
 Poco usato oggi per questioni di equità.
+
+9. Doppia preferenza
+--------------------------------
+In questo metodo elettorale ogni elettore esprime due preferenze:
+il candidato preferito (peso x) e il candidato meno gradito (peso -y)
+Vince il candidato che ha il punteggio più alto (somma di tutte le x e le y).
 
 B) Plurinominale (più candidati eletti)
 ---------------------------------------
@@ -8727,7 +8733,7 @@ Gli elettori hanno un numero fisso di crediti da spendere su opzioni diverse con
 3. Voto per consenso (consensus voting)
 Mira al consenso unanime o quasi; usato in piccoli gruppi o assemblee deliberative.
 
-ANalizziamo il tipo di elezione "UNINOMINALE" e i relativi metodi di voto.
+Analizziamo il tipo di elezione "UNINOMINALE" e i relativi metodi di voto.
 
 1) Metodo uninominale secco (first-past-the-post)
 -------------------------------------------------
@@ -9190,6 +9196,181 @@ A differenza dell’approval voting (sì/no), il range voting permette sfumature
 ;-> Vincitori possibili: ((16 "A"))
 ;-> Vincitore selezionato: (16 "A")
 
-============================================================================
+9) Doppia preferenza
+--------------------------------
+In questo metodo elettorale ogni elettore esprime due preferenze:
+- uno positivo: il candidato preferito (migliore),
+- uno negativo: il candidato meno gradito (peggiore).
 
+Esempio: pesi --> (+1 / –1)
+- Ogni elettore assegna:
+  a) +1 punto al proprio candidato preferito,
+  b) –1 punto a quello che detesta di più.
+- Tutti gli altri ricevono 0 punti.
+- Si sommano i punteggi.
+- Vince il candidato con il punteggio totale più alto.
+
+Questo metodo premia i candidati più accettabili globalmente riducendo il rischio che un candidato fortemente divisivo (molto amato da alcuni ma detestato da molti) vinca.
+I pesi dei due voti possono avere valori diversi: (+2 / –1) oppure (+1 / –0.5).
+
+(define (doppia-preferenza num-elettori candidati voto-pos voto-neg)
+  (local (preferenze conteggio max-voti vincitori stop idx-mig idx-peg)
+    ; inizializza array dei punteggi per ogni candidato
+    (setq conteggio (array (length candidati) '(0)))
+    ; genera per ogni elettore una classifica casuale dei candidati
+    (setq preferenze (map (fn (_) (randomize (copy candidati))) (sequence 1 num-elettori)))
+    (println "Preferenze (primo = migliore, ultimo = peggiore):")
+    (dolist (p preferenze) (println p))
+    ; per ogni preferenza, assegna i punteggi positivo e negativo
+    (dolist (p preferenze)
+      (setq idx-mig (find (p 0) candidati))
+      (setq idx-peg (find (last p) candidati))
+      (++ (conteggio idx-mig) voto-pos)
+      (++ (conteggio idx-peg) voto-neg))
+    ; genera lista accoppiata (punteggio, candidato) e ordina
+    (setq conteggio (sort (map list conteggio candidati) >))
+    (setq max-voti (conteggio 0 0))
+    (setq vincitori '())
+    (setq stop nil)
+    ; trova i vincitori con punteggio massimo
+    (dolist (x conteggio stop)
+      (if (= (x 0) max-voti)
+          (push x vincitori -1)
+          (setq stop true)))
+    ; stampa risultati
+    (println "Punteggi totali: " conteggio)
+    (println "Vincitori possibili: " vincitori)
+    (println "Vincitore selezionato: " ((randomize vincitori) 0))))
+
+(doppia-preferenza 15 '("A" "B" "C" "D") 1 -1)
+;-> Preferenze (primo = migliore, ultimo = peggiore):
+;-> ("B" "A" "D" "C")
+;-> ("B" "A" "D" "C")
+;-> ("C" "B" "D" "A")
+;-> ("A" "D" "B" "C")
+;-> ("B" "C" "A" "D")
+;-> ("D" "A" "C" "B")
+;-> ("D" "A" "B" "C")
+;-> ("A" "B" "D" "C")
+;-> ("B" "A" "D" "C")
+;-> ("C" "A" "B" "D")
+;-> ("C" "D" "B" "A")
+;-> ("C" "A" "B" "D")
+;-> ("B" "D" "C" "A")
+;-> ("C" "A" "B" "D")
+;-> ("A" "D" "B" "C")
+;-> Punteggi totali: ((4 "B") (0 "A") (-2 "D") (-2 "C"))
+;-> Vincitori possibili: ((4 "B"))
+;-> Vincitore selezionato: (4 "B")
+
+Nota:
+nell'esempio gli elettori hanno 4 preferenze solo perché usiamo una classifica casuale completa per poter selezionare il primo (migliore) e l'ultimo (peggiore). Le altre preferenze non vengono considerate per il conteggio.
+
+
+----------------
+Teorema di Arrow
+----------------
+
+Il teorema dice che non è possibile soddisfare tutti e cinque questi criteri, se ci sono almeno 3 candidati e almeno 2 elettori:
+
+1) Universalità (Dominio illimitato) – ogni combinazione di ranking è ammessa.
+2) Indipendenza da alternative irrilevanti (IIA) – il confronto tra due opzioni non deve essere influenzato dalla presenza di una terza.
+3) Sovranità degli elettori (non dittatura) – nessun singolo elettore deve determinare sempre il risultato.
+4) Monotonicità – se una preferenza migliora, non dovrebbe danneggiarne le chance.
+5) Pareto-efficienza – se tutti preferiscono A a B, il risultato deve rifletterlo.
+
+Il Teorema di Arrow si applica a tutti i metodi basati su ranking (preferenze ordinali complete), escludendo quelli basati su approvazione, punteggi numerici, o voto secco.
+
+A) Metodi a cui si applica il Teorema di Arrow
+Arrow dimostra che non esiste un sistema di voto perfetto (rispettando alcuni criteri ragionevoli) per aggregare le preferenze ordinali in un ordinamento collettivo, a meno che sia dittatoriale.
+Ecco i metodi coperti dal teorema:
+
+  Metodo                    Tipo
+  ------                    ----
+  Condorcet                 Ordinale, confronto a due
+  Voto alternativo (IRV)    Ordinale, con eliminazioni
+  Metodo di Borda           Ordinale, punteggio per rango
+  Copeland                  Ordinale, tipo Condorcet
+  Schulze / Ranked Pairs    Ordinale, Condorcet avanzato
+  Qualsiasi metodo che usa ranking Ordinale.
+
+B) Metodi non soggetti direttamente al teorema
+Arrow non si applica ai metodi che non aggregano ranking ordinali o non restituiscono un ordinamento collettivo, ad esempio:
+
+  Metodo                                    Perchè escluso
+  ------                                    --------------
+  Uninominale secco (first-past-the-post)   Usa solo la prima preferenza
+  Approval voting                           Preferenze binarie (sì/no)
+  Range voting                              Preferenze cardinali (punteggi)
+  Cumulative voting                         Voti distribuiti numericamente
+  Sorteggio                                 Non aggrega preferenze
+  Quadratic voting                          Voti con peso, cardinalità
+
+
+-----------------
+Differenze di bit
+-----------------
+
+Sequenza OEIS A037861:
+(Number of 0's) - (number of 1's) in the base-2 representation of n.
+  1, -1, 0, -2, 1, -1, -1, -3, 2, 0, 0, -2, 0, -2, -2, -4, 3, 1, 1, -1,
+  1, -1, -1, -3, 1, -1, -1, -3, -1, -3, -3, -5, 4, 2, 2, 0, 2, 0, 0, -2,
+  2, 0, 0, -2, 0, -2, -2, -4, 2, 0, 0, -2, 0, -2, -2, -4, 0, -2, -2, -4,
+  -2, -4, -4, -6, 5, 3, 3, 1, 3, 1, 1, -1, 3, ...
+
+Sequenza OEIS A145037:
+Number of 1's minus number of 0's in the binary representation of n.
+  0, 1, 0, 2, -1, 1, 1, 3, -2, 0, 0, 2, 0, 2, 2, 4, -3, -1, -1, 1, -1, 1,
+  1, 3, -1, 1, 1, 3, 1, 3, 3, 5, -4, -2, -2, 0, -2, 0, 0, 2, -2, 0, 0, 2,
+  0, 2, 2, 4, -2, 0, 0, 2, 0, 2, 2, 4, 0, 2, 2, 4, 2, 4, 4, 6, -5, -3, -3,
+  -1, -3, -1, -1, 1, -3, -1, -1, 1, -1, 1, 1, 3, -3, -1, -1, 1, -1, 1, 1,
+  3, -1, 1, 1, ...
+
+(define (bit1-count num)
+"Count the bit 1 of an integer"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter)
+    )
+    counter))
+
+(define (bit0-count num)
+"Count the bit 0 of an integer"
+  (- (length (bits num)) (bit1-count num)))
+
+Differenza tra 0 e 1:
+
+(define (A037861 num)
+  (- (bit0-count num) (bit1-count num)))
+
+(map A037861 (sequence 0 50))
+;-> (1 -1 0 -2 1 -1 -1 -3 2 0 0 -2 0 -2 -2 -4 3 1 1 -1
+;->  1 -1 -1 -3 1 -1 -1 -3 -1 -3 -3 -5 4 2 2 0 2 0 0 -2
+;->  2 0 0 -2 0 -2 -2 -4 2 0 0)
+
+Differenza tra 1 e 0:
+
+(define (A145037 num)
+  (- (bit1-count num) (bit0-count num)))
+
+(bit1-count 5)
+(bit0-count 5)
+(A145037 5)
+
+(map A145037 (sequence 0 50))
+;-> (-1 1 0 2 -1 1 1 3 -2 0 0 2 0 2 2 4 -3 -1 -1 1 -1 1
+;->  1 3 -1 1 1 3 1 3 3 5 -4 -2 -2 0 -2 0 0 2 -2 0 0 2
+;->  0 2 2 4 -2 0 0)
+
+Valore assoluto della differenza:
+
+(define (seq num)
+  (abs (- (bit0-count num) (bit1-count num))))
+
+(map seq (sequence 0 50))
+;-> (1 1 0 2 1 1 1 3 2 0 0 2 0 2 2 4 3 1 1 1 1 1 
+;->  1 3 1 1 1 3 1 3 3 5 4 2 2 0 2 0 0 2 2 0 0 2 0 2 2 4 2 0 0)
+
+============================================================================
 
