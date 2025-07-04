@@ -3029,6 +3029,12 @@ NOTE LIBERE 30
   Teorema di Arrow
   Differenze di bit
 
+NOTE LIBERE 31
+==============
+  Inversioni crescenti dei numeri naturali
+  Generatore di schemi per Cercaparole
+  Matrice --> HTML
+
 PROBLEMI SUI DADI
 =================
   Problemi 1,...,80

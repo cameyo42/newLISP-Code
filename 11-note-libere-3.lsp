@@ -3550,6 +3550,8 @@ Proviamo la funzione con un cercaparole in inglese:
 ;->   ("SPICES" 6 8 "NO") ("SPINACH" 8 11 "NO"))
 ;->  (("PIETRA" -1)))
 
+Vedi anche "Generatore di schemi per Cercaparole" su "Note libere 31".
+
 
 -------------------------
 Generare frazioni proprie
