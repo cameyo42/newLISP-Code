@@ -279,11 +279,167 @@ Proviamo:
   ("G" "H" "I")))
 
 ; crea la pagina html (stringa)
-(setq html (matrice2html "Matrice di Test" matrix))
+(setq html (matrice2html "Matrice di Test" matrix '("uno" "due" "tre"))
 ; salva su file
 (write-file "matrice.html" html)
 ; visualizza il file html sul browser predefinito
 (exec "matrice.html")
+
+
+-------------
+Brazilian CPF
+-------------
+
+https://codegolf.stackexchange.com/questions/269151/validate-a-cpf-number
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Ogni cittadino brasiliano ha un numero di identificazione nazionale associato, denominato CPF.
+Questo numero ha 11 cifre (formattate come XXX.XXX.XXX-XX) ed è convalidato dal seguente algoritmo (reale):
+  1) Prendi le 9 cifre più significative del numero. Chiamalo c.
+  2) Moltiplica l'n-esima cifra meno significativa di c per n+1, dove 1<=n<=9.
+  3) Somma tutti i prodotti e calcola il resto della divisione tra questo e 11.
+  4) Se il resto r è minore di 2, considera 0. 
+     Altrimenti, considera 11 - r. 
+     Aggiorna 'c' per includerlo come cifra meno significativa aggiunta.
+  5) Prima volta al passaggio 4?
+     Torna al passaggio 1, ma ora 1<=n<=10.
+     Altrimenti, vai al passaggio 5.
+  6) 'c' è uguale al tuo numero iniziale?
+     In caso affermativo, il tuo CPF è valido.
+
+Esempio:
+Prendiamo 111.444.777-35.
+
+Prendiamo le 9 cifre più significative del numero. Chiamiamolo 'c':
+c = 111444777
+
+Moltiplica l'n-esima cifra meno significativa di 'c' per n+1, dove 1 ≤ n ≤ 9:
+     c   1 1 1  4  4  4  7  7  7
+ (n+1)  10 9 8  7  6  5  4  3  2
+result  10 9 8 28 24 20 28 21 14
+
+Somma tutti i prodotti e calcola il resto della divisione tra questo e 11:
+10+9+8+28+24+20+28+21+14 = 162 mod 11 = 8
+
+Se il resto r è minore di 2, considera 0.
+Altrimenti, considera 11 - r.
+Aggiorna 'c' aggiungendo la cifra meno significativa:
+Considera 11 - 8 = 3, c = 1114447773.
+
+Torna al punto 1, ma ora 1 ≤ n ≤ 10.
+     c   1  1 1  4  4  4  7  7  7 3
+ (n+1)  11 10 9  8  7  6  5  4  3 2
+result  11 10 9 32 28 24 35 28 21 6
+
+11+10+9+32+28+24+35+28+21+6 = 204 mod 11 = 6
+
+Quindi 11 - 6 = 5, c = 11144477735.
+
+'c' è uguale al numero iniziale? Sì. Pertanto, il CPF è valido.
+
+(define (cpf? code)
+  (local (str cifre somma-prodotti val)
+    ; creazione numero/stringa 'c' a 9 cifre
+    (setq str (select code '(0 1 2 4 5 6 8 9 10)))
+    ;(setq num (int str 0 10))
+    ; Primo giro
+    ; creazione lista delle cifre
+    (setq cifre (map (fn(x) (int x 0 10)) (explode str)))
+    ; somma dei prodotti cifra*(n+1)
+    (setq somma-prodotti (apply + (map * cifre '(10 9 8 7 6 5 4 3 2))))
+    ; calcolo del modulo
+    ; e aggiunta del valore al numero/stringa --> nuovo numero/stringa
+    (if (< (% somma-prodotti 11) 2)
+        (push "0" str -1)
+        (push (string (- 11 (% somma-prodotti 11))) str -1))
+    ; Secondo giro
+    ; creazione lista delle cifre del nuovo numero
+    (setq cifre (map (fn(x) (int x 0 10)) (explode str)))
+    ; somma dei prodotti cifra*(n+1)
+    (setq somma-prodotti (apply + (map * cifre '(11 10 9 8 7 6 5 4 3 2))))
+    ; calcolo del modulo
+    ; e aggiunta del valore al numero/stringa --> nuovo numero/stringa
+    (if (< (% somma-prodotti 11) 2)
+        (push "0" str -1)
+        (push (string (- 11 (% somma-prodotti 11))) str -1))
+    ; aggiunge "." "." e "-" al numero-stringa
+    (push "." str 3)
+    (push "." str 7)
+    (push "-" str 11)
+    (= code str)))
+
+(cpf? "111.444.777-35") ;-> true
+(cpf? "523.986.800-02") ;-> true
+(cpf? "058.300.335-42") ;-> true
+(cpf? "068.650.863-76") ;-> true
+(cpf? "393.852.580-01") ;-> true
+(cpf? "392.906.007-80") ;-> true
+(cpf? "018.718.637-59") ;-> true
+(cpf? "033.373.634-66") ;-> true
+(cpf? "663.778.052-92") ;-> true
+(cpf? "714.628.314-35") ;-> true
+(cpf? "546.692.758-95") ;-> true
+(cpf? "240.299.015-57") ;-> true
+(cpf? "831.901.302-05") ;-> true
+(cpf? "977.278.105-09") ;-> true
+(cpf? "701.595.919-45") ;-> true
+(cpf? "687.304.519-57") ;-> true
+(cpf? "558.298.493-30") ;-> true
+(cpf? "301.623.419-03") ;-> true
+(cpf? "566.847.323-65") ;-> true
+(cpf? "605.053.766-60") ;-> true
+(cpf? "295.350.637-31") ;-> true
+
+(cpf? "001.338.908-38") ;-> nil
+(cpf? "637.940.265-42") ;-> nil
+(cpf? "351.161.559-40") ;-> nil
+(cpf? "781.618.495-93") ;-> nil
+(cpf? "103.413.164-75") ;-> nil
+(cpf? "255.341.928-32") ;-> nil
+(cpf? "764.835.030-56") ;-> nil
+(cpf? "413.953.767-24") ;-> nil
+(cpf? "238.849.696-53") ;-> nil
+(cpf? "287.101.226-91") ;-> nil
+(cpf? "669.784.801-84") ;-> nil
+(cpf? "514.627.048-28") ;-> nil
+(cpf? "148.932.528-80") ;-> nil
+(cpf? "957.015.430-39") ;-> nil
+(cpf? "117.182.278-24") ;-> nil
+(cpf? "896.383.465-78") ;-> nil
+(cpf? "713.315.098-39") ;-> nil
+(cpf? "301.031.051-83") ;-> nil
+(cpf? "473.829.973-76") ;-> nil
+
+Possiamo semplificare la funzione nel modo seguente:
+1) Usiamo filter per ottenere solo cifre, evitando l'uso manuale di select.
+2) Usiamo una funzione 'digit-check' che calcola le cifre finali in modo parametrico.
+3) Funziona anche se il CPF è dato in formato stringa senza punti/lineette.
+
+(define (cpf? code)
+  (local (digits c sum r)
+    ;----------------------
+    (define (digit-check n)
+      (setq c (slice digits 0 n))
+      (setq sum (apply + (map * c (sequence (+ 1 n) 2 -1))))
+      (setq r (% sum 11))
+      (if (< r 2) 0 (- 11 r)))
+    ;----------------------
+    ; crea una lista di cifre rimuovendo 
+    ; tutti i caratteri non numerici
+    (setq digits (map int (filter (fn(x) (<= "0" x "9")) (explode code))))
+    (and (= (length digits) 11) ; numero-cifre = 11 ?
+         ; prima cifra calcolata = prima cifra ?
+         (= (digits 9) (digit-check 9)) 
+         ; seconda cifra calcolata = seconda cifra ?
+         (= (digits 10) (digit-check 10)))))
+
+Versione code-golf (214 caratteri):
+
+(define(z e)(define(k n)(setq r(%(apply +(map *(slice d 0 n)(sequence(+ 1 n)2 -1)))11))(if(< r 2)0(- 11 r)))
+(setq d(map int(filter(fn(x)(<= "0" x "9"))(explode e))))
+(and(=(length d)11)(=(d 9)(k 9))(=(d 10)(k 10))))
 
 ============================================================================
 
