@@ -441,5 +441,98 @@ Versione code-golf (214 caratteri):
 (setq d(map int(filter(fn(x)(<= "0" x "9"))(explode e))))
 (and(=(length d)11)(=(d 9)(k 9))(=(d 10)(k 10))))
 
+
+-------------------------
+Messaggio binario segreto
+-------------------------
+
+Scriviamo due funzioni "encode" e "decode" per spedire un messaggio segreto.
+Le funzioni prendono due parametri:
+a) la stringa da codificare/decodificare
+b) la stringa dei comandi ("lrfu")
+
+La stringa dei comandi ha il seguente significato:
+  "l" --> ruota la stringa di 1 bit a sinistra
+  "r" --> ruota la stringa di 1 bit a destra
+  "f" --> inverte ogni bit nella stringa di bit
+  "u" --> inverte la stringa di bit
+I comandi possono essere in qualsiasi ordine, qualche comando può mancare e alcuni possono essere multipli.
+
+La codifica viene effettuata con il seguente algoritmo:
+1) Convertire ogni carattere della stringa nel relativo numero ASCII a 7bit.
+2) Convertire ogni numero in binario (con 7 caratteri)
+3) Unire tutti i numeri binari in un unica stringa
+4) Per ogni comando della stringa comandi:
+   Se "l" --> ruota la stringa di 1 bit a sinistra
+   Se "r" --> ruota la stringa di 1 bit a destra
+   Se "f" --> inverte ogni bit nella stringa di bit
+   Se "u" --> inverte la stringa di bit
+
+(define (flip-bits bin-str)
+  (let (out "")
+    (dostring (b bin-str)
+      (if (= b 48) ; "0"
+          (push "1" out -1)
+          (push "0" out -1)))))
+
+(define (encode str cmd)
+  (let (binary (join (map (fn(x) (format "%07s" (bits (char x)))) (explode str))))
+    (dostring (ch cmd)
+      (cond ((= ch 108) (rotate binary -1)) ;l (rotate left)
+            ((= ch 114) (rotate binary +1)) ;r (rotate right)
+            ((= ch 102) (setq binary (flip-bits binary))) ;f (flip)
+            ((= ch 117) (reverse binary)))) ;u (reverse)
+    binary))
+
+(setq crypt (encode "newLISP" "lufr"))
+;-> "0011110100011010011011011001100001000010110010001"
+
+La decodifica viene effettuata con il seguente algoritmo:
+1) Per ogni comando della stringa comandi:
+   Se "l" --> ruota la stringa di 1 bit a sinistra
+   Se "r" --> ruota la stringa di 1 bit a destra
+   Se "f" --> inverte ogni bit nella stringa di bit
+   Se "u" --> inverte la stringa di bit
+2) Unire tutti i numeri binari in un unica stringa
+3) Dividere la stringa in numeri binari da 7 bit.
+4) Convertire i numeri binari in caratteri.
+
+Per la decodifica dobbiamo conoscere la stringa dei comandi con cui abbiamo codificato la stringa.
+Per costruire la stringa dei comandi della decodifica partendo dalla stringa dei comandi della codifica bisogna effetture i seguenti passaggi:
+1) convertire ogni "l" in "r" e ogni "r" in "l"
+2) invertire la stringa
+
+Esempio:
+codifica comandi = "lufr"
+decodifica comandi (scambia l/r) --> "rufl" (inverte stringa) --> "lfur"
+
+(define (decode-cmd cmd)
+  (let (out "")
+    (for (i 0 (- (length cmd) 1))
+      (cond ((= (cmd i) "l") (push "r" out -1))
+            ((= (cmd i) "r") (push "l" out -1))
+            ((= (cmd i) "u") (push "u" out -1))
+            ((= (cmd i) "f") (push "f" out -1))))
+    (reverse out)))
+
+(decode-cmd "lufr")
+;-> "lfur"
+
+(define (decode str dmc)
+  (dostring (ch dmc)
+    (cond ((= ch 108) (rotate str -1)) ;l (rotate left)
+          ((= ch 114) (rotate str +1)) ;r (rotate right)
+          ((= ch 102) (setq str (flip-bits str))) ;f (flip)
+          ((= ch 117) (reverse str)))) ;u (reverse)
+    (join (map (fn(x) (char (int x 0 2))) (explode str 7))))
+
+(decode crypt (decode-cmd "lufr"))
+;-> "newLISP"
+
+(decode (encode "sanpierdarena" "llufr") (decode-cmd "llufr"))
+;-> "sanpierdarena"
+
+Vedi anche "Codifica e decodifica di una stringa" su "Note libere 24".
+
 ============================================================================
 

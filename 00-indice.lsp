@@ -3035,6 +3035,7 @@ NOTE LIBERE 31
   Generatore di schemi per Cercaparole
   Matrice --> HTML
   Brazilian CPF
+  Messaggio binario segreto
 
 PROBLEMI SUI DADI
 =================

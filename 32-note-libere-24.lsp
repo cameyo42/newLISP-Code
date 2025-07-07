@@ -748,6 +748,8 @@ Proviamo:
 (decode (encode "--- HeLlO WoRlD ---"))
 ;-> "--- HeLlO WoRlD ---"
 
+Vedi anche "Messaggio binario segreto" su "Note libere 31".
+
 
 --------------------------
 Generare un grafo regolare
