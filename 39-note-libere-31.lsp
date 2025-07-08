@@ -534,5 +534,122 @@ decodifica comandi (scambia l/r) --> "rufl" (inverte stringa) --> "lfur"
 
 Vedi anche "Codifica e decodifica di una stringa" su "Note libere 24".
 
+
+-------------------------
+Esplosione di una stringa
+-------------------------
+
+Data una stringa composta da caratteri ASCII (33..126) (no spazi).
+1) trasformare la stringa in palindroma invertendola e aggiungendola prima di se stessa (escludendo il carattere centrale)
+Esempio: la stringa "012345", diventerà "54321012345".
+2) stampare il seguente testo:
+
+  5    4    3    2    1    0    1    2    3    4    5
+       5   4   3   2   1   0   1   2   3   4   5
+            5  4  3  2  1  0  1  2  3  4  5
+                 5 4 3 2 1 0 1 2 3 4 5
+                      54321012345
+                 5 4 3 2 1 0 1 2 3 4 5
+            5  4  3  2  1  0  1  2  3  4  5
+       5   4   3   2   1   0   1   2   3   4   5
+  5    4    3    2    1    0    1    2    3    4    5
+
+Dal centro verso l'esterno in entrambe le direzioni, ogni carattere è separato da uno spazio in più rispetto alla riga precedente.
+
+Procedimento:
+
+; stringa di esempio
+(setq str "012345")
+; rende palindroma la stringa
+(setq str (append (reverse (slice str 1)) str))
+;-> "54321012345"
+; calcola quante righe devono essere stampate
+(setq rows (- (length str) 2))
+;-> 9
+; metà intera delle righe
+(setq meta (/ rows 2))
+;-> 4
+; calcola, per ogni riga, il valore degli spazi interni
+; tra due caratteri per ogni riga (lista)
+(setq inside (sequence 0 meta))
+;-> (0 1 2 3 4)
+(setq inside (append (reverse (slice inside 1)) inside))
+;-> (4 3 2 1 0 1 2 3 4)
+; calcola, per ogni riga, il valore degli spazi iniziali 
+; a sinistra della riga
+(setq left (series 0 (fn(x) (+ x (div (length str) 2))) (+ meta 1)))
+;-> (0 5 10 15 20)
+(setq left (append left (slice (reverse left) 1)))
+;-> (0 5 10 15 20 15 10 5 0)
+; ciclo di stampa (per ogni riga)
+(for (r 0 (- rows 1))
+  ; stampa gli spazi iniziali a sinistra
+  (print (dup " " (left r)))
+  ; spazi tra i caratteri
+  (setq spaces (inside r))
+  ; ciclo di stampa di tutti i caratteri della riga corrente
+  (dolist (ch (explode str))
+    ; stampa carattere e spazi
+    (print ch (dup " " spaces))
+  )
+  (println)
+)
+;-> 5    4    3    2    1    0    1    2    3    4    5
+;->      5   4   3   2   1   0   1   2   3   4   5
+;->           5  4  3  2  1  0  1  2  3  4  5
+;->                5 4 3 2 1 0 1 2 3 4 5
+;->                     54321012345
+;->                5 4 3 2 1 0 1 2 3 4 5
+;->           5  4  3  2  1  0  1  2  3  4  5
+;->      5   4   3   2   1   0   1   2   3   4   5
+;-> 5    4    3    2    1    0    1    2    3    4    5
+
+(define (boom str)
+  (local (rows meta inside left)
+    ; rende palindroma la stringa
+    (setq str (append (reverse (slice str 1)) str))
+    ; calcola quante righe devono essere stampate
+    (setq rows (- (length str) 2))
+    ; metà intera delle righe
+    (setq meta (/ rows 2))
+    ; calcola, per ogni riga, il valore degli spazi interni
+    ; tra due caratteri per ogni riga (lista)
+    (setq inside (sequence 0 meta))
+    (setq inside (append (reverse (slice inside 1)) inside))
+    ; calcola, per ogni riga, il valore degli spazi iniziali 
+    ; a sinistra della riga
+    (setq left (series 0 (fn(x) (+ x (div (length str) 2))) (+ meta 1)))
+    (setq left (append left (slice (reverse left) 1)))
+    ; ciclo di stampa (per ogni riga)
+    (for (r 0 (- rows 1))
+      ; stampa gli spazi iniziali a sinistra
+      (print (dup " " (left r)))
+      ; spazi tra i caratteri
+      (setq spaces (inside r))
+      ; ciclo di stampa di tutti i caratteri della riga corrente
+      (dolist (ch (explode str))
+        ; stampa carattere e spazi
+        (print ch (dup " " spaces))
+      )
+      (println)) '>))
+
+(boom ".......")
+;-> .     .     .     .     .     .     .     .     .     .     .     .     .
+;->       .    .    .    .    .    .    .    .    .    .    .    .    .
+;->             .   .   .   .   .   .   .   .   .   .   .   .   .
+;->                   .  .  .  .  .  .  .  .  .  .  .  .  .
+;->                         . . . . . . . . . . . . .
+;->                               .............
+;->                         . . . . . . . . . . . . .
+;->                   .  .  .  .  .  .  .  .  .  .  .  .  .
+;->             .   .   .   .   .   .   .   .   .   .   .   .   .
+;->       .    .    .    .    .    .    .    .    .    .    .    .    .
+;-> .     .     .     .     .     .     .     .     .     .     .     .     .
+
+(boom "1234567890")
+
+Vedi immagine "boom-string.png" nella cartella "data".
+
+
 ============================================================================
 
