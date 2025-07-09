@@ -651,5 +651,388 @@ Procedimento:
 Vedi immagine "boom-string.png" nella cartella "data".
 
 
+--------------------------------------------
+Numeri casuali, pi greco, logaritmi naturali
+--------------------------------------------
+
+Generiamo due numeri casuali tra 0 e 1 con distribuzione uniforme: n1 e n2.
+Dividiamo i numeri random: res = n1/n2
+Qual'è la probabilità che round(res) sia un numero pari?
+Qual'è la probabilità che floor(res) sia un numero pari?
+
+(define (test-round prove)
+  (setq pari 0)
+  (for (i 1 prove)
+    (setq n1 (random))
+    (setq n2 (random))
+    (setq res (round (div n1 n2) 0))
+    (if (even? res) (++ pari)))
+  (div pari prove))
+
+(time (test-round 1e7))
+;-> 0.4646439
+
+Matematicamente la probabilità cercata vale:
+
+Prob(x/y even) = (5 - pi)/4
+
+(setq pi 3.1415926535897931)
+(div (sub 5 pi) 4)
+;-> 0.4646018366025517
+
+(define (test-floor prove)
+  (setq pari 0)
+  (for (i 1 prove)
+    (setq n1 (random))
+    (setq n2 (random))
+    (setq res (floor (div n1 n2)))
+    (if (even? res) (++ pari)))
+  (div pari prove))
+
+(test-floor 1e7)
+;-> 0.6535496
+
+Matematicamente la probabilità cercata vale:
+
+Prob(x/y even) = (1/2)*(2 - ln(2))
+
+(mul 0.5 (sub 2 (log 2)))
+;-> 0.6534264097200273
+
+
+---------------------------------
+Sequenze, dismutazioni, rotazioni
+---------------------------------
+
+Abbiamo una sequenza 'seq' di N numeri da 1 a N.
+Abbiamo una lista 'lst' di N numeri da 1 a N.
+Risulta che:
+
+  lst(i) != seq(i), per i=0..(N-1)
+
+Quindi la lista è una dismutazione (derangement) della sequenza.
+In altre parole è una permutazione della sequenza tale che nessun elemento appare nella sua posizione originale.
+
+Vedi "Dismutazioni (Derangements)" su "Funzioni varie".
+
+Se facciamo ruotare la lista di una posizione alla volta, qual è il valore minimo e massimo di numeri nella stessa posizione tra la lista e la sequenza?
+Esempio:
+Lista = (1 2 3 4)
+Dismutazioni:  (2 4 1 3) (4 1 2 3) (2 1 4 3) (3 1 4 2) (3 4 1 2)
+               (4 3 1 2) (4 3 2 1) (3 4 2 1) (2 3 4 1)
+Output:
+Dismutazione   Rotazione    Elementi uguali allo stesso indice di (1 2 3 4)
+(2 4 1 3)      (1 3 2 4)    2
+(4 1 2 3)      (1 2 3 4)    4
+(2 1 4 3)      (3 2 1 4)    2
+(3 1 4 2)      (4 2 3 1)    2
+(3 4 1 2)      (1 2 3 4)    4
+(4 3 1 2)      (1 2 4 3)    2
+(4 3 2 1)      (1 4 3 2)    2
+(3 4 2 1)      (2 1 3 4)    2
+(2 3 4 1)      (1 2 3 4)    4
+Valore minimo di elementi uguali = 2
+Valore massimo di elementi uguali = 4
+
+(define (dism lst)
+"Generates all dismutations without repeating from a list of items"
+(define (dis?)
+(catch
+  (let (ok true)
+    (dolist (el lst)
+      (if (= el (base $idx))
+        (throw nil)))
+    ok)))
+  (local (i indici out base)
+    ; lista originale
+    (setq base lst)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; non aggiungiamo la lista iniziale alla soluzione
+    ; perchè non è una dismutazione
+    ; (setq out (list lst))
+    (setq out '())
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i))
+            )
+            ;(println lst)
+            ; inseriamo la permutazione corrente solo se ogni elemento
+            ; non appare nella sua posizione originale
+            (if (dis?)
+              (push lst out -1)
+            )
+            (++ (indici i))
+            (setq i 0)
+          )
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )
+       )
+    )
+    out))
+
+(dism '(1 2 3 4))
+;-> ((2 4 1 3) (4 1 2 3) (2 1 4 3) (3 1 4 2) (3 4 1 2)
+;->  (4 3 1 2) (4 3 2 1) (3 4 2 1) (2 3 4 1))
+
+Funzione che calcola il numero di elementi che hanno lo stesso valore nelle stesse posizioni di due liste:
+
+(define (uguali lst1 lst2)
+  (first (count '(0) (map - lst1 lst2))))
+
+(uguali '(1 2 3 4) '(0 2 3 4))
+;-> 3
+
+(define (min-max items show)
+  (local (max-equal lst dismute current tmp num-equal)
+    (setq out '())
+    (setq max-equal 0)
+    (setq lst (sequence 1 items))
+    (setq dismute (dism lst))
+    (when show
+      (println "Sequenza: " lst)
+      (println "Dismutazioni: " (length dismute)))
+    (dolist (el dismute)
+      (setq max-equal 0)
+      (setq current (list el 0))
+      (setq tmp el)
+      (for (r 1 (length tmp))
+        (setq num-equal (uguali (rotate tmp) lst))
+        (when (> num-equal max-equal)
+          (setq max-equal num-equal)
+          (setq current (list el tmp max-equal)))
+      )
+      (push current out -1)
+      ;(if (zero? (% $idx 10000)) (println $idx))
+    )
+    (setq nums (map (fn(x) (x 2)) out))
+    (list (apply min nums) (apply max nums))))
+
+Proviamo:
+
+(min-max 6 true)
+;-> Sequenza: (1 2 3 4 5 6)
+;-> Dismutazioni: 265
+;-> (2 6)
+
+(map min-max (sequence 2 9))
+;-> ((2 2) (3 3) (2 4) (2 5) (2 6) (2 7) (2 8) (2 9))
+
+(map output (sequence 2 9))
+;-> ((2 2) (3 3) (2 4) (2 5) (2 6) (2 7) (2 8) (2 9))
+
+Il risultato è intuitivo:
+1) con N diverso 3 il minimo è sempre 2, perchè qualunque dismutazione riporta almeno due elementi nella posizione originale.
+2) il massimo vale sempre N, perchè esiste sempre una dismutazione che è uguale alla rotazione di un posto della sequenza.
+
+
+-------------------------------
+x^2 + y^2 + z^2 + w^2 = x*y*z*w
+-------------------------------
+
+A simple equation that behaves weirdly - Numberphile
+https://www.youtube.com/watch?v=a7BVL1MOCl4
+
+Risolvere la seguente equazione:
+
+  x^2 + y^2 + z^2 + w^2 = x*y*z*w
+
+per gli interi positivi x,y,z,w interi fino ad un dato N.
+
+La prima soluzione vale: x = y = z = w = 2
+
+Elenco di tutte le soluzioni (23) con valori fino a 1 milione:
+
+  2,2,2,2
+  2,2,2,6
+  2,2,6,22
+  2,2,22,82
+  2,2,82,306
+  2,2,306,1142
+  2,2,1142,4262
+  2,2,4262,15906
+  2,2,15906,59362
+  2,2,59362,221542
+  2,2,221542,826806
+  2,6,22,262
+  2,6,262,3122
+  2,6,3122,37202
+  2,6,37202,443302
+  2,22,82,3606
+  2,22,262,11522
+  2,22,3606,158582
+  2,22,11522,506706
+  2,82,306,50182
+  2,82,3606,591362
+  2,306,1142,698902
+  6,22,262,34582
+
+(setq sol-milione '((2 2 2 2) (2 2 2 6) (2 2 6 22) (2 2 22 82)
+                   (2 2 82 306) (2 2 306 1142) (2 2 1142 4262)
+                   (2 2 4262 15906) (2 2 15906 59362) (2 2 59362 221542)
+                   (2 2 221542 826806) (2 6 22 262) (2 6 262 3122)
+                   (2 6 3122 37202) (2 6 37202 443302) (2 22 82 3606)
+                   (2 22 262 11522) (2 22 3606 158582) (2 22 11522 506706)
+                   (2 82 306 50182) (2 82 3606 591362) (2 306 1142 698902)
+                   (6 22 262 34582)))
+
+(length sol-milione)
+;-> 23
+
+Funzione dell'equazione:
+
+(define (f x y z w) (= (+ (* x x) (* y y) (* z z) (* w w)) (* x y z w)))
+
+Metodo brute-force:
+
+(define (genera1 limite)
+  ;(for (x 2 limite 2)
+    (setq x 2) ; trucco
+    (for (y x 22 2) ; trucco
+      (for (z y limite 2)
+        (for (w z limite 2)
+          (if (f x y z w) (println x { } y { } z { } w))))))
+
+(time (genera1 10000))
+;-> 2 2 2 2
+;-> 2 2 2 6
+;-> 2 2 6 22
+;-> 2 2 22 82
+;-> 2 2 82 306
+;-> 2 2 306 1142
+;-> 2 2 1142 4262
+;-> 2 6 22 262
+;-> 2 6 262 3122
+;-> 2 22 82 3606
+;-> 37447.687
+
+Non è possibile risolvere il problema usando la forza bruta.
+
+Dal punto di vista matematico è stato dimostrato che è possibile generare nuove soluzioni partendo da una soluzione nota.
+Esempio:
+Partiamo dalla soluzione con x = y = z = w = 2:
+(2 2 2 2)
+Per generare una nuova soluzione:
+1) scegliamo uno dei 4 valori e lo chiamiamo 'x' (per esempio il primo 2):
+2) calcoliamo il nuovo valore di 'x': new-x = y*z*w - x
+   new-x = 2*2*2 - 2 = 6
+3) Sostituiamo 'x' con 'new-x' nella soluzione di partenza
+   (6 2 2 2)
+
+Verifichiamo che la soluzione sia corretta:
+(f 6 2 2 2)
+;-> true
+(apply f '(6 2 2 2))
+;-> true
+
+Per ogni soluzione di partenza possiamo generare 4 soluzioni diverse.
+
+Algoritmo
+fatte --> lista delle soluzioni terminate (espanse)
+da-fare --> lista delle soluzioni da espandere
+1) Partiamo dalla soluzione base (2 2 2 2).
+2) Generiamo 4 soluzioni diverse e le inseriamo in fondo alla lista 'da-fare'
+   (se le soluzioni contengono numeri inferiori ad un limite dato
+    e se non sono già presenti nella lista 'da-fare' e nella lista 'fatte').
+3) Inseriamo la soluzione base nella lista 'fatte'
+   (se non era già presente nella lista 'fatte').
+4) Se la lista 'da-fare' è vuota --> Stop
+   Altrimenti:
+      Estraiamo la prima soluzione dalla lista 'da-fare'.
+      Questa lista diventa la soluzione base.
+      Ripetere dal passo 2).
+
+Ad ogni passo generiamo 1 soluzione terminata.
+
+Funzione che trova tutte le soluzioni intere dell'equazione fino ad un dato limite:
+
+(define (genera2 limite)
+  (define (f x y z w) (= (+ (* x x) (* y y) (* z z) (* w w)) (* x y z w)))
+  (local (fatte da-fare lst prod tmp x new-x)
+    ; lista delle soluzioni calcolate
+    (setq fatte '())
+    ; lista delle soluzioni da espandere
+    ; inizializzata con la soluzione base (biginteger)
+    (setq da-fare '((2L 2L 2L 2L)))
+    (setq stop nil)
+    (until stop
+      (if da-fare ; se la lista 'da-fare' non è vuota
+          (begin
+            ; prende la prima lista dalle soluzioni da espandere
+            (setq lst (pop da-fare))
+            (setq prod (apply * lst))
+            ;(print lst) (read-line)
+            ; modifica ogni elemento/numero della lista corrente
+            ; per creare una nuova soluzione
+            (for (k 0 3)
+              (setq tmp lst)
+              (setq x (lst k))
+              (setq new-x (- (/ prod x) x))
+              (setf (tmp k) new-x)
+              ; ordina la lista corrente per evitare duplicati
+              ; es. (2 2 2 6) deve essere uguale a (2 6 2 2))
+              (sort tmp)
+              ;(println "tmp: " tmp)
+              ; inserisce la lista tmp (nuova soluzione)
+              ; nella lista delle soluzioni da espandere:
+              ; se new-x è inferiore a 'limite' e
+              ; se non esiste già nelle soluzioni da espandere e
+              ; se non esiste già nelle soluzioni calcolate
+              (if (and (<= new-x limite)
+                      (not (ref tmp da-fare))
+                      (not (ref tmp fatte)))
+                  (push tmp da-fare -1))
+            )
+            ; ordina la lista corrente per evitare duplicati
+            ; es. (2 2 2 6) deve essere uguale a (2 6 2 2))
+            (sort lst)
+            ; inserisce la lista corrente nelle soluzioni calcolate
+            ; (se non esiste nelle soluzioni calcolate)
+            (if (not (ref lst fatte)) (push lst fatte -1)))
+          ;else (la lista da-fare è vuota --> stop)
+            (setq stop true)))
+    ;(println (length fatte))
+    ;(println (length da-fare))
+    (sort fatte)))
+
+Proviamo:
+
+(genera2 10000)
+;-> ((2L 2L 2L 2L) (2L 2L 2L 6L) (2L 2L 6L 22L) (2L 2L 22L 82L)
+;->  (2L 2L 82L 306L) (2L 2L 306L 1142L) (2L 2L 1142L 4262L)
+;->  (2L 6L 22L 262L) (2L 6L 262L 3122L) (2L 22L 82L 3606L))
+
+(genera2 1e6)
+;-> ((2L 2L 2L 2L) (2L 2L 2L 6L) (2L 2L 6L 22L) (2L 2L 22L 82L)
+;->  (2L 2L 82L 306L) (2L 2L 306L 1142L) (2L 2L 1142L 4262L)
+;->  (2L 2L 4262L 15906L) (2L 2L 15906L 59362L) (2L 2L 59362L 221542L)
+;->  (2L 2L 221542L 826806L) (2L 6L 22L 262L) (2L 6L 262L 3122L)
+;->  (2L 6L 3122L 37202L) (2L 6L 37202L 443302L) (2L 22L 82L 3606L)
+;->  (2L 22L 262L 11522L) (2L 22L 3606L 158582L) (2L 22L 11522L 506706L)
+;->  (2L 82L 306L 50182L) (2L 82L 3606L 591362L) (2L 306L 1142L 698902L)
+;->  (6L 22L 262L 34582L))
+ 
+(time (genera2 1e6))
+;-> 0 ms
+
+Verifichiamo la correttezza della soluzione:
+
+(= (sort (genera2 1e6)) (sort sol-milione))
+;-> true
+
+La funzione è molto veloce:
+
+(time (println (length (genera2 1e20))))
+;-> 325
+;-> 15.567
+(time (println (length (sort (genera2 1e50)))))
+;-> 2903
+;-> 698.961 ms
+
 ============================================================================
 

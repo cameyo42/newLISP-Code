@@ -3037,6 +3037,9 @@ NOTE LIBERE 31
   Brazilian CPF
   Messaggio binario segreto
   Esplosione di una stringa
+  Numeri casuali, pi greco, logaritmi naturali
+  Sequenze, dismutazioni, rotazioni
+  x^2 + y^2 + z^2 + w^2 = x*y*z*w
 
 PROBLEMI SUI DADI
 =================

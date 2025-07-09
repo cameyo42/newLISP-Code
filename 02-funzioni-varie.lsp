@@ -8749,7 +8749,8 @@ Quindi possiamo scrivere la seguente funzione:
 Dismutazioni (Derangements)
 ---------------------------
 
-Nel calcolo combinatorio vengono dette dismutazioni (o sconvolgimenti, o permutazioni complete) le permutazioni di un insieme tali che nessun elemento appare nella sua posizione originale. In altre parole, uno dismutazione è una permutazione che non ha punti fissi.
+Nel calcolo combinatorio vengono dette dismutazioni (o sconvolgimenti, o permutazioni complete) le permutazioni di un insieme tali che nessun elemento appare nella sua posizione originale.
+In altre parole, uno dismutazione è una permutazione che non ha punti fissi.
 Non esiste alcuna dismutazione per un insieme di un solo elemento, ne esiste 1 per un insieme di 2 elementi, 2 per un insieme di 3 elementi, 9 per uno di 4 elementi, ad esempio, le 9 dismutazioni possibili della parola "ABCD" sono:
 
   BADC BCDA BDAC
@@ -8758,7 +8759,7 @@ Non esiste alcuna dismutazione per un insieme di un solo elemento, ne esiste 1 p
 
 Il simbolo matematico che rappresenta la dismutazione è: !n
 
-Per calcolare il numero di dismutazioni !n di un insieme esistono due formule:
+Per calcolare il numero di dismutazioni !n di un insieme esistono tre formule:
 
 1)  !n = (n - 1)*(!(n-1) + !(n-2)),  dove !0 = 1 e !1 = 0
 
@@ -8768,7 +8769,13 @@ Per calcolare il numero di dismutazioni !n di un insieme esistono due formule:
 3)  !n = n!∑----------,  per n >= 0
            0    i!
 
+Inoltre risulta:
+
+   !n = lim(N!/e)
+        (N->Inf)
+
 Sequenza OEIS A000166:
+Subfactorial or rencontres numbers, or derangements: number of permutations of n elements with no fixed points.
   1, 0, 1, 2, 9, 44, 265, 1854, 14833, 133496, 1334961, 14684570,
   176214841, 2290792932, 32071101049, 481066515734, 7697064251745,
   130850092279664, 2355301661033953, 44750731559645106, 895014631192902121,
@@ -8949,6 +8956,8 @@ Vediamo il tempo di esecuzione:
 (time (println (length (dism '(a b c d e f g h i j)))))
 ;-> 1334961
 ;-> 7603.603
+
+Vedi anche "Sequenze, dismutazioni, rotazioni" su "Note libere 31".
 
 
 -------------------------
