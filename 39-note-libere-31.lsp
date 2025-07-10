@@ -1034,5 +1034,44 @@ La funzione è molto veloce:
 ;-> 2903
 ;-> 698.961 ms
 
+
+------------------------------------------------------------------
+Ordinamento di lettere senza distinzioni tra maiuscole e minuscole
+------------------------------------------------------------------
+
+Data una stringa con soli caratteri alfabetici (a..z,A..Z), ordinare i caratteri senza considerare le differenze tra maiuscole e minuscole (ordinamento: A,a,B,b,C,c,...Z,z,).
+Per esempio:
+stringa = "BbAaBcC"
+output = "AaBBbCc"
+
+La primitiva 'sort' ordina i caratteri in modo ASCII:
+
+(join (sort (explode "AaBBbCc")))
+;-> "ABBCabc
+
+Però possiamo usare lo stesso 'sort' con un comparatore specifico:
+
+(define (ordina-stringa str)
+  (join
+    (sort (explode str)
+          (fn (a b)
+            (letn ((la (lower-case a))
+                   (lb (lower-case b)))
+              (if (= la lb)
+                  (<= (char a) (char b)) ; maiuscole prima
+                  (<= la lb))))))) ; ordinamento standard
+
+Spiegazione del comparatore:
+1) lower-case rende il confronto insensibile al case.
+2) Se le lettere sono uguali (ignora case), usa (char a) per dare precedenza alla maiuscola (perché ha valore ASCII minore).
+
+Proviamo:
+
+(ordina-stringa "BbAaBcC")
+;-> "AaBBbCc"
+
+(ordina-stringa "SuperCaliFragilistiCheSpiralidoso")
+;-> "aaaCCdeeFghiiiiiillloopprrrSSsstu"
+
 ============================================================================
 

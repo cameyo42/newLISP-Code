@@ -131,8 +131,10 @@
 |   135    |  4989              |         -  |      2874  |      1194  |
 |   145    |  608720            |         -  |     99501  |         0  |
 |   173    |  1572729           |         -  |       124  |         0  |
+|   187    |  17427258          |         -  |     10641  |         -  |
 |   188    |  95962097          |         -  |        29  |         -  |
 |   191    |  1918080160        |         -  |         1  |         0  |
+|   205    |  0.5731441         |         -  |    309852  |         -  |
 |   206    |  1389019170        |         -  |         2  |         -  |
 |   469    |  0.56766764161831  |         -  |         0  |         -  |
 
@@ -13866,6 +13868,91 @@ Utilizzando fino a un milione di tessere quante diverse lamine quadrate si posso
 
 
 ============
+Problema 187
+============
+
+Semiprimi
+
+Un numero composto è un numero che contiene almeno due fattori primi.
+Ad esempio, 15 = 3 * 5, 9 = 3 * 3, 12 = 2 * 2 * 3
+Ci sono dieci numeri composti inferiori a trenta che contengono esattamente due fattori primi, non necessariamente distinti:
+4, 6, 9, 10, 14, 15, 21, 22, 25, 26
+Quanti numeri interi composti, n < 10^8, hanno esattamente due fattori primi, non necessariamente distinti?
+
+Algoritmo
+Calcoliamo i primi fino a 10^8/2.
+Moltiplichiamo tutte le coppie di primi e prendiamo quelle che che hanno un prodotto inferiore a 10^8.
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (e187)
+  (local (limite lst primi conta i j)
+    (setq limite 1e4)
+    ; creazione lista dei numeri primi
+    ; (+ 100 per essere certi di calcolare qualche numero primo in più)
+    (setq lst (primes-to (+ (/ limite 2) 100)))
+    ; conversione della lista in un array
+    (setq len (length lst))
+    (setq primi (array len lst))
+    ; variabile per il conteggio delle coppie di primi
+    (setq conta 0)
+    (setq i 0)
+    (setq j 0)
+    ; ciclo fino a primi(i)*primi(i) < limite
+    (while (< (* (primi i) (primi i)) limite)
+      (setq j i)
+      ; ciclo fino a primi(i)*primi(j) < limite
+      (while (< (* (primi i) (primi j)) limite)
+        ; nuova coppia da aggiungere
+        (++ conta)
+        (++ j))
+      (++ i))
+    conta))
+
+(e187)
+;-> 17427258
+(time (e187))
+;-> 10641.482
+
+(define (e187-1)
+  (local (limite lst primi conta i j)
+    (setq limite 1e8)
+    ; creazione lista dei numeri primi
+    ; (+ 100 per essere certi di calcolare qualche numero primo in più)
+    (setq lst (primes-to (+ (/ limite 2) 100)))
+    ; conversione della lista in un array
+    (setq len (length lst))
+    (setq primi (array len lst))
+    ; variabile per il conteggio delle coppie di primi
+    (setq conta 0)
+    (setq stop-i nil)
+    (for (i 0 limite 1 stop-i)
+      (setq stop-j nil)
+      (if (< limite (* (primi i) (primi i))) (setq stop-i true))
+      (for (j i limite 1 stop-j)
+        (if (< limite (* (primi i) (primi j)))
+            (setq stop-j true)
+            (++ conta))))
+    conta))
+
+(e187-1)
+;-> 17427258
+(time (e187-1))
+;-> 10797.733
+----------------------------------------------------------------------------
+
+
+============
 Problema 188
 ============
 
@@ -14009,6 +14096,109 @@ Riportiamo l'implementazione in newLISP:
 
 (time (e191))
 ;-> 0
+----------------------------------------------------------------------------
+
+============
+Problema 205
+============
+
+Gioco di dadi
+
+Peter ha nove dadi a quattro facce (piramidali), ognuno con le facce numerate: 1, 2, 3, 4.
+Colin ha sei dadi a sei facce (cubici), ognuno con le facce numerate: 1, 2, 3, 4, 5, 6.
+Peter e Colin lanciano i dadi e confrontano i totali: il totale più alto vince.
+Il risultato è un pareggio se i totali sono uguali.
+Qual è la probabilità che Peter (Piramidale) batta Colin (Cubico)?
+Dai la tua risposta arrotondata a sette cifre decimali nella forma 0.abcdefg.
+
+La lista A contiene tutti i risultati possibili del lancio dei dadi di Peter.
+La lista B contiene tutti i risultati possibili del lancio dei dadi di Colin.
+Dobbiamo calcolare la probabilità che un numero scelto a caso da A sia maggiore di un numero scelto a caso da B.
+Per fare questo, prendiamo le liste A e B e per ogni coppia (a, b) con 'a' in A (Peter) e 'b' in B (Colin), contiamo quante volte risulta (a > b) (vittorie).
+La probabilità cercata vale:
+  
+  P(vittoria Peter) = vittorie/numero-coppie
+
+dove numero-coppie = lunghezza(A)*lunghezza(B)
+
+Risultato = 0.5731441
+
+Nota: consideriamo A la lista di Colin perchè ha meno elementi.
+Quindi, P(vittoria Peter) = 1 - P(vittoria Colin o pareggio)
+
+(define (e205-1)
+  ; crea la lista di tutti i risultati possibili di colin (A)
+  (setq A '())
+  (for (d1 1 6) (for (d2 1 6) (for (d3 1 6) (for (d4 1 6) (for (d5 1 6)
+  (for (d6 1 6) (push (+ d1 d2 d3 d4 d5 d6) A)))))))
+  (sort A)
+  (setq lenA (length A))
+  ; crea la lista di tutti i risultati possibili di peter (B)
+  (setq B '())
+  (for (d1 1 4) (for (d2 1 4) (for (d3 1 4)  (for (d4 1 4)
+  (for (d5 1 4) (for (d6 1 4) (for (d7 1 4)  (for (d8 1 4)
+  (for (d9 1 4) (push (+ d1 d2 d3 d4 d5 d6 d7 d8 d9) B))))))))))
+  (sort B)
+  (setq lenB (length B))
+  ; calcola la probabilità di vittoria o pareggio di (A) (colin)
+  (setq totale (* lenA lenB))
+  ;(println "totale: " totale)
+  (setq vittorie 0)
+  ; per ogni coppia (a b)...
+  (dolist (a A)
+      (setq stop nil)
+      (setq conta 0)
+      (dolist (b B stop)
+        (if (>= a b)
+            (++ conta)
+            ;else
+            (setq stop true)))
+      (++ vittorie conta))
+  (setq res (sub 1 (div vittorie totale)))
+  (println res)
+  (format "%1.7f" res))
+
+(time (println (e205-1)))
+;-> 0.5731440767829801
+;-> 0.5731441
+;-> 309851.942
+
+Un metodo piu veloce:
+(setq vittorie 0)
+(dolist (a A) (++ vittorie (find a B <)))
+(find a B <) restituisce l'indice del primo numero di B maggiore di 'a'.
+Poichè B è una lista ordinata questo numero rappresenta quanti numeri sono minori o uguali ad 'a'.
+
+(define (e205-2)
+  ; crea la lista di tutti i risultati possibili di colin (A)
+  (setq A '())
+  (for (d1 1 6) (for (d2 1 6) (for (d3 1 6) (for (d4 1 6) (for (d5 1 6)
+  (for (d6 1 6) (push (+ d1 d2 d3 d4 d5 d6) A)))))))
+  (sort A)
+  (setq lenA (length A))
+  ; crea la lista di tutti i risultati possibili di peter (B)
+  (setq B '())
+  (for (d1 1 4) (for (d2 1 4) (for (d3 1 4)  (for (d4 1 4)
+  (for (d5 1 4) (for (d6 1 4) (for (d7 1 4)  (for (d8 1 4)
+  (for (d9 1 4) (push (+ d1 d2 d3 d4 d5 d6 d7 d8 d9) B))))))))))
+  (push 37 B) ; serve per '(find a B <)' quando a = 36
+  (sort B)
+  (setq lenB (length B))
+  ; calcola la probabilità di vittoria o pareggio di (A) (colin)
+  (setq totale (* lenA (- lenB 1)))
+  ;(println "totale: " totale)
+  (setq vittorie 0)
+  ; per ogni elemento di A...
+  (dolist (a A)
+    (++ vittorie (find a B <)))
+  (setq res (sub 1 (div vittorie totale)))
+  (println res)
+  (format "%1.7f" res))
+
+(time (println (e205-2)))
+;-> 0.5731440767829801
+;-> 0.5731441
+;-> 309851.942
 ----------------------------------------------------------------------------
 
 
