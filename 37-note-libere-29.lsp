@@ -5095,7 +5095,7 @@ Quindi la probabilità vale:
 
           numero casi positivi
   prob = ----------------------
-                 1296 (tutti i casi)
+          1296 (tutti i casi)
 
 Funzione che calcola tutti i risultati possibili del lancio di 4 dadi:
 

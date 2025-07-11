@@ -136,6 +136,7 @@
 |   191    |  1918080160        |         -  |         1  |         0  |
 |   205    |  0.5731441         |         -  |    309852  |         -  |
 |   206    |  1389019170        |         -  |         2  |         -  |
+|   231    |  7526965179680     |         -  |      3825  |         -  |
 |   469    |  0.56766764161831  |         -  |         0  |         -  |
 
 Sito web: https://projecteuler.net/archives
@@ -14110,6 +14111,7 @@ Peter e Colin lanciano i dadi e confrontano i totali: il totale più alto vince.
 Il risultato è un pareggio se i totali sono uguali.
 Qual è la probabilità che Peter (Piramidale) batta Colin (Cubico)?
 Dai la tua risposta arrotondata a sette cifre decimali nella forma 0.abcdefg.
+============================================================================
 
 La lista A contiene tutti i risultati possibili del lancio dei dadi di Peter.
 La lista B contiene tutti i risultati possibili del lancio dei dadi di Colin.
@@ -14324,6 +14326,60 @@ Scriviamo la funzione finale:
 
 
 ============
+Problema 231
+============
+
+Fattorizzazione in numeri primi dei coefficienti binomiali.
+
+Il coefficiente binomiale binom(10 3) = 120.
+120 = 2^3 * 3 * 5 = 2*2*2*3*5 e 2 + 2 + 2 + 3 + 5 = 14.
+Quindi la somma dei termini nella fattorizzazione in numeri primi di binom(10 3) vale 14.
+Trova la somma dei termini nella fattorizzazione in numeri primi di:
+binom(20000000 15000000)
+============================================================================
+
+Vedi "Formula di Legendre" su "Note libere 31".
+
+(define (legendre n p)
+  (setq L (floor (log n p)))
+  (setq sum 0)
+  (if (> L 0) (for (i 1 L) (++ sum (floor (div n (pow p i))))))
+  sum)
+
+Gli esponenti dei primi di binom(a b) sono dati dalla formula:
+
+  Sum[i=1,Inf](floor(a/p^j) - floor(b/p^j) - floor((a - b)/p^j))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (e231 a b)
+  (let ( (sum 0) (primi (primes-to a)) )
+    (dolist (p primi)
+      (setq pj p)
+      (while (<= pj a)
+          (++ sum (* p (- (/ a pj) (/ b pj) (/ (- a b) pj))))
+          (setq pj (* pj p))))
+    sum))
+
+(e231 20000000 15000000)
+;-> 7526965179680
+
+(time (e231 20000000 15000000))
+;-> 3824.978
+----------------------------------------------------------------------------
+
+
+============
 Problema 469
 ============
 
@@ -14339,7 +14395,6 @@ Possiamo verificare che E(4) = 1/2 ed E(6) = 5/9.
 
 Trovare E(1018).
 Dare la risposta arrotondata a quattordici cifre decimali nella forma 0.abcdefghijklmn.
-
 ============================================================================
 
 (define (e469)

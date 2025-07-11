@@ -1073,5 +1073,63 @@ Proviamo:
 (ordina-stringa "SuperCaliFragilistiCheSpiralidoso")
 ;-> "aaaCCdeeFghiiiiiillloopprrrSSsstu"
 
+
+------------------------------
+Numero medio di corrispondenze
+------------------------------
+
+Abbiamo due liste composte ognuna da N numeri interi.
+I numeri delle liste sono scelti indipendentemente e uniformemente a caso tra M possibili valori interi.
+Qual è il numero medio di elementi (media attesa) che hanno lo stesso valore e la stessa posizione nelle due liste?
+
+Risulta che:
+  Se M = N, allora la media attesa vale 1.
+  Se M > N, allora la media attesa è minore di 1.
+  Se M < N, allora la media attesa è maggiore di 1.
+
+Funzione che verifica quanti elementi tra due liste hanno lo stesso valore nella stessa posizione:
+
+(define (same lst1 lst2)
+  (first (count '(true) (map = lst1 lst2))))
+
+(same '(1 2 3 4 5) '(1 2 3 4 6))
+;-> 4
+(same '(0 1 2 3 4 5) '(1 2 3 4 5 0))
+;-> 0
+
+Funzione che simula il processo:
+
+(define (simula N M itera)
+  (let ( (totale 0) (l1 '()) (l2 '()) )
+    (for (i 1 itera)
+      (setq l1 (rand M N))
+      (setq l2 (rand M N))
+      (++ totale (same l1 l2)))
+    (div totale itera)))
+
+Proviamo:
+
+(simula 100 100 1e5)
+;-> 1.00155
+(simula 100 1000 1e5)
+;-> 0.10003
+(simula 100 10 1e5)
+;-> 10.00065
+(simula 1000 10 1e5)
+;-> 100.00466
+
+La media attesa del numero di elementi nella stessa posizione con lo stesso valore tra due liste di lunghezza N, i cui elementi sono scelti indipendentemente e uniformemente a caso tra M possibili valori interi, vale:
+
+  Media = N/M
+
+La probabilità che due numeri casuali indipendenti tra 0 e M−1 coincidano:
+
+  P(uguali) = 1/M
+  
+Questo vale per ogni posizione 'i' (da 0 a N-1).
+Poichè ci sono N posizioni, la media attesa vale:
+
+  Media = N * 1/M = N/M
+
 ============================================================================
 

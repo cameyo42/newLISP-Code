@@ -334,7 +334,7 @@ ROSETTA CODE
 PROJECT EULERO
 ==============
   Problemi 1..105, 108..110, 112..117, 119..125,
-           135, 145, 173, 187, 188, 191, 205, 206, 469
+           135, 145, 173, 187, 188, 191, 205, 206, 231, 469
 
 PROBLEMI VARI
 =============
@@ -3041,6 +3041,7 @@ NOTE LIBERE 31
   Sequenze, dismutazioni, rotazioni
   x^2 + y^2 + z^2 + w^2 = x*y*z*w
   Ordinamento di lettere senza distinzioni tra maiuscole e minuscole
+  Numero medio di corrispondenze
 
 PROBLEMI SUI DADI
 =================
