@@ -1233,5 +1233,145 @@ Primes of the form (10^k - 1)/9. Also called repunit primes or repdigit primes.
 (primi-rep)
 ;-> (11L 1111111111111111111L)
 
+
+---------------
+Numero di Erdos
+---------------
+
+Il numero di Erdos è un modo per descrivere la "distanza" tra una persona e il matematico ungherese Paul Erdos in termini di collaborazione in pubblicazioni matematiche.
+La definizione del numero di Erdos è ricorsiva: per possedere un numero di Erdos, un autore deve aver collaborato a una ricerca con un autore che possiede un numero di Erdos.
+Erdos ha un numero di Erdos pari a 0.
+Per ogni altro autore, se k è il minimo numero di Erdos dei suoi collaboratori, il suo numero di Erdos è k+1.
+Di conseguenza, i coautori di Erdos hanno numero di Erdos 1, i loro coautori (se non hanno collaborato a loro volta con Erdos) hanno numero di Erdos 2, e così via.
+Chi non ha nessuna catena di collaborazioni che porta a Paul Erdos non ha un numero di Erdos, oppure lo ha infinito.
+
+Quindi per ogni pubblicazione abbiamo una lista di autori.
+Per esempio  (E = Erdos):
+(E A B) (E C) (E Z) (E D L) (K C) (L K)
+Come calcolare i numeri di Erdos per A, B, C, D, E, L, K, e Z?
+
+Per calcolare i numeri di Erdos a partire da una lista di pubblicazioni (ognuna con una lista di autori), possiamo modellare il problema come una visita in ampiezza (BFS) su un grafo in cui i nodi sono gli autori e gli archi rappresentano un collegamento tra due autori se hanno scritto un articolo insieme.
+
+Algoritmo
+1) Costruire un grafo in cui ogni autore è un nodo, e per ogni pubblicazione collegsre tutti gli autori tra loro.
+2) Iniziare da "E" (Erdos) con numero 0.
+3) Usare una coda per eseguire una BFS:
+   - per ogni autore nella coda, assegna 'numero + 1' ai suoi vicini non ancora visitati.
+
+Esempio:
+pubblicazioni = ((E A B) (E C) (E Z) (E D L) (K C) (L K))
+
+1) Trasformiamo le pubblicazioni in un grafo non orientato:
+  E: A B C Z D L  
+  A: E B  
+  B: E A  
+  C: E K  
+  Z: E  
+  D: E L  
+  L: E D K  
+  K: C L
+
+2) Il numero di Erdos di E vale 0
+  E = 0
+
+3) BFS
+
+Partiamo da E:
+- Visitiamo i vicini di E: A B C Z D L --> numero Erdos 1
+- Visitiamo i vicini di A B C Z D L:
+  A --> già assegnato
+  B --> già assegnato
+  C --> collega K, ancora non assegnato --> K ha Erdos 2
+  Z --> nessun altro
+  D --> già fatto
+  L --> già fatto
+- Visitiamo K --> i vicini sono C, L --> già assegnati
+Fine.
+
+Output:
+  (E 0) (A 1) (B 1) (C 1) (Z 1) (D 1) (L 1) (K 2)
+
+; Funzione di utilità per cercare un valore in una lista associativa
+(define (lookup-assoc chiave lista)
+  (let ((ris (assoc chiave lista)))
+    (if ris (last ris) nil)))
+
+; Funzione di utilità per aggiornare o aggiungere una coppia chiave-valore in una lista associativa
+(define (setf-assoc chiave valore lista)
+  (let ((pos (find chiave (map first lista))))
+    (if pos
+        (begin
+          (setf (last (lista pos)) valore)
+          lista)
+        (append lista (list (list chiave valore))))))
+
+; Funzione per eliminare duplicati da una lista eventualmente annidata
+(define (unique-flat lst)
+  (unique (flat lst)))
+
+; Funzione principale per calcolare i numeri di Erdos
+(define (erdos pubblicazioni)
+  (local (grafo erdos-num visited queue)
+    ; Costruzione del grafo:
+    ; lista associativa autore --> lista dei suoi coautori
+    ; Per ogni pubblicazione, 
+    ; colleghiamo ogni autore a tutti gli altri della stessa pubblicazione
+    (setq grafo '())
+    (dolist (pubblicazione pubblicazioni)
+      (dolist (a pubblicazione)
+        (dolist (b pubblicazione)
+          (unless (= a b)
+            (let ((vicini (or (lookup-assoc a grafo) '())))
+              (setq grafo
+                    (setf-assoc a
+                                (unique-flat (append vicini (list b)))
+                                grafo)))))))
+    ;(println grafo)
+    ; Inizializzazione della lista associativa dei numeri di Erdos
+    (setq erdos-num '())
+    ; Lista degli autori già visitati durante la BFS
+    (setq visited '())
+    ; Coda per la BFS: inizialmente contiene solo Erdos con numero 0
+    (setq queue '(("E" 0)))
+    ; Esecuzione della visita in ampiezza (BFS)
+    (while queue
+      (letn ((corrente (pop queue))
+             (nome (corrente 0))
+             (numero (corrente 1)))
+        ; Se il nodo non è stato ancora visitato
+        (unless (ref nome visited)
+          ; Aggiungiamo il nodo alla lista dei visitati
+          (push nome visited)
+          ; Registriamo il numero di Erdos per questo autore
+          (setq erdos-num (setf-assoc nome numero erdos-num))
+          ; Aggiungiamo alla coda tutti i coautori con numero incrementato
+          (dolist (vicino (or (lookup-assoc nome grafo) '()))
+            (push (list vicino (+ numero 1)) queue -1)))))
+    ; Ritorna la lista autore --> numero di Erdos
+    erdos-num))
+
+Proviamo:
+
+(setq pubblicazioni '(
+  ("E" "A" "B")
+  ("E" "C")
+  ("E" "Z")
+  ("E" "D" "L")
+  ("K" "C")
+  ("L" "K")))
+(erdos pubblicazioni)
+;-> (("E" 0) ("A" 1) ("B" 1) ("C" 1) ("Z" 1) ("D" 1) ("L" 1) ("K" 2))
+
+(setq pubblicazioni '(
+  ("E" "A" "B")
+  ("E" "C")
+  ("E" "Z")
+  ("E" "D" "C")
+  ("K" "C")
+  ("L" "K")
+  ("K" "Y")))
+(erdos pubblicazioni)
+;-> (("E" 0) ("A" 1) ("B" 1) ("C" 1) ("Z" 1) ("D" 1) ("K" 2) ("L" 3) ("Y" 3))
+
 ============================================================================
 
