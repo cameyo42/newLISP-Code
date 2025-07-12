@@ -128,6 +128,7 @@
 |   123    |  21035             |         -  |       134  |         -  |
 |   124    |  21417             |         -  |       140  |         -  |
 |   125    |  2906969179        |         -  |      1570  |         -  |
+|   132    |  843296            |         -  |       275  |         -  |
 |   135    |  4989              |         -  |      2874  |      1194  |
 |   145    |  608720            |         -  |     99501  |         0  |
 |   173    |  1572729           |         -  |       124  |         0  |
@@ -13485,6 +13486,75 @@ Trova la somma di tutti i numeri minori di 10^8 che sono entrambi palindromi e p
 
 (time (e125 1e8))
 ;-> 1569.753
+----------------------------------------------------------------------------
+
+
+============
+Problema 132
+============
+
+Un numero composto interamente da numeri uno è chiamato repunit.
+Definiremo R(k) come una repunit di lunghezza k.
+Ad esempio, R(10) = 1111111111 = 11 * 41 * 271 * 9091, e la somma di questi fattori primi è 9414.
+Trova la somma dei primi quaranta fattori primi di R(10^9).
+
+Si tratta di trovare i numeri primi p che soddisfano:
+
+  R(k) ≡ 0 mod p       (1)
+
+La formula per calcolare il k-esimo repunit è la seguente:
+
+  R(k) = (10^k - 1)/9  (2)
+
+Sostituendo la (2) in (1):
+
+  (10^k - 1) ≡ 0 mod 9p  -->  10^k ≡ 1 mod 9*p
+
+Quindi occorre trovare e sommare i primi 40 numeri primi p che soddisfano:
+
+  (10^k mod 9*p) = 1
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (powmod base expt modulo)
+"Calculate (base^exponent % modulo)"
+  (let (out 1L)
+    (while (> expt 0)
+      (if (odd? expt)
+          (setq out (% (* out base) modulo)))
+      (setq base (% (* base base) modulo))
+      (setq expt (/ expt 2)))
+    out))
+
+(define (e132)
+  (local (somma primi conta)
+    (setq somma 0)
+    ; calcoliamo i numeri primi fino ad 1 milione (per sicurezza)
+    (setq primi (primes-to 1e6))
+    (setq conta 0)
+    (while (< conta 40)
+      (setq p (pop primi))
+      (when (= (powmod 10 1000000000 (* 9 p)) 1)
+        ;(println p)
+        (++ conta)
+        (++ somma p)))
+    somma))
+
+(e132)
+;-> 843296
+
+(time (e132))
+;-> 275.254
 ----------------------------------------------------------------------------
 
 

@@ -333,7 +333,7 @@ ROSETTA CODE
 
 PROJECT EULERO
 ==============
-  Problemi 1..105, 108..110, 112..117, 119..125,
+  Problemi 1..105, 108..110, 112..117, 119..125, 132,
            135, 145, 173, 187, 188, 191, 205, 206, 231, 469
 
 PROBLEMI VARI
@@ -3042,6 +3042,9 @@ NOTE LIBERE 31
   x^2 + y^2 + z^2 + w^2 = x*y*z*w
   Ordinamento di lettere senza distinzioni tra maiuscole e minuscole
   Numero medio di corrispondenze
+  Numeri con somma dei fattori prima
+  Numeri composti con somma dei fattori prima
+  Repunit
 
 PROBLEMI SUI DADI
 =================
@@ -3089,7 +3092,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (349 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (359 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

@@ -1131,5 +1131,107 @@ Poichè ci sono N posizioni, la media attesa vale:
 
   Media = N * 1/M = N/M
 
+
+----------------------------------
+Numeri con somma dei fattori prima
+----------------------------------
+
+Sequenza OEIS A100118:
+Numbers whose sum of prime factors is prime (counted with multiplicity).
+  2, 3, 5, 6, 7, 10, 11, 12, 13, 17, 19, 22, 23, 28, 29, 31, 34, 37, 40,
+  41, 43, 45, 47, 48, 52, 53, 54, 56, 58, 59, 61, 63, 67, 71, 73, 75, 76,
+  79, 80, 82, 83, 88, 89, 90, 96, 97, 99, 101, 103, 104, 107, 108, 109,
+  113, 117, 118, 127, 131, 136, 137, 139, 142, 147, 148, 149, ...
+
+(define (seq? num)
+  (prime? (apply + (factor num))))
+
+(seq? 11)
+;-> true
+
+(filter seq? (sequence 2 149))
+;-> (2 3 5 6 7 10 11 12 13 17 19 22 23 28 29 31 34 37 40
+;->  41 43 45 47 48 52 53 54 56 58 59 61 63 67 71 73 75 76
+;->  79 80 82 83 88 89 90 96 97 99 101 103 104 107 108 109
+;->  113 117 118 127 131 136 137 139 142 147 148 149)
+
+
+-------------------------------------------
+Numeri composti con somma dei fattori prima
+-------------------------------------------
+
+Sequenza OEIS A046363:
+Composite numbers whose sum of prime factors (with multiplicity) is prime.
+  6, 10, 12, 22, 28, 34, 40, 45, 48, 52, 54, 56, 58, 63, 75, 76, 80, 82,
+  88, 90, 96, 99, 104, 108, 117, 118, 136, 142, 147, 148, 153, 165, 172,
+  175, 176, 184, 198, 202, 207, 210, 214, 224, 245, 248, 250, 252, 268,
+  273, 274, 279, 294, 296, 298, 300, 316, 320, 325, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (seq? num)
+  (let (f (factor num))
+    (and (> (length f) 1) (prime? (apply + f)))))
+
+(seq? 12)
+
+(filter seq? (sequence 2 325))
+;-> (6 10 12 22 28 34 40 45 48 52 54 56 58 63 75 76 80 82
+;->  88 90 96 99 104 108 117 118 136 142 147 148 153 165 172
+;->  175 176 184 198 202 207 210 214 224 245 248 250 252 268
+;->  273 274 279 294 296 298 300 316 320 325)
+
+
+-------
+Repunit
+-------
+
+Una repunit R(n) è un numero come 11, 111 o 1111 che contiene n volte solo la cifra 1.
+Il termine sta per "repeated unit" ed è stato coniato nel 1966 da Albert Beiler nel suo libro "Recreations in the Theory of Numbers".
+Definizione:
+
+  R(1) = 1
+  R(n) = (10^n - 1)/9
+
+Sequenza OEIS A002275:
+Repunits: (10^n - 1)/9. Often denoted by R_n.
+  0, 1, 11, 111, 1111, 11111, 111111, 1111111, 11111111, 111111111,
+  1111111111, 11111111111, 111111111111, 1111111111111, ...
+
+Proprietà
+- Solo le repunit con un numero primo di cifre possono essere prime (condizione necessaria, ma non sufficiente).
+- Tutte le repunit consecutive R(n−1) e R(n) sono prime tra loro per ogni n.
+
+Sequenza OEIS A004022:
+Primes of the form (10^k - 1)/9. Also called repunit primes or repdigit primes.
+  11, 1111111111111111111, 11111111111111111111111, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (primi-rep)
+  (filter (fn(x) (prime? (/ (- (** 10 x) 1) 9))) (sequence 2 19 2)))
+
+(define (primi-rep)
+  (let ( (out '()) (rep 1) )
+    (for (n 2 19) ; fino al numero di cifre del valore massimo di Int64 (19)
+      (setq rep (/ (- (** 10 n) 1) 9))
+      (if (prime? rep) (push rep out -1)))))
+
+(primi-rep)
+;-> (11L 1111111111111111111L)
+
 ============================================================================
 
