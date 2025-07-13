@@ -1373,5 +1373,279 @@ Proviamo:
 (erdos pubblicazioni)
 ;-> (("E" 0) ("A" 1) ("B" 1) ("C" 1) ("Z" 1) ("D" 1) ("K" 2) ("L" 3) ("Y" 3))
 
+
+---------------------
+Curiosità aritmetiche
+---------------------
+
+Sottrazione incantevole
+-----------------------
+
+ 987654321 -  -->  digit sum 45
+ 123456789 =  -->  digit sum 45
+ ---------
+ 864197532    -->  digit sum 45
+
+Schema 1
+--------
+
+  12345679 * 9 * 1 = 111111111
+  12345679 * 9 * 2 = 222222222
+  12345679 * 9 * 3 = 333333333
+  12345679 * 9 * 4 = 444444444
+  12345679 * 9 * 5 = 555555555
+  12345679 * 9 * 6 = 666666666
+  12345679 * 9 * 7 = 777777777
+  12345679 * 9 * 8 = 888888888
+  12345679 * 9 * 9 = 999999999
+
+(define (schema1)
+  (local (a b c)
+    (setq a 12345679)
+    (setq b 9)
+    (for (k 1 9)
+      (setq c k)
+      (println a " * " b " * " c " = "  (* a b c))) '>))
+
+(schema1)
+;-> 12345679 * 9 * 1 = 111111111
+;-> 12345679 * 9 * 2 = 222222222
+;-> 12345679 * 9 * 3 = 333333333
+;-> 12345679 * 9 * 4 = 444444444
+;-> 12345679 * 9 * 5 = 555555555
+;-> 12345679 * 9 * 6 = 666666666
+;-> 12345679 * 9 * 7 = 777777777
+;-> 12345679 * 9 * 8 = 888888888
+;-> 12345679 * 9 * 9 = 999999999
+
+Come viene creata?
+
+(define (tabelle cifre)
+  (local (base fattori cost molt)
+    (setq base (/ (- (pow 10 cifre) 1) 9))
+    (setq fattori (factor base))
+    (println base " - " fattori)
+    (dolist (f fattori)
+      (println "f = " f)
+      (setq cost f)
+      (setq molt (/ (apply * fattori) f))
+      (for (k 1 9)
+        (println (string molt " * " cost " * " k " = " (* molt cost k)))
+      )
+      (for (k 1 9)
+        (println (string molt " * " (* cost k) " = " (* molt cost k)))
+      )
+      (for (k 1 9)
+        (println (string (* molt cost) " * " k " = " (* molt cost k)))
+      )
+      (print "----------------------------------------") (read-line))))
+
+(tabelle 9)
+
+Schema 2
+--------
+
+          1*9 +  2 = 11
+         12*9 +  3 = 111
+        123*9 +  4 = 1111
+       1234*9 +  5 = 11111
+      12345*9 +  6 = 111111
+     123456*9 +  7 = 1111111
+    1234567*9 +  8 = 11111111
+   12345678*9 +  9 = 111111111
+  123456789*9 + 10 = 1111111111
+
+(define (schema2)
+  (local (spaces a b c)
+    (setq spaces 9)
+    (for (k 1 9)
+      (setq a "")
+      (for (i 1 k) (extend a (string i)))
+      (setq a (int a))
+      (setq b 9)
+      (setq c (+ k 1))
+      (println (string (dup " " (- spaces k))
+                a "*" b " +" (format "%3d" c) " = "
+                (+ (* a b) c)))) '>))
+
+(schema2)
+;->         1*9 +  2 = 11
+;->        12*9 +  3 = 111
+;->       123*9 +  4 = 1111
+;->      1234*9 +  5 = 11111
+;->     12345*9 +  6 = 111111
+;->    123456*9 +  7 = 1111111
+;->   1234567*9 +  8 = 11111111
+;->  12345678*9 +  9 = 111111111
+;-> 123456789*9 + 10 = 1111111111
+
+Schema 3
+--------
+
+          1*8 + 1 = 9
+         12*8 + 2 = 98
+        123*8 + 3 = 987
+       1234*8 + 4 = 9876
+      12345*8 + 5 = 98765
+     123456*8 + 6 = 987654
+    1234567*8 + 7 = 9876543
+   12345678*8 + 8 = 98765432
+  123456789*8 + 9 = 987654321
+
+(define (schema3)
+  (local (spaces a b c)
+    (setq spaces 9)
+    (for (k 1 9)
+      (setq a "")
+      (for (i 1 k) (extend a (string i)))
+      (setq a (int a))
+      (setq b 8)
+      (setq c k)
+      (println (string (dup " " (- spaces k))
+                a "*" b " +" (format "%2d" c) " = "
+                (+ (* a b) c)))) '>))
+
+(schema3)
+;->         1*8 + 1 = 9
+;->        12*8 + 2 = 98
+;->       123*8 + 3 = 987
+;->      1234*8 + 4 = 9876
+;->     12345*8 + 5 = 98765
+;->    123456*8 + 6 = 987654
+;->   1234567*8 + 7 = 9876543
+;->  12345678*8 + 8 = 98765432
+;-> 123456789*8 + 9 = 987654321
+
+Schema4
+-------
+
+         9*9 + 7 = 88
+        98*9 + 6 = 888
+       987*9 + 5 = 8888
+      9876*9 + 4 = 88888
+     98765*9 + 3 = 888888
+    987654*9 + 2 = 8888888
+   9876543*9 + 1 = 88888888
+  98765432*9 + 0 = 888888888
+
+(define (schema4)
+  (local (spaces a b c)
+    (setq spaces 8)
+    (for (k 1 8)
+      (setq a "")
+      (for (i 1 k) (extend a (string (- 10 i))))
+      (setq a (int a))
+      (setq b 9)
+      (setq c (- 8 k))
+      (println (string (dup " " (- spaces k))
+                a "*" b " +" (format "%3d" c) " = "
+                (+ (* a b) c)))) '>))
+
+(schema4)
+;->        9*9 +  7 = 88
+;->       98*9 +  6 = 888
+;->      987*9 +  5 = 8888
+;->     9876*9 +  4 = 88888
+;->    98765*9 +  3 = 888888
+;->   987654*9 +  2 = 8888888
+;->  9876543*9 +  1 = 88888888
+;-> 98765432*9 +  0 = 888888888
+
+Schema 5
+--------
+
+          1 * 1         =         1
+         11 * 11        =        121
+        111 * 111       =       12321
+       1111 * 1111      =      1234321
+      11111 * 11111     =     123454321
+     111111 * 111111    =    12345654321
+    1111111 * 1111111   =   1234567654321
+   11111111 * 11111111  =  123456787654321
+  111111111 * 111111111 = 12345678987654321
+
+(define (schema5)
+  (local (spaces a b c)
+    (setq spaces 8)
+    (for (k 1 9)
+      (setq a (/ (- (pow 10 k) 1) 9))
+      (setq sp (dup " " spaces))
+      (println (string sp a " * " a sp " = " sp (* a a)))
+      (-- spaces 1)) '>))
+      ;(println (string (dup " " spaces) a " * " a " = " (* a a)))
+      ;(-- spaces 2)) '>))
+
+(schema5)
+;->         1 * 1         =         1
+;->        11 * 11        =        121
+;->       111 * 111       =       12321
+;->      1111 * 1111      =      1234321
+;->     11111 * 11111     =     123454321
+;->    111111 * 111111    =    12345654321
+;->   1111111 * 1111111   =   1234567654321
+;->  11111111 * 11111111  =  123456787654321
+;-> 111111111 * 111111111 = 12345678987654321
+
+Schema 6
+--------
+
+                        1 + 2 = 3
+                    4 + 5 + 6 = 7 + 8
+             9 + 10 + 11 + 12 = 13 + 14 + 15
+       16 + 17 + 18 + 19 + 20 = 21 + 22 + 23 + 24
+  25 + 26 + 27 + 28 + 29 + 30 = 31 + 32 + 33 + 34 + 35
+  ecc.
+
+(define (center-string str num-chars fill-char)
+"Justify a string to the center"
+  (letn ( (len-str (length str)) (space (- num-chars len-str)) )
+    (setq fill-char (or fill-char " "))
+    (if (even? space)
+      ; centratura pari
+      (append (dup fill-char (/ space 2)) str (dup fill-char (/ space 2))))
+      ; centratura dispari
+      (append (dup fill-char (/ space 2)) str (dup fill-char (+ (/ space 2) 1)))))
+
+(define (schema6 rows)
+  (local (table sx dx curr riga max-len)
+    (setq table '())
+    (setq sx 2)
+    (setq dx 1)
+    (setq curr 0)
+    ; ciclo per ogni riga...
+    (for (r 1 rows)
+      (setq riga "")
+      ; parte sinistra
+      (for (s 1 sx)
+        (++ curr)
+        (push (string curr) riga -1)
+        (if (!= s sx) (push " + " riga -1)))
+      (++ sx)
+      (push " = " riga -1)
+      ; parte destra
+      (for (d 1 dx)
+        (++ curr)
+        (push (string curr) riga -1)
+        (if (!= d dx) (push " + " riga -1)))
+      (++ dx)
+      (push riga table -1)
+      ;(println riga)
+    )
+    ; lunghezza della riga più lunga
+    (setq max-len (length (table -1)))
+    ; stampa centrata
+    (dolist (el table)
+      (if (odd? (length el)) (push " " el))
+      (println (center-string el max-len " "))) '>))
+
+(schema6 7)
+;->                                 1 + 2 = 3
+;->                             4 + 5 + 6 = 7 + 8
+;->                      9 + 10 + 11 + 12 = 13 + 14 + 15
+;->                16 + 17 + 18 + 19 + 20 = 21 + 22 + 23 + 24
+;->           25 + 26 + 27 + 28 + 29 + 30 = 31 + 32 + 33 + 34 + 35
+;->      36 + 37 + 38 + 39 + 40 + 41 + 42 = 43 + 44 + 45 + 46 + 47 + 48
+;-> 49 + 50 + 51 + 52 + 53 + 54 + 55 + 56 = 57 + 58 + 59 + 60 + 61 + 62 + 63
+
 ============================================================================
 

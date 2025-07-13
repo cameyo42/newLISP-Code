@@ -3046,6 +3046,7 @@ NOTE LIBERE 31
   Numeri composti con somma dei fattori prima
   Repunit
   Numero di Erdos
+  Curiosità aritmetiche
 
 PROBLEMI SUI DADI
 =================
