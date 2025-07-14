@@ -1647,5 +1647,277 @@ Schema 6
 ;->      36 + 37 + 38 + 39 + 40 + 41 + 42 = 43 + 44 + 45 + 46 + 47 + 48
 ;-> 49 + 50 + 51 + 52 + 53 + 54 + 55 + 56 = 57 + 58 + 59 + 60 + 61 + 62 + 63
 
+
+-----------------
+Bandiera Italiana
+-----------------
+
+Dimensioni standard: 2/3
+Dimensioni di guerra: 1/1
+
+Colori (wikipedia):
+  Pantone
+  Verde:  (17-6153 TCX)
+  Bianco: (11-0601 TCX)
+  Rosso:  (18-1662 TCX)
+
+  CMYK
+  Verde:  (C:100 M:0 Y:100 K:0)
+  Bianco: (C:0 M:0 Y:0 K:5)
+  Rosso:  (C:0 M:100 Y:100 K:0)
+
+  RGB
+  Verde:  (R:0 G:140 B:69)
+  Bianco: (R:244 G:249 B:255)
+  Rosso:  (R:205 G:33 B:42)
+
+Colori usati:
+  Verde:  (R:0 G:53 B:26)     --> (ANSI 29)
+  Bianco: (R:244 G:249 B:255) --> (ANSI 231)
+  Rosso:  (R:73 G:12 B:13)    --> (ANSI 160)
+
+(define (foreground color)
+  (let (f (string "\027[38;5;" color "m"))
+    (print f)))
+
+(define (it h w)
+  (local (colori banda)
+    (setq colori '(29 231 160))
+    (setq banda (/ w 3))
+    (for (i 1 h)
+      (dolist (c colori) (print (foreground c) (dup "█" banda)))
+      (println))
+      (print (foreground 255)) '>))
+
+Proviamo:
+
+(it 3 9)
+(it 6 18)
+(it 5 18)
+(it 4 9)
+(it 14 9)
+
+Nota: la dimensione più comune di una cella nel terminale DOS è 9x14 pixel.
+Comunque il carattere "█" ha un rapporto di 1 a 2 (circa).
+
+(define (quadrato l w)
+  (for (i 1 l) (println (foreground 231) (dup "█" (* l 2))))
+    (print (foreground 255)) '>)
+
+(quadrato 2)
+(quadrato 5)
+(quadrato 10)
+
+
+-----------------
+Talmudic division
+-----------------
+
+Nel Talmud babilonese (Bava Metzia 2a) viene riportato il seguente problema:
+  Un uomo ha debiti con tre creditori rispettivamente per 100, 200 e 300 euro.
+  Se l'uomo ha un totale di 100 euro, come ripartirli tra i debitori?
+  Se l'uomo ha un totale di 200 euro, come ripartirli tra i debitori?
+  Se l'uomo ha un totale di 300 euro, come ripartirli tra i debitori?
+
+Il Talmud riporta la seguente soluzione:
+  +--------+---------+---------+---------+----------------------------------+
+  | Totale |  C1     |  C2     |  C3     | Metodo                           |
+  +--------+---------+---------+---------+----------------------------------+
+  |  100   |  33+1/3 |  33+1/3 |  33+1/3 | divisione in parti uguali        |
+  +--------+---------+---------+---------+----------------------------------+
+  |  200   |  50     |  75     |  75     | divisione ???                    |
+  +--------+---------+---------+---------+----------------------------------+
+  |  300   |  50     |  100    |  150    | divisione in parti proporzionali |
+  +--------+---------+---------+---------+----------------------------------+
+
+Nel Talmud troviamo anche un esempio con 2 creditori in cui uno vuole il 50% di una somma e l'altro vuole il 100%.
+La soluzione consiste nel determinare la differenza tra le due richieste (parte disputata), dividere questa differenza per due e assegnare ognuna di queste parti ai due creditori.
+La parte restante (parte non disputata) viene assegnata a chi ha chiesto la parte più alta.
+In questo caso la parte disputata vale (1 - 1/2)/2 = 1/4.
+Ognuno riceve 1/4.
+Rimane 1/2 che viene assegnato a chi ha chiesto il 100%.
+Quindi il primo creditore riceve 1/4 della somma e il secondo creditore riceve 3/4 della somma (qualunque sia la somma iniziale).
+
+Questo metodo viene chiamato "equal divison of the contested sum" e nel 1980 Robert Aumann e Michael Maschler pubblicarono un algoritmo per estendere questo metodo al caso di N creditori.
+
+Algoritmo per la divisione del patrimonio secondo il Talmud
+-----------------------------------------------------------
+1) Ordina i creditori in base all'entità del credito, dal più piccolo al più grande.
+2) Dividi equamente il patrimonio tra tutti i creditori fino a quando il creditore con la richiesta più bassa ha ricevuto la metà del proprio credito.
+3) Continua la divisione equa del patrimonio, escludendo il creditore che ha già ricevuto la metà, fino a quando il secondo creditore più basso raggiunge la metà del proprio credito.
+4) Ripeti il processo, escludendo progressivamente i creditori che hanno già ricevuto la metà del loro credito, fino a quando ogni creditore ha ricevuto almeno la metà di quanto richiesto.
+5) A questo punto, inverti la logica: comincia a distribuire il patrimonio restante partendo dal creditore con il credito più alto, fino a quando la perdita (cioè la differenza tra quanto richiesto e quanto ricevuto) di quel creditore è uguale alla perdita del creditore con il credito immediatamente inferiore.
+6) Poi dividi equamente il patrimonio rimanente tra i creditori con la perdita maggiore, fino a quando le loro perdite diventano uguali a quella del gruppo successivo.
+7) Prosegui in questo modo fino a quando tutto il patrimonio è stato assegnato.
+
+Si tratta di un algoritmo di divisione proporzionale con soglia, noto come "Talmudic division", quando le risorse sono insufficienti a coprire tutti i debiti.
+
+Esempio:
+--------
+Patrimonio totale: 200
+Creditori:
+  C1: 100
+  C2: 200
+  C3: 300
+
+Fase 1: Prima metà (fino a metà delle richieste)
+------------------------------------------------
+Ordinati: C1 (100), C2 (200), C3 (300)
+Obiettivo: dare fino a metà di ogni richiesta.
+Quindi:
+  C1 --> massimo 50
+  C2 --> massimo 100
+  C3 --> massimo 150
+Totale massimo distribuito in questa fase: 50 + 100 + 150 = 300, ma abbiamo solo 200, quindi ci fermiamo prima.
+
+Distribuzione in ordine
+
+1. Distribuiamo equamente tra i 3 creditori finché C1 raggiunge la metà della sua richiesta (50).
+   Ogni giro dà x euro a ciascuno. Dopo x euro:
+     C1: riceve x --> vogliamo x = 50 --> 50
+     C2: riceve x = 50
+     C3: riceve x = 50
+   Spesa totale: 3 * 50 = 150
+   Rimangono: 200 - 150 = 50
+
+2. Ora C1 è fuori (ha metà del suo credito).
+   Restano C2 e C3, che hanno ricevuto 50 ciascuno (su un massimo di 100 e 150 rispettivamente).
+
+3. Distribuiamo equamente tra C2 e C3 finché uno dei due raggiunge metà del proprio credito:
+   Mancano ancora 50 --> dividiamo 25 a testa
+   C2 arriva a 75
+   C3 arriva a 75
+   (C2 doveva arrivare a 100, quindi non ancora a metà: fermiamo qui perché i 200 sono finiti)
+
+Risultato dopo la Fase 1:
+  C1: 50
+  C2: 75
+  C3: 75
+
+Ora passiamo alla seconda parte dell'algoritmo: lavorare all’indietro sui "loss" (le perdite).
+
+Fase 2: Bilanciamento delle perdite
+-----------------------------------
+Calcoliamo quanto ha perso ogni creditore:
+
+  +-----------+-----------+----------+---------+
+  | Creditore | Richiesta | Ricevuto | Perdita |
+  +-----------+-----------+----------+---------+
+  | C1        | 100       | 50       | 50      |
+  +-----------+-----------+----------+---------+
+  | C2        | 200       | 75       | 125     |
+  +-----------+-----------+----------+---------+
+  | C3        | 300       | 75       | 225     |
+  +-----------+-----------+----------+---------+
+
+L'algoritmo ora mira a equa perdita tra i creditori partendo dai più grandi.
+Cerchiamo di bilanciare la perdita del creditore più alto (C3) con quella del secondo (C2), e poi con C1 se possibile.
+
+Ma nel nostro caso, i soldi sono già finiti nella Fase 1.
+Quindi non possiamo fare alcun aggiustamento nella Fase 2: tutto è già stato distribuito.
+
+Conclusione
+-----------
+La distribuzione finale secondo l’algoritmo descritto è:
+  C1: 50
+  C2: 75
+  C3: 75
+
+La somma è 200, e rispetta la logica:
+a) Prima, garantire fino alla metà delle richieste (tutti ottengono fino a quel punto).
+b) Poi, nessuna risorsa residua da riequilibrare le perdite, quindi non si prosegue.
+
+(define (talmud-division totale crediti)
+  (local (creditori n assegnati meta fine attivi k max-quote quota
+          perdite max-perdita massimi prossime delta)
+  ; Ordina i crediti in ordine crescente
+  (setq creditori (sort crediti <))
+  ; Numero di creditori
+  (setq n (length creditori))
+  ; Inizializza l'elenco degli importi assegnati a zero
+  (setq assegnati (dup 0 n))
+  ; Calcola la metà di ciascun credito
+  (setq meta (map (fn (x) (div x 2)) creditori))
+  ; FASE 1: Assegna fino a metà di ogni credito
+  ; -------------------------------------------
+  (setq fine nil) ; variabile di controllo ciclo
+  (while (not fine)
+    ; Trova gli indici dei creditori che non hanno ancora raggiunto la metà
+    (setq attivi (filter (fn (i) (< (assegnati i) (meta i))) (sequence 0 (- n 1))))
+    (setq k (length attivi))
+    ; Se non ci sono più attivi o non ci sono fondi, esci dal ciclo
+    (if (or (= k 0) (<= totale 0))
+        (setq fine true)
+        (begin
+          ; Calcola quanto può ricevere ciascun attivo: il minimo tra ciò che gli manca e il totale diviso per k
+          (setq max-quote (apply min (map (fn (i) (sub (meta i) (assegnati i))) attivi)))
+          (setq quota (min max-quote (div totale k)))
+          ; Se la quota è nulla o negativa, termina il ciclo
+          (if (<= quota 0)
+              (setq fine true)
+              ; Altrimenti assegna la quota a ciascun attivo
+              (dolist (i attivi)
+                (inc (assegnati i) quota)
+                (dec totale quota))))))
+  ; FASE 2: Bilancia le perdite tra i creditori maggiori
+  ; ----------------------------------------------------
+  ; Calcola la perdita per ciascun creditore = credito - ricevuto
+  (setq perdite (map sub creditori assegnati))
+  (setq fine nil)
+  (while (not fine)
+    (if (<= totale 0)
+        (setq fine true)
+        (begin
+          ; Trova la perdita massima
+          (setq max-perdita (apply max perdite))
+          ; Trova gli indici dei creditori con perdita massima
+          (setq massimi (filter (fn (i) (= (perdite i) max-perdita)) (sequence 0 (- n 1))))
+          (setq k (length massimi))
+          ; Trova le perdite minori tra i restanti
+          (setq prossime (filter (fn (i) (< (perdite i) max-perdita)) (sequence 0 (- n 1))))
+          ; Calcola quanto si può ridurre la perdita dei massimi
+          (if (null? prossime)
+              (setq delta max-perdita)
+              (begin
+                (setq prox-max (apply max (map (fn (i) (perdite i)) prossime)))
+                (setq delta (sub max-perdita prox-max))))
+          ; La quota è il minimo tra 'delta' e 'totale / k'
+          (setq quota (min delta (div totale k)))
+          ; Se la quota è nulla, termina
+          (if (<= quota 0)
+              (setq fine true)
+              ; Altrimenti assegna la quota a ciascun "massimo"
+              (begin
+                (dolist (i massimi)
+                  (inc (assegnati i) quota)
+                  (dec totale quota))
+                ; Ricalcola le perdite aggiornate
+                (setq perdite (map sub creditori assegnati)))))))
+  ; Ritorna la lista degli importi assegnati a ciascun creditore
+  assegnati))
+
+Proviamo:
+
+(talmud-division 100 '(100 200 300))
+;-> (33.33333333333334 33.33333333333334 33.33333333333334)
+(talmud-division 200 '(100 200 300))
+;-> (50 75 75)
+(talmud-division 300 '(100 200 300))
+;-> (50 100 150)
+Abbiamo trovato le stesse soluzioni del Talmud.
+
+(talmud-division 700 '(100 200 300))
+;-> (100 200 300)
+(talmud-division 500 '(100 200 300))
+;-> (66.66666666666667 166.6666666666667 266.6666666666667)
+(talmud-division 103 '(100 200 300))
+;-> (34.33333333333334 34.33333333333334 34.33333333333334)
+(talmud-division 99 '(99 200 300))
+;-> (33 33 33)
+(talmud-division 50 '(100 200 300))
+;-> (16.66666666666667 16.66666666666667 16.66666666666667)
+(talmud-division 0 '(100 200 300))
+;-> (0 0 0)
+
 ============================================================================
 

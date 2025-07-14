@@ -6962,7 +6962,6 @@ Funzione che disegna la bandiera Rainbow:
     (dolist (col colori) (print (foreground col) (dup "█" len)) (println))
     (print (foreground 255)) '>))
 
-
 (rainbow 24)
 
 Vedi l'immagine "rainbow-flag" nella cartella "data".

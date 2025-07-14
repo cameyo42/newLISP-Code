@@ -3047,6 +3047,8 @@ NOTE LIBERE 31
   Repunit
   Numero di Erdos
   Curiosità aritmetiche
+  Bandiera Italiana
+  Talmudic division
 
 PROBLEMI SUI DADI
 =================
