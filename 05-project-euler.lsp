@@ -129,8 +129,10 @@
 |   124    |  21417             |         -  |       140  |         -  |
 |   125    |  2906969179        |         -  |      1570  |         -  |
 |   132    |  843296            |         -  |       275  |         -  |
+|   133    |  453647705         |         -  |       375  |         -  |
 |   135    |  4989              |         -  |      2874  |      1194  |
 |   145    |  608720            |         -  |     99501  |         0  |
+|   147    |  846910284         |         -  |         0  |         -  |
 |   173    |  1572729           |         -  |       124  |         0  |
 |   187    |  17427258          |         -  |     10641  |         -  |
 |   188    |  95962097          |         -  |        29  |         -  |
@@ -13559,6 +13561,76 @@ Quindi occorre trovare e sommare i primi 40 numeri primi p che soddisfano:
 
 
 ============
+Problema 133
+============
+
+Un numero composto interamente da unità è chiamato repunit. Definiremo R(k) come una repunit di lunghezza k.
+Ad esempio, R(6) = 111111.
+
+Consideriamo repunit della forma R(10^n).
+
+Sebbene R(10), R(100) o R(1000) non siano divisibili per 17, R(10000) è divisibile per 17.
+Tuttavia, non esiste alcun valore di n per il quale R(10^n) sia divisibile per 19.
+In effetti, è notevole che 11, 17, 41 e 73 siano gli unici quattro numeri primi inferiori a cento che possono essere un fattore di R(10^n).
+
+Trova la somma di tutti i numeri primi inferiori a centomila che non saranno mai un fattore di R(10^n).
+============================================================================
+
+Soluzione simile a quella del problema 132.
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (powmod base expt modulo)
+"Calculate (base^exponent % modulo)"
+  (let (out 1L)
+    (while (> expt 0)
+      (if (odd? expt)
+          (setq out (% (* out base) modulo)))
+      (setq base (% (* base base) modulo))
+      (setq expt (/ expt 2)))
+    out))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (e133)
+  (setq L 100000)
+  (setq L 99999)
+  ; Iniziamo con somma = 5 per includere i numeri primi 2 e 3 che
+  ; non sono mai fattori di una repunit
+  (setq s (+ 2 3))
+  (setq primi (primes-to L))
+  (pop primi) ; elimina il 2
+  (pop primi) ; elimina il 3
+  ; valore grande
+  (setq q (** 10 25))
+  (dolist (p primi)
+    (if (!= (powmod 10 q p) 1)
+      (++ s p))))
+
+(e133)
+;-> 453647705
+
+(time (e133))
+;-> 374.904
+----------------------------------------------------------------------------
+
+
+============
 Problema 135
 ============
 
@@ -13866,6 +13938,63 @@ Scriviamo la funzione finale:
 ;-> 608720
 
 (time (e145-2))
+;-> 0
+----------------------------------------------------------------------------
+
+
+============
+Problema 147
+============
+
+Rettangoli in griglie tratteggiate
+
+In una griglia tratteggiata 3x2, un totale di 37 rettangoli diversi potrebbero essere situati al suo interno, come indicato nell'immagine.
+
+Vedi immagine "e147.png" nella cartella "data".
+
+Ci sono 5 griglie più piccole di 3x2, con dimensioni verticali e orizzontali importanti, ovvero 1x1, 2x1, 3x1, 1x2 e 2x2. Se ciascuna di esse è tratteggiata, il seguente numero di rettangoli diversi potrebbe essere situato all'interno di queste griglie più piccole:
+
+  1x1: 1
+  2x1: 4
+  3x1: 8
+  1x2: 4
+  2x2: 18
+
+Aggiungendo questi numeri ai 37 della griglia 3x2, un totale di 72 rettangoli diversi potrebbero essere situati all'interno di griglie 3x2 e più piccole.
+
+Quanti rettangoli diversi potrebbero essere collocati all'interno di griglie di dimensioni 47x43 e inferiori?
+============================================================================
+
+Numero di rettangoli orizzontali e verticali in una griglia mxn:
+
+   m*(m + 1)*n*(n + 1)
+  ---------------------
+            4
+
+Numero di rettangoli diagonali in una griglia mxn:
+
+  n*((2*m - n)*(4*n*n - 1) - 3)
+ ------------------------------,  con (m >= n)
+              6  
+
+(define (e147 m n)
+  (define (rov m n)
+    (/ (* m (+ m 1) n (+ n 1)) 4))
+  (define (rd m n)
+    (if (< m n) (swap m n))
+    (/ (* n (- (* (- (* 2 m) n) (- (* 4 n n) 1)) 3)) 6))
+  (setq somma 0)
+  (for (i 1 m)
+    (for (j 1 n)
+      (setq somma (+ somma (rov i j) (rd i j))))))
+
+(e147 3 2)
+;-> 72
+
+(e147 47 43)
+;-> 846910284
+
+(time (e147 47 43))
 ;-> 0
 ----------------------------------------------------------------------------
 

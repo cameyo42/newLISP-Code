@@ -5951,7 +5951,7 @@ Codici ANSI ESCape (ESCAPE ANSI CODE)
 ;  (print (_fore i) "██" "(" (format "%03d" i) ") ")
 ;  (if (zero? (% i 15)) (println)))
 
-Vedi anche "Codici ansi escape" su "newLISP in generale".
+Vedi anche "Codici ANSI escape" su "newLISP in generale".
 
 
 --------------

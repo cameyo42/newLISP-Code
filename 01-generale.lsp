@@ -11275,6 +11275,23 @@ Vedi "ANSI-colors.png" nella cartella "data".
 
 Naturalmente sul terminale l'output è a colori...
 
+Nella cartella "data" troviamo il file "ansi-colors.lsp" che contiene i codici RGB e il nome dei colori ANSI da 0 a 255: (ANSI Red Green Bue Name)
+
+(load "F:\\Lisp-Scheme\\newLisp\\MAX\\newLISP-CodeNEW\\data\\ansi-color-rgb.lsp")
+
+(define (foreground color)
+  (let (f (string "\027[38;5;" color "m"))
+    (print f)))
+
+(define (colors)
+  (for (i 0 255)
+    (println (foreground i) (format "%03d" i) " ██ " 
+         "(" (format "%03d %03d %03d" 
+          (ansi-color-rgb i 1) (ansi-color-rgb i 2) (ansi-color-rgb i 3)) ") "
+          (ansi-color-rgb i 4))))
+
+(colors)
+
 Colori RGB
 ----------
 I terminali più moderni supportano Truecolor (RGB a 24 bit), che consente di impostare i colori di primo piano e di sfondo utilizzando i codici RGB (Red Green Blue).
