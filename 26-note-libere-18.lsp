@@ -909,6 +909,8 @@ Facciamo alcune prove:
 (collinear '(641027 3459466) '(475989 3458761) '(-675960 3453838))
 ;-> nil
 
+Vedi anche "Punti collineari nei segmenti con coordinate intere" su "Note libere 31".
+
 
 --------------------
 Quale era e periodo?

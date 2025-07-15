@@ -1926,5 +1926,80 @@ Abbiamo trovato le stesse soluzioni del Talmud.
 (talmud-division 100 '(10 20 30 40 50 60))
 ;-> (5 10 15 20 25 25)
 
+
+--------------------------------------------------
+Punti collineari nei segmenti con coordinate intere
+--------------------------------------------------
+
+Abbiamo due punti 2D p1 = (x1,y1) e p2 = (x2,y2) con coordinate intere (anche negative).
+Calcolare i punti di coordinate intere che appartengono al segmento che unisce i due punti (considerando anche p1 e p2).
+
+Per calcolare 'quanti' sono i punti collineari con coordinate intere tra p1 e p2 possiamo usare la seguente formula:
+
+  numero punti interi = gcd((abs(x2 - x1)), (abs(y2 - y1)))) + 1
+
+(define (conta-punti-interi x1 y1 x2 y2)
+  (+ 1 (gcd (abs (- x2 x1)) (abs (- y2 y1)))))
+
+Proviamo:
+
+(conta-punti-interi 5 10 10 5)
+;-> 6
+(conta-punti-interi -8 5 0 5)
+;-> 9
+(conta-punti-interi -3 -3 2 2)
+;-> 6
+(conta-punti-interi 0 0 0 10)
+;-> 11
+(conta-punti-interi -5 -1 1 8)
+;-> 4
+(conta-punti-interi -2 -5 1 10)
+;-> 4
+
+Per calcolare 'quali' sono i punti collineari con coordinate intere tra p1 e p2 usiamo il seguente algoritmo:
+https://stackoverflow.com/questions/23729244/algorithm-to-calculate-the-number-of-lattice-points-in-a-polygon
+
+1) Calcolare:
+
+   a) delta-x = x2 - x1, delta-y = y2 - y1
+   b) k = gcd((abs(delta-x)), (abs(delta-y))).
+
+2) Definire il passo minimo in cui i punti rimangono interi:
+ 
+   dx, dy = ((delta-x/k), (delta-y/k)))
+  
+3) I punti interi sul segmento sono:
+
+   (x1 + i*delta-x), (y1 + i*delta-y), con i = 0, 1, ..., k. 
+
+In totale (k + 1) punti (compresi gli estremi).
+
+(define (punti-collineari x1 y1 x2 y2)
+  (letn ((dx (- x2 x1))                   ; differenza orizzontale
+         (dy (- y2 y1))                   ; differenza verticale
+         (k (gcd (abs dx) (abs dy)))      ; quanti passi interi (inclusivi)
+         (sx (/ dx k))                    ; passo orizzontale
+         (sy (/ dy k)))                   ; passo verticale
+    (map (fn(i) (list (+ x1 (* sx i))     ; genera i punti (x, y)
+                      (+ y1 (* sy i))))
+         (sequence 0 k))))                ; i da 0 a k inclusi
+
+Proviamo:
+
+(punti-collineari 5 10 10 5)
+;-> ((5 10) (6 9) (7 8) (8 7) (9 6) (10 5))
+(punti-collineari -8 5 0 5)
+;-> ((-8 5) (-7 5) (-6 5) (-5 5) (-4 5) (-3 5) (-2 5) (-1 5) (0 5))
+(punti-collineari -3 -3 2 2)
+;-> ((-3 -3) (-2 -2) (-1 -1) (0 0) (1 1) (2 2))
+(punti-collineari 0 0 0 10)
+;-> ((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (0 6) (0 7) (0 8) (0 9) (0 10))
+(punti-collineari -5 -1 1 8)
+;-> ((-5 -1) (-3 2) (-1 5) (1 8))
+(punti-collineari -2 -5 1 10)
+;-> ((-2 -5) (-1 0) (0 5) (1 10))
+
+Vedi anche "Punti collineari" su "Note libere 18".
+
 ============================================================================
 

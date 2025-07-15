@@ -333,7 +333,7 @@ ROSETTA CODE
 
 PROJECT EULERO
 ==============
-  Problemi 1..105, 108..110, 112..117, 119..125, 132,
+  Problemi 1..105, 108..110, 112..117, 119..125, 132, 133,
            135, 145, 147, 173, 187, 188, 191, 205, 206, 231, 469
 
 PROBLEMI VARI
@@ -3049,6 +3049,7 @@ NOTE LIBERE 31
   Curiosità aritmetiche
   Bandiera Italiana
   Talmudic division
+  Punti collineari nei segmenti con coordinate intere
 
 PROBLEMI SUI DADI
 =================
