@@ -89,21 +89,21 @@
 
   "Duelling Idiots and Other Probability Puzzlers", Paul Nahin, 2000
   "Digital Dice Computational Solutions to Practical Probability Problems", Paul Nahin, 2008
-  
+
   "Godel, Escher, Bach: un'eterna ghirlanda brillante", Douglas Hofstadter, 1979
 
   "The Math Book", Clifford A. Pickover, 2009
-  
+
   "La Cattedrale di Turing: le origini dell'universo digitale", George Dyson, 2012
-  
+
   "Più o meno quanto?" L'arte di fare stime sul Mondo, Lawrence Weinstein-John Adam, 2009
-  
+
   "Lure of the integers", Joe Roberts, 1992
-  
+
   "La piccola bottega della curiosità matematiche del professor Steward", Ian Stewart, 2010
-  
+
   "I favolosi numeri di Fibonacci", Posamentier-Lehmann, 2010
-  
+
 
   Siti web:
   ---------
@@ -131,11 +131,11 @@
 
   Mathematics Stack Exchange è un sito di domande e risposte per persone che studiano matematica a qualsiasi livello.
   https://math.stackexchange.com/
-  
+
   Code Golf Stack Exchange is a question and answer site for programming puzzle enthusiasts and code golfers.
   This is a site for recreational programming competitions, not general programming questions.
   https://codegolf.stackexchange.com/
-  
+
   We believe that three things lead to success: Practice, Practice and Practice!
   https://www.codeabbey.com/
 
@@ -167,6 +167,9 @@
   Search the history of over 663 billion web pages on the Internet (2022-02-27).
   Internet Archive is a non-profit library of millions of free books, movies, software, music, websites, and more.
   https://archive.org/
+
+  Videos about numbers and mathematics. Videos by Brady Haran since 2011.
+  https://www.youtube.com/@numberphile
 
 =============================================================================
 

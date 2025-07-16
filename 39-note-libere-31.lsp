@@ -2258,5 +2258,96 @@ Questo perchè per ogni somma abbiamo N numeri da modificare per ottenere il ris
 Nel 2025 ancora non è stato scoperto nessun quadrato multimagico 3x3 (e non si sa neanche se esiste).
 Invece è stato dimostrato che esistono quadrati multimagici per ogni dimensione maggiore di 3.
 
+
+------------
+Gara di moto
+------------
+
+Durante una gara di moto, vengono registrate le posizioni di ogni pilota alla partenza e al termine di ogni giro fino alla fine della corsa.
+Nella registrazione ogni pilota appare (giri + 1) volte (consideriamo anche la partenza).
+Determinare, per ogni pilota, le sue posizioni dal primo all'ultimo giro.
+Le posizioni devono essere elencate in ordine di arrivo dei piloti.
+
+Esempio: gara con 3 piloti e 4 giri
+  piloti: a b c
+               Posizioni
+  partenza --> a b c
+  giro 1   --> a c b
+  giro 2   --> c a b
+  giro 3   --> c a b
+  giro 4   --> a c b
+  Input: ((a b c) (a c b) (c a b) (c a b) (a c b))
+  Output: (non consideriamo la posizione di partenza)
+  pilota a --> (1 2 2 1)
+  pilota c --> (2 1 1 2)
+  pilota b --> (3 3 3 3)
+
+Durante un giro gara possono verificarsi i seguenti casi:
+1) sorpasso tra due o più piloti (cambiano le posizioni tra i piloti)
+2) ritiro di uno o più piloti (mancano alcuni piloti)
+3) i doppiati sono trattati normalmente (cioè, quando arrivano al giro i-esimo vengono inseriti nella lista i-esima in base alla loro posizione in quel giro) e terminano comunque la corsa.
+
+Esempio: gara con 3 piloti e 4 giri (con ritiro)
+  piloti: a b c
+               Posizioni
+  partenza --> a b c
+  giro 1   --> a c b
+  giro 2   --> c a b
+  giro 3   --> c b (a ritirato)
+  giro 4   --> b c
+  Input: ((a b c) (a c b) (c a b) (c b) (b c))
+  Output: (non consideriamo la posizione di partenza)
+  pilota b --> (3 3 2 1)
+  pilota c --> (2 1 1 2)
+  pilota a --> (1 2 r r)
+
+(define (andamento posizioni)
+  (let ( (out '()) (piloti (posizioni 0)) (tmp '()) )
+    ;(println (posizioni 0))
+    ; ciclo per ogni pilota
+    (dolist (p piloti)
+        (setq tmp '())
+        ; ciclo per ogni giro
+        (dolist (g (slice posizioni 1)) ; togliamo la posizione di partenza
+          (setq pos (find p g))
+          ; se esiste il pilota in questo giro,
+          ; allora aggiungiamo la posizione corrente
+          (if (setq pos (find p g)) 
+              (push (+ pos 1) tmp -1)
+              (push 'r tmp -1)))
+      ; inseriamo la lista corrente 'tmp' (pilota (posizioni)) alla soluzione
+      (push (list p tmp) out -1))
+    ;(println out)
+    ; ordina la lista in base alla posizione di arrivo dei piloti
+    (sort out (fn(x y) (<= (x 1 -1) (y 1 -1))))))
+
+Proviamo:
+(setq lst '((a b c) (a c b) (c a b) (c a b) (a c b)))
+(andamento lst)
+;-> ((a (1 2 2 1)) (c (2 1 1 2)) (b (3 3 3 3)))
+
+(setq lst '((a b c) (a c b) (c a b) (c b) (b c)))
+(andamento lst)
+;-> ((b (3 3 2 1)) (c (2 1 1 2)) (a (1 2 r r)))
+
+
+(setq piloti '(a b c d e f))
+(setq giri (list piloti))
+(extend giri (collect (randomize piloti true) 5))
+; al sesto giro si ritira il pilota f
+(setq piloti '(a b c d e))
+(extend giri (collect (randomize piloti true) 11))
+; al dodicesimo giro si ritira il pilota b
+(setq piloti '(a c d e))
+(extend giri (collect (randomize piloti true) 4))
+
+(andamento giri)
+;-> ((c (3 3 2 4 6 1 1 4 2 5 4 1 3 3 3 3 1 2 2 1))
+;->  (a (6 6 4 5 1 2 3 3 3 1 3 3 5 2 5 4 4 1 3 2))
+;->  (e (5 5 6 3 4 3 2 2 5 3 1 4 2 4 1 1 2 3 1 3))
+;->  (d (4 4 3 1 2 5 5 1 4 2 2 2 1 1 4 2 3 4 4 4))
+;->  (b (1 2 5 6 5 4 4 5 1 4 5 5 4 5 2 5 r r r r))
+;->  (f (2 1 1 2 3 r r r r r r r r r r r r r r r)))
+
 ============================================================================
 

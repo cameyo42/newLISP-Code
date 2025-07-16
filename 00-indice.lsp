@@ -3051,6 +3051,7 @@ NOTE LIBERE 31
   Talmudic division
   Punti collineari nei segmenti con coordinate intere
   Multimagic Square - Quadrati magici di potenze dei numeri
+  Gara di moto
 
 PROBLEMI SUI DADI
 =================
