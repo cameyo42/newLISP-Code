@@ -2001,5 +2001,262 @@ Proviamo:
 
 Vedi anche "Punti collineari" su "Note libere 18".
 
+
+---------------------------------------------------------
+Multimagic Square - Quadrati magici di potenze dei numeri
+---------------------------------------------------------
+
+Un quadrato magico è bimagico (o 2-multimagico) se rimane magico dopo che ogni suo numero è stato elevato al quadrato.
+Per estensione, un quadrato è P-multimagico se rimane magico dopo che ogni suo numero è stato sostituito dalla sua potenza k-esima (per k=1, 2, ..., a P).
+
+(define (print-matrix matrix border)
+"Print a matrix m x n"
+  (local (row col lenmax fmtstr)
+    ; converto matrice in lista?
+    (if (array? matrix) (setq matrix  (array-list matrix)))
+    ; righe della matrice
+    (setq row (length matrix))
+    ; colonne della matrice
+    (setq col (length (first matrix)))
+    ; valore massimo della lunghezza tra gli elementi (come stringa)
+    (setq lenmax (apply max (map length (map string (flat matrix)))))
+    ; creo stringa di formattazione
+    (setq fmtstr (append "%" (string (+ lenmax 1) "s")))
+    ; stampa la matrice
+    (for (i 0 (- row 1))
+      (if border (print "|"))
+      (for (j 0 (- col 1))
+        (print (format fmtstr (string (matrix i j))))
+      )
+      (if border (println " |") (println))
+    ) nil))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+Funzione che verifica la correttezza di un quadrato magico:
+(restituisce il numero magico se è un quadrato magico, altrimenti nil)
+
+(define (check matrix show)
+  (local (result rows cols sum)
+    (setq result '())
+    ; somme righe
+    (setq rows (length matrix))
+    (setq cols (length (matrix 0)))
+    (dolist (row matrix)
+      (setq sum (apply + row))
+      (push sum result -1)
+      (if show (println "Row " (+ $idx 1) ": " sum))
+    )
+    ; somme colonne
+    (setq trasposta (transpose matrix))
+    (dolist (row trasposta)
+      (setq sum (apply + row))
+      (push sum result -1)
+      (if show (println "Col " (+ $idx 1) ": " sum))
+    )
+    ; somma diagonale (alto sx --> basso dx)
+    (setq sum 0L)
+    (for (i 0 (- rows 1)) (++ sum (matrix i i)))
+    (push sum result -1)
+    (if show (println "D1:  " sum))
+    ; somma diagonale (basso sx --> alto dx)
+    (setq sum 0L)
+    (for (i 0 (- rows 1)) (++ sum (matrix (- rows i 1) i)))
+    (push sum result -1)
+    (if show (println "D2:  " sum))
+    ; le somme sono tutte uguali?
+    (if (apply = result) sum nil)))
+
+Funzione che calcola una data potenza di tutti i numeri di una matrice:
+
+(define (pow-matrix matrix power)
+  (let (out '())
+    (dolist (row matrix)
+      (push (map (fn(x) (** x power)) row) out -1))))
+
+The Matt Parker Square (3x3) (2016)
+-----------------------------------
+Quasi-magico solo il quadrato
+
+(setq parker '((29 1 47)
+               (41 37 1)
+               (23 41 29)))
+
+(print-matrix (setq parker2 (pow-matrix parker 2)))
+;->  841L    1L 2209L
+;-> 1681L 1369L    1L
+;->  529L 1681L  841L
+
+(check parker2 true)
+;-> Row 1: 3051L
+;-> Row 2: 3051L
+;-> Row 3: 3051L
+;-> Col 1: 3051L
+;-> Col 2: 3051L
+;-> Col 3: 3051L
+;-> D1:  3051L
+;-> D2:  4107L
+;-> nil
+
+The Cheah Xu Heng Square (3x3) (2024)
+-------------------------------------
+Quasi-magico solo il quadrato
+
+(setq heng '((222 381 6)
+             (291 174 282)
+             (246 138 339)))
+
+(setq heng2 (pow-matrix heng 2))
+;-> ((49284 145161 36) (84681 30276 79524) (60516 19044 114921))
+
+(print-matrix (setq heng2 (pow-matrix heng 2)))
+;-> 49284L 145161L     36L
+;-> 84681L  30276L  79524L
+;-> 60516L  19044L 114921L
+
+(check heng2 true)
+;-> Row 1: 194481L
+;-> Row 2: 194481L
+;-> Row 3: 194481L
+;-> Col 1: 194481L
+;-> Col 2: 194481L
+;-> Col 3: 194481L
+;-> D1:  194481L
+;-> D2:  90828L
+;-> nil
+
+The Jaren Wakley Square (3x3) (2021)
+------------------------------------
+Quasi-magico solo il quadrato
+
+(setq wakley '((1756 292 1234)
+               (1006 1604 1052)
+               (772 1426 1436)))
+
+(print-matrix (setq wakley2 (pow-matrix wakley 2)))
+;-> 3083536L   85264L 1522756L
+;-> 1012036L 2572816L 1106704L
+;->  595984L 2033476L 2062096L
+
+(check wakley2 true)
+;-> Row 1: 4691556L
+;-> Row 2: 4691556L
+;-> Row 3: 4691556L
+;-> Col 1: 4691556L
+;-> Col 2: 4691556L
+;-> Col 3: 4691556L
+;-> D1:  7718448L
+;-> D2:  4691556L
+;-> nil
+
+The Georges Pfeffermann Square (8x8) (1890)
+-------------------------------------------
+BiMagico
+
+(setq pfeffer '((56 34 8 57 18 47 9 31)
+                (33 20 54 48 7 29 59 10)
+                (26 43 13 23 64 38 4 49)
+                (19 5 35 30 53 12 46 60)
+                (15 25 63 2 41 24 50 40)
+                (6 55 17 11 36 58 32 45)
+                (61 16 42 52 27 1 39 22)
+                (44 62 28 37 14 51 21 3)))
+
+(check pfeffer)
+;-> 260L
+
+(setq pfeffer2 (pow-matrix pfeffer 2))
+;-> ((3136 1156 64 3249 324 2209 81 961)
+;->  (1089 400 2916 2304 49 841 3481 100)
+;->  (676 1849 169 529 4096 1444 16 2401)
+;->  (361 25 1225 900 2809 144 2116 3600)
+;->  (225 625 3969 4 1681 576 2500 1600)
+;->  (36 3025 289 121 1296 3364 1024 2025)
+;->  (3721 256 1764 2704 729 1 1521 484)
+;->  (1936 3844 784 1369 196 2601 441 9))
+
+(print-matrix (setq pfeffer2 (pow-matrix pfeffer 2)))
+;-> 3136L 1156L   64L 3249L  324L 2209L   81L  961L
+;-> 1089L  400L 2916L 2304L   49L  841L 3481L  100L
+;->  676L 1849L  169L  529L 4096L 1444L   16L 2401L
+;->  361L   25L 1225L  900L 2809L  144L 2116L 3600L
+;->  225L  625L 3969L    4L 1681L  576L 2500L 1600L
+;->   36L 3025L  289L  121L 1296L 3364L 1024L 2025L
+;-> 3721L  256L 1764L 2704L  729L    1L 1521L  484L
+;-> 1936L 3844L  784L 1369L  196L 2601L  441L    9L
+
+(check pfeffer2)
+;-> 11180L
+
+The Walter Trump square (12x12) (2002)
+--------------------------------------
+TriMagico
+
+(setq trump '((1 22 33 41 62 66 79 83 104 112 123 144)
+              (9 119 45 115 107 93 52 38 30 100 26 136)
+              (75 141 35 48 57 14 131 88 97 110 4 70)
+              (74 8 106 49 12 43 102 133 96 39 137 71)
+              (140 101 124 42 60 37 108 85 103 21 44 5)
+              (122 76 142 86 67 126 19 78 59 3 69 23)
+              (55 27 95 135 130 89 56 15 10 50 118 90)
+              (132 117 68 91 11 99 46 134 54 77 28 13)
+              (73 64 2 121 109 32 113 36 24 143 81 72)
+              (58 98 84 116 138 16 129 7 29 61 47 87)
+              (80 34 105 6 92 127 18 53 139 40 111 65)
+              (51 63 31 20 25 128 17 120 125 114 82 94)))
+
+(setq trump2 (pow-matrix trump 2))
+(check trump2)
+;-> 83810L
+
+(setq trump3 (pow-matrix trump 3))
+(check trump3)
+;-> 9082800L
+
+http://multimagie.com/
+
+TriMagic:
+- Gaston Tarry (128x128) (1902)
+- Eutrope Cazalas (62x62) (1933)
+- William H. Benson (32x32) (1976)
+- Walter Trump (12x12) (2002)
+
+TetraMagic
+- Charles Devimeux (256x256) (1983)
+- Andre Vericel (512x512) (2001)
+- Pang Fengchu (243x243) (2004)
+
+PentaMagic
+- Andre Vericel (1024x1024) (2001)
+- Li Wen (729x729)
+ecc.
+
+Proviamo a verificare il quadrato TetraMagico 256x256 di Charles Devimeux.
+Il file "devimeux.lsp" si trova nella cartella "data".
+
+(load "devimeux.lsp")
+(length devimeux)
+;-> 256
+(map length devimeux)
+
+(check devimeux)
+;-> 8388480L
+(check (setq devimeux2 (pow-matrix devimeux 2)))
+;-> 366495487360L
+ (check (setq devimeux3 (pow-matrix devimeux 3)))
+;-> 18013848757862400L
+(check (setq devimeux4 (pow-matrix devimeux 4)))
+;-> 944437268143413954688L
+
+Nota: la difficolta di costruzione dei quadrati multimagici aumenta con il diminuire delle dimensioni del quadrato.
+Questo perchè per ogni somma abbiamo N numeri da modificare per ottenere il risultato voluto.
+Nel 2025 ancora non è stato scoperto nessun quadrato multimagico 3x3 (e non si sa neanche se esiste).
+Invece è stato dimostrato che esistono quadrati multimagici per ogni dimensione maggiore di 3.
+
 ============================================================================
 

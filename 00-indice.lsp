@@ -3050,6 +3050,7 @@ NOTE LIBERE 31
   Bandiera Italiana
   Talmudic division
   Punti collineari nei segmenti con coordinate intere
+  Multimagic Square - Quadrati magici di potenze dei numeri
 
 PROBLEMI SUI DADI
 =================
