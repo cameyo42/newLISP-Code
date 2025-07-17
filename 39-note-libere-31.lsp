@@ -2330,7 +2330,6 @@ Proviamo:
 (andamento lst)
 ;-> ((b (3 3 2 1)) (c (2 1 1 2)) (a (1 2 r r)))
 
-
 (setq piloti '(a b c d e f))
 (setq giri (list piloti))
 (extend giri (collect (randomize piloti true) 5))
@@ -2348,6 +2347,167 @@ Proviamo:
 ;->  (d (4 4 3 1 2 5 5 1 4 2 2 2 1 1 4 2 3 4 4 4))
 ;->  (b (1 2 5 6 5 4 4 5 1 4 5 5 4 5 2 5 r r r r))
 ;->  (f (2 1 1 2 3 r r r r r r r r r r r r r r r)))
+
+
+------------------
+Undo/Redo classico
+------------------
+
+Vediamo alcune funzioni per spiegare il meccanismo di base delle operazioni di Undo e Redo.
+
+Modello 1: Cronologia lineare storica
+-------------------------------------
+- Ogni operazione (anche dopo un 'undo') aggiunge un nuovo stato e non cancella nulla.
+- 'redo' è sempre possibile, anche dopo nuove modifiche.
+- La 'redo-list' funziona come uno stack parallelo, che si arricchisce indipendentemente.
+
+Pro:
+- Mantiene una cronologia completa di tutte le operazioni
+- Permette di "navigare" avanti e indietro tra tutti gli stati, come una *timeline*.
+- Più flessibile per scenari in cui si vuole esplorare la cronologia senza perdere nulla.
+
+Contro
+- Si discosta dal comportamento classico degli editor (Ctrl+Z -> modifica -> niente più Ctrl+Y).
+- Può confondere l’utente se si aspetta che un nuovo 'insert' annulli il percorso di redo.
+
+Modello 2: Timeline a ramo unico (comportamento classico degli editor)
+----------------------------------------------------------------------
+- Se facciamo 'undo', poi eseguiamo una nuova operazione ('insert', 'remove'), la 'redo-list' viene azzerata.
+- Il nuovo stato "taglia" la cronologia futura.
+
+Pro:
+- Si comporta come gli utenti si aspettano da Notepad, Gimp, ecc.
+- Più semplice per l'utente finale.
+
+Contro:
+- Perdiamo la possibilità di tornare su percorsi alternativi nella cronologia.
+
+Implementazione Modello 1
+-------------------------
+- 'redo' è sempre possibile, anche dopo modifiche.
+- Le due pile 'undo-list' e 'redo-list' sono indipendenti, gestite simmetricamente.
+- La 'redo-list' non viene mai cancellata.
+
+; Stato globale
+(setq lista '())     ; La lista principale modificata dall'utente
+(setq undo-list '()) ; Stack degli stati precedenti (per undo)
+(setq redo-list '()) ; Stack degli stati successivi (per redo)
+
+; Inserisce un elemento alla fine della lista
+(define (insert el)
+  ; Salva lo stato corrente per permettere undo
+  (push lista undo-list)
+  ; NON si azzera la redo-list: manteniamo la cronologia completa
+  (push el lista -1)
+  lista)
+
+; Rimuove l'ultimo elemento della lista
+(define (remove)
+  (when lista
+    ; Salva lo stato corrente per permettere undo
+    (push lista undo-list)
+    ; NON si azzera la redo-list
+    (pop lista -1))
+  lista)
+
+; Ripristina lo stato precedente (undo)
+(define (undo)
+  (when undo-list
+    ; Salva lo stato attuale per permettere redo
+    (push lista redo-list)
+    ; Ripristina l'ultimo stato precedente
+    (setq lista (pop undo-list)))
+  lista)
+
+; Riapplica uno stato annullato (redo)
+(define (redo)
+  (when redo-list
+    ; Salva lo stato attuale per permettere undo
+    (push lista undo-list)
+    ; Ripristina lo stato successivo
+    (setq lista (pop redo-list)))
+  lista)
+
+Proviamo:
+
+(insert 'a)  --> (a)
+(insert 'b)  --> (a b)
+(undo)       --> (a)
+(insert 'c)  --> (a c)
+(redo)       --> (a b)
+
+Implementazione Modello 2
+-------------------------
+- Dopo ogni 'undo', se si fa 'insert' o 'remove', si azzera la 'redo-list', ma solo in quel caso.
+- Bisogna sapere se l'ultimo comando è stato 'undo', prima di decidere se azzerare la 'redo-list'.
+- Questo richiede una variabile di stato che tenga traccia dell’ultima azione.
+- last-op tiene traccia dell'ultima operazione, (quindi possiamo sapere se siamo nel "ramo alternativo").
+- Il comportamento finale è esattamente quello di un editor tradizionale con Ctrl+Z e Ctrl+Y.
+
+; Stato globale
+(setq lista '())     ; La lista principale che l'utente modifica
+(setq undo-list '()) ; Stack degli stati precedenti (per undo)
+(setq redo-list '()) ; Stack degli stati futuri (per redo)
+(setq last-op 'none) ; Ultima operazione ('insert, 'remove, 'undo, 'redo)
+
+; Inserisce un elemento alla fine della lista
+(define (insert el)
+  ; Salva lo stato corrente per poter fare undo
+  (push lista undo-list)
+  ; Se l'ultima operazione è stata un undo, la redo-list non è più valida
+  (if (= last-op 'undo) (setq redo-list '()))
+  ; Aggiunge l'elemento alla lista
+  (push el lista -1)
+  ; Aggiorna il tipo dell'ultima operazione
+  (setq last-op 'insert)
+  lista)
+
+; Rimuove l'ultimo elemento della lista
+(define (remove)
+  (when lista
+    ; Salva lo stato per undo
+    (push lista undo-list)
+    ; Invalida redo se l'ultimo comando era un undo
+    (if (= last-op 'undo) (setq redo-list '()))
+    ; Rimuove l'ultimo elemento
+    (pop lista -1))
+  ; Aggiorna il tipo dell'ultima operazione
+  (setq last-op 'remove)
+  lista)
+
+; Ripristina lo stato precedente
+(define (undo)
+  (when undo-list
+    ; Salva lo stato attuale per permettere il redo
+    (push lista redo-list)
+    ; Ripristina l'ultimo stato precedente
+    (setq lista (pop undo-list))
+    ; Registra che è stato fatto un undo
+    (setq last-op 'undo))
+  lista)
+
+; Riapplica uno stato annullato (solo se non invalidato da insert/remove dopo un undo)
+(define (redo)
+  (when redo-list
+    ; Salva lo stato attuale per permettere eventuale undo
+    (push lista undo-list)
+    ; Ripristina lo stato successivo
+    (setq lista (pop redo-list))
+    ; Registra che è stato fatto un redo
+    (setq last-op 'redo))
+  lista)
+
+Proviamo:
+
+(insert 'a)  --> (a)
+(insert 'b)  --> (a b)
+(undo)       --> (a)
+(insert 'c)  --> (a c)
+(redo)       --> (a c)
+
+Nota: quando il passaggio tra due stati avviene con una funzione invertibile, allora nelle liste 'undo' e 'redo' possiamo memorizzare solo la funzione inversa (risparmio di memoria).
+Questo approccio corrisponde a una macchina a stack di comandi invertibili, un pattern chiamato anche Command Pattern con undo/redo.
+In ambito funzionale e logico si parla anche di 'reversible computation'.
 
 ============================================================================
 

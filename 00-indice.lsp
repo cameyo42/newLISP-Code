@@ -3052,6 +3052,7 @@ NOTE LIBERE 31
   Punti collineari nei segmenti con coordinate intere
   Multimagic Square - Quadrati magici di potenze dei numeri
   Gara di moto
+  Undo/Redo classico
 
 PROBLEMI SUI DADI
 =================
