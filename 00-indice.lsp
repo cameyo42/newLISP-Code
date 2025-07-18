@@ -333,8 +333,8 @@ ROSETTA CODE
 
 PROJECT EULERO
 ==============
-  Problemi 1..105, 108..110, 112..117, 119..125, 132, 133,
-           135, 145, 147, 173, 187, 188, 191, 205, 206, 231, 469
+  Problemi 1..105, 108..110, 112..125, 132, 133, 135,
+           145, 147, 173, 187, 188, 191, 205, 206, 231, 469
 
 PROBLEMI VARI
 =============
@@ -3053,6 +3053,7 @@ NOTE LIBERE 31
   Multimagic Square - Quadrati magici di potenze dei numeri
   Gara di moto
   Undo/Redo classico
+  Lettura al contrario
 
 PROBLEMI SUI DADI
 =================

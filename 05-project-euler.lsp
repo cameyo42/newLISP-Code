@@ -121,6 +121,7 @@
 |   115    |  168               |         -  |         2  |         -  |
 |   116    |  20492570929       |         -  |         1  |         -  |
 |   117    |  100808458960497   |         -  |         1  |         -  |
+|   118    |  44680             |         -  |     20720  |         -  |
 |   119    |  248155780267521   |         -  |        26  |         -  |
 |   120    |  333082500         |         -  |         0  |         -  |
 |   121    |  2269              |         -  |         1  |         -  |
@@ -13036,6 +13037,83 @@ NOTA: questo è correlato al problema 116
 
 
 ============
+Problema 118
+============
+
+Utilizzando tutte le cifre da 1 a 9 e concatenandole liberamente per formare numeri interi decimali, si possono formare diversi insiemi.
+È interessante notare che, con l'insieme (2, 5, 47, 89, 631), tutti gli elementi che gli appartengono sono primi.
+
+Quanti insiemi distinti contenenti ciascuna delle cifre da 1 a 9 una sola volta contengono solo elementi primi?
+============================================================================
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che esplora tutte le possibili partizioni ordinate delle cifre in numeri primi crescenti, aggiornando un contatore globale ogni volta che arriva a una partizione completa.
+
+(define (count-prime-set digits startIndex prevNum)
+  ; Se abbiamo usato tutte le cifre (indice arrivato alla fine della lista)
+  (if (= startIndex (length digits))
+      ; allora abbiamo trovato una partizione valida → incrementa il contatore globale
+      (++ conta)
+      ; altrimenti, prova tutte le possibili suddivisioni successive
+      (for (split (+ startIndex 1) (length digits))
+        ; costruisce il numero dalle cifre tra startIndex (incluso) e split (escluso)
+        (let ((num (toInteger digits startIndex split)))
+          ; se il numero è strettamente maggiore del precedente e primo
+          (when (and (> num prevNum) (prime? num))
+              ;(println prevNum { } num)
+              ; chiamata ricorsiva: continua la ricerca a partire da split
+              (count-prime-set digits split num))))))
+
+(define (toInteger digits start end)
+  (int (join (map string (slice digits start (- end start)))) 0 10))
+
+(toInteger '(1 2 3 4 5 6 7) 0 3)
+;-> 123
+(toInteger '(1 2 3 4 5 6 7) 3 5)
+;-> 45
+
+(define (e118)
+  (let ( (permute (perm (sequence 1 9))) (conta 0) )
+  ; prova tutte le permutazioni
+  (dolist (p permute) 
+    ; prova tutti gli insiemi di cifre per ogni permutazione
+    ; per contare gli insiemi primi (usando tutte le cifre)
+    (count-prime-set p 0 0))
+  conta))
+
+(time (println (e118)))
+;-> 44680
+;-> 20720.629
+----------------------------------------------------------------------------
+
+
+============
 Problema 119
 ============
 
@@ -14597,15 +14675,15 @@ Dare la risposta arrotondata a quattordici cifre decimali nella forma 0.abcdefgh
 ============================================================================
 
 (define (e469)
-  (local (a b c)
+  (local (a b c out)
     (setq a 0)
     (setq b 1)
-    (for (i 2 50)
+    (for (i 2 30)
       (setq c (add (div (mul 2 a) i) 1))
       (setq a b)
       (setq b (add b c))
       (setq out (sub 1 (div (add c 1) (add i 3))))
-      ;(println out)
+      (println out)
     )
     (println (format "%16.14f" out))))
 

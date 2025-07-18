@@ -2243,7 +2243,7 @@ y
 Dividere una stringa in tutti i modi possibili
 ----------------------------------------------
 
-Data una stringa, dividerla in tutti i modi possibili.
+Data una stringa, dividerla in tutti i modi possibili (mantenendo l'ordine dei caratteri inalterato).
 
 Per esempio:
 

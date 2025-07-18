@@ -2363,7 +2363,7 @@ Modello 1: Cronologia lineare storica
 
 Pro:
 - Mantiene una cronologia completa di tutte le operazioni
-- Permette di "navigare" avanti e indietro tra tutti gli stati, come una *timeline*.
+- Permette di "navigare" avanti e indietro tra tutti gli stati, come una 'timeline'.
 - Più flessibile per scenari in cui si vuole esplorare la cronologia senza perdere nulla.
 
 Contro
@@ -2508,6 +2508,39 @@ Proviamo:
 Nota: quando il passaggio tra due stati avviene con una funzione invertibile, allora nelle liste 'undo' e 'redo' possiamo memorizzare solo la funzione inversa (risparmio di memoria).
 Questo approccio corrisponde a una macchina a stack di comandi invertibili, un pattern chiamato anche Command Pattern con undo/redo.
 In ambito funzionale e logico si parla anche di 'reversible computation'.
+
+
+--------------------
+Lettura al contrario
+--------------------
+
+I correttori di bozze a volte leggono le righe al contrario.
+Questa tecnica, detta anche "lettura al contrario" o "lettura a ritroso", è un metodo utilizzato per individuare errori che potrebbero sfuggire durante una lettura tradizionale.
+Leggendo il testo al contrario, il correttore si concentra sulla singola parola o frase, senza farsi trascinare dal significato complessivo del testo, riducendo così la probabilità di ignorare errori di battitura, refusi o piccoli errori grammaticali. 
+
+Data una stringa che contiene un testo su più righe, scrivere una funzione che inverte le parole di ogni riga.
+La funzione deve essere la più breve possibile.
+
+(setq str 
+"Questa settimana vado al mare.
+Stasera mangio la pizza con la mozzarella.
+Senti, corriamo più piano.
+Attenzione: pericolo valanghe")
+
+(define (bozze str)
+  (let (righe (map parse (parse str "\r\n")))
+    (dolist (r righe) (println (join (reverse r) " ")))))
+
+(bozze str)
+
+Versione code-golf (90 caratteri):
+(define(b s)(let(a(map parse(parse s "\r\n")))(dolist(r a)(println(join(reverse r)" ")))))
+
+(b str)
+;-> mare. al vado settimana Questa
+;-> mozzarella. la con pizza la mangio Stasera
+;-> piano. più corriamo , Senti
+;-> valanghe pericolo Attenzione
 
 ============================================================================
 
