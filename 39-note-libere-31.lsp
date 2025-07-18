@@ -2542,5 +2542,99 @@ Versione code-golf (90 caratteri):
 ;-> piano. più corriamo , Senti
 ;-> valanghe pericolo Attenzione
 
+
+-------------------------------------------
+Estrazione casuale di elementi da una lista
+-------------------------------------------
+
+Data una lista di elementi (non necessariamente univoci) dobbiamo estrarre alcuni elementi in modo casuale.
+
+(setq lst '(a b c d a e f b g h g)) 
+
+1) Estrazione casuale di N elementi
+-----------------------------------
+
+(define (sample-list num lst)
+  (if (> num (length lst)) '()
+      (slice (randomize lst) 0 num)))
+
+Proviamo:
+
+(sample-list 5 lst)
+;-> (b b f e a)
+(sample-list 5 lst)
+;-> (e c a b a)
+(sample-list 5 lst)
+;-> (a h b g f)
+
+2) Estrazione casuale di N elementi univoci
+-------------------------------------------
+
+(define (sample-list-unique num lst)
+  (letn ( (unici (unique lst)) (len (length unici)) )
+    (if (> num len) '()
+        (slice (randomize unici) 0 num))))
+
+(sample-list-unique 5 lst)
+;-> (h g a c b)
+(sample-list-unique 5 lst)
+;-> (b h d g a)
+
+Questa funzione estrae correttamente N elementi univoci, ma gli elementi con più occorrenze hanno la stessa probabilità di essere estratti di quelli che compaiono solo una volta (perchè estraiamo dalla lista dei numeri unici).
+Se vogliamo che i numeri con più occorrenze abbiamo una maggiore probabilità di essere estratti dobbiamo usare un altro metodo.
+
+(define (sample-list-unique num lst)
+  (letn ( (len (length lst)) 
+          (unici (unique lst)) (len-u (length unici))
+          (out '()) )
+    (if (> num len-u) '()
+        (begin
+          ; creazione di una hashmap
+          (new Tree 'myHash)
+          (until (= (length (myHash)) num)
+            ; estrae un elemento a caso
+            (setq value (lst (rand len)))
+            ; inserisce valore casuale nell'hash (se non esiste)
+            (myHash (string value) value))
+          ; assegnazione dei valori dell'hashmap ad una lista
+          (setq out (myHash))
+          (setq out (map last out))
+          ; eliminazione dell'hashmap
+          (delete 'myHash)
+          ; out è ordinata, quindi dobbiamo mischiare gli elementi
+          (randomize out)))))
+
+Proviamo:
+
+(sample-list-unique 5 lst)
+;-> (h e c b g)
+(sample-list-unique 5 lst)
+;-> (a d b e g)
+
+Questa funzione rallenta con l'aumentare delle occorrenze degli elementi (perchè abbiamo una maggiore probabilità di selezionare un numero già scelto prima).
+
+Proviamo con una lista di 20003 elementi (20000 a, 1 b, 1 c, 1 d):
+
+(silent (setq t (dup 'a 20000))
+        (push 'b t 5000)
+        (push 'c t 10000)
+        (push 'd t 15000))
+
+(time (println (sample-list-unique 1 t)))
+;-> (a)
+;-> 9.519
+
+(time (println (sample-list-unique 2 t)))
+;-> (b a)
+;-> 339.99
+
+(time (println (sample-list-unique 3 t)))
+;-> (b a d)
+;-> 474.957
+
+(time (println (sample-list-unique 4 t)))
+;-> (b c a d)
+;-> 644.405
+
 ============================================================================
 

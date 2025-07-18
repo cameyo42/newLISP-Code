@@ -3054,6 +3054,7 @@ NOTE LIBERE 31
   Gara di moto
   Undo/Redo classico
   Lettura al contrario
+  Estrazione casuale di elementi da una lista
 
 PROBLEMI SUI DADI
 =================
