@@ -2549,7 +2549,7 @@ Estrazione casuale di elementi da una lista
 
 Data una lista di elementi (non necessariamente univoci) dobbiamo estrarre alcuni elementi in modo casuale.
 
-(setq lst '(a b c d a e f b g h g)) 
+(setq lst '(a b c d a e f b g h g))
 
 1) Estrazione casuale di N elementi
 -----------------------------------
@@ -2635,6 +2635,47 @@ Proviamo con una lista di 20003 elementi (20000 a, 1 b, 1 c, 1 d):
 (time (println (sample-list-unique 4 t)))
 ;-> (b c a d)
 ;-> 644.405
+
+
+-------------------------
+Distanza tra numeri primi
+-------------------------
+
+Sequenza OEIS A001223:
+Prime gaps: differences between consecutive primes.
+  1, 2, 2, 4, 2, 4, 2, 4, 6, 2, 6, 4, 2, 4, 6, 6, 2, 6, 4, 2, 6, 4, 6,
+  8, 4, 2, 4, 2, 4, 14, 4, 6, 2, 10, 2, 6, 6, 4, 6, 6, 2, 10, 2, 4, 2,
+  12, 12, 4, 2, 4, 6, 2, 10, 6, 6, 6, 2, 6, 4, 2, 10, 14, 4, 2, 4, 14,
+  6, 10, 2, 4, 6, 8, 6, 6, 4, 6, 8, 4, 8, 10, 2, 10, 2, 6, 4, 6, 8, 4,
+  2, 4, 12, 8, 4, 8, 4, 6, 12, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (pair-func lst func rev)
+"Produces a list applying a function to each pair of elements of a list"
+      (if rev
+          (map func (chop lst) (rest lst))
+          (map func (rest lst) (chop lst))))
+
+(define (dist-primi limite)
+  (pair-func (primes-to limite) -))
+
+(dist-primi 500)
+;-> (1 2 2 4 2 4 2 4 6 2 6 4 2 4 6 6 2 6 4 2 6 4 6
+;->  8 4 2 4 2 4 14 4 6 2 10 2 6 6 4 6 6 2 10 2 4 2
+;->  12 12 4 2 4 6 2 10 6 6 6 2 6 4 2 10 14 4 2 4 14
+;->  6 10 2 4 6 8 6 6 4 6 8 4 8 10 2 10 2 6 4 6 8 4
+;->  2 4 12 8 4 8)
 
 ============================================================================
 

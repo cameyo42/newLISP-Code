@@ -6051,12 +6051,12 @@ Test di correttezza:
 Superstringa comune più corta (Shortest Common Superstring)
 -----------------------------------------------------------
 
-Dato una lista S di stringhe, restituirei la stringa più piccola che contiene ciascuna stringa in S come sottostringa.
+Dato una lista S di stringhe, restituire la stringa più piccola che contiene ciascuna stringa in S come sottostringa.
 
 Questo è un problema chiamato Superstringa Comune più Corta (Shortest Common Superstring - SCS).
 Il problema SCS esatto è NP-hard, ma per input di piccole dimensioni (come <= 10 stringhe), possiamo risolverlo con la forza bruta:
 
-Algoritmo:
+Algoritmo O(n!):
 - Eliminare tutte le stringhe che sono sottostringhe di altre, poiché non influenzano il risultato finale.
 - Calcolare tutte le permutazioni di S.
 - Per ogni permutazione, unire le stringhe in modo greedy utilizzando la massima sovrapposizione possibile.
@@ -6089,7 +6089,7 @@ Algoritmo:
     )
     out))
 
-;; Rimuove dalla lista tutte le stringhe che sono sottostringhe di altre
+; Rimuove dalla lista tutte le stringhe che sono sottostringhe di altre
 (define (remove-substrings lst)
   (let (result '())
     (dolist (s lst)
@@ -6098,7 +6098,7 @@ Algoritmo:
         (push s result -1))) ; Inserisce alla fine per mantenere l'ordine
     result))
 
-;; Calcola la lunghezza massima dell'overlap tra la fine di 'a' e l'inizio di 'b'
+; Calcola la lunghezza massima dell'overlap tra la fine di 'a' e l'inizio di 'b'
 (define (overlap a b)
   (let ((maxi 0) (len (min (length a) (length b))))
     (for (i 1 len)
@@ -6106,23 +6106,23 @@ Algoritmo:
           (setq maxi i)))
     maxi))
 
-;; Unisce le stringhe 'a' e 'b' sfruttando l'overlap massimo
+; Unisce le stringhe 'a' e 'b' sfruttando l'overlap massimo
 (define (merge a b)
   (let ((o (overlap a b)))
     (string a (slice b o)))) ; Aggiunge solo la parte non sovrapposta di 'b'
 
-;; Calcola la superstringa più corta che contiene tutte le stringhe nella lista
+; Calcola la superstringa più corta che contiene tutte le stringhe nella lista
 (define (shortest-superstring lst)
   (setq lst (remove-substrings lst)) ; Rimuove le stringhe ridondanti
   (let ((min-str nil)
         (min-len 1e6))
     (dolist (p (perm lst)) ; Prova tutte le permutazioni delle stringhe
       (let ((merged (first p)))
-        ;; Unisce le stringhe nell'ordine della permutazione
+        ; Unisce le stringhe nell'ordine della permutazione
         (if (> (length p) 1)
             (for (i 1 (- (length p) 1))
               (setq merged (merge merged (p i)))))
-        ;; Aggiorna il risultato se la stringa corrente è più corta
+        ; Aggiorna il risultato se la stringa corrente è più corta
         (when (< (length merged) min-len)
           (setq min-str merged)
           (setq min-len (length merged)))))
@@ -6142,6 +6142,128 @@ Proviamo:
 ;-> "abcd"
 (shortest-superstring '("catg" "ctaagt" "gcta" "ttca" "atgcatc"))
 ;-> "gctaagttcatgcatc"
+(shortest-superstring '("cat" "tiger" "gerbil"))
+;-> "carigerbil"
+
+Un algoritmo molto più veloce è il seguente O(n*n):
+Greedy con massima sovrapposizione (approssimazione)
+Ad ogni passo:
+- Trova la coppia di stringhe con la massima sovrapposizione.
+- Uniscile in una sola stringa.
+- Ripeti finché resta una sola stringa.
+
+Questo algoritmo è molto più veloce del bruteforce e spesso fornisce una superstringa corta, anche se non ottimale.
+Comunque è stati dimostrato che produce una soluzione di lunghezza <= 2 volte l'ottimo.
+
+; Calcola la lunghezza massima di sovrapposizione tra fine di 'a' e inizio di 'b'
+(define (max-overlap a b)
+  (letn ((max-val 0)
+         (la (length a))
+         (lb (length b)))
+    (for (i 1 (min la lb))
+      (when (= (slice a (- la i)) (slice b 0 i))
+        (setq max-val i)))
+    max-val))
+
+; Unisce due stringhe 'a' e 'b' sfruttando la massima sovrapposizione
+(define (merge-with-overlap a b)
+  (let ((k (max-overlap a b)))
+    (append a (slice b k))))
+
+; Algoritmo greedy per la superstringa comune più corta
+(define (greedy-scs lst)
+  (let (copia lst)
+    ; Elimina le stringhe che sono sottostringhe di altre
+    (setq copia (filter (fn (s)
+                          (not (exists (fn (t) (and (!= s t) (find s t))) copia)))
+                        copia))
+    ; Ripeti finché rimane più di una stringa
+    (while (> (length copia) 1)
+      (letn ((max-val 0)
+             (best1 nil)
+             (best2 nil)
+             (merged nil))
+        ; Cerca la coppia con massima sovrapposizione
+        (dolist (s1 copia)
+          (dolist (s2 copia)
+            (when (!= s1 s2)
+              (let ((k (max-overlap s1 s2)))
+                (when (> k max-val)
+                  (setq max-val k best1 s1 best2 s2))))))
+        ; Se nessuna sovrapposizione trovata, scegli prime due stringhe
+        (when (not best1)
+          (setq best1 (copia 0))
+          (setq best2 (copia 1)))
+        ; Unisce le due stringhe selezionate
+        (setq merged (merge-with-overlap best1 best2))
+        ; Aggiorna la lista rimuovendo le due vecchie e aggiungendo la nuova
+        (setq copia (filter (fn (x) (and (!= x best1) (!= x best2))) copia))
+        (push merged copia -1)))
+    ; Restituisce la superstringa finale
+    (first copia)))
+
+Proviamo:
+
+(greedy-scs '("potato" "gota" "ta"))
+;-> "potatogota"
+(greedy-scs '("abc" "bcd" "cde"))
+;-> "abcde"
+(greedy-scs '("a" "ab" "abc"))
+;-> "abc"
+(greedy-scs '("x" "xy" "xyz"))
+;-> "xyz"
+(greedy-scs '("abcd"))
+;-> "abcd"
+(greedy-scs '("catg" "ctaagt" "gcta" "ttca" "atgcatc"))
+;-> "gctaagttcatgcatc"
+(greedy-scs '("cat" "tiger" "gerbil"))
+;-> "catigerbil"
+
+Vediamo la velocità delle due funzioni:
+
+(greedy-scs '("catg" "ctaagt" "gcta" "ttca" "atgcatc" "ggttca" "tcgag"
+              "gtckji" "ghjki" "kijgtc" "kidghu"))
+
+(time (println (shortest-superstring '("catg" "ctaagt" "gcta" "ttca" "atgcatc"
+                                "ggttca" "tcgag" "gtckji" "ghjki" "kijgtc"))))
+;-> ggttcatgcatcgaghjkijgtckjigctaagt
+;-> 7328.581
+
+(time (println (greedy-scs '("catg" "ctaagt" "gcta" "ttca" "atgcatc"
+                             "ggttca" "tcgag" "gtckji" "ghjki" "kijgtc"))))
+;-> ghjkijgtckjiggttcatgcatcgagctaagt
+;-> 0
+
+Verifica dei risultati:
+
+(setq parole '("catg" "ctaagt" "gcta" "ttca" "atgcatc"
+               "ggttca" "tcgag" "gtckji" "ghjki" "kijgtc"))
+
+(dolist (el parole)
+ (println el { } (find el "ggttcatgcatcgaghjkijgtckjigctaagt")))
+;-> catg 4
+;-> ctaagt 27
+;-> gcta 26
+;-> ttca 2
+;-> atgcatc 5
+;-> ggttca 0
+;-> tcgag 10
+;-> gtckji 20
+;-> ghjki 14
+;-> kijgtc 17
+
+(dolist (el parole)
+ (println el { } (find el "ghjkijgtckjiggttcatgcatcgagctaagt")))
+;-> catg 16
+;-> ctaagt 27
+;-> gcta 26
+;-> ttca 14
+;-> atgcatc 17
+;-> ggttca 12
+;-> tcgag 22
+;-> gtckji 6
+;-> ghjki 0
+;-> kijgtc 3
 
 
 -------------------

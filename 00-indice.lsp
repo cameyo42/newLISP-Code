@@ -3055,6 +3055,7 @@ NOTE LIBERE 31
   Undo/Redo classico
   Lettura al contrario
   Estrazione casuale di elementi da una lista
+  Distanza tra numeri primi
 
 PROBLEMI SUI DADI
 =================
