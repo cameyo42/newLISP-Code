@@ -2678,6 +2678,73 @@ Prime gaps: differences between consecutive primes.
 ;->  2 4 12 8 4 8)
 
 
+------------------
+GraphWiz e newLISP
+------------------
+
+https://graphviz.org/
+
+What is Graphviz?
+-----------------
+Graphviz is open source graph visualization software. Graph visualization is a way of representing structural information as diagrams of abstract graphs and networks.
+It has important applications in networking, bioinformatics, software engineering, database and web design, machine learning, and in visual interfaces for other technical domains.
+
+Features
+--------
+The Graphviz layout programs take descriptions of graphs in a simple text language, and make diagrams in useful formats, such as images and SVG for web pages, PDF or Postscript for inclusion in other documents, or display in an interactive graph browser.
+Graphviz has many useful features for concrete diagrams, such as options for colors, fonts, tabular node layouts, line styles, hyperlinks, and custom shapes.
+
+Command Line of DOT rendering program:
+All Graphviz programs have a similar invocation:
+
+cmd [ flags ] [ input files ]
+
+Esempio:
+
+Un esempio di file in formato .dot per i grafi orientati è il seguente:
+
+file: grafo.dot
+
+digraph G {
+  A -> B [label="4"];
+  B -> C [label="5"];
+  B -> D [label="2"];
+  C -> D [label="3"];
+  D -> C [label="3"];
+  D -> A [label="6"];
+  D -> E [label="6"];
+  E -> B [label="3"];
+  E -> C [label="4"];
+}
+
+Adesso con il programma GraphWiz possiamo costruire il grafo con il seguente comando da terminale:
+
+c:\util\Graphviz-13.1.0-win64\bin>dot -Tpng grafo.dot -o graphwiz.png
+
+Il file "graphwiz.png" si trova nella cartella "data".
+
+Formati di output:
+PNG:
+dot -Tpng grafo.dot -o grafo.png
+
+PDF:
+dot -Tpdf grafo.dot -o grafo.pdf
+
+SVG:
+dot -Tsvg grafo.dot -o grafo.svg
+
+Comandi alternativi:
+
+fdp: visualizzatore mediamente veloce (layout meno preciso):
+fdp -Tpng grafo.dot -o grafo.png
+
+neato: visualizzatore più veloce (layout peggiore):
+neato -Tpdf grafo.dot -o grafo.pdf
+
+Per maggiori informazioni riferirsi alla documentazione di GraphWiz:
+https://graphviz.org/documentation/
+
+
 -------------------------------
 Programming with Bits and Bytes
 -------------------------------
@@ -3000,6 +3067,12 @@ Creiamo il grafo in formato SVG dal terminale con GraphWiz:
 dot -Tsvg grafo.dot -o grafo.svg
 
 Il file "grafo.svg" si trova nella cartella "data".
+
+Oppure (layout più conciso):
+
+fdp -Tsvg grafo.dot -o grafo-fdp.svg
+
+Il file "grafo-fdp.svg" si trova nella cartella "data".
 
 ============================================================================
 

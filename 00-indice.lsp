@@ -3056,6 +3056,7 @@ NOTE LIBERE 31
   Lettura al contrario
   Estrazione casuale di elementi da una lista
   Distanza tra numeri primi
+  GraphWiz e newLISP
   Programming with Bits and Bytes
 
 PROBLEMI SUI DADI
