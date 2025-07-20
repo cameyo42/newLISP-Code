@@ -2677,5 +2677,329 @@ Prime gaps: differences between consecutive primes.
 ;->  6 10 2 4 6 8 6 6 4 6 8 4 8 10 2 10 2 6 4 6 8 4
 ;->  2 4 12 8 4 8)
 
+
+-------------------------------
+Programming with Bits and Bytes
+-------------------------------
+
+https://codegolf.stackexchange.com/questions/57204/programming-with-bits-and-bytes
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+In questa sfida scriverai un interprete per un linguaggio semplice che ho inventato.
+Il linguaggio si basa su un singolo accumulatore A, che ha una lunghezza di un byte esatto (8 bit).
+All'inizio di un programma, A = 0.
+Queste sono le istruzioni del linguaggio:
+
+!: Inversione (Inversion)
+Questa istruzione inverte semplicemente ogni bit dell'accumulatore.
+Ogni zero diventa uno e ogni uno diventa zero. Semplice!
+
+>: Sposta a destra (shift-right)
+Questa istruzione sposta ogni bit di A di una posizione a destra.
+Il bit più a sinistra diventa uno zero e il bit più a destra viene scartato.
+
+<: Sposta a sinistra (shift-left)
+Questa istruzione sposta ogni bit di A di una posizione a sinistra.
+Il bit più a destra diventa uno zero e il bit più a sinistra viene scartato.
+
+@: Scambia Nybbles (swap-nybbles)
+Questa istruzione scambia i quattro bit superiori di A con i quattro bit inferiori.
+Ad esempio, se A è 01101010 e si esegue @, A sarà 10100110:
+
+ ____________________
+ |                  |
+0110 1010    1010 0110
+      |_______|
+
+$: Stampa (print-acc)
+Stampa il contenuto dell'accumulatore A (binario e intero)
+
+Funzioni per le istruzioni del linguaggio:
+
+(define (inversion n)  (& (~ n) 255))
+(define (shift-right n) (>> n 1))
+; shift-left mascherato per rimanere entro 8 bit
+(define (shift-left n) (& (<< n 1) 255))
+(define (swap-nybbles n)  (| (>> n 4) (& (<< n 4) 240)))
+(define (print-acc n) (println "A = " (format "%3d - %08s" n (bits n))))
+
+Funzione che esegue un programma nel nostro linguaggio:
+
+(define (run prg verbose)
+  (let (A 0)
+    (if verbose (println "Init: " A))
+    (dolist (cmd (explode prg))
+      ;(println cmd)
+      (cond ((= cmd "!") (setq A (inversion A)))
+            ((= cmd ">") (setq A (shift-right A)))
+            ((= cmd "<") (setq A (shift-left A)))
+            ((= cmd "@") (setq A (swap-nybbles A)))
+            ((= cmd "$") (print-acc A))
+            ((= cmd " ") nil)  ; spazio escluso
+            ((= cmd "\r") nil) ; return escluso
+            ((= cmd "\n") nil) ; newline escluso
+            (true (println "Error: '" cmd "' unknown.")))
+      (if verbose (println cmd " --> A = " (format "%3d - %08s" A (bits A)))))
+    A))
+
+Proviamo:
+
+(run "!")
+;-> 255
+(run "!>>")
+;-> 63
+(run "!<@")
+;-> 239
+
+(run "!$<$@$")
+;-> A = 255 - 11111111
+;-> A = 254 - 11111110
+;-> A = 239 - 11101111
+;-> 239
+
+(run "!$<$@$" true)
+Init: 0
+;-> ! --> A = 255 - 11111111
+;-> A = 255 - 11111111
+;-> $ --> A = 255 - 11111111
+;-> < --> A = 254 - 11111110
+;-> A = 254 - 11111110
+;-> $ --> A = 254 - 11111110
+;-> @ --> A = 239 - 11101111
+;-> A = 239 - 11101111
+;-> $ --> A = 239 - 11101111
+;-> 239
+
+(run "!nop!&6*!")
+;-> Error: 'n' unknown.
+;-> Error: 'o' unknown.
+;-> Error: 'p' unknown.
+;-> Error: '&' unknown.
+;-> Error: '6' unknown.
+;-> Error: '*' unknown.
+;-> 255
+
+(setq s "!
+        <
+        k
+        @")
+(run s)
+;-> Error: 'k' unknown.
+;-> 239
+
+Problema: scrivere un programma che stampa i numeri da 1 a 5.
+
+Soluzione: "!<!$ <$ >!<!$ ><<$ >!<!$"
+
+(run "!<!$ <$ >!<!$ ><<$ >!<!$")
+;-> A =   1 - 00000001
+;-> A =   2 - 00000010
+;-> A =   3 - 00000011
+;-> A =   4 - 00000100
+;-> A =   5 - 00000101
+
+Come abbiamo fatto?
+
+Il linguaggio permette solamente di partire da 255 e arrivare (dopo un certo numero di operazioni) ad un altro numero.
+Quanti numeri possiamo raggiungere partendo da 255?
+
+Possiamo modellare lo spazio degli stati dell'accumulatore A partendo dal valore iniziale 11111111 (255) e applicando ricorsivamente le operazioni !, >, <, @ fintanto che il valore non raggiunge 0 (che è uno stato terminale).
+Per ogni numero n != 0, costruiamo una lista con elementi del tipo:
+
+  (n (! n) (> n) (< n) (@ n))
+
+e arrestiamo la costruzione se uno dei risultati è 0.
+Usiamo una funzione ricorsiva che genera elementi/nodi di 5 elementi.
+Per evitare cicli usiamo una lista di numeri visitati.
+La funzione genera tutte le transizioni raggiungibili partendo da un dato numero e ci permette di capire quali numeri sono raggiungibili da un certo stato.
+
+
+Funzione che genera tutte le possibili transizioni partendo da uno stato iniziale:
+
+(define (genera-transizioni start)
+(define (step n)
+  (list n (inversion n) (shift-right n) (shift-left n) (swap-nybbles n)))
+  (letn ((visitate '())
+         (risultato '()))
+    (define (esplora n)
+      (unless (or (= n 0) (ref n visitate))
+        (push n visitate)
+        (let ((riga (step n)))
+          (push riga risultato -1)
+          (dolist (x (rest riga))
+            (esplora x)))))
+    (esplora start)
+    risultato))
+
+Proviamo:
+
+(setq transizioni (genera-transizioni 255))
+;-> ((255 0 127 254 255) (127 128 63 254 247) (128 127 64 0 8)
+;->  (64 191 32 128 4) (191 64 95 126 251) (95 160 47 190 245)
+;->  (160 95 80 64 10) (80 175 40 160 5) (175 80 87 94 250)
+;->  ...
+;->  (59 196 29 118 179) (28 227 14 56 193) (227 28 113 198 62)
+;->  (198 57 99 140 108) (57 198 28 114 147) (4 251 2 8 64)
+;->  (251 4 125 246 191) (53 202 26 106 83) (202 53 101 148 172)) 
+
+Vediamo quanti numeri possiamo raggiungere partendo da 255:
+(length transizioni)
+;-> 255
+
+Vediamo quali sono questi 255 numeri:
+(setq raggiungibili (unique (sort (map first transizioni))))
+;-> (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+;->  26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
+;->  48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69
+;->  70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 86 88 89 90 91 92 94
+;->  96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113
+;->  114 115 116 118 119 120 121 122 123 124 126 127 128 129 130 131 132
+;->  133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149
+;->  150 151 152 154 156 158 160 161 162 163 164 165 166 167 168 169 172
+;->  173 176 177 178 179 180 181 182 183 184 188 192 193 194 195 196 197
+;->  198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 214 216
+;->  218 220 222 224 225 226 227 228 229 230 231 232 233 236 237 238 239
+;->  240 241 242 243 244 246 247 248 252 254 255)
+(length raggiungibili)
+;-> 255
+
+(difference (sequence 1 255) (map first transizioni))
+;-> ()
+
+Quindi partendo da 255 possiamo raggiungere tutti i numeri da 1 a 255.
+(Il numero 0 lo possiamo raggiungere partendo da 1 e applicando '!').
+
+Queste transizioni rappresentano lo spazio degli stati raggiungibili e può essere visto come un grafo orientato fortemente connesso (da ogni nodo è possibile raggiungere qualunque altro nodo).
+
+Possiamo scrivere una funzione 'trova-path' che cerca nel grafo il percorso da un numero ad un altro.
+Il risultato è una lista di coppie (numero operazione).
+
+(define (trova-path start target)
+  ; Inizializza la coda con un percorso contenente 
+  ; solo il nodo iniziale e operazione vuota
+  (letn ((queue (list (list (list start ""))))
+         ; Array per segnare i nodi già visitati
+         (visitati (array 256 '(nil)))
+         ; Flag per indicare se il percorso è stato trovato
+         (trovato nil)
+         ; Variabile per salvare il percorso trovato
+         (risultato nil))
+    ; Continua finché la coda non è vuota e il percorso non è stato trovato
+    (while (and queue (not trovato))
+      ; Estrai il primo percorso dalla coda
+      (let ((path (pop queue)))
+        ; Prendi il valore dell'ultimo nodo del percorso
+        (let (n (first (last path)))
+          ; Se il nodo non è stato ancora visitato
+          (unless (visitati n)
+            ; Segna il nodo come visitato
+            (setf (visitati n) true)
+            ; Se è il nodo target, salva il percorso e ferma il ciclo
+            (if (= n target)
+                (begin
+                  (setq trovato true)
+                  (setq risultato path))
+                ; Altrimenti, genera le transizioni possibili
+                (dolist (t (list (list (>> n 1) ">")
+                                 (list (& (<< n 1) 255) "<")
+                                 (list (| (>> n 4) (& (<< n 4) 240)) "@")
+                                 (list (& (~ n) 255) "!")))
+                  (letn ((m (t 0))     ; nuovo numero raggiunto
+                         (op (t 1)))   ; operazione usata
+                    ; Aggiungi alla coda se il nodo è valido e non visitato
+                    (unless (or (= m 0) (visitati m))
+                      ; Costruisci un nuovo path aggiungendo la coppia (m op)
+                      (push (append path (list (list m op))) queue -1)))))))))
+    ; Restituisci il percorso trovato (lista di coppie (numero operazione))
+    risultato))
+
+Proviamo:
+
+(trova-path 255 1)
+;-> ((255 "") (254 "<") (1 "!"))
+
+(trova-path 255 142)
+;-> ((255 "") (254 "<") (252 "<") (248 "<") (124 ">") (199 "@") (142 "<"))
+
+Con questa funzione possiamo costruire il programma che stampa i numeri da 1 a 5:
+
+(trova-path 255 1)
+;-> ((255 "") (254 "<") (1 "!"))
+(trova-path 1 2)
+;-> ((1 "") (2 "<"))
+(trova-path 2 3)
+;-> ((2 "") (1 ">") (254 "!") (252 "<") (3 "!"))
+(trova-path 3 4)
+;-> ((3 "") (1 ">") (2 "<") (4 "<"))
+(trova-path 3 4)
+;-> ((3 "") (1 ">") (2 "<") (4 "<"))
+(trova-path 4 5)
+;-> ((4 "") (2 ">") (253 "!") (250 "<") (5 "!"))
+
+(setq program "!") ; partiamo da 255
+(extend program (join (map last (trova-path 255 1)))) ; arriviamo a 1
+(push "$" program -1) ; stampiamo 1
+(extend program (join (map last (trova-path 1 2))))   ; arriviamo a 2
+(push "$" program -1) ; stampiamo 2
+(extend program (join (map last (trova-path 2 3))))   ; arriviamo a 3
+(push "$" program -1) ; stampiamo 3
+(extend program (join (map last (trova-path 3 4))))   ; arriviamo a 4
+(push "$" program -1) ; stampiamo 4
+(extend program (join (map last (trova-path 4 5))))   ; arriviamo a 5
+(push "$" program -1) ; stampiamo 5
+;-> "!<!$<$>!<!$><<$>!<!$"
+
+(run program)
+;-> A =   1 - 00000001
+;-> A =   2 - 00000010
+;-> A =   3 - 00000011
+;-> A =   4 - 00000100
+;-> A =   5 - 00000101
+
+Per finire rappresentiamo il grafo delle transizioni in un file SVG.
+(Vedi "GraphWiz e newLISP" su "Note libere 31".)
+
+Partendo dall'output di 'genera-transizioni':
+(es. ((255 0 127 254 255) (127 128 63 254 247) (128 127 64 0 8) (64 191 32 128 4) ...)
+Generiamo un file .dot per GraphWiz del tipo:
+
+digraph G {
+  255 -> 0 [label="!"];
+  255 -> 127 [label=">"];
+  255 -> 254 [label="<"];
+  255 -> 255 [label="@"];
+  ...
+}
+
+(define (genera-dot transizioni)
+  (let ((operazioni '("!" ">" "<" "@"))
+        (risultato '()))
+    (push "digraph G {" risultato)
+    (dolist (riga transizioni)
+      (let ((nodo (riga 0)))
+        (for (i 1 4)
+          (let ((dest (riga i)))
+            ; Evita archi ridondanti (nodo -> nodo) se non vuoi loop
+            (push (string "  " nodo " -> " dest " [label=\"" (operazioni (- i 1)) "\"];") risultato -1)))))
+    (push "}" risultato -1)
+    (join risultato "\n")))
+
+(setq graph (genera-dot transizioni))
+
+Scriviamo il risultato in un file:
+
+(setq f (open "grafo.dot" "w"))
+(write f graph)
+(close f)
+
+Creiamo il grafo in formato SVG dal terminale con GraphWiz:
+(ci vuole molto tempo...)
+
+dot -Tsvg grafo.dot -o grafo.svg
+
+Il file "grafo.svg" si trova nella cartella "data".
+
 ============================================================================
 
