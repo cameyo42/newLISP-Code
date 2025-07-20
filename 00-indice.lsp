@@ -3058,6 +3058,7 @@ NOTE LIBERE 31
   Distanza tra numeri primi
   GraphWiz e newLISP
   Programming with Bits and Bytes
+  Balanced Ternary
 
 PROBLEMI SUI DADI
 =================

@@ -1794,7 +1794,7 @@ Risultato dopo la Fase 1:
   C2: 75
   C3: 75
 
-Ora passiamo alla seconda parte dell'algoritmo: lavorare all’indietro sui "loss" (le perdite).
+Ora passiamo alla seconda parte dell'algoritmo: lavorare all'indietro sui "loss" (le perdite).
 
 Fase 2: Bilanciamento delle perdite
 -----------------------------------
@@ -1818,7 +1818,7 @@ Quindi non possiamo fare alcun aggiustamento nella Fase 2: tutto è già stato d
 
 Conclusione
 -----------
-La distribuzione finale secondo l’algoritmo descritto è:
+La distribuzione finale secondo l'algoritmo descritto è:
   C1: 50
   C2: 75
   C3: 75
@@ -1849,7 +1849,8 @@ b) Poi, nessuna risorsa residua da riequilibrare le perdite, quindi non si prose
     (if (or (= k 0) (<= totale 0))
         (setq fine true)
         (begin
-          ; Calcola quanto può ricevere ciascun attivo: il minimo tra ciò che gli manca e il totale diviso per k
+          ; Calcola quanto può ricevere ciascun attivo:
+          ; il minimo tra ciò che gli manca e il totale diviso per k
           (setq max-quote (apply min (map (fn (i) (sub (meta i) (assegnati i))) attivi)))
           (setq quota (min max-quote (div totale k)))
           ; Se la quota è nulla o negativa, termina il ciclo
@@ -2368,7 +2369,7 @@ Pro:
 
 Contro
 - Si discosta dal comportamento classico degli editor (Ctrl+Z -> modifica -> niente più Ctrl+Y).
-- Può confondere l’utente se si aspetta che un nuovo 'insert' annulli il percorso di redo.
+- Può confondere l'utente se si aspetta che un nuovo 'insert' annulli il percorso di redo.
 
 Modello 2: Timeline a ramo unico (comportamento classico degli editor)
 ----------------------------------------------------------------------
@@ -2440,7 +2441,7 @@ Implementazione Modello 2
 -------------------------
 - Dopo ogni 'undo', se si fa 'insert' o 'remove', si azzera la 'redo-list', ma solo in quel caso.
 - Bisogna sapere se l'ultimo comando è stato 'undo', prima di decidere se azzerare la 'redo-list'.
-- Questo richiede una variabile di stato che tenga traccia dell’ultima azione.
+- Questo richiede una variabile di stato che tenga traccia dell'ultima azione.
 - last-op tiene traccia dell'ultima operazione, (quindi possiamo sapere se siamo nel "ramo alternativo").
 - Il comportamento finale è esattamente quello di un editor tradizionale con Ctrl+Z e Ctrl+Y.
 
@@ -3073,6 +3074,64 @@ Oppure (layout più conciso):
 fdp -Tsvg grafo.dot -o grafo-fdp.svg
 
 Il file "grafo-fdp.svg" si trova nella cartella "data".
+
+
+----------------
+Balanced Ternary
+----------------
+
+Il "balanced ternary" (ternario bilanciato) è un sistema numerico posizionale non standard.
+È un sistema in base 3, che, a differenza del sistema ternario standard, usa come cifre -1, 0 e 1 anziché 0, 1 e 2.
+Le potenze di 3 usate per rappresentare il numero possono avere quindi coefficiente positivo, nullo o negativo.
+In questo sistema ogni cifra rappresenta -1, 0 o +1, con potenze di 3:
+
+  valore = cifra0*3^0 + cifra1*3^1 + cifra2*3^2 + ...
+
+Esempio:
+4 = 1*3^2 + (-1)*3^0 -> balance ternary: (1 0 -1)
+
+Funzione che prende un intero decimale e lo converte nella notazione "balanced ternary" (-1,0,1).
+
+(define (balanced-ternary num)
+  (let (ris '())
+    (while (!= num 0)
+      (letn ((r (% num 3)))
+        (cond
+          ((= r 0) (push 0 ris) (setq num (/ num 3)))
+          ((= r 1) (push 1 ris) (setq num (/ num 3)))
+          ((= r 2) (push -1 ris) (setq num (+ (/ num 3) 1))))))
+    ris))
+
+Proviamo:
+
+(balanced-ternary 42)
+;-> (1 -1 -1 -1 0)
+
+(map (fn(x) (list x (balanced-ternary x))) (sequence 1 12))
+;-> ((1 (1)) (2 (1 -1)) (3 (1 0)) (4 (1 1)) (5 (1 -1 -1)) (6 (1 -1 0))
+;->  (7 (1 -1 1)) (8 (1 0 -1)) (9 (1 0 0)) (10 (1 0 1)) (11 (1 1 -1))
+;->  (12 (1 1 0)))
+
+La lista risultante è ordinata dalla cifra meno significativa alla più significativa.
+
+Funzione che un numero intero nella notazione "balanced ternary" (-1,0,1) e lo converte in intero decimale:
+
+(define (from-balanced-ternary lst)
+  (letn ((ris 0)
+         (n (length lst)))
+    (dotimes (i n)
+      (setq ris (+ ris (* (lst i) (pow 3 (- n i 1))))))
+    ris))
+
+Proviamo:
+
+(from-balanced-ternary '(1 -1 -1 -1 0))
+;-> 42
+
+(map (fn(x) (list x (from-balanced-ternary (balanced-ternary x))))
+     (sequence 1 20))
+;-> ((1 1) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10) (11 11)
+;->  (12 12) (13 13) (14 14) (15 15) (16 16) (17 17) (18 18) (19 19) (20 20))
 
 ============================================================================
 

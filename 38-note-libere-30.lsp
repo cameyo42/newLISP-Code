@@ -8114,14 +8114,14 @@ dove:
   Indici validi: i = 0,...,h - 1; j = 0,...,w - 1
   Padding simmetrico: ph = floor(kh/2), pw = floor(kw/2)
   La matrice viene estesa con zeri ai bordi per mantenere la dimensione
-  Output della stessa dimensione dell’input
+  Output della stessa dimensione dell'input
 
 3) Modalità full (Include tutti i casi parziali)
   Output size: (h + kh - 1) × (w + kw - 1)
   Indici validi: i = 0,...,h + kh - 2; j = 0,...,w + kw - 2
   Padding massimo: il kernel può uscire completamente dai bordi
   I fuori dai limiti vengono considerati come 0 (zero-padding)
-  Output più grande dell’input
+  Output più grande dell'input
 
 Queste formule valgono sia per convoluzione che per correlazione, perché la differenza è solo nel kernel ruotato o meno, non nella dimensione dell'output.
 
@@ -8879,7 +8879,7 @@ Analizziamo il tipo di elezione "UNINOMINALE" e i relativi metodi di voto.
 -------------------
 - Ogni elettore fornisce una classifica ordinata dei candidati (ranking).
 - Si confrontano tutte le coppie di candidati tra loro.
-- Un candidato vince una sfida a due se è preferito da più della metà degli elettori rispetto all’altro.
+- Un candidato vince una sfida a due se è preferito da più della metà degli elettori rispetto all'altro.
 - Il vincitore di Condorcet è colui che batte ogni altro candidato in uno scontro diretto.
 
 Nota:️ Se esiste un vincitore, allora è unico.
@@ -8964,7 +8964,7 @@ Condorcet è ideale quando si ha bisogno di un vincitore che sia più forte test
 ---------------
 - Ogni elettore fornisce una classifica dei candidati.
 - Ad ogni posizione viene assegnato un punteggio:
-- Se ci sono n candidati, il primo in classifica ottiene n–1 punti, il secondo n–2, ..., l’ultimo 0.
+- Se ci sono n candidati, il primo in classifica ottiene n–1 punti, il secondo n–2, ..., l'ultimo 0.
 - Si sommano i punti di ogni candidato su tutti i voti.
 - Vince chi ha il punteggio totale più alto.
 
@@ -9030,7 +9030,7 @@ Possibili soluzioni:
 6) Approval voting
 ------------------
 - Ogni elettore approva o non approva ciascun candidato.
-- Non c’è classifica né voto unico: si può votare più candidati.
+- Non c'è classifica né voto unico: si può votare più candidati.
 - Vince il candidato con più approvazioni totali.
 
 È un sistema molto usato in ambiti scientifici o accademici, perché è semplice, evita il "male minore unico" e premia i candidati più accettabili da molti (non solo i più amati da pochi).
@@ -9085,7 +9085,7 @@ Possibili soluzioni:
 - I punteggi per ogni candidato sono sommati.
 - Vince il candidato con il punteggio totale più alto.
 
-A differenza dell’approval voting (sì/no), il range voting permette sfumature di gradimento.
+A differenza dell'approval voting (sì/no), il range voting permette sfumature di gradimento.
 
 (define (range-voting num-elettori candidati max-punteggio)
   (local (punteggi voti conteggio max-vincitori stop)
