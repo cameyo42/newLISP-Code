@@ -816,9 +816,9 @@ Regola 182:
 ;-> ██████████████████████████████████████████████████████████████
 
 
----------------------------------
-Palidromo precedente e successivo
----------------------------------
+----------------------------------
+Palindromo precedente e successivo
+----------------------------------
 
 Dato un numero intero positivo, scrivere una funzione per determinare il numero palindromo successivo e il numero palindromo precedente al numero dato.
 

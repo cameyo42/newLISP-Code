@@ -3274,5 +3274,115 @@ Se si tratta di liste con duplicati, il comportamento è più simile a un prodot
 
 Vedi anche "Prodotto cartesiano" su "Funzioni varie".
 
+
+--------------------------------------
+Palindromo più vicino divisibile per N
+--------------------------------------
+
+Dato un numero intero N diverso da 0, determinare il numero palindromo più vicino ad N che è divisibile per N.
+
+(define (palindromo? num)
+  (let ( (rev 0) (val num) )
+    ; crea il numero invertito
+    (until (zero? val)
+      (setq rev (+ (* rev 10)
+      (% val 10))) (setq val (/ val 10)))
+    (= rev num)))
+
+(define (find-pali num)
+  (local (up down found out)
+    (setq up num)
+    (setq down num)
+    (setq found nil)
+    ; ricerca bidirezionale, partendo da 'num',
+    ; del palindromo che è divisibile per 'num'
+    (until found
+      ;(print down { } up) (read-line)
+            ; caso palindromo maggiore
+      (cond ((and (!= up 0) (palindromo? up) (zero? (% up num)))
+              (set 'out up 'found true))
+            ; caso palindromo minore
+            ((and (!= down 0) (palindromo? down) (zero? (% down num)))
+              (set 'out down 'found true))
+            ; incr e decr up e down
+            (true (++ up) (-- down))))
+    out))
+
+Proviamo:
+
+(find-pali 16)
+;-> 272
+(/ 272 16)
+;-> 17
+
+(find-pali 1)
+;-> 1
+(find-pali 42)
+;-> 252
+(find-pali 111)
+;-> 111
+(time (println (find-pali 1234)))
+;-> 28382
+;-> 53.36
+(time (println (find-pali -1234)))
+;-> -28382
+;-> 53.391
+
+Sembra veloce, ma:
+
+(time (println (find-pali 12342)))
+;-> 456654
+;-> 942.439
+
+(time (println (find-pali 12345)))
+(CTRL-C per fermare)
+
+Il metodo è molto inefficiente.
+Molto meglio moltiplicare il numero dato per k=1,2,... fino a che k*n non risulta palindromo.
+
+(define (find-pali2 num)
+  (let ( (out 0) (num (* 1L num)) (found nil) (k 1) )
+    (until found
+      (when (palindromo? (* num k))
+        (setq found true)
+        (setq out (* num k)))
+      (++ k))
+    out))
+
+Proviamo:
+
+(find-pali2 16)
+;-> 272L
+(find-pali2 1)
+;-> 1L
+(find-pali2 42)
+;-> 252L
+(find-pali2 111)
+;-> 111L
+(time (println (find-pali2 1234)))
+;-> 23382L
+;-> 0
+(time (println (find-pali2 -1234)))
+;-> -23382L
+;-> 0
+(time (println (find-pali2 12342)))
+;-> 456654L
+;-> 0
+(time (println (find-pali2 12345)))
+;-> 536797635L
+;-> 184.987
+(time (println (find-pali2 123456)))
+;-> 6180330816L
+;-> 227.779
+(time (println (find-pali2 1234567)))
+;-> 85770307758L
+;-> 343.711
+(time (println (find-pali2 1234568)))
+;-> 2957554557592L
+;-> 13498.625
+(time (println (find-pali2 123456789)))
+;-> 535841353148535L
+;-> 29525.506
+
 ============================================================================
 

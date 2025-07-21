@@ -2621,7 +2621,7 @@ NOTE LIBERE 26
   Gradiente di una funzione
   Somma ponderata delle cifre
   Automi cellulari elementari (Wolfram)
-  Palidromo precedente e successivo
+  Palindromo precedente e successivo
   Funzione per l'input di una password
   Trasformata di Burrows-Wheeler
   Consigli sparsi sul Problem Solving
@@ -3060,6 +3060,7 @@ NOTE LIBERE 31
   Programming with Bits and Bytes
   Balanced Ternary
   Liste originali di un prodotto cartesiano
+  Palindromo più vicino divisibile per N
 
 PROBLEMI SUI DADI
 =================
