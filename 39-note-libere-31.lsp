@@ -3087,8 +3087,7 @@ In questo sistema ogni cifra rappresenta -1, 0 o +1, con potenze di 3:
 
   valore = cifra0*3^0 + cifra1*3^1 + cifra2*3^2 + ...
 
-Esempio:
-4 = 1*3^2 + (-1)*3^0 -> balance ternary: (1 0 -1)
+Esempio: 4 = 1*3^2 + (-1)*3^0 -> balance ternary: (1 0 -1)
 
 Funzione che prende un intero decimale e lo converte nella notazione "balanced ternary" (-1,0,1).
 
@@ -3118,9 +3117,9 @@ Funzione che un numero intero nella notazione "balanced ternary" (-1,0,1) e lo c
 
 (define (from-balanced-ternary lst)
   (letn ((ris 0)
-         (n (length lst)))
-    (dotimes (i n)
-      (setq ris (+ ris (* (lst i) (pow 3 (- n i 1))))))
+         (len (length lst)))
+    (dotimes (i len)
+      (setq ris (+ ris (* (lst i) (pow 3 (- len i 1))))))
     ris))
 
 Proviamo:
@@ -3132,6 +3131,148 @@ Proviamo:
      (sequence 1 20))
 ;-> ((1 1) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10) (11 11)
 ;->  (12 12) (13 13) (14 14) (15 15) (16 16) (17 17) (18 18) (19 19) (20 20))
+
+Sequenza OEIS A065363:
+Sum of balanced ternary digits in n. Replace 3^k with 1 in balanced ternary expansion of n.
+  0, 1, 0, 1, 2, -1, 0, 1, 0, 1, 2, 1, 2, 3, -2, -1, 0, -1, 0, 1, 0, 1, 2,
+  -1, 0, 1, 0, 1, 2, 1, 2, 3, 0, 1, 2, 1, 2, 3, 2, 3, 4, -3, -2, -1, -2,
+  -1, 0, -1, 0, 1, -2, -1, 0, -1, 0, 1, 0, 1, 2, -1, 0, 1, 0, 1, 2, 1, 2,
+  3, -2, -1, 0, -1, 0, 1, 0, 1, 2, -1, 0, 1, 0, 1, 2, 1, 2, 3, 0, 1, 2, 1,
+  2, 3, 2, 3, 4, -1, 0, 1, 0, 1, 2, 1, 2, 3, 0, 1, 2, 1, 2, ...
+
+(define (seq num) (apply + (balanced-ternary num)))
+(map seq (sequence 0 50))
+;-> (0 1 0 1 2 -1 0 1 0 1 2 1 2 3 -2 -1 0 -1 0 1 0 1 2
+;->  -1 0 1 0 1 2 1 2 3 0 1 2 1 2 3 2 3 4 -3 -2 -1 -2 
+;->  -1 0 -1 0 1 -2)
+
+Vediamo come vengono composti i numeri con questo sistema:
+
+(define (show-balanced-ternary num)
+  (letn ( (ris 0) (lst (balanced-ternary num)) (len (length lst)) )
+  (println num " -> " lst)
+    (dotimes (i len)
+      (println (format "%+2d%s%d%s%d"
+               (lst i) "*3^" (- len i 1) " = " (* (lst i) (pow 3 (- len i 1)))))
+      (setq ris (+ ris (* (lst i) (pow 3 (- len i 1))))))
+    ris))
+
+Proviamo:
+
+(show-balanced-ternary 49)
+;-> 49 -> (1 -1 -1 1 1)
+;-> +1*3^4 = 81
+;-> -1*3^3 = -27
+;-> -1*3^2 = -9
+;-> +1*3^1 = 3
+;-> +1*3^0 = 1
+;-> 49
+
+(show-balanced-ternary 11)
+;-> 11 -> (1 1 -1)
+;-> +1*3^2 = 9
+;-> +1*3^1 = 3
+;-> -1*3^0 = -1
+;-> 11
+
+-----------------------------------------
+Liste originali di un prodotto cartesiano
+-----------------------------------------
+
+Il prodotto cartesiano di due liste A e B è la lista di tutte le coppie ordinate composte da un elemento di A e un elemento di B (l'ordine della lista non è rilevante).
+
+Esempio, il prodotto cartesiano di {1,2,7,1} e {4,6} vale:
+
+(define (cp lst1 lst2)
+  (let (out '())
+    (if (or (null? lst1) (null? lst2))
+        '()
+        (dolist (el1 lst1)
+          (dolist (el2 lst2)
+            (push (list el1 el2) out -1))))))
+
+(cp '(1 2 7) '(4 6))
+;-> ((1 4) (1 6) (2 4) (2 6) (7 4) (7 6))
+
+Scrivere una funzione che prende una lista e determina se è un prodotto cartesiano.
+In caso positivo deve restituire le liste originali, altrimenti nil.
+
+In ogni lista L che rappresenta un prodotto cartesiano risulta:
+- per ogni coppia di coppie (a,b),(c,d) in L i prodotti dei conteggi count(a,b) * count(c,d) e count(a,d) * count(c,b) sono uguali.
+Chiaramente, questo è necessario affinché L sia un prodotto cartesiano.
+Per la sufficienza, osserviamo che risulta count(a,b)/count(c,b) = count(a,d)/count(c,d) per ogni b,d, quindi la riga a è un multiplo della riga c. Poiché questo vale per ogni a,c, la matrice dei conteggi ha rango <= 1 e può essere scritta come prodotto esterno.
+
+Quindi per verificare se una lista L è un prodotto cartesiano deve risultare:
+
+  count(a,b) * count(c,d) = count(a,d) * count(c,b)
+
+(define (check l1 l2)
+  (let ( (a (l1 0)) (b (l1 1)) (c (l2 0)) (d (l2 1)) )
+    (= (* (first (count (list l1) lst))             ;(a b)*
+          (first (count (list l2) lst)))            ;(c d)
+       (* (first (count (list (list a d)) lst))     ;(a d)*
+          (first (count (list (list c b)) lst)))))) ;(c b)
+
+Quando la lista data L rappresenta un prodotto cartesiano vogliamo restituire le due liste di partenza.
+Le due liste di partenza sono costituite da:
+a) prima lista = elementi presenti nelle prime posizioni di ogni coppia di L
+a) seconda lista = elementi presenti nelle seconde posizioni di ogni coppia di L
+
+Nota: questo è vero solo quando non eistono molteplicità, cioè le liste originali sono due 'set' (ognuna lista è costituita da elementi diversi)
+
+(define (cartesian? lst)
+  ;; Se la lista ha una sola coppia, è comunque un prodotto cartesiano:
+  (if (= (length lst) 1)
+      ;; Estrae i due elementi della coppia in due liste distinte
+      (list (list (lst 0 0)) (list (lst 0 1)))
+      ;else
+      (let (stop nil)
+        ;; Confronta ogni coppia di coppie (i, j)
+        (for (i 0 (- (length lst) 2) 1 stop)
+          (for (j (+ i 1) (- (length lst) 1) 1 stop)
+            ;; Se una violazione della regola viene trovata, stop = true
+            (if-not (check (lst i) (lst j)) (setq stop true))))
+        ;; Se nessuna violazione, restituisce le due liste originali
+        (if stop nil
+            ;(list (map first lst) (map last lst))))))
+            (list (unique (map first lst)) (unique (map last lst)))))))
+
+Proviamo:
+
+(cartesian? '((1 1)))
+;-> ((1) (1))
+(cartesian? '((3 1)))
+;-> ((3) (1))
+
+(cartesian? (cp '(1 2 7) '(4 6)))
+;-> ((1 2 7) (4 6))
+(cartesian? '((1 4) (1 6) (2 4) (7 4) (7 6) (2 6)))
+;-> ((1 2 7) (4 6))
+(cartesian? (cp '(1 2 3 4) '(1 2)))
+;-> ((1 2 3 4) (1 2))
+
+(cartesian? '((1 2) (2 2) (3 2) (1 3) (2 3)))
+;-> nil
+
+Quando esistono molteplicità, allora la funzione non genera correttamente le liste:
+
+(cartesian? (cp '(1 2 3 4) '(1 2 1)))
+;-> ((1 2 3 4) (1 2)) ; errore
+(cartesian? (cp '(1 2 3 4) '(1 2 1 2)))
+;-> ((1 2 3 4) (1 2)) ; errore
+
+Questo perchè quando usiamo 'unique' per selezionare gli elementi delle liste risultanti eliminiamo le molteplicità.
+
+Quindi la funzione 'cartesian?' verifica che la lista data sia esattamente un prodotto cartesiano con molteplicità coerenti (matrice rango 1).
+In altre parole, se le liste di partenza sono due 'set' (cioè ognuna ha elementi tutti distinti), allora la funzione produce risultati corretti.
+In definitiva, la funzione verifica sempre correttamente se la lista data è un prodotto cartesiano, ma non produce liste corrette nel caso in cui le liste originali hanno elementi multipli.
+
+La distinzione tra "set" e "liste" è cruciale.
+Se L1 e L2 possono contenere duplicati e il loro ordine è rilevante, la ricostruzione diventa più complessa e in molti casi impossibile da fare in modo univoco da un prodotto cartesiano.
+Generalmente, il prodotto cartesiano è definito su insiemi (dove gli elementi sono unici e non ordinati).
+Se si tratta di liste con duplicati, il comportamento è più simile a un prodotto vettoriale o tensoriale e richiede più informazioni.
+
+Vedi anche "Prodotto cartesiano" su "Funzioni varie".
 
 ============================================================================
 

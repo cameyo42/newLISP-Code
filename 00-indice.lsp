@@ -3059,6 +3059,7 @@ NOTE LIBERE 31
   GraphWiz e newLISP
   Programming with Bits and Bytes
   Balanced Ternary
+  Liste originali di un prodotto cartesiano
 
 PROBLEMI SUI DADI
 =================

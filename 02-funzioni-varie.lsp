@@ -4629,6 +4629,8 @@ Esempio:
 (pcf f g (sequence 1 3) (sequence 1 3))
 ;-> ((1 1) (1 4) (1 9) (2 1) (2 4) (2 9) (3 1) (3 4) (3 9))
 
+Vedi anche "Liste originali di un prodotto cartesiano" su "Note libere 31".
+
 
 ------------------------------
 Insieme delle parti (powerset)
