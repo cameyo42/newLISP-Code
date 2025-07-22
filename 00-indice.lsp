@@ -3061,6 +3061,8 @@ NOTE LIBERE 31
   Balanced Ternary
   Liste originali di un prodotto cartesiano
   Palindromo più vicino divisibile per N
+  Andata e ritorno di una barca
+  Creazione di acronimi
 
 PROBLEMI SUI DADI
 =================

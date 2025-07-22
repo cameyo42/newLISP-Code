@@ -3384,5 +3384,121 @@ Proviamo:
 ;-> 535841353148535L
 ;-> 29525.506
 
+
+-----------------------------
+Andata e ritorno di una barca
+-----------------------------
+
+Una barca impiega t1 minuti per andare da A a B con la corrente a favore.
+La stessa barca impiega t2 minuti per andare da B a A controcorrente.
+Quanto impiegherebbe la barca ad andare e tornare senza corrente?
+
+v = velocità barca
+t1 = tempo di andata
+
+c = velocità corrente
+t2 = tempo di ritorno
+
+v1 = velocità di andata = (v + c)
+v2 = velocità di ritorno = (v - c)
+S = distanza andata (AB) = distanza ritorno (BA)
+
+S = v2*t1 = v1*t2
+S = (v + c)*t1 = (v - c)*t2
+
+v*t1 + c*t1 = v*t2 - c*t2
+c*(t1 + t2) = v*(t2 - t1)
+c = v*(t2 - t1)/(t1 + t2)     (1)
+
+deltaT = tempo andata/ritorno senza corrente
+
+v*deltaT = (v + c)*t1 = (v - c)*t2   (2)
+
+Sostituendo la (1) nella (2):
+
+t1*(v + v*(t2 - t1)/(ta + t2)) + t2*(v - v*(t2 - t1)/(t1 + t2)) = v*deltaT
+v*t1 + (v*t1)*(t2-t1)/(t1+t2)) + v*t2 - (v*t2)*(t2-t1)/(t1+t2)) = v*deltaT
+v*t1*(1 + (t2 - t1)/(t1 + t2)) + v*t2*(1 - (t2 - t1)/(t1 + t2)) = v*deltaT
+
+deltaT = t1*(1 + (t2 - t1)/(t1 + t2)) + t2*(1 - (t2 - t1)/(t1 + t2))
+
+(define (tempo t1 t2)
+  (add (mul t1 (add 1 (div (sub t2 t1) (add t1 t2))))
+       (mul t2 (sub 1 (div (sub t2 t1) (add t1 t2))))))
+
+Esempio:
+t1 = 3 minuti
+t2 = 5 minuti
+
+Tempo necessario di andata e ritorno senza corrente:
+
+(tempo 3 5)
+;-> 7.5 ; minuti
+
+Nota: la barca impiega più tempo ad andare e tornare quando c'è la corrente.
+Questo accade perchè t2 > t1, cioè la barca viaggia per più tempo controcorrente di quanto non faccia a favore di corrente. In altre parole, il tratto controcorrente dura di più e quindi il tempo per cui siamo sfavoriti è maggiore del tempo per cui siamo favoriti.
+
+
+---------------------
+Creazione di acronimi
+---------------------
+
+Data una stringa di parole separate da spazio " ", scrivere una funzione che genera uno o più acronimi per la stringa.
+La funzione prende due parametri:
+1) una stringa di parole
+2) una stringa di parole che non devono essere considerate per l'acronimo 
+
+(define (powerset lst)
+"Generate all sublists of a list"
+  (if (empty? lst)
+      (list '())
+      (let ((element (first lst))
+            (p (powerset (rest lst))))
+         (extend (map (fn (subset) (cons element subset)) p) p) )))
+
+(define (acronimo str nowords)
+  (local (words all out lower diff stringa res)
+    (setq words (parse str))
+    ; powerset di tutte le parole da escludere
+    (setq all (powerset nowords))
+    (setq out '())
+    ; per ogni lista in powerset...
+    (dolist (el all)
+      ; genera l'acronimo
+      (setq lower (map lower-case words))   ; lowercase 
+      (setq diff (difference lower el))     ; remove nowords 
+      (setq stringa (map title-case diff))  ; title-case
+      (setq res (join (map first stringa))) ; current string
+      ; inserisce la stringa e il relativo acronimo nella soluzione
+      (push (list (join stringa " ") res) out -1)
+    )
+    ; elimina risultati uguali
+    (unique out)))
+
+Proviamo:
+
+(setq nowords '("the" "and" "or" "by" "of"))
+
+(acronimo "newLISP Programming language" nowords)
+;-> (("Newlisp Programming Language" "NPL"))
+
+(acronimo "Light Amplification by Stimulation of Emitted Radiation" nowords)
+;-> (("Light Amplification Stimulation Emitted Radiation" "LASER")
+;->  ("Light Amplification Stimulation Of Emitted Radiation" "LASOER")
+;->  ("Light Amplification By Stimulation Emitted Radiation" "LABSER")
+;->  ("Light Amplification By Stimulation Of Emitted Radiation" "LABSOER"))
+
+(acronimo "The united states of america" nowords)
+;-> (("United States America" "USA")
+;->  ("United States Of America" "USOA")
+;->  ("The United States America" "TUSA")
+;->  ("The United States Of America" "TUSOA"))
+
+(acronimo "Jordan Of the World" nowords)
+;-> (("Jordan World" "JW")
+;->  ("Jordan Of World" "JOW")
+;->  ("Jordan The World" "JTW")
+;->  ("Jordan Of The World" "JOTW"))
+
 ============================================================================
 
