@@ -3839,5 +3839,79 @@ Verrsione code-golf (244 caratteri, senza \r\n):
 (f)
 ;-> 0 1 2 3 4 5 6 7 8 9 10 42
 
+
+---------------------------------
+Funzioni con gli stessi caratteri
+---------------------------------
+
+Scrivere due funzioni che usano gli stessi caratteri (corrispondenza 1:1).
+Funzione 1: verifica che due stringhe siano anagrammi l'uno dell'altro.
+Funzione 2: verifica che due stringhe differiscano l'uno dall'altra in ogni posizione dei caratteri.
+
+Le stringhe di input hanno la stessa lunghezza
+
+(define (ab s1 s2) '(((alfxa-!-axflb0mnp))) (= (sort (map char (explode s1))) (sort (map char (explode s2)))))
+(define (ba s1 s2) '(bastrots)(for-all (fn(x)(!= x 0))(map - (map char (explode s1))(map char (explode s2)))))
+
+Proviamo:
+
+(ab "print" "trinp")
+;-> true
+(ba "print" "trinp")
+;-> nil
+
+(ab "return 6" "print 9;")
+;-> nil
+(ba "return 6" "print 9;")
+;-> true
+
+(ab "sameletters" "mesasteeltr")
+;-> true
+(ba "sameletters" "mesasteeltr")
+;-> true
+
+Verifica che le due funzioni hanno gli stessi caratteri (1:1):
+
+(define (remove-common lst1 lst2)
+"Remove common elements of two lists (remove 1:1)"
+  (cond
+    ((= lst1 '()) lst2)
+    ((= lst2 '()) lst1)
+    (true
+      (local (out len1 len2 i j el1 el2)
+        (setq out '())
+        (setq len1 (length lst1))
+        (setq len2 (length lst2))
+        ; usa i vettori
+        (setq lst1 (array len1 lst1))
+        (setq lst2 (array len2 lst2))
+        ; ordina le liste
+        (sort lst1)
+        (sort lst2)
+        (setq i 0)
+        (setq j 0)
+        ; confronta gli elementi ed avanza con due puntatori
+        (while (and (< i len1) (< j len2))
+          (setq el1 (lst1 i))
+          (setq el2 (lst2 j))
+                ; elementi uguali
+          (cond ((= el1 el2) (++ i) (++ j))
+                ; primo elemento minore
+                ((< el1 el2) (push el1 out -1) (++ i))
+                ; secondo elemento minore
+                ((> el1 el2) (push el2 out -1) (++ j)))
+        )
+        ; aggiunge gli elementi della lista più lunga
+        (cond ((and (= i len1) (= j len2)) out)
+              ((= i len1) (extend out (array-list (slice lst2 j))))
+              ((= j len2) (extend out (array-list (slice lst1 i)))))))))
+
+(setq p1 "(define (ab s1 s2) '(((alfxa-!-axflb0mnp))) (= (sort (map char (explode s1))) (sort (map char (explode s2)))))")
+(setq p2 "(define (ba s1 s2) '(bastrots)(for-all (fn(x)(!= x 0))(map - (map char (explode s1))(map char (explode s2)))))")
+(setq p1 (explode p1))
+(setq p2 (explode p2))
+(join (remove-common p1 p2))
+;-> ""
+
 ============================================================================
 

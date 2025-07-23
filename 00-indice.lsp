@@ -3065,6 +3065,7 @@ NOTE LIBERE 31
   Creazione di acronimi
   La costante dei primi
   Numeri con pi greco ed e
+  Funzioni con gli stessi caratteri
 
 PROBLEMI SUI DADI
 =================
