@@ -3063,6 +3063,8 @@ NOTE LIBERE 31
   Palindromo più vicino divisibile per N
   Andata e ritorno di una barca
   Creazione di acronimi
+  La costante dei primi
+  Numeri con pi greco ed e
 
 PROBLEMI SUI DADI
 =================

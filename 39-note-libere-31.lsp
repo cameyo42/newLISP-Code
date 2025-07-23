@@ -3500,5 +3500,344 @@ Proviamo:
 ;->  ("Jordan The World" "JTW")
 ;->  ("Jordan Of The World" "JOTW"))
 
+
+---------------------
+La costante dei primi
+---------------------
+
+Esiste un numero decimale con infinite cifre che rappresenta tutti i numeri primi.
+Questo numero vale:
+
+  0.4146825098511116602...
+
+Come viene calcolato?
+
+1) Prendiamo la lista dei primi fino a un dato N
+2) Formare un numero binario (come stringa) composto da "0" e "1" in cui:
+   a) se l'indice della stringa è primo scrivere "1"
+   b) se l'indice della stringa non è primo scrivere "0"
+   (l'indice della stringa parte da 1)
+3) Aggiungere "0." al numero binario/stringa
+4) Convertire il numero binario/stringa in decimale
+
+Esempio:
+N = 20
+primi = (2 3 5 7 11 13 17 19)
+stringa binaria = 0 1 1 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 1
+                    2 3   5   7   0  11  13      17  19
+stringa binaria = "0110101000101000101"
+Aggiungo "0."   = "0.0110101000101000101"
+Conversione stringa binaria in decimale = 0.4146823883056641
+
+Funzione che converte da stringa binaria a numero decimale:
+
+(define (bin-frac binary)
+  (setq len (length binary))
+  (setq punto (or (find "." binary) len))
+  (setq int-dec 0)
+  (setq frac-dec 0)
+  (setq due 1)
+  ; conversione parte intera del binario in decimale
+  (for (i (- punto 1) 0 -1)
+    (setq int-dec (+ int-dec (* (int (binary i)) due)))
+    (setq due (* due 2))
+  )
+  ; conversione parte frazionaria del binario in decimale
+  (setq due 2)
+  (for (i (+ punto 1) (- len 1))
+    (setq frac-dec (add frac-dec (div (int (binary i)) due)))
+    (setq due (* due 2))
+  )
+  (add int-dec frac-dec))
+
+(bin-frac "0.0110")
+;-> 0.375
+(bin-frac "0.01101010101")
+;-> 0.41650390625
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Funzione che costruisce la stringa binaria dalla lista dei numeri primi:
+
+(define (build limite)
+  (local (primi s)
+    (setq primi (primes-to limite))
+    (setq s (dup "0" (+ (apply max primi) 1)))
+    (dolist (el primi) (setf (s el) "1"))
+    (push "." s 1)))
+
+Proviamo:
+
+(build 20)
+;-> "0.0110101000101000101"
+(bin-frac (build 20) 25)
+;-> 0.4146823883056641
+(bin-frac (build 25) 25)
+;-> 0.4146825075149536
+(bin-frac (build 50) 50)
+;-> 0.4146825098511116
+(bin-frac (build 60) 60)
+;-> 0.4146825098511117
+(bin-frac (build 65) 65)
+;-> 0.4146825098511117  ; stesso risultato
+(bin-frac (build 70) 70)
+;-> -1.#IND
+
+Otteniamo lo stesso risultato perchè i float IEEE 754 hanno al massimo 16 cifre.
+
+Vediamo un metodo alternativo.
+Calcoliamo l'espansione in potenze di 2 di un numero binario.
+
+Funzione che converte da stringa binaria a espansione binaria:
+
+(define (bin-frac-expansion binary)
+  (local (len punto int-dec frazioni due)
+  (setq len (length binary))
+  (setq punto (or (find "." binary) len))
+  (setq int-dec 0)
+  (setq frazioni '())
+  (setq due 1)
+  ; parte intera
+  (for (i (- punto 1) 0 -1)
+    (setq int-dec (+ int-dec (* (int (binary i)) due)))
+    (setq due (* due 2)))
+  ; parte frazionaria (corretto j -> j+1)
+  (for (j 0 (- len punto 2))
+    (if (= (binary (+ punto 1 j)) "1")
+        (push (string "1/2^" (+ j 1)) frazioni -1)))
+  ; risultato
+  (if (= (length frazioni) 0)
+      (string int-dec)
+      (string int-dec " + " (join frazioni " + ")))))
+
+(bin-frac-expansion "0.011101")
+;-> "0 + 1/2^2 + 1/2^3 + 1/2^4 + 1/2^6"
+(bin-frac-expansion "0.1010101")
+;-> "0 + 1/2^1 + 1/2^3 + 1/2^5 + 1/2^7"
+(bin-frac-expansion "0.0110101000101000101")
+;-> "0 + 1/2^2 + 1/2^3 + 1/2^5 + 1/2^7 + 1/2^11 + 1/2^13 + 1/2^17 + 1/2^19"
+
+Calcoliamo la frazione generata dall'espansione binaria e poi calcoliamo la frazione con una funzione che divide due numeri con precisione predefinita.
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+Funzione che valuta una espansione binaria:
+
+(define (eval-binary-expansion s)
+  (local (termini num den k n d g)
+    (setq termini (parse s "+"))
+    (setq num 0L)
+    (setq den 1L)
+    (dolist (trm termini)
+      (setq trm (trim trm))
+      (if (find "^" trm)
+          ; termine frazionario "1/2^k"
+          (begin
+            (setq k (int (last (parse trm "^"))))
+            (setq n 1L)
+            (setq d (** 2L k)))
+          ; termine intero
+          (begin
+            (setq n (bigint (int trm)))
+            (setq d 1L)))
+      ; somma frazioni: num/den + n/d
+      (setq num (+ (* num d) (* n den)))
+      (setq den (* d den)))
+    ; semplifica
+    (setq g (gcd num den))
+    (list (/ num g) (/ den g))))
+
+Proviamo:
+
+(bin-frac-expansion "0.011101")
+;-> "0 + 1/2^2 + 1/2^3 + 1/2^4 + 1/2^6"
+(eval-binary-expansion "0 + 1/2^2 + 1/2^3 + 1/2^4 + 1/2^6")
+;-> (29L 64L)
+
+(bin-frac-expansion "0.1010101")
+;-> "0 + 1/2^1 + 1/2^3 + 1/2^5 + 1/2^7"
+(eval-binary-expansion "0 + 1/2^1 + 1/2^3 + 1/2^5 + 1/2^7")
+;-> (85L 128L)
+
+(bin-frac-expansion "0.0110101000101000101")
+;-> "0 + 1/2^2 + 1/2^3 + 1/2^5 + 1/2^7 + 1/2^11 + 1/2^13 + 1/2^17 + 1/2^19"
+(eval-binary-expansion "0 + 1/2^2 + 1/2^3 + 1/2^5 + 1/2^7 + 1/2^11 + 1/2^13 + 1/2^17 + 1/2^19")
+;-> (217413L 524288L)
+(div 217413L 524288L)
+;-> 0.4146823883056641
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out))
+
+(define (bigint-int num)
+"Convert a big-integer to int (if possible)"
+  (let ( (MAX-INT 9223372036854775807) (MIN-INT -9223372036854775808) )
+    (if (or (< num MIN-INT) (> num MAX-INT))
+        num
+        (+ 0 num))))
+
+(map bigint-int (int-list 1234))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+Funzione che trova il dividendo minore tra num1 e num2:
+
+(define (trova-dividendo num1 num2)
+  (cond ((<= num1 num2) num1)
+    (true
+      (let ( (dividendo 0L) (k 0) (L1 (int-list num1)) )
+        (while (< dividendo num2)
+          (setq dividendo (+ (L1 k) (* dividendo 10)))
+          (++ k))
+        dividendo))))
+
+Funzione che effettua la divisione tra due numeri interi con decimali predefiniti:
+
+(define (divisione num1 num2 decimali)
+  (local (intero out resto virgola dividendo cifra)
+    ; calcolo parte intera
+    (setq intero "")
+    (cond ((= num1 num2) "1")
+          ((zero? (% num1 num2)) (string (/ num1 num2)))
+          (true
+          (when (> num1 num2)
+                (setq intero (string (/ num1 num2)))
+                (setq num1 (% num1 num2)))
+          ; calcolo parte decimale
+          (setq out '())
+          (setq resto nil)
+          (setq virgola nil)
+          (setq decimali (or decimali 16))
+          ; Ciclo fino a che non abbiamo resto 0...
+          (until (zero? resto)
+            ; Calcolo del dividendo corrente
+            (setq dividendo (trova-dividendo num1 num2))
+            ; Calcola la cifra corrente del risultato
+            (setq cifra (/ dividendo num2))
+            (push cifra out -1)
+            ; Calcolo del resto
+            (setq resto (- dividendo (* cifra num2)))
+            ; Calcolo nuovo numero
+            (cond
+              ; Se resto = 0,
+              ; allora fine della divisione (se abbiamo messo la virgola)
+              ((and (zero? resto) virgola) nil)
+              (true
+                ; Creazione nuovo numero
+                (setq num1 (int (string resto
+                                (slice (string num1) (length dividendo))) 0 10))
+                ; Se il nuovo numero < divisore, allora mettiamo la virgola e
+                ; aggiungiamo uno zero al nuovo numero
+                (when (< num1 num2)
+                  (setq num1 (* num1 10))
+                  ; mettiamo la virgola se non l'abbiamo già messa prima
+                  (if (not virgola) (begin
+                      (setq virgola true) (push "." out -1)))))
+            )
+            ;(print (join (map string out))) (read-line)
+            ; Se abbiamo calcolato il numero di decimali predefinito,
+            ; allora fermiamo la divisione (ponendo resto = 0)
+            (when virgola
+              (if (> (length (slice out (find "." out))) decimali)
+                  (setq resto 0)))
+          )
+          (when (!= intero "")
+            (pop out) (push intero out))
+          (join (map string out))))))
+
+Proviamo:
+
+(setq s (build 60))
+;-> "0.01101010001010001010001000001010000010001010001000001000001"
+
+(setq e (bin-frac-expansion s))
+;-> "0 + 1/2^2 + 1/2^3 + 1/2^5 + 1/2^7 + 1/2^11 + 1/2^13 + 1/2^17 + 1/2^19 +
+;->  1/2^23 + 1/2^29 + 1/2^31 + 1/2^37 + 1/2^41 + 1/2^43 + 1/2^47 + 1/2^53 +
+;->  1/2^59"
+
+(setq f (eval-binary-expansion e))
+;-> (239048191595843649L 576460752303423488L)
+
+(div (f 0) (f 1))
+;-> 0.4146825098511117
+
+(divisione (f 0) (f 1))
+;-> "0L.4146825098511116"
+
+(divisione (f 0) (f 1) 25)
+;-> "0L.4146825098511116598071213"
+
+Purtroppo la funzione 'divisione' non accetta numeri superiori a Int64.
+
+(setq s (build 100))
+(setq e (bin-frac-expansion s))
+(setq f (eval-binary-expansion e))
+(div (f 0) (f 1))
+;-> 0.4146823883056641
+
+(divisione (f 0) (f 1) 50)
+;-> ERR: number out of range in function <
+;-> called from user function (divisione (f 0) (f 1))
+
+
+------------------------
+Numeri con pi greco ed e
+------------------------
+
+Utilizzando la costante 'pi greco' e la costante 'e' scrive 12 espressioni che restituiscono i nuimeri da 0 a 10 e il numero 42.
+Non è possibile usare cifre (0..9) o stringhe ("...") nelle espressioni.
+
+(define (expr12)
+  (let ( (e 2.7182818284590451) (pi 3.1415926535897931) )
+    (print (sub e e) { })
+    (print (div e e) { })
+    (print (floor e) { })
+    (print (ceil e) { })
+    (print (ceil pi) { })
+    (print (ceil (sub (mul e e) e)) { })
+    (print (ceil (add e e)) { })
+    (print (floor (mul e e)) { })
+    (print (ceil (mul e e)) { })
+    (print (ceil (mul pi e)) { })
+    (print (ceil (mul pi pi)) { })
+    (print (ceil (mul (pow e e) e)) "\n") '>))
+
+(expr12)
+;-> 0 1 2 3 4 5 6 7 8 9 10 42
+
+Verrsione code-golf (244 caratteri, senza \r\n):
+
+(define (f)
+(let((e 2.718)(pi 3.14))
+(println(sub e e){ }(div e e){ }(floor e){ }
+(ceil e){ }(ceil pi){ }(ceil(sub(mul e e)e)){ }(ceil(add e e)){ }
+(floor(mul e e)){ }(ceil(mul e e)){ }(ceil(mul pi e)){ }
+(ceil(mul pi pi)){ }(ceil(mul(pow e e)e)))))
+
+(f)
+;-> 0 1 2 3 4 5 6 7 8 9 10 42
+
 ============================================================================
 

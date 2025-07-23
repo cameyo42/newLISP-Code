@@ -1611,45 +1611,56 @@ Parametri:
   decimali = numero massimo di decimali dopo la virgola (precisione)
 
 (define (divisione num1 num2 decimali)
-  (local (out resto virgola dividendo cifra)
-    (setq out '())
-    (setq resto nil)
-    (setq virgola nil)
-    (setq decimali (or decimali 16))
-    ; Ciclo fino a che non abbiamo resto 0...
-    (until (zero? resto)
-      ; Calcolo del dividendo corrente
-      (setq dividendo (trova-dividendo num1 num2))
-      ; Calcola la cifra corrente del risultato
-      (setq cifra (/ dividendo num2))
-      (push cifra out -1)
-      ; Calcolo del resto
-      (setq resto (- dividendo (* cifra num2)))
-      ; Calcolo nuovo numero
-      (cond
-        ; Se resto = 0,
-        ; allora fine della divisione (se abbiamo messo la virgola)
-        ((and (zero? resto) virgola) nil)
-        (true
-          ; Creazione nuovo numero
-          (setq num1 (int (string resto
-                                (slice (string num1) (length dividendo))) 0 10))
-          ; Se il nuovo numero < divisore, allora mettiamo la virgola e
-          ; aggiungiamo uno zero al nuovo numero
-          (when (< num1 num2)
-            (setq num1 (* num1 10))
-            ; mettiamo la virgola se non l'abbiamo già messa prima
-            (if (not virgola) (begin
-                (setq virgola true) (push "." out -1)))))
-      )
-      ;(print (join (map string out))) (read-line)
-      ; Se abbiamo calcolato il numero di decimali predefinito,
-      ; allora fermiamo la divisione (ponendo resto = 0)
-      (when virgola
-        (if (> (length (slice out (find "." out))) decimali) (setq resto 0))
-      )
-    )
-    (join (map string out))))
+  (local (intero out resto virgola dividendo cifra)
+    ; calcolo parte intera
+    (setq intero "")
+    (cond ((= num1 num2) "1")
+          ((zero? (% num1 num2)) (string (/ num1 num2)))
+          (true
+          (when (> num1 num2)
+                (setq intero (string (/ num1 num2)))
+                (setq num1 (% num1 num2)))
+          ; calcolo parte decimale
+          (setq out '())
+          (setq resto nil)
+          (setq virgola nil)
+          (setq decimali (or decimali 16))
+          ; Ciclo fino a che non abbiamo resto 0...
+          (until (zero? resto)
+            ; Calcolo del dividendo corrente
+            (setq dividendo (trova-dividendo num1 num2))
+            ; Calcola la cifra corrente del risultato
+            (setq cifra (/ dividendo num2))
+            (push cifra out -1)
+            ; Calcolo del resto
+            (setq resto (- dividendo (* cifra num2)))
+            ; Calcolo nuovo numero
+            (cond
+              ; Se resto = 0,
+              ; allora fine della divisione (se abbiamo messo la virgola)
+              ((and (zero? resto) virgola) nil)
+              (true
+                ; Creazione nuovo numero 
+                (setq num1 (int (string resto
+                                      (slice (string num1) (length dividendo))) 0 10))
+                ; Se il nuovo numero < divisore, allora mettiamo la virgola e
+                ; aggiungiamo uno zero al nuovo numero
+                (when (< num1 num2)
+                  (setq num1 (* num1 10))
+                  ; mettiamo la virgola se non l'abbiamo già messa prima
+                  (if (not virgola) (begin
+                      (setq virgola true) (push "." out -1)))))
+            )
+            ;(print (join (map string out))) (read-line)
+            ; Se abbiamo calcolato il numero di decimali predefinito,
+            ; allora fermiamo la divisione (ponendo resto = 0)
+            (when virgola
+              (if (> (length (slice out (find "." out))) decimali) (setq resto 0))
+            )
+          )
+          (when (!= intero "")
+            (pop out) (push intero out))
+          (join (map string out))))))
 
 Proviamo:
 
@@ -1672,8 +1683,6 @@ Proviamo:
 (divisione 10 0)
 ;-> ERR: division by zero in function /
 ;-> called from user function (divisione 10 0)
-(div 123 42358)
-;-> 0.002903819821521318
 (divisione 123 42358 20)
 ;-> "0.00290381982152131828"
 
