@@ -3066,6 +3066,9 @@ NOTE LIBERE 31
   La costante dei primi
   Numeri con pi greco ed e
   Funzioni con gli stessi caratteri
+  Ordinamento di parole (numero di caratteri unici)
+  Solve 3^x + 9^x = 27^x
+  Reciproci dei numeri primi
 
 PROBLEMI SUI DADI
 =================
@@ -3113,7 +3116,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (359 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (360 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

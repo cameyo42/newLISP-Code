@@ -3688,15 +3688,6 @@ Proviamo:
       (push (% num 10) out)
       (setq num (/ num 10))) out))
 
-(define (bigint-int num)
-"Convert a big-integer to int (if possible)"
-  (let ( (MAX-INT 9223372036854775807) (MIN-INT -9223372036854775808) )
-    (if (or (< num MIN-INT) (> num MAX-INT))
-        num
-        (+ 0 num))))
-
-(map bigint-int (int-list 1234))
-
 (define (list-int lst)
 "Convert a list of digits to integer"
   (let (num 0)
@@ -3912,6 +3903,251 @@ Verifica che le due funzioni hanno gli stessi caratteri (1:1):
 (setq p2 (explode p2))
 (join (remove-common p1 p2))
 ;-> ""
+
+
+-------------------------------------------------
+Ordinamento di parole (numero di caratteri unici)
+-------------------------------------------------
+
+Data una lista che contiene parole (stringhe), scrivere una funzione che ordina le parole in base al numero di caratteri unici delle parole.
+
+(define (ordina lst)
+  (let (unici (map (fn(x) (unique (explode x))) lst))
+       (sort (map (fn(x y) (list (length x) x y)) unici lst) > )))
+
+(setq lista '("parola" "domani" "cavallo" "torta" "aiuola" "giglio"))
+(ordina lista)
+;-> ((6 ("d" "o" "m" "a" "n" "i") "domani")
+;->  (5 ("p" "a" "r" "o" "l") "parola")
+;->  (5 ("c" "a" "v" "l" "o") "cavallo")
+;->  (5 ("a" "i" "u" "o" "l") "aiuola")
+;->  (4 ("t" "o" "r" "a") "torta")
+;->  (4 ("g" "i" "l" "o") "giglio"))
+
+
+----------------------
+Solve 3^x + 9^x = 27^x
+----------------------
+
+Trovare il valore di x della seguente equazione:
+
+  3^x + 9^x = 27^x 
+
+Soluzione:
+
+  3^x + (3^x)^2 = (3^x)^3
+
+  Poniamo: y = 3^x
+  
+  y + y^2 = y^3  --> y^3 - y^2 - y = 0
+  
+  Calcolo delle radici di y^3 - y^2 - y = 0:
+  
+  y*(y^2 - y - 1) --> y1 = 0
+  
+  (y^2 - y - 1) --> y2 = (1 + sqrt(5))/2, y3 = (1 - sqrt(5))/2
+
+  Poichè y = 3^x deve essere un numero positivo, l'unica soluzione valida è:
+  
+  y3 = y = (1 + sqrt(5))/2
+  
+  Notiamo che (1 + sqrt(5))/2 è la sezione aurea (golden ratio) phi.
+  
+  y = 3^x = phi
+  
+  phi = 3^x
+  
+  log(phi) = x*log(3)
+
+  x = log(phi)/log(3)
+  
+  x = log3(phi) = 0.4380178794859424
+  
+(log (div (add 1 (sqrt 5)) 2) 3)
+;-> 0.4380178794859424
+  
+(define (f x) (abs (sub (add (pow 3 x) (pow 9 x)) (pow 27 x))))
+
+(f (log (div (add 1 (sqrt 5)) 2) 3))
+;-> 0
+
+(define (find-root)
+  (for (x 0 0.44 0.00000001)
+    (if (< (f x) 1e-8) (println x))))
+
+(time (find-root))
+;-> 0.43801788
+;-> 20191.49
+
+(f 0.43801788)
+;-> 3.306104723321823e-009
+
+
+--------------------------
+Reciproci dei numeri primi
+--------------------------
+
+Nell'800 (1876-1879) William Shank scrisse un libro "Reciprocals of Prime Numbers" in cui elencava, per ogni numero primo P, il numero di cifre del periodo del reciproco di P, cioè 1/P.
+Shank ha calcolato il periodo di tutti i primi nell'intervallo (60000...110000).
+
+Funzione che calcola la lunghezza del periodo del reciproco di un intero N:
+
+(define (period-inverse N)
+"Calculate period of 1/N"
+  (if (or (= N 2) (= N 5)) 0
+  ;else
+  (let ( (resti '())        ; lista dei resti visti
+         (cifre '())        ; lista delle cifre decimali
+         (indici '())       ; indici in cui il resto si ripete
+         (resto (% 1 N))    ; primo resto della divisione
+         (idx '())          ; lista degli indici dei resti ripetuti
+         (decimali "")      ; stringa con tutte le cifre decimali
+         (periodo "")       ; parte periodica come stringa
+         (antiperiodo "") ) ; parte non periodica
+    ; Cicla finché non si ripete un resto
+    (while (not (member resto resti))
+      (push resto resti -1)
+      (push (floor (/ (* resto 10) N)) cifre -1)
+      (setq resto (% (* resto 10) N)))
+    ; Aggiungi la cifra successiva (dopo il ciclo)
+    (push (floor (/ (* resto 10) N)) cifre -1)
+    ; Salva ancora il resto ripetuto
+    (push resto resti -1)
+    ; Trova le due posizioni dove il resto si ripete
+    ; Trova gli indici del periodo (dalla lista dei resti)
+    (setq idx (ref-all (resti -1) resti))
+    ; Costruisce la stringa dei decimali
+    (setq decimali (join (map string cifre)))
+    ; Estrae la parte periodica dalla stringa
+    (setq periodo (slice decimali (idx 0 0) (- (idx 1 0) (idx 0 0))))
+    ; Calcola l'antiperiodo
+    ;(setq antiperiodo (slice decimali 0 (idx 0 0)))
+    ; Output formato stringa
+    ;(println (string (/ 1 N) "." antiperiodo "(" periodo ")"))
+    ; Output formato lista
+    ; (list (/ 1 N) antiperiodo periodo)))
+    ; Calcola la lunghezza del periodo
+    (length periodo))))
+
+Proviamo:
+
+(period-inverse 599)
+;-> 299
+(period-inverse 60013)
+;-> 5001
+(period-inverse 60017)
+;-> 60016
+(time (println (period-inverse 60029)))
+;-> 60028
+;-> 9323.674
+(period-inverse 60037)
+;-> 10006
+(period-inverse 60041)
+;-> 7505
+(period-inverse 60077)
+;-> 30038
+(period-inverse 61561)
+;-> 405
+(period-inverse 62003)
+;-> 29
+
+(map period-inverse '(2 3 5 7 11 13 17 19 23 29 31 37 41 43 47))
+;-> (0 1 0 6 2 6 16 18 22 28 15 3 5 21 46)
+
+Sequenza OEIS A002371:
+Period of decimal expansion of 1/(n-th prime) (0 by convention for the primes 2 and 5).
+  0, 1, 0, 6, 2, 6, 16, 18, 22, 28, 15, 3, 5, 21, 46, 13, 58, 60, 33, 35,
+  8, 13, 41, 44, 96, 4, 34, 53, 108, 112, 42, 130, 8, 46, 148, 75, 78, 81,
+  166, 43, 178, 180, 95, 192, 98, 99, 30, 222, 113, 228, 232, 7, 30, 50,
+  256, 262, 268, 5, 69, 28, 141, 146, 153, 155, 312, 79, 110, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(map period-inverse (primes-to 300))
+;-> (0 1 0 6 2 6 16 18 22 28 15 3 5 21 46 13 58 60 33 35
+;->  8 13 41 44 96 4 34 53 108 112 42 130 8 46 148 75 78 81
+;->  166 43 178 180 95 192 98 99 30 222 113 228 232 7 30 50
+;->  256 262 268 5 69 28 141 146)
+
+Calcoliamo (fino ad un dato limite) quale numero primo P (fino ad un dato limite) ha la massima lunghezza del periodo 1/P.
+
+(define (periodo-massimo limite)
+  (let ( (primi (primes-to limite)) (max-len 0) (primo 0) (cur-len 0) )
+    (dolist (p primi)
+      (setq cur-len (period-inverse p))
+      (if (> cur-len max-len) (set 'max-len cur-len 'primo p)))
+    (list primo max-len)))
+
+Proviamo:
+
+(periodo-massimo 1000)
+;-> (983 982)
+(periodo-massimo 2000)
+;-> (1979 1978)
+(periodo-massimo 3000)
+;-> (2971 2970)
+
+Matematicamente risulta:
+se p è un numero primo, la lunghezza del periodo di 1/p è sempre minore di p.
+
+Se p è primo e non divide 10 (non vale 2 o 5), la parte decimale di 1/p è periodica, e la lunghezza del periodo è data dall'ordine di 10 modulo p, cioè:
+
+  minimo k > 0 tale che 10^k ≡ 1 (mod p)
+
+Questa lunghezza divide (p - 1), perché il gruppo moltiplicativo Z(p*) ha ordine (p - 1).
+Quindi:
+
+  periodo(1/p) divide (p - 1) ==> periodo <= (p - 1)
+
+Casi particolari:
+Se il primo divide 2 o 5 (cioè è 2 o 5), allora 1/p ha espansione finita, quindi la lunghezza del periodo vale 0.
+
+In definitiva:
+- Se p = 2 o p = 5: periodo = 0
+- Se p diverso da 2 e 5: il periodo di 1/p è sempre maggiore di 0 e minore o uguale a (p - 1).
+
+Per calcolare la lunghezza del periodo di 1/p possiamo usare anche il seguente risultato matematico:
+Dato un numero primo p, il numero di cifre del periodo di 1/p è il numero più piccolo k tale che il numero ripetuto 999...99 (numero con k 9) sia divisibile per p.
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (k9 p)
+  (if (or (= p 2) (= p 5)) 0
+  ;else
+  (letn ( (k (length p)) (num (- (** 10 k) 1)) (found nil)  (res nil) )
+    (until found
+      ;(print num) (read-line)
+      (if (zero? (% num p)) (set 'found true 'res k))
+      (setq num (+ (* num 10) 9))
+      (++ k))
+    res)))
+
+Proviamo:
+
+(k9 599)
+;-> 299
+
+(map k9 (primes-to 100))
+;-> (0 1 0 6 2 6 16 18 22 28 15 3 5 21 46 13 58 60 33 35 8 13 41 44 96)
+
+(time (println (k9 60029)))
+;-> 60028
+;-> 6620.283
 
 ============================================================================
 
