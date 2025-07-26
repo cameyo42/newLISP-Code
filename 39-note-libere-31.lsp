@@ -4079,7 +4079,7 @@ Period of decimal expansion of 1/(n-th prime) (0 by convention for the primes 2 
 ;->  166 43 178 180 95 192 98 99 30 222 113 228 232 7 30 50
 ;->  256 262 268 5 69 28 141 146)
 
-Calcoliamo (fino ad un dato limite) quale numero primo P (fino ad un dato limite) ha la massima lunghezza del periodo 1/P.
+Calcoliamo (fino ad un dato limite) quale numero primo P ha la massima lunghezza del periodo 1/P.
 
 (define (periodo-massimo limite)
   (let ( (primi (primes-to limite)) (max-len 0) (primo 0) (cur-len 0) )
@@ -4148,6 +4148,141 @@ Proviamo:
 (time (println (k9 60029)))
 ;-> 60028
 ;-> 6620.283
+
+
+------------------------------------------------
+Somma dei numeri interi contenuti in una stringa
+------------------------------------------------
+
+Data una stringa contenente cifre, lettere maiuscole e minuscole, estrarre i numeri interi e restituire la loro somma.
+Esempio:
+
+  b1wbD5qw45QEs5Fw4eQQQ33wqe4WE
+
+I numeri interi sono: 1 5 45 5 4 33 4.
+La loro somma vale: 1 + 5 + 45 + 5 + 4 + 33 + 4 = 97.
+
+L'espressione '(find-all {-?\d+} str)' trova tutti gli interi (come stringhe) nella stringa (anche gli interi negativi):
+
+(find-all {-?\d+} "b1wbD5qw45QEs5Fw4eQQQ33wqe4WE")
+;-> ("1" "5" "45" "5" "4" "33" "4")
+
+Poi convertiamo le stringhe in interi:
+
+(map (fn(x) (int x 0 10)) (find-all {-?\d+} "b1wbD5qw45QEs5Fw4eQQQ33wqe4WE"))
+;-> (1 5 45 5 4 33 4)
+
+(define (somma-interi str)
+  (apply + (map (fn(x) (int x 0 10)) (find-all {-?\d+} str))))
+
+(somma-interi "4dasQWE65asAs5dAa5dWD")
+;-> 79
+(somma-interi "b1wbD5qw45QEs5Fw4eQQQ33wqe4WE")
+;-> 97
+(somma-interi "25 mele -10 pere = 15 boh")
+;-> 30
+(somma-interi "1 + 2 + 3 + 4 + 5 -5")
+;-> 10
+(somma-interi "1 + 2 + 3 + 4 + 5 - 5")
+;-> 20
+
+Versione code-golf (65 caratteri):
+
+(define(f s)(apply +(map(fn(x)(int x 0 10))(find-all {-?\d+}s))))
+
+(f "4dasQWE65asAs5dAa5dWD")
+;-> 79
+
+Nota: per estrarre i numeri float da una stringa:
+      (map float (find-all {-?.?\d+(\.\d+)?} str))
+
+
+----------------
+All together now
+----------------
+
+https://codegolf.stackexchange.com/questions/269151/validate-a-cpf-number
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Dato una lista di cifre da 1 a 9, indica se ogni cifra è raggruppata in un unico blocco contiguo.
+In altre parole, non ci sono due cifre uguali separate da cifre diverse.
+Va bene anche se una cifra non compare affatto.
+
+Input: Una lista non vuota di cifre da 1 a 9.
+
+Output: Un valore true coerente se tutte le cifre sono raggruppate in blocchi contigui e un valore nil coerente in caso contrario.
+
+Casi 'true':
+  3
+  51
+  44999911
+  123456789
+  222222222222222222222
+
+Casi 'nil':
+  818
+  8884443334
+  4545
+  554553
+  1234567891
+
+Possiamo scrivere una funzione che restituisce true se gli elementi in s appaiono solo una volta e nell'ordine in cui compaiono per la prima volta (cioè l'ordinamento deve risultare uguale alla lista data).
+Per fare questo usiamo una funzione specifica per la comparazione di 'sort'.
+
+Funzione che prende una lista L e restituisce True se gli elementi di L sono in ordine secondo il primo indice in cui appaiono (cioè se sono negli stessi indici della lista data):
+
+(define (grouped? lst)
+  (define (compare x y) (<= (find x lst) (find y lst)))
+  (= lst (sort (copy lst) compare)))
+
+(define (g? s)
+  (= s (sort (copy s) (fn (a b) (< (ref a s) (ref b s)))))
+)
+
+(grouped? (explode "3"))
+;-> true
+(grouped? (explode "51"))
+;-> true
+(grouped? (explode "44999911"))
+;-> true
+(grouped? (explode "123456789"))
+;-> true
+(grouped? (explode "222222222222222222222"))
+;-> true
+(grouped? (explode "818"))
+;-> nil
+(grouped? (explode "8884443334"))
+;-> nil
+(grouped? (explode "4545"))
+;-> nil
+(grouped? (explode "554553"))
+;-> nil
+(grouped? (explode "1234567891"))
+;-> nil
+
+Versione code-golf (64 caratteri):
+
+(define(g l)(= l(sort(copy l)(fn(a b)(<(ref a l)(ref b l))))))
+(g (explode "51"))
+;-> true
+(g (explode "44999911"))
+;-> true
+(g (explode "123456789"))
+;-> true
+(g (explode "222222222222222222222"))
+;-> true
+(g (explode "818"))
+;-> nil
+(g (explode "8884443334"))
+;-> nil
+(g (explode "4545"))
+;-> nil
+(g (explode "554553"))
+;-> nil
+(g (explode "1234567891"))
+;-> nil
 
 ============================================================================
 

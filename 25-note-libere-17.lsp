@@ -2373,9 +2373,9 @@ Applichiamo "parse" senza alcun parametro opzionale (in questo caso viene effett
 Vediamo cosa accade quando ci sono numeri in virgola mobile nella stringa:
 
 (setq str "10 palline, 7 carte e 2.5 penne.")
-;-> "10 palline, 7 carte e 2e3 penne."
+;-> "10 palline, 7 carte e 2.5 penne."
 (setq token (parse str))
-;-> ("10" "palline" "," "7" "carte" "e" "2e3" "penne.")
+;-> ("10" "palline" "," "7" "carte" "e" "2.5" "penne.")
 (setq int-nil (map int token))
 ;-> (10 nil nil 7 nil nil 2 nil)
 (setq interi (clean nil? int-nil))
@@ -2410,6 +2410,7 @@ Parsing della stringa s con delimitatori " " e "." e ",":
 ;-> ("dev" "obj" "lisp" "test")
 
 Vedere anche "Parsing di stringhe" su "Note libere 2".
+Vedere anche "Estrazione di numeri da una stringa" su "Note libere 24"
 
 
 -----------------------

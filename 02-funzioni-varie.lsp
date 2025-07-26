@@ -4774,6 +4774,53 @@ Se vogliamo eliminare le terne simmetriche possiamo ordinare tutte le terne e po
 (unique (map (fn(x) (sort x)) (filter coprimi? (terne 20))))
 ;-> ((3 4 5) (5 12 13) (7 24 25) (8 15 17) (9 40 41) (11 60 61) (12 35 37))
 
+Possiamo fare un grafico 3D dei punti (con Mathematica):
+
+Creazione delle terne (punti 3D):
+(setq points (terne 10000))
+
+(define (list-csv lst file-str sepchar)
+"Create a file csv from a list"
+  (local (outfile)
+    (if (nil? sepchar)
+        (setq sepchar ",")
+    )
+    (setq outfile (open file-str "write"))
+    (dolist (el lst)
+      (if (list? el)
+          (setq line (join (map string el) sepchar))
+          (setq line (string el))
+      )
+      (write-line outfile line)
+    )
+    (print outfile { })
+    (close outfile)))
+
+Esportazione in un file .csv (punti.csv):
+
+(list-csv points "punti.csv")
+
+Istruzioni per Mathematica:
+
+(* imposta cartella corrente *)
+SetDirectory["F:\\tmp\\"];
+
+(* importa i punti del file "punti.csv" *)
+punti = N @ Import["punti.csv"];
+
+(* controlla la correttezza del formato dei punti (x,y,z) *)
+Dimensions[punti] (* deve restituire {n, 3} *)
+
+(* grafico 3D dei punti interpolati *)
+ListSurfacePlot3D[punti,
+ Mesh -> None,
+ PlotStyle -> Directive[Orange, Opacity[0.8]],
+ ColorFunction -> "Rainbow",
+ AxesLabel -> {"X", "Y", "Z"}
+]
+
+Il file "terne10000.png" si trova nella cartella "data".
+
 Vedi anche "Terne pitagoriche primitive" su "Note libere 27".
 
 

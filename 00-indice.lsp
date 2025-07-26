@@ -3069,6 +3069,8 @@ NOTE LIBERE 31
   Ordinamento di parole (numero di caratteri unici)
   Solve 3^x + 9^x = 27^x
   Reciproci dei numeri primi
+  Somma dei numeri interi contenuti in una stringa
+  All together now
 
 PROBLEMI SUI DADI
 =================
@@ -3112,7 +3114,7 @@ APPENDICI
   Considerazioni lungo il tragitto
 
 BIBLIOGRAFIA/WEB
-================
+-================
 
 YO LIBRARY
 ==========

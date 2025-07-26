@@ -7872,6 +7872,8 @@ Proviamo:
 (extract-numbers str2 true)
 ;-> (-3.1415 2.7182 -3 0.1 -0.1)
 
+Vedere anche "Parsing di stringhe" su "Note libere 2".
+Vedere anche "Estrazione di interi da una stringa" su "Note libere 17"
 
 -----------------------------------------------
 Funzione che può essere eseguita solo una volta

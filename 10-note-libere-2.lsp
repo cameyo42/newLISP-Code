@@ -1810,6 +1810,9 @@ Per evitare di creare stringhe vuote possiamo usare un regex:
 (parse "1,2,, 3,4" "(,| )+" 0)
 ;-> ("1" "2" "3" "4")
 
+Vedere anche "Estrazione di interi da una stringa" su "Note libere 17"
+Vedere anche "Estrazione di numeri da una stringa" su "Note libere 24"
+
 
 --------------------------------------
 Formattazione di elementi di una lista
