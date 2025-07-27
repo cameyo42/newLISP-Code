@@ -4284,5 +4284,404 @@ Versione code-golf (64 caratteri):
 (g (explode "1234567891"))
 ;-> nil
 
+
+------------------------------------
+Breve introduzione ai numeri p-adici
+------------------------------------
+
+I numeri 10-adici sono gli interi con un infinito numero di cifre a sinistra.
+
+Vediamo la costruzione di un numero 10-adico.
+Partiamo da 5 e calcoliamo il suo quadrato (25).
+Se il quadrato contiene (alla fine) tutto il numero di partenza, allora si continua ad elevare al quadrato l'ultimo quadrato, altrimenti si eleva al quadrato solo la parte contenuta.
+Esempio:
+_   _
+5L 25L 5L
+
+__   __
+25L 625L 25L
+
+---     ---
+625L 390625L 625L
+
+ -----         -----
+390625L 152587890625L 90625L
+
+-----       -----
+90625L 8212890625L 90625L
+
+----------            ----------
+8212890625L 67451572418212890625L 8212890625L
+
+Notiamo che ogni quadrato di un numero contiene il numero stesso (alla fine).
+
+(define (square x) (* x x))
+
+Funzione che calcola le cifre uguali di due numeri partendo dalla fine:
+
+(define (ultime-cifre a b)
+  (letn ((fattore 1L)
+         (risultato 0L)
+         (cifre nil))
+    (while (and (> a 0) (> b 0) (= (% a 10) (% b 10)))
+      (setq risultato (+ (* fattore (% a 10)) risultato))
+      (setq cifre true)
+      (setq a (/ a 10L))
+      (setq b (/ b 10L))
+      (setq fattore (* fattore 10L)))
+    (if cifre risultato nil)))
+
+Funzione che applica il processo descritto:
+
+(define (processo num k show)
+  (local (num2 parte out)
+    ; k rappresenta quante volte applichiamo il processo
+    (for (i 1 k)
+      ; quadrato del numero
+      (setq num2 (square num))
+      ; 'parte' è il numero formato dalle cifre uguali di num e num2
+      (setq parte (ultime-cifre num num2))
+      (when show (print num { } num2 { } parte) (read-line))
+      ; se 'parte' è uguale al numero...
+      (if (= parte num)
+        (setq num num2)   ; il nuovo numero è num2
+        (setq num parte)) ; altrimenti il nuovo numero è 'parte'
+      (push num out -1))
+    (unique out)))
+
+Proviamo:
+
+(processo 5L 8 true)
+;-> 5L 25L 5L
+;-> 25L 625L 25L
+;-> 625L 390625L 625L
+;-> 390625L 152587890625L 90625L
+;-> 90625L 8212890625L 90625L
+;-> 8212890625L 67451572418212890625L 8212890625L
+;-> 67451572418212890625L 4549714621689417981542646884918212890625L 18212890625L
+;-> 18212890625L 331709384918212890625L 18212890625L
+;-> (25L 625L 390625L 90625L 8212890625L 67451572418212890625L
+;->  18212890625L 331709384918212890625L)
+
+Il numero ...331709384918212890625L è un numero 10-adico.
+
+Possiamo sommare due numeri 10-adici:
+
+   ...64945873683 +
+   ...90982887761 =
+   --------------
+  ...155928761444
+
+Possiamo moltiplicare due numeri 10-adici
+
+            ...3972160792 x
+            ...7613192851 =
+            ---------------
+           ... 3972160792 +
+         ... 198608039600 +
+        ... 3177728633600 +
+        ... 7944321584000 +
+      ... 357494471280000 +
+      ... 397216079200000 +
+    ... 11916482376000000 +
+    ... 39721607920000000 +
+  ... 2383296475200000000 +
+  .......................
+  --------------------------
+  ... 30240826144676897992
+
+Prendiamo il numero ...857142857143 e moltiplichhiamolo per 7:
+
+
+...857142857143 x
+              7 =
+-----------------
+...000000000001
+
+Quindi ...857142857143 x 7 = 1, cioè:
+
+                     1
+  ...857142857143 = ---
+                     7
+
+Quindi i numeri 10-adici possono rappresentare anche le frazioni.
+
+Come trovare il numero 10-adico che rappresenta 1/3?
+
+  ...??????????? x
+               3 =
+  ----------------
+  ...00000000001
+
+Quale numero moltiplicato per 3 ha come cifra finale 1? 7
+7 x 3 = 21 scrivo 1 e riporto 2.
+
+  ...??????????7 x
+               3 =
+  ----------------
+  ...00000000001
+
+Quale numero moltiplicato per 3 e sommato a 2 ha come cifra finale 0? 6
+(6 x 3) + 2 = 20, scrivo 0 e riporto 2
+
+  ...?????????67 x
+               3 =
+  ----------------
+  ...00000000001
+
+Quale numero moltiplicato per 3 e sommato a 2 ha come cifra finale 0? 6
+(6 x 3) + 2 = 20, scrivo 0 e riporto 2
+
+  ...????????667 x
+               3 =
+  ----------------
+  ...00000000001
+
+Continuando in questo modo otteniamo:
+
+  ...66666666667 x
+               3 =
+  ----------------
+  ...00000000001
+
+Funzione che costruisce una rappresentazione 10-adica di 1/n, dal termine meno significativo verso sinistra, propagando i riporti in modo specifico:
+
+(define (inverse-padic n digits)
+  (local (out riporto stop val cifra)
+    ; inizializza la lista delle cifre dell'inverso p-adico
+    (setq out '())
+    ; il riporto iniziale è 0 (nessuna cifra precedente da propagare)
+    (setq riporto 0)
+    ; flag per interrompere il ciclo interno quando troviamo la cifra giusta
+    (setq stop nil)
+    ; calcolo della prima cifra meno significativa (a(0))
+    ; cerchiamo x tale che l'ultima cifra di (x * n + riporto) sia 1
+    ; cioè vogliamo che a(0)*n ≡ 1 mod 10
+    (for (x 1 9 1 stop)
+      (setq val (+ (* x n) riporto))
+      (when (= (% val 10) 1)
+        (setq stop true)
+        (setq cifra x)
+        ; il nuovo riporto è tutto tranne l'ultima cifra (divisione intera per 10)
+        (setq riporto (/ val 10))))
+    ; aggiungiamo la cifra trovata alla lista delle cifre
+    (push cifra out)
+    ; ciclo per trovare le cifre successive (a(1), a(2), ..., a(k))
+    ; in ogni passo troviamo x tale che l'ultima cifra di (x * n + riporto) sia 0
+    ; cioè: vogliamo che x*n + riporto ≡ 0 mod 10
+    (for (d 2 digits)
+      (setq stop nil)
+      (for (x 0 9 1 stop)
+        (setq val (+ (* x n) riporto))
+        (when (= (% val 10) 0)
+          (setq stop true)
+          (setq cifra x)
+          ; aggiorniamo il riporto per il passo successivo
+          (setq riporto (/ val 10))))
+      ; aggiungiamo la cifra alla lista
+      (push cifra out))
+    ; concatenazione finale: le cifre sono già in ordine crescente di peso (a(0), a(1), ...)
+    ; convertiamo ogni cifra in stringa e le uniamo
+    (string "..." (join (map string out)))))
+
+Proviamo:
+
+(inverse-padic 3 10)
+;-> "...6666666667"
+(inverse-padic 7 12)
+;-> "...857142857143"
+(inverse-padic 11 10)
+;-> "...9090909091"
+
+Funzione che calcola l'espansione 10-adica di una frazione a/b (ai minimi termini):
+
+(define (inverse-padic-fraction a b digits)
+  (local (out riporto stop val cifra)
+    ; inizializziamo la lista che conterrà le cifre 10-adiche
+    (setq out '())
+    ; il riporto iniziale è zero, perché non ci sono cifre calcolate prima
+    (setq riporto 0)
+    ; calcoliamo la prima cifra meno significativa
+    ; cerchiamo x in [0..9] tale che (x * b + riporto) modulo 10 sia uguale all'ultima cifra di a
+    (setq stop nil)
+    (for (x 0 9 1 stop)
+      (setq val (+ (* x b) riporto))
+      (when (= (% val 10) (% a 10))
+        (setq stop true)       ; fermiamo la ricerca perché abbiamo trovato la cifra corretta
+        (setq cifra x)         ; memorizziamo la cifra trovata
+        (setq riporto (/ val 10)))) ; calcoliamo il nuovo riporto per la prossima iterazione
+    (push cifra out)            ; inseriamo la cifra nella lista
+    ; calcoliamo le cifre successive, da 2 fino a digits
+    (for (d 2 digits)
+      (setq stop nil)          ; resettiamo il flag per il ciclo interno
+      (setq cifra nil)         ; resettiamo la cifra per la nuova iterazione
+      ; cerchiamo x in [0..9] tale che (x * b + riporto) modulo 10 sia zero
+      (for (x 0 9 1 stop)
+        (setq val (+ (* x b) riporto))
+        (when (= (% val 10) 0)
+          (setq stop true)     ; fermiamo la ricerca perché abbiamo trovato la cifra corretta
+          (setq cifra x)       ; memorizziamo la cifra trovata
+          (setq riporto (/ val 10)))) ; aggiorniamo il riporto
+      ; se non troviamo alcuna cifra valida, interrompiamo il ciclo esterno
+      (if (nil? cifra) (stop))
+      (push cifra out))         ; inseriamo la cifra nella lista
+    ; convertiamo la lista di cifre in stringa, aggiungendo "..." all'inizio
+    ; la lista out è già in ordine corretto (dalla cifra meno significativa verso le più significative)
+    (string "..." (join (map string out)))))
+
+Proviamo:
+
+(inverse-padic-fraction 1 3 10)
+;-> "...6666666667"
+(inverse-padic-fraction 1 7 12)
+;-> "...857142857143"
+(inverse-padic-fraction 1 11 10)
+;-> "...9090909091"
+(inverse-padic-fraction 2 11 10)
+;-> "...8181818182"
+(inverse-padic-fraction 3 7 10)
+;-> "...1428571429"
+
+L'espansione p-adica si legge da destra verso sinistra (cioè partendo dalla cifra meno significativa), al contrario delle notazioni abituali. 
+Per un numero razionale a/b, la sua espansione *p*-adica è una somma infinita:
+
+  a/b = c(0) + c(1)*p + c(1)*p^2 + c(3)*p^3 + ...
+
+dove ogni c(i) è una cifra tra 0 e p-1, e la serie converge nella metrica p-adica (diversa da quella usuale reale).
+
+Per esempio l'espansione che abbiamo ottenuto per 2/11,:
+
+  ...8181818182
+
+significa:
+
+  2 + 8*10 + 1*10^2 + 8*10^3 + 1*10^4 + 8*10^5 + ...
+
+La prima cifra a destra è il termine di grado zero (10^0), e ogni cifra a sinistra corrisponde a potenze crescenti di p (qui p = 10).
+
+Possiamo ricostruire il numero sommando:
+
+    2*10^0 = 2
+  + 8*10^1 = 80
+  + 1*10^2 = 100
+  + 8*10^3 = 8000
+  + 1*10^4 = 10000
+  + ...
+
+Questa somma infinita converge, in senso 10-adico, a 2/11.
+
+I numeri p-adici possono rappresentare anche i numeri negativi.
+
+Prendiamo il numero 10-adico composto da soli 9:
+
+  ...999999999
+
+Poniamo:
+
+   ...999999999 = m        (1)
+
+Moltiplichiamo per 10:
+
+  ...9999999990 = 10*m     (2)
+  
+Sottraiamo la (2) dalla (1):
+  
+   ...999999999 = m    -
+  ...9999999990 = 10*m =
+  ----------------------
+              9 = -9*m  
+
+Quindi: m = -(9/9) = -1,  -->  ...999999999 = -1
+
+  ...999999999 - 1 = 0
+
+Quanto vale il numero -7 in 10-adico?
+
+  ...999999993
+
+Come possiamo trovare il negativo di un numero 10-adico?
+
+1) Moltiplicando il numero 10-adico per ...999999999
+2) Calcolando il complemento a 9 del numero 10-adico e poi aggiungendo 1
+
+Per esempio (con il metodo 2):
+
+  1/7 = ...857142857143
+
+Complemento a 9:
+
+  ...142857142856
+  
+Aggiungo 1:
+
+  ...142857142857
+
+Verifichiamo la correttezza del risultato calcolando 1/7 + (-1/7) (che deve risultare 0):
+
+  ...857142857143 +
+  ...142857142857 =
+  -----------------
+  ...000000000000
+
+Quindi i numeri p-adici possono essere sommati, sottratti e moltiplicati tra loro.
+
+Problema con i numeri 10-adici
+------------------------------
+Con un meccanismo di ricostruzione delle moltiplicazioni simile a quello quello usato per rappresentare le frazioni, possiamo trovare due numeri diversi da 0 la cui moltiplicazione vale 0.
+Per esempio:
+
+    ...12890625 x
+    ...12890624 =
+  ---------------
+  ... 51562500 +
+  ... 57812500 +
+  ... 34375000 +
+  ... 00000000 +
+  ... 56250000 +
+  ... 00000000 +
+  ... 50000000 +
+  ... 50000000 +
+  ............ =
+  --------------
+  ... 00000000
+
+Questo è dovuto al fatto che 10 non è un numero primo (10 = 2 * 5).
+Per evitare questo problema si utilizzano le rappresentazioni p-adiche in cui 'p' è un numero primo.
+Per esempio nell rappresentazioni 3-adiche abbiamo solo le cifre 0, 1 e 2.
+Il prodotto di due cifre qualsiasi vale 0 se e solo se una delle due cifre vale 0.
+Invece, nelle rappresentazioni 10-adiche il valore 0 può essere ottenuto in diversi modi (2*5, 4*5).
+
+I numeri p-adici permettono di vedere i numeri da un altro punto di vista.
+I numeri p-adici non servono a "contare", ma a studiare proprietà aritmetiche.
+Guardano i numeri con la lente del modulo p, dove la priorità è quanto un numero è divisibile per p.
+Sono uno strumento potente per risolvere problemi in matematica pura e applicata.
+A) Guardano la divisibilità, non la grandezza
+Nel mondo reale (numeri decimali), i numeri vicini sono quelli con valore simile:
+es. `1.0001` è vicino a `1`.
+Nel mondo p-adico, due numeri sono vicini se la loro differenza è molto divisibile per p.
+Ad esempio, in 5-adico, 10 e 35 sono vicini perchè 35 - 10 = 25 = 5^2.
+
+B) Permettono di risolvere equazioni difficili
+Alcune equazioni che non hanno soluzioni nei numeri reali o razionali, hanno soluzioni nei numeri p-adici.
+Possono aiutare a vedere una soluzione modulo p, poi modulo p^2, p^3, ecc., e alla fine risalire alla soluzione completa (metodo di Hensel).
+
+C) Permettono calcoli modulari avanzati in teoria dei numeri moderna
+La dimostrazione dell'ultimo teorema di Fermat, usa idee p-adiche.
+È possibile studiare un'equazione localmente (mod p) e poi globalmente, mettendo insieme i dati p-adici.
+
+Nota:
+Alcuni sistemi p-addici hanno proprietà interessanti.
+Ad esempio, nel sistema 5-adico il numero:
+  ...04340423140223032431212
+Moltiplicato per se stesso dà:
+  ...4444444444
+Che è una rappresentazione di -1 (aggiungi 1 e ottieni 0).
+Questo significa che il sistema 5-adico contiene la radice quadrata di -1, l'unità immaginaria!
+(Questo vale per ogni (p mod 4) = 1)
+
+Nota:
+Working in the p-adics is working modulo p^n, without picking a specific 'n' ahead of time.
+Un numero p-adico è un numero modulo p^n, dove non hai deciso in anticipo quale sia 'n'.
+
 ============================================================================
 

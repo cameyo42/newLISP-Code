@@ -3071,6 +3071,7 @@ NOTE LIBERE 31
   Reciproci dei numeri primi
   Somma dei numeri interi contenuti in una stringa
   All together now
+  Breve introduzione ai numeri p-adici
 
 PROBLEMI SUI DADI
 =================
