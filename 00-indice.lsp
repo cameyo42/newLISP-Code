@@ -3072,6 +3072,7 @@ NOTE LIBERE 31
   Somma dei numeri interi contenuti in una stringa
   All together now
   Breve introduzione ai numeri p-adici
+  Iterazione di una funzione e cicli
 
 PROBLEMI SUI DADI
 =================

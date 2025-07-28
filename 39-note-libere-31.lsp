@@ -4683,5 +4683,185 @@ Nota:
 Working in the p-adics is working modulo p^n, without picking a specific 'n' ahead of time.
 Un numero p-adico è un numero modulo p^n, dove non hai deciso in anticipo quale sia 'n'.
 
+
+----------------------------------
+Iterazione di una funzione e cicli
+----------------------------------
+
+Considera la funzione: f(x) = x^2 + c
+c = -29/16
+x iniziale = x0 = -7/4
+Calcolando f(x) e continuando a inserire il valore risultante in f(x) otteniamo:
+  f(-7/4) = 5/4
+  f(5/4)) = -1/4
+  f(-1/4) = -7/4
+Cioè otteniamo un insieme di valori ciclico.
+
+Questo processo si chiama iterazione di una funzione e viene usato per nello studio della dinamica discreta o dinamica di funzione.
+
+Come calcolare i valori di c e x0 tali che si abbia un ciclo lungo N?
+Deve risultare:
+
+  fN(x0) = x0
+  fK(x0) != x0 (per 0 < k < N)
+
+Nel caso N = 3:
+
+x1 = f(x0) = x0^2 + c
+x2 = f(x1) = (x0^2 + c)^2 + c
+x3 = f(x2) = ((x0^2 + c)^2 + c)^2 + c
+
+Imponendo: x3 = x0, otteniamo un'equazione algebrica in x0 e c da cui troviamo le soluzioni razionali.
+
+Metodo risolutivo
+1. Fissare n (lunghezza del ciclo).
+2. Impostare x1 = f(x0), x2 = f(x1), ..., xN = f(x(N-1))
+3. Imporre xN = x0
+4. Risolvere il sistema simbolico o numerico per trovare coppie (x_0, c)
+
+Oppure possiamo provare a calcolare c e x0 con la forza-bruta.
+
+;f(x) = x^2 + c
+(define (func x c) (+rat (*rat x x) c))
+
+; Funzioni per il calcolo delle quattro operazioni
+; aritmetiche con le frazioni: "+", "-" "*" "/"
+; (big-integer enabled)
+; Note: 0 is '(0 1)
+; La funzione 'rat' riduce una frazione n/d ai minimi termini
+(define (rat n d)
+  (let (g (gcd n d))
+    (map (curry * 1L)
+         (list (/ n g) (/ d g)))))
+(define (+rat r1 r2)
+  (setq r1 (list (bigint (r1 0)) (bigint(r1 1))))
+  (setq r2 (list (bigint (r2 0)) (bigint(r2 1))))
+  (rat (+ (* (r1 0L) (r2 1L))
+          (* (r2 0L) (r1 1L)))
+       (* (r1 1L) (r2 1L))))
+(define (-rat r1 r2)
+  (setq r1 (list (bigint (r1 0)) (bigint(r1 1))))
+  (setq r2 (list (bigint (r2 0)) (bigint(r2 1))))
+  (rat (- (* (r1 0L) (r2 1L))
+          (* (r2 0L) (r1 1L)))
+       (* (r1 1) (r2 1))))
+(define (*rat r1 r2)
+  (setq r1 (list (bigint (r1 0)) (bigint(r1 1))))
+  (setq r2 (list (bigint (r2 0)) (bigint(r2 1))))
+  (rat (* (r1 0L) (r2 0L))
+       (* (r1 1L) (r2 1L))))
+(define (/rat r1 r2)
+  (setq r1 (list (bigint (r1 0)) (bigint(r1 1))))
+  (setq r2 (list (bigint (r2 0)) (bigint(r2 1))))
+  (rat (* (r1 0L) (r2 1L))
+       (* (r1 1L) (r2 0L))))
+
+Funzione che applica l'iterazione della funzione partendo da c, x0 e cerca cicli di lunghezza 'max-ciclo':
+
+(define (recurse c x0 max-ciclo)
+  (local (res ciclo k)
+    (setq max-ciclo (or max-ciclo 3))
+    (setq res '())
+    (setq ciclo nil)
+    (setq x x0)
+    (push x res)
+    (setq k 1)
+    (until (or ciclo (> k max-ciclo))
+      (setq x (func x c))
+      ;(print x) (read-line)
+      (++ k)
+      (cond ((ref x res)
+            (push x res -1)
+            ;(println "ciclo con valore: " x)
+            (setq ciclo true))
+            (true (push x res -1))))
+    (if ciclo (chop res) nil)))
+
+(recurse '(-29L 16L) '(-7L 4L) 3)
+;-> ((-7L 4L) (5L 4L) (-1L 4L))
+(recurse '(-29L 16L) '(-2L 3L) 3)
+;-> nil
+
+Nota: non usare mai (max-ciclo > 3), perchè si generano velocemente delle frazioni enormi che mandano in crash newLISP.
+
+Funzione che cerca cicli di lunghezza miniore di 4 considerando tutte le frazioni tra un minimo e un massimo numeratore e denominatore:
+
+(define (cerca-tutti max-c-num max-c-den max-x-num max-x-den)
+  (let (out '()) ; inizializza la lista dei risultati
+    ; ciclo su tutti i possibili numeratori a del parametro c
+    (for (a (- max-c-num) max-c-num)
+      ; ciclo su tutti i possibili denominatori b del parametro c
+      (for (b 1 max-c-den)
+        ; solo se il razionale a/b è valido (b != 0)
+        (when (!= (gcd a b) 0)
+          ; costruisce il razionale c = a/b
+          (let (c (rat a b))
+            ;(println c)
+            ; ciclo su tutti i possibili numeratori n del punto iniziale x0
+            (for (n (- max-x-num) max-x-num)
+              ; ciclo su tutti i possibili denominatori d del punto iniziale x0
+              (for (d 1 max-x-den)
+                ; solo se il razionale n/d è valido (d != 0)
+                (when (!= (gcd n d) 0)
+                  ; costruisce il razionale x0 = n/d
+                  (let (x0 (rat n d))
+                    ;(println x0)
+                    ; calcola l'orbita partendo da x0 con parametro c
+                    (let (res (recurse c x0 3))
+                      ; se è stato trovato un ciclo valido
+                      ; e non è già presente in out
+                      (when (and res (not (ref (list c res) out)))
+                        ; aggiunge la coppia (c ciclo) alla lista dei risultati
+                        (push (list c res) out -1)))))))))))
+    ; restituisce la lista dei risultati trovati
+    out))
+
+Proviamo:
+
+(setq all (cerca-tutti 5 5 5 5 3))
+;-> (((-1L 1L) ((-1L 1L) (0L 1L)))
+;->  ((-1L 1L) ((0L 1L) (-1L 1L)))
+;->  ((-1L 1L) ((1L 1L) (0L 1L) (-1L 1L)))
+;->  ((-2L 1L) ((-1L 1L)))
+;->  ((-2L 1L) ((-2L 1L) (2L 1L)))
+;->  ((-2L 1L) ((0L 1L) (-2L 1L) (2L 1L)))
+;->  ((-2L 1L) ((1L 1L) (-1L 1L)))
+;->  ((-2L 1L) ((2L 1L)))
+;->  ((-3L 1L) ((-1L 1L) (-2L 1L) (1L 1L)))
+;->  ((-3L 1L) ((-2L 1L) (1L 1L)))
+;->  ((-3L 1L) ((1L 1L) (-2L 1L)))
+;->  ((-3L 1L) ((2L 1L) (1L 1L) (-2L 1L)))
+;->  ((-3L 4L) ((-3L 2L) (3L 2L)))
+;->  ((-3L 4L) ((-1L 2L)))
+;->  ((-3L 4L) ((1L 2L) (-1L 2L)))
+;->  ((-3L 4L) ((3L 2L)))
+;->  ((0L 1L) ((-1L 1L) (1L 1L)))
+;->  ((0L 1L) ((0L 1L)))
+;->  ((0L 1L) ((1L 1L)))
+;->  ((1L 4L) ((-1L 2L) (1L 2L)))
+;->  ((1L 4L) ((1L 2L))))
+
+(length all)
+;-> 21
+
+Verifichiamo il risultato:
+
+(dolist (el all) (if (!= (el 1) (recurse (el 0) (el 1 0))) (println "error")))
+;-> nil
+
+Vediamo di calcolare l'esempio iniziale:
+
+(time (setq all (cerca-tutti 30 30 10 10 3)))
+;-> 8319.765
+
+(length all)
+;-> 144
+
+Cerchiamo il nostro esempio:
+(find '(-29 16) (map first all))
+;-> 30
+(all 30)
+;-> ((-29L 16L) ((-7L 4L) (5L 4L) (-1L 4L)))
+
 ============================================================================
 
