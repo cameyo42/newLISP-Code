@@ -3075,6 +3075,9 @@ NOTE LIBERE 31
   Iterazione di una funzione e cicli
   Somma e prodotto di due numeri
   Curiosità matematiche
+  Numeri BIU
+  Palline nelle scatole
+  Quadrati antimagici
 
 PROBLEMI SUI DADI
 =================

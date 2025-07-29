@@ -5144,5 +5144,287 @@ Numero pandigitale e pi greco "pi"
 
 10 cifre corrette: 3.1415926535
 
+
+----------
+Numeri BIU
+----------
+
+https://codegolf.stackexchange.com/questions/143826/biu-numbers-or-sumdivized-numbers
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Dato un intero positivo k.
+Trovare i suoi divisori.
+Trovare i fattori primi distinti di ciascun divisore.
+Sommare tutti questi fattori.
+Se questo numero (somma) è un divisore di k (se la somma divide k), allora questo numero k è un numero BIU.
+
+Nota: 1 è considerato un numero BIU.
+
+Ecco i primi 20 numeri BIU:
+  1, 21, 54, 290, 735, 1428, 1485, 1652, 2262, 2376, 2580, 2838, 2862, 
+  3003, 3875, 4221, 4745, 5525, 6750, 7050...
+
+Esempi
+Prendiamo il numero 54.
+Troviamo tutti i divisori: [1, 2, 3, 6, 9, 18, 27, 54]
+Troviamo i fattori primi distinti di ciascun divisore:
+Nota: Nel caso di 1, prendiamo come fattore primo distinto 1
+  1 -> 1
+  2 -> 2
+  3 -> 3
+  6 -> 2,3
+  9 -> 3
+  18 -> 2,3
+  27 -> 3
+  54 -> 2,3
+Ora calcoliamo la somma di tutti questi fattori primi:
+  1+2+3+2+3+3+2+3+3+2+3=27
+  27 divide 54 (non lascia resto)
+Quindi, 54 è un numero BIU.
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (biu? num)
+  (let ( (somma 0) (divisori (divisors num)) )
+    (dolist (d divisori)
+      (if (= d 1)
+        (++ somma d)
+        (++ somma (apply + (unique (factor d))))))
+    (zero? (% num somma))))
+
+Proviamo:
+
+(biu? 1)
+;-> true
+
+(biu? 54)
+;-> true
+
+(biu? 55)
+;-> nil
+
+(time (println (filter biu? (sequence 1 10000))))
+;-> (1 21 54 290 735 1428 1485 1652 2262 2376 2580 2838 2862
+;->  3003 3875 4221 4745 5525 6750 7050 7337 7565 7888 8835 9215)
+;-> 129.819
+
+
+---------------------
+Palline nelle scatole
+---------------------
+
+Date N palline e M scatole, scrivere una funzione che inserisce le palline nelle scatole in modo che ogni scatola ha un numero di paliine diverso.
+
+Facciamo un esempio con 30 palline e 10 scatole.
+Disponiamo le scatole in ordine crescente di numero di palline e indichiamo questi numeri con s0, s1, ... s9.
+Deve risultare: s0 < s1 < s2 < ... < s9.
+Partiamo lasciando vuota s0 (0 palline).
+Poi in s2 possiamo mettere 1 pallina.
+Poi in s3 possiamo mettere 2 palline.
+...
+Continuando in questo modo otteniamo:
+
+  0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 = 45.
+
+Quindi, come minimo, abbiamo bisogno di 45 palline per mettere un numero diverso di palline in 10 scatole.
+
+Funzione che inserisce, se possibile, N palline in M scatole
+(e ogni scatola contiene un numero di palline diverso):
+
+(define (inserisci palline scatole)
+  (let ( (out '())
+         (minimo (/ (* scatole (- scatole 1)) 2)) ) ; Formula di Gauss
+    (when (<= minimo palline)
+      ; crea la sequenza da 0 a (scatole - 1)
+      (setq out (sequence 0 (- scatole 1)))
+      ; aggiorna l'ultimo valore della sequenza aggiungendo
+      ; la differenza tra le palline e il minimo
+      (setf (out -1) (+ $it (- palline minimo))))
+    out))
+
+(inserisci 30 10)
+;-> nil
+(inserisci 45 10)
+;-> (0 1 2 3 4 5 6 7 8 9)
+(inserisci 46 10)
+;-> (0 1 2 3 4 5 6 7 8 10)
+
+Adesso imponiamo che ogni scatola deve avere esattamente 1 pallina in più della precedente.
+Es. 175 palline in 5 scatole  -->  (+ 33 34 35 36 37)
+
+La somma di M numeri partendo da i vale:
+
+  S = i + (i+1) + (i+2) + ... + (i+M-1)
+    = M*i + (0 + 1 + 2 + ... + M-1)
+    = M*i + M*(M-1)/2
+
+Adesso troviamo il valore di i partendo dal valore di N:
+
+  N = M*i + M*(M-1)/2  -->  i = (N - M*(M-1)/2)/M
+
+(define (inserisci-1 N M)
+  (letn ((offset (/ (* M (- M 1)) 2)) ; somma da aggiungere
+         (numeratore (- N offset)))
+    (if (zero? (% numeratore M))
+        (let ((i (/ numeratore M)))
+          (sequence i (+ i (- M 1))))
+        nil)))
+
+Proviamo :
+
+(inserisci-1 175 5)
+;-> (33 34 35 36 37)
+
+(inserisci-1 30 10)
+;-> nil
+
+(inserisci-1 30 4)
+;-> (6 7 8 9)
+
+(inserisci-1 31 4)
+;-> nil
+
+
+-------------------
+Quadrati antimagici
+-------------------
+
+Un quadrato antimagico è un quadrato di numeri interi (non necessariamente tutti diversi) in cui le somme di ogni riga, di ogni colonna e di entrambe le diagonali sono diverse.
+Scrivere una funzione per costruire un quadrato antimagico 3x3 con il minor numero di numeri.
+
+Dobbiamo ottenere 9 risultati diversi sommando K numeri.
+Con K = 3 questo non è possibile.
+Per esempio, scegliamo i numeri 1, 2 e 3.
+Somme possibili:
+  1 + 1 + 1 = 3
+  1 + 1 + 2 = 4
+  1 + 1 + 3 = 5
+  1 + 2 + 2 = 5
+  1 + 2 + 3 = 6
+  1 + 3 + 3 = 7
+  2 + 2 + 2 = 6
+  2 + 2 + 3 = 6
+  2 + 3 + 3 = 8
+  3 + 3 + 3 = 9
+Ci sono 7 somme diverse: (3 4 5 6 7 8 9)
+Quindi non possiamo costruire il quadrato (ne occorrono almeno 9).
+
+Proviamo con K = 4: 1, 2, 3 e 4.
+
+(define (comb-rep k lst)
+"Generate all combinations of k elements with repetition from a list of items"
+  (cond ((zero? k 0) '(()))
+        ((null? lst) '())
+        (true
+         (append (map (lambda (x) (cons (first lst) x))
+                      (comb-rep (- k 1) lst))
+                 (comb-rep k (rest lst))))))
+
+(comb-rep 3 '(1 2 3 4))
+;-> ((1 1 1) (1 1 2) (1 1 3) (1 1 4) (1 2 2) (1 2 3) (1 2 4) (1 3 3)
+;->  (1 3 4) (1 4 4) (2 2 2) (2 2 3) (2 2 4) (2 3 3) (2 3 4) (2 4 4)
+;->  (3 3 3) (3 3 4) (3 4 4) (4 4 4))
+
+(setq somme (unique (map (fn(x) (apply + x)) (comb-rep 3 '(1 2 3 4)))))
+;-> (3 4 5 6 7 8 9 10 11 12)
+
+Con 4 numeri otteniamo 10 somme diverse e, potenzialmente, potremmo costruire un quadrato antimagico 3x3.
+Comunque la costruzione ci permette di scegliere solo 3 somme (righe o colonne o diagonali) e le altre vengono determinate automaticamente.
+
+Per risolvere il problema calcoliamo tutte le possibili costruzioni di quadrati e verifichiamo se sono antimagici.
+
+Algoritmo
+Calcoliamo tutte le permutazione con ripetizione (9) di K cifre.
+Selezioniamo solo le permutazioni che hanno tutte le K cifre.
+Per ognuna delle permutazioni selezionate verifichiamo se è un quadrato antimagico.
+
+(define (perm-rep k lst)
+"Generate all permutations of k elements with repetition from a list of items"
+  (if (zero? k) '(())
+      (flat (map (lambda (p) (map (lambda (e) (cons e p)) lst))
+                         (perm-rep (- k 1) lst)) 1)))
+
+Funzione che verifica se un quadrato è antimagico:
+
+(define (antimagic? matrix show)
+  (local (result rows cols sum)
+    (setq result '())
+    ; somme righe
+    (setq rows (length matrix))
+    (setq cols (length (matrix 0)))
+    (dolist (row matrix)
+      (setq sum (apply + row))
+      (push sum result -1)
+      (if show (println "Row " (+ $idx 1) ": " sum))
+    )
+    ; somme colonne
+    (setq trasposta (transpose matrix))
+    (dolist (row trasposta)
+      (setq sum (apply + row))
+      (push sum result -1)
+      (if show (println "Col " (+ $idx 1) ": " sum))
+    )
+    ; somma diagonale (alto sx --> basso dx)
+    (setq sum 0L)
+    (for (i 0 (- rows 1)) (++ sum (matrix i i)))
+    (push sum result -1)
+    (if show (println "D1:  " sum))
+    ; somma diagonale (basso sx --> alto dx)
+    (setq sum 0L)
+    (for (i 0 (- rows 1)) (++ sum (matrix (- rows i 1) i)))
+    (push sum result -1)
+    (if show (println "D2:  " sum))
+    ; le somme sono tutte uguali?
+    (= (unique result) result)))
+
+Funzione che conta quanti quadrati antimagici si possono formare con k cifre
+(considerando le inversioni, riflessioni, ecc.):
+
+(define (conta-antimagici k)
+  (let ( (conta 0) (permute (perm-rep 9 (sequence 1 k))) )
+    (setq permute (filter (fn(x) (= (length (unique x)) k)) permute))
+    (dolist (p permute)
+      (if (antimagic? (explode p 3)) (++ conta)))
+     conta))
+
+Proviamo:
+
+(conta-antimagici 3)
+;-> 0
+(conta-antimagici 4)
+;-> 0
+(conta-antimagici 5)
+;-> 3408
+(time (println (conta-antimagici 6)))
+;-> 30448
+;-> 32565.973
+
+Quindi per costruire un quadrato antimagico 3x3 occorrono almeno 5 numeri diversi.
+
 ============================================================================
 
