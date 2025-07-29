@@ -3074,6 +3074,7 @@ NOTE LIBERE 31
   Breve introduzione ai numeri p-adici
   Iterazione di una funzione e cicli
   Somma e prodotto di due numeri
+  Curiosità matematiche
 
 PROBLEMI SUI DADI
 =================

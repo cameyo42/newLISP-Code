@@ -4995,7 +4995,7 @@ y = c + jd
                (add (mul (real num2) (real num2)) (mul (imag num2) (imag num2)))))))
 
 (define (ccalc-y x) (cx-div x (cx-sub x '(1 0))))
-(define (calc-y x) (div x (sub x 1)))
+
 (ccalc-y '(2 0))
 ;-> (2 0)
 (ccalc-y '(3 0))
@@ -5024,6 +5024,125 @@ Parte sinistra e destra dell'equazione:
 ;-> (1 -0.5)
 (ceq x y)
 ;-> ((2 1.5) (2 1.5))
+
+(setq x '(0 1)) ;j
+(setq y (ccalc-y x))
+;-> (0.5 -0.5)
+(ceq x y)
+;-> ((0.5 0.5) (0.5 0.5))
+
+
+---------------------
+Curiosità matematiche
+---------------------
+
+Data la seguente equazione:
+
+  x^4 + x^3 + x^2 + x + 1
+
+Determinare i valori di x per cui l'equazione produce un quadrato perfetto.
+
+(define (f x) (+ (* x x x x) (* x x x) (* x x) x 1))
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (isq (int (sqrt num)))
+    (= num (* isq isq))))
+
+(define (perfect-square xmin xmax)
+  (for (x xmin xmax)
+    (if (square? (f x)) (println "x = " x))))
+
+(perfect-square -10 10)
+;-> x = -1
+;-> x = 0
+;-> x = 3
+
+---------------------------------------
+
+Problema
+  x1 + x2 + x3 + x4 = x1 * x2 * x3 * x4 = 1
+Soluzione
+  x1 = n^2/(n^2 - 1), x2 = 1/(1 - n^2), x3 = (n^2 - 1)/n, x4 = (1 - n^2)/n
+
+---------------------------------------
+
+Problema
+  x1 + x2 + x3 + x4 + x5 = x1 * x2 * x3 * x4 * x5 = 1
+Soluzione
+  x1 = n, x2 = -1/n, x3 = -n, x4 = 1/n, x5 = 1
+
+---------------------------------------
+
+Somma nulla (2 numeri)
+
+Se a + b = 0, allora risulta:
+
+  (a - b)*(1/a - 1/b) = 4
+
+(define (test a b)
+  (mul (sub a b) (sub (div a) (div b))))
+
+---------------------------------------
+
+Somma nulla (3 numeri)
+
+Se a + b + c = 0, allora risulta:
+
+      a         b         c       b - c     c - a     a - b
+  (------- + ------- + -------)*(------- + ------- + -------) = 9
+    b - c     c - a     a - b       a         b         c
+
+con (b - c), (c - a) e (a - b) diversi da 0.
+
+---------------------------------------
+
+Sedici 4 per formare 1000
+
+  444 + 444 + 44 + 44 + 4 + 4 + 4 + 4 + 4 + 4 = 1000
+(+ 444 444 44 44 4 4 4 4 4 4)
+;-> 1000
+
+---------------------------------------
+
+Otto 8 per formare 1000
+
+  888 + 88 + 8 + 8 + 8 = 1000
+(+ 888 88 8 8 8)
+;-> 1000
+
+---------------------------------------
+
+Numero pandigitale e numero di Eulero "e"
+
+  (1 + 9^(-4^(6*7)))^3^(2^85) = 2.7182818284590451... = e
+
+Con WolframAlpha è possibile calcolarlo...
+Questa formula genera correttamente le prime 18,457,734,525,360,901,453,873,570 cifre di 'e'.
+Autore: Richard Sabey (2004)
+Come è stata costruita:
+
+ lim(1 + 1/N)^N = e
+N->Inf
+
+Ponendo: 
+  N = 3^(2^85)
+  N = 9^(4^(6*7))  -->  1/N = 9^(-4^(6*7))
+
+Sostituiamo N e 1/N nel limite sopra:
+
+ (1 + 1/N) = (1 + 9^(-4^(6*7)))^3^(2^85)
+
+---------------------------------------
+
+Numero pandigitale e pi greco "pi"
+
+  2^5- .6 - (.3^9/7)^(.8^.1)
+
+(sub (pow 2 (pow 5 0.4)) .6 (pow (div (pow .3 9) 7) (pow .8 .1)))
+;-> 3.141592653590454
+
+10 cifre corrette: 3.1415926535
 
 ============================================================================
 
