@@ -4863,5 +4863,167 @@ Cerchiamo il nostro esempio:
 (all 30)
 ;-> ((-29L 16L) ((-7L 4L) (5L 4L) (-1L 4L)))
 
+
+------------------------------
+Somma e prodotto di due numeri
+------------------------------
+
+Trovare le coppie di numeri in cui la loro somma è uguale al loro prodotto.
+In formule, per quali coppie (x, y) è verificata la seguente equazione:
+
+  x + y = x * y
+
+Con x e y entrambi interi esistono solo due soluzioni:
+
+1) x = 0, y = 0
+2) x = 2, y = 2
+
+Ricaviamo y in funzione di x:
+
+  x + y = x*y
+  x = x*y - y
+  x = y*(x - 1)
+  y = x/(x - 1)
+
+Quindi fissato un numero x, possiamo calcolare il valore di y che soddisfa l'equazione.
+
+Con i float:
+------------
+
+(define (calc-y x) (div x (sub x 1)))
+(calc-y 2)
+;-> 2
+(calc-y 3)
+;-> 1.5
+(calc-y 4)
+;-> 1.333333333333333
+
+Parte sinistra e destra dell'equazione:
+
+(define (eq x y) (list (add x y) (mul x y)))
+
+(setq x 3)
+(setq y (calc-y x))
+(eq x y)
+;-> (4.5 4.5)
+
+(for (x 2 50) (println (eq x (calc-y x))))
+;-> (4 4)
+;-> (4.5 4.5)
+;-> (5.333333333333333 5.333333333333333)
+;-> (6.25 6.25)
+;-> (7.2 7.199999999999999)
+;-> (8.166666666666666 8.166666666666668)
+;-> (9.142857142857142 9.142857142857142)
+;-> (10.125 10.125)
+;-> (11.11111111111111 11.11111111111111)
+;-> (11.11111111111111 11.11111111111111)
+
+Con le frazioni:
+----------------
+
+x = a/b                           --> (a b)
+y = c/d, dove c = a e d = (a - b) --> (a (a - b))
+
+(define (fcalc-y x) (list (x 0) (- (x 0) (x 1))))
+(fcalc-y '(2 1))
+;-> (2 1)
+(fcalc-y '(3 1))
+;-> (3 2)
+(fcalc-y '(4 1))
+;-> (4 3)
+(fcalc-y '(1 2))
+;-> (1 -1)
+(fcalc-y '(2 3))
+;-> (2 -1)
+
+Parte sinistra e destra dell'equazione:
+
+x + y = (a*d + b*c)/(b*d)
+x * y = (a*c)/(b*d)
+
+(define (feq x y) 
+  (let ( (a (x 0)) (b (x 1)) (c (x 0)) (d (- (x 0) (x 1))) )
+    (list
+    (list (+ (* a d) (* b c)) (* b d))
+    (list (* a c) (* b d)))))
+
+(setq x '(2 1))
+(setq y (fcalc-y x))
+;-> (2 1)
+(feq x y)
+;-> ((4 1) (4 1))
+
+(setq x '(3 1))
+(setq y (fcalc-y x))
+;-> (3 2)
+(feq x y)
+;-> ((9 2) (9 2))
+
+(setq x '(1 2))
+(setq y (fcalc-y x))
+;-> (1 -1)
+(feq x y)
+;-> ((1 -2) (1 -2))
+
+Con i numeri complessi:
+-----------------------
+x = a + jb
+y = c + jd
+
+; Extract real part "real"
+(define (real num) (first num))
+; Extract imaginary part "imag"
+(define (imag num) (last num))
+(define (cx-add num1 num2)
+"Addition of two complex number (cartesian)"
+  (list (add (real num1) (real num2)) (add (imag num1) (imag num2))))
+(define (cx-sub num1 num2)
+"Subtraction of two complex number (cartesian)"
+  (list (sub (real num1) (real num2)) (sub (imag num1) (imag num2))))
+(define (cx-mul num1 num2)
+"Multiplication of two complex number (cartesian)"
+  (list (sub (mul (real num1) (real num2)) (mul (imag num1) (imag num2)))
+        (add (mul (imag num1) (real num2)) (mul (real num1) (imag num2)))))
+(define (cx-div num1 num2)
+"Division of two complex number (cartesian)"
+  (if (and (zero? (real num2)) (zero? imag num2))
+    (list nil nil)
+    (list (div (add (mul (real num1) (real num2)) (mul (imag num1) (imag num2)))
+               (add (mul (real num2) (real num2)) (mul (imag num2) (imag num2))))
+          (div (sub (mul (imag num1) (real num2)) (mul (real num1) (imag num2)))
+               (add (mul (real num2) (real num2)) (mul (imag num2) (imag num2)))))))
+
+(define (ccalc-y x) (cx-div x (cx-sub x '(1 0))))
+(define (calc-y x) (div x (sub x 1)))
+(ccalc-y '(2 0))
+;-> (2 0)
+(ccalc-y '(3 0))
+;-> (1.5 0)
+(ccalc-y '(2 2))
+;-> 1.2 -0.4
+
+Parte sinistra e destra dell'equazione:
+
+(define (ceq x y) (list (cx-add x y) (cx-mul x y)))
+
+(setq x '(2 0))
+(setq y (ccalc-y x))
+;-> (2 0)
+(ceq x y)
+;-> ((4 0) (4 0))
+
+(setq x '(3 2))
+(setq y (ccalc-y x))
+;-> (1.25 -0.25)
+(ceq x y)
+;-> ((4.25 1.75) (4.25 1.75))
+
+(setq x '(1 2))
+(setq y (ccalc-y x))
+;-> (1 -0.5)
+(ceq x y)
+;-> ((2 1.5) (2 1.5))
+
 ============================================================================
 
