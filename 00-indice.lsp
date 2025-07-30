@@ -3078,6 +3078,8 @@ NOTE LIBERE 31
   Numeri BIU
   Palline nelle scatole
   Quadrati antimagici
+  Parole a X
+  Divisori propri massimi
 
 PROBLEMI SUI DADI
 =================

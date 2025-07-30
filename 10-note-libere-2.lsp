@@ -4726,6 +4726,16 @@ GLi specchi non invertono sinistra e destra: questa è solo la nostra interpreta
 Il nostro riflesso nello specchio è in realtà invertito da davanti a dietro: se hai un neo sul lato sinistro del tuo viso, appare ancora sul lato sinistro del riflesso. Ma siamo abituati a vedere i volti di altre persone e istintivamente eseguiamo la rotazione mentale perché sappiamo che si sono girati di 180 gradi per fronteggiarci. L'immagine nello specchio viene riflessa, non ruotata, quindi quando la ruotiamo indietro nella nostra testa, appare invertita.
 Ogni sezione dello specchio riflette semplicemente ciò che è direttamente di fronte ad esso. Quindi qualunque cosa sia alla mia destra mentre guardo nello specchio sarà alla mia destra nello specchio. Niente è stato invertito, è solo una riflessione, tutto qui.
 
+In verità, gli specchi non invertono realmente destra e sinistra, né alto e basso: invertono la direzione in profondità, cioè l'asse "fronte-retro".
+In altre parole, uno specchio piano inverte l'asse perpendicolare alla sua superficie, cioè:
+- Se ci muoviamo in avanti verso lo specchio, l'immagine si muove all'indietro .
+- Le direzioni alto/basso e destra/sinistra restano invariate nel riflesso.
+Se alziamo la mano destra, l'immagine alza la mano destra (cioè si trova dalla stessa parte).
+L'impressione che inverta destra e sinistra è dovuta al fatto che tendiamo a immaginare di metterci al posto della nostra immagine riflessa.
+Per fare questo immaginiamo di ruotarci di 180° sul piano orizzontale, cioè come se ci voltassimo per "guardare dallo specchio", e in questa rotazione mentale, destra e sinistra si scambiano.
+Ma questa è una nostra interpretazione. Lo specchio, invece, non ruota l'immagine, la ribalta solo frontalmente.
+Se facessimo una rotazione mentale sull'asse alto/basso, cioè a testa in giù, ci sembrerebbe che il riflesso inverta alto e basso!
+
 
 --------------
 Treni e mosche

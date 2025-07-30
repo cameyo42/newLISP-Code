@@ -5426,5 +5426,208 @@ Proviamo:
 
 Quindi per costruire un quadrato antimagico 3x3 occorrono almeno 5 numeri diversi.
 
+Per finire vediamo quanti (e quali) quadrati antimagici possiamo costruire con le cifre da 1 a 9.
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (antimagici9 lista)
+  (let ( (out '()) (conta 0) (permute (perm (sequence 1 9))) )
+    (dolist (p permute)
+      (if (antimagic? (explode p 3)) (push (explode p 3) out -1)))
+    (if lista out (length out))))
+
+(antimagici9)
+;-> 24960
+
+(time (setq am9 (antimagici9 true)))
+;-> 2258.182
+
+(antimagic? (am9 0) true)
+;-> Row 1: 8
+;-> Row 2: 13
+;-> Row 3: 24
+;-> Col 1: 12
+;-> Col 2: 14
+;-> Col 3: 19
+;-> D1:  17L
+;-> D2:  16L
+;-> true
+
+
+----------
+Parole a X
+----------
+
+Data una stringa (es. "PROGRAM"), stampare la stringa nel modo seguente:
+
+P           M
+  R       A
+    O   R
+      G
+    O   R
+  R       A
+P           M
+
+Se la stringa ha un numero pari di caratteri aggiungere "-" al centro della stringa.
+
+(define (x str)
+  (local (len mid inv cx-sp sx-sp)
+    ; se stringa con numeri pari di caratteri, allora aggiunge "-" al centro
+    (if (even? (length str)) (push "-" str (/ (length str) 2)))
+    ; lunghezza della stringa
+    (setq len (length str))
+    ; indice carattere centrale
+    (setq mid (/ len 2))
+    ; numero di spazi al centro (iniziali)
+    (setq cx-sp (+ 3 (* 4 (- (/ len 2) 1))))
+    ; numero di spazi a sinistra (iniziali)
+    (setq sx-sp 0)
+    ; ciclo per ogni carattere
+    (for (i 0 (- len 1))
+      (cond ((< i mid) ; parte superiore
+              (println (dup " " sx-sp) (str i) (dup " " cx-sp) (str (- (+ i 1))))
+              (-- cx-sp 4)
+              (++ sx-sp 2))
+            ((= i mid) ; carattere centrale
+              (println (dup " " sx-sp) (str mid))
+              (-- sx-sp 2)
+              (++ cx-sp 4))
+            ((> i mid) ; parte inferiore
+              (println (dup " " sx-sp) (str (- (+ i 1))) (dup " " cx-sp) (str i))
+              (++ cx-sp 4)
+              (-- sx-sp 2)))) '>))
+
+(x "PAROLE")
+;-> P           E
+;->   A       L
+;->     R   O
+;->       -
+;->     R   O
+;->   A       L
+;-> P           E
+
+(x "newLISP")
+;-> n           P
+;->   e       S
+;->     w   I
+;->       L
+;->     w   I
+;->   e       S
+;-> n           P
+
+Versione compressa:
+
+(define (x s)
+  (if (even? (length s)) (push "-" s (/ (length s) 2)))
+  (letn ((n (length s)) (m (/ n 2)) (a 0) (b (+ 3 (* 4 (- m 1)))))
+    (for (i 0 (- n 1))
+      (let (j (if (< i m) i (- (- n 1) i)))
+        (println (dup " " a) (s j) (if (= i m) "" (string (dup " " b) (s (- (- n 1) j)))))
+        (if (< i m) (++ a 2) (-- a 2))
+        (if (< i m) (-- b 4) (++ b 4))))'>))
+
+Versione code-golf (291 caratteri):
+
+(define(x s)
+(if(even?(length s))(push "-" s(/(length s)2)))
+(letn((n(length s))(m(/ n 2))(a 0)(b(+ 3(* 4(- m 1)))))
+(for(i 0(- n 1))
+(let(j(if(< i m)i(-(- n 1)i)))
+(println(dup " " a)(s j)(if(= i m)""(string(dup " " b)(s(-(- n 1)j)))))
+(if(< i m)(++ a 2)(-- a 2))
+(if(< i m)(-- b 4)(++ b 4))))'>))
+
+(x "PAROLE")
+;-> P           E
+;->   A       L
+;->     R   O
+;->       -
+;->     R   O
+;->   A       L
+;-> P           E
+
+(x "newLISP")
+;-> n           P
+;->   e       S
+;->     w   I
+;->       L
+;->     w   I
+;->   e       S
+;-> n           P
+
+(x "AB")
+;-> A   B
+;->   -
+;-> A   B
+
+
+-----------------------
+Divisori propri massimi
+-----------------------
+
+Dato un intero N > 1, determinare la somma dei massimi divisori propri dei numeri da 2 a N.
+Un divisore proprio di un intero N è un divisore di N, che non è N stesso.
+
+Sequenza OEIS A280050:
+a(n) = Sum_[k=2..n] k/lpf(k), where lpf(k) is the least prime dividing k
+  0, 1, 2, 4, 5, 8, 9, 13, 16, 21, 22, 28, 29, 36, 41, 49, 50, 59, 60, 70,
+  77, 88, 89, 101, 106, 119, 128, 142, 143, 158, 159, 175, 186, 203, 210,
+  228, 229, 248, 261, 281, 282, 303, 304, 326, 341, 364, 365, 389, 396,
+  421, 438, 464, 465, 492, 503, 531, 550, 579, 580, 610, 611, 642, 663,
+  695, 708, 741, 742, 776, 799, 834, 835, ...
+
+Possiamo trovare il più grande divisore proprio di N usando una semplice osservazione:
+se 'd' è il più piccolo divisore di N maggiore di 1, allora N/d è il più grande divisore proprio.
+
+(define (max-div N)
+  (if (= N 1) nil
+  ; else
+  (let ( (d 2) (out 1) )
+    (while (<= d (/ N 2))
+      (when (= (% N d) 0) 
+          (setq out (/ N d))
+          (setq d (+ N 1)))
+      (++ d)) out)))
+
+(max-div 12)
+;-> 6
+(max-div 13)
+;-> 1
+(max-div 11)
+;-> 1
+(max-div 256)
+;-> 128
+(max-div 1)
+;-> 0 ; dovrebbe essere nil, ma lo usiamo per il caso 0
+
+(define (seq N)
+  (cond ((= N 1) 0)
+        (true (apply + (map max-div (sequence 2 N))))))
+
+(map seq (sequence 1 50))
+;-> (0 1 2 4 5 8 9 13 16 21 22 28 29 36 41 49 50 59 60 70
+;->  77 88 89 101 106 119 128 142 143 158 159 175 186 203 210
+;->  228 229 248 261 281 282 303 304 326 341 364 365 389 396 421)
+
 ============================================================================
 
