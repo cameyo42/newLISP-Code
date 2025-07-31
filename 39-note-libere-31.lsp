@@ -5629,5 +5629,115 @@ se 'd' è il più piccolo divisore di N maggiore di 1, allora N/d è il più gra
 ;->  77 88 89 101 106 119 128 142 143 158 159 175 186 203 210
 ;->  228 229 248 261 281 282 303 304 326 341 364 365 389 396 421)
 
+
+------------------------
+Somma dei numeri dispari
+------------------------
+
+Da un post su LinkedIn:
+
+We ask every candidate a trivial coding question.
+Something like: "Given a list of numbers, return the sum of the even ones."
+It's not meant to be hard. Not meant to be clever.
+Not meant to filter anyone out, theoretically.
+It's just... a basic check.
+A developer or SRE with 6-10 years of experience should be able to do this in their sleep, right?
+Apparently not.
+~75% of candidates fail. Not just junior applicants.
+I'm talking about people with "senior" in their title.
+People who say they mentor juniors.
+People who claim years of production experience.
+I... really don't understand.
+
+Data una lista di numeri restituire la somma dei numeri dispari.
+
+(define (sum-odd1 lst)
+  (let (sum 0)
+    (dolist (num lst) (if (odd? num) (++ sum num))) sum))
+
+(setq lst '(1 2 3 4 5 6 8 8))
+(sum-odd1 lst)
+;-> 9
+
+(define (sum-odd2 lst) (apply + (filter odd? lst)))
+(sum-odd2 lst)
+;-> 9
+
+Espressioni equivalenti:
+1) (odd? num)
+2) ((num % 2) == 1) 
+3) ((& num 1) == 1)
+
+
+---------------------------
+Lista delle funzioni utente
+---------------------------
+
+In una sessione REPL vogliamo sapere quali sono le funzioni definite dall'utente.
+
+La funzione prende due parametri:
+1) src, se vale true stampa anche il codice sorgente delle funzioni
+2) contesto, nome del contesto di cui vogliamo i nomi delle funzioni utente
+
+(define (function-list src ctx)
+  ; se contesto (ctx) vale nil, allora usiamo il contesto MAIN
+  (if (= ctx nil) (setq ctx (context)))
+  ; ciclo sui simboli di newLISP
+  (dolist (el (symbols ctx))
+    ; se troviamo una funzione lambda, allora quella è una funzione utente
+    (if (lambda? (eval el))
+      (if src
+        (println el ": " (eval el) "\n") ; nome e sorgente della funzione corrente
+        (println el)))) '>) ; nome della funzione corrente
+
+Proviamo:
+
+(function-list)
+;-> function-list
+;-> module
+
+(function-list true)
+;-> function-list: (lambda (src ctx)
+;->  (if (= ctx nil)
+;->   (setq ctx (context)))
+;->  (dolist (el (symbols ctx))
+;->   (if (lambda? (eval el))
+;->    (if src
+;->     (println el ": " (eval el))
+;->     (println el)))) '>)
+;-> 
+;-> module: (lambda ($x) (load (append (env "NEWLISPDIR") "/modules/" $x)))
+
+(define (test m n) (if (> m n) m n))
+
+(function-list)
+;-> function-list
+;-> module
+;-> test
+
+(context 'DISNEY)
+(define (pluto a b c) (+ a b c))
+(define (topolino x y) (list x y))
+(define (pippo) (println "SuperPippo"))
+;-> DISNEY>
+
+(MAIN:function-list nil 'DISNEY)
+;-> DISNEY:pippo
+;-> DISNEY:pluto
+;-> DISNEY:topolino
+
+(MAIN:function-list nil 'MAIN)
+;-> function-list
+;-> module
+;-> test
+
+(context 'MAIN)
+(function-list true 'DISNEY)
+;-> DISNEY:pippo: (lambda () (println "SuperPippo"))
+
+;-> DISNEY:pluto: (lambda (DISNEY:a DISNEY:b DISNEY:c) (+ DISNEY:a DISNEY:b DISNEY:c))
+
+;-> DISNEY:topolino: (lambda (DISNEY:x DISNEY:y) (list DISNEY:x DISNEY:y))
+
 ============================================================================
 

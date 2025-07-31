@@ -3080,6 +3080,8 @@ NOTE LIBERE 31
   Quadrati antimagici
   Parole a X
   Divisori propri massimi
+  Somma dei numeri dispari
+  Lista delle funzioni utente
 
 PROBLEMI SUI DADI
 =================

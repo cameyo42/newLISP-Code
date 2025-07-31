@@ -1973,9 +1973,7 @@ script 1 2 3
 
 ("newlisp" "script" "1" "2" "3")
 
-Try executing this script with different command-line parameters.
-
-newLISP has a function, (main-args int) for this.
+Prova a eseguire questo script con parametri della riga di comando diversi.
 
 Per ottenere il nome del programma/script possiamo usare il seguente script:
 
@@ -4679,7 +4677,9 @@ Vedi anche "Sequenza di Golomb (memoized)" su "Note libere 27".
 Acquistare e vendere azioni
 ---------------------------
 
-Nel trading di azioni, un acquirente compra azioni e le vende in una data futura. Dato il prezzo delle azioni di n giorni, il trader può effettuare al massimo k transazioni (dove una nuova transazione può iniziare solo dopo che la transazione precedente è stata completata). Determinare il profitto massimo che un trader può realizzare dato il prezzo delle azioni di n giorni e il numero k di transazioni.
+Nel trading di azioni, un acquirente compra azioni e le vende in una data futura.
+Dato il prezzo delle azioni di n giorni, il trader può effettuare al massimo k transazioni (dove una nuova transazione può iniziare solo dopo che la transazione precedente è stata completata).
+Determinare il profitto massimo che un trader può realizzare dato il prezzo delle azioni di n giorni e il numero k di transazioni.
 
 Esempi:
 
@@ -4721,7 +4721,8 @@ Allora la relazione è:
 
 profitto[t][i] sarà il massimo di:
   1) profitto[t][i-1] che rappresenta non fare alcuna transazione il giorno i-esimo.
-  2) Massimo profitto ottenuto vendendo l'iesimo giorno. Per vendere azioni l'i-esimo giorno, dobbiamo acquistarle in uno qualsiasi dei [0, i – 1] giorni. Se acquistiamo azioni il giorno j-esimo e le vendiamo il giorno i-esimo, il profitto massimo sarà prezzo[i] – prezzo[j] + profitto[t-1][j] dove j varia da 0 a i-1. Qui il profitto[t-1][j] è il migliore che avremmo potuto fare con una transazione in meno fino al j-esimo giorno.
+  2) Massimo profitto ottenuto vendendo l'iesimo giorno. Per vendere azioni l'i-esimo giorno, dobbiamo acquistarle in uno qualsiasi dei [0, i – 1] giorni. Se acquistiamo azioni il giorno j-esimo e le vendiamo il giorno i-esimo, il profitto massimo sarà prezzo[i] – prezzo[j] + profitto[t-1][j] dove j varia da 0 a i-1.
+  Qui il profitto[t-1][j] è il migliore che avremmo potuto fare con una transazione in meno fino al j-esimo giorno.
 
 Vediamo una possibile implementazione:
 
@@ -4816,7 +4817,9 @@ può essere riscritta come,
   dove prev-diff è max(profit[t-1][j] – prezzo[j])
   per tutti j nell'intervallo [0, i-2]
 
-Quindi, se abbiamo già calcolato max(profit[t-1][j] – prezzo[j]) per tutti j nell'intervallo [0, i-2], possiamo calcolarlo per j = i – 1 in tempo costante. In altre parole, non dobbiamo più guardare indietro nell'intervallo [0, i-1] per scoprire il giorno migliore per l'acquisto. Possiamo determinarlo in tempo costante usando la relazione seguente:
+Quindi, se abbiamo già calcolato max(profit[t-1][j] – prezzo[j]) per tutti j nell'intervallo [0, i-2], possiamo calcolarlo per j = i – 1 in tempo costante.
+In altre parole, non dobbiamo più guardare indietro nell'intervallo [0, i-1] per scoprire il giorno migliore per l'acquisto.
+Possiamo determinarlo in tempo costante usando la relazione seguente:
 
   profitto[t][i] = max(profitto[t][i-1], prezzo[i] + max(prev-diff, profitto [t-1][i-1] – prezzo[i-1])
   dove prev-diff è max(profit[t-1][j] – price[j]) per tutti j nell'intervallo [0, i-2]
