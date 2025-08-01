@@ -5637,8 +5637,7 @@ Complessità temporale O(1).
 
 Ted Walther ha scritto una funzione più elegante:
 
-(define (digital_root n)
-    (+ 1 (% (- n 1) 9)))
+(define (digital-root n) (+ 1 (% (- n 1) 9)))
 
 Vediamo adesso la dimostrazione matematica.
 
@@ -5671,6 +5670,21 @@ N = ∑ d(i)*10^i ⇒ N mod 9 ≡ ∑ (d(i)*10^i mod 9) ≡ ∑ d(i) mod 9
 
 Notare che qualsiasi numero intero positivo in base b è congruente alla somma delle sue cifre modulo (b-1) per qualsiasi base.
 
+Sequenza OEIS A010888:
+Digital root of n (repeatedly add the digits of n until a single digit is reached).
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
+  6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2,
+  3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8,
+  9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
+  6, 7, 8, 9, 1, 2, 3, 4, 5, ...
+
+(map digital-root (sequence 0 100))
+;-> (0 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 1 2 3 4 5
+;->  6 7 8 9 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 1 2
+;->  3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8
+;->  9 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 1 2 3 4 5
+;->  6 7 8 9 1)
+
 Per completezza riportiamo una funzione che calcola la somma delle cifre di un numero (non ripetutamente):
 
 (define (digit-sum n)
@@ -5683,6 +5697,21 @@ Per completezza riportiamo una funzione che calcola la somma delle cifre di un n
 
 (digit-sum 123456789L)
 ;-> 45
+
+Sequenza OEIS A007953:
+Digital sum (i.e., sum of digits) of n; also called digsum(n).
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5,
+  6, 7, 8, 9, 10, 11, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 4, 5, 6, 7, 8, 9,
+  10, 11, 12, 13, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 6, 7, 8, 9, 10, 11,
+  12, 13, 14, 15, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 8, 9, 10, 11, 12,
+  13, 14, 15, ...
+
+(map digit-sum (sequence 0 100))
+;-> (0 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 10 2 3 4 5
+;->  6 7 8 9 10 11 3 4 5 6 7 8 9 10 11 12 4 5 6 7 8 9
+;->  10 11 12 13 5 6 7 8 9 10 11 12 13 14 6 7 8 9 10 11
+;->  12 13 14 15 7 8 9 10 11 12 13 14 15 16 8 9 10 11 12
+;->  13 14 15 16 17 9 10 11 12 13 14 15 16 17 18 1)
 
 
 ---------------------------------------------------

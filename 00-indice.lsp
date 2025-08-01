@@ -3083,6 +3083,7 @@ NOTE LIBERE 31
   Somma dei numeri dispari
   Lista delle funzioni utente
   Massimizzazione di funzioni con vincoli
+  Primi troncabili
 
 PROBLEMI SUI DADI
 =================

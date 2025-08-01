@@ -5883,5 +5883,155 @@ La formula per trovare i valori che massimizzano la funzione vale:
 x(k) = -----------------, per k=1,2,...m
         Sum[i=1..m]a(i)
 
+
+----------------
+Primi troncabili
+----------------
+
+Definire la sequenza dei numeri primi che rimangono primi anche quando togliamo il primo numero a 'sinistra'.
+Questo deve essere vero fino a che rimane una sola cifra (che deve essere prima).
+
+Esempio:
+Numero primo: 1223
+Tronca a sinistra: 223 (numero primo)
+Tronca a sinistra: 23 (numero primo)
+Tronca a sinistra: 2 (numero primo)
+
+Sequenza OEIS A024785
+Left-truncatable primes: every suffix is prime and no digits are zero.
+  2, 3, 5, 7, 13, 17, 23, 37, 43, 47, 53, 67, 73, 83, 97, 113, 137, 167,
+  173, 197, 223, 283, 313, 317, 337, 347, 353, 367, 373, 383, 397, 443,
+  467, 523, 547, 613, 617, 643, 647, 653, 673, 683, 743, 773, 797, 823,
+  853, 883, 937, 947, 953, 967, 983, 997, 1223, ...
+
+La sequenza è finita e l'ultimo termine è:
+a(4260) = 357686312646216567629137 (Angell and Godwin, 1999)
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (left-trunc limite)
+  (let ( (out '()) (primi (primes-to limite)) )
+    (dolist (p primi)
+      ;(println "p: " p)
+      (if (< p 10)
+          (push p out -1)
+      ;else
+          (let ((valido true) (num p))
+            (while (and valido (> num 0))
+              (if (not (prime? num))
+                  (setq valido nil)
+              ;else
+                  (let (str (slice (string num) 1))
+                    (if (= (str 0) "0") (setq valido nil))
+                    (if (= str "")
+                      (setq num -1)
+                      (setq num (int str 0 10))))))
+          (if valido (push p out -1)))))
+    out))
+
+(left-trunc 1225)
+;-> (2 3 5 7 13 17 23 37 43 47 53 67 73 83 97 113 137 167
+;->  173 197 223 283 313 317 337 347 353 367 373 383 397 443
+;->  467 523 547 613 617 643 647 653 673 683 743 773 797 823
+;->  853 883 937 947 953 967 983 997 1223)
+
+Verifichiamo le prime 19 cifre del numero più grande:
+
+357686312646216567629137  --> 24 cifre
+     -------------------
+     9223372036854775807  --> 19 cifre (max value for Int64)
+
+(define (check)
+  (let ((continua true) (num 6312646216567629137))
+       (while continua
+         (cond ((prime? num)
+                (println num " primo")
+                (let (str (slice (string num) 1))
+                    (if (= str "")
+                      (setq continua nil)
+                      (setq num (int str 0 10)))))
+               (true
+                (println "Errore: " num " non primo")
+                (setq continua nil))))))
+
+(time (check))
+;-> 6312646216567629137 primo
+;-> 312646216567629137 primo
+;-> 12646216567629137 primo
+;-> 2646216567629137 primo
+;-> 646216567629137 primo
+;-> 46216567629137 primo
+;-> 6216567629137 primo
+;-> 216567629137 primo
+;-> 16567629137 primo
+;-> 6567629137 primo
+;-> 567629137 primo
+;-> 67629137 primo
+;-> 7629137 primo
+;-> 629137 primo
+;-> 29137 primo
+;-> 9137 primo
+;-> 137 primo
+;-> 37 primo
+;-> 7 primo
+;-> 9578.942
+
+Definire la sequenza dei numeri primi che rimangono primi anche quando togliamo il primo numero a 'destra'.
+Questo deve essere vero fino a che rimane una sola cifra (che deve essere prima).
+
+Esempio:
+Numero primo: 2939
+Tronca a destra: 293 (numero primo)
+Tronca a destra: 29 (numero primo)
+Tronca a destra: 2 (numero primo)
+
+Sequenza OEIS A024770:
+Right-truncatable primes: every prefix is prime.
+  2, 3, 5, 7, 23, 29, 31, 37, 53, 59, 71, 73, 79, 233, 239, 293, 311,
+  313, 317, 373, 379, 593, 599, 719, 733, 739, 797, 2333, 2339, 2393,
+  2399, 2939, 3119, 3137, 3733, 3739, 3793, 3797, 5939, 7193, 7331,
+  7333, 7393, 23333, 23339, 23399, 23993, 29399, 31193, ...
+
+(define (right-trunc limite)
+  (let ( (out '()) (primi (primes-to limite)) )
+    (dolist (p primi)
+      ;(println "p: " p)
+      (if (< p 10)
+          (push p out -1)
+      ;else
+          (let ((valido true) (num p))
+            (while (and valido (> num 0))
+              (if (not (prime? num))
+                  (setq valido nil)
+              ;else
+                  (let (str (chop (string num))) ; unica modifica (left-trunc)
+                    (if (= (str 0) "0") (setq valido nil))
+                    (if (= str "")
+                      (setq num -1)
+                      (setq num (int str 0 10))))))
+          (if valido (push p out -1)))))
+    out))
+
+(right-trunc 31195)
+;-> (2 3 5 7 23 29 31 37 53 59 71 73 79 233 239 293 311
+;->  313 317 373 379 593 599 719 733 739 797 2333 2339 2393
+;->  2399 2939 3119 3137 3733 3739 3793 3797 5939 7193 7331
+;->  7333 7393 23333 23339 23399 23993 29399 31193)
+
 ============================================================================
 
