@@ -5739,5 +5739,149 @@ Proviamo:
 
 ;-> DISNEY:topolino: (lambda (DISNEY:x DISNEY:y) (list DISNEY:x DISNEY:y))
 
+
+---------------------------------------
+Massimizzazione di funzioni con vincoli
+---------------------------------------
+
+Esempio 1
+---------
+
+Data la funzione:
+
+  f(x1, x2, ..., xm) = x1 * x2^2 * ... * xm^m   (1)
+
+Determinare i valori (x1, x2, ..., xm) che rendono massima la funzione con il seguente vincolo:
+
+  x1 + x2 + x3 + ... + xm = m
+
+Si può dimostrare (Metodo dei moltiplicatori di Lagrange) che per massimizzare la funzione i valori cercati valgono:
+
+            2*k
+  x(k) = ---------,  per k = 1,2,...m
+          (m + 1)
+
+Per minimizzare la funzione bisogna distribuire quasi tutto il valore di m nell'ultima variabile xm, e tenere tutte le altre variabili (x1, x2, ... x(m-1) molto vicine a 0.
+
+(define (f-pot list-vals)
+  (let (res 1)
+    (dolist (val list-vals)
+      (setq res (mul res (pow val (+ $idx 1)))))))
+
+(define (maximo1 m)
+  (let (values '())
+    (for (k 1 m)
+      (push (div (mul 2 k) (add m 1)) values -1))
+    (println values (apply add values))
+    (f-pot values)))
+
+(maximo 10)
+;-> (0.1818181818181818 0.3636363636363637 0.5454545454545454
+;->  0.7272727272727273 0.9090909090909091 1.090909090909091 
+;->  1.272727272727273 1.454545454545455 1.636363636363637
+;->  1.818181818181818)
+;-> 10
+;-> 4112.085002853611
+
+Per il minimo (solo un esempio, non è il minimo assoluto):
+
+(f-pot '(0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 9.1))
+;-> 3.894161181181089e-036
+
+Esempio 2
+---------
+
+Data la funzione:
+
+  f(x1, x2, ..., xm) = x1 * x2^2 * ... * xm^m   (1)
+
+Determinare i valori (x1, x2, ..., xm) che rendono massima la funzione con il seguente vincolo:
+
+  x1 + x2 + x3 + ... + xm = S
+
+In questo caso la somma del vincolo ha un generico valore S.
+
+Formula dei valori per massimizzare la funzione:
+
+            2*S*k
+  x(k) = -----------,  per k = 1,2,...m
+          m*(m + 1)
+
+(define (maximo2 S m)
+  (let (values '())
+    (for (k 1 m)
+      (push (div (mul 2 S k) (mul m (add m 1))) values -1))
+    (println values (apply add values))
+    (f-pot values)))
+
+(maximo2 10 10)
+;-> (0.1818181818181818 0.3636363636363637 0.5454545454545454
+;->  0.7272727272727273 0.9090909090909091 1.090909090909091 
+;->  1.272727272727273 1.454545454545455 1.636363636363637
+;->  1.818181818181818)
+;-> 10
+;-> 4112.085002853611
+
+(maximo2 20 10)
+;-> (0.3636363636363637 0.7272727272727273 1.090909090909091
+;->  1.454545454545455 1.818181818181818 2.181818181818182
+;->  2.545454545454545 2.909090909090909 3.272727272727273
+;->  3.636363636363636)
+;-> 20
+;-> 1.481534758925386e+020
+
+Per il minimo (solo un esempio, non è il minimo assoluto):
+
+(f-pot '(0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 19.1))
+;-> 6.461504817787884e-033
+
+Esempio 3
+---------
+Data la seguente funzione che rappresenta il prodotto delle variabili:
+
+  f(x1, x2, ..., xm) = x1 * x2 * ... * xm
+
+sotto il vincolo:
+
+  x1 + x2 + ... + xm = S, con x(i) > 0
+
+La formula per trovare i valori che massimizzano la funzione vale:
+  
+  x(i) = S/m, tutti gli elementi sono uguali
+
+Questo è un caso classico di disuguaglianza aritmetico-geometrica, che afferma:
+
+  (x1 + x2 + ... + xm)/m >= pow(x1*x2*...*xm 1/m)
+
+con uguaglianza se e solo se tutti gli x(i) sono uguali.
+
+(define (f-prod list-vals) (apply mul list-vals))
+
+(define (maximo3 S m)
+ (let (values (dup (div S m) m))
+  (println values { } (apply add values))
+  (f-prod values)))
+
+(maximo3 20 10)
+;-> (2 2 2 2 2 2 2 2 2 2) 20
+;-> 1024
+
+Esempio 4
+---------
+
+Data la seguente funzione:
+
+  f(x1, x2, ..., xm) = x1^a1 * x2^a2 * ... * xm^am
+
+sotto il vincolo:
+
+  (x1 + x2 + ... + xm) = S, con x(i) > 0 e a(k) dati.
+
+La formula per trovare i valori che massimizzano la funzione vale:
+
+             a(k)
+x(k) = -----------------, per k=1,2,...m
+        Sum[i=1..m]a(i)
+
 ============================================================================
 

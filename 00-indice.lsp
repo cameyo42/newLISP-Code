@@ -333,8 +333,8 @@ ROSETTA CODE
 
 PROJECT EULERO
 ==============
-  Problemi 1..105, 108..110, 112..125, 132, 133, 135,
-           145, 147, 173, 187, 188, 191, 205, 206, 231, 469
+  Problemi 1..105, 108..110, 112..125, 132, 133, 135, 145, 147,
+           173, 187, 188, 190, 191, 205, 206, 231, 469
 
 PROBLEMI VARI
 =============
@@ -3082,6 +3082,7 @@ NOTE LIBERE 31
   Divisori propri massimi
   Somma dei numeri dispari
   Lista delle funzioni utente
+  Massimizzazione di funzioni con vincoli
 
 PROBLEMI SUI DADI
 =================

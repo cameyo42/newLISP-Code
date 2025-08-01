@@ -137,6 +137,7 @@
 |   173    |  1572729           |         -  |       124  |         0  |
 |   187    |  17427258          |         -  |     10641  |         -  |
 |   188    |  95962097          |         -  |        29  |         -  |
+|   190    |  371048281         |         -  |         0  |         -  |
 |   191    |  1918080160        |         -  |         1  |         0  |
 |   205    |  0.5731441         |         -  |    309852  |         -  |
 |   206    |  1389019170        |         -  |         2  |         -  |
@@ -14278,6 +14279,43 @@ Trova le ultime 8 cifre di 1777↑↑1855.
 
 
 ============
+Problema 190
+============
+
+Sia Sm = (x1, x2, ... , xm) la m-upla di numeri reali positivi con x1 + x2 + ... + xm = m per cui Pm = x1 * x2^2 * ... * xm^m è massimizzata.
+
+Ad esempio, si può verificare che [P10] = 4112 ([ ] è la funzione della parte intera).
+
+Trova la Somma[Pm] per 2 ≤ m ≤ 15.
+============================================================================
+
+Si può dimostrare (Metodo dei moltiplicatori di Lagrange) che per massimizzare la funzione i valori cercati valgono:
+
+            2*k
+  x(k) = ---------,  per k = 1,2,...m
+          (m + 1)
+
+(define (f-pot list-vals)
+  (let (res 1)
+    (dolist (val list-vals)
+      (setq res (mul res (pow val (+ $idx 1)))))))
+
+(define (maximo m)
+  (let (values '())
+    (for (k 1 m)
+      (push (div (mul 2 k) (add m 1)) values -1))
+    ;(println values (apply add values))
+    (f-pot values)))
+
+(define (e190) (apply add (map (fn(x) (int (maximo x))) (sequence 2 15))))
+
+(time (println (e190)))
+;-> 371048281
+;-> 0
+----------------------------------------------------------------------------
+
+
+============
 Problema 191
 ============
 
@@ -14321,7 +14359,7 @@ Questa funzione genera una situazione del giorno che permette di calcolare in nu
     ; 1) se siamo in ritardo (ma non assenti),
     ;    allora il contatore "assenti" resta invariato e
     ;    il contatore di "ritardo" aumenta di uno
-    (setq event-late   (calc (- days 1) absent (+ late 1)))
+    (setq event-late (calc (- days 1) absent (+ late 1)))
     ; 2) se siamo assenti,
     ;    allora il contatore "assenti" aumenta di 1 e
     ;    il contatore "ritardo" si azzera
