@@ -4806,6 +4806,19 @@ However, one can use collect and a small helper function to get the following al
 ;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 6 3) ("AAA" 15 3))
 
 
+Cerca la sottostringa che si trova tra la seconda parentesi aperta e
+ il primo spazio che incontriamo dopo
+--------------------------------------------------------------------
+Con la stringa "(define (print-me! a b c)" deve restituire "print-me!"
+(setq s "(define (print-me! a b c)")
+(setq m (regex {^\([^()]+\(\s*([^\s()]+)} s 1))
+;-> ("(define (print-me!" 0 18 "print-me!" 9 9)
+regex in newLISP restituisce una lista del tipo:
+(string-matched start-index end-index group1 start1 length1 group2 start2 length2 ...)
+(m 3)
+;-> "print-me!"
+
+
 -------------------------------
 Serie di Taylor (Seno e Coseno)
 -------------------------------

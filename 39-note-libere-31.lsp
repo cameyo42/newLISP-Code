@@ -6033,5 +6033,106 @@ Right-truncatable primes: every prefix is prime.
 ;->  2399 2939 3119 3137 3733 3739 3793 3797 5939 7193 7331
 ;->  7333 7393 23333 23339 23399 23993 29399 31193)
 
+
+------------------
+Wrong SAT question
+------------------
+
+Negli Stati Uniti, il SAT (Scholastic Assessment Test) è un test standardizzato utilizzato per l'ammissione ai college e alle università.
+È un esame che valuta le competenze accademiche degli studenti, in particolare nelle aree di lettura, scrittura e matematica.
+Nel 1982, ci fu una domanda del SAT a cui (quasi) tutti gli studenti risposero male.
+
+Vedi figura "sat1982.png" nella cartella "data".
+Abbiamo due circonferenze tangenti:
+1) Centro in A e raggio ra = (1/3)*rb
+2) Centro in B e raggio rb
+Le due circonferenze sono tangenti con A che ruota esternamente a B.
+
+Nella figura sopra, il raggio del cerchio A è 1/3 del raggio del cerchio B.
+Partendo dalla posizione mostrata nella figura, il cerchio A ruota attorno al cerchio B.
+Alla fine di quante rivoluzioni del cerchio A, il centro del cerchio raggiungerà per primo il suo punto di partenza?
+Risposte:
+(A) 3/2 (B) 3 (C) 6 (D) 9/2 (E) 9
+
+Soluzione
+---------
+La circonferenza di A vale Ca = 2*pi*ra = 2*pi*(1/3)*rb
+La circonferenza di B vale Cb = 2*pi*rb
+Numero di rivoluzioni di A = R = Cb/Ca = 2*pi*rb / 2*pi*(1/3)*rb = 3/2
+Questa soluzione è errata.
+
+L'errore consiste nel considerare le rivoluzioni di A rispetto al punto di tangenza dei due cerchi.
+Invece occorre considerare quanto spazio percorre il centro del cerchio A.
+
+Il centro della circonferenza A percorre uno spazio pari a:
+
+  S = 2*pi*(ra + rb) = 2*pi*4*ra
+
+Quindi il numero di rivoluzioni di A vale:
+
+  R = S/Ca = 2*pi*4*ra / 2*pi*ra = 4
+
+Quindi risulta:
+
+  R = (rb/ra) + 1
+
+(define (rivoluzioni ra rb) (add (div rb ra) 1))
+
+(rivoluzioni (div 3) 1)
+;-> 4
+
+(rivoluzioni 1 1)
+;-> 2 ; verificabile utilizzando con due monete uguali
+
+
+---------------------------------
+Stringa diversa da tutte le altre
+---------------------------------
+
+Date N stringhe diverse composte ognuna da M caratteri ASCII (32..126).
+Scrivere una funzione che restituisce una stringa lunga M caratteri diversa da tutte le N stringhe date.
+
+Ci sono diversi metodi per risolvere il problema.
+Un'idea efficace è usare una variante del "diagonal argument" di Cantor:
+costruire una nuova stringa modificando il carattere 'i'-esimo della 'i'-esima stringa di input.
+In questo modo la nuova stringa sarà diversa da ognuna delle stringhe originali: differisce almeno in un carattere da ciascuna di esse.
+
+Questo algoritmo funziona solo se risulta N <= M, cioè ci sono più posizioni disponibili per differenziarsi che stringhe.
+Se (N > M), la funzione non può garantire l'esistenza di una stringa diversa da tutte (esaurirebbe le posizioni in cui cambiare).
+
+Nota: se N = 256^M, allora non esiste nessuna stringa alternativa (tutte già occupate).
+
+Ci sono (+ 126 (- 32) 1) = 95 caratteri.
+Con la formula (+ (- 126 i) 32) l'unico carattere che mappa su se stesso è il 79 ("O").
+
+(for (i 32 126)
+  (setq c (+ (- 126 i) 32))
+  ;(setq c (% (+ i 1) 128))
+  (if (= i c) (println i { } c))
+  (if (or (> c 126) (< c 32)) (println i { } c)))
+;-> 79 79
+
+(define (other lista)
+  (let ((M (length (first lista)))
+        (N (length lista))
+        (out '()))
+    ; ciclo fino alla lunghezza della lista (numero di parole)
+    (for (i 0 (- N 1))
+      (let (c (+ (- 126 (char ((lista i) i))) 32)) ; nuovo carattere
+        (if (= c 79)
+          ; se il nuovo carattere è 79 ("O"),
+          (push 32 out -1) ; allora inseriamo 32 (" ")
+          (push c out -1)))) ; altrimenti inseriamo il nuovo carattere
+    (join (map char out))))
+
+Proviamo:
+
+(other '("abcde" "bbbbb" "ccccc"))
+;-> "=<;"
+(other '("AAA" "ABB" "ABC"))
+;-> "]\\["
+(other '("OOO1" "AOA1" "  O1" "    "))
+;-> "   ~"
+
 ============================================================================
 

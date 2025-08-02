@@ -3084,6 +3084,8 @@ NOTE LIBERE 31
   Lista delle funzioni utente
   Massimizzazione di funzioni con vincoli
   Primi troncabili
+  Wrong SAT question
+  Stringa diversa da tutte le altre
 
 PROBLEMI SUI DADI
 =================
