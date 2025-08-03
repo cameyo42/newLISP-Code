@@ -4809,13 +4809,15 @@ Smallest prime not dividing n.
                 (for (y (* x x) num (* 2 x) (> y num))
                   (setf (arr y) true)))) lst))))
 
-(setq primi (primes-to 10000))
+(length (setq primi (primes-to 10000)))
+;-> 1229
 
-(define (A num)
-  (let ( (sol nil) (solve nil) )
-    (dolist (p primi solve)
-      (if (!= (% (% num p) 7) 0)
-        (set 'solve true 'sol p)
+(define (A N)
+  (let (sol nil)
+    (dolist (p primi sol)
+      (if (!= (% N p) 0)
+        (setq sol p)
+        (setq p nil)  ; esci anticipatamente (ottimizzazione)
       )
     )
     sol))
@@ -4827,10 +4829,12 @@ Proviamo:
 (A 1)
 ;-> 2
 (A 6)
-(map A (sequence 1 101))
+;-> 5
+(map A (sequence 1 105))
 ;-> (2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 5
 ;->  2 3 2 3 2 7 2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 5
 ;->  2 3 2 3 2 5 2 3 2 3 2 7 2 3 2 3 2 5 2 3 2 3 2 5
+;->  2 3 2 3 2 5 2 3 2 3 2 5 2 3 2 3 2 7 2 3 2 3 2 5
 ;->  2 3 2 3 2 5 2 3 2)
 
 

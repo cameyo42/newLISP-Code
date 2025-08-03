@@ -6248,5 +6248,95 @@ Proviamo:
 
 Quindi la risposta al problema è negativa (non è possibile).
 
+
+-------------------------------------
+Raggruppare gli elementi di una lista
+-------------------------------------
+
+Data una lista di N elementi tutti diversi, generare tutti i raggruppamenti di due sottoliste di N/2 elementi ciascuna (o N/2 e (N/2 + 1) in caso di N dispari.
+
+Consideriamo tutte le combinazioni di N/2 elementi, e le raggruppiamo ciascuna con il complemento (cioè con gli altri N/2 elementi), evitando i duplicati (cioè evitare di includere sia ((A) (B)) che ((B) (A))).
+
+(define (group-half L)
+  (sort L)
+  (letn ((N (length L))
+         (meta (/ N 2))
+         (combinazioni (comb meta L))
+         (out '()))
+    (dolist (c combinazioni)
+      (let (resto (difference L c)) ; resto degli elementi della lista
+        ; evita duplicati
+        (if (< (join (map string c)) (join (map string resto)))
+            (push (list c resto) out -1))))
+    out))
+
+(group-half '(4 3 2 1))
+;-> (((1 2) (3 4)) ((1 3) (2 4)) ((1 4) (2 3)))
+
+(group-half '(a b c d))
+;-> (((a b) (c d)) ((a c) (b d)) ((a d) (b c)))
+
+(group-half '("sara" "mario" "luca" "max" "maria"))
+;-> ((("luca" "maria") ("mario" "max" "sara"))
+;->  (("luca" "mario") ("maria" "max" "sara"))
+;->  (("luca" "max") ("maria" "mario" "sara"))
+;->  (("luca" "sara") ("maria" "mario" "max")))
+
+Data una lista L (di qualsiasi tipo: numeri, stringhe, simboli), restituire tutte le partizioni in due sottoliste disgiunte e complementari
+di dimensioni (k, N-k), con 1 <= k <= floor(N/2).
+Ogni partizione deve essere restituita una sola volta:
+((A) (B)) è considerata uguale a ((B) (A)), quindi i duplicati simmetrici devono essere eliminati.
+
+(define (group-all L)
+  (sort L) ; ordina la lista per avere ordine coerente nelle partizioni
+  (letn ((N (length L))
+         (out '())   ; lista finale di partizioni
+         (visti '())) ; lista delle partizioni già viste (come chiavi stringa)
+    ; prova tutti i valori di k da 1 a floor(N/2)
+    (for (k 1 (/ N 2))
+      ; per ogni combinazione c di k elementi da L
+      (dolist (c (comb k L))
+        (letn (
+          (resto (difference L c)) ; ottiene il complemento di c
+          ; converte le due sottoliste in stringhe
+          (k1 (join (map string c)))
+          (k2 (join (map string resto)))
+          ; ordina le due rappresentazioni per ottenere una chiave canonica
+          (chiave (sort (list k1 k2)))
+        )
+          ; se la chiave non è già stata vista, la aggiunge
+          (unless (ref chiave visti)
+            (push chiave visti -1)
+            (push (list c resto) out -1)))))
+    out)) ; restituisce la lista delle partizioni uniche
+
+Il (sort L) iniziale garantisce che le combinazioni partano sempre dallo stesso ordine.
+L’uso di )join (map string ...)) permette di costruire una chiave univoca anche per simboli/stringhe/numeri.
+La chiave ("123" "45") e ("45" "123") diventano entrambe ("123" "45") dopo ordinamento, quindi niente duplicati.
+
+(group-all '(1 2 3 4))
+;-> (((1) (2 3 4)) ((2) (1 3 4)) ((3) (1 2 4)) ((4) (1 2 3)) 
+;->  ((1 2) (3 4)) ((1 3) (2 4)) ((1 4) (2 3)))
+
+(group-all '("sara" "mario" "luca" "max" "maria"))
+;-> ((("luca") ("maria" "mario" "max" "sara")) 
+;->  (("maria") ("luca" "mario" "max" "sara"))
+;->  (("mario") ("luca" "maria" "max" "sara"))
+;->  (("max") ("luca" "maria" "mario" "sara"))
+;->  (("sara") ("luca" "maria" "mario" "max"))
+;->  (("luca" "maria") ("mario" "max" "sara"))
+;->  (("luca" "mario") ("maria" "max" "sara"))
+;->  (("luca" "max") ("maria" "mario" "sara"))
+;->  (("luca" "sara") ("maria" "mario" "max"))
+;->  (("maria" "mario") ("luca" "max" "sara"))
+;->  (("maria" "max") ("luca" "mario" "sara"))
+;->  (("maria" "sara") ("luca" "mario" "max"))
+;->  (("mario" "max") ("luca" "maria" "sara"))
+;->  (("mario" "sara") ("luca" "maria" "max"))
+;->  (("max" "sara") ("luca" "maria" "mario")))
+
+(length (group-all '(a b c d e f g h i j)))
+;-> 511
+
 ============================================================================
 

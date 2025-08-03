@@ -3087,6 +3087,7 @@ NOTE LIBERE 31
   Wrong SAT question
   Stringa diversa da tutte le altre
   a + b = c (1..9) con colori diversi
+  Raggruppare gli elementi di una lista
 
 PROBLEMI SUI DADI
 =================
@@ -3134,7 +3135,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (360 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (362 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
