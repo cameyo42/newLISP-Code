@@ -3086,6 +3086,7 @@ NOTE LIBERE 31
   Primi troncabili
   Wrong SAT question
   Stringa diversa da tutte le altre
+  a + b = c (1..9) con colori diversi
 
 PROBLEMI SUI DADI
 =================

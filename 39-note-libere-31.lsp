@@ -6082,7 +6082,7 @@ Quindi risulta:
 ;-> 4
 
 (rivoluzioni 1 1)
-;-> 2 ; verificabile utilizzando con due monete uguali
+;-> 2 ; verificabile utilizzando due monete uguali
 
 
 ---------------------------------
@@ -6133,6 +6133,120 @@ Proviamo:
 ;-> "]\\["
 (other '("OOO1" "AOA1" "  O1" "    "))
 ;-> "   ~"
+
+
+-----------------------------------
+a + b = c (1..9) con colori diversi
+-----------------------------------
+
+The Problem with 7825 - Numberphile
+https://www.youtube.com/watch?v=1gBwexpG0IY
+
+Data la seguente operazione di somma:
+
+  a + b = c, con a < b < c
+
+Consideriamo i numeri da 1 a 9.
+Possiamo colorare questi numeri, da 1 a 9, con due colori (rosso e blu), in modo che a + b = c non siano tutti dello stesso colore?
+
+Calcoliamo la lista delle operazioni possibili:
+
+(setq nums (sequence 1 9))
+(setq oper '())
+(for (i 0 (- (length nums) 2))
+  (for (j (+ i 1) (- (length nums) 1))
+    (if (<= (+ (nums i) (nums j)) 9)
+      (push (list (nums i) (nums j)) oper -1))))
+
+oper
+;-> ((1 2) (1 3) (1 4) (1 5) (1 6) (1 7) (1 8) (2 3)
+;->  (2 4) (2 5) (2 6) (2 7) (3 4) (3 5) (3 6) (4 5))
+
+che rappresentano le seguenti operazioni:
+  1 + 2, 1 + 3, 1 + 4, 1 + 5, 1 + 6, 1 + 7, 1 + 8, 2 + 3,
+  2 + 4, 2 + 5, 2 + 6, 2 + 7, 3 + 4, 3 + 5, 3 + 6, 4 + 5
+
+Tutte le altre operazioni (es. 3 + 7) hanno una somma maggiore di 9.
+
+Le possibili colorazioni dei numeri da 1 a 9 in rosso e blu sono 2^9 = 512.
+
+Possiamo calcolarle come permutazioni ripetute di 9 elementi con i due colori "r" (rosso) e "b" (blu):
+
+(define (perm-rep k lst)
+"Generate all permutations of k elements with repetition from a list of items"
+  (if (zero? k) '(())
+      (flat (map (lambda (p) (map (lambda (e) (cons e p)) lst))
+                         (perm-rep (- k 1) lst)) 1)))
+
+(setq col19 (perm-rep 9 '("r" "b")))
+;-> (("r" "r" "r" "r" "r" "r" "r" "r" "r")
+;->  ("b" "r" "r" "r" "r" "r" "r" "r" "r")
+;->  ("r" "b" "r" "r" "r" "r" "r" "r" "r")
+;->  ...
+;->  ("b" "r" "r" "r" "r" "r" "b" "r" "r")
+;->  ("r" "b" "r" "r" "r" "r" "b" "r" "r")
+;->  ("b" "b" "r" "r" "r" "r" "b" "r" "r")
+;->  ("r" "r" "b" "r" "r" "r" "b" "r" "r")
+;->  ...
+;->  ("b" "r" "b" "b" "b" "b" "b" "b" "b")
+;->  ("r" "b" "b" "b" "b" "b" "b" "b" "b")
+;->  ("b" "b" "b" "b" "b" "b" "b" "b" "b"))
+
+(length col19)
+;-> 512
+
+Funzione che effettua il controllo tra tutte le colorazioni e le operazioni possibili:
+
+(define (check show)
+  ; ciclo per ogni colorazione dei numeri
+  (dolist (el col19)
+    (setq stop nil)
+    ; inserisce uno '0' all'inizio per facilitare l'indicizzazione
+    (push 0 el)
+    (if show (println el))
+    ; ciclo per ogni operazione possibile
+    (dolist (op oper stop)
+      ; calcolo a + b = c
+      (setq somma (+ (op 0) (op 1)))
+      ; a, b, c tutti dello stesso colore?
+      (when (= (el (op 0)) (el (op 1)) (el somma))
+          ; stop ciclo delle operazioni possibili
+          (setq stop true)
+          (when show
+            (println (op 0) (el (op 0)) { + } (op 1) (el (op 1)) { = } somma (el somma))
+            (println "Errore: stesso colore\n"))))
+    ; se stop = nil, allora abbiamo trovato una soluzione
+    (if (not stop) (println "Solution: " el))))
+
+Proviamo:
+
+(check)
+;-> nil
+
+(check true)
+;-> (0 "r" "r" "r" "r" "r" "r" "r" "r" "r")
+;-> 1r + 2r = 3r
+;-> Errore: stesso colore
+;-> ...
+;-> (0 "b" "b" "r" "r" "r" "b" "r" "r" "r")
+;-> 3r + 4r = 7r
+;-> Errore: stesso colore
+;->
+;-> (0 "r" "r" "b" "r" "r" "b" "r" "r" "r")
+;-> 1r + 4r = 5r
+;-> Errore: stesso colore
+;->
+;-> (0 "b" "r" "b" "r" "r" "b" "r" "r" "r")
+;-> 2r + 5r = 7r
+;-> Errore: stesso colore
+;-> ...
+;-> (0 "b" "b" "b" "b" "b" "b" "b" "b" "b")
+;-> 1b + 2b = 3b
+;-> Errore: stesso colore
+;->
+;-> nil
+
+Quindi la risposta al problema è negativa (non è possibile).
 
 ============================================================================
 
