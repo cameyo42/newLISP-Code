@@ -1037,6 +1037,7 @@ Il quinto primo è errato perchè A^(3^5) è maggiore del massimo intero Int64.
 
 Non si conosce una formula chiusa per la costante di Mills, quindi è impossibile fare un'approssimazione a priori.
 Comunque è possibile determinare la successione dei primi di Mills tramite una stima del valore della costante, e da questi ricavarne un valore più preciso (ricorsione).
+Considerando vera l'Ipotesi di Riemann, sono state calcolate circa 7000 cifre di A.
 
 
 ----------------------

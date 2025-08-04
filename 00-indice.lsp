@@ -3089,6 +3089,7 @@ NOTE LIBERE 31
   a + b = c (1..9) con colori diversi
   Raggruppare gli elementi di una lista
   Una costante che rappresenta i numeri primi
+  Pristine program
 
 PROBLEMI SUI DADI
 =================

@@ -8265,6 +8265,7 @@ Verifichiamo la congettura per valori fino a n:
   (local (primi out)
     (setq out '())
     (setq primi (sieve n))
+    ;(setq primi (sieve n))
     (for (i 4 n 2)
       (setq stop nil)
       (dolist (el primi stop)
@@ -8289,7 +8290,7 @@ Verifichiamo la congettura per valori fino a n:
 ;-> fine ; nessun errore
 
 (time (testGoldbach 100000))
-;-> 38084.502
+;-> 28658.391
 
 Infine scriviamo la funzione che genera tutte le coppie di numeri primi che sommate valgono n:
 
@@ -8310,6 +8311,52 @@ Infine scriviamo la funzione che genera tutte le coppie di numeri primi che somm
 
 (coppie 20)
 ;-> ((3 17) (7 13) (13 7) (17 3))
+
+Altro metodo per verificare la congettura (più veloce):
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (congettura limite)
+  (new Tree 'Hash)
+  (local (somme primi len-p even-nums pari)
+    (setq somme '())
+    (setq primi (primes-to limite))
+    (setq len-p (length primi))
+    ; utilizziamo un array
+    (setq primi (array len-p primi))
+    ;(println primi)
+    ; Doppio ciclo per generare tutte le somme
+    (for (i 0 (- len-p 1))
+      (for (j i (- len-p 1))
+        (setq s (+ (primi i) (primi j)))
+        ; solo somme pari e minori di 'limite'
+        (if (and (<= s limite) (even? s)) (Hash s s))))
+    (setq even-nums (sort (map last (Hash))))
+    ;(println even-nums)
+    (delete 'Hash)
+    ; creazione di una lista di numeri pari da 4 a limite
+    (setq pari (sequence 4 limite 2))
+    ; verifica della congetturaettura
+    (= even-nums pari)))
+
+Proviamo:
+
+(congettura 10000)
+;-> true
+
+(time (println (congettura 100000)))
+;-> true
+;-> 12163.751
 
 
 -------------------------------------------

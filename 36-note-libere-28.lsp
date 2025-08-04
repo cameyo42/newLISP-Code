@@ -1526,6 +1526,9 @@ Numeri che non sono somma di due primi
 (setq num-no (flat (ref-all 0 somme)))
 ;-> (0 1 2 3 11 17)
 
+Congettura (1.000.000$ per la dimostrazione)
+Ogni numero pari maggiore di 2 può essere espresso come somma di due numeri primi
+
 
 ---------------------------------------------------------------------
 Divisione tra interi con precisione illimitata (algoritmo elementare)

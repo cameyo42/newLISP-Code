@@ -6463,5 +6463,29 @@ Il 14-esimo (42) è sbagliato (deve valere 43)
 Il 15-esimo (79) numero calcolato è primo, ma non è il 15-esimo primo (47).
 Questo perchè nel calcolo accumuliamo errori floating-point.
 
+
+----------------
+Pristine program
+----------------
+
+Un "pristine program" (programma incontaminato) è come un programma che non ha errori di per sé, ma che genererà errori se lo si modifica rimuovendo qualsiasi sottostringa contigua di N caratteri, dove 1 <= N < lunghezza.
+Scrivere un pristine program (funzione, espressione, ecc.) più corto possibile.
+
+Soluzione
+
+(if)
+;-> nil
+
+Infatti, rimuovendo qualunque sottostringa di 1 o 2 o 3 caratteri otteniamo un'espressione che genera errore:
+
+tolgo "("   -->  "if)"  --> if@409645 ERR: missing parenthesis : "...if)"
+tolgo "(i"  -->  "f)"   --> ERR: missing parenthesis : "...f)"
+tolgo "(if" -->  ")"    --> ERR: missing parenthesis : "...)"
+tolgo "i"   -->  "(f)"  --> ERR: invalid function : (f)
+tolgo "if"  -->  "()"   --> ERR: invalid function : ()
+tolgo "if)" -->  "("    --> ERR: missing parenthesis : "...("
+tolgo "f)"  -->  "(i)"  --> ERR: invalid function : (i)
+tolgo ")"   -->  "(if"  --> ERR: missing parenthesis : "...(if"
+
 ============================================================================
 
