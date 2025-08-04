@@ -6338,5 +6338,130 @@ La chiave ("123" "45") e ("45" "123") diventano entrambe ("123" "45") dopo ordin
 (length (group-all '(a b c d e f g h i j)))
 ;-> 511
 
+
+-------------------------------------------
+Una costante che rappresenta i numeri primi
+-------------------------------------------
+
+https://arxiv.org/abs/2010.15882
+"A Prime-Representing Constant"
+Dylan Fridman, Juli Garbulsky, Bruno Glecer,
+James Grime, and Massi Tron Florentin
+
+We present a constant and a recursive relation to define a sequence  such that the floor of  is the th prime.
+Therefore, this constant generates the complete sequence of primes.
+We also show this constant is irrational and consider other sequences that can be generated using the same method.
+
+Theorem 1. 
+Let pn denote the nth prime. Then there exists a constant
+
+  f1 = 2.920050977316 . . .
+
+and a sequence
+
+  f(n) = floor(f(n-1)) * [f(n-1) - floor(f(n-1)) + 1]
+
+such that the floor of f(n) is the nth prime, i.e., floor(f(n)) = p(n).
+
+Per la prova vedere l'articolo originale.
+
+Costruzione della costante
+--------------------------
+Definiamo la seguente sequenza:
+
+
+                         p(k) - 1
+  g(n) = Sum[k=1,n](------------------)
+                     Prod[i=1,k-1]p(i)
+
+                          p2 - 1     p3 - 1      p4 - 1        p5 - 1
+  lim(g(n)) = (p1 - 1) + -------- + -------- + ---------- + ------------- + ...
+   n->Inf                   p1       p1*p2      p1*p2*p3     p1*p2*p3*p4
+
+(define (primes-to num)
+"Generates all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(length (setq primi (primes-to 100)))
+;-> 25
+
+Inseriamo 1 all'inizio dei 'primi' per facilitare l'indicizzazione
+(push 1 primi)
+
+Funzione che calcola la costante:
+
+(define (g n)
+  (local (val num den)
+  (setq val 1) ; (primi(1) - 1) = (2 - 1) = 1
+  (for (k 2 n)
+    (setq num (- (primi k) 1))
+    (setq den 1)
+    (for (i 1 (- k 1))
+      (setq den (mul den (primi i)))
+      ;(print k { } num { } den { } (div num den)) (read-line)
+    )
+    (setq val (add val (div num den)))
+ )
+ val)
+
+Proviamo:
+
+(g 15)
+;-> 2.920050977316134
+
+Aumentando i termini la costante non si modifica perchè abbiamo raggiunto la precisione massima consentita dai float.
+
+(g 20)
+;-> 2.920050977316134
+
+Adesso definiamo la sequenza:
+
+  f(1) = 2.920050977316...
+  f(n) = floor(f(n-1)) * [f(n-1) - floor(f(n-1)) + 1]
+
+(define (f n)
+  (local (fprev fcur idx)
+    (setq fprev 2.920050977316134)
+    (println "1: "(floor fprev))
+    (for (i 2 n)
+      (setq fcur (mul (floor fprev) (sub fprev (floor fprev) (- 1))))
+      (println i ": " (floor fcur))
+      (setq fprev fcur)) '>))
+
+Proviamo a calcolare i primi 15 numeri primi:
+
+(f 15)
+;-> 1: 2
+;-> 2: 3
+;-> 3: 5
+;-> 4: 7
+;-> 5: 11
+;-> 6: 13
+;-> 7: 17
+;-> 8: 19
+;-> 9: 23
+;-> 10: 29
+;-> 11: 31
+;-> 12: 37
+;-> 13: 41
+;-> 14: 42 ;errato
+;-> 15: 79 ; primo ma non è il 15-esimo
+
+(slice primi 1 15)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47)
+
+I primi 13 numeri sono tutti numeri primi (dal primo (2) al tredicesiono (41)).
+Il 14-esimo (42) è sbagliato (deve valere 43)
+Il 15-esimo (79) numero calcolato è primo, ma non è il 15-esimo primo (47).
+Questo perchè nel calcolo accumuliamo errori floating-point.
+
 ============================================================================
 
