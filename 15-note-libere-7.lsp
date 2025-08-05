@@ -7463,6 +7463,26 @@ L'uso di questo parametro rallenta leggermente la velocità di esecuzione del ci
 (time (for-list k) 10000)
 ;-> 1390.832
 
+(define (test n)
+(for (i 1 n)
+  (for (j 1 n)
+    (setq a (+ i j 1)))))
+
+(time (test 1000))
+;-> 45.317
+(time (test 10000))
+;-> 4369.861
+
+(define (test1 n)
+(for (i 1 n 1 stop)
+  (for (j 1 n 1 stop)
+    (setq a (+ i j 1)))))
+
+(time (test1 1000))
+;-> 54.952
+(time (test1 10000))
+;-> 5292.12
+
 
 -------------------
 Quicksort iterativo

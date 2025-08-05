@@ -3090,6 +3090,8 @@ NOTE LIBERE 31
   Raggruppare gli elementi di una lista
   Una costante che rappresenta i numeri primi
   Pristine program
+  Primi Repubblicani
+  Numeri di Belfagor
 
 PROBLEMI SUI DADI
 =================

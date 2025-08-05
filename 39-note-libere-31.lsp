@@ -6257,6 +6257,15 @@ Data una lista di N elementi tutti diversi, generare tutti i raggruppamenti di d
 
 Consideriamo tutte le combinazioni di N/2 elementi, e le raggruppiamo ciascuna con il complemento (cioè con gli altri N/2 elementi), evitando i duplicati (cioè evitare di includere sia ((A) (B)) che ((B) (A))).
 
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
 (define (group-half L)
   (sort L)
   (letn ((N (length L))
@@ -6276,11 +6285,38 @@ Consideriamo tutte le combinazioni di N/2 elementi, e le raggruppiamo ciascuna c
 (group-half '(a b c d))
 ;-> (((a b) (c d)) ((a c) (b d)) ((a d) (b c)))
 
+(group-half '("sara" "mario" "luca" "max" "maria" "eva"))
+;-> ((("eva" "luca" "maria") ("mario" "max" "sara"))
+;->  (("eva" "luca" "mario") ("maria" "max" "sara"))
+;->  (("eva" "luca" "max") ("maria" "mario" "sara"))
+;->  (("eva" "luca" "sara") ("maria" "mario" "max"))
+;->  (("eva" "maria" "mario") ("luca" "max" "sara"))
+;->  (("eva" "maria" "max") ("luca" "mario" "sara"))
+;->  (("eva" "maria" "sara") ("luca" "mario" "max"))
+;->  (("eva" "mario" "max") ("luca" "maria" "sara"))
+;->  (("eva" "mario" "sara") ("luca" "maria" "max"))
+;->  (("eva" "max" "sara") ("luca" "maria" "mario")))
+
+Nota: quando N è dispari la lista risultante non genera tutti i raggruppamenti.
+In tal caso possiamo usare un elemento fittizio (es "X"):
+
 (group-half '("sara" "mario" "luca" "max" "maria"))
 ;-> ((("luca" "maria") ("mario" "max" "sara"))
 ;->  (("luca" "mario") ("maria" "max" "sara"))
 ;->  (("luca" "max") ("maria" "mario" "sara"))
 ;->  (("luca" "sara") ("maria" "mario" "max")))
+
+(group-half '("sara" "mario" "luca" "max" "maria" "X"))
+;-> ((("X" "luca" "maria") ("mario" "max" "sara"))
+;->  (("X" "luca" "mario") ("maria" "max" "sara"))
+;->  (("X" "luca" "max") ("maria" "mario" "sara"))
+;->  (("X" "luca" "sara") ("maria" "mario" "max"))
+;->  (("X" "maria" "mario") ("luca" "max" "sara"))
+;->  (("X" "maria" "max") ("luca" "mario" "sara"))
+;->  (("X" "maria" "sara") ("luca" "mario" "max"))
+;->  (("X" "mario" "max") ("luca" "maria" "sara"))
+;->  (("X" "mario" "sara") ("luca" "maria" "max"))
+;->  (("X" "max" "sara") ("luca" "maria" "mario")))
 
 Data una lista L (di qualsiasi tipo: numeri, stringhe, simboli), restituire tutte le partizioni in due sottoliste disgiunte e complementari
 di dimensioni (k, N-k), con 1 <= k <= floor(N/2).
@@ -6484,8 +6520,205 @@ tolgo "(if" -->  ")"    --> ERR: missing parenthesis : "...)"
 tolgo "i"   -->  "(f)"  --> ERR: invalid function : (f)
 tolgo "if"  -->  "()"   --> ERR: invalid function : ()
 tolgo "if)" -->  "("    --> ERR: missing parenthesis : "...("
-tolgo "f)"  -->  "(i)"  --> ERR: invalid function : (i)
+tolgo "f"   -->  "(i)"  --> ERR: invalid function : (i)
+tolgo "f)"  -->  "(i"   --> ERR: missing parenthesis : "...(i"
 tolgo ")"   -->  "(if"  --> ERR: missing parenthesis : "...(if"
+
+
+------------------
+Primi Repubblicani
+------------------
+
+Un numero primo Repubblicano (Republican) è un numero primo in cui la parte destra è un numero primo e la parte sinistra non è un numero primo.
+
+Esempio:
+  N = 16661
+  16661 è un numero primo
+  parte destra = 61    --> numero primo
+  parte sinistra = 16  --> non è numero primo
+  Quindi 16661 è un numero Repubblicano
+
+Se la lunghezza di n è dispari, la cifra centrale non viene utilizzata nel calcolo.
+Quindi né la metà sinistra né quella destra conterranno la cifra centrale.
+Se la lunghezza di n è pari, vengono utilizzati tutti i numeri (metà e metà).
+
+Sequenza OEIS A125524:
+Republican primes: primes such that the right half of the prime is prime and the left half is not.
+  13, 17, 43, 47, 67, 83, 97, 103, 107, 113, 127, 137, 157, 163, 167, 173,
+  193, 197, 433, 443, 457, 463, 467, 487, 607, 613, 617, 643, 647, 653,
+  673, 677, 683, 823, 827, 853, 857, 863, 877, 883, 887, 907, 937, 947,
+  953, 967, 977, 983, 997, 1013, 1019, 1031, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che verifica se un intero è un primo Repubblicano:
+
+(define (rep? n)
+  (cond ((< n 10) nil)
+        ((prime? n)
+          (let ( (s (string n)) (len (length n)) (sx 0) (dx 0) )
+            ; parte sinistra
+            (setq sx (int (slice s 0 (/ len 2)) 0 10))
+            ; parte destra
+            (setq dx (int (slice s (- (/ len 2)) (/ len 2)) 0 10))
+            ;(println sx { } dx)
+            (if (and (prime? dx) (not (prime? sx))) true nil)))
+       ; n non è primo
+       (true nil)))
+
+Proviamo:
+
+(rep? 16661)
+;-> true
+
+(filter rep? (sequence 1 1031))
+;-> (13 17 43 47 67 83 97 103 107 113 127 137 157 163 167 173
+;->  193 197 433 443 457 463 467 487 607 613 617 643 647 653
+;->  673 677 683 823 827 853 857 863 877 883 887 907 937 947
+;->  953 967 977 983 997 1013 1019 1031)
+
+-------------------------------------------
+Carattere medio di una funzione/espressione
+-------------------------------------------
+
+Scrivere una funzione o espressione che restituisce il carattere medio della funzione stessa.
+
+Calcolo del 'carattere medio' di una funzione (o espressione):
+
+Supponiamo di avere la funzione "(define (somma a b) (+ a b))".
+Calcoliamo i valori ASCII dei caratteri:
+(setq numeri (map char (explode "(define (somma a b) (+ a b))")))
+;-> (40 100 101 102 105 110 101 32 40 115 111 109 109 97 32
+;->  97 32 98 41 32 40 43 32 97 32 98 41 41)
+Calcoliamo la media di questi numeri:
+(setq media (div (apply + numeri) (length numeri)))
+;-> 72.42857142857143
+Arrotondiamo la media al numero intero più vicino:
+(setq media (floor (add media 0.5)))
+;-> 72
+Calcoliamo il carattere relativo alla media:
+(char 72)
+;-> "H"
+
+(define (medio str)
+  (letn ( (numeri (map char (explode str)))
+          (media (div (apply + numeri) (length numeri))) )
+    (println (char (floor (add media 0.5)))) '>))
+
+(medio "(define (somma a b) (+ a b))")
+;-> H
+
+Dopo alcuni calcoli e prove la seguente espressione risolve il problema:
+
+(medio "(print "Z")")
+;-> Z
+
+(print "Z")
+;-> Z
+
+
+------------------
+Numeri di Belfagor
+------------------
+
+Un numero di Belfagor ha la seguente struttura:
+
+  1 (n zeri) 666 (n zeri) 1
+
+Possiamo costruire tali numeri con la formula:
+
+  (10^(n+3) + 666)*10^(n-1) + 1
+
+Sequenza OEIS A232449:
+The palindromic Belphegor numbers: (10^(n+3)+666)*10^(n+1)+1.
+  16661, 1066601, 100666001, 10006660001, 1000066600001, 100000666000001,
+  10000006660000001, 1000000066600000001, 100000000666000000001,
+  10000000006660000000001, 1000000000066600000000001,
+  100000000000666000000000001, 10000000000006660000000000001,
+  1000000000000066600000000000001, ...
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (belfagor n)
+  (+ (* (+ 666L (** 10 (+ n 3))) (** 10 (+ n 1))) 1))
+
+Proviamo:
+
+(belfagor 0)
+;-> 16661L
+
+(belfagor 1)
+;-> 1066601L
+
+(map belfagor (sequence 1 10))
+;-> (1066601L 100666001L 10006660001L 1000066600001L 100000666000001L
+;->  10000006660000001L 1000000066600000001L 100000000666000000001L
+;->  10000000006660000000001L 1000000000066600000000001L)
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(filter prime? (map belfagor (sequence 0 7)))
+;-> (16661L)
+
+(belfagor 13)
+;-> 1000000000000066600000000000001L (questo è un numero primo)
+
+Nota: i numeri di Belfagor sono palindromi.
+
+
+--------------------------------------
+Numeri primi cattivi  (Naughty primes)
+--------------------------------------
+
+I numeri primi cattivi sono numeri primi in cui le occorrenze della cifra 0 è maggiore delle occorrenze di tutte le altre cifre.
+
+Esempio:
+N = 70001 (numero primo)
+Occorrenze 0 = 3 (0,0,0)
+Occorrenze altre cifre = 2 (7,1)
+
+Sequenza OEIS A164968:
+Naughty primes: primes in which the number of zeros is greater than the number of all other digits.
+  10007, 10009, 40009, 70001, 70003, 70009, 90001, 90007, 100003, 200003,
+  200009, 300007, 400009, 500009, 700001, 900001, 900007, 1000003, 1000033,
+  1000037, 1000039, 1000081, 1000099, 1000303, 1000403, 1000409, 1000507,
+  1000609, 1000907, 1001003, 1003001, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (naughty? num)
+  (if (prime? num)
+    (letn ( (len (length num))
+            (s (string num))
+            (zeri (length (ref-all "0" (explode s)))) )
+      (> zeri (- len zeri)))
+  ;else
+  nil))
+
+Proviamo:
+
+(naughty? 10007)
+;-> true
+
+(filter naughty? (sequence 1 1003001))
+;-> (10007 10009 40009 70001 70003 70009 90001 90007 100003 200003
+;->  200009 300007 400009 500009 700001 900001 900007 1000003 1000033
+;->  1000037 1000039 1000081 1000099 1000303 1000403 1000409 1000507
+;->  1000609 1000907 1001003 1003001)
 
 ============================================================================
 
