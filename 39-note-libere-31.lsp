@@ -6720,5 +6720,240 @@ Proviamo:
 ;->  1000037 1000039 1000081 1000099 1000303 1000403 1000409 1000507
 ;->  1000609 1000907 1001003 1003001)
 
+
+------------------------------------------
+Numeri primi della Bestia (Beastly primes)
+------------------------------------------
+
+I numeri primi della Bestia sono numeri primi che contengono 666 nel numero.
+
+Sequenza OEIS A131645:
+Beastly primes (version 2): primes containing 666 as a substring.
+  6661, 16661, 26669, 46663, 56663, 66601, 66617, 66629, 66643, 66653,
+  66683, 66697, 76667, 96661, 96667, 106661, 106663, 106669, 116663,
+  146669, 166601, 166603, 166609, 166613, 166619, 166627, 166631, 166643,
+  166657, 166667, 166669, 166679, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (beastly? num)
+  (if (prime? num)
+    (letn ( (len (length num))
+            (s (string num)) )
+      (if (find "666" s) true nil))
+  ;else
+  nil))
+
+Proviamo:
+
+(filter beastly? (sequence 666 166679))
+;-> (6661 16661 26669 46663 56663 66601 66617 66629 66643 66653
+;->  66683 66697 76667 96661 96667 106661 106663 106669 116663
+;->  146669 166601 166603 166609 166613 166619 166627 166631 166643
+;->  166657 166667 166669 166679)
+
+Nota: in alcuni testi antichi il numero della Bestia è il 616.
+
+
+-----------------------------------------------
+Numeri interi come somma di 3 numeri palindromi
+-----------------------------------------------
+
+https://arxiv.org/abs/1602.06208
+"Every positive integer is a sum of three palindromes"
+Javier Cilleruelo, Florian Luca, Lewis Baxter
+
+For integer g >= 5, any positive integer can be written as a sum of three palindromes in base g.
+Per un numero intero g >= 5, qualsiasi numero intero positivo può essere scritto come somma di tre palindromi in base g.
+
+Esempio: (30 04 1777 è la data di nascita di Gauss)
+
+30041777 = 20100102 + 9305039 + 636636
+
+(+ 20100102 9305039 636636)
+;-> 30041777
+
+Algoritmo brute-force
+---------------------
+
+Funzione che verifica se un numero è palindromo:
+(define (palindrome? n) (let ((s (string n))) (= s (reverse (copy s)))))
+
+Versione 1
+----------
+Tre cicli 'for': i(1 N), j(1 N), k(1 N)
+
+(define (brute1 n show)
+  (let (out '())
+    (for (i 1 n)
+      (for (j 1 n)
+        (for (k 1 n)
+          (when (and (= (+ i j k) n) (palindrome? i) (palindrome? j) (palindrome? k))
+            (if show (println i { } j { } k))
+            (push (list i j k) out -1)))))
+    out))
+
+(time (setq b1 (brute1 1000)))
+;-> 75431.659
+
+(length b1)
+;-> 591
+
+Ci sono molti elementi ripetuti:
+
+(length (unique (map sort b1)))
+;-> 99
+
+Versione 2
+----------
+Tre cicli 'for': i(1 N), j(i N), k(j N)
+(Evitiamo le triple ripetute in ordine inverso)
+
+(define (brute2 n show)
+  (let (out '())
+    (for (i 1 n)
+      (for (j i n)
+        (for (k j n)
+          (when (and (= (+ i j k) n) (palindrome? i) (palindrome? j) (palindrome? k))
+            (if show (println i { } j { } k))
+            (push (list i j k) out -1)))))
+    out))
+
+(time (setq b2 (brute2 1000)))
+;-> 12610.221
+
+(length b2)
+;-> 99
+
+Versione 3
+----------
+
+Tre cicli 'for': i(1 N), j(i N), k(j N)
+- Controllo (> N (+ i j) per evitare che (i + j) >= N
+- Controllo (<= (+ i j k) n) per evitare che (i + j + k) > N
+
+(define (brute3 n show)
+  (let (out '())
+    (for (i 1 n)
+      (for (j i n)
+        (when (> n (+ i j)
+          (for (k j n)
+            (when (<= (+ i j k) n)
+              (when (and (= (+ i j k) n) (palindrome? i) (palindrome? j) (palindrome? k))
+                  (if show (println i { } j { } k))
+                  (push (list i j k) out -1))))))))
+    out))
+
+(time (setq b3 (brute3 1000)))
+;-> 9895.236
+
+(length b3)
+;-> 99
+
+Versione 4
+----------
+Due cicli 'for': i(1 N/3), j(i (N-i)/2), k = N - i - j
+
+- 'i' va da 1 a n/3 perché se (i > n/3), la somma (i + j + k) > n
+- 'j' va da 'i' a (n - i)/2 per lo stesso motivo.
+- 'k' è determinato: k = n - i - j
+- Verifica (k >= j) per evitare triple ripetute in ordine diverso.
+
+(define (brute4 n show)
+  (let (out '())
+    (for (i 1 (/ n 3))
+      (for (j i (/ (- n i) 2))
+        (let ((k (- n i j)))
+          (when (and (>= k j) (palindrome? i) (palindrome? j) (palindrome? k))
+            (if show (println i { } j { } k))
+            (push (list i j k) out -1)))))
+    out))
+
+(time (setq b4 (brute4 1000)))
+;-> 59.213
+
+(length b4)
+;-> 99
+
+b4
+;-> ((1 101 898) (1 111 888) (1 121 878) (1 131 868) (1 141 858) (1 151 848)
+;->  (1 161 838) (1 171 828) (1 181 818) (1 191 808) (1 202 797) (1 212 787)
+;-> ...
+;->  (2 9 989) (3 8 989) (3 88 909) (3 99 898) (4 7 989) (4 77 919) (5 6 989)
+;->  (5 66 929) (6 55 939) (7 44 949) (8 33 959) (9 22 969) (11 101 888)
+;->  (11 111 878) (11 121 868) (11 131 858) (11 141 848) (11 151 838)
+;-> ...
+;->  (11 474 515) (11 484 505) (22 181 797) (22 191 787) (22 282 696)
+;->  (22 292 686) (22 383 595) (22 393 585) (22 484 494) (33 99 868)
+;->  (44 88 868) (55 77 868) (66 66 868))
+
+(map (fn(x) (apply + x)) b4)
+;-> (1000 1000 1000 1000 1000 1000 ... 1000 1000 1000 1000 1000 1000 1000)
+
+(time (setq b44 (brute4 10000)))
+;-> 5502.861
+
+(length b44)
+;-> 137
+
+(b44 -1)
+;-> (666 666 8668)
+
+Versione 5
+----------
+I cicli partono dai numeri più grandi:
+
+(define (brute6 n show)
+  (let (out '())
+    (for (i (/ n 3) 1 -1)
+      (for (j (/ (- n i) 2) i -1)
+        (let ((k (- n i j)))
+          (when (and (>= k j) (palindrome? i) (palindrome? j) (palindrome? k))
+            (when show (print i { } j { } k) (read-line))
+            (push (list i j k) out -1)))))
+    out))
+
+(brute5 1000)
+;-> ((66 66 868) (55 77 868) (44 88 868) (33 99 868) (22 484 494)
+;->  (22 393 585) (22 383 595) (22 292 686) (22 282 696) (22 191 787)
+;-> ...
+
+(brute5 34077 true)
+;-> 8558 8558 16961
+;-> 8448 8668 16961
+;-> ...
+
+Versione 6
+----------
+Controllo anticipato sui palindromi 'i' e 'j':
+
+(define (brute6 n show)
+  (let (out '())
+    (for (i (/ n 3) 1 -1)
+      (when (palindrome? i)
+        (for (j (/ (- n i) 2) i -1)
+          (when (palindrome? j)
+            (let ((k (- n i j)))
+              (when (and (>= k j) (palindrome? k))
+                (when show (print i { } j { } k) (read-line))
+                (push (list i j k) out -1)))))))
+    out))
+
+(time (setq b6 (brute6 1000)))
+;-> 14.343
+
+(time (setq b66 (brute6 10000)))
+;-> 564.414
+
+(brute6 341777 true)
+;-> 85858 85958 169961
+;-> 84948 86868 169961
+;-> 84948 85658 171171
+;-> 84848 86968 169961
+;-> ...
+
 ============================================================================
 

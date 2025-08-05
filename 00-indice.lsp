@@ -3092,6 +3092,9 @@ NOTE LIBERE 31
   Pristine program
   Primi Repubblicani
   Numeri di Belfagor
+  Numeri primi cattivi  (Naughty primes)
+  Numeri primi della Bestia (Beastly primes)
+  Numeri interi come somma di 3 numeri palindromi
 
 PROBLEMI SUI DADI
 =================
