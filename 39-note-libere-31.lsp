@@ -6780,6 +6780,7 @@ Algoritmo brute-force
 ---------------------
 
 Funzione che verifica se un numero è palindromo:
+
 (define (palindrome? n) (let ((s (string n))) (= s (reverse (copy s)))))
 
 Versione 1
@@ -6954,6 +6955,61 @@ Controllo anticipato sui palindromi 'i' e 'j':
 ;-> 84948 85658 171171
 ;-> 84848 86968 169961
 ;-> ...
+
+
+-------------------------------------
+Distanze tra numeri interi palindromi
+-------------------------------------
+
+Calcoliamo la sequenza dei numeri interi palindromi.
+
+Sequenza OEIS A002113:
+Palindromes in base 10.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33, 44, 55, 66, 77, 88, 99, 101,
+  111, 121, 131, 141, 151, 161, 171, 181, 191, 202, 212, 222, 232, 242,
+  252, 262, 272, 282, 292, 303, 313, 323, 333, 343, 353, 363, 373, 383,
+  393, 404, 414, 424, 434, 444, 454, 464, 474, 484, 494, 505, 515, ...
+
+(define (palindromo? num)
+  (local (rev val)
+    (setq rev 0)
+    (setq val num)
+    ; crea il numero invertito
+    (until (zero? val)
+      (setq rev (+ (* rev 10) (% val 10)))
+      (setq val (/ val 10))
+    )
+    (= rev num)))
+
+(setq A002113 (filter palindromo? (sequence 0 515)))
+;-> (0 1 2 3 4 5 6 7 8 9 11 22 33 44 55 66 77 88 99 101
+;->  111 121 131 141 151 161 171 181 191 202 212 222 232 242
+;->  252 262 272 282 292 303 313 323 333 343 353 363 373 383
+;->  393 404 414 424 434 444 454 464 474 484 494 505 515)
+
+Nota: The number of palindromes with d digits is 10 if d = 1,
+      and otherwise it is 9 * 10^(floor((d - 1)/2)), (Sloane, 2015)
+
+Calcoliamo le differenze tra palindromi successivi.
+
+Sequenza OEIS A086862:
+Differences between successive palindromes.
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 11, 11, 11, 11, 11, 11, 11, 11, 2, 10, 10,
+  10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11,
+  10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 10,
+  10, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, ...
+
+Formula: a(n) = A002113(n+1) - A002113(n)
+
+(setq A086862 (map - (rest A002113) (chop A002113)))
+;-> (1 1 1 1 1 1 1 1 1 2 11 11 11 11 11 11 11 11 2 10 10
+;->  10 10 10 10 10 10 10 11 10 10 10 10 10 10 10 10 10 11
+;->  10 10 10 10 10 10 10 10 10 11 10 10 10 10 10 10 10 10
+;->  10 11 10)
+
+(setq pali (filter palindromo? (sequence 0 1e5)))
+(length (setq dist (map - (rest pali) (chop pali))))
+;-> 1098
 
 ============================================================================
 

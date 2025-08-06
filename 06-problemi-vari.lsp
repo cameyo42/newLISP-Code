@@ -8614,6 +8614,15 @@ rotazione 3: 9377 -> numero primo
 
 Trovare tutti i numeri primi circolari sotto al milione.
 
+Sequenza OEIS A068652:
+Numbers such that every cyclic permutation is a prime.
+  2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, 97, 113, 131, 197, 199,
+  311, 337, 373, 719, 733, 919, 971, 991, 1193, 1931, 3119, 3779, 7793,
+  7937, 9311, 9377, 11939, 19391, 19937, 37199, 39119, 71993, 91193,
+  93719, 93911, 99371, 193939, 199933, 319993, ...
+
+Un primo circolare è composto solo dalle cifre 1, 3, 7 e 9 (tranne 2 e 5).
+
 (define (primo? n)
    (if (< n 2) nil
        (= 1 (length (factor n)))))

@@ -878,6 +878,73 @@ Proviamo:
 (prev-next-pali 1234567890)
 ;-> (1234554321 1234664321)
 
+Versione alternativa (più veloce, ma meno affidabile):
+
+(define (lesser-palindrome n)
+  (letn (
+    (s (string n))                ; converte il numero in stringa
+    (L (length s))                ; lunghezza totale
+    (H (div (+ L 1) 2))           ; metà sinistra (inclusivo se dispari)
+    (half (slice s 0 H))          ; metà sinistra
+    (build (fn (h len)            ; costruisce il palindromo completo
+      (if (= (% len 2) 0)
+          (string h (reverse h))
+          (string h (reverse (slice h 0 (- (length h) 1)))))))
+    (pad (fn (str len)            ; padding con zeri a sinistra
+      (string (dup "0" (- len (length str))) str)))
+    (pal (build half L))          ; primo palindromo candidato
+    (p (int pal 0 10)))           ; converte in intero in base 10
+    (if (<= p n)
+        p                         ; già valido: restituisci
+        (let ((val (- (int half 0 10) 1)))        ; decrementa la metà sinistra
+          (if (or (< val 0) (< (length (string val)) (length half)))
+              (int (dup "9" (- L 1)) 0 10)        ; se troppo piccolo: 999...9
+              (let ((new-half (pad (string val) H)))
+                (int (build new-half L) 0 10))))))) ; ricostruisci palindromo e restituisci
+
+(define (greater-palindrome n)
+  (letn (
+    (s (string n))            ; converte il numero in stringa
+    (L (length s))            ; lunghezza totale
+    (H (div (+ L 1) 2))       ; metà sinistra
+    (half (slice s 0 H))      ; metà sinistra
+    (build (fn (h len)        ; costruisce il palindromo
+      (if (= (% len 2) 0)     
+          (string h (reverse h))
+          (string h (reverse (slice h 0 (- (length h) 1)))))))
+    (p (int (build half L) 0 10))) ; primo candidato
+    (if (>= p n)
+        p                          ; già valido
+        (let ((new-half (string (+ (int half 0 10) 1)))) ; incrementa metà sinistra
+          (if (> (length new-half) H)
+              (int (build new-half (+ L 1)) 0 10) ; se overflow -> palindromo più lungo
+              (int (build new-half L) 0 10))))))  ; altrimenti ricostruisci e restituisci
+
+Proviamo:
+
+(lesser-palindrome 23167421011)
+;-> 23167376132
+(greater-palindrome 23167421011)
+;-> 23167476132
+
+Test di correttezza:
+
+(for (i 1 1000)
+  (setq num (rand 1e8))
+  (setq a (prev-next-pali num))
+  (setq b (list (lesser-palindrome num) (greater-palindrome num)))
+  (if (!= a b) (println num { } a { } b)))
+;-> nil
+
+Test di velocità:
+(setq t 3578275361)
+(= (prev-next-pali t) (list (lesser-palindrome t) (greater-palindrome t)))
+;-> true
+(time (prev-next-pali t) 10)
+;-> 1781.244
+(time (list (lesser-palindrome t) (greater-palindrome t)) 10)
+;-> 0
+
 Vedi anche "Palindromo più vicino" su "Note libere 9".
 
 

@@ -3095,6 +3095,7 @@ NOTE LIBERE 31
   Numeri primi cattivi  (Naughty primes)
   Numeri primi della Bestia (Beastly primes)
   Numeri interi come somma di 3 numeri palindromi
+  Distanze tra numeri interi palindromi
 
 PROBLEMI SUI DADI
 =================
