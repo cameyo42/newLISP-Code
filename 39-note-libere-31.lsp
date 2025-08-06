@@ -6949,12 +6949,53 @@ Controllo anticipato sui palindromi 'i' e 'j':
 (time (setq b66 (brute6 10000)))
 ;-> 564.414
 
+(time (setq b666 (brute6 100000)))
+;-> 14329.36
+
 (brute6 341777 true)
 ;-> 85858 85958 169961
 ;-> 84948 86868 169961
 ;-> 84948 85658 171171
 ;-> 84848 86968 169961
 ;-> ...
+
+Versione 7
+----------
+Funzione 'palindromo?' più veloce di 'palindrome?'.
+Rimozione parametro 'show' e (when show ...).
+
+(define (palindromo? num)
+  (let ((rev 0) (val num))
+    ; crea il numero invertito
+    (until (zero? val)
+      (setq rev (+ (* rev 10) (% val 10)))
+      (setq val (/ val 10)))
+    (= rev num)))
+
+(define (brute7 n)
+  (let (out '())
+    (for (i (/ n 3) 1 -1)
+      (when (palindromo? i)
+        (for (j (/ (- n i) 2) i -1)
+          (when (palindromo? j)
+            (let ((k (- n i j)))
+              (when (and (>= k j) (palindromo? k))
+                (push (list i j k) out -1)))))))
+    out))
+
+(time (setq b7 (brute7 1000)))
+;-> 8.976
+
+Siamo passati da 75431 msec (versione 1) a 9 msec (versione 7).
+
+(time (setq b77 (brute7 10000)))
+;-> 398.932
+
+(time (setq b777 (brute7 100000)))
+;-> 11867.259
+
+(= (brute6 10000) (brute7 10000))
+;-> true
 
 
 -------------------------------------
@@ -7010,6 +7051,77 @@ Formula: a(n) = A002113(n+1) - A002113(n)
 (setq pali (filter palindromo? (sequence 0 1e5)))
 (length (setq dist (map - (rest pali) (chop pali))))
 ;-> 1098
+
+
+--------------
+Primi assoluti
+--------------
+
+I numeri primi assoluti (o numeri primi permutabili) sono numeri primi in cui ogni permutazione delle cifre è un numero primo.
+
+Sequenza OEIS A003459:
+Absolute primes (or permutable primes): every permutation of the digits is a prime.
+  2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, 97, 113, 131, 199, 311,
+  337, 373, 733, 919, 991, 1111111111111111111, 11111111111111111111111, ...
+
+Un primo assoluto è composto solo dalle cifre 1, 3, 7 e 9 (tranne 2 e 5).
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (absolute? num)
+  (if (not (prime? num)) nil
+  ;else
+  (let ( (permute (perm (int-list num)))
+         (stop nil) )
+    (dolist (p permute stop)
+      (if (not (prime? (list-int p))) (setq stop true)))
+    (not stop))))
+
+Proviamo:
+
+(absolute? 733)
+
+(filter absolute? (sequence 2 1000))
+;-> (2 3 5 7 11 13 17 31 37 71 73 79 97 113 131 199 311
+;->  337 373 733 919 991)
 
 ============================================================================
 

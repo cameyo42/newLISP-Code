@@ -3096,6 +3096,7 @@ NOTE LIBERE 31
   Numeri primi della Bestia (Beastly primes)
   Numeri interi come somma di 3 numeri palindromi
   Distanze tra numeri interi palindromi
+  Primi assoluti
 
 PROBLEMI SUI DADI
 =================
