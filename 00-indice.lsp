@@ -3097,6 +3097,8 @@ NOTE LIBERE 31
   Numeri interi come somma di 3 numeri palindromi
   Distanze tra numeri interi palindromi
   Primi assoluti
+  Costante di Apery
+  Funzione Z e numeri coprimi
 
 PROBLEMI SUI DADI
 =================

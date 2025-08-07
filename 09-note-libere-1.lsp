@@ -7289,6 +7289,9 @@ Per finire scriviamo una funzione che calcola Z(s) con numeri floating-point:
 (Z 4 1000000)
 ;-> 1.082323233710861
 
+Vedi anche "Costante di Apery" su "Note libere 31".
+Vedi anche "Funzione Z e numeri coprimi" su "Note libere 31".
+
 
 -------------------------------------
 Rotazione di stringhe, liste e numeri

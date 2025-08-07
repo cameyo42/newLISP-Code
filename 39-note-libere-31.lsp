@@ -7123,5 +7123,127 @@ Proviamo:
 ;-> (2 3 5 7 11 13 17 31 37 71 73 79 97 113 131 199 311
 ;->  337 373 733 919 991)
 
+
+-----------------
+Costante di Apery
+-----------------
+
+In matematica la costante di Apéry è un numero che si incontra in molte situazioni.
+Viene definita come valore assunto dalla funzione zeta di Riemann:
+
+  Z(3) = 1 + 1/2^3 + 1/3^3 + 1/4^3 + 1/5^3 ...
+
+Il suo valore decimale è il seguente:
+
+  1.20205690315959428539973816151144999076...
+
+Il calcolo diretto converge molto lentamente:
+
+(define (Z s n)
+  (let (out 0)
+    (for (i 1 n)
+      (setq out (add out (div (pow i s)))))
+  out))
+
+Proviamo:
+
+(Z 3 1000)
+;-> 1.202056403659343 (6 cifre decimali corrette)
+(Z 3 10000)
+;-> 1.202056898160098 (6 cifre corrette)
+(Z 3 100000)
+;-> 1.202056903109732 (10 cifre corrette)
+(Z 3 1000000)
+;-> 1.202056903150321 (11 cifre corrette)
+(Z 3 10000000)
+;-> 1.202056903150321 (11 cifre corrette) limite precisione float raggiunto
+
+Per il calcolo di Z(e) sono state proposte diverse serie che convergono più velocemente della formula originale.
+
+  Z(3) = (4/3) * Sum[k=0,Inf](-1)^k/(k + 1)^3
+
+(define (a1 n)
+  (let (s 0)
+    (for (k 0 n)
+      (setq s (add s (div (pow -1 k) (mul (+ k 1) (+ k 1) (+ k 1))))))
+    (div (mul s 4) 3)))
+
+(a1 1000)
+;-> 1.20205690382327 (9 cifre corrette)
+(a1 1000000)
+;-> 1.202056903159584 (13 cifre corrette)
+(a1 10000000)
+;-> 1.202056903159584 (13 cifre corrette) limite precisione float raggiunto
+
+  Z(3) = (5/2) * Sum[k=1,Inf](-1)^(k-1) * (n!)^2/((2*n)!*(n^3))
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(define (a2 n)
+  (let (s 0)
+  (for (k 1 n)
+    (setq s (add s (mul (pow -1 (- k 1))
+                        (div (mul (fact-i k) (fact-i k))
+                             (mul (fact-i (* 2 k)) k k k)))))
+  (div (mul s 5) 2))))
+
+(a2 10)
+;-> 1.202056900941365 (8 cifre corrette)
+(a2 20)
+;-> 1.202056903159594 (15 cifre corrette)
+(a2 25)
+;-> 1.202056903159594  (15 cifre corrette) limite precisione float raggiunto
+
+Vedi anche "Funzione Z e ipotesi di Riemann" su "Note libere 1".
+Vedi anche "Funzione Z e numeri coprimi" su "Note libere 31".
+
+
+---------------------------
+Funzione Z e numeri coprimi
+---------------------------
+
+Eulero ha dimostrato che:
+
+  Z(s) = Prod[(1 - 1/p^s)^(-1)], (p numeri primi)
+
+Dati s numeri interi, quanto vale la probabilità che siano tutti coprimi tra loro (cioè gcd(s) = 1)?
+
+ P(coprimi) = 1 - 1/p^s = 1/Z(s)
+
+Facciamo alcune verifiche:
+
+(define (prob s iter)
+  (let (ok 0)
+  (for (i 1 iter)
+    (setq nums (rand 10000 s))
+    (if (= (apply gcd nums) 1) (++ ok)))
+  (div (div ok iter))))
+
+Zeta(2) = pi^2/6
+(setq pi 3.1415926535897931)
+(setq z2 (div (mul pi pi) 6))
+;-> 1.644934066848226
+(prob 2 1e8)
+;-> 1.64523401125804
+
+Zeta(3) = 1.2020569031595942853997...
+(prob 3 1e8)
+;-> 1.202167252697155
+
+Zeta(4) = pi^4/90
+(setq z4 (div (mul pi pi pi pi) 90))
+;-> 1.082323233711138
+(prob 4 1e8)
+;-> 1.082345951513651
+
+Vedi anche "Funzione Z e ipotesi di Riemann" su "Note libere 1".
+Vedi anche "Costante di Apery" su "Note libere 31".
+
 ============================================================================
 
