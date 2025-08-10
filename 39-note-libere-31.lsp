@@ -7546,5 +7546,39 @@ Scegliendo due numeri interi a caso, qual è la probabilità che siano coprimi?
 La risposta è il reciproco della funzione Zeta di Riemann con s uguale a 2 (1/Z(2)).
 Vedi "Funzione Z e numeri coprimi" su "Note libere 31".
 
+
+----------------------------------------
+Inserire una stringa in un'altra stringa
+----------------------------------------
+
+Date due stringhe S1 e S2 e una posizione P (indice) di S2, inserire la stringa S1 nella posizione P.
+Se P non viene definito oppure P è maggiore della lunghezza di S2, allora aggiungere S1 in fondo a S2.
+
+(define (insert s str pos)
+  (let (len (length str))
+    (if (or (nil? pos) (>= pos len))
+      (extend str s)
+      (push s str pos))))
+
+Proviamo:
+
+(insert "abc" "123456" 1)
+;-> "1abc23456"
+(insert "abc" "123456" 0)
+;-> "abc123456"
+(insert "abc" "123456" 20)
+;-> "123456abc"
+(insert "abc" "123456")
+;-> "123456abc"
+
+Con indici negativi, partiamo dal fondo della stringa:
+
+(insert "abc" "123456" -1)
+;-> "123456abc"
+(insert "abc" "123456" -2)
+;-> "12345abc6"
+(insert "abc" "123456" -30)
+;-> "abc123456"
+
 ============================================================================
 

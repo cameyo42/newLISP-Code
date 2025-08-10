@@ -3102,6 +3102,7 @@ NOTE LIBERE 31
   The goat problem
   Funzioni e punti fissi (Teorema di Banach)
   Griglia di punti (lattice) e visibilità
+  Inserire una stringa in un'altra stringa
 
 PROBLEMI SUI DADI
 =================
