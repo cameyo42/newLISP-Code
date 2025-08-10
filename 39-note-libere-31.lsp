@@ -6347,7 +6347,7 @@ Ogni partizione deve essere restituita una sola volta:
     out)) ; restituisce la lista delle partizioni uniche
 
 Il (sort L) iniziale garantisce che le combinazioni partano sempre dallo stesso ordine.
-L’uso di )join (map string ...)) permette di costruire una chiave univoca anche per simboli/stringhe/numeri.
+L'uso di )join (map string ...)) permette di costruire una chiave univoca anche per simboli/stringhe/numeri.
 La chiave ("123" "45") e ("45" "123") diventano entrambe ("123" "45") dopo ordinamento, quindi niente duplicati.
 
 (group-all '(1 2 3 4))
@@ -7244,6 +7244,95 @@ Zeta(4) = pi^4/90
 
 Vedi anche "Funzione Z e ipotesi di Riemann" su "Note libere 1".
 Vedi anche "Costante di Apery" su "Note libere 31".
+
+
+----------------
+The goat problem
+----------------
+
+In un recinto circolare di raggio R una capra è legata con una corda lunga L, con 0 <= L <= 2R
+La corda è fissata su un punto P del bordo interno del recinto, quindi la capra può muoversi solo all'interno del recinto.
+Qual è l'area accessibile alla capra per pascolare?
+
+La capra può descrivere un semicerchio di raggio L, centrato sul punto di fissaggio P.
+L'area accessibile è data dall'intersezione tra il cerchio del recinto (di raggio R) e il cerchio di raggio L (con centro in P).
+
+Ponendo R = 1, l'area accessibile alla capra vale: pi + a*cos(a) - sin(a)
+dove 'a' è l'angolo interno dei due lati lunghi L che partono da P e toccano il recinto in due punti opposti.
+
+Quanto deve essere lunga la corda L affinchè la capra abbia una superficie accessibile pari alla metà dell'area del recinto?
+Con R = 1, l'area del cerchio vale pi, quindi deve risultare:
+
+  pi + a*cos(a) - sin(a) = pi/2
+
+Questa è una equazione trascendentale e il calcolo di 'a' utilizza metodi di approssimazione successiva.
+Il valore approssimato di 'a' vale:
+
+  a = 109.19985... gradi
+
+Quindi la lunghezza della corda vale:
+
+  L = 2*cos(a/2) = 1.158564478683944
+
+(setq pi 3.1415926535897931)
+(mul 2 (cos (div (mul (div 109.19985 2) pi) 180)))
+;-> 1.158564478683944
+
+Espansione decimale della lunghezza della corda della capra per pascolare metà di un'unità di campo.
+
+Sequenza OEIS A133731:
+Decimal expansion of goat tether length to graze half a unit field.
+  1, 1, 5, 8, 7, 2, 8, 4, 7, 3, 0, 1, 8, 1, 2, 1, 5, 1, 7, 8, 2, 8, 2, 3,
+  3, 5, 0, 9, 9, 3, 3, 5, 0, 9, 1, 4, 9, 6, 8, 8, 2, 9, 2, 2, 6, 6, 4, 9,
+  2, 0, 9, 6, 5, 1, 1, 8, 2, 0, 6, 9, 5, 8, 8, 4, 8, 2, 0, 6, 6, 9, 8, 0,
+  2, 5, 5, 9, 1, 9, 6, 0, 9, 3, 1, 9, 9, 3, 2, 1, 6, 1, 0, 7, 3, 0, 8, 6,
+  0, 4, 3, 8, 1, 7, 5, 9, 6, ...
+
+  1.15872847301812151782823350993350914968829226649...
+
+Questo numero è legato ad un'altra sequenza:
+
+Sequenza OEIS A173201:
+Fixed point of the iteration x |-> x - (sin(x) - cos(x)*x - Pi/2)/(sin(x)*x).
+  1, 9, 0, 5, 6, 9, 5, 7, 2, 9, 3, 0, 9, 8, 8, 3, 8, 9, 4, 8, 8, 2, 6, 6,
+  6, 4, 3, 7, 1, 6, 0, 9, 6, 6, 7, 0, 3, 4, 9, 5, 0, 4, 3, 1, 2, 1, 6, 1,
+  2, 8, 0, 3, 2, 1, 2, 1, 9, 3, 5, 6, 4, 5, 5, 9, 9, 9, 4, 5, 4, 4, 2, 4,
+  0, 9, 9, 5, 7, 9, 5, 0, 2, 2, 7, 5, 7, 1, 6, 1, 6, 6, 3, 4, 6, 4, 6, 3,
+  0, 3, 9, 7, 1, 5, 3, 9, 8, ...
+
+  1.90569572930988389488266643716096670349504312161...
+
+La relazione tra le due sequenze è la seguente:
+
+  A133731 = cos(A173201/2)*2
+  A173201 = 2*arccos(A133731/2)
+
+(mul 2 (cos (mul 0.5 A173201)))
+(mul 2 (cos (mul 0.5 c)))
+
+;-> 1.158728473018122
+
+Calcoliamo la sequenza A173201 risolvendo l'equazione con il metodo iterativo:
+
+  x |-> x - (sin(x) - cos(x)*x - pi/2)/(sin(x)*x)
+
+(setq pi 3.1415926535897931)
+(define (f x)
+  (sub x (div (sub (sin x) (mul x (cos x)) (div pi 2))
+              (mul x (sin x)))))
+
+(define (solve x0 iter)
+  (let (x x0)
+    (for (i 1 iter)
+      (setq x (sub x (div (sub (sin x) (mul x (cos x)) (div pi 2))
+                          (mul x (sin x))))))
+    x))
+
+(setq A173201 (solve 1 10))
+;-> 1.905695729309884
+
+(setq A133731 (mul 2 (cos (div A173201 2))))
+;-> 1.158728473018122
 
 ============================================================================
 

@@ -3099,6 +3099,7 @@ NOTE LIBERE 31
   Primi assoluti
   Costante di Apery
   Funzione Z e numeri coprimi
+  The goat problem
 
 PROBLEMI SUI DADI
 =================
