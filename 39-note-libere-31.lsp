@@ -7334,5 +7334,155 @@ Calcoliamo la sequenza A173201 risolvendo l'equazione con il metodo iterativo:
 (setq A133731 (mul 2 (cos (div A173201 2))))
 ;-> 1.158728473018122
 
+
+------------------------------------------
+Funzioni e punti fissi (Teorema di Banach)
+------------------------------------------
+
+Prendiamo una funzione (es. sqrt(x)) un valore iniziale (es. x0 = 2).
+Poi, partendo da x0, applichiamo la funzione un numero N di volte utilizzando ogni volta il risultato precedente.
+
+(define (fixed func x0 iteration)
+  (series x0 (fn(x) (func x)) iteration))
+
+Funzione: sqrt(x)
+x0 = 2
+
+(fixed sqrt 2 55)
+;-> (2 1.414213562373095 1.189207115002721 1.090507732665258 1.044273782427414
+;->  1.021897148654117 1.010889286051701 1.005429901112803 1.002711275050203
+;->  ...
+;->  1.000000000000005 1.000000000000002 1.000000000000001 1 1 1 1 1)
+
+Funzione: sqrt
+x0 = 1/2
+
+(fixed sqrt .5 55)
+;-> (0.5 0.7071067811865476 0.8408964152537146 0.9170040432046712
+;->  0.9576032806985736 0.9785720620877001 0.9892280131939755
+;->  ...
+;->  0.9999999999999998 0.9999999999999999 0.9999999999999999)
+
+Per la funzione 'sqrt', partendo da qualunque numero x > 0 e applicando ripetutamente la funzione si ottiene il punto fisso x = 1 (sqrt(1) = 1) .
+
+Un "punto fisso" di una funzione f è un punto x per cui risulta: f(x) = x.
+
+Esistono molte altre funzioni che hanno un punto fisso.
+
+Funzione: cos(x)
+x0 = 1
+
+(fixed cos 1 100)
+;-> (1 0.5403023058681398 0.8575532158463934 0.6542897904977791
+;->  ...
+;->  0.7390851332151607 0.7390851332151607 0.7390851332151607)
+
+Funzione: e^(-x^2)
+x0 = 1
+(setq e 2.7182818284590451)
+(define (func x) (pow e (sub (mul x x))))
+
+(fixed func 1 250)
+;-> (1 0.3678794411714423 0.8734230184931167 0.4663271888497616
+;->  ...
+;->  0.652918640419205 0.6529186404192044 0.652918640419205 0.6529186404192044)
+
+Teorema del punto fisso di Banach
+---------------------------------
+"In a complete space X, every contraction f: X -> X has a fixed point P that you can
+get by repeatedly applying the function F to any point in the space ...f(f(f(x))) = x."
+
+In uno spazio completo X, ogni contrazione f: X -> X ha un punto fisso P che si può
+ottenere applicando ripetutamente la funzione F a qualsiasi punto dello spazio ...f(f(f(x))) = x.
+
+Uno spazio completo può essere intuitivamente pensato come un oggetto geometrico chiuso senza buchi al suo interno.
+Si può pensare ad una contrazione come ad una sorta di funzione di restringimento dello spazio X.
+Il teorema afferma che continuando ad applicare la funzione f allo spazio X, quest'ultimo si riduce ad un punto che è il punto fisso.
+
+La funzione di contrazione f: X -> X deve soddisfare la sequente condizione:
+per ogni coppia di punti x,y di X, dist(f(x), f(y)) < Q*dist(x, y)
+dove 'dist' è una misura di distanza tra due punti dello spazio X e Q è un fattore di scala (0 < Q < 1).
+Questa condizione significa che ad ogni applicazione di f, lo spazio X si riduce.
+
+Per definire uno spazio completo dobbiamo prima definire cosa intendiamo per 'sequenza di Cauchy'.
+Una sequenza viene detta di Cauchy, se la distanza tra i punti della sequenza tende a 0:
+
+  lim dist(x(n), x(n+1)) = 0
+ n->Inf
+
+Uno spazio è 'completo' se ogni sequenza di Cauchy converge.
+
+Esempio
+-------
+
+Immaginiamo di avere uno spazio metrico (X, d) che rappresenta l'insieme di tutti i punti della regione, con la distanza d data dalla distanza geografica (anche approssimata su un piano).
+Funzione f: X -> X
+Dato un punto p reale sul territorio, f(p) è il punto della mappa che rappresenta la posizione di p.
+Se la mappa è in scala (ad esempio 1:100 000) e poi riposizionata sopra il territorio in modo da coprire la stessa zona, allora f porta ogni punto reale alla sua "posizione cartografica" sulla carta.
+Se la scala della mappa è k < 1 (ad esempio k = 1/100000) e la posizioni sopra il territorio mantenendo l'orientamento, la distanza tra le immagini di due punti p e q sulla mappa sarà:
+
+  dist(f(p), f(q)) = k * dist(p, q)
+
+Questo è esattamente il caso di applicazione contrattiva con costante di contrazione k.
+
+Applicando il teorema di Banach possiamo affermare che:
+se f è una contrazione su uno spazio metrico completo X, allora esiste un unico punto fisso p' tale che:
+
+  f(p') = p'
+
+Quindi esiste un unico punto della regione che, sulla mappa posata, si trova esattamente sulla sua posizione reale.
+
+Vediamo una simulazione:
+Lo spazio metrico è rappresentato da coordinate 2D reali (x, y).
+La mappa è scalata con fattore k < 1 e posizionata sopra la regione senza rotazioni o deformazioni.
+La funzione T prende un punto reale e restituisce dove si trova sulla mappa.
+
+; -------------------------------
+; Teorema di Banach - punto fisso
+; Esempio della mappa geografica
+; -------------------------------
+(define (banach)
+  ; Costante di contrazione (scala mappa)
+  (setq k 0.3)
+  ; Punto di riferimento per la mappa (offset)
+  ; simula lo spostamento della mappa rispetto al territorio
+  (setq offset '(2 1))
+  ; Funzione contrattiva T(p)
+  (define (T p)
+    (list
+      (add (mul k (p 0)) (offset 0))
+      (add (mul k (p 1)) (offset 1))))
+  ; Metodo iterativo di Banach
+  (define (banach-inizio p0 eps)
+    (letn ((p p0) (q (T p)) (passi 0))
+      (while (> (sqrt (add (pow (sub (p 0) (q 0)) 2)
+                        (pow (sub (p 1) (q 1)) 2))) eps)
+        (setq p q)
+        (setq q (T p))
+        (++ passi))
+      (list q passi)))
+  ; punto iniziale casuale
+  (setq start (list (rand 10) (rand 10)))
+  ; Tolleranza per la convergenza
+  (setq eps 1e-6)
+  ; Calcolo del punto fisso
+  (setq risultato (banach-inizio start eps))
+  (println "Punto iniziale: " start)
+  (println "Punto fisso trovato: " (risultato 0))
+  (println "Iterazioni: " (risultato 1)))
+
+(banach)
+;-> Punto iniziale: (7 5)
+;-> Punto fisso trovato: (2.85714305529443 1.42857159939175)
+;-> Iterazioni: 13
+
+T(p) simula il fatto che la mappa sia ridotta di scala k e spostata di un certo 'offset'.
+La funzione banach-inizio implementa la formula iterativa di Banach: 
+  p(n+1) = T(p(n))
+e si ferma quando la distanza tra iterazioni successive è minore di 'eps'.
+Alla fine si ottiene l'unico punto che si trova esattamente nella stessa posizione sia nel mondo reale che sulla mappa.
+
+Vedi il grafico "banach.png" nella cartella "data".
+
 ============================================================================
 

@@ -3100,6 +3100,7 @@ NOTE LIBERE 31
   Costante di Apery
   Funzione Z e numeri coprimi
   The goat problem
+  Funzioni e punti fissi (Teorema di Banach)
 
 PROBLEMI SUI DADI
 =================
