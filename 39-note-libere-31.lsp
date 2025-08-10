@@ -4657,7 +4657,7 @@ Guardano i numeri con la lente del modulo p, dove la priorità è quanto un nume
 Sono uno strumento potente per risolvere problemi in matematica pura e applicata.
 A) Guardano la divisibilità, non la grandezza
 Nel mondo reale (numeri decimali), i numeri vicini sono quelli con valore simile:
-es. `1.0001` è vicino a `1`.
+es. '1.0001' è vicino a '1'.
 Nel mondo p-adico, due numeri sono vicini se la loro differenza è molto divisibile per p.
 Ad esempio, in 5-adico, 10 e 35 sono vicini perchè 35 - 10 = 25 = 5^2.
 
@@ -7414,7 +7414,6 @@ Uno spazio è 'completo' se ogni sequenza di Cauchy converge.
 
 Esempio
 -------
-
 Immaginiamo di avere uno spazio metrico (X, d) che rappresenta l'insieme di tutti i punti della regione, con la distanza d data dalla distanza geografica (anche approssimata su un piano).
 Funzione f: X -> X
 Dato un punto p reale sul territorio, f(p) è il punto della mappa che rappresenta la posizione di p.
@@ -7483,6 +7482,69 @@ e si ferma quando la distanza tra iterazioni successive è minore di 'eps'.
 Alla fine si ottiene l'unico punto che si trova esattamente nella stessa posizione sia nel mondo reale che sulla mappa.
 
 Vedi il grafico "banach.png" nella cartella "data".
+
+
+---------------------------------------
+Griglia di punti (lattice) e visibilità
+---------------------------------------
+
+Immaginiamo di avere una griglia infinita di punti con coordinate intere (lattice):
+
+  asse y
+    |
+  . | . . . . . . . . . . . .
+  . | . . . . . . . . . . . .
+  . | . . . . . . . . . . . .
+  9 | x x x x x x x x x . . .
+  8 | x x x x x x x x x . . .
+  7 | x x x x x x x x x . . .
+  6 | x x x x x x x x x . . .
+  5 | x x x x x x x x x . . .
+  4 | x x x x x x x x x . . .
+  3 | x x x x x x x x x . . .
+  2 | x x x x x x x x x . . .
+  1 | x x x x x x x x x . . .
+  0 +---------------------------- asse x
+    0 1 2 3 4 5 6 7 8 9 . . . 
+
+Consideriamo un osservatore nel punto (0,0) che guarda lungo una direzione compresa tra l'asse x e l'asse y.
+Questa direzione può essere identificata dall'angolo (alfa) che forma con l'asse x (0 < alfa < 90 gradi).
+Per esempio, se l'angolo alfa vale 45 gradi, allora la direzione attraversa i punti:
+(0,0), (1,1), (2,2), ecc..
+La direzione può essere identificata anche con il 'gradiente', che in questo caso è dato dal rapporto y/x.
+Nota: il valore del gradiente ci permette di identificare quali punti vengono incontrati dalla relativa direzione.
+(Es. gradiente = 2 --> attraversiamo i punti (1,2), (2,4), ecc.)
+
+Domanda:
+L'osservatore vedrà sempre almeno un punto con qualunque valore del gradiente?
+In altre parole, esiste una o più direzioni che non incontrano alcun punto?
+
+Risposta:
+Se il gradiente è razionale (rapporto tra due interi), allora l'osservatore incontrerà sempre un punto.
+Se il gradiente non è razionale, allora non incontrerà mai alcun punto.
+
+Per esempio, con un gradiente pari a sqrt(2) non si incontra mai un punto.
+(vedi figura "lattice.png" nella cartella "data").
+
+Domanda:
+Prendendo il valore del gradiente in modo casuale, quale probabilità abbiamo di incontrare un punto?
+
+Risposta:
+I numeri razionali sono infiniti, ma sono numerabili.
+I numeri irrazionali sono infiniti, ma non numerabili.
+Quindi scegliendo un gradiente casuale abbiamo (matematicamente) una probabilità dello 0% di incontrare un punto.
+Nota: questo vale se i punti sono adimensionali e la direzione ha spessore nullo.
+
+Domanda:
+Scegliendo un punto casuale di una griglia lattice finita (NxN), quanto vale la probabilità che quel punto sia visibile dall'osservatore (0,0)?
+
+Risposta: 6/pi^2, dove pi = 3.1415926535897931...
+Infatti, affinchè il punto scelto sia visibile, occorre che i valori delle coordinate del punto (x e y) siano coprimi.
+Perché se non fossero coprimi, (cioè se avessero fattori comuni), sarebbero nascosti da un punto precedente.
+Quindi la domanda diventa:
+Scegliendo due numeri interi a caso, qual è la probabilità che siano coprimi?
+La risposta è il reciproco della funzione Zeta di Riemann con s uguale a 2 (1/Z(2)).
+Vedi "Funzione Z e numeri coprimi" su "Note libere 31".
 
 ============================================================================
 

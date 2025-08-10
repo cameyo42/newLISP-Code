@@ -3101,6 +3101,7 @@ NOTE LIBERE 31
   Funzione Z e numeri coprimi
   The goat problem
   Funzioni e punti fissi (Teorema di Banach)
+  Griglia di punti (lattice) e visibilità
 
 PROBLEMI SUI DADI
 =================
