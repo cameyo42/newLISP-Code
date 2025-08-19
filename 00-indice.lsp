@@ -3103,6 +3103,8 @@ NOTE LIBERE 31
   Funzioni e punti fissi (Teorema di Banach)
   Griglia di punti (lattice) e visibilità
   Inserire una stringa in un'altra stringa
+  Eliminazione degli spazi extra da una stringa
+  Problem 4 of the 2025 International Mathematical Olympiad
 
 PROBLEMI SUI DADI
 =================

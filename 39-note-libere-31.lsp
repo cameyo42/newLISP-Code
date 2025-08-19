@@ -7580,5 +7580,195 @@ Con indici negativi, partiamo dal fondo della stringa:
 (insert "abc" "123456" -30)
 ;-> "abc123456"
 
+
+---------------------------------------------
+Eliminazione degli spazi extra da una stringa
+---------------------------------------------
+
+Abbiamo una stringa di caratteri ASCII formata solo da numeri, minuscole, maiuscole e spazio " ".
+Scrivere una funzione che rimuove gli spazi iniziali e finali e, se ci sono più spazi tra due parole, li riduce a un solo spazio.
+La funzione deve essere la più corta possibile.
+
+Esempi:
+Input: "Stringa   valida"
+Output: "Stringa valida"
+
+Input: "  a b   c  d   ")
+Output: "a b c d"
+
+Input: "  etc  etc     etc etc  "
+Output: "etc etc etc etc"
+
+Input: "abcdefg"
+Output: "abcdefg"
+
+Input: "           "
+Output: ""
+
+Input: "12 34  5 6   a7 8  ee 9 "
+Output: "12 34 5 6 a7 8 ee 9"
+
+Versione code-golf (31 caratteri):
+
+(define(f s)(join(parse s)" "))
+
+Proviamo:
+
+(f "Stringa   valida  ")
+;-> "Stringa valida"
+(f "  a b   c  d   ")
+;-> "a b c d"
+(f "  etc  etc     etc etc  ")
+;-> "etc etc etc etc"
+(f "abcdefg")
+;-> "abcdefg"
+(f "           ")
+;-> ""
+(f "12 34  5 6   a7 8  ee 9 ")
+;-> "12 34 5 6 a7 8 ee 9"
+
+Nota: "parse" usa il parsing dei sorgenti newlisp, quindi 'cattura' anche altri caratteri (es. "(", ")", ecc.)
+
+
+---------------------------------------------------------
+Problem 4 of the 2025 International Mathematical Olympiad
+---------------------------------------------------------
+
+Problema 4 delle Olimpiadi Internazionali di Matematica del 2025
+Un divisore proprio di un intero positivo N è un divisore positivo di N diverso da N stesso.
+La sequenza infinita a1,a2, ... è composta da interi positivi, ognuno dei quali ha almeno tre divisori propri.
+Per ogni n >= 1, l'intero a(n+1) è la somma dei tre divisori propri più grandi di a(n).
+Determina tutti i possibili valori di a1.
+
+Spiegazione
+Dato un numero n, sia f(n) la somma dei tre divisori propri di n più grandi.
+Per esempio:
+
+f(24) = 6 + 8 + 12 = 26.
+
+Applichiamo f ripetutamente finché non risulta uno dei seguenti casi:
+1) non è più possibile applicare f perchè il valore attuale ha meno di 3 divisori propri.
+2) la somma f(n) è uguale ad n, quindi il processo continua per sempre.
+
+La sequenza è composta da tutti i valori di n per cui il processo continua indefinitamente.
+
+Nota: matematicamente risulta che questo processo non può generare cicli chiusi (loop).
+
+Sequenza OEIS A386276:
+Numbers k such that the sequence defined by f(1) = k and f(x+1) = the sum of the three largest proper divisors of f(x), consists entirely of numbers having at least three proper divisors.
+  6, 18, 42, 54, 66, 72, 78, 102, 114, 126, 138, 162, 174, 186, 198, 216,
+  222, 234, 246, 258, 282, 294, 306, 318, 342, 354, 366, 378, 402, 414,
+  426, 438, 462, 474, 486, 498, 504, 522, 534, 546, 558, 582, 594, 606,
+  618, 642, 648, 654, 666, 678, 702, 714, 726, 738, ...
+
+Algoritmo brute-force
+---------------------
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (forever? num)
+  (local (res stop dl len sum)
+    (setq res nil)
+    (setq stop nil)
+    ; ciclo finchè possibile...
+    (until stop
+      ; calcola divisori di num
+      (setq dl (divisors num))
+      ; rimuove l'ultimo divisore (num)
+      (pop dl -1)
+      ; numero di divisori
+      (setq len (length dl))
+      (cond ((< len 3) (setq stop true)) ; (divisori < 3) --> stop
+            (true
+              ; calcolo f(num) (somma dei tre divisori più grandi)
+              (setq sum (apply + (slice dl -3 3)))
+              ; se f(n) = n (cioè sum = num),
+              ; allora num appartiene alla sequenza
+              (when (= sum num) 
+                (setq res true)
+                (setq stop true))
+              (setq num sum)))
+    )
+    res))
+
+Proviamo:
+
+(forever? 24)
+;-> nil
+(forever? 216)
+;-> true
+
+(filter forever? (sequence 2 738))
+;-> (6 18 42 54 66 72 78 102 114 126 138 162 174 186 198 216
+;->  222 234 246 258 282 294 306 318 342 354 366 378 402 414
+;->  426 438 462 474 486 498 504 522 534 546 558 582 594 606
+;->  618 642 648 654 666 678 702 714 726 738)
+
+Algoritmo matematico
+--------------------
+
+Condizioni per l'appartenenza alla serie di un numero N:
+
+  N = 2^a2 * 3^a3 * 5^a5 * 7^a7 * ...
+
+deve risultare:
+- a2 è dispari
+- 2*a3 > a2
+- a5 = 0
+
+(define (check? num)
+  (letn ( (f (factor num)) (c (count '(2 3 5) f)) )
+    (and (odd? (c 0)) (> (* 2 (c 1)) (c 0)) (zero? (c 2)))))
+
+Proviamo:
+
+(check? 24)
+;-> nil
+(check? 216)
+;-> true
+
+(filter check? (sequence 2 738))
+;-> (6 18 42 54 66 72 78 102 114 126 138 162 174 186 198 216
+;->  222 234 246 258 282 294 306 318 342 354 366 378 402 414
+;->  426 438 462 474 486 498 504 522 534 546 558 582 594 606
+;->  618 642 648 654 666 678 702 714 726 738)
+
+Verifica di correttezza:
+
+(= (filter forever? (sequence 2 1e5)) (filter check? (sequence 2 1e5)))
+;-> true
+
+Test di velocità:
+
+(time (filter forever? (sequence 2 1e5)))
+;-> 2460.777
+
+(time (filter check? (sequence 2 1e5)))
+;-> 140.566
+
 ============================================================================
 
