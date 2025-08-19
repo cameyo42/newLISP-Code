@@ -7770,5 +7770,143 @@ Test di velocità:
 (time (filter check? (sequence 2 1e5)))
 ;-> 140.566
 
+
+----------------
+Primi di Hilbert
+----------------
+
+Un numero di Hilbert è un numero nella forma: 4*n + 1
+
+Sequenza OEIS A016813:
+a(n) = 4*n + 1.
+  1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69,
+  73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 129,
+  133, 137, 141, 145, 149, 153, 157, 161, 165, 169, 173, 177, 181, 185,
+  189, 193, 197, 201, 205, 209, 213, 217, 221, 225, 229, 233, 237, ...
+
+(define (H limite) (map (fn(x) (+ (* x 4) 1)) (sequence 0 limite)))
+
+(H 60)
+;-> (1 5 9 13 17 21 25 29 33 37 41 45 49 53 57 61 65 69
+;->  73 77 81 85 89 93 97 101 105 109 113 117 121 125 129
+;->  133 137 141 145 149 153 157 161 165 169 173 177 181 185
+;->  189 193 197 201 205 209 213 217 221 225 229 233 237 241)
+
+I numeri primi di Hilbert sono definiti come i numeri di Hilbert H > 1 che non sono divisibili per nessun numero di Hilbert k tali che 1 < k < H.
+
+Sequenza OEIS A057948:
+S-primes: let S = {1,5,9, ... 4i+1, ...}, then an S-prime is in S but is not divisible by any members of S except itself and 1.
+  5, 9, 13, 17, 21, 29, 33, 37, 41, 49, 53, 57, 61, 69, 73, 77, 89, 93, 97,
+  101, 109, 113, 121, 129, 133, 137, 141, 149, 157, 161, 173, 177, 181, 193,
+  197, 201, 209, 213, 217, 229, 233, 237, 241, 249, 253, 257, 269, 277, 281,
+  293, 301, 309, 313, 317, 321, 329, ...
+
+(define (primiH limite)
+  (local (out hil previous modulus)
+    (setq out '())
+    ; crea una lista con tutti i numeri di Hilbert minori di 'limite'
+    (setq hil (H (floor (div (- limite 1) 4))))
+    ; elimina il primo numero della lista (1)
+    (pop hil)
+    (dolist (el hil)
+      ; crea una lista con tutti i numeri precedenti al numero corrente (el)
+      (setq previous (slice hil 0 $idx))
+      ;(println el { } previous)
+      ; crea una lista con i moduli delle divisioni
+      ; tra il numero corrente e i numeri precedenti
+      (setq modulus (map (fn(x) (% el x)) previous))
+      ;(println modulus)
+      ; se non esiste alcun valore a 0 nella lista dei moduli,
+      ; allora il numero è un primo di Hilbert
+      (if-not (ref 0 modulus) (push el out -1)))
+    out))
+
+(primiH 330)
+;-> (5 9 13 17 21 29 33 37 41 49 53 57 61 69 73 77 89 93 97
+;->  101 109 113 121 129 133 137 141 149 157 161 173 177 181 193
+;->  197 201 209 213 217 229 233 237 241 249 253 257 269 277 281
+;->  293 301 309 313 317 321 329)
+
+(time (primiH 1e3))
+;-> 0
+(time (primiH 1e4))
+;-> 265.729
+(time (primiH 1e5))
+;-> 26799.259
+
+Versione più veloce:
+
+(define (primiH2 limite)
+  (local (out hil previous modulus)
+    (setq out '())
+    ; crea una lista con tutti i numeri di Hilbert minori di 'limite'
+    (setq hil (H (floor (div (- limite 1) 4))))
+    ; elimina il primo numero della lista (1)
+    (pop hil)
+    (dolist (el hil)
+      ; crea una lista con tutti i numeri precedenti al numero corrente (el)
+      (setq previous (slice hil 0 $idx))
+      ;(println el { } previous)
+      (setq stop nil)
+      ; ciclo per dividere 'el' con ogni numero precedente
+      (dolist (p previous stop)
+        ; se un modulo vale 0, allora il numero non è primo di Hilbert
+        ; e usciamo dal ciclo
+        (if (zero? (% el p)) (setq stop true)))
+      ; se i moduli sono tutti diversi da 0,
+      ; allora 'el' è un primo di Hilbert
+      (if-not stop (push el out -1)))
+    out))
+
+Test di correttezza:
+
+(= (primiH2 1000) (primiH 1000))
+;-> true
+
+Test di velocità:
+
+(time (primiH2 1e3))
+;-> 0
+(time (primiH2 1e4))
+;-> 124.896
+(time (primiH2 1e5))
+;-> 11860.309
+
+
+--------------------------
+Effetto numero convergente
+--------------------------
+
+Dato un numero di N cifre scrivere una funzione che stampa il numero da 000...0 (N zeri) fino a N.
+La stampa deve essere fatta incrementando prima le unità, poi le decine, ecc.
+
+(define (cls)
+"Clear screen of REPL (ANSI sequence)"
+  (print "\027[H\027[2J"))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (converge num ms)
+  (local (len cifre current pos)
+    (setq len (length num))
+    (setq cifre (reverse (int-list num)))
+    (setq current (dup "0" len))
+    (setq pos len)
+    (cls) (println current) (sleep ms)
+    (dolist (c cifre)
+      (-- pos)
+      (if-not (zero? c)
+        (for (k 0 c)
+          (setf (current pos) (string k))
+          (cls) (println current) (sleep ms)))) '>))
+
+(test 367287867511 50)
+
 ============================================================================
 

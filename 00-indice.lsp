@@ -3105,6 +3105,8 @@ NOTE LIBERE 31
   Inserire una stringa in un'altra stringa
   Eliminazione degli spazi extra da una stringa
   Problem 4 of the 2025 International Mathematical Olympiad
+  Primi di Hilbert
+  Effetto numero convergente
 
 PROBLEMI SUI DADI
 =================
