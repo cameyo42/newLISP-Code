@@ -7907,6 +7907,44 @@ La stampa deve essere fatta incrementando prima le unità, poi le decine, ecc.
           (cls) (println current) (sleep ms)))) '>))
 
 (test 367287867511 50)
+;-> 000000000000
+;-> 000000000001
+;-> 000000000002
+;-> ...
+;-> 167287867511
+;-> 267287867511
+;-> 367287867511
+
+
+------------------------
+Intervallo di intervalli
+------------------------
+
+Dato un numero intero N (es. 4), generare un intervallo da 1 a N:
+
+  (1 2 3 4)
+
+Quindi, per ogni numero dell'intervallo, generare una lista da 1 a quel numero:
+
+  ((1) (1 2) (1 2 3) (1 2 3 4))
+
+Infine, invertire ogni elemento della lista:.
+
+  ((1) (2 1) (3 2 1) (4 3 2 1))
+
+La funzione deve essere la più breve possibile.
+
+Versione code-golf (63 caratteri):
+
+(define(f N)(map reverse(map(curry sequence 1)(sequence 1 N))))
+
+(f 4)
+;-> ((1) (2 1) (3 2 1) (4 3 2 1))
+
+(f 10)
+;-> ((1) (2 1) (3 2 1) (4 3 2 1) (5 4 3 2 1) (6 5 4 3 2 1)
+;->  (7 6 5 4 3 2 1) (8 7 6 5 4 3 2 1) (9 8 7 6 5 4 3 2 1)
+;->  (10 9 8 7 6 5 4 3 2 1))
 
 ============================================================================
 

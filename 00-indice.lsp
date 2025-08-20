@@ -3107,6 +3107,7 @@ NOTE LIBERE 31
   Problem 4 of the 2025 International Mathematical Olympiad
   Primi di Hilbert
   Effetto numero convergente
+  Intervallo di intervalli
 
 PROBLEMI SUI DADI
 =================
