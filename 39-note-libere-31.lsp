@@ -7946,5 +7946,262 @@ Versione code-golf (63 caratteri):
 ;->  (7 6 5 4 3 2 1) (8 7 6 5 4 3 2 1) (9 8 7 6 5 4 3 2 1)
 ;->  (10 9 8 7 6 5 4 3 2 1))
 
+
+---------------------------------------------
+Valori massimi e minimi da interi concatenati
+---------------------------------------------
+
+Questo problema è tratto da "Five programming problems every Software Engineer should be able to solve in less than 1 hour" di Santiago Valdarrama.
+Data una lista di interi positivi, restituire i valori massimi e minimi che si possono ottenere concatenando tutti gli interi.
+
+Esempi:
+
+Input =  (420 423 42)
+Output = (42423420 42042342)
+
+Input = (5 56 50)
+Output = (56550 50556)
+
+Input = (3 23)
+Output = (323 233)
+
+Algoritmo Brute-force
+---------------------
+1) Generare tutte le permutazioni della lista di interi.
+2) Calcolare il valore di ogni permutazione (unione degli interi).
+3) Ordinare la lista dei valori in modo crescente.
+4) Il primo numero della lista è il valore minimo, l'ultimo è il valore massimo.
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (max-min lst)
+  (local (permute numbers)
+    (setq permute (perm lst))
+    (setq numbers (sort (map int (map (fn(x) (join (map string x))) permute))))
+    ;(println numbers)
+    (list (numbers -1) (numbers 0))))
+
+Proviamo:
+
+(max-min '(420 423 42))
+;-> (42423420 42042342)
+
+(max-min '(5 56 50))
+;-> (56550 50556)
+
+(max-min '(3 23))
+;-> (323 233)
+
+Algoritmo con ordinamento
+-------------------------
+Convertire i numeri in stringa, ordinarli e infine unire le stringhe (numeri) ordinate.
+
+(define (largest lst)
+  (join (sort (map string lst) >)))
+
+(largest '(54 546 548 60))
+;-> "6054854654"
+
+(largest '(54 9 546 548 60))
+;-> "96054854654"
+
+(largest '(3 23))
+;-> "323"
+
+Purtroppo la funzione sbaglia con:
+
+(setq t '(420 423 42))
+
+(largest '(420 423 42))
+;-> "42342042"
+
+Il risultato corretto è: 42423420
+
+(> 42423420 42342042)
+;-> true
+
+Dobbiamo cambiare il metodo di comparazione nell'ordinamento:
+
+(define (biggest lst)
+  ; join the descending sort of the strings of numbers
+  ; compare "x"+"y" and "y"+"x"
+  (join (sort (map string lst) (fn(x y) (>= (string x y) (string y x))))))
+
+(biggest t)
+;-> "42423420"
+
+(biggest '(5 56 50))
+;-> "56550"
+
+(biggest '(54 546 548 60))
+;-> "6054854654"
+
+(biggest '(54 9 546 548 60))
+;-> "96054854654"
+
+(biggest '(3 23))
+;-> "323"
+
+Per trovare il valore minimo basta invertire l'ordinamento:
+
+(define (smallest lst)
+  ; join the ascending sort of the strings of numbers
+  ; compare "x"+"y" and "y"+"x"
+  (join (sort (map string lst) (fn(x y) (<= (string x y) (string y x))))))
+
+(smallest t)
+;-> "42042342"
+
+(smallest '(5 56 50))
+;-> "50556"
+
+(smallest '(54 546 548 60))
+;-> "5454654860"
+
+(smallest '(54 9 546 548 60))
+;-> "54546548609"
+
+(smallest '(3 23))
+;-> "233"
+
+Uniamo le due funzioni:
+
+(define (max&min lst)
+  (list (int (biggest lst)) (int (smallest lst))))
+
+Proviamo:
+
+(= (max-min '(420 423 42)) (max&min '(420 423 42)))
+;-> true
+
+(= (max-min '(5 56 50)) (max&min '(5 56 50)))
+;-> true
+
+(= (max-min '(3 23)) (max&min '(3 23)))
+;-> true
+
+(max&min '(50 2 1 9))
+;-> (95021 12509)
+
+(max&min '(52 36 526))
+;-> (5265236 3652526)
+
+(max&min '(52 36 525))
+;-> (5255236 3652525)
+
+(max&min '(52 36 524))
+;-> (5252436 3652452)
+
+Test di correttezza:
+
+(for (i 1 10000)
+  (let (t (map (fn(x) (+ x 1)) (rand 100 5)))
+    (if (!= (max-min t) (max&min t))
+        (println t { } (max-min t) { } (max&min t)))))
+;-> nil
+
+Test di velocità:
+
+(time (max-min '(56 78 34 1 198)) 1e3)
+;-> 328.04
+
+(time (max&min '(56 78 34 1 198)) 1e3)
+;-> 15.586
+
+(time (max-min '(56 78 34 1 198 4 9 78)) 1e2)
+;-> 25535.952
+
+(time (max&min '(56 78 34 1 198 4 9 78)) 1e2)
+;-> 0
+
+
+------------------
+Sequenza Iccanobif
+------------------
+
+La sequenza viene generata partendo dalla sequenza standard di Fibonacci, ma dopo aver sommato i due numeri precedenti, si capovolge il risultato e si eliminano gli zeri iniziali.
+
+Sequenza OEIS A014258:
+Iccanobif numbers: add previous two terms and reverse the sum.
+  0, 1, 1, 2, 3, 5, 8, 31, 93, 421, 415, 638, 3501, 9314, 51821, 53116,
+  739401, 715297, 8964541, 8389769, 1345371, 415379, 570671, 50689, 63126,
+  518311, 734185, 6942521, 6076767, 88291031, 89776349, 83760871, 22735371,
+  242694601, 279924562, 361916225, 787048146, ...
+
+(define (obif num)
+  (if (zero? num) 0L
+  ;else
+  (local (a b c)
+    (setq a 0L b 1L c 0L)
+    (for (i 0 (- num 1))
+      (setq c (+ a b))
+      ; convert c to string
+      (setq c (string c))
+      ; remove the L of big-integer
+      (pop c -1)
+      ; reverse c
+      (setq c (reverse c))
+      ; remove all "0" at the beginning
+      (while (= (c 0) "0") (pop c))
+      ; reconvert to big-integer
+      (setq c (eval-string (push "L" c -1)))
+      ;(println c) (read-line)
+      (setq a b)
+      (setq b c)
+    )
+    a)))
+
+Proviamo:
+
+(map obif (sequence 0 36))
+;-> (0L 1L 1L 2L 3L 5L 8L 31L 93L 421L 415L 638L 3501L 9314L 51821L 53116L
+;->  739401L 715297L 8964541L 8389769L 1345371L 415379L 570671L 50689L 63126L
+;->  518311L 734185L 6942521L 6076767L 88291031L 89776349L 83760871L 22735371L
+;->  242694601L 279924562L 361916225L 787048146L)
+
+
+-----------------
+Divisione e resto
+-----------------
+
+Scrivere una funzione che prende dur numeri interi 'a' e 'b' e restituisce la divisione intera tra 'a' e 'b' e il relativo resto.
+
+(define (div-rem a b) (list (/ a b) (% a b)))
+
+Proviamo:
+
+(div-rem 5 7)
+;-> (0 5)
+(div-rem 5 1)
+;-> (5 0)
+(div-rem 0 1)
+;-> (0 0)
+(div-rem 101 50)
+;-> (2 1)
+(div-rem 18 4)
+;-> (4 2)
+(div-rem 255 25)
+;-> (10 5)
+
 ============================================================================
 

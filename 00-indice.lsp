@@ -3108,6 +3108,12 @@ NOTE LIBERE 31
   Primi di Hilbert
   Effetto numero convergente
   Intervallo di intervalli
+  Valori massimi e minimi da interi concatenati
+  Sequenza Iccanobif
+  Divisione e resto
+
+NOTE LIBERE 32
+==============
 
 PROBLEMI SUI DADI
 =================
@@ -3151,7 +3157,7 @@ APPENDICI
   Considerazioni lungo il tragitto
 
 BIBLIOGRAFIA/WEB
--================
+================
 
 YO LIBRARY
 ==========

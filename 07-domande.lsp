@@ -7075,6 +7075,8 @@ Dobbiamo cambiare il metodo di comparazione nell'ordinamento:
 (biggest t)
 ;-> "42423420"
 
+Vedi anche "Valori massimi e minimi da interi concatenati" su "Note libere 31".
+
 
 ------------------------------------------------
 Rettangoli e quadrati in una scacchiera (Google)

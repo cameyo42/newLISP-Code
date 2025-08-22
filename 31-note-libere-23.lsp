@@ -1740,6 +1740,16 @@ Versione ottimizzata:
 (time (seq2 30) 1e4)
 ;-> 272.375
 
+Versione da definizione:
+
+(define (pf N)
+  (cond ((= N 0) 1)
+        ((= N 1) 1)
+        (true (apply lcm (sequence 1 N)))))
+
+(time (map pf (sequence 0 30)) 1e4)
+;-> 1415.228
+
 
 -----------------------------
 Strette di mano (handshaking)

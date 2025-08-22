@@ -210,7 +210,7 @@
   (let ( (as '()) (t1 0) (t2 0) )
     ; Insert pairs
     (setq as (map list (randomize (sequence 1 items))
-                      (randomize (sequence 1 items))))
+                       (randomize (sequence 1 items))))
     ; Query all keys
     (for (q 1 items)
       (if (lookup q as) (++ t1))
@@ -441,7 +441,7 @@
 (define (floating)
   ; Test IEE compliance of some FP operations and handling of 'inf' and 'NaN'
   ; numbers. In all versions of newLISP (32Bit and 64Bit) floating point
-  ;  numbers are represented as IEEE 754 64-bit: Double (binary64) numbers.
+  ; numbers are represented as IEEE 754 64-bit: Double (binary64) numbers.
   ;(println)
   ;(println "Testing floating point performance")
   (set-locale "C")
