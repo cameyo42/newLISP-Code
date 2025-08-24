@@ -6,7 +6,7 @@
  MIT-0 License
 ============================================================================
 
-"Ogni cosa può accadere solo una volta"
+ "Ogni cosa può accadere solo una volta"
 
 ========
 
@@ -3114,6 +3114,10 @@ NOTE LIBERE 31
 
 NOTE LIBERE 32
 ==============
+  Somma dei numeri che non dividono N
+  Numeri divisibili dalla somma e dal prodotto delle loro cifre
+  Somma alternata dei numeri di una lista
+  Print the internal format of the source of a function with line numbers
 
 PROBLEMI SUI DADI
 =================
