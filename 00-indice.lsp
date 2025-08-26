@@ -3118,6 +3118,8 @@ NOTE LIBERE 32
   Numeri divisibili dalla somma e dal prodotto delle loro cifre
   Somma alternata dei numeri di una lista
   Print the internal format of the source of a function with line numbers
+  Quante partite a scacchi sono possibili?
+  Struttura dati Find-Union (Disjoint Set Union)
 
 PROBLEMI SUI DADI
 =================

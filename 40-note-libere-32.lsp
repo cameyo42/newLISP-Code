@@ -225,5 +225,225 @@ Scrivere una funzione che stampa il formato interno del sorgente (con numeri di 
 ;-> 4    (pop line -1)
 ;-> 5    (map (lambda (x) (println (format "%3d " (+ $idx 1)) x)) line) '>))
 
+
+----------------------------------------
+Quante partite a scacchi sono possibili?
+----------------------------------------
+
+Negli scacchi una mossa significa che sia il Bianco che il Nero hanno spostato un pezzo.
+In altre parole, una sola mossa del Bianco o del Nero viene chiamata 'ply' (semimossa).
+Occorrono un ply del Bianco e un ply del Nero per fare una mossa completa.
+
+Il primo scienziato a fare una stima del numero di partite di scacchi possibili è stato Claude Shannon.
+Nel suo articolo del 1950 "Programming a Computer for Playing Chess" (Programmazione di un computer per giocare a scacchi), Shannon ha presentato un calcolo per il limite inferiore della complessità dell'albero di gioco degli scacchi, che ha portato a circa 10^120 partite possibili, per dimostrare l'impraticabilità di risolvere gli scacchi con la forza bruta.
+
+Il calcolo considera che per ogni posizione esistono, in media, 30 ply (semimosse) legali possibili.
+e che una partita, in media, dura 40 mosse (80 ply).
+In questo modo il numero di partite possibili vale: 30^80
+
+Per ogni posizione esistono, in media, 30 ply (semimosse) legali possibili.
+Quindi il numero di partite possibili vale: 30^80
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(** 30 80)
+;-> 147808829414345923316083210206383297601000000000000000000000
+;-> 00000000000000000000000000000000000000000000000000000000000L
+
+Funzione che converte una potenza a^b in 10^x (calcola x):
+(define (power10 base exponent) (div (mul exponent (log base)) (log 10)))
+
+(power10 30 80)
+;-> 118.169700377573
+
+Quindi 30^80 ~= 10^118.
+
+Nota: gli atomi Universo osservabile sono circa 10^80.
+
+Shannon ha anche stimato il numero di possibili posizioni:
+  
+  64!/(32!*8!^2*2!^6) ~= 10^43
+
+Questo valore include alcune posizioni illegali.
+
+Sequenza OEIS A048987:
+Number of possible chess games at the end of the n-th ply.
+  1, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860, 84998978956,
+  2439530234167, 69352859712417, 2097651003696806, 62854969236701747,
+  1981066775000396239, 61885021521585529237, 2015099950053364471960, ...
+Does not include games which end in fewer than n plies.
+According to the laws of chess, the "50-move rule" and "draw by 3-fold repetition" do not prevent infinite games because they require an appeal by one of the players, but the "75-move rule" introduced on Jul 01 2014 is automatic and makes chess finite.
+
+Sequenza OEIS A079485:
+Number of chess games that end in checkmate after exactly n plies.
+  0, 0, 0, 0, 8, 347, 10828, 435767, 9852036, 400191963, 8790619155,
+  362290010907, 8361091858959, 346742245764219, ...
+
+
+----------------------------------------------
+Struttura dati Find-Union (Disjoint Set Union)
+----------------------------------------------
+
+La struttura dati Find-Union (chiamata anche Disjoint Set - DSU) memorizza e gestisce insiemi (set) che non hanno elementi in comune.
+La struttura supporta le seguenti operazioni:
+1) make-set(v):
+   Crea un nuovo insieme costituito dal nuovo elemento v
+2) union-sets(a b):
+   Unisce i due insiemi specificati (l'insieme in cui si trova l'elemento a e l'insieme in cui si trova l'elemento b)
+3) find-set(v):
+   Restituisce il rappresentante (detto anche leader) dell'insieme che contiene l'elemento v.
+   Questo rappresentante è un elemento del suo insieme corrispondente.
+   Viene selezionato in ogni insieme dalla struttura dati stessa (e può cambiare nel tempo, in particolare dopo le chiamate a union-sets).
+   Questo rappresentante può essere utilizzato per verificare se due elementi fanno parte dello stesso insieme o meno.
+   a e b appartengono esattamente allo stesso insieme, se find_set(a) == find_set(b). Altrimenti appartengono a insiemi diversi.
+Come vedremo in seguito, la struttura dati consente di eseguire ciascuna di queste operazioni in un tempo medio di quasi O(1).
+
+Vediamo un esempio:
+Abbiamo 10 individui: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.
+Tra gli individui esistono le seguenti relazioni:
+
+  0 <-> 1
+  1 <-> 3
+  2 <-> 5
+  2 <-> 8
+  9 <-> 4
+  6 <-> 9
+
+Per rispondere a domande del tipo se '0' sia amico di '3' o meno, dobbiamo creare i seguenti 4 gruppi e mantenere una connessione accessibile tra gli elementi del gruppo:
+
+  G1 = (0 1 3)
+  G2 = (2 5 8)
+  G3 = (4 6 9)
+  G4 = (7)
+
+Determinare se x e y appartengono allo stesso gruppo o meno, significa trovare se x e y sono amici diretti/indiretti.
+
+L'idea centrale è quella di suddividere gli individui in insiemi diversi in base ai gruppi a cui appartengono.
+Questo metodo è noto come Unione di insiemi disgiunti, che mantiene una collezione di insiemi disgiunti e ogni insieme è rappresentato da uno dei suoi membri.
+Inizialmente, tutti gli elementi appartengono a insiemi diversi.
+Dopo aver rappresentato le relazioni fornite, selezioniamo un membro come rappresentante.
+Quindi, due persone appartengono allo stesso gruppo se i loro rappresentanti sono gli stessi (cioè sono amici diretti/indiretti).
+
+Per implementare l'algoritmo abbiamo bisogno delle seguenti strutture dati:
+
+1) Lista: una lista di interi (es. 'parent').
+Con N elementi, l'indice i-esimo della lista rappresenta l'elemento i-esimo.
+Più precisamente, l'indice i-esimo della lista 'parent' contiene il genitore dell'elemento i-esimo.
+Queste relazioni creano uno o più alberi virtuali.
+
+2) Albero: è un insieme (set) disgiunto (implementato come lista).
+Se due elementi appartengono allo stesso albero, allora appartengono allo stesso insieme disgiunto.
+Il nodo radice (o il nodo più in alto) di ogni albero è chiamato rappresentante dell'insieme.
+Esiste sempre un singolo rappresentante univoco per ogni insieme.
+Una semplice regola per identificare un rappresentante è: se 'i' è il rappresentante di un insieme, allora (parent i) = i.
+Se 'i' non è il rappresentante del suo insieme, allora può essere trovato risalendo l'albero fino a trovare il rappresentante.
+
+Le due operazioni principali sulle strutture dati sono:
+
+1) find-set(v):
+Funzione che cerca il rappresentante dell'insieme di un dato elemento.
+Il rappresentante è sempre la radice dell'albero.
+Quindi implementiamo 'find-set' attraversando ricorsivamente la lista 'parent' fino a trovare un nodo che è radice (genitore di se stesso).
+
+2) union-sets(a b):
+Funzione che combina due insiemi e per crearne uno.
+Prende due elementi come input e trova i rappresentanti dei loro insiemi utilizzando l'operazione 'find', e infine inserisce uno degli alberi (quello che rappresenta l'insieme) sotto il nodo radice dell'altro albero.
+
+Implementazione O(N):
+
+Funzione di inizializzazione della struttura dati:
+
+(define (init-dsu size) (setq parent (sequence 0 (- size 1))))
+
+Funzione per inizializzare un elemento della struttura dati:
+
+(define (make-set v) (setf (parent v) v))
+
+Funzione che ricerca il rappresentante di un elemento:
+
+(define (find-set v)
+  (if (!= (parent v) v)
+      (setf (parent v) (find-set (parent v))))
+  (parent v))
+
+Funzione che combina due insiemi in uno (imposta le relazioni):
+
+(define (union-sets a b)
+  (setq a (find-set a))
+  (setq b (find-set b))
+  (if (!= a b) (setf (parent b) a)))
+
+Esempio 1:
+
+Elementi: 1 2 3 4
+Relazioni:
+  1 <-> 2
+  3 <-> 4
+  1 <-> 3
+Gruppi:
+  G = (1 2 3 4)
+
+(init-dsu 5)
+(union-sets 1 2)
+;-> 1
+(union-sets 3 4)
+;-> 3
+(union-sets 1 3)
+;-> 1
+(= (find-set 1) (find-set 2))
+;-> true
+(= (find-set 1) (find-set 3))
+;-> true
+(= (find-set 1) (find-set 0))
+;-> nil
+
+Esempio 2:
+
+Elementi: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.
+Relazioni:
+  0 <-> 1
+  1 <-> 3
+  2 <-> 5
+  2 <-> 8
+  9 <-> 4
+  6 <-> 9
+Gruppi:
+  G1 = (0 1 3)
+  G2 = (2 5 8)
+  G3 = (4 6 9)
+  G4 = (7)
+
+(init-dsu 10)
+(union-sets 0 1)
+(union-sets 1 3)
+(union-sets 2 5)
+(union-sets 2 8)
+(union-sets 9 4)
+(union-sets 6 9)
+parent
+;-> (0 0 2 0 9 2 6 7 2 6)
+(= (find-set 0) (find-set 3))
+;-> true
+parent
+;-> (0 0 2 0 9 2 6 7 2 6)
+(= (find-set 4) (find-set 9))
+;-> true
+parent
+;-> (0 0 2 0 6 2 6 7 2 6)
+(= (find-set 6) (find-set 2))
+;-> nil
+parent
+(0 0 2 0 6 2 6 7 2 6)
+
+Queste funzioni hanno una complessità temporale di O(N).
+Possiamo migliorare il comportamento con alcune modifiche.
+
+...CONTINUA...
+
 ============================================================================
 
