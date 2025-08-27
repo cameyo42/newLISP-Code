@@ -668,5 +668,83 @@ Esempi:
 Ulteriori approfondimenti:
 https://cp-algorithms.com/data_structures/disjoint_set_union.html
 
+
+---------------------------
+Numeri primi su un orologio
+---------------------------
+
+Quanti e quali numeri primi ci sono in un orologio (ore, minuti, secondi) in un giorno?
+Quanti e quali numeri primi ci sono in un orologio (ore, minuti) in un giorno?
+
+Sequenza OEIS A229106:
+Prime time display in hours, minutes, seconds on a six-digit 24-hour digital clock.
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 101, 103,
+  107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 211, 223, 227, 229, 233,
+  239, 241, 251, 257, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 401,
+  409, 419, 421, 431, 433, 439, 443, ...
+Leading zeros are ignored, so the term a(3) = 5, for example, corresponds to the display 00:00:05. Sequence has 7669 entries.
+The first 211 terms are the same as in A050246.
+
+Sequenza OEIS A050246:
+Digital clock primes.
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 101, 103,
+  107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 211, 223, 227, 229, 233,
+  239, 241, 251, 257, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 401,
+  409, 419, 421, 431, 433, 439, 443, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (time-list t1 t2)
+"Generate a list of times (HH MM SS) from t1 to t2"
+  (local (out a b)
+    (setq out '())
+    (for (h (t1 0) (t2 0))
+      (for (m 0 59)
+        (for (s 0 59)
+          (push (list h m s) out -1))))
+    (setq a (find t1 out))
+    (setq b (find t2 out))
+    (slice out a (+ (- b a) 1))))
+
+(define (primi-hms)
+  (let (lst (time-list '(0 0 0) '(23 59 59)))
+    (setq lst (map (fn(x) (format "%02d%02d%02d" (x 0) (x 1) (x 2))) lst))
+    (filter prime? (map (fn(x) (int x 0 10)) lst))))
+
+(primi-hms)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 101 103
+;->  107 109 113 127 131 137 139 149 151 157 211 223 227 229 233
+;->  239 241 251 257 307 311 313 317 331 337 347 349 353 359 401
+;->  409 419 421 431 433 439 443 449 457 503 509 521 523 541 547
+;-> ...
+;->  235349 235439 235441 235447 235513 235519 235523 235537 235541
+;->  235553 235559 235601 235607 235621 235723 235747 235751 235811
+;->  235813 235849 235901 235919 235927 235951)
+(length (primi-hms))
+;-> 7669
+
+(define (primi-hm)
+  (let (lst (time-list '(0 0 0) '(23 59 59)))
+    (setq lst (unique (map (fn(x) (slice x 0 2)) lst)))
+    (setq lst (map (fn(x) (format "%02d%02d" (x 0) (x 1))) lst))
+    (filter prime? (map (fn(x) (int x 0 10)) lst))))
+
+(primi-hm)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 101 103
+;->  107 109 113 127 131 137 139 149 151 157 211 223 227 229 233
+;->  239 241 251 257 307 311 313 317 331 337 347 349 353 359 401
+;->  409 419 421 431 433 439 443 449 457 503 509 521 523 541 547
+;-> ...
+;->  1823 1831 1847 1901 1907 1913 1931 1933 1949 1951 2003 2011
+;->  2017 2027 2029 2039 2053 2111 2113 2129 2131 2137 2141 2143
+;->  2153 2203 2207 2213 2221 2237 2239 2243 2251 2309 2311 2333
+;->  2339 2341 2347 2351 2357)
+
+(length (primi-hm))
+;-> 211
+
 ============================================================================
 

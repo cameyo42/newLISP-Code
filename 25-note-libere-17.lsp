@@ -4343,6 +4343,40 @@ Possiamo usare anche funzioni definite dall'utente:
 (pam 5 '((fn(x) (* x x)) sin) true)
 ;-> -0.132351750097773
 
+Possiamo generalizzare la funzione passando una lista di numeri (nums) al posto di un solo numero (num):
+
+(define (pam1 nums funcs one)
+  (let ( (out '()) (tmp nil) )
+    (cond ((true? one) 
+            ; out = lista di interi (lunga quanto 'nums')
+            (dolist (n nums)
+              (setq tmp n)
+              (dolist (f funcs)
+                (setq tmp ((eval f) tmp)))
+              (push tmp out -1)))
+          (true 
+            ; out = lista (lunga quanto 'nums')
+            ;       di liste di interi (lunghe quanto 'funcs' + 1)
+            (dolist (n nums)
+              (setq tmp (list n))
+              (dolist (f funcs)
+                (push ((eval f) n) tmp -1))
+              (push tmp out -1)))
+    )
+    out))
+
+Proviamo:
+
+(pam1 '(5) '((fn(x) (+ x 1)) (fn(x) (+ x 2))))
+;-> ((5 6 7))
+(pam1 '(5) '((fn(x) (+ x 1)) (fn(x) (+ x 2))) true)
+;-> (8)
+
+(pam1 '(1 5) '((fn(x) (+ x 1)) (fn(x) (+ x 2))))
+;-> ((1 2 3) (5 6 7))
+(pam1 '(1 5) '((fn(x) (+ x 1)) (fn(x) (+ x 2))) true)
+;-> (4 8)
+
 
 ---------
 Bit-array

@@ -7267,7 +7267,7 @@ Per esempio:
 (bits -22)
 ;-> "1111111111111111111111111111111111111111111111111111111111101010"
 
-Nota: ~num = = -num - 1 = -(num + 1)
+Nota: ~num = - num - 1 = -(num + 1)
 
 A volte abbiamo bisogno di un'inversione bit a bit personalizzata che influenzi solo i bit attivi del numero, dal bit 1 meno significativo a destra (LSB) fino al bit 1 più significativo a sinistra (MSB).
 Per esempio:
