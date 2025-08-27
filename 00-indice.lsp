@@ -3119,7 +3119,7 @@ NOTE LIBERE 32
   Somma alternata dei numeri di una lista
   Print the internal format of the source of a function with line numbers
   Quante partite a scacchi sono possibili?
-  Struttura dati Find-Union (Disjoint Set Union)
+  Struttura dati Disjoint Set Union (Find-Union)
 
 PROBLEMI SUI DADI
 =================

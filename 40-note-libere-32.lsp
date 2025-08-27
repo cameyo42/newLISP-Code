@@ -286,7 +286,7 @@ Number of chess games that end in checkmate after exactly n plies.
 
 
 ----------------------------------------------
-Struttura dati Find-Union (Disjoint Set Union)
+Struttura dati Disjoint Set Union (Find-Union)
 ----------------------------------------------
 
 La struttura dati Find-Union (chiamata anche Disjoint Set - DSU) memorizza e gestisce insiemi (set) che non hanno elementi in comune.
@@ -367,9 +367,8 @@ Funzione per inizializzare un elemento della struttura dati:
 Funzione che ricerca il rappresentante di un elemento:
 
 (define (find-set v)
-  (if (!= (parent v) v)
-      (setf (parent v) (find-set (parent v))))
-  (parent v))
+  (cond ((= v (parent v)) v)
+        (true (find-set (parent v)))))
 
 Funzione che combina due insiemi in uno (imposta le relazioni):
 
@@ -434,16 +433,240 @@ parent
 (= (find-set 4) (find-set 9))
 ;-> true
 parent
-;-> (0 0 2 0 6 2 6 7 2 6)
+;-> (0 0 2 0 9 2 6 7 2 6)
 (= (find-set 6) (find-set 2))
 ;-> nil
 parent
-(0 0 2 0 6 2 6 7 2 6)
+;-> (0 0 2 0 9 2 6 7 2 6)
 
-Queste funzioni hanno una complessità temporale di O(N).
+La funzione find-set(v) ha una complessità temporale di O(N).
 Possiamo migliorare il comportamento con alcune modifiche.
 
-...CONTINUA...
+Ottimizzazione (Compressione dei percorsi e Unione per rango/dimensione)
+------------------------------------------------------------------------
+L'idea principale è quella di ridurre l'altezza degli alberi che rappresentano insiemi diversi. Questo obiettivo viene raggiunto con due metodi più comuni:
+1) Compressione dei percorsi
+2) Unione per rango (o per dimensione)
+
+1) Compressione dei percorsi (utilizzata per migliorare find-set())
+-------------------------------------------------------------------
+L'idea è quella di appiattire l'albero quando viene chiamata find-set().
+Quando find-set() viene chiamata per un elemento x, viene restituita la radice dell'albero.
+L'operazione find-set() attraversa da x per trovare la radice.
+L'idea della compressione dei percorsi è quella di rendere la radice trovata il padre di x in modo da non dover attraversare nuovamente tutti i nodi intermedi.
+Se x è la radice di un sottoalbero, anche il percorso (verso la radice) da tutti i nodi sotto x viene compresso.
+Accelera la struttura dati comprimendo l'altezza degli alberi.
+Questo può essere ottenuto inserendo un piccolo meccanismo di caching nell'operazione find-set(v).
+
+La nuova implementazione di 'find-set' diventa:
+
+(define (find-set v)
+  (cond ((= v (parent v)) v)
+        (true (setf (parent v) (find-set (parent v))))))
+
+Questa modifica prima trova il rappresentante dell'insieme (vertice radice), e poi, durante il processo di stack unwinding, i nodi visitati vengono associati direttamente al rappresentante.
+In questo modo l'operazione raggiunge una complessità temporale media di O(log n) per chiamata.
+
+Proviamo:
+
+(init-dsu 10)
+(union-sets 0 1)
+(union-sets 1 3)
+(union-sets 2 5)
+(union-sets 2 8)
+(union-sets 9 4)
+(union-sets 6 9)
+parent
+;-> (0 0 2 0 9 2 6 7 2 6)
+(= (find-set 0) (find-set 3))
+;-> true
+parent
+;-> (0 0 2 0 9 2 6 7 2 6)
+(= (find-set 4) (find-set 9))
+;-> true
+parent
+;-> (0 0 2 0 6 2 6 7 2 6) ; cambia la radice da 9 a 6 dell'indice 4
+(= (find-set 6) (find-set 2))
+;-> nil
+parent
+;-> (0 0 2 0 6 2 6 7 2 6)
+
+La seconda modifica che implementiamo rende il tutto ancora più veloce.
+In questa ottimizzazione modificheremo l'operazione union-set().
+Per essere precisi, cambieremo quale albero viene collegato all'altro.
+Nell'implementazione di base, il secondo albero veniva sempre collegato al primo.
+In pratica, questo può portare ad alberi contenenti catene di lunghezza O(N).
+Con questa ottimizzazione eviteremo questo problema scegliendo con molta attenzione quale albero viene collegato.
+
+2a) Unione per rango (utilizzata per migliorare union-sets())
+-------------------------------------------------------------
+Il rango è come l'altezza degli alberi che rappresentano insiemi diversi.
+Utilizziamo una lista aggiuntiva di interi chiamata 'rank'.
+La dimensione di questa lista è la stessa della lista padre 'parent'.
+Se 'i' è rappresentativo di un insieme, rank(i) è il rango dell'elemento i.
+Il rango è uguale all'altezza se non si utilizza la compressione dei percorsi.
+Con la compressione dei percorsi, il rango può essere maggiore dell'altezza effettiva.
+Quindi utilizziamo il limite superiore della profondità dell'albero, perché la profondità diminuisce quando si applica la compressione dei percorsi.
+Ora ricordiamo che nell'operazione di Unione, non importa quale dei due alberi venga spostato sotto l'altro.
+Ora ciò che vogliamo fare è ridurre al minimo l'altezza dell'albero risultante.
+Se stiamo unendo due alberi (o insiemi), chiamiamoli sinistro e destro, quindi tutto dipende dal rango di sinistro e dal rango di destro.
+- Se il rango di sinistra è inferiore al rango di destra, allora è meglio spostarsi a sinistra sotto a destra, perché ciò non cambierà il rango di destra (mentre spostarsi a destra sotto a sinistra aumenterebbe l'altezza).
+- Allo stesso modo, se il rango di destra è inferiore al rango di sinistra, allora dovremmo spostarci a destra sotto a sinistra.
+- Se i ranghi sono uguali, non importa quale albero si trovi sotto l'altro, ma il rango del risultato sarà sempre maggiore di uno rispetto al rango degli alberi.
+
+2b) Unione per dimensione (utilizzata per migliorare union-sets())
+Utilizziamo una lista di interi chiamata 'size'.
+La dimensione di questa lista è la stessa della lista padre 'parent'.
+Se 'i' è il rappresentante di un insieme, size(i) è il numero di elementi nell'albero che rappresenta l'insieme.
+Ora stiamo unendo due alberi (o insiemi), chiamiamoli left e right: in questo caso, tutto dipende dalla dimensione dell'albero left e dalla dimensione dell'albero right (o insieme).
+- Se la dimensione di left è inferiore a quella di right, allora è meglio spostare left sotto right e aumentare la dimensione di right di quella di left.
+- Allo stesso modo, se la dimensione di right è inferiore a quella di left, allora dovremmo spostare right sotto left e aumentare la dimensione di left di quella di right.
+- Se le dimensioni sono uguali, non importa quale albero vada sotto l'altro.
+
+In entrambi gli approcci, l'essenza dell'ottimizzazione è la stessa: colleghiamo l'albero con il rango inferiore a quello con il rango maggiore.
+Entrambe le ottimizzazioni sono equivalenti in termini di complessità temporale e spaziale. Quindi, in pratica, è possibile utilizzarne una qualsiasi.
+
+Unione per dimensione (implementazione)
+---------------------------------------
+Funzione di inizializzazione della struttura dati:
+
+(define (init-dsu N)
+  (setq parent (sequence 0 (- N 1)))
+  (setq size (dup 1 N)))
+
+Funzione per inizializzare un elemento della struttura dati:
+
+(define (make-set v)
+  (setf (parent v) v)
+  (setf (size v) 1))
+
+Funzione che combina due insiemi in uno (imposta le relazioni):
+
+(define (union-sets a b)
+  (setq a (find-set a))
+  (setq b (find-set b))
+  (if (!= a b) 
+    (begin
+      (if (< (size a) (size b)) (swap a b))
+      (setf (parent b) a)
+      (setq (size a) (+ (size a) (size b))))))
+
+Proviamo:
+
+(init-dsu 10)
+(union-sets 0 1)
+(union-sets 1 3)
+(union-sets 2 5)
+(union-sets 2 8)
+(union-sets 9 4)
+(union-sets 6 9)
+parent
+;-> (0 0 2 0 9 2 9 7 2 9) ; diversa dalla lista della versione di base
+(= (find-set 0) (find-set 3))
+;-> true
+parent
+;-> (0 0 2 0 9 2 9 7 2 9)
+(= (find-set 4) (find-set 9))
+;-> true
+parent
+;-> (0 0 2 0 9 2 9 7 2 9)
+(= (find-set 6) (find-set 2))
+;-> nil
+parent
+;-> (0 0 2 0 9 2 9 7 2 9)
+
+Unione per rango (implementazione)
+----------------------------------
+Funzione di inizializzazione della struttura dati:
+
+(define (init-dsu N)
+  (setq parent (sequence 0 (- N 1)))
+  (setq rank (dup 0 N)))
+
+Funzione per inizializzare un elemento della struttura dati:
+
+(define (make-set v)
+  (setf (parent v) v)
+  (setf (rank v) 0))
+
+Funzione che combina due insiemi in uno (imposta le relazioni):
+
+(define (union-sets a b)
+  (setq a (find-set a))
+  (setq b (find-set b))
+  (if (!= a b) 
+    (begin
+      (if (< (rank a) (rank b)) (swap a b))
+      (setf (parent b) a)
+      (if (= (rank a) (rank b)) (++ (rank a))))))
+
+Proviamo:
+
+(init-dsu 10)
+(union-sets 0 1)
+(union-sets 1 3)
+(union-sets 2 5)
+(union-sets 2 8)
+(union-sets 9 4)
+(union-sets 6 9)
+parent
+;-> (0 0 2 0 9 2 9 7 2 9) ; diversa dalla lista della versione di base
+(= (find-set 0) (find-set 3))
+;-> true
+parent
+;-> (0 0 2 0 9 2 9 7 2 9)
+(= (find-set 4) (find-set 9))
+;-> true
+parent
+;-> (0 0 2 0 9 2 9 7 2 9)
+(= (find-set 6) (find-set 2))
+;-> nil
+parent
+;-> (0 0 2 0 9 2 9 7 2 9)
+
+Riassunto
+---------
+La Disjoint Set Union (DSU), detta anche Union-Find, è una struttura dati molto usata in algoritmi e problemi che richiedono di gestire partizioni dinamiche di insiemi disgiunti.
+Permette di:
+
+- capire rapidamente se due elementi appartengono allo stesso insieme (find)
+- unire due insiemi (union)
+
+Grazie a ottimizzazioni come path compression e union by rank/size, le operazioni hanno costo quasi costante (ammortizzato, O(alpha(N)), dove alpha è la funzione inversa di Ackermann).
+
+Casi d'uso principali di DSU:
+
+1. Grafi e connettività
+   - Verificare se due nodi appartengono alla stessa componente connessa.
+   - Costruzione di alberi di copertura minimi (algoritmo di Kruskal).
+   - Rilevare la presenza di cicli durante l'aggiunta di archi.
+
+2. Problemi di clustering
+   - Partizionare dati in insiemi disgiunti.
+   - Algoritmi di segmentazione (ad esempio in computer vision).
+
+3. Problemi di equivalenza
+   - Gestire classi di equivalenza (es. congruenze, raggruppamenti).
+   - Determinare se due elementi sono equivalenti in base a vincoli dati.
+
+4. Percolazione e sistemi fisici
+   - Modellare reti di connessione (acqua, elettricità, ecc.) e verificare la percolazione.
+   - Verificare la formazione di cluster connessi.
+
+5. Dynamic Connectivity
+   - Rispondere a query tipo "aggiungi un arco" e "sono i due nodi collegati?" in tempo efficiente.
+
+6. Problemi su insiemi
+   - Gestire insiemi che si fondono nel tempo (ad esempio simulazioni di unioni di gruppi).
+   - Giochi o puzzle dove gruppi di celle si uniscono.
+
+Esempi:
+- In un social network: determinare se due persone fanno parte dello stesso gruppo di amici.
+- In un labirinto random: verificare che l'aggiunta di un corridoio non crei cicli.
+- Nei problemi in cui occorre risolvere query di tipo "sono nello stesso insieme?" o "unisci i due insiemi".
+
+Ulteriori approfondimenti:
+https://cp-algorithms.com/data_structures/disjoint_set_union.html
 
 ============================================================================
 
