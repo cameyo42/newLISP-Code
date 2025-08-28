@@ -3121,6 +3121,8 @@ NOTE LIBERE 32
   Quante partite a scacchi sono possibili?
   Struttura dati Disjoint Set Union (Find-Union)
   Numeri primi su un orologio
+  Liste di k primi consecutivi che sommano come i loro inversi
+  Somma dei primi N numeri primi quadrata
 
 PROBLEMI SUI DADI
 =================

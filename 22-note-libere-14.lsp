@@ -874,6 +874,7 @@ Metodo newLISP:
 (inv-dig 1234567890)
 ;-> 987654321
 (inv-dig 1000)
+;-> 1
 
 Vediamo se le due funzioni producono gli stessi risultati:
 

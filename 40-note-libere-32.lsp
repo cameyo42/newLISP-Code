@@ -746,5 +746,213 @@ Digital clock primes.
 (length (primi-hm))
 ;-> 211
 
+
+------------------------------------------------------------
+Liste di k primi consecutivi che sommano come i loro inversi
+------------------------------------------------------------
+
+Cominciamo considerando una coppia di primi consecutivi.
+
+Data la lista dei primi p1, p2, ..., pk,... e dei loro inversi q1, q2, ... qk, ..., determinare le coppie consecutive di primi p(i) e p(i+1) per cui risulta:
+
+  p(i) + p(i+1) = q(i) + q(i+1)
+
+Per inverso di un numero si intende il numero con tutte le cifre invertite.
+Esempio:
+N = 25437, Inversione = 73452
+
+Inoltre deve risultare p(i) != q(i) e p(i+1) != q(i+1), cioè i numeri primi non devono essere palindromi.
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Funzione che inverte le cifre di un numero:
+
+(define (invert-digits num) (int (reverse (string num)) 0 10))
+
+Funzione che cerca le coppie di primi consecutivi che soddisfano i requisiti:
+
+(define (search-pair limite show)
+  (local (out primi len conta p1 p2 q1 q2)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (setq len (length primi))
+    (setq primi (array len primi))
+    (setq conta 0)
+    (for (i 0 (- len 2))
+      (setq p1 (primi i))
+      (setq p2 (primi (+ i 1)))
+      (setq q1 (invert-digits p1))
+      (setq q2 (invert-digits p2))
+      ;(println p1 { } p2 { } q1 { } q2)
+      (when (and (!= p1 q1) (!= p2 q2)
+                (= (+ p1 p2) (+ q1 q2)))
+        (push (list p1 p2 (+ p1 p2) q1 q2) out -1)
+        (if show (println p1 " + " p2 " = " (+ p1 p2) " = " q1 " + " q2))
+        (++ conta)))
+    (if show 
+        (println conta " coppie.")
+        ;else
+        out)))
+
+Proviamo:
+
+(search-pair 1e3 true)
+;-> 211 + 223 = 434 = 112 + 322
+;-> 281 + 283 = 564 = 182 + 382
+;-> 457 + 461 = 918 = 754 + 164
+;-> 487 + 491 = 978 = 784 + 194
+;-> 509 + 521 = 1030 = 905 + 125
+;-> 557 + 563 = 1120 = 755 + 365
+;-> 569 + 571 = 1140 = 965 + 175
+;-> 587 + 593 = 1180 = 785 + 395
+;-> 653 + 659 = 1312 = 356 + 956
+;-> 827 + 829 = 1656 = 728 + 928
+;-> 857 + 859 = 1716 = 758 + 958
+;-> 11 coppie.
+
+(length (search-pair 1e5))
+;-> 56
+
+(length (search-pair 1e7))
+;-> 357
+
+Possiamo estendere la funzione per trattare una lista di K primi consecutivi.
+
+Funzione che cerca k primi consecutivi che soddisfano i requisiti:
+
+(define (search-k k limite)
+  (local (out primi len p q)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (setq len (length primi))
+    (setq primi (array len primi))
+    (for (i 0 (- len k))
+      (setq p '())
+      (setq q '())
+      ; costruzione delle liste dei primi (p) e dei suoi inversi (q)
+      (for (n 0 (- k 1))
+        (push (primi (+ i n)) p -1)
+        (push (invert-digits (primi (+ i n))) q -1))
+      ;(println p { } q)
+                 ; primi non palindromi?
+      (when (and (for-all true? (map (fn (x y) (!= x y)) p q))
+                 ; somme uguali?
+                 (= (apply + p) (apply + q)))
+        (push (list p (apply + p) q) out -1))
+    out)))
+
+Proviamo:
+
+(search-k 2 1e3)
+;-> (((211 223) 434 (112 322)) ((281 283) 564 (182 382))
+;->  ((457 461) 918 (754 164)) ((487 491) 978 (784 194))
+;->  ((509 521) 1030 (905 125)) ((557 563) 1120 (755 365))
+;->  ((569 571) 1140 (965 175)) ((587 593) 1180 (785 395))
+;->  ((653 659) 1312 (356 956)) ((827 829) 1656 (728 928))
+;->  ((857 859) 1716 (758 958)))
+
+(length (search-K 2 1e5))
+;-> 56
+
+(length (search-K 2 1e7))
+;-> 357
+
+(search-k 3 1e3)
+;-> (((37 41 43) 121 (73 14 34)) 
+;->  ((43 47 53) 143 (34 74 35))
+;->  ((59 61 67) 187 (95 16 76))
+;->  ((491 499 503) 1493 (194 994 305))
+;->  ((541 547 557) 1645 (145 745 755))
+;->  ((571 577 587) 1735 (175 775 785))
+;->  ((599 601 607) 1807 (995 106 706)))
+
+(time (println (length (setq k37 (search-k 3 1e7)))))
+;-> 16
+;-> 4641.255
+(time (println (length (setq k47 (search-k 4 1e7)))))
+;-> 70
+;-> 5470.054
+(time (println (length (setq k57 (search-k 5 1e7)))))
+;-> 13
+;-> 6343.569
+(time (println (length (setq k67 (search-k 6 1e7)))))
+;-> 32
+;-> 7188.629
+(time (println (length (setq k77 (search-k 7 1e7)))))
+;-> 4
+;-> 8078.289
+(time (println (length (setq k87 (search-k 8 1e7)))))
+;-> 7
+;-> 8902.718999999999
+(time (println (length (setq k97 (search-k 9 1e7)))))
+;-> 3
+;-> 9795.275
+(time (println (length (setq k107 (search-k 10 1e7)))))
+;-> 6
+;-> 10685.699
+(k107 0)
+;-> ((569 571 577 587 593 599 601 607 613 617)
+;->   5934
+;->  (965 175 775 785 395 995 106 706 316 716))
+
+
+---------------------------------------
+Somma dei primi N numeri primi quadrata
+---------------------------------------
+
+Determinare i valori di N per cui la somma dei primi N numeri primi è un quadrato perfetto.
+
+Sequenza OEIS A033997:
+Numbers n such that sum of first n primes is a square.
+  9, 2474, 6694, 7785, 709838, 126789311423, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (a (bigint num))
+    (while (> (* a a) num)
+      (setq a (/ (+ a (/ num a)) 2))
+    )
+    (= (* a a) num)))
+
+(define (sequenza limite)
+  (local (out primi len num)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (setq len (length primi))
+    ; converte in vettore (indicizzazione più veloce della lista)
+    (setq primi (array len primi))
+    (setq num 0)
+    (for (i 0 (- len 1))
+      (++ num (primi i))
+      (if (square? num) (push (list (+ i 1) num) out -1)))
+    out))
+
+(time (println (sequenza 1.1e7)))
+;-> ((9 100) (2474 25633969) (6694 212372329)
+;->  (7785 292341604) (709838 3672424151449))
+;-> 10516.531
+
 ============================================================================
 
