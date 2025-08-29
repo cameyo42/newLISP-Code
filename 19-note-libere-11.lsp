@@ -1600,9 +1600,9 @@ Liste casuali:
 ;-> 0.9926726835897934
 
 
---------------
-Numeri frugali
---------------
+------------------------
+Numeri frugali/economici
+------------------------
 
 Un numero frugale (o numero economico) è un numero il cui numero di cifre è strettamente maggiore del numero di cifre nella sua fattorizzazione (inclusi gli esponenti). Se l'esponente è 1 per un certo numero primo, coinvolto nella fattorizzazione dei primi, allora quell'esponente non contribuisce al numero di cifre nella fattorizzazione dei primi.
 Alcuni esempi di numeri frugali sono:

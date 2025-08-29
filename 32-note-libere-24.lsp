@@ -3145,6 +3145,18 @@ Vediamo alcuni semplici esempi di come usare WolframScript con newLISP:
 ;-> ("x^6 + 3*x^4*xy + 3*x^2*xy^2 + xy^3 + 3*x^4*y^2 + 6*x^2*xy*y^2 +
 ;->   3*xy^2*y^2 + 3*x^2*y^4 + 3*xy*y^4 + y^6")
 
+Per passare una stringa al posto del codice possiamo usare questo metodo:
+
+(setq cmd "{wolframscript -code \"3 + 1\"}")
+;-> "{wolframscript -code \"3 + 1\"}"
+(exec (eval-string cmd))
+;-> ("4")
+
+(setq expr "3 + 1")
+(setq cmd (append "{wolframscript -code \"" expr "\"}"))
+(exec (eval-string cmd))
+;-> ("4")
+
 Le possibilità di utilizzo sono innumerevoli.
 
 

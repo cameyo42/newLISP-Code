@@ -165,7 +165,7 @@ Versione 2:
 
 (define(somma2 lst)
   (letn ( (len (length lst)) (max-idx (- (ceil (div len 2)) 1)) (out '()) )
-    (for (i 0 max-idx) 
+    (for (i 0 max-idx)
       (push (+ (lst i) (lst (- len i 1))) out -1))))
 
 (somma2 '(1 2 7 3 4 1))
@@ -207,7 +207,7 @@ Scrivere una funzione che stampa il formato interno del sorgente (con numeri di 
     (map (fn(x) (println (format "%3d " (+ $idx 1)) x)) line) '>))
 
 (define (somma a b)
-  (if (> a b) 
+  (if (> a b)
     (+ a b b)
     ;else
     (+ a a b)))
@@ -266,7 +266,7 @@ Quindi 30^80 ~= 10^118.
 Nota: gli atomi Universo osservabile sono circa 10^80.
 
 Shannon ha anche stimato il numero di possibili posizioni:
-  
+
   64!/(32!*8!^2*2!^6) ~= 10^43
 
 Questo valore include alcune posizioni illegali.
@@ -545,7 +545,7 @@ Funzione che combina due insiemi in uno (imposta le relazioni):
 (define (union-sets a b)
   (setq a (find-set a))
   (setq b (find-set b))
-  (if (!= a b) 
+  (if (!= a b)
     (begin
       (if (< (size a) (size b)) (swap a b))
       (setf (parent b) a)
@@ -594,7 +594,7 @@ Funzione che combina due insiemi in uno (imposta le relazioni):
 (define (union-sets a b)
   (setq a (find-set a))
   (setq b (find-set b))
-  (if (!= a b) 
+  (if (!= a b)
     (begin
       (if (< (rank a) (rank b)) (swap a b))
       (setf (parent b) a)
@@ -799,7 +799,7 @@ Funzione che cerca le coppie di primi consecutivi che soddisfano i requisiti:
         (push (list p1 p2 (+ p1 p2) q1 q2) out -1)
         (if show (println p1 " + " p2 " = " (+ p1 p2) " = " q1 " + " q2))
         (++ conta)))
-    (if show 
+    (if show
         (println conta " coppie.")
         ;else
         out)))
@@ -868,7 +868,7 @@ Proviamo:
 ;-> 357
 
 (search-k 3 1e3)
-;-> (((37 41 43) 121 (73 14 34)) 
+;-> (((37 41 43) 121 (73 14 34))
 ;->  ((43 47 53) 143 (34 74 35))
 ;->  ((59 61 67) 187 (95 16 76))
 ;->  ((491 499 503) 1493 (194 994 305))
@@ -907,7 +907,7 @@ Proviamo:
 
 
 ---------------------------------------
-Somma dei primi N numeri primi quadrata
+Somma quadrata dei primi N numeri primi
 ---------------------------------------
 
 Determinare i valori di N per cui la somma dei primi N numeri primi è un quadrato perfetto.
@@ -953,6 +953,95 @@ Numbers n such that sum of first n primes is a square.
 ;-> ((9 100) (2474 25633969) (6694 212372329)
 ;->  (7785 292341604) (709838 3672424151449))
 ;-> 10516.531
+
+
+---------------------------------
+La media dei primi K numeri primi
+---------------------------------
+
+Definiamo la media della somma dei primi k numeri primi (Average Prime Number):
+
+  APN(k) = Sum[i=1,k]p(k) / k
+
+Determinare i valori di k per cui APN è un numero intero.
+
+Sequenza OEIS A045345:
+Numbers k such that k divides sum of first k primes A007504(k).
+  1, 23, 53, 853, 11869, 117267, 339615, 3600489, 96643287, 2664167025,
+  43435512311, 501169672991, 745288471601, 12255356398093, 153713440932055,
+  6361476515268337, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (sequenza limite)
+  (local (out primi len num)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (setq len (length primi))
+    ; converte in vettore (indicizzazione più veloce della lista)
+    (setq primi (array len primi))
+    (setq num 0)
+    (for (i 0 (- len 1))
+      (++ num (primi i))
+      (if (zero? (% num (+ i 1))) (push (list (+ i 1) (primi i)) out -1)))
+    out))
+
+Proviamo:
+
+(time (println (sequenza 1e7)))
+;-> ((1 2) (23 83) (53 241) (853 6599) (11869 126551)
+;->  (117267 1544479) (339615 4864121))
+;-> 1765.533
+
+(time (println (sequenza 1e8)))
+;-> ((1 2) (23 83) (53 241) (853 6599) (11869 126551)
+;->  (117267 1544479) (339615 4864121) (3600489 60686737))
+;-> 19017.252
+
+
+-----------------------
+La funzione "takewhile"
+-----------------------
+
+La funzione "takewhile" (python, haskell, ecc.) prende come parametri una lista e una funzione/predicato.
+Restituisce i primi elementi della lista che soddisfano il predicato.
+Quando incontra il primo elemento che non soddisfa il predicato, allora restituisce la lista costruita fino a quel momento.
+
+Esempio:
+  lista = (1 3 6 5 2)
+  predicato = odd?
+  output = (1 3)
+Perchè quando incontriamo 6 (che non è dispari) usciamo dalla funzione e i numeri dispari incontrati precedentemente sono 1 e 3.
+
+(define (takewhile lst pred)
+  (let ( (out '()) (stop nil) )
+    (dolist (el lst stop)
+      (if (pred el)
+          (push el out -1)
+          (setq stop true)))
+    out))
+
+Proviamo:
+
+(takewhile '(1 3 6 5 2) odd?)
+;-> (1 3)
+
+Con una funzione/predicato definito dall'utente:
+
+(define (pred x) (or (even? x) (and (> x 0) (< x 5))))
+
+(takewhile '(1 3 6 5 2) pred)
+;-> (1 3 6)
 
 ============================================================================
 

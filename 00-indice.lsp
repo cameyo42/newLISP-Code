@@ -1387,7 +1387,7 @@ NOTE LIBERE 11
   La funzione "DEFUN" del Common LISP
   Spirale di Ulam
   Coefficiente di correlazione
-  Numeri frugali
+  Numeri frugali/economici
   Numeri Blum
   Firma dei primi (Prime signature)
   Numeri di Achille
@@ -3122,7 +3122,9 @@ NOTE LIBERE 32
   Struttura dati Disjoint Set Union (Find-Union)
   Numeri primi su un orologio
   Liste di k primi consecutivi che sommano come i loro inversi
-  Somma dei primi N numeri primi quadrata
+  Somma quadrata dei primi N numeri primi
+  La media dei primi K numeri primi
+  La funzione "takewhile"
 
 PROBLEMI SUI DADI
 =================
