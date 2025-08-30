@@ -1043,5 +1043,118 @@ Con una funzione/predicato definito dall'utente:
 (takewhile '(1 3 6 5 2) pred)
 ;-> (1 3 6)
 
+
+----------------------
+La costante di Honaker
+----------------------
+
+Consideriamo la serie della somma degli inversi dei numeri primi palindromi:
+
+  S = Sum[i=1..Inf] 1/p(i) = 1/2 + 1/3 + 1/5 + 1/7 + 1/11 + 1/101 + ...
+
+Questa serie è convergente.
+
+Valore della serie (calcolato fino a tutti i primi palindromi con 11 cifre):
+
+  1.3239820264...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Funzione che inverte le cifre di un numero intero:
+
+(define (invert-digits num) (int (reverse (string num)) 0 10))
+
+(define (honaker limite)
+  (let (val 0)
+    (for (num 2 limite)
+      ; (invert-digits num) è più veloce di (prime? num)
+      (if (and (= num (invert-digits num)) (prime? num))
+          (setq val (add val (div num)))))
+    val))
+
+Proviamo:
+
+(honaker 10)
+;-> 1.176190476190476
+(honaker 101)
+;-> 1.267099567099567
+(honaker 1000)
+;-> 1.32072324459029  ; 2 cifre corrette (dopo la virgola)
+(time (println (honaker 1e6)))
+;-> 1.323748402250648 ; 3 cifre corrette (dopo la virgola)
+;-> 638.471
+(time (println (honaker 1e7)))
+;-> 1.323964105671205 ; 4 cifre corrette (dopo la virgola)
+;-> 6406.019
+(time (println (honaker 1e8)))
+;-> 1.323964105671205 ; 4 cifre corrette (dopo la virgola)
+;-> 65912.74000000001
+
+Abbiamo raggiunto il limite di precisione dei numeri float.
+
+Proviamo calcolando la somma come frazione e poi effettuare la divisione:
+
+Calcola i primi palindromi fino ad un dato limite:
+
+(define (primi-pali limite)
+  (let (out '(2))
+    (for (num 3 limite 2)
+      (if (and (= num (invert-digits num)) (prime? num))
+          (push num out -1)))
+    out))
+
+Somma gli inversi di una lista di numeri:
+(restituisce una frazione (numeratore denominatore))
+
+(define (sum-inv lst)
+  (local (den num)
+    (setf (lst 0) 2L)
+    (setq den (apply * lst))
+    (setq num (apply + (map (fn(x) (/ den x)) lst)))
+    (list num den)))
+
+Proviamo fino a 1e6:
+
+(setq fraz (map string (sum-inv (primi-pali 1e6))))
+;-> ("6515180...936554873L"
+;->  "4921766...330192690L")
+
+Usiamo WolframScript per calcolare la frazione con 20 cifre di precisione.
+Vedi "Wolfram Engine e WolframScript" su "Note libere 24".
+
+Togliamo le "L" finali ai numeri:
+(pop (fraz 0) -1)
+(pop (fraz 1) -1)
+
+Impostiamo l'expressione:
+(setq expr (string "N[" (fraz 0) "/" (fraz 1) ",20]"))
+
+Impostiamo il comando:
+(setq cmd (append "{wolframscript -code \"" expr "\"}"))
+
+Eseguiamo il comando:
+(exec (eval-string cmd))
+;-> ("1.32374840225064855416442574628003596276`20.")
+
+Putroppo non possiamo continuare perchè la stringa di comando 'cmd' diventa troppo lunga per il terminale.
+
+Comunque risulta:
+1e7  -->  1.3239641056712024580 ; 4 cifre corrette (dopo la virgola)
+1e8  -->  1.3239641056712024580 ; 4 cifre corrette (dopo la virgola)
+
+Con Mathematica (2e9):
+
+AbsoluteTiming[{limit = 2000000000;
+  (*Primi palindromi fino al limite*)
+  palPrimes = Select[Prime[Range[PrimePi[limit]]], PalindromeQ];
+  (*Somma degli inversi*)
+  sumReciprocals = Total[1/palPrimes];
+  (*Visualizzazione numerica a 20 cifre*)
+  N[sumReciprocals, 20]}]
+;-> {470.4, {1.3239807180655250609}} ; 5 cifre corrette (dopo la virgola)
+
 ============================================================================
 

@@ -7232,7 +7232,7 @@ Funzione 'series':
 ;-> (1 4 10 22 46 94 190 382)
 
 L'uomo e le monete - Metodo della Falsa Posizione (Lineare)
-----------------------------------------------------------
+-----------------------------------------------------------
 Un uomo ha un certo numero di monete.
 Se ne regala la metà più 2, gli restano 10 monete.
 Quante monete aveva all'inizio?
@@ -7385,6 +7385,69 @@ Proviamo:
 ;-> (40 20 40 100)
 ;-> 22814.998
 
+I due serpenti e la torre
+-------------------------
+Un serpente (A) si trova alla base di una torre che è alta a 100 metri e ogni giorno prima sale di 1/3 di metro e poi scende di 1/4.
+Sulla sommità della torre c'è un altro serpente (B) che ogni giorno prima scende di 1/5 di metro e poi sale di 1/6.
+Dopo quanti giorni i serpenti si incontrano lungo la torre?
+
+Facciamo un esempio con dati più semplici:
+La torre è alta 10 metri
+Ogni giorno il serpente A sale di 2 metri e poi scende di 1 metro
+Ogni giorno il serpente B scende di 3 metri e poi sale di 1.5 metri
+
+Primo ragionamento (errato)
+A ogni giorno percorre la distanza DA = 2 - 1 = 1 metro
+B ogni giorno percorre la distanza DB = 3 - 1.5 = 1.5 metri
+
+Matematicamente deve risultare:
+
+  DA*x + DB*x >= 10, dove x è il numero di giorni
+
+Inserendo i valori per DA e DB e risolvendo per x:
+
+   1*x + 1.5*x >=10
+   2.5*x >= 10
+   x >= 10/2.5 = 4
+
+Quindi i serpenti si incontrano dopo 4 giorni.
+
+Questo ragionamento è corretto dal punto di vista matematico, ma è sbagliato concettualmente.
+Infatti dobbiamo considerare lo spostamento totale di ogni serpente come due azioni differenti: un primo movimento in una direzione e poi un altro movimento nella direzione opposta.
+Questo perchè i serpenti potrebbero incontrarsi al termine del primo movimento di entrambi.
+
+Secondo ragionamento (corretto)
+A ogni giorno percorre la distanza DA = da1 - da2 = 2 - 1
+B ogni giorno percorre la distanza DB = db1 - db2 = 3 - 1.5
+
+Al giorno (x + 1), per il primo movimento deve risultare:
+
+ (DA*x + da1) + (DB*x + db1) >= 10
+
+Al giorno (x + 1), per il secondo movimento deve risultare:
+ 
+ (DA*x + da1 - da2) + (DB*x + db1 - db2) >= 10
+
+Il secondo movimento non ci interessa, perchè avviene dopo del primo movimento.
+
+Quindi matematicamente deve risultare:
+
+  (DA*x + da1) + (DB*x + db1) >= h, dove x è il numero di giorni e h l'altezza della torre
+  DA*x + DB*x >= h - da1 - db1
+  x*(DA + DB) >= h - da1 - db1
+  x = (h - da1 - db1)/(DA + DB)
+  x = (10 - 2 - 3)/(1 + 1.5) = 5/2.5 = 2
+
+Dopo 2 giorni i due serpenti si trovano nella condizione di incontrarsi domani (x+1) dopo il primo movimento.
+Quindi i serpenti si incontrano dopo 3 giorni.
+
+Risolvendo il problema di Fibonacci utilizzando la formula:
+
+  x = (h - da1 - db1)/(DA + DB)                                  ------ 
+  x = (100 - 1/3 - 1/5)/(1/12 + 1/30) = 5968/7 = 852*(4/7) = 852.571428
+
+Nel giorno 853 i due serpenti si trovano nella condizione di incontrarsi domani (x+1) dopo il primo movimento (nel giorno 852 sono ancora troppo distanti).
+Quindi i serpenti si incontrano dopo 854 giorni.
 
 ---------
 Countdown

@@ -3125,6 +3125,7 @@ NOTE LIBERE 32
   Somma quadrata dei primi N numeri primi
   La media dei primi K numeri primi
   La funzione "takewhile"
+  La costante di Honaker
 
 PROBLEMI SUI DADI
 =================
