@@ -1320,7 +1320,7 @@ Per soddisfare CO il numero in DO deve avere l'ultima cifra che vale 3 o 9.
 ;-> ()
 Quindi il numero cercato per DO vale (7 2 3).
 
-Soluzione cruciverba
+Soluzione cruciverba:
 
   +-----+-----+-----+
   | A   | B   | C   |
@@ -1332,6 +1332,254 @@ Soluzione cruciverba
   | E   |     |
   | 8   | 8   |
   +-----+-----+
+
+
+------------------------------------------
+Alcuni confronti tra elementi di due liste
+------------------------------------------
+
+Funzione che verifica se due liste (con la stessa lunghezza) hanno elementi tutti uguali negli stessi indici (cioè se due liste sono uguali):
+
+(define (all-equal-idx? lst1 lst2) (= lst1 lst2))
+
+(all-equal-idx? '(1 2 3) '(1 2 3))
+;-> true
+(all-equal-idx? '(1 2 3) '(1 2 4))
+;-> nil
+
+Funzione che verifica se due liste (con la stessa lunghezza) hanno elementi tutti diversi negli stessi indici:
+
+(define (all-different-idx? lst1 lst2)
+  (for-all true? (map (fn (x y) (!= x y)) lst1 lst2)))
+
+(all-different-idx? '(1 2 3) '(4 5 6))
+;-> true
+(all-different-idx? '(1 2 3) '(4 2 4))
+;-> nil
+
+Funzione che verifica se due liste (con la stessa lunghezza) hanno almeno un elemento diverso negli stessi indici:
+
+(define (atleast-one-different-idx? lst1 lst2)
+  (exists true? (map (fn (x y) (!= x y)) lst1 lst2)))
+
+(atleast-one-different-idx? '(1 2 4) '(1 2 3))
+;-> true
+(atleast-one-different-idx? '(1 2 4) '(1 2 4))
+;-> nil
+
+Funzione che verifica se due liste (con la stessa lunghezza) hanno almeno un elemento uguale negli
+stessi indici:
+
+(define (atleast-one-equal-idx? lst1 lst2)
+  (exists true? (map (fn (x y) (= x y)) lst1 lst2)))
+
+(atleast-one-equal-idx? '(1 2 4) '(5 6 4))
+;-> true
+(atleast-one-equal-idx? '(1 2 4) '(5 6 7))
+;-> nil
+
+Funzione che verifica se due liste hanno gli stessi elementi (in qualunque ordine):
+
+(define (all-equal? lst1 lst2) (= (sort lst1) (sort lst2)))
+
+(all-equal? '(1 2 3) '(3 1 2))
+;-> true
+(all-equal? '(1 2 3) '(1 2 4))
+;-> nil
+
+Funzione che verifica se due liste hanno tutti elementi diversi (in qualunque ordine):
+
+(define (all-different? lst1 lst2)
+  (local (len1 len2 len-all)
+    (setq len1 (length lst1))
+    (setq len2 (length lst2))
+    (setq len-all (length (unique (extend lst1 lst2))))
+    (= len-all (+ len1 len2))))
+
+(all-different? '(1 2 3) '(4 5 6))
+;-> true
+(all-different? '(1 2 3) '(4 5 1))
+;-> nil
+
+Funzione che rimuove gli elementi in comune tra due liste  (1:1):
+
+(define (remove-common lst1 lst2)
+"Remove common elements of two lists (remove 1:1)"
+  (cond
+    ((= lst1 '()) lst2)
+    ((= lst2 '()) lst1)
+    (true
+      (local (out len1 len2 i j el1 el2)
+        (setq out '())
+        (setq len1 (length lst1))
+        (setq len2 (length lst2))
+        ; usa i vettori
+        (setq lst1 (array len1 lst1))
+        (setq lst2 (array len2 lst2))
+        ; ordina le liste
+        (sort lst1)
+        (sort lst2)
+        (setq i 0)
+        (setq j 0)
+        ; confronta gli elementi ed avanza con due puntatori
+        (while (and (< i len1) (< j len2))
+          (setq el1 (lst1 i))
+          (setq el2 (lst2 j))
+                ; elementi uguali
+          (cond ((= el1 el2) (++ i) (++ j))
+                ; primo elemento minore
+                ((< el1 el2) (push el1 out -1) (++ i))
+                ; secondo elemento minore
+                ((> el1 el2) (push el2 out -1) (++ j)))
+        )
+        ; aggiunge gli elementi della lista più lunga
+        (cond ((and (= i len1) (= j len2)) out)
+              ((= i len1) (extend out (array-list (slice lst2 j))))
+              ((= j len2) (extend out (array-list (slice lst1 i)))))))))
+
+(remove-common '(3 2 2 1 0) '(1 2 3 4 5))
+;-> (0 2 4 5)
+(remove-common '(1 2 3 4) '(5 6 7 2 2))
+;-> (1 2 3 4 5 6 7)
+
+Funzione che prende gli elementi in comune tra due liste (1:1):
+
+(define (take-common lst1 lst2)
+"Take common elements of 2 lists (take 1:1)"
+  (cond
+    ((or (= lst1 '()) (= lst2 '())) '())
+    (true
+      (local (out len1 len2 i j el1 el2)
+        (setq out '())
+        (setq len1 (length lst1))
+        (setq len2 (length lst2))
+        ; usa i vettori
+        (setq lst1 (array len1 lst1))
+        (setq lst2 (array len2 lst2))
+        ; ordina le liste
+        (sort lst1)
+        (sort lst2)
+        (setq i 0)
+        (setq j 0)
+        ; confronta gli elementi ed avanza con due puntatori
+        (while (and (< i len1) (< j len2))
+          (setq el1 (lst1 i))
+          (setq el2 (lst2 j))
+                ; elementi uguali
+          (cond ((= el1 el2) (push el1 out -1) (++ i) (++ j))
+                ; primo elemento minore
+                ((< el1 el2) (++ i))
+                ; secondo elemento minore
+                ((> el1 el2) (++ j)))
+        )
+        out))))
+
+(take-common '(3 2 1 1 0) '(1 2 3 4 5 1))
+;-> (1 1 2 3)
+(take-common '(1 2 3 4) '(5 6 7))
+;-> ()
+
+
+--------------------
+Creazione di griglie
+--------------------
+
+Scrivere una funzione che prende larghezza e altezza e stampa una griglia in cui una cella ha la seguente raffigurazione:
+
+  ╔════╗
+  ║    ║
+  ╚════╝
+
+Esempi:
+Larghezza = 5
+Altezza = 4
+  ╔════╦════╦════╦════╦════╗
+  ║    ║    ║    ║    ║    ║
+  ╠════╬════╬════╬════╬════╣
+  ║    ║    ║    ║    ║    ║
+  ╠════╬════╬════╬════╬════╣
+  ║    ║    ║    ║    ║    ║
+  ╠════╬════╬════╬════╬════╣
+  ║    ║    ║    ║    ║    ║
+  ╚════╩════╩════╩════╩════╝
+
+Larghezza = 4
+Altezza = 1
+  ╔════╦════╦════╦════╗
+  ║    ║    ║    ║    ║
+  ╚════╩════╩════╩════╝
+
+La funzione deve essere la più corta possibile.
+
+(define (griglia width height)
+  (let ( (top    (string "╔══" (dup "══╦══" (- width 1)) "══╗"))
+         (mid    (string (dup "║    " width) "║"))
+         (inter  (string "╠══" (dup "══╬══" (- width 1)) "══╣"))
+         (bottom (string "╚══" (dup "══╩══" (- width 1)) "══╝")) )
+    (println top "\n" mid)
+    (dotimes (x (- height 1)) (println inter "\n" mid))
+    (println bottom) '>))
+
+Proviamo:
+
+(griglia 1 1)
+(griglia 5 4)
+(griglia 2 1)
+(griglia 8 8)
+
+Versione code-golf (217 caratteri - one line):
+
+(define(g w h)
+(letn((z println)(k string)
+(t(k"╔══"(dup"══╦══"(- w 1))"══╗"))
+(m(k(dup"║    "w)"║"))
+(i(k"╠══"(dup"══╬══"(- w 1))"══╣"))
+(b(k"╚══"(dup"══╩══"(- w 1))"══╝")))
+(z t"\n"m)(dotimes(x(- h 1))(z i"\n"m))(z b)'>))
+
+Proviamo:
+
+(g 1 1)
+;-> ╔════╗
+;-> ║    ║
+;-> ╚════╝
+
+(g 5 4)
+;-> ╔════╦════╦════╦════╦════╗
+;-> ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║
+;-> ╚════╩════╩════╩════╩════╝
+
+(g 2 1)
+;-> ╔════╦════╗
+;-> ║    ║    ║
+;-> ╚════╩════╝
+
+(g 8 8)
+;-> ╔════╦════╦════╦════╦════╦════╦════╦════╗
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╠════╬════╬════╬════╬════╬════╬════╬════╣
+;-> ║    ║    ║    ║    ║    ║    ║    ║    ║
+;-> ╚════╩════╩════╩════╩════╩════╩════╩════╝
+
+
 
 ============================================================================
 

@@ -3127,6 +3127,8 @@ NOTE LIBERE 32
   La funzione "takewhile"
   La costante di Honaker
   Cruciverba matematico
+  Alcuni confronti tra elementi di due liste
+  Creazione di griglie
 
 PROBLEMI SUI DADI
 =================
