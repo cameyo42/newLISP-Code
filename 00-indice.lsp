@@ -3126,6 +3126,7 @@ NOTE LIBERE 32
   La media dei primi K numeri primi
   La funzione "takewhile"
   La costante di Honaker
+  Cruciverba matematico
 
 PROBLEMI SUI DADI
 =================

@@ -1156,5 +1156,182 @@ AbsoluteTiming[{limit = 2000000000;
   N[sumReciprocals, 20]}]
 ;-> {470.4, {1.3239807180655250609}} ; 5 cifre corrette (dopo la virgola)
 
+
+---------------------
+Cruciverba matematico
+---------------------
+
+Risolvere il seguente cruciverba (crucinumero):
+
+  +-----+-----+-----+
+  | A   | B   | C   |
+  |     |     |     |
+  +-----+-----+-----+
+  | D   |     |     |
+  |     |     |     |
+  +-----+-----+-----+
+  | E   |     |
+  |     |     |
+  +-----+-----+
+
+Orizzontali
+A: numero con solo cifre pari in ordine strettamente decrescente.
+D: un numero non divisibile per 9.
+E: un numero divisibile per 11
+
+Verticali
+A: numero con cifre consecutive in ordine crescente.
+B: numero in cui il prodotto delle due cifre più piccole è uguale alla cifra più grande.
+C: un numero primo più grande di 10.
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (group-block lst num)
+"Create a list with blocks of elements: (0..num) (1..num+1) (n..num+n)"
+  (local (out items len)
+    (setq out '())
+    (setq len (length lst))
+    (if (>= len num) (begin
+        ; numero di elementi nella lista di output (numero blocchi)
+        (setq items (- len num (- 1)))
+        (for (k 0 (- items 1))
+          (push (slice lst k num) out -1))))
+  out))
+
+AO: numero (3 cifre) con solo cifre pari in ordine strettamente decrescente.
+(define (AO) (group-block '(8 6 4 2) 3))
+(AO)
+;-> ((8 6 4) (6 4 2))
+
+DO: numero (3 cifre) non divisibile per 9.
+(define (DO) (map int-list (clean (fn(x) (zero? (% x 9))) (sequence 100 999))))
+(DO)
+;-> ((1 0 0) (1 0 1) (1 0 2) (1 0 3) (1 0 4) (1 0 5) (1 0 6) (1 0 7)
+;->  ...
+;->  (9 9 1) (9 9 2) (9 9 3) (9 9 4) (9 9 5) (9 9 6) (9 9 7) (9 9 8))
+
+EO: numero (2 cifre) divisibile per 11
+(define (EO) (map int-list (filter (fn(x) (zero? (% x 11))) (sequence 10 99))))
+(EO)
+;-> ((1 1) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9))
+
+AV: numero (3 cifre) con cifre consecutive in ordine crescente.
+(define (AV) (group-block '(1 2 3 4 5 6 7 8 9) 3))
+(AV)
+;-> ((1 2 3) (2 3 4) (3 4 5) (4 5 6) (5 6 7) (6 7 8) (7 8 9))
+
+BV: numero (3 cifre) in cui il prodotto delle due cifre più piccole è uguale alla cifra più grande.
+(define (BV)
+  (let (out '())
+    (for (num 100 999)
+      (setq lst (sort (int-list num)))
+      (if (= (* (lst 0) (lst 1)) (lst 2))
+          (push num out -1)))
+     (map int-list out)))
+(BV)
+;-> ((1 1 1) (1 2 2) (1 3 3) (1 4 4) (1 5 5) (1 6 6) (1 7 7) (1 8 8) (1 9 9)
+;->  (2 1 2) (2 2 1) (2 2 4) (2 3 6) (2 4 2) (2 4 8) (2 6 3) (2 8 4) (3 1 3)
+;->  (3 2 6) (3 3 1) (3 3 9) (3 6 2) (3 9 3) (4 1 4) (4 2 2) (4 2 8) (4 4 1)
+;->  (4 8 2) (5 1 5) (5 5 1) (6 1 6) (6 2 3) (6 3 2) (6 6 1) (7 1 7) (7 7 1)
+;->  (8 1 8) (8 2 4) (8 4 2) (8 8 1) (9 1 9) (9 3 3) (9 9 1))
+
+CV: numero (2 cifre) primo più grande di 10.
+(define (CV) (map int-list (filter prime? (sequence 11 99))))
+(CV)
+;-> ((1 1) (1 3) (1 7) (1 9) (2 3) (2 9) (3 1) (3 7) (4 1) (4 3) (4 7)
+;->  (5 3) (5 9) (6 1) (6 7) (7 1) (7 3) (7 9) (8 3) (8 9) (9 7))
+
+Cominciamo mettendo (8 6 4) in AO.
+Cerchiamo in AV se esiste almeno un numero che inizia per 8.
+(find '(8 ? ?) (AV) match)
+(find-all '(8 ? ?) (AV))
+;-> ()
+Non c'è nessun numero che inizia per 8 in AV.
+
+Allora in AO mettiamo (6 4 2).
+Cerchiamo in AV se esiste almeno un numero che inizia per 8.
+(find-all '(6 ? ?) (AV))
+;-> ((6 7 8))
+Troviamo un numero che inizia per 6 in AV.
+
+  +-----+-----+-----+
+  | A   | B   | C   |
+  | 6   | 4   | 2   |
+  +-----+-----+-----+
+  | D   |     |     |
+  | 7   |     |     |
+  +-----+-----+-----+
+  | E   |     |
+  | 8   |     |
+  +-----+-----+
+
+Adesso cerchiamo i numeri che iniziano per 8 in EO.
+(find-all '(8 ?) (EO))
+;-> ((8 8))
+
+  +-----+-----+-----+
+  | A   | B   | C   |
+  | 6   | 4   | 2   |
+  +-----+-----+-----+
+  | D   |     |     |
+  | 7   |     |     |
+  +-----+-----+-----+
+  | E   |     |
+  | 8   | 8   |
+  +-----+-----+
+
+Cerchiamo in BV i numeri che iniziano per 4 e terminano con 8.
+(find-all '(4 ? 8) (BV))
+;-> ((4 2 8))
+
+  +-----+-----+-----+
+  | A   | B   | C   |
+  | 6   | 4   | 2   |
+  +-----+-----+-----+
+  | D   |     |     |
+  | 7   | 2   |     |
+  +-----+-----+-----+
+  | E   |     |
+  | 8   | 8   |
+  +-----+-----+
+
+Adesso cerchiamo i numeri che iniziano con (2) in CV.
+(find-all '(2 ?) (CV))
+;-> ((2 3) (2 9))
+
+Cerchiamo i numeri che iniziano con (7 2) in DO.
+(find-all '(7 2 ?) (DO))
+;-> ((7 2 1) (7 2 2) (7 2 3) (7 2 4) (7 2 5) (7 2 6) (7 2 7) (7 2 8))
+Per soddisfare CO il numero in DO deve avere l'ultima cifra che vale 3 o 9.
+(find-all '(7 2 3) (DO))
+;-> ((7 2 3))
+(find-all '(7 2 9) (DO))
+;-> ()
+Quindi il numero cercato per DO vale (7 2 3).
+
+Soluzione cruciverba
+
+  +-----+-----+-----+
+  | A   | B   | C   |
+  | 6   | 4   | 2   |
+  +-----+-----+-----+
+  | D   |     |     |
+  | 7   | 2   | 3   |
+  +-----+-----+-----+
+  | E   |     |
+  | 8   | 8   |
+  +-----+-----+
+
 ============================================================================
 
