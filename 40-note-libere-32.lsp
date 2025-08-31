@@ -1580,6 +1580,78 @@ Proviamo:
 ;-> ╚════╩════╩════╩════╩════╩════╩════╩════╝
 
 
+------------------
+Primi e palindromi
+------------------
+
+Alcune sequenze su numeri primi  e palindromi.
+
+Sequenza OEIS A038582:
+Numbers k such that sum of the first k primes is a palindrome.
+  1, 2, 8, 7693, 8510, 12941, 146134, 637571, 27198825, 53205635,
+  6283318531, 7167375533, 226095996998, 435966708249, ...
+8 si trova nella sequenza perchè la somma dei primi 8 primi 2+3+5+7+11+13+17+19 = 77 è palindromo.
+
+Sequenza OEIS A038583:
+Palindromes that are the sum of consecutive initial primes.
+  2, 5, 77, 285080582, 352888253, 854848458, 137372273731, 2939156519392,
+  6833383883833386, 27155268786255172, 477749724515427947774,
+  625179415050514971526, 714014821826628128410417,
+  2719564270866680724659172,...
+77 si trova nella sequenza perchè 2+3+5+7+11+13+17+19 = 77 è palindromo
+
+Sequenza OEIS A038584:
+Primes p such that the sum of the primes from 2 through p is a palindrome.
+  2, 3, 19, 78347, 87641, 139241, 1959253, 9564097, 516916921, 1048924213, 155353386241, 178196630873, 6433462703963, 12702232868389
+19 si trova nella sequenza perchè 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 = 77 è palindromo.
+
+(define (reverse-digits num)
+"Reverse the digits of an integer"
+  (int (reverse (string num)) 0 10))
+
+(define (primes num-primes)
+"Generate a given number of prime numbers (starting from 2)"
+  (let ( (k 3) (tot 1) (out '(2)) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k 2))
+    out))
+
+Possiamo scrivere una funzione unica per tutte e tre le sequenze:
+
+(define (seq-all limite)
+  (local (out primi sum)
+    (setq out '())
+    (setq primi (primes limite))
+    (setq sum 0)
+    (dolist (p primi)
+      (++ sum p)
+      (if (= sum (reverse-digits sum))
+          ; A038582 --> (+ $idx 1)
+          ; A038583 --> sum
+          ; A038584 --> p
+          (push (list (+ $idx 1) sum p) out -1)))
+    out))
+
+(time (println (setq lst (seq-all 1e6))))
+;-> ((1 2 2) (2 5 3) (8 77 19) (7693 285080582 78347) (8510 352888253 87641)
+;->  (12941 854848458 139241) (146134 137372273731 1959253)
+;->  (637571 2939156519392 9564097))
+;-> 18655.959
+
+A038582
+(map first lst)
+;-> (1 2 8 7693 8510 12941 146134 637571)
+
+A038583
+(map (fn(x) (x 1)) lst)
+;-> (2 5 77 285080582 352888253 854848458 137372273731 2939156519392)
+
+A038584
+(map last lst)
+;-> (2 3 19 78347 87641 139241 1959253 9564097)
 
 ============================================================================
 
