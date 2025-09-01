@@ -3132,6 +3132,8 @@ NOTE LIBERE 32
   Primi e palindromi
   Numeri con cifre crescenti e decrescenti
   Deviazione standard della somma dei primi K numeri primi
+  Persona più vicina
+  Cifre uguali dopo trasformazione
 
 PROBLEMI SUI DADI
 =================

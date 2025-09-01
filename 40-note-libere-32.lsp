@@ -1848,5 +1848,150 @@ Differenza delle differenze:
 ;-> (-0.0009943761397153139 0.003856530543998815 -0.0002494464424671605
 ;->  0.00124316459914553 -0.001742138476402033)
 
+
+------------------
+Persona più vicina
+------------------
+
+Ci sono tre persone che si trovano lungo una linea (retta numerica) alle posizioni intere x, y e z:
+- x è la posizione della Persona 1 (che si muove verso la Persona 3).
+- y è la posizione della Persona 2 (che si muove verso la Persona 3).
+- z è la posizione della Persona 3 (che non si muove).
+Sia la Persona 1 che la Persona 2 si muovono verso la Persona 3 alla stessa velocità.
+Determinare quale persona raggiunge per prima la Persona 3:
+- Restituire 0 se entrambe arrivano contemporaneamente.
+- Restituire 1 se la Persona 1 arriva per prima.
+- Restituire 2 se la Persona 2 arriva per prima.
+
+(define (vicina a b c)
+  (let ( (ac (abs (- a c))) (bc (abs (- b c))) )
+    (cond ((< ac bc) 1) ((> ac bc) 2) (true 0))))
+
+(vicina -3 3 -1)
+;-> 1
+(vicina -3 -3 -3)
+;-> 0
+
+Adesso scriviamo una funzione che accetta una lista di N persone/posizioni con numeri reali e restituisce tutte le persone più vicine alla persona ferma.
+La persona ferma (target) è l'ultima della lista.
+
+(define (vicinaN lst)
+  (local (out target min-dist dist)
+    (setq out '())
+    (setq target (pop lst -1))
+    (setq min-dist (abs (sub target (lst 0))))
+    (dolist (el lst)
+      (setq dist (abs (sub target el)))
+      (cond ((= dist min-dist)
+              ; distanza uguale --> aggiungo alla lista
+              (push (list el $idx) out -1))
+            ((< dist min-dist)
+              ; distanza minore --> aggiorno distanza minore e creo nuova lista
+              (setq min-dist dist)
+              (setq out (list (list el $idx))))))
+    (println "Posizione Target: " target)
+    (println "Distanza minima: " min-dist)
+    (println "Persone a distanza minima (posizione indice):")
+    out))
+
+Proviamo:
+
+(setq lst '(1 2 3 4 5 6 7 11 9))
+(vicinaN lst)
+;-> Posizione Target: 9
+;-> Distanza minima: 2
+;-> Persone a distanza minima (posizione indice):
+;-> ((7 6) (11 7))
+
+(setq lst '(-3 3 3 -3 3 -3 0))
+(vicinaN lst)
+;-> Posizione Target: 0
+;-> Distanza minima: 3
+;-> Persone a distanza minima (posizione indice):
+;-> ((-3 0) (3 1) (3 2) (-3 3) (3 4) (-3 5))
+
+(setq lst (rand 100 100))
+(vicinaN lst)
+;-> Posizione Target: 50
+;-> Distanza minima: 1
+;-> Persone a distanza minima (posizione indice):
+;-> ((51 13) (51 38) (51 90) (49 96))
+
+
+--------------------------------
+Cifre uguali dopo trasformazione
+--------------------------------
+
+Dato un numero intero N di K cifre eseguire ripetutamente la seguente operazione finché il numero non ha esattamente due cifre:
+ 1) Per ogni coppia di cifre consecutive in N, a partire dalla prima cifra, calcolare una nuova cifra come somma delle due cifre modulo 10.
+ 2) Unire le cifre calcolate, mantenendo l'ordine in cui sono state prodotte.
+Al termine restituire true se le due cifre che rimangono sono uguali, altrimenti restituire nil.
+
+Esempio:
+
+N = 3911
+(3 + 9) % 10 = 2
+(9 + 1) % 10 = 0
+(1 + 1) % 10 = 2
+N = 202
+(2 + 0) % 10 = 2
+(0 + 2) % 10 = 2
+N = 22  --> true
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (go num)
+  (let ( (len (length num)) (digits (int-list num)) )
+    (while (> len 2)
+      (setq digits (map (fn(x y) (% (+ x y) 10)) (rest digits) (chop digits)))
+      ;(print digits) (read-line)
+      (-- len))
+    (if (= (digits 0) (digits 1))
+        (list (+ (* 10 (digits 0)) (digits 1)) true)
+        (list (+ (* 10 (digits 0)) (digits 1)) nil))))
+
+(go 3911)
+;-> (22 true)
+(go 3902L)
+;-> (11 true)
+(go 34789L)
+;-> (48 nil)
+(go 39023547345737L)
+;-> (83 nil)
+
+Proviamo con numeri grandi:
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(length (fact-i 200))
+;-> 375
+(time (println (go (fact-i 200))))
+;-> (82 nil)
+;-> 39.615
+
+(length (fact-i 1000))
+;-> 2568
+(time (println (go (fact-i 1000))))
+;-> (66 true)
+;-> 1587.675
+
+(length (fact-i 3250))
+;-> 10005
+(time (println (go (fact-i 3250))))
+;-> (14 nil)
+;-> 24256.541
+
 ============================================================================
 
