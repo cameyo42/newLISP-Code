@@ -1653,5 +1653,200 @@ A038584
 (map last lst)
 ;-> (2 3 19 78347 87641 139241 1959253 9564097)
 
+
+----------------------------------------
+Numeri con cifre crescenti e decrescenti
+----------------------------------------
+
+Dati due numeri interi positivi a e b (con b > a), determinare tutti i numeri fra a e b (compresi) che hanno cifre crescenti.
+Esempi:
+N = 122 (cifre crescenti)
+N = 131 (cifre non crescenti)
+
+Sequenza OEIS A009994:
+Numbers with digits in nondecreasing order.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 22,
+  23, 24, 25, 26, 27, 28, 29, 33, 34, 35, 36, 37, 38, 39, 44, 45, 46,
+  47, 48, 49, 55, 56, 57, 58, 59, 66, 67, 68, 69, 77, 78, 79, 88, 89,
+  99, 111, 112, 113, 114, 115, 116, 117, 118, 119, 122, ...
+
+Dati due numeri interi positivi a e b (con b > a), determinare tutti i numeri fra a e b (compresi) che hanno cifre decrescenti.
+Esempi:
+N = 311 (cifre decrescenti)
+N = 131 (cifre non decrescenti)
+
+Sequenza OEIS A009996:
+Numbers with digits in nonincreasing order.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 21, 22, 30, 31, 32, 33, 40,
+  41, 42, 43, 44, 50, 51, 52, 53, 54, 55, 60, 61, 62, 63, 64, 65, 66, 70,
+  71, 72, 73, 74, 75, 76, 77, 80, 81, 82, 83, 84, 85, 86, 87, 88, 90, 91,
+  92, 93, 94, 95, 96, 97, 98, 99, 100, 110, 111, 200, 210, 211, ...
+
+(define (decrescente? num)
+  (if (< num 10) true
+      ;else
+        (let ((prev 0) (stop nil))
+          ; controlliamo dalla cifra più a destra
+          ; quindi le cifre devono essere crescenti
+          ; cifra precedente = 0
+          (while (and (!= num 0) (not stop))
+            ;(print (% num 10) { } prev) (read-line)
+            ; controllo se l'ordinamento è decrescente
+            (if (< (% num 10) prev)
+                (setq stop true)
+                ;else
+                (set 'prev (% num 10) 'num (/ num 10))))
+          (not stop))))
+
+(decrescente? 211)
+;-> true
+(decrescente? 2113)
+;-> nil
+(decrescente? 1234)
+;-> nil
+(decrescente? 1111)
+;-> true
+
+(define (crescente? num)
+  (if (< num 10) true
+      ;else
+      (let ((prev 9) (stop nil))
+        ; controlliamo dalla cifra più a destra
+        ; quindi le cifre devono essere decrescenti
+        ; cifra precedente = 9
+        (while (and (!= num 0) (not stop))
+          ;(print (% num 10) { } prev) (read-line)
+          ; controllo se l'ordinamento è crescente
+          (if (> (% num 10) prev)
+              (setq stop true)
+              ;else
+              (set 'prev (% num 10) 'num (/ num 10))))
+        (not stop))))
+
+(crescente? 233)
+;-> true
+(crescente? 2113)
+;-> nil
+(crescente? 1234)
+;-> true
+(crescente? 1111)
+;-> true
+
+(define (trova-crescenti a b) (filter crescente? (sequence a b)))
+
+(trova-crescenti 10 30)
+;-> (11 12 13 14 15 16 17 18 19 22 23 24 25 26 27 28 29)
+
+(trova-crescenti 0 122)
+;-> (0 1 2 3 4 5 6 7 8 9 11 12 13 14 15 16 17 18 19 22
+;->  23 24 25 26 27 28 29 33 34 35 36 37 38 39 44 45 46
+;->  47 48 49 55 56 57 58 59 66 67 68 69 77 78 79 88 89
+;->  99 111 112 113 114 115 116 117 118 119 122)
+
+(length (trova-crescenti 0 10000))
+;-> 715
+
+(define (trova-decrescenti a b) (filter decrescente? (sequence a b)))
+
+(trova-decrescenti 10 30)
+;-> (10 11 20 21 22 30)
+
+(trova-decrescenti 0 211)
+;-> (0 1 2 3 4 5 6 7 8 9 10 11 20 21 22 30 31 32 33 40
+;->  41 42 43 44 50 51 52 53 54 55 60 61 62 63 64 65 66 70
+;->  71 72 73 74 75 76 77 80 81 82 83 84 85 86 87 88 90 91
+;->  92 93 94 95 96 97 98 99 100 110 111 200 210 211)
+
+(length (trova-decrescenti 0 10000))
+;-> 998
+
+Vedi anche "Numeri metadrome, plaindrome, nialpdrome e katadrome" su "Note libere 15".
+
+
+--------------------------------------------------------
+Deviazione standard della somma dei primi K numeri primi
+--------------------------------------------------------
+
+Calcolare la sequenza delle deviazioni standard della somma dei primi K numeri primi.
+
+Funzione per il calcolo della media di una lista di numeri:
+
+(define (media lst)
+  (div (apply add lst) (length lst)))
+
+Funzione per il calcolo della deviazione standard di una lista di numeri:
+
+(define (devst lst) ; diviso N
+  (let (m (media lst))
+    (sqrt (div (apply add (map (fn(x) (mul (sub x m) (sub x m))) lst))
+               (length lst)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Funzione che calcola le deviazioni standard delle somme cumulate dei numeri primi fino ad un dato limite:
+
+(define (primi-devstd limite)
+  (local (out primi sum)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (setq cur '())
+    (dolist (p primi)
+      (push p cur -1)
+      (push (devst cur) out -1))
+    (println (length primi))
+    out))
+
+(primi-devstd 100)
+;-> 25
+;-> (0 0.5 1.247219128924647 1.920286436967152 3.2 4.017323597731316
+;->  5.146823867043378 5.977823600609171 7.030796453136166 8.560957890329798
+;->  9.680004098079865 11.15391062462947 12.55991557654513 13.67199580850415
+;->  14.81830699581508 16.20655249428453 17.76937998501645 19.05037182489273
+;->  20.50133432587436 21.89857301287004 23.08969005526216 24.43633150701351
+;->  25.75300742251957 27.19269586365672 28.88044320989551)
+
+Calcoliamo la differenza tra coppie di deviazioni standard consecutive:
+
+(silent
+  (setq ds (primi-devstd 1e5))
+  (setq diff (map sub (rest ds) (chop ds))))
+
+(apply max diff)
+;-> 3.385527391139476
+(apply min diff)
+;-> 0.5
+
+(slice diff 0 10)
+;-> (0.5 0.747219128924647 0.6730673080425049 1.279713563032848
+;->  0.817323597731316 1.129500269312062 0.8309997335657933 1.052972852526995
+;->  1.530161437193631 1.119046207750067)
+
+(slice diff -10 10)
+;-> (3.372961606048193 3.3715936630324 3.373212165715813 3.372217523257859
+;->  3.373089144122787 3.372094767983072 3.37595129852707 3.375701852084603
+;->  3.376945016683749 3.375202878207347)
+
+Differenza delle differenze:
+
+(setq diff2 (map sub (rest diff) (chop diff)))
+
+(slice diff2 0 5)
+;-> (0.247219128924647 -0.07415182088214212 0.6066462549903433
+;->  -0.4623899653015322 0.3121766715807457)
+
+(slice diff2 -5 5)
+;-> (-0.0009943761397153139 0.003856530543998815 -0.0002494464424671605
+;->  0.00124316459914553 -0.001742138476402033)
+
 ============================================================================
 

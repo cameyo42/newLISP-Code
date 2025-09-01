@@ -3129,6 +3129,9 @@ NOTE LIBERE 32
   Cruciverba matematico
   Alcuni confronti tra elementi di due liste
   Creazione di griglie
+  Primi e palindromi
+  Numeri con cifre crescenti e decrescenti
+  Deviazione standard della somma dei primi K numeri primi
 
 PROBLEMI SUI DADI
 =================
