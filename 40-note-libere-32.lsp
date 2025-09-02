@@ -1993,5 +1993,271 @@ Proviamo con numeri grandi:
 ;-> (14 nil)
 ;-> 24256.541
 
+
+-------------------
+Numeri k-palindromi
+-------------------
+
+Un numero intero è k-palindromo se è palindromo ed è divisibile da k.
+Dato k e un numero di cifre N, determinare il palindromo più grande con N cifre divisibile da k.
+Vincoli:
+  1 <= N <= 10^5
+  1 <= K <= 9
+
+(define (reverse-digits num)
+"Reverse the digits of an integer"
+  (int (reverse (string num)) 0 10))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (k-pal n k)
+  (let ( (out nil) (stop nil)
+         (max-number (- (** 10 n) 1))
+         (min-number (- (** 10 (- n 1)) 1)) )
+  (for (i max-number min-number -1 stop)
+    (when (and (zero? (% i k)) (= i (reverse-digits i)))
+          (setq out i) (setq stop true)))
+  out))
+
+Proviamo:
+
+(k-pal 3 5)
+;-> 595
+
+(k-pal 1 4)
+;-> 8
+
+(k-pal 5 6)
+;-> 89898
+
+La funzione è molto lenta per valori di N maggiori di 8.
+
+(time (println (k-pal 6 5)))
+;-> 599995
+;-> 130.082
+
+(time (println (k-pal 7 5)))
+;-> 5999995
+;-> 1270.995
+
+(time (println (k-pal 8 5)))
+;-> 59999995
+;-> 12792.944
+
+Con N = 10^5 la funzione non termina prima di anni...
+
+N=8
+(time (for (i 1 1e8) (setq a 1)))
+;-> 2534
+N=9
+(time (for (i 1 1e9) (setq a 1)))
+;-> 25219.387
+
+Per ogni incremento di N, il tempo viene moltiplicato per 10.
+Considerando che l'aumento sia lineare (ma non lo è):
+(mul 25.219387 10 (- 10e5 9))
+;-> 252191600.25517 ;secondi
+(div 252191600.25517 3600)
+;-> 70053.22229310278 ; ore
+(div 70053.22229310278 24)
+;-> 2918.884262212616 ; giorni
+(div 2918.884262212616 365)
+;-> 7.996943184144153 ; anni
+
+Analizziamo quali sono i numeri k-pal per N che va da 1 a 9 con numeri da 1 a K cifre:
+
+(define (lista k-max n-max)
+  (setq out '())
+  (for (k 1 k-max)
+    (setq tmp (list k))
+    (for (n 1 n-max)
+      (push (list n (k-pal n k)) tmp -1))
+    (push tmp out -1))
+  out)
+
+(lista 9 7)
+;-> ((1 (1 9) (2 99) (3 999) (4 9999) (5 99999) (6 999999) (7 9999999))
+;->  (2 (1 8) (2 88) (3 898) (4 8998) (5 89998) (6 899998) (7 8999998))
+;->  (3 (1 9) (2 99) (3 999) (4 9999) (5 99999) (6 999999) (7 9999999))
+;->  (4 (1 8) (2 88) (3 888) (4 8888) (5 88988) (6 889988) (7 8899988))
+;->  (5 (1 5) (2 55) (3 595) (4 5995) (5 59995) (6 599995) (7 5999995))
+;->  (6 (1 6) (2 66) (3 888) (4 8778) (5 89898) (6 897798) (7 8998998))
+;->  (7 (1 7) (2 77) (3 959) (4 9779) (5 99799) (6 999999) (7 9994999))
+;->  (8 (1 8) (2 88) (3 888) (4 8888) (5 88888) (6 888888) (7 8889888))
+;->  (9 (1 9) (2 99) (3 999) (4 9999) (5 99999) (6 999999) (7 9999999)))
+
+Analizzando i valori possiamo costruire il numero k-palindromo.
+
+(define (k-pal2 n k)
+  (local (out l q r)
+    (cond ((= k 1) (setq out (dup "9" n)))
+          ((= k 2)
+            (if (< n 3)
+                (setq out (dup "8" n))
+                ;else
+                (setq out (string "8" (dup "9" (- n 2)) "8"))))
+          ((= k 3) (setq out (dup "9" n)))
+          ((= k 4)
+            (if (< n 5)
+                (setq out (dup "8" n))
+                ;else
+                (setq out (string "88" (dup "9" (- n 4)) "88"))))
+          ((= k 5)
+            (if (< n 3)
+                (setq out (dup "5" n))
+                ;else
+                (setq out (string "5" (dup "9" (- n 2)) "5"))))
+          ((= k 6)
+            (cond ((< n 3)
+                    (setq out (dup "6" n)))
+                  ((= (% n 2) 1)
+                    (setq l (- (/ n 2) 1))
+                    (setq out (string "8" (dup "9" l) "8" (dup "9" l) "8")))
+                  (true
+                    (setq l (- (/ n 2) 2))
+                    (setq out (string "8" (dup "9" l) "77" (dup "9" l) "8")))))
+          ((= k 7)
+            (setq mid '("" "7" "77" "959"
+                        "9779" "99799" "999999" "9994999"
+                        "99944999" "999969999" "9999449999" "99999499999"))
+            (setq q (/ n 12))
+            (setq r (% n 12))
+            (setq out (string (dup "999999" q) (mid r) (dup "999999" q))))
+          ((= k 8)
+            (if (< n 7)
+                (setq out (dup "8" n))
+                ;else
+                (setq out (string "888" (dup "9" (- n 6)) "888"))))
+          ((= k 9) (setq out (dup "9" n)))
+    )
+    out))
+
+Proviamo:
+
+(k-pal2 3 5)
+;-> "595"
+
+(k-pal2 1 4)
+;-> "8"
+
+(k-pal2 5 6)
+;-> "89898"
+
+(time (println (k-pal2 6 5)))
+;-> "599995"
+;-> 0
+
+(time (println (k-pal2 7 5)))
+;-> "5999995"
+;-> 0
+
+(time (println (k-pal2 8 5)))
+;-> "59999995"
+;-> "1.009"
+
+(k-pal2 100 7)
+;-> "99999999999999999999999999999999999999999999999997
+;->  79999999999999999999999999999999999999999999999999"
+
+(define (lista2 k-max n-max)
+  (setq out '())
+  (for (k 1 k-max)
+    (setq tmp (list k))
+    (for (n 1 n-max)
+      (push (list n (k-pal2 n k)) tmp -1))
+    (push tmp out -1))
+  out)
+
+(lista2 9 7)
+;-> ((1 (1 "9") (2 "99") (3 "999") (4 "9999") (5 "99999") (6 "999999") (7 "9999999"))
+;->  (2 (1 "8") (2 "88") (3 "898") (4 "8998") (5 "89998") (6 "899998") (7 "8999998"))
+;->  (3 (1 "9") (2 "99") (3 "999") (4 "9999") (5 "99999") (6 "999999") (7 "9999999"))
+;->  (4 (1 "8") (2 "88") (3 "888") (4 "8888") (5 "88988") (6 "889988") (7 "8899988"))
+;->  (5 (1 "5") (2 "55") (3 "595") (4 "5995") (5 "59995") (6 "599995") (7 "5999995"))
+;->  (6 (1 "6") (2 "66") (3 "888") (4 "8778") (5 "89898") (6 "897798") (7 "8998998"))
+;->  (7 (1 "7") (2 "77") (3 "959") (4 "9779") (5 "99799") (6 "999999") (7 "9994999"))
+;->  (8 (1 "8") (2 "88") (3 "888") (4 "8888") (5 "88888") (6 "888888") (7 "8889888"))
+;->  (9 (1 "9") (2 "99") (3 "999") (4 "9999") (5 "99999") (6 "999999") (7 "9999999")))
+
+
+----------------
+Nave e container
+----------------
+
+Una nave ha NxN celle per container.
+Ogni cella può contenere un container con peso massimo pari a W.
+La nave può caricare al massimo un peso totale pari a P.
+Dati N, P e W, determinare quanti container può caricare la nave.
+
+Quanti container al massimo può contenere la nave (spazio)? A = NxN
+Quanti container al massimo può contenere la nave (peso)?   B = W / P
+Quindi il numero di container è il valore minimo tra A e B.
+
+(define (ship N P W) (min (* N N) (/ W P)))
+
+Proviamo:
+
+(ship 2 3 15)
+;-> 4
+(ship 4 6 10)
+;-> 1
+(ship 3 5 20)
+;-> 4
+(ship 10 15 200)
+;-> 13
+
+
+-------------------------------------------------------------------
+Rimozione continua e decrescente di K carte da un mazzo con N carte
+-------------------------------------------------------------------
+
+Il gioco si svolge tra due giocatori A e B con un mazzo di N carte.
+Inizialmente il giocatore A rimuove le prime K carte dal mazzo, poi il giocatore B rimuove le prime (K - 1) carte del mazzo.
+Il gioco continua in questo modo, ed ogni volta il numero di carte da rimuovere viene diminuito di 1.
+Il primo giocatore che non può muovere (perchè non ci sono carte a sufficienza da rimuovere) perde.
+Se un giocatore raggiunge K = 0 (cioè deve rimuovere 0 carte) e ci sono ancora carte nel mazzo, allora il gioco finisce in pareggio.
+Se un giocatore raggiunge K = 1, e il mazzo ha una sola carta, allora il gioco finisce in pareggio (perchè l'altro giocatore dovrebbe rimuovere 0 carte infatti per lui K = 0).
+
+Dati N e K determinare il vincitore del gioco.
+
+(define (game n k)
+  (let (out "AB")
+    (if (>= n (/ (* k (+ k 1)) 2)) ; sempre pareggio
+        (setq out "AB")
+        ;else
+        (let (continua true)
+          (++ k)
+          (while (and (>= n 0) (>= k 0) continua)
+            (-- k)
+            (-- n k)
+            (when (< n 0)
+            ;(println n { } k)
+              (setq continua nil)
+              (setq out "B"))
+            (when continua
+              (-- k)
+              (-- n k)
+              (when (< n 0)
+              ;(println n { } k))
+                (setq continua nil)
+                (setq out "A"))))))
+    out))
+
+Proviamo:
+
+(game 12 10)
+;-> "A"
+(game 55 10)
+;-> "AB"
+(game 100 10)
+;-> "AB"
+(game 21 10)
+;-> "B"
+
 ============================================================================
 

@@ -3134,6 +3134,9 @@ NOTE LIBERE 32
   Deviazione standard della somma dei primi K numeri primi
   Persona più vicina
   Cifre uguali dopo trasformazione
+  Numeri k-palindromi
+  Nave e container
+  Rimozione continua e decrescente di K carte da un mazzo con N carte
 
 PROBLEMI SUI DADI
 =================
