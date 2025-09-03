@@ -3137,6 +3137,7 @@ NOTE LIBERE 32
   Numeri k-palindromi
   Nave e container
   Rimozione continua e decrescente di K carte da un mazzo con N carte
+  Formaggio e topi
 
 PROBLEMI SUI DADI
 =================

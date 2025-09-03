@@ -2227,6 +2227,7 @@ Dati N e K determinare il vincitore del gioco.
 
 (define (game n k)
   (let (out "AB")
+        ; (n > (somma dei primi k numeri)) ?
     (if (>= n (/ (* k (+ k 1)) 2)) ; sempre pareggio
         (setq out "AB")
         ;else
@@ -2258,6 +2259,61 @@ Proviamo:
 ;-> "AB"
 (game 21 10)
 ;-> "B"
+
+
+----------------
+Formaggio e topi
+----------------
+
+Abbiamo una certa quantità totale di formaggio (kg).
+Alcuni topi mangiano il formaggio contemporaneamente e riducono la quantità di formaggio.
+Per mangiare X kg di formaggio i topi impiegano:
+  (timeTopo(i)*1 + timeTopo(i)*2 + ... + timeTopo(i)*X) secondi.
+Esempio:
+Per mangiare 1kg di formaggio occorrono timeTopo(i) secondi,
+per mangiare 2kg di formaggio occorrono timeTopo(i) + timeTopo(i)*2 secondi,
+e così via.
+Data la quantità totale di formaggio Q e una lista con i tempi di lavoro di ogni topo determinare il numero di secondi necessario affinchè i topi mangino tutto il formaggio.
+
+Per risolvere il problema eseguiamo una ricerca binaria sul massimo numero di secondi per verificare se è sufficiente mangiare tutto il formaggio con tutti i topi che mangiano contemporaneamente.
+
+I kg 'x' che un topo con tempo di lavoro 't' mangia in 'k' secondi valgono:
+
+  t * (1 + 2 + ... + x) <= k
+          (1 + x) * x/2 <= k/t
+      x^2 + x - 2 * k/t <= 0
+                      x <= (sqrt(1 + 8 * k / t) - 1)/2
+
+(define (secondi totale topo)
+  (local (minimo sx dx)
+    (setq minimo (apply min topo))
+    (setq sx 1)
+    (setq dx (/ (* minimo totale (+ totale 1) 2)))
+    (while (< sx dx)
+      (setq m (/ (+ sx dx) 2))
+      (if (< (mangia topo m) totale)
+          (setq sx (+ m 1))
+          (setq dx m)))
+    sx))
+
+(define (mangia topo m)
+  (let (qty 0)
+    (dolist (t topo)
+      (++ qty (int (div (add (sqrt (add 1 (div (mul 8 m) t))) -1) 2))))
+    qty))
+
+Proviamo:
+
+(secondi 20 '(1 1 1 1))
+;-> 15
+(secondi 20 '(1 1 1))
+;-> 28
+(secondi 4 '(2 1 1))
+;-> 3
+(seconds 10 '(3 2 2 4))
+;-> 12
+(secondi 5 '(1))
+;-> 15
 
 ============================================================================
 

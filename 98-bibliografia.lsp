@@ -5,6 +5,7 @@
 ====================
 
   Documentazione ufficiale:
+  -------------------------
   http://www.newLISP.org/index.cgi?Documentation
 
   Tutorial "Introduction to newLISP" su WikiBooks:
@@ -13,7 +14,8 @@
   "newLISP in 21 minutes" di John W. Small
   http://www.newLISP.org/newLISP_in_21_minutes.html
 
-  Forum ufficiale di newLISP
+  Forum ufficiale di newLISP:
+  ---------------------------
   Vecchio forum:
   http://www.newLISPfanclub.alh.net/forum/
   Nuovo forum (2023)
@@ -31,17 +33,10 @@
   cameyo github:
   https://github.com/cameyo42/newLISP-Code
 
-  Libro sulla Fuzzy Logic (in newLISP):
-  "A Practical Introduction to Fuzzy Logic using Lisp", Luis Arguelles Mendez, 2015
-
   Informazioni sui numeri Floating Point:
   https://floating-point-gui.de
   http://pages.cs.wisc.edu/~david/courses/cs552/S12/handouts/goldberg-floating-point.pdf
-
-  "Numerical Computing with IEEE Floating Point Arithmetic", Michael Overton
-
-  "Handbook of Floating-Point Arithmetic" AA.VV.
-
+  
   Articoli su newLISP:
   "Crawler Tractor" di Kazimir Majorinc
   http://kazimirmajorinc.com/Documents/Crawler-tractor/index.html
@@ -57,6 +52,13 @@
 
   Libri:
   ------
+  "Numerical Computing with IEEE Floating Point Arithmetic", Michael Overton
+
+  "Handbook of Floating-Point Arithmetic" AA.VV.
+
+  Libro sulla Fuzzy Logic (in newLISP):
+  "A Practical Introduction to Fuzzy Logic using Lisp", Luis Arguelles Mendez, 2015  
+  
   "The Littler Schemer", Friedman-Felleiser, 4ed, 1996
 
   "The Art of Computer Programming", Donald Knuth, 4 volumi, 1968..2015
@@ -103,7 +105,6 @@
   "La piccola bottega della curiosità matematiche del professor Steward", Ian Stewart, 2010
 
   "I favolosi numeri di Fibonacci", Posamentier-Lehmann, 2010
-
 
   Siti web:
   ---------
