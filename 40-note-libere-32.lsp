@@ -2315,5 +2315,242 @@ Proviamo:
 (secondi 5 '(1))
 ;-> 15
 
+
+-------------------------
+Tre scelte con una moneta
+-------------------------
+
+Abbiamo tre vernici di colore diverso e vogliamo pitturare una stanza usando un solo colore scelto a caso. Con noi abbiamo solo una moneta (Testa/Croce).
+Come utilizzare la moneta per scegliere un colore a caso (con probabilità uguali)?
+
+Basta lanciare la moneta due volte per avere 4 eventi distinti:
+1) Testa-Croce
+2) Testa-Testa
+3) Croce-Testa
+4) Croce-Croce
+
+Poi abbiniamo i colori (es. Rosso, Giallo, Blu) ai primi 3 eventi:
+1) Testa-Croce --> Rosso
+2) Testa-Testa --> Giallo
+3) Croce-Testa --> Blu
+Se esce il quarto evento, allora ripetiamo il processo:
+4) Croce-Croce --> Rilanica la moneta 2 volte
+
+Testa = 0
+Croce = 1
+
+(define (moneta3)
+  (let ( (a (rand 2)) (b (rand 2)) )
+    (cond ((and (= a 0) (= b 1)) 'Rosso)  ; TC
+          ((and (= a 0) (= b 0)) 'Giallo) ; TT
+          ((and (= a 1) (= b 0)) 'Blu)    ; TT
+          (true (moneta3)))))
+
+Proviamo:
+
+(collect (moneta3) 10)
+;-> (Blu Rosso Blu Rosso Blu Giallo Blu Giallo Blu Giallo)
+
+Verifichiamo le probabilità di ogni colore:
+
+(count (list 'Rosso 'Giallo 'Blu) (collect (moneta3) 1e5))
+;-> (33273 33245 33482)
+
+
+---------------------------------------------
+Creazione di intervalli con numeri di k cifre
+---------------------------------------------
+
+Dato un numero di cifre k, determinare tutti gli intervalli numerici (valore minimo, valore massimo) che hanno cifre da 1 a k.
+
+Esempio:
+  k = 3
+  Intervallo numerico con 1 cifra: (1 9)
+  Intervallo numerico con 2 cifre: (10 99)
+  Intervallo numerico con 3 cifre: (100 999)
+Output: (1 9) (10 99) (100 999)
+
+Inoltre la funzione deve prendere un parametro ('odd o 'even) che specifica se le cifre devono essere in numero dispari o in numero pari.
+
+Esempio:
+  k = 3, dispari
+  Intervallo numerico con 1 cifra: (1 9),     dispari? si
+  Intervallo numerico con 2 cifre: (10 99),   dispari? no
+  Intervallo numerico con 3 cifre: (100 999), dispari? si
+  Output: (1 9) (100 999)
+
+(define (range-k-digits k type)
+  ; caso speciale
+  (if (= k 1)
+      ; gestione dei casi speciali
+      (cond ((= type 'odd) (list 1 9)) ; un solo intervallo se dispari
+            ((= type 'even) '())       ; nessun intervallo se pari
+            (true (list 1 9)))         ; tutti gli intervalli: 1
+  ; else: costruiamo la lista completa di intervalli
+      (let ( (all '()) (minimo 0) (massimo 0) )
+        ; per ogni numero di cifre da 1 a k
+        (for (i 1 k) ; i = numero di cifre
+          ; calcoliamo minimo e massimo dell’intervallo
+          (setq minimo (pow 10 (sub i 1)))
+          (setq massimo (sub (pow 10 i) 1))
+          ; aggiungiamo l’intervallo (minimo, massimo), tagliato da max-num
+          (push (list minimo massimo) all -1)
+        )
+        ;(println all { } (length all))
+        ; selezione finale: dispari, pari, o tutti
+        (cond ((= type 'odd)
+                (select all (sequence 0 (- (length all) 1) 2))) ; cifre dispari
+              ((= type 'even)
+                (select all (sequence 1 (- (length all) 1) 2))) ; cifre pari
+              (true all))))) ; tutti gli intervalli
+
+Proviamo:
+
+(range-k-digits 1)
+;-> (1 9)
+(range-k-digits 3)
+;-> ((1 9) (10 99) (100 999))
+(range-k-digits 10)
+;-> ((1 9) (10 99) (100 999) (1000 9999) (10000 99999) (100000 999999)
+;->  (1000000 9999999) (10000000 99999999) (100000000 999999999)
+;->  (1000000000 9999999999))
+(range-k-digits 10 'odd)
+;-> ((1 9) (100 999) (10000 99999) (1000000 9999999) (100000000 999999999))
+(range-k-digits 10 'even)
+;-> ((10 99) (1000 9999) (100000 999999) (10000000 99999999)
+;->  (1000000000 9999999999))
+
+Adesso scriviamo una funzione che prende un valore massimo come limite dell'ultimo intervallo (invece del numero di cifre k).
+In questo caso dobbiamo calcolare k e considerare quando inserire il valore massimo nell'ultimo intervallo.
+
+(define (range-digits max-num type)
+  ; Se il numero massimo è minore di 10
+  (if (< max-num 10)
+      ; gestione dei casi speciali
+      (cond ((= type 'odd) (list 1 max-num)) ; un solo intervallo se dispari
+            ((= type 'even) '())             ; nessun intervallo se pari
+            (true (list 1 max-num)))         ; tutti gli intervalli: 1
+  ; else: costruiamo la lista completa di intervalli
+      (let ( (all '()) (minimo 0) (massimo 0) (k 0) )
+        ; k = numero di cifre del numero massimo
+        (setq k (ceil (log max-num 10)))
+        ; aumenta k se max-num è una potenza di 10
+        (if (= max-num (pow 10 k)) (++ k))
+        ; per ogni numero di cifre da 1 a k
+        (for (i 1 k) ; i = numero di cifre
+          ; calcoliamo minimo e massimo dell’intervallo
+          (setq minimo (pow 10 (sub i 1)))
+          (setq massimo (sub (pow 10 i) 1))
+          ; aggiungiamo l’intervallo (minimo, massimo), tagliato da max-num
+          (push (list minimo (min max-num massimo)) all -1)
+        )
+        ;(println all { } (length all))
+        ; selezione finale: dispari, pari, o tutti
+        (cond ((= type 'odd)
+                (select all (sequence 0 (- (length all) 1) 2))) ; cifre dispari
+              ((= type 'even)
+                (select all (sequence 1 (- (length all) 1) 2))) ; cifre pari
+              (true all))))) ; tutti gli intervalli
+
+Proviamo:
+
+(range-digits 1000)
+;-> ((1 9) (10 99) (100 999) (1000 1000))
+(range-digits 1000 'odd)
+;-> ((1 9) (100 999))
+(range-digits 1000 'even)
+;-> ((10 99) (1000 1000))
+(range-digits 100)
+;-> ((1 9) (10 99) (100 100))
+(range-digits 100 'odd)
+;-> ((1 9) (100 100))
+(range-digits 100 'even)
+;-> ((10 99))
+(range-digits 99)
+;-> ((1 9) (10 99))
+(range-digits 99 'odd)
+;-> ((1 9))
+(range-digits 99 'even)
+;-> ((10 99))
+(range-digits 123456)
+;-> ((1 9) (10 99) (100 999) (1000 9999) (10000 99999) (100000 123456))
+(range-digits 123456 'odd)
+;-> ((1 9) (100 999) (10000 99999))
+(range-digits 123456 'even)
+;-> ((10 99) (1000 9999) (100000 123456))
+(range-digits 12345)
+;-> ((1 9) (10 99) (100 999) (1000 9999) (10000 12345))
+(range-digits 12345 'odd)
+;-> ((1 9) (100 999) (10000 12345))
+(range-digits 12345 'even)
+;-> ((10 99) (1000 9999))
+(range-digits 1)
+;-> (1 1)
+(range-digits 4 'odd)
+;-> (1 4)
+(range-digits 8 'even)
+;-> ()
+
+
+-----------------------------------------------------------------
+Numeri con numero di cifre pari uguale al numero di cifre dispari
+-----------------------------------------------------------------
+
+Determinare la sequenza dei numeri che hanno un numero di cifre pari uguale al numero di cifre dispari.
+
+Sequenza OEIS A227870:
+Numbers with equal number of even and odd digits.
+  10, 12, 14, 16, 18, 21, 23, 25, 27, 29, 30, 32, 34, 36, 38, 41, 43, 45,
+  47, 49, 50, 52, 54, 56, 58, 61, 63, 65, 67, 69, 70, 72, 74, 76, 78, 81,
+  83, 85, 87, 89, 90, 92, 94, 96, 98, 1001, 1003, 1005, 1007, 1009, 1010,
+  1012, 1014, 1016, 1018, 1021, 1023, 1025, ...
+
+(define (pari-dispari num)
+  (if (odd? (length num)) ; se abbiamo un numero di cifre dispari, allora nil
+      nil
+      ;else
+      (let ( (pari 0) (dispari 0))
+        (while (!= num 0)
+          (if (even? (% num 10))
+              (++ pari)
+              (++ dispari))
+          (setq num (/ num 10)))
+        (= pari dispari))))
+
+(filter pari-dispari (sequence 1  1025))
+;-> (10 12 14 16 18 21 23 25 27 29 30 32 34 36 38 41 43 45
+;->  47 49 50 52 54 56 58 61 63 65 67 69 70 72 74 76 78 81
+;->  83 85 87 89 90 92 94 96 98 1001 1003 1005 1007 1009 1010
+;->  1012 1014 1016 1018 1021 1023 1025)
+
+
+-----------------------------------------------------------------------
+Numeri con somma delle cifre pari uguale alla somma delle cifre dispari
+-----------------------------------------------------------------------
+
+Determinare la sequenza dei numeri che hanno somma delle cifre pari uguale alla somma delle cifre dispari.
+
+Sequenza OEIS A036301:
+Numbers whose sum of even digits and sum of odd digits are equal.
+  0, 112, 121, 134, 143, 156, 165, 178, 187, 211, 314, 336, 341, 358, 363,
+  385, 413, 431, 516, 538, 561, 583, 615, 633, 651, 718, 781, 817, 835,
+  853,  871, 1012, 1021, 1034, 1043, 1056, 1065, 1078, 1087, 1102, 1120,
+  1201, 1210, 1223, 1232, 1245, 1254, 1267, 1276, 1289, 1298, ...
+
+(define (sum-pari-dispari num)
+  (let ( (pari 0) (dispari 0) (cifra 0) )
+    (while (!= num 0)
+      (if (even? (setq cifra (% num 10)))
+          (++ pari cifra)
+          (++ dispari cifra))
+      (setq num (/ num 10)))
+    (= pari dispari)))
+
+(filter sum-pari-dispari (sequence 0 1298))
+;-> (0 112 121 134 143 156 165 178 187 211 314 336 341 358 363
+;->  385 413 431 516 538 561 583 615 633 651 718 781 817 835
+;->  853 871 1012 1021 1034 1043 1056 1065 1078 1087 1102 1120
+;->  1201 1210 1223 1232 1245 1254 1267 1276 1289 1298)
+
 ============================================================================
 

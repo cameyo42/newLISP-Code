@@ -3138,6 +3138,10 @@ NOTE LIBERE 32
   Nave e container
   Rimozione continua e decrescente di K carte da un mazzo con N carte
   Formaggio e topi
+  Tre scelte con una moneta
+  Creazione di intervalli con numeri di k cifre
+  Numeri con numero di cifre pari uguale al numero di cifre dispari
+  Numeri con somma delle cifre pari uguale alla somma delle cifre dispari
 
 PROBLEMI SUI DADI
 =================
