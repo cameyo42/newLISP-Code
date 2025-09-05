@@ -2552,5 +2552,235 @@ Numbers whose sum of even digits and sum of odd digits are equal.
 ;->  853 871 1012 1021 1034 1043 1056 1065 1078 1087 1102 1120
 ;->  1201 1210 1223 1232 1245 1254 1267 1276 1289 1298)
 
+
+------------------------------------
+Numeri primi in una stringa di cifre
+------------------------------------
+
+Data una stringa di cifre, determinare tutti i numeri primi contenuti nella stringa come sottostringa.
+
+Esempio
+  stringa = "12234"
+  primi = 2 3 23 223 1223
+
+Sequenza OEIS A039997:
+Number of distinct primes which occur as substrings of the digits of n.
+  0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 2, 0, 1, 0, 2, 0, 1, 1, 1, 1, 3,
+  1, 2, 1, 2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 3, 1, 1, 0, 1, 1, 2, 0, 1, 0,
+  2, 0, 0, 1, 1, 2, 3, 1, 1, 1, 2, 1, 2, 0, 1, 1, 1, 0, 1, 0, 2, 0, 0,
+  1, 2, 2, 3, 1, 2, 1, 1, 1, 2, 0, 0, 1, 2, 0, 1, 0, 1, 0, 1, 0, 0, 1,
+  1, 0, 1, 0, 2, 0, 0, 0, 1, 1, 2, 0, 1, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (divide str binary)
+  (let (out "")
+    (for (i 0 (- (length binary) 1))
+      (if (= (binary i) "1")
+          ; taglio
+          (extend out (string (str i) { }))
+          ; nessun taglio
+          (extend out (str i))))
+    ; inserisce caratteri finali
+    (extend out (str -1))
+    out))
+
+(define (find-primi str)
+  (cond ((= (length str) 1)
+          (if (prime? (int str 0 10))
+              (list str)
+              '()))
+        (true
+          (local (out len max-tagli taglio fmt numeri)
+            (setq out '())
+            (setq len (length str))
+            ; numero massimo di tagli
+            (setq max-tagli (- len 1))
+            ; formattazione con 0 davanti
+            (setq fmt (string "%0" max-tagli "s"))
+            (for (i 0 (- (pow 2 max-tagli) 1))
+              ; taglio corrente
+              (setq taglio (format fmt (bits i)))
+              ; taglia la stringa con taglio corrente e
+              ; forma una lista di numeri (stringhe)
+              (setq numeri (parse (divide str taglio) " "))
+              ;(println numeri)
+              ; cerca i numeri primi nella lista di numeri
+              (dolist (num numeri)
+                (if (prime? (int num 0 10)) (push (int num 0 10) out -1)))
+            )
+            (unique (sort out))))))
+
+Proviamo:
+
+(find-primi "12234")
+;-> (2 3 23 223 1223)
+(find-primi "123456789")
+;-> (2 3 5 7 23 67 89 4567 23456789)
+(time (println (find-primi "123456789123456789")))
+;-> (2 3 5 7 23 67 89 4567 67891 89123 4567891 23456789
+;->  56789123 1234567891 4567891234567 23456789123456789)
+;-> 2921.919
+
+Calcoliamo la sequenza:
+
+(map (fn(x) (length (find-primi x))) (map string (sequence 1 105)))
+;-> (0 1 1 0 1 0 1 0 0 0 1 1 2 0 1 0 2 0 1 1 1 1 3
+;->  1 2 1 2 1 2 1 2 2 1 1 2 1 3 1 1 0 1 1 2 0 1 0
+;->  2 0 0 1 1 2 3 1 1 1 2 1 2 0 1 1 1 0 1 0 2 0 0
+;->  1 2 2 3 1 2 1 1 1 2 0 0 1 2 0 1 0 1 0 1 0 0 1
+;->  1 0 1 0 2 0 0 0 1 1 2 0 1)
+
+
+---------------------------------------------------------
+Numeri con somma delle cifre uguale al numero di divisori
+---------------------------------------------------------
+
+Determinare la sequenza dei numeri che hanno la somma delle cifre uguale al numero di divisori.
+
+Sequenza OEIS A057531:
+Numbers whose sum of digits and number of divisors are equal.
+  1, 2, 11, 22, 36, 84, 101, 152, 156, 170, 202, 208, 225, 228, 288, 301,
+  372, 396, 441, 444, 468, 516, 525, 530, 602, 684, 710, 732, 804, 828,
+  882, 952, 972, 1003, 1016, 1034, 1070, 1072, 1106, 1111, 1164, 1236,
+  1304, 1308, 1425, 1472, 1476, 1521, 1524, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors-count num)
+"Count the divisors of an integer number"
+  (if (= num 1)
+      1
+      (let (lst (factor-group num))
+        (apply * (map (fn(x) (+ 1 (last x))) lst)))))
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+(define (check? num) (= (digit-sum num) (divisors-count num)))
+
+Proviamo:
+
+(check? 30)
+;-> nil
+(check? 22)
+;-> true
+
+(filter check? (sequence 1 1524))
+;-> (1 2 11 22 36 84 101 152 156 170 202 208 225 228 288 301
+;->  372 396 441 444 468 516 525 530 602 684 710 732 804 828
+;->  882 952 972 1003 1016 1034 1070 1072 1106 1111 1164 1236
+;->  1304 1308 1425 1472 1476 1521 1524)
+
+(time (println (length (setq all (filter check? (sequence 1 1e6))))))
+;-> 11405
+;-> 3625.516
+
+
+-----------------------------------------------------------------
+Numero minimo di operazioni per rendere tutti i numeri uguali a 1
+-----------------------------------------------------------------
+
+Abbiamo una lista di N numeri interi positivi.
+L'unica operazione possibile sui numeri della lista è la seguente:
+selezionare un indice i tale che 0 <= i < (N - 1) e sostituisci nums(i) o nums(i+1) con il loro MCD (Massimo Comun Divisore).
+Scrivere una funzione che restituisce il numero minimo di operazioni per rendere tutti gli elementi della lista uguali a 1.
+
+Possiamo ridurre tutti gli elementi a 1 solo se il MCD di tutti gli elementi è uguale a 1.
+Abbiamo due casi:
+1) Se ci sono degli 1 nella lista, è possibile utilizzare ogni 1 per convertire i suoi vicini a 1 tramite operazioni MCD (poiché MCD(1, qualsiasi numero) = 1).
+In questo caso il numero di operazioni minime necessarie vale:
+  lunghezza-della-lista - numero-di-uno-nella-lista
+2) Se inizialmente non ci sono 1, è necessario prima crearne almeno uno trovando la sottolista più corta il cui MCD sia uguale a 1, quindi 'distribuire' quell'1 a tutti gli altri elementi.
+In questo caso il numero di operazioni minime dipende da quanti elementi devono essere modificati e dal numero minimo di passaggi necessari per creare il primo 1.
+
+Esempio 1:
+Input: nums = (2 8 3 4)
+Output: 4
+Operazioni:
+- indice i = 2, sostituire (nums 2) con MCD(3,4) = 1, Risultato = [2,8,1,4].
+- indice i = 1, sostituire (nums 1) con MCD(8,1) = 1, Risultato = [2,1,1,4].
+- indice i = 0, sostituire (nums 0) con MCD(2,1) = 1, Risultato = [1,1,1,4].
+- indice i = 2, sostituire (nums 3) con MCD(1,4) = 1, Risultato = [1,1,1,1].
+
+Esempio 2:
+Input: nums = (2 4 8 12)
+Output: nil
+Operazioni: nessuna operazione può creare un 1.
+
+(define (min-ops nums)
+  (local (len ones min-len cur-gcd stop)
+    ; numero di elementi (N)
+    (setq len (length nums))
+    ; conta il numero di 1 nella lista
+    (setq ones (first (count '(1) nums)))
+    (cond 
+      ; Se ci sono x valori a 1 nella lista ,
+      ; allora abbiamo bisogno (N - x) operazioni per convertire
+      ; tutti gli elementi diversi da 1 in 1
+      ((> ones 1) (- len ones))
+      (true
+        ; Cerca la sottolista di lunghezza minima il cui MCD è uguale a 1
+        (setq min-len (+ len 1))
+        ;(println "min-len: " min-len)
+        ; Prova tutte le possibili sottolista a partire dall'indice i
+        (for (i 0 (- len 1))
+          ;(println "i: " i)
+          (setq cur-gcd 0)
+          (setq stop nil)
+          ; Estende la sottolista da i a j
+          (for (j i (- len 1) 1 stop)
+            ; Calcola il MCD di tutti gli elementi dall'indice i a j
+            (setq cur-gcd (gcd cur-gcd (nums j)))
+            ;(println "i: " i { } "j: " j)
+            ;(println "nums(i): " (nums i) { } "numsj): " (nums j))
+            ;(print "cur-gcd: " cur-gcd) (read-line)
+            ; Se troviamo una sottolista con MCD = 1, allora...
+            (when (= cur-gcd 1) 
+              ; aggiorna la lunghezza minima
+              (setq min-len (min min-len (+ j 1 (- i))))
+              ;(println "min-len: " min-len) (read-line)
+              ; Ferma il ciclo perchè non abbiamo bisogno di estendere
+              ; la lista da questo punto
+              (setq stop true))))
+        (if (> min-len len)
+            ; Se non esiste alcun sottoarray con MCD = 1, restituisce nil
+            nil
+            ;else
+            ; Totale operazioni = 
+            ;    (min-len - 1) [per creare il primo 1] +
+            ;    (len - 1)     [per propagare 1 a tutti gli altri elementi]
+            (+ len min-len (- 2)))))))
+
+Proviamo:
+
+(min-ops '(2 8 4 3))
+;-> 4
+
+(min-ops '(2 4 8 12))
+;-> nil
+
+(min-ops '(1 2 3 4 5 6 7 8 9))
+;-> 8
+
+(min-ops '(2 2 3 4 5 6 7 8 9))
+;-> 9
+
+Togliere il commento alle linee "print" per vedere come funziona l'algoritmo.
+
 ============================================================================
 

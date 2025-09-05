@@ -3142,6 +3142,9 @@ NOTE LIBERE 32
   Creazione di intervalli con numeri di k cifre
   Numeri con numero di cifre pari uguale al numero di cifre dispari
   Numeri con somma delle cifre pari uguale alla somma delle cifre dispari
+  Numeri primi in una stringa di cifre
+  Numeri con somma delle cifre uguale al numero di divisori
+  Numero minimo di operazioni per rendere tutti i numeri uguali a 1
 
 PROBLEMI SUI DADI
 =================
