@@ -2900,5 +2900,160 @@ Errori impercettibili:
 In teoria, se la differenza assoluta tra due numeri consecutivi è maggiore del valore assoluto del doppio del primo numero, allora mossa con 3 punti esclamativi !!! (non l'ha vista neanche il computer).
 In pratica, il computer valuta l'ultima posizione con una mossa in più della precedente, quindi potrebbe "vedere" un vantaggio maggiore.
 
+
+---------------------------------------
+La funzione "parse" (Tokenize a string)
+---------------------------------------
+
+"Tokenize a string" significa suddividere una stringa in parti più piccole, chiamate token.
+Un token è un'unità significativa di testo (una parola, un numero, un simbolo, ecc.) oppure una sequenza definita da una regola (come separatori o spazi).
+
+Esempio:
+  stringa = "Questo è un esempio di tokenize."
+  tokenizzazione per spazi " " = "Questo" "è" "un" "esempio" "di" "tokenize."
+
+In programmazione si usa per dividere una stringa in parole o simboli su cui lavorare (es. parsing di comandi, lettura CSV).
+In linguistica computazionale/NLP è il primo passo per elaborare il linguaggio naturale (es. trasformare una frase in singole parole o sottoparole).
+Nei compilatori la tokenizzazione (o lexing) trasforma il codice sorgente in simboli (parole chiave, numeri, operatori, ecc.).
+
+Per fare questo newLISP ha la funzione "parse".
+
+*******************
+>>> funzione PARSE
+*******************
+sintassi: (parse str-data [str-break [regex-option]])
+
+Suddivide la stringa risultante dalla valutazione di "str-data" in token di stringa, che vengono poi restituiti in una lista.
+Se non viene specificato "str-break", l'analisi esegue la tokenizzazione in base alle regole di analisi interne di newLISP.
+È possibile specificare una stringa in "str-break" per tokenizzare solo al momento dell'occorrenza di una stringa.
+Se viene specificato un numero o una stringa "regex-option", è possibile utilizzare un pattern di espressione regolare in "str-break".
+Se "str-break" non è specificato, la dimensione massima del token è 2048 per le stringhe tra virgolette e 256 per gli identificatori.
+In questo caso, newLISP utilizza lo stesso tokenizzatore più veloce utilizzato per l'analisi del codice sorgente newLISP.
+Se viene specificato "str-break", non vi è alcuna limitazione alla lunghezza dei token.
+Viene utilizzato un algoritmo diverso che suddivide la stringa sorgente "str-data" in corrispondenza della stringa in "str-break".
+
+; no break string specified
+(parse "hello how are you")
+;-> ("hello" "how" "are" "you")
+
+; strings break after spaces, parentheses, commas, colons and numbers.
+; Spaces and the colon are swollowed
+(parse "weight is 10lbs")
+;-> ("weight" "is" "10" "lbs")
+(parse "one:two:three" ":")
+;-> ("one" "two" "three")
+
+;; specifying a break string
+(parse "one--two--three" "--")
+;-> ("one" "two" "three")
+
+; a regex option causes regex parsing
+(parse "one-two--three---four" "-+" 0)
+;-> ("one" "two" "three" "four")
+
+(parse "hello regular   expression 1, 2, 3" {,\s*|\s+} 0)
+;-> ("hello" "regular" "expression" "1" "2" "3")
+
+Gli ultimi due esempi mostrano un'espressione regolare come stringa di interruzione con l'opzione predefinita 0 (zero).
+Invece di { e } (parentesi graffe sinistra e destra), è possibile utilizzare le virgolette doppie per limitare il pattern.
+In questo caso, è necessario utilizzare doppie barre rovesciate all'interno del pattern.
+L'ultimo pattern potrebbe essere utilizzato per l'analisi di file CSV (Comma Separated Values).
+Per i numeri delle opzioni delle espressioni regolari, vedere "regex".
+
+parse restituirà i campi vuoti attorno ai separatori come stringhe vuote:
+; empty fields around separators returned as empty strings
+(parse "1,2,3," ",")
+;-> ("1" "2" "3" "")
+(parse "1,,,4" ",")
+;-> ("1" "" "" "4")
+(parse "," ",")
+;-> ("" "")
+Questo comportamento è necessario quando si analizzano record con campi vuoti.
+
+L'analisi di una stringa vuota produrrà sempre un elenco vuoto:
+(parse "")
+;-> ()
+(parse "" " ")
+;-> ()
+
+Utilizzare la funzione "regex" per suddividere le stringhe e le funzioni "directory", "find", "find-all", "regex", "replace" e "search" per utilizzare le espressioni regolari.
+---------------------
+
+Supponiamo di avere la stringa:
+(setq str "3,  5 ;;; (define) 7 8, k 9 text")
+;-> "3,  5 ;;; (define) 7 8, k 9 text"
+e di voler tokenizzarla/suddividerla in base ai caratteri ",", ";", "(", ")" e " ".
+Possiamo usare una espressione regolare: "[,;() ]+"
+(parse str "[,;() ]+" 0)
+;-> ("3" "5" "define" "7" "8" "k" "9" "text")
+
+In pratica con "parse" possiamo suddividere una stringa in (quasi) qualunque modo.
+
+
+-------------------------------------------
+La funzione "history" (Nome della funzione)
+-------------------------------------------
+
+Vediamo la definizione della funzione "history" dal manuale:
+
+********************
+>>>funzione HISTORY
+********************
+sintassi: (history [bool-params])
+
+history returns a list of the call history of the enclosing function.
+Without the optional bool-params, a list of function symbols is returned.
+The first symbol is the name of the enclosing function.
+When the optional bool-params evaluates to true, the call arguments are included with the symbol.
+
+(define (foo x y)
+    (bar (+ x 1) (* y 2)))
+
+(define (bar a b)
+    (history))
+
+; history returns names of calling functions
+(foo 1 2)
+;-> (bar foo)
+
+; the additional 'true' forces inclusion of callpatterns
+(define (bar a b)
+    (history true))
+
+(foo 1 2)
+;-> ((bar (+ x 1) (* y 2)) (foo 1 2))
+---------------------
+
+Con "history" possiamo determinare il nome di una funzione all'interno di se stessa:
+
+(define (get-my-name) (history))
+
+(define (somma a b)
+  (let (name (get-my-name))
+    (println "I'm " (name 1))
+    (+ a b)))
+
+(somma 1 2)
+;-> I'm somma
+;-> 3
+
+Possiamo anche usare "history" all'interno della funzione stessa:
+
+(define (somma a b)
+  (println "Eseguo: " (first (history true)))
+  (+ a b))
+
+(somma 1 2)
+;-> Eseguo: (somma 1 2)
+;-> 3
+
+(somma (+ 1 1) (+ 2 2))
+;-> Eseguo: (somma (+ 1 1) (+ 2 2))
+;-> 6
+
+Questa funzione può essere utile in fase di debug dei programmi (es. stampare la lista delle funzioni chiamate).
+
+Vedi anche "Nome della funzione" su "Note libere 8".
+
 ============================================================================
 

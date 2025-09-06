@@ -3146,6 +3146,8 @@ NOTE LIBERE 32
   Numeri con somma delle cifre uguale al numero di divisori
   Numero minimo di operazioni per rendere tutti i numeri uguali a 1
   Chess Bar Evaluation
+  La funzione "parse" (Tokenize a string)
+  La funzione "history" (Nome della funzione)
 
 PROBLEMI SUI DADI
 =================
