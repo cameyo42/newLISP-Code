@@ -3055,5 +3055,91 @@ Questa funzione può essere utile in fase di debug dei programmi (es. stampare l
 
 Vedi anche "Nome della funzione" su "Note libere 8".
 
+
+--------------------
+Automa in espansione
+--------------------
+
+Abbiamo una griglia bidimensionale infinita di celle vuote.
+Un automa viene inserito in una cella.
+Ad ogni generazione l'automa si riproduce in tutte le celle adiacenti (alto, basso, destra, sinistra).
+Vediamo le prime 4 generazioni:
+
+                                                     ██
+                                  ██               ██████  
+                ██              ██████           ██████████
+  ██          ██████          ██████████       ██████████████
+                ██              ██████           ██████████
+                                  ██               ██████
+                                                     ██  
+  gen 1      gen 2            gen 3            gen 4
+  celle=1    celle=5          celle=13         celle=25
+
+Dopo N generazioni, quante celle sono piene/occupate?
+
+Calcolo di tutte le celle (per righe)
+-------------------------------------
+'row-max' è il numero di celle della riga più lunga (ed è anche il numero di righe di ogni configurazione).
+
+(define (celle1 n)
+  (local (row-max celle)
+    (setq row-max (- (* 2L n) 1))
+    (setq celle (- row-max))
+    (for (i 1 row-max 2) (++ celle (* i 2)))
+    celle))
+
+(map celle1 (sequence 1 10))
+(1 5 13 25 41 61 85 113 145 181)
+;-> (1L 5L 13L 25L 41L 61L 85L 113L 145L 181L)
+
+Formula matematica
+------------------
+Se racchiudiamo ogni generazione nel suo quadrato minimo di contenimento possiamo osservare che il numero di celle vuote è uguale al numero di celle piene meno 1.
+Quindi il numero di celle occupate vale:
+
+  (row-max * row-max) - (row-max * row-max)/2
+
+(define (celle2 n)
+  (let (r (- (* 2L n) 1))
+    (- (* r r) (/ (* r r) 2))))
+
+(celle2 3)
+
+(map celle2 (sequence 1 10))
+;-> (1L 5L 13L 25L 41L 61L 85L 113L 145L 181L)
+
+Formula matematica
+------------------
+a(n) = n^2 + (n - 1)^2
+
+(define (celle3 n) (+ (* n n) (* (- n 1) (- n 1))))
+
+(map celle3 (sequence 1 10))
+;-> (1 5 13 25 41 61 85 113 145 181)
+
+Formula matematica
+------------------
+a(n) = 2*(n-1)*n+1
+
+(define (celle4 n) (+ (* 2 n (- n 1)) 1))
+
+(map celle4 (sequence 1 10))
+;-> (1 5 13 25 41 61 85 113 145 181)
+
+Sequenza OEIS A001844:
+Centered square numbers: a(n) = 2*n*(n+1)+1. Sums of two consecutive squares.
+Also, consider all Pythagorean triples (X,Y,Z=Y+1) ordered by increasing Z:
+then sequence gives Z values.
+  1, 5, 13, 25, 41, 61, 85, 113, 145, 181, 221, 265, 313, 365, 421, 481,
+  545, 613, 685, 761, 841, 925, 1013, 1105, 1201, 1301, 1405, 1513, 1625,
+  1741, 1861, 1985, 2113, 2245, 2381, 2521, 2665, 2813, 2965, 3121, 3281,
+  3445, 3613, 3785, 3961, 4141, 4325, 4513, ...
+
+(map celle4 (sequence 1 50))
+;-> (1 5 13 25 41 61 85 113 145 181 221 265 313 365 421 481
+;->  545 613 685 761 841 925 1013 1105 1201 1301 1405 1513 1625
+;->  1741 1861 1985 2113 2245 2381 2521 2665 2813 2965 3121 3281
+;->  3445 3613 3785 3961 4141 4325 4513 4705 4901)
+
 ============================================================================
 

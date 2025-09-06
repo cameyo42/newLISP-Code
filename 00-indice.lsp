@@ -3148,6 +3148,7 @@ NOTE LIBERE 32
   Chess Bar Evaluation
   La funzione "parse" (Tokenize a string)
   La funzione "history" (Nome della funzione)
+  Automa in espansione
 
 PROBLEMI SUI DADI
 =================
