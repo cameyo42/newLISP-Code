@@ -3145,6 +3145,7 @@ NOTE LIBERE 32
   Numeri primi in una stringa di cifre
   Numeri con somma delle cifre uguale al numero di divisori
   Numero minimo di operazioni per rendere tutti i numeri uguali a 1
+  Chess Bar Evaluation
 
 PROBLEMI SUI DADI
 =================

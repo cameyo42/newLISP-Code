@@ -2782,5 +2782,123 @@ Proviamo:
 
 Togliere il commento alle linee "print" per vedere come funziona l'algoritmo.
 
+
+--------------------
+Chess Bar Evaluation
+--------------------
+
+In una partita a scacchi il computer valuta la posizione dopo ogni mossa del Bianco e del Nero.
+La valutazione è un numero che può essere:
+1) maggiore di 0 (posizione favorevole al Bianco)
+2) uguale a 0 (posizione pari)
+3) minore di 0 (posizione favorevole al Nero)
+Graficamente questa valutazione viene rappresentata con un numero e una barra:
+
+Esempio:
+valutazione = +1.5
+      -5 -4 -3 -2 -1  0 +1 +2 +3 +4 +5
+       .  .  .  .  .  .  .  .  .  .  .
+(1.5)  ====================...........
+
+Nota: in modo indicativo quando la valutazione vale intorno a 1, un giocatore è in vantaggio di circa un pedone (materialmente o posizionalmente)
+
+Esempio di partita (con valutazione per ogni mossa):
+ 1. e4   (+0.28)      c5   (+0.40)
+ 2. d4   (+0.16)      cxd4 (+0.16)
+ 3. Nf3  (+0.16)      Cc6  (+0.36)
+ 4. c3   (-0.12)      dxc3 (-0.12)
+ 5. Nxc3 (-0.16)      e6   (-0.08)
+ 6. Bc4  (-0.20)      Bb4  (-0.08)
+ 7. O-O  (-0.12)      a6   (+0.12)
+ 8. a4   (-0.36)      Bxc3 (+0.80)
+ 9. bxc3 (+0.80)      h6   (+1.36)
+10. Ba3  (+1.00)      Nge7 (+1.24)
+11. Nd4  (+1.24)      O-O  (+1.32)
+12. Nxc6 (+1.32)      bxc6 (+1.48)
+13. Qd6  (+0.68)      Re8  (+0.68)
+14. f4   (+0.24)      Bb7  (+2.24)
+15. f5   (+0.77)      Nc8  (+3.28)
+16. Qg3  (+3.28)      d5   (+8.60)
+17. f6   (+8.60)      g6   (+9.32)
+18. Qh4  (+9.32)      Kh7  (+99)
+19. Bc1  (+99)        Abbandona
+
+Nota: negli scacchi una mossa significa una semi-mossa del Bianco e una semi-mossa del Nero.
+
+La lista delle valutazioni vale:
+
+(setq values '(0.28 0.40 0.16 0.16 0.16 0.36 -0.12 -0.12 -0.16 -0.08
+               -0.20 -0.08 -0.12 0.12 -0.36 0.80 0.80 1.36 1.00 1.24
+               1.24 1.32 1.32 1.48 0.68 0.68 0.24 2.24 0.77 3.28
+               3.28 8.60 8.60 9.32 9.32 99 99))
+
+Vogliamo scrivere una funzione che analizza la lista delle valutazioni e determina chi, dove e quanto hanno sbagliato i giocatori durante la partita.
+La funzione prende un parametro 'threshold' che specifica il minimo scarto tra due valutazioni consecutive.
+
+(define (analyze threshold values)
+  (setq game (map (fn(x) (list (+ $idx 1) x)) (map sub (rest values) (chop values))))
+  (let ( (changes '()) (prev 0.0) )
+    ; ciclo per ogni valutazione...
+    (dolist (el values)
+      ; variazione della valutazione tra
+      ; la semi-mossa corrente e la semi-mossa precedente
+      (setq delta (abs (sub el prev)))
+      ; numero mossa corrente
+      (setq mossa (/ (+ $idx 2) 2))
+      (when (> delta threshold)
+          ;(print prev { } el) (read-line)
+          ; Inserisce una lista:
+          ; (giocatore valore-precedente valore-corrente delta-valore)
+          ; Indice pari: mossa del Bianco
+          ; Indice dispari: mossa del Nero
+          (if (even? $idx)
+              (push (list 'B mossa prev el (format "%2.2f" (sub el prev)))
+                    changes -1)
+              (push (list 'N mossa prev el (format "%2.2f" (sub el prev)))
+                    changes -1)))
+      ; aggiorna valutazione precedente
+      (setq prev el))
+    changes))
+
+Proviamo:
+
+Errori di circa un pedone:
+(analyze 1 values)
+;-> ((N 8 -0.36 0.8 "1.16")
+;->  (N 14 0.24 2.24 "2.00")
+;->  (B 15 2.24 0.77 "-1.47")
+;->  (N 15 0.77 3.28 "2.51")
+;->  (N 16 3.28 8.6 "5.32")
+;->  (N 18 9.32 99 "89.68"))
+
+Il valore (N 8 -0.36 0.8 "1.16") significa:
+Il Nero, con la mossa 8, è passato da -036 a 0.8, perdendo 1.16 punti.
+
+Errori grossolani:
+(analyze 2 values)
+;-> ((N 15 0.77 3.28 "2.51")
+;->  (N 16 3.28 8.6 "5.32")
+;->  (N 18 9.32 99 "89.68"))
+
+Errori impercettibili:
+(analyze 0.25 values)
+;-> ((B 1 0 0.28 "0.28") 
+;->  (B 4 0.36 -0.12 "-0.48") 
+;->  (B 8 0.12 -0.36 "-0.48")
+;->  (N 8 -0.36 0.8 "1.16")
+;->  (N 9 0.8 1.36 "0.56")
+;->  (B 10 1.36 1 "-0.36")
+;->  (B 13 1.48 0.68 "-0.80")
+;->  (B 14 0.68 0.24 "-0.44")
+;->  (N 14 0.24 2.24 "2.00")
+;->  (B 15 2.24 0.77 "-1.47")
+;->  (N 15 0.77 3.28 "2.51")
+;->  (N 16 3.28 8.6 "5.32")
+;->  (N 17 8.6 9.32 "0.72")
+;->  (N 18 9.32 99 "89.68"))
+
+In teoria, se la differenza assoluta tra due numeri consecutivi è maggiore del valore assoluto del doppio del primo numero, allora mossa con 3 punti esclamativi !!! (non l'ha vista neanche il computer).
+In pratica, il computer valuta l'ultima posizione con una mossa in più della precedente, quindi potrebbe "vedere" un vantaggio maggiore.
+
 ============================================================================
 
