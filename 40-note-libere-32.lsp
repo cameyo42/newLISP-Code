@@ -3141,5 +3141,231 @@ then sequence gives Z values.
 ;->  1741 1861 1985 2113 2245 2381 2521 2665 2813 2965 3121 3281
 ;->  3445 3613 3785 3961 4141 4325 4513 4705 4901)
 
+File per Golly (Life Simulation):
+A) Regola1.table --> regola dell'esempio
+B) Regola2.table --> regola dell'esempio + celle morte con 4 vicini
+
+I file "Regola1.table" e "Regola2.table" si trovano nella cartella "data".
+
+Copiare il seguente file "Regola1.table" sulla cartella \Rules di Golly.
+----------------------------
+#
+# Regola 1
+#
+n_states:2
+neighborhood:vonNeumann
+symmetries:none
+
+# Stati:
+# 0 = morto
+# 1 = vivo
+
+# variabili per i 4 vicini
+var n={0,1}
+var e={0,1}
+var s={0,1}
+var w={0,1}
+
+# ordine: C,N,E,S,W,C'
+
+# ---- celle morte ----
+0,0,0,0,0,0     # morta senza vicini resta morta
+0,n,e,s,w,1     # morta con almeno 1 vicino -> viva
+
+# ---- celle vive ----
+1,n,e,s,w,1     # viva resta viva sempre
+----------------------------
+
+Copiare il seguente file "Regola2.table" sulla cartella \Rules di Golly.
+----------------------------
+#
+# Regola 2
+#
+n_states:2
+neighborhood:vonNeumann
+symmetries:none
+
+# variabili per i 4 vicini (ognuno può valere 0 o 1)
+var n={0,1}
+var e={0,1}
+var s={0,1}
+var w={0,1}
+
+# ordine: C,N,E,S,W,C'  (C' è il nuovo stato)
+# 1) cella morta con 0 vicini resta morta
+0,0,0,0,0,0
+
+# 2) cella morta con almeno 1 vicino -> nasce (la regola generale)
+0,n,e,s,w,1
+
+# 3) cella viva con 4 vicini -> muore
+1,1,1,1,1,0
+----------------------------
+
+
+--------------------------------------------------------------
+Sequenze della somma/differenza dei numeri con il loro inverso
+--------------------------------------------------------------
+
+Sequenza OEIS A056964:
+a(n) = n + reversal of digits of n.
+  0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 11, 22, 33, 44, 55, 66, 77, 88, 99,
+  110, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 33, 44, 55, 66, 77, 88,
+  99, 110, 121, 132, 44, 55, 66, 77, 88, 99, 110, 121, 132, 143, 55, 66,
+  77, 88, 99, 110, 121, 132, 143, 154, 66, 77, 88, 99, 110, ...
+
+Sequenza OEIS A056965:
+a(n) = n - (reversal of digits of n).
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, -9, -18, -27, -36, -45, -54, -63,
+  -72, 18, 9, 0, -9, -18, -27, -36, -45, -54, -63, 27, 18, 9, 0, -9, -18,
+  -27, -36, -45, -54, 36, 27, 18, 9, 0, -9, -18, -27, -36, -45, 45, 36,
+  27, 18, 9, 0, -9, -18, -27, -36, 54, 45, 36, 27, 18, 9, 0, -9, -18, -27,
+  63, 54, 45, 36, 27, 18, 9, 0, -9, -18, 72, 63, 54, ...
+
+(define (seq op num)
+  (op num (int (reverse (string num)) 0 10)))
+
+(map (curry seq +) (sequence 0 65))
+;-> (0 2 4 6 8 10 12 14 16 18 11 22 33 44 55 66 77 88 99
+;->  110 22 33 44 55 66 77 88 99 110 121 33 44 55 66 77 88
+;->  99 110 121 132 44 55 66 77 88 99 110 121 132 143 55 66
+;->  77 88 99 110 121 132 143 154 66 77 88 99 110 121)
+
+(map (curry seq -) (sequence 0 65))
+;-> (0 0 0 0 0 0 0 0 0 0 9 0 -9 -18 -27 -36 -45 -54 -63
+;->  -72 18 9 0 -9 -18 -27 -36 -45 -54 -63 27 18 9 0 -9 -18
+;->  -27 -36 -45 -54 36 27 18 9 0 -9 -18 -27 -36 -45 45 36
+;->  27 18 9 0 -9 -18 -27 -36 54 45 36 27 18 9)
+
+
+-----------------------
+Scontornare una matrice
+-----------------------
+
+Data una matrice, eliminare le righe e le colonne che contengono tutti zero.
+
+Esempio:
+
+  0 0 0 0 0
+  0 1 0 2 0       1 0 2 0
+  0 0 4 5 0  -->  0 4 5 0
+  0 0 0 3 0       0 0 3 0
+  0 0 0 0 1       0 0 0 1
+
+(define (cutout matrix)
+  (let ( (rows '()) (out '()) )
+    (dolist (row matrix)
+      (if-not (for-all zero? row)
+          (push row rows -1)))
+    (setq rows (transpose rows))
+    (dolist (row rows)
+      (if-not (for-all zero? row)
+          (push row out -1)))
+    (transpose out)))
+
+Proviamo:
+
+(setq m '((0 0 0 0 0) (0 1 0 2 0) (0 0 4 5 0) (0 0 0 3 0) (0 0 0 0 1)))
+
+(cutout m)
+;-> ((1 0 2 0) (0 4 5 0) (0 0 3 0) (0 0 0 1))
+
+
+-------------
+Algoritmo 196
+-------------
+
+Algoritmo 196
+-------------
+Iniziare con un numero intero positivo n.
+Se palindromo, stop.
+In caso contrario, somma n con le cifre invertite di n (es 123 + 321 = 444).
+a(n) restituisce il palindromo in corrispondenza del quale questo processo si ferma, oppure -1 se non viene mai raggiunto alcun palindromo.
+
+Sequenza OEIS A033865:
+Start with n. If palindrome, stop. Otherwise add to itself with digits reversed.
+a(n) gives palindrome at which it stops, or -1 if no palindrome is ever reached.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 11, 33, 44, 55, 66, 77, 88, 99, 121,
+  22, 33, 22, 55, 66, 77, 88, 99, 121, 121, 33, 44, 55, 33, 77, 88, 99,
+  121, 121, 363, 44, 55, 66, 77, 44, 99, 121, 121, 363, 484, 55, 66, 77,
+  88, 99, 55, 121, 363, 484, 1111, 66, 77, 88, 99, 121, 121, 66, 484,
+  1111, 4884, 77, 88, 99, 121, 121, 363, 484, 77, 4884, 44044, 88, ...
+
+Funzione ricorsiva:
+
+(define (find-pali num)
+  (let (rev (int (reverse (string num)) 0 10))
+    (cond ((= num rev) num)
+          (true (find-pali (+ num rev))))))
+
+Proviamo:
+
+(map find-pali (sequence 0 80))
+;-> (0 1 2 3 4 5 6 7 8 9 11 11 33 44 55 66 77 88 99 121
+;->  22 33 22 55 66 77 88 99 121 121 33 44 55 33 77 88 99
+;->  121 121 363 44 55 66 77 44 99 121 121 363 484 55 66 77
+;->  88 99 55 121 363 484 1111 66 77 88 99 121 121 66 484
+;->  1111 4884 77 88 99 121 121 363 484 77 4884 44044 88)
+
+Con numeri grandi la ricorsione genera stack overflow:
+
+(map find-pali (sequence 0 200))
+;-> ERR: call or result stack overflow in function reverse : string
+;-> called from user function (find-pali (+ num rev))
+
+Scriviamo una funzione iterativa che lavora con i big integer:
+
+(define (find-pali2 limite max-recur)
+  (local (out num stop cur rev)
+    (setq out '(0L))
+    (setq num 1L)
+    ; ciclo per calcolare la sequenza da 1 a limite...
+    (while (< num limite)
+      (setq stop nil)
+      (setq cur num)
+      ; ripete il processo per 'max-recur' iterazioni...
+      (for (r 1 max-recur 1 stop)
+        ; inverte il numero corrente
+        (setq rev (reverse (string cur)))
+        ; sposta la "L" dei big-integer dall'inizio alla fine
+        (when (= (rev 0) "L")
+          (pop rev) (push "L" rev -1))
+        ; rimuove eventuali zeri iniziali
+        (while (= (rev 0) "0") (pop rev))
+        ; controllo condizione palindromi
+        (cond ((= rev (string cur))
+                (setq stop true)
+                (push cur out -1))
+              (true (setq cur (+ cur (eval-string rev)))))
+        ;(print cur { } rev) (read-line)
+      )
+      ; stampa i numeri che non hanno palindromi
+      ; dopo 'max-recur' iterazioni del processo
+      (if (not stop) (println (list num max-recur)))
+      ; prossimo numero
+      (setq num (+ num 1L)))
+    out))
+
+Proviamo:
+
+(find-pali2 200 30)
+;-> (196L 30)
+;-> (0L 1L 2L 3L 4L 5L 6L 7L 8L 9L 11L 11L 33
+;-> ...
+;-> 233332L 2992L 9339L 881188L 79497L 3113L)
+Con 30 iterazioni il numero 196 non ha generato alcun palindromo.
+
+(find-pali2 200 1000)
+;-> (196L 30)
+;-> (0L 1L 2L 3L 4L 5L 6L 7L 8L 9L 11L 11L 33
+;-> ...
+;-> 233332L 2992L 9339L 881188L 79497L 3113L)
+Con 1000 iterazioni il numero 196 non ha generato alcun palindromo.
+
+https://mathworld.wolfram.com/196-Algorithm.html
+Partendo da N=196, il 1 maggio 2006, dopo 724756966 iterazioni ancora nessun numero palindromo: il numero raggiunto ha più di 300 milioni di cifre (VanLandingham).
+
+Vedi anche "Numeri palindromi e numeri di Lychrel" su "Note libere 5".
+
 ============================================================================
 

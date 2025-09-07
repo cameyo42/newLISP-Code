@@ -10558,6 +10558,8 @@ Il numero 1.186.060.307.891.929.990, dopo 261 iterazioni giunge ad un palindromo
 ;-> (44562665878976437622437848976653870388884783662598425855963436955852489526638748888307835667984873422673467987856626544L
 ;->  261)
 
+Vedi anche "Algoritmo 196" su "Note libere 32".
+
 
 ------------------------------
 Numeri primi di Sophie Germain

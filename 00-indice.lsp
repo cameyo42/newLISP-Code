@@ -3149,6 +3149,9 @@ NOTE LIBERE 32
   La funzione "parse" (Tokenize a string)
   La funzione "history" (Nome della funzione)
   Automa in espansione
+  Sequenze della somma/differenza dei numeri con il loro inverso
+  Scontornare una matrice
+  Algoritmo 196
 
 PROBLEMI SUI DADI
 =================
