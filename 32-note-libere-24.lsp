@@ -7694,7 +7694,7 @@ Generazione di tutte le frazioni con num e den ad una sola cifra e (num != den):
 (length frac)
 ;-> 72
 
-Funzione che genera tutte le coppie di una lista:
+Funzione che genera tutte le coppie di elementi di una lista per cui indice i < indice j:
 
 (define (pair-list lst)
   (let (out '())

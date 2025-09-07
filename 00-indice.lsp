@@ -2703,7 +2703,7 @@ NOTE LIBERE 27
   Centrare una stringa
   Numero di coppie buone
   Madhava di Sangamagrama
-  Numero di coppie buone
+  Lista di tutte le coppie di elementi con (indice i < indice j)
   Numeri di Bernoulli e somma di potenze di interi successivi
   Selezione casuale con blacklist
   Operazioni aritmetiche (+,-,*,/) su interi-stringa
@@ -3152,6 +3152,7 @@ NOTE LIBERE 32
   Sequenze della somma/differenza dei numeri con il loro inverso
   Scontornare una matrice
   Algoritmo 196
+  Numeri come differenza di un numero e del suo contrario
 
 PROBLEMI SUI DADI
 =================
@@ -3199,7 +3200,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (363 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (364 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

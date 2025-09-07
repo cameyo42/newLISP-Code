@@ -1984,8 +1984,12 @@ Per esempio:
   N = 101
   100 + 001 = 100 + 1 = 101
 
+La seguente funzione calcola tutte le possibili coppie (k, inverse(k)) che soddisfano:
+
+  (k + inverse(k)) = num
+
 (define (mirror num)
-  (let (out '())
+  (let ( (out '()) (kappa nil) )
     (for (k 0 num)
       ; calcola il contrario (inverso) del numero
       (setq kappa (int (reverse (string k)) 0 10))
@@ -2133,6 +2137,8 @@ Proviamo:
 ;-> ((6301 1036) (6211 1126) (6121 1216) (6031 1306) (5302 2035) (5212 2125)
 ;->  (5122 2215) (5032 2305) (4303 3034) (4213 3124) (4123 3214) (4033 3304)
 ;->  (7030 307) (7120 217) (7210 127) (7300 37))
+
+Vedi anche "Numeri come differenza di un numero e del suo contrario" su "Note libere 32".
 
 
 -----------------------

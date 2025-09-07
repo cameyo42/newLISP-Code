@@ -3207,6 +3207,11 @@ var w={0,1}
 Sequenze della somma/differenza dei numeri con il loro inverso
 --------------------------------------------------------------
 
+Determinare le sequenze dei numeri n per cui risulta:
+
+1) n + inversione delle cifre di n
+2) n - inversione delle cifre di n
+
 Sequenza OEIS A056964:
 a(n) = n + reversal of digits of n.
   0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 11, 22, 33, 44, 55, 66, 77, 88, 99,
@@ -3366,6 +3371,61 @@ https://mathworld.wolfram.com/196-Algorithm.html
 Partendo da N=196, il 1 maggio 2006, dopo 724756966 iterazioni ancora nessun numero palindromo: il numero raggiunto ha più di 300 milioni di cifre (VanLandingham).
 
 Vedi anche "Numeri palindromi e numeri di Lychrel" su "Note libere 5".
+
+
+-------------------------------------------------------
+Numeri come differenza di un numero e del suo contrario
+-------------------------------------------------------
+
+Calcolare la sequenza dei numeri interi positivi che possono essere espressi come differenza assoluta di due interi positivi k e il contrario di k.
+
+La seguente funzione calcola tutte le possibili coppie (k, inverse(k)) che soddisfano:
+
+  abs(k - inverse(k)) = num
+
+(define (mirror num)
+  (let ( (out '()) (kappa nil) )
+    (for (k 0 num)
+      ; calcola il contrario (inverso) del numero
+      (setq kappa (int (reverse (string k)) 0 10))
+      (if (= (abs (- k kappa)) num)
+          (if (> k kappa)
+            (push (list k kappa) out -1)
+            (push (list kappa k) out -1)
+          )
+      )
+    )
+    (unique out)))
+
+Proviamo:
+
+Prima vediamo quali numeri sono nella sequenza fino a 10000:
+
+(setq seq (filter mirror (sequence 1 1000)))
+;-> (18 27 36 45 54 63 72 198 297 396 495 594 693 792)
+
+Nota: questa sequenza non esiste in OEIS (7 settembre 2025).
+
+Adesso vediamo quante coppie hanno ciascun numero della sequenza calcolata:
+
+(setq coppie (map (fn(x y) (list x (mirror y))) seq seq))
+
+(slice coppie 0 5)
+;-> ((18 ((31 13)))
+;->  (27 ((41 14) (52 25)))
+;->  (36 ((51 15) (62 26)))
+;->  (45 ((61 16) (72 27) (83 38)))
+;->  (54 ((71 17) (82 28) (93 39))))
+
+(slice coppie -2 2)
+;-> ((693 ((801 108) (811 118) (821 128) (831 138) (841 148) (851 158)
+;->        (861 168) (871 178) (881 188) (891 198) (902 209) (912 219)
+;->        (922 229) (932 239) (942 249) (952 259) (962 269) (972 279)
+;->        (982 289) (992 299)))
+;->  (792 ((901 109) (911 119) (921 129) (931 139) (941 149) (951 159)
+;->        (961 169) (971 179) (981 189) (991 199))))
+
+Vedi anche "Numeri come somma di un numero e del suo contrario" su "Note libere 22".
 
 ============================================================================
 

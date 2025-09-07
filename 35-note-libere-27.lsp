@@ -394,108 +394,29 @@ Proviamo:
 ;-> 5.841993555577574e-012
 
 
-----------------------
-Numero di coppie buone
-----------------------
+--------------------------------------------------------------
+Lista di tutte le coppie di elementi con (indice i < indice j)
+--------------------------------------------------------------
 
-Data una lista di numeri interi L, scrivere una funzione che restituisce il numero di coppie buone.
-Una coppia di indici (i, j) è detta 'Buona' se L[i] == L[j] e i < j.
+Data una lista determinare tutte le coppie per cui risulta i < j (dove i e j sono indici della lista).
 
-Soluzione Brute-Force O(n^2):
+Il numero di coppie vale:
 
-Funzione che restituisce tutte le coppie buone:
+  coppie = n*(n - 1)/2, dove n è il numero di elementi della lista
 
-(define (buone1 lst)
-  (local (out len)
-    (setq out '())
-    (setq len (length lst))
+(define (pairs-ij lst)
+  (let ( (out '()) (len (length lst)) )
     (for (i 0 (- len 2))
       (for (j (+ i 1) (- len 1))
-        (if (= (lst i) (lst j)) (push (list i j) out -1))))
-    out))
+        (push (list (lst i) (lst j)) out -1)))))
 
-(setq a '(2 4 5 2 2 5))
-(buone1 a)
-;-> ((0 3) (0 4) (2 5) (3 4))
+Proviamo:
 
-(setq b '(2 2 2 2))
-(buone1 b)
-;-> ((0 1) (0 2) (0 3) (1 2) (1 3) (2 3))
+(pairs-ij '(1 2 3 4 5))
+;-> ((1 2) (1 3) (1 4) (1 5) (2 3) (2 4) (2 5) (3 4) (3 5) (4 5))
 
-(setq c '(1 2 3 4 5))
-(buone1 c)
-;-> ()
-
-Funzione che conta le coppie buone:
-
-(define (buone2 lst)
-  (local (conta len)
-    (setq conta 0)
-    (setq len (length lst))
-    (for (i 0 (- len 2))
-      (for (j (+ i 1) (- len 1))
-        (if (= (lst i) (lst j)) (++ conta))))
-    conta))
-
-(buone2 a)
-;-> 4
-
-(buone2 b)
-;-> 6
-
-(buone2 c)
-;-> 0
-
-Soluzione con lista associativa (oppure hash-map) O(n):
-
-Algoritmo:
-(setq lst '(2 4 5 2 2 5))
-
-Calcoliamo una lista associativa con elementi del tipo: (numero occorrenze)
-(setq unici (unique lst))
-;-> (2 4 5)
-(setq link (map list unici (count unici lst)))
-;-> ((2 3) (4 1) (5 2))
-
-Adesso attraversiamo la lista e per ogni numero x che incontriamo:
-1) diminuire di 1 le occorrenze di x nel relativo elemento della lista associata
-2) aumentare il conteggio delle coppie buone del valore attuale delle occorrenze di x nel relativo elemento della lista associata
-
-(setq coppie 0)
-;-> 0
-(dolist (el lst)
-  (setf (lookup el link) (- $it 1))
-  (++ coppie (lookup el link)))
-;-> 4
-
-(define (buone3 lst)
-  (local (coppie unici link)
-    (setq coppie 0)
-    (setq unici (unique lst))
-    (setq link (map list unici (count unici lst)))
-    (dolist (el lst)
-      (setf (lookup el link) (- $it 1))
-      (++ coppie (lookup el link)))
-    coppie))
-
-(buone3 a)
-;-> 4
-
-(buone3 b)
-;-> 6
-
-(buone3 c)
-;-> 0
-
-Vediamo la velocità delle due funzioni:
-
-(setq test (rand 100 1000))
-(time (buone2 test))
-;-> 471.736
-(time (buone3 test))
-;-> 0.952
-
-La funzione 'buone3' è molto veloce, ma non è possibile estrapolare il valore delle coppie.
+(length (pairs-ij (rand 100 100)))
+;-> 4950
 
 
 -----------------------------------------------------------
