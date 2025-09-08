@@ -3153,6 +3153,8 @@ NOTE LIBERE 32
   Scontornare una matrice
   Algoritmo 196
   Numeri come differenza di un numero e del suo contrario
+  Invertire le cifre di un numero integer o big-integer
+  Coppie di interi divisibili per k
 
 PROBLEMI SUI DADI
 =================

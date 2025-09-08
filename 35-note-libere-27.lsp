@@ -398,7 +398,10 @@ Proviamo:
 Lista di tutte le coppie di elementi con (indice i < indice j)
 --------------------------------------------------------------
 
-Data una lista determinare tutte le coppie per cui risulta i < j (dove i e j sono indici della lista).
+Data una lista di n elementi determinare tutte le coppie per cui risulta:
+ 
+  0 <= i < j <= (n - 1)
+  dove i e j sono indici della lista.
 
 Il numero di coppie vale:
 

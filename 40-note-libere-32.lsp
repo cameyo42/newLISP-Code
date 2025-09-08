@@ -3427,5 +3427,317 @@ Adesso vediamo quante coppie hanno ciascun numero della sequenza calcolata:
 
 Vedi anche "Numeri come somma di un numero e del suo contrario" su "Note libere 22".
 
+
+-----------------------------------------------------
+Invertire le cifre di un numero integer o big-integer
+-----------------------------------------------------
+
+Scrivere una funzione che inverte le cifre di un numero intero (anche big-integer).
+
+(define (reverse-digits-big num)
+  (if (zero? num) 0
+  ;else
+    (begin
+    ; converte 'num' in stringa e lo inverte
+    (setq num (reverse (string num)))
+    ; se 'num' è big-integer, allora sposta la "L" dall'inizio alla fine
+    (when (= (num 0) "L") (pop num) (push "L" num -1))
+    ; rimuove eventuali zeri iniziali
+    (while (= (num 0) "0") (pop num))
+    ; converte la stringa 'num' in numero intero o big-integer
+    (eval-string num))))
+
+Proviamo:
+
+(reverse-digits-big 0)
+;-> 0
+(reverse-digits-big 2)
+;-> 2
+(reverse-digits-big 2L)
+;-> 2L
+(reverse-digits-big 100000000000000000000000000000)
+;-> 1L
+(reverse-digits-big 100000000000000000000000000000L)
+;-> 1L
+(reverse-digits-big 1234567890)
+;-> 987654321
+(reverse-digits-big 1234567890L)
+;-> 987654321L
+
+
+---------------------------------
+Coppie di interi divisibili per k
+---------------------------------
+
+Data una lista di numeri interi di lunghezza n e un intero k, restituire il numero di coppie (i, j) tali che:
+
+  1) 0 <= i < j <= n - 1 and
+  2) nums[i] * nums[j] is divisible by k.
+
+(define (pairs-ij lst)
+"Generate all pairs of elements of a list with (index i < index j)"
+  (let ( (out '()) (len (length lst)) )
+    (for (i 0 (- len 2))
+      (for (j (+ i 1) (- len 1))
+        (push (list (lst i) (lst j)) out -1)))))
+
+(define (all-pairs1 lst k)
+  (let ( (out '()) (len (length lst)) )
+    (for (i 0 (- len 2))
+      (for (j (+ i 1) (- len 1))
+        (if (zero? (% (* (lst i) (lst j)) k))
+            (push (list i j) out -1))))))
+
+(setq lst '(1 2 3 4 5))
+(all-pairs1 lst 2)
+;-> ((0 1) (0 3) (1 2) (1 3) (1 4) (2 3) (3 4))
+
+Elementi di ogni coppia:
+(map (fn(x) (list (lst (x 0)) (lst (x 1)))) (all-pairs1 lst 2))
+;-> ((1 2) (1 4) (2 3) (2 4) (2 5) (3 4) (4 5))
+
+Test di velocità:
+
+(silent (setq test (rand (pow 10 2) (pow 10 2))))
+(time (println (length (all-pairs1 test 2))))
+;-> 3465
+;-> 0.996
+
+(silent (setq test (rand (pow 10 3) (pow 10 3))))
+(time (println (length (all-pairs1 test 2))))
+;-> 372240
+;-> 599.557
+
+(silent (setq test (rand (pow 10 4) (pow 10 4))))
+(time (println (length (all-pairs1 test 2))))
+;-> 37412364
+;-> 661047.466 ; 661 secondi (11 minuti)
+
+Proviamo ad usare un vettore al posto di una lista:
+
+(define (all-pairs2 lst k)
+  (letn ( (out '()) (len (length lst)) (vec (array len lst)) )
+    (for (i 0 (- len 2))
+      (for (j (+ i 1) (- len 1))
+        (if (zero? (% (* (vec i) (vec j)) k))
+            (push (list i j) out -1))))))
+
+(setq lst '(1 2 3 4 5))
+(all-pairs2 lst 2)
+;-> ((0 1) (0 3) (1 2) (1 3) (1 4) (2 3) (3 4))
+
+Elementi di ogni coppia:
+(map (fn(x) (list (lst (x 0)) (lst (x 1)))) (all-pairs2 lst 2))
+;-> ((1 2) (1 4) (2 3) (2 4) (2 5) (3 4) (4 5))
+
+Test di velocità:
+
+(silent (setq test (rand (pow 10 2) (pow 10 2))))
+(time (println (length (all-pairs2 test 2))))
+;-> 3572
+;-> 0
+
+(silent (setq test (rand (pow 10 3) (pow 10 3))))
+(time (println (length (all-pairs2 test 2))))
+;-> 372240
+;-> 94.604
+
+(silent (setq test (rand (pow 10 4) (pow 10 4))))
+(time (println (length (all-pairs2 test 2))))
+;-> 37938495
+;-> 8531.493
+
+Con i vettori la funzione è più veloce, ma sempre O(n^2).
+
+Poichè il problema richiede di trovare il numero delle coppie (e non tutti gli indici delle coppie), possiamo ottimizzare la funzione utilizzando il MCD (Massimo Comun Divisore).
+
+Vediamo prima il codice e poi come lavora la funzione:
+
+(define (count-pairs nums k show)
+  (letn ((ans 0)
+         (gcds '())) ; lista associativa per contare i gcd
+    (for (i 0 (- (length nums) 1))
+      (let (gcd-i (gcd (nums i) k))
+      ; controllo con tutti i gcd già incontrati
+      (dolist (pair gcds)
+        (let ((gcd-j (first pair)) (conta (last pair)))
+          (if (= 0 (% (* gcd-i gcd-j) k))
+              (++ ans conta))))
+      ; aggiorno contatore per gcd-i
+      (if (lookup gcd-i gcds)
+          (++ (lookup gcd-i gcds))
+          (push (list gcd-i 1) gcds -1))
+      ; stampa dopo aver processato nums(i)
+      (if show (println "dopo " (nums i) " -> " gcds))))
+    (if show (println "finale gcds: " gcds))
+    ans))
+
+Proviamo:
+
+(count-pairs '(1 2 3 4 5) 2)
+;-> 7
+
+(time (println (count-pairs test 2)))
+;-> 110.264
+
+1. Funzione
+-----------
+La funzione è:
+(define (count-pairs nums k) ...)
+Riceve:
+  nums = lista di numeri,
+  k = divisore richiesto.
+Restituisce:
+  ans = numero di coppie (i,j) tali che (nums i) * (nums j) è divisibile per k.
+
+2. Variabili principali
+-----------------------
+(letn ((ans 0)
+       (gcds '()))
+  ans = contatore delle coppie trovate, parte da 0.
+  gcds = lista associativa (tipo dizionario), che memorizza quante volte è apparso ogni gcd(nums(i), k).
+  La chiave è il valore del gcd, il valore è il numero di occorrenze.
+Esempio:
+  ((2 3) (3 1)) significa che abbiamo visto
+  gcd=2 tre volte,
+  gcd=3 una volta.
+
+3. Ciclo principale
+-------------------
+(for (i 0 (- (length nums) 1)) ...)
+Scorriamo tutta la lista nums.
+Per ogni numero:
+a. Calcoliamo il suo gcd con k:
+   (set 'gcd-i (gcd (nums i) k))
+   Questo valore rappresenta:
+   "la parte di nums(i) che può contribuire a rendere il prodotto divisibile da k".
+b. Confrontiamo gcd-i con tutti i gcd già visti:
+   (dolist (pair gcds)
+     (let ((gcd-j (first pair)) (conta (last pair)))
+       (if (= 0 (% (* gcd-i gcd-j) k))
+           (++ ans conta))))
+   gcd-j = un gcd precedente,
+   conta = quante volte è comparso.
+   Se gcd-i * gcd-j è multiplo di k, significa che il nuovo numero può formare una "coppia valida" con ciascuno dei numeri che avevano gcd-j.
+   --> Incrementiamo ans di conta.
+c. Aggiorniamo il dizionario gcds:
+   (if (lookup gcd-i gcds)
+       (++ (lookup gcd-i gcds))
+       (push (list gcd-i 1) gcds -1))
+   Se gcd-i è già presente, aumentiamo il suo conteggio,
+   Altrimenti lo aggiungiamo con valore 1.
+
+4. Stampa passo passo
+---------------------
+Dopo ogni numero stampiamo lo stato di gcds:
+(println "dopo " (nums i) " -> " gcds)
+Alla fine stampiamo il risultato finale:
+(println "finale gcds: " gcds)
+ans
+
+5. Esempio
+----------
+(count-pairs '(2 3 4 9 6) 6)
+
+Esecuzione:
+1. num=2, gcd=2 --> gcds=((2 1))
+2. num=3, gcd=3 --> prodotto con gcd=2: 2*3=6, divisibile --> 1 coppia trovata
+   gcds=((2 1)(3 1))
+3. num=4, gcd=2 --> prodotto con (2,1) e (3,1):
+   - 2*2=4 non divisibile,
+   - 2*3=6 divisibile --> 1 coppia.
+     gcds=((2 2)(3 1))
+4. num=9, gcd=3 --> prodotto con (2,2) e (3,1):
+   - 3*2=6 divisibile --> 2 coppie,
+   - 3*3=9 non divisibile.
+     gcds=((2 2)(3 2))
+5. num=6, gcd=6 --> prodotto con (2,2), (3,2):
+   - 6*2=12 divisibile --> 2 coppie,
+   - 6*3=18 divisibile --> 2 coppie.
+     Totale +4.
+     gcds=((2 2)(3 2)(6 1))
+Risultato finale:
+finale gcds: ((2 2) (3 2) (6 1))
+8
+
+Test di velocità
+(silent (setq test (rand (pow 10 2) (pow 10 2))))
+(time (println (count-pairs test 2)))
+;-> 3915
+;-> 0
+
+(silent (setq test (rand (pow 10 3) (pow 10 3))))
+(time (println (count-pairs test 2)))
+;-> 375747
+;-> 0
+
+(silent (setq test (rand (pow 10 4) (pow 10 4))))
+(time (println (count-pairs test 2)))
+;-> 37236174
+;-> 110.465
+
+(silent (setq test (rand (pow 10 5) (pow 10 5))))
+(time (println (count-pairs test 2)))
+;-> 3756266999
+;-> 9782.138
+
+Nota:
+Adesso la funzione restituisce solo il numero totale delle coppie. Per avere anche le coppie di indici, bisogna memorizzarle mentre si fa il ciclo.
+L'idea è questa:
+- oltre a 'ans' (che conta), si mantiene una lista 'coppie',
+- ogni volta che si trova che '(gcd-i * gcd-j) % k = 0', invece di aumentare solo il contatore, si aggiungono a 'coppie' tutte le coppie di indici '(j, i)' corrispondenti,
+- per poterlo fare serve che 'gcds' non memorizzi solo quante volte è comparso un gcd, ma anche gli indici dove è comparso.
+In pratica:
+- adesso 'gcds' è del tipo ((2 2) (3 2) (6 1)) (gcd --> conteggio),
+- andrebbe trasformato in qualcosa tipo '((2 (0 2)) (3 (1 3)) (6 (4)))' (gcd --> lista di indici).
+Così, quando si arriva a un nuovo 'i' con 'gcd-i', possiamo vedere in 'gcds' tutti gli indici 'j' precedenti con 'gcd-j' compatibile e salvare la coppia '(j, i)'.
+Alla fine la funzione può restituire sia il numero delle coppie che la lista completa delle coppie di indici.
+
+Comunque in questo modo (cioe' restituendo anche le coppie di indici) la funzione rallenta molto in caso di liste lunghe.
+
+Il motivo è che l'attuale funzione è stata pensata per essere ottimizzata:
+- Con il solo conteggio, non serve più controllare ogni coppia '(i,j)' esplicitamente --> la complessità si riduce notevolmente (dipende dal numero di divisori di 'k', non dalla lunghezza di 'nums').
+- Se invece vuoi anche le **coppie di indici**, sei costretto a memorizzare tutti gli indici associati a ciascun 'gcd' e, al momento del confronto, a generare le coppie esplicite.
+- Questo porta a un'esplosione combinatoria: per ogni coppia di gcd compatibili, si deve produrre un numero di tuple proporzionale al prodotto delle cardinalità delle loro liste di indici.
+- la versione con le coppie esplicite diventa quasi equivalente a un algoritmo quadratico (O(n^2) nel caso peggiore).
+
+Analisi comparativa
+-------------------
+
+A) Variante solo conteggio
+  Per ogni numero 'num' calcola 'gcd(num, k)' → 'gcd-i'.
+  Confronta 'gcd-i' con i gcd già visti ('gcds'), sommando direttamente il **conteggio** dei validi.
+  Non deve mai scorrere le liste degli indici, solo aggiornare i contatori.
+Complessità
+Tempo:
+  Ogni 'num' viene confrontato solo con i diversi 'gcd' già memorizzati.
+  Il numero di possibili valori di 'gcd(num, k)' è **limitato dai divisori di 'k'** (di solito pochi rispetto a 'n').
+  Complessità ≈ 'O(n * d)' dove 'd = numero di divisori di k'.
+  Esempio: se 'k = 1000', 'd = 16'.
+Spazio:
+  Memorizza solo un contatore per ogni 'gcd'.
+  Complessità 'O(d)'.
+
+B) Variante con lista di coppie (i,j)
+  'gcds' deve contenere **gli indici** dei numeri con quel 'gcd'.
+  Esempio: '((2 (0 2)) (3 (1 3)) (6 (4)))'.
+  Per ogni nuovo indice 'i', si confronta 'gcd-i' con ogni 'gcd-j' compatibile, e si devono costruire tutte le coppie '(j, i)'.
+Complessità
+Tempo:
+Nel peggiore dei casi, può produrre fino a tutte le coppie possibili --> quadratico O(n^2).
+Anche se il controllo resta limitato ai divisori di 'k', la creazione esplicita delle coppie costringe a scorrere liste potenzialmente grandi.
+Spazio:
+Non solo i 'd' contatori, ma anche tutte le liste di indici.
+Nel peggiore dei casi, memorizza praticamente tutta la sequenza di indici --> O(n).
+Inoltre, se si restituiscono tutte le coppie, la lista finale può avere dimensione fino a O(n^2).
+
+Riassunto
++----------------+--------------------+----------------+----------------+
+| Variante       | Tempo medio        | Tempo peggiore | Spazio         |
++----------------+--------------------+----------------+----------------+
+| Solo conteggio | O(n * d)           | O(n * d)       | O(d)           |
+| Con coppie     | O(n * d + #coppie) | O(n²)          | O(n + #coppie) |
++----------------+--------------------+----------------+----------------+
+
 ============================================================================
 
