@@ -3154,7 +3154,8 @@ NOTE LIBERE 32
   Algoritmo 196
   Numeri come differenza di un numero e del suo contrario
   Invertire le cifre di un numero integer o big-integer
-  Coppie di interi divisibili per k
+  Coppie di interi divisibili per un numero k
+  Ordinare una lista in base al MCD con un numero k
 
 PROBLEMI SUI DADI
 =================
@@ -3202,7 +3203,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (364 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (365 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

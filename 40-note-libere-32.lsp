@@ -3465,9 +3465,9 @@ Proviamo:
 ;-> 987654321L
 
 
----------------------------------
-Coppie di interi divisibili per k
----------------------------------
+-------------------------------------------
+Coppie di interi divisibili per un numero k
+-------------------------------------------
 
 Data una lista di numeri interi di lunghezza n e un intero k, restituire il numero di coppie (i, j) tali che:
 
@@ -3738,6 +3738,56 @@ Riassunto
 | Solo conteggio | O(n * d)           | O(n * d)       | O(d)           |
 | Con coppie     | O(n * d + #coppie) | O(n²)          | O(n + #coppie) |
 +----------------+--------------------+----------------+----------------+
+
+
+-------------------------------------------------
+Ordinare una lista in base al MCD con un numero k
+-------------------------------------------------
+
+Data una lista L di interi e un numero intero k, restituire la lista degli interi ordinata in base ai valori di MCD[L(i), k].
+La funzione deve essere la più corta possibile.
+
+(define (order-gcd lst k show)
+  (local (gcds coppie)
+    ; calcola gli MCD di tutti gli elementi con k
+    (setq gcds (map (curry gcd k) lst))
+    (if show (println "gcds: " gcds))
+    ; crea le coppie (mcd numero) per ogni numero
+    (setq coppie (map (fn(x y) (list x y)) gcds lst))
+    (if show (println "coppie: " coppie))
+    ; ordina le coppie (tipo ordine: prima per gcd e poi per numero)
+    (sort coppie)
+    (if show (println "coppie ordinate: " coppie))
+    ; prende tutti i numeri dalle coppie ordinate
+    (map last coppie)))
+
+Proviamo:
+
+(setq L1 '(1 2 3 4 5 6 7))
+(order-gcd L1 4 true)
+;-> gcds: (1 2 1 4 1 2 1)
+;-> coppie: ((1 1) (2 2) (1 3) (4 4) (1 5) (2 6) (1 7))
+;-> coppie ordinate: ((1 1) (1 3) (1 5) (1 7) (2 2) (2 6) (4 4))
+;-> (1 3 5 7 2 6 4)
+;-> (1 3 5 7 2 6 4)
+
+(setq L2 '(51 28 14 65 52 17 45 23 53 62))
+(order-gcd L2 4 true)
+;-> gcds: (1 4 2 1 4 1 1 1 1 2)
+;-> coppie: ((1 51) (4 28) (2 14) (1 65) (4 52) (1 17) (1 45) (1 23)
+;->          (1 53) (2 62))
+;-> coppie ordinate: ((1 17) (1 23) (1 45) (1 51) (1 53) (1 65) (2 14)
+;->                   (2 62) (4 28) (4 52))
+;-> (17 23 45 51 53 65 14 62 28 52)
+
+Versione code-golf (75 caratteri):
+
+(define(o l k)(map last(sort(map(fn(x y)(list x y))(map(curry gcd k)l)l))))
+
+(o L1 4)
+;-> (1 3 5 7 2 6 4)
+(o L2 4)
+;-> (17 23 45 51 53 65 14 62 28 52)
 
 ============================================================================
 
