@@ -3156,6 +3156,7 @@ NOTE LIBERE 32
   Invertire le cifre di un numero integer o big-integer
   Coppie di interi divisibili per un numero k
   Ordinare una lista in base al MCD con un numero k
+  Operazioni per rendere due numeri uguali
 
 PROBLEMI SUI DADI
 =================

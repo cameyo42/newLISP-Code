@@ -3789,5 +3789,314 @@ Versione code-golf (75 caratteri):
 (o L2 4)
 ;-> (17 23 45 51 53 65 14 62 28 52)
 
+
+----------------------------------------
+Operazioni per rendere due numeri uguali
+----------------------------------------
+
+Abbiamo due interi con lo stesso numero di cifre.
+Dobbiamo far diventare i numeri uguali usando solo le seguenti operazioni:
+1) scambiare di posto due cifre ad uno dei due numeri
+2) aggiungere 1 ad una cifra di uno dei due numeri (9+1=0)
+Scrivere una funzione in newLISP che calcolare il numero minimo di operazioni per far diventare i due numeri uguali.
+I numeri uguali possono anche essere diversi dai due numeri dati.
+Esempio:
+  a = 13420
+  b = 31259
+  Scambio 1 e 3 in a  --> a = 31420
+  Scambio 4 e 2 in a  --> a = 31240
+  Aggiungo 1 a 4 in a --> a = 31250
+  Aggiungo 1 a 9 in b --> b = 31250
+  a = b = 31250
+
+Algoritmo
+1. Trasformare i numeri in liste di cifre.
+2. Controllare che abbiano la stessa lunghezza.
+3. Generare tutte le permutazioni di 'digits-a'.
+4. Per ogni permutazione calcolare il numero minimo di scambi usando la decomposizione in cicli.
+5. Per ogni permutazione di 'b' calcolare analogamente gli scambi.
+6. Per ogni coppia di permutazioni '(perm-a, perm-b)' calcola la somma delle distanze cicliche tra le cifre corrispondenti.
+7. Sommare tutti i costi: scambi di 'a' + scambi di 'b' + trasformazioni +1.
+8. Memorizzare il minimo totale tra tutte le combinazioni.
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+; Calcola la distanza ciclica minima tra due cifre (mod 10)
+(define (cyclic-distance a b)
+  ; Minimo tra andare avanti o indietro sulla ruota delle cifre
+  (min (abs (- a b)) (- 10 (abs (- a b)))))
+
+; Calcola il numero minimo di operazioni per rendere due numeri uguali
+(define (min-operations a b)
+  (if (= a b) 0
+  ;else
+  (let ((digits-a (int-list a))
+        (digits-b (int-list b)))
+    (if (!= (length digits-a) (length digits-b))
+        nil
+        ;else
+        (let ((n (length digits-a))
+              (min-total-cost 999999))
+          ; Genera tutte le permutazioni di a
+          (let ((all-perms-a (perm digits-a)))
+            (dolist (perm-a all-perms-a)
+              ; Calcola il costo degli scambi per ottenere questa permutazione
+              (let ((swap-cost-a 0))
+                ; Calcola il numero minimo di scambi (cicli nella permutazione)
+                (let ((visited (array n '(nil))))
+                  (for (i 0 (- n 1))
+                    (unless (visited i)
+                      (let ((cycle-length 0)
+                            (current i))
+                        (while (not (visited current))
+                          (setf (visited current) true)
+                          (inc cycle-length)
+                          ; Trova dove va l'elemento corrente
+                          (for (j 0 (- n 1))
+                            (if (= (digits-a current) (perm-a j))
+                                (setq current j))))
+                        (if (> cycle-length 1)
+                            (setq swap-cost-a (+ swap-cost-a (- cycle-length 1))))))))
+                ; Ora prova tutte le permutazioni di b
+                (let ((all-perms-b (perm digits-b)))
+                  (dolist (perm-b all-perms-b)
+                    ; Calcola il costo degli scambi per perm-b
+                    (let ((swap-cost-b 0))
+                      ; Calcolo analogo per b
+                      (let ((visited-b (array n '(nil))))
+                        (for (i 0 (- n 1))
+                          (unless (visited-b i)
+                            (let ((cycle-length 0)
+                                  (current i))
+                              (while (not (visited-b current))
+                                (setf (visited-b current) true)
+                                (inc cycle-length)
+                                (for (j 0 (- n 1))
+                                  (if (= (digits-b current) (perm-b j))
+                                      (setq current j))))
+                              (if (> cycle-length 1)
+                                  (setq swap-cost-b (+ swap-cost-b (- cycle-length 1))))))))
+                      ; Calcola il costo delle trasformazioni con +1 (mod 10)
+                      (letn ((transform-cost (apply + (map cyclic-distance perm-a perm-b)))
+                            (total-cost (+ swap-cost-a swap-cost-b transform-cost)))
+                        ; Aggiorna il costo minimo se trovato uno più piccolo
+                        (if (< total-cost min-total-cost)
+                            (setq min-total-cost total-cost)))))))))
+          min-total-cost)))))
+
+Proviamo:
+
+(min-operations 123 123)
+;-> 0
+
+(setq a 13420)
+(setq b 31259)
+(min-operations a b)
+;-> 4
+
+(setq a 12)
+(setq b 31)
+(min-operations a b)
+;-> 2
+
+(setq a 12)
+(setq b 41)
+(min-operations a b)
+;-> 3
+
+(setq a 12345)
+(setq b 54321)
+(min-operations 12345 54321)
+;-> 2
+
+Nota: il codice funziona correttamente, ma è molto lento per numeri con più di 5-6 cifre, perché il numero di permutazioni cresce esponenzialmente.
+
+(time (println (min-operations 132683 945612)))
+;-> 6
+;-> 3656.564
+(time (println (min-operations 1326837 9456125)))
+;-> 8
+;-> 225162.333
+
+Per visualizzare le operazioni effettive (scambi e +1) dobbiamo tenere traccia di ogni operazione quando viene calcolata, invece di calcolare solo il costo.
+
+Algoritmo
+1) Converte a e b in liste di cifre.
+2) Genera tutte le permutazioni di a e b.
+3) Per ogni permutazione:
+4)  - Calcola gli scambi minimi usando i cicli, e registra gli scambi in ops.
+5)  - Calcola la trasformazione ciclica +1 per far corrispondere le cifre, e registra le +1 in ops.
+6) Somma scambi e +1 per ottenere il costo totale.
+7) Tiene traccia del costo minimo e della lista di operazioni corrispondente (best-ops).
+8) Alla fine stampa il costo e la lista completa delle operazioni.
+
+Lista delle operazioni:
++-------------------+-----------------------------+
+| Tipo operazione   | Lista / campi               |
++-------------------+-----------------------------+
+| Scambio ("swap")  | '("swap" numero pos1 pos2)' |
+| Incremento ("+1") | '("+1" numero pos n)'       |
++-------------------+-----------------------------+
+Esempi
+  ("swap" "A" 0 2) --> scambia la cifra in posizione 0 con quella in posizione 2 del numero 'A'
+  ("+1" "B" 3 4) --> aggiunge 1 per 4 volte alla cifra in posizione 3 del numero 'B'
+
+; Calcola il numero minimo di operazioni per rendere due numeri uguali
+; Restituisce (costo-minimo lista-operazioni)
+(define (min-operations-ops a b)
+  (if (= a b) (list 0 '())
+  ;else
+  (letn ((digits-a (int-list a)) (digits-b (int-list b)))
+    (if (!= (length digits-a) (length digits-b))
+        nil
+        ;else
+        (letn ((n (length digits-a)) (min-total-cost 999999) (best-ops '()))
+          (let ((all-perms-a (perm digits-a)))
+            (dolist (perm-a all-perms-a)
+              (letn ((swap-cost-a 0) (ops-a '()) (visited (array n '(nil))))
+                (for (i 0 (- n 1))
+                  (unless (visited i)
+                    (letn ((cycle-length 0) (cycle-pos '()) (current i))
+                      (while (not (visited current))
+                        (setf (visited current) true)
+                        (push current cycle-pos -1)
+                        (inc cycle-length)
+                        (for (j 0 (- n 1))
+                          (if (= (nth current digits-a) (nth j perm-a))
+                              (setq current j))))
+                      (if (> cycle-length 1)
+                          (for (k 1 (- (length cycle-pos) 1))
+                            (push (list "swap" "A" (nth 0 cycle-pos) (nth k cycle-pos)) ops-a -1)
+                            (setf swap-cost-a (+ swap-cost-a 1)))))))
+                (let ((all-perms-b (perm digits-b)))
+                  (dolist (perm-b all-perms-b)
+                    (letn ((swap-cost-b 0) (ops-b '()) (visited-b (array n '(nil))))
+                      (for (i 0 (- n 1))
+                        (unless (visited-b i)
+                          (letn ((cycle-length 0) (cycle-pos '()) (current i))
+                            (while (not (visited-b current))
+                              (setf (visited-b current) true)
+                              (push current cycle-pos -1)
+                              (inc cycle-length)
+                              (for (j 0 (- n 1))
+                                (if (= (nth current digits-b) (nth j perm-b))
+                                    (setq current j))))
+                            (if (> cycle-length 1)
+                                (for (k 1 (- (length cycle-pos) 1))
+                                  (push (list "swap" "B" (nth 0 cycle-pos) (nth k cycle-pos)) ops-b -1)
+                                  (setf swap-cost-b (+ swap-cost-b 1)))))))
+                      (letn ((ops-transform '()) (transform-cost 0))
+                        (for (i 0 (- n 1))
+                          (let ((dist (cyclic-distance (nth i perm-a) (nth i perm-b))))
+                            (when (> dist 0)
+                              (push (list "+1" "A" i dist) ops-transform -1)
+                              (setf transform-cost (+ transform-cost dist)))))
+                        (let ((total-cost (+ swap-cost-a swap-cost-b transform-cost))
+                              (ops-total (append ops-a ops-b ops-transform)))
+                          (if (< total-cost min-total-cost)
+                              (begin
+                                (setf min-total-cost total-cost)
+                                (setf best-ops ops-total))))))))))
+            (println "Costo minimo:" min-total-cost)
+            (println "Operazioni:")
+            ;(println best-ops)
+            (dolist (op best-ops) (println op))
+            (list min-total-cost best-ops)))))))
+
+Proviamo:
+
+(min-operations-ops 123 123)
+;-> (0 ())
+
+(min-operations-ops 13420 31259)
+;-> Costo minimo:4
+;-> Operazioni:
+;-> ("swap" "B" 0 1)
+;-> ("swap" "B" 2 3)
+;-> ("+1" "A" 2 1)
+;-> ("+1" "A" 4 1)
+;-> (4 (("swap" "B" 0 1) ("swap" "B" 2 3) ("+1" "A" 2 1) ("+1" "A" 4 1)))
+
+(min-operations-ops 12 31)
+;-> Costo minimo:2
+;-> Operazioni:
+;-> ("swap" "B" 0 1)
+;-> ("+1" "A" 1 1)
+;-> (2 (("swap" "B" 0 1) ("+1" "A" 1 1)))
+
+(min-operations-ops 12 41)
+;-> Costo minimo:3
+;-> Operazioni:
+;-> ("swap" "B" 0 1)
+;-> ("+1" "A" 1 2)
+;-> (3 (("swap" "B" 0 1) ("+1" "A" 1 2)))
+
+(min-operations-ops 12345 54321)
+;-> Costo minimo:2
+;-> Operazioni:
+;-> ("swap" "B" 0 4)
+;-> ("swap" "B" 1 3)
+;-> (2 (("swap" "B" 0 4) ("swap" "B" 1 3)))
+
+
+(time (println (min-operations-ops 132683 945612)))
+;-> Costo minimo:6
+;-> Operazioni:
+;-> ("swap" "A" 0 4)
+;-> ("swap" "A" 1 5)
+;-> ("+1" "A" 0 1)
+;-> ("+1" "A" 1 1)
+;-> ("+1" "A" 2 2)
+;-> (6 (("swap" "A" 0 4) ("swap" "A" 1 5) ("+1" "A" 0 1) ("+1" "A" 1 1) ("+1" "A" 2 2)))
+;-> 6250.516
+
+(time (println (min-operations-ops 1326837 9456125)))
+;-> Costo minimo:8
+;-> Operazioni:
+;-> ("swap" "A" 1 4)
+;-> ("swap" "B" 0 6)
+;-> ("+1" "A" 1 1)
+;-> ("+1" "A" 2 1)
+;-> ("+1" "A" 3 1)
+;-> ("+1" "A" 5 2)
+;-> ("+1" "A" 6 1)
+;-> (8 (("swap" "A" 1 4) ("swap" "B" 0 6) ("+1" "A" 1 1) ("+1" "A" 2 1) ("+1" "A" 3 1)
+;->   ("+1" "A" 5 2)
+;->   ("+1" "A" 6 1)))
+;-> 386633.251
+
 ============================================================================
 
