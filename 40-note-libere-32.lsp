@@ -4223,5 +4223,137 @@ Proviamo:
 (omogenee "aabb" true)
 ;-> (6 ("a" "a" "aa" "b" "b" "bb"))
 
+
+-------------------------
+Punti e angoli di visione
+-------------------------
+
+In un piano 2D abbiamo un punto O (Osservatore) in una posizione fissa (x,y).
+Inizialmente il punto è rivolto (guarda) verso Est (direzione x positiva) con un angolo di visione (cono visivo) di Alfa (gradi).
+Il punto O guarda solo in avanti (non guarda anche dietro di lui).
+Un altro punto P si trova in posizione (x1,y1).
+Determinare se il punto O vede il punto P.
+
+    Y
+  
+    |
+    |      left-ray
+    |        /
+  y1|       /              P
+    |      /
+    |     / alfa/2
+   y|    O-------------> direzione visiva
+    |     \ alfa/2
+    |      \
+    |       \
+    |        \
+    |      right ray
+  0 +---------------------------- X
+    0    x                 x1
+
+Per generalizzare la situazione, supponiamo che il punto possa ruotare in senso antiorario di un angolo pari a Beta (gradi).
+Quando ruota ('facing') di Beta gradi, il suo campo visivo copre tutti gli angoli nell'intervallo (Beta - alfa/2, Beta + alfa/2)
+facing = +x --> angoli positivi --> ruota antiorario
+(es. da Est verso Nord se x = pi/2).
+facing = -x --> angoli negativi --> ruota orario
+(es. da Est verso Sud se x = pi/2).
+
+In pratica per "ruotare" il campo visivo di P di x radianti, basta impostare il facing = x.
+  facing = 0 --> guarda a Est
+  facing = pi/2 --> guarda a Nord
+  facing = pi --> guarda a Ovest
+  facing = -pi/2 --> guarda a Sud
+
+Il punto P è visibile se l'angolo che forma con la posizione di P (rispetto alla direzione Est) rientra nel campo visivo attuale.
+Quindi occorre confrontare l'angolo direzionale del punto O con l'angolo verso P, normalizzando gli angoli per gestire il "wrap" intorno a -pi...pi.
+Il calcolo dell'angolo relativo tra O e P deve essere fatto tenendo conto del valore di 'facing'.
+
+Algoritmo:
+1) calcolare dx = x1-x, dy = y1-y
+2) angolo verso P: atan2(dy,dx)
+3) angolo di facing (0 = Est, pi/2 = nord, ecc.)
+4) prendere la differenza e normalizzarla in (-pi,pi]
+5) confrontore abs(diff) <= alpha/2
+
+- atan2(dy,dx) dà l'angolo assoluto verso P rispetto all'asse X positivo (Est).
+- 'facing' è l'angolo che indica la direzione in cui guarda O (in radianti). Se O guarda Est, facing = 0.
+- 'alpha' è l'ampiezza dell'angolo di visione in radianti
+- La normalizzazione evita problemi quando l'angolo attraversa -pi/pi (es. facing vicino a pi).
+
+Schema logico:
+1) Differenze di coordinate
+   Calcola
+   dx = x1 - x, dy = y1 - y
+   cioè lo spostamento dal punto O a P.
+2) Angolo assoluto verso P
+   Usa 'atan2(dy, dx)' per ottenere l'angolo (in radianti) che il vettore OP forma con l'asse X positivo (Est).
+   Questo angolo è compreso tra -pi e pi.
+3) Angolo relativo rispetto a facing
+   Sottrae l'angolo 'facing' (la direzione di osservazione di O):
+   rel = angle - text
+   Poi normalizza questo valore nell'intervallo (-pi, pi] per evitare problemi di salto quando si passa da pi a -pi.
+4) Ampiezza del campo visivo
+   Prende alpha/2, che rappresenta la metà dell'angolo di visione (metà a sinistra e metà a destra rispetto alla direzione di facing).
+5) Confronto finale
+   Se (rel <= alpha/2), allora il punto P cade dentro il cono visivo di O.
+   Altrimenti è fuori.
+
+; valore di pi greco
+(setq pi 3.1415926535897931)
+
+(define (deg-rad deg)
+"Convert decimal degrees to radiants"
+  (mul deg 1.745329251994329577e-2))
+
+(define (normalize-angle a) ; normalizza un angolo nell'intervallo (-pi, pi]
+ (letn ((t (mod a (* 2 pi))))
+  (if (> t pi) (sub t (* 2 pi)) (if (<= t (- pi)) (add t (* 2 pi)) t))))
+
+Funzione che verifica se il punto O vede il punto P:
+
+(define (sees? ox oy px py alfa facing)
+ ; ox, oy = coordinate osservatore O
+ ; px, py = coordinate punto P
+ ; alfa = ampiezza dell'angolo di visione (in gradi)
+ ; facing = direzione in cui guarda O (0=Est, pi/2=Nord, ecc.)
+ (letn (
+   (alpha (deg-rad alfa)) ; alfa in radianti
+   (dx (sub px ox)) ; differenza x tra P e O
+   (dy (sub py oy)) ; differenza y tra P e O
+   (angle (atan2 dy dx)) ; angolo assoluto verso P rispetto a Est
+   (rel (normalize-angle (sub angle facing))) ; angolo relativo tra facing e P
+   (half (div alpha 2)) ; metà del campo visivo
+  )
+  (<= (abs rel) half))) ; vero se P cade entro +-alpha/2 (nel campo visivo)
+
+Il ruolo di 'facing' viene incluso nel passo:
+  rel = normalize-angle(angle - facing)
+Questa operazione "sposta" il sistema di riferimento in modo che la direzione in cui guarda O diventi 0.
+Quindi dopo la normalizzazione il confronto si riduce a chiedere:
+    rel <= alpha/2
+Ecco perché 'half' non tiene conto di 'facing': l'angolo relativo è già stato calcolato.
+
+Proviamo:
+
+(sees? 0 0 1 1 90 0)
+;-> true
+(sees? 0 0 -1 1 90 0)
+;-> nil
+(sees? 5 5 10 6 60 0)
+;-> true
+(sees? 5 5 5 10 60 0)
+;-> nil
+(sees? 5 5 10 6 60 (div pi 2))
+;-> nil
+(sees? 5 5 5 10 60 (div pi 2))
+;-> true
+(sees? 5 5 10 6 2 0)
+;-> nil
+(sees? 5 5 10 5 2 0)
+;-> true
+
+Nota:
+Se vogliamo inserire il parametro della profondita della visione (PV) del punto O, basta verificare che la distanza tra P e O sia minore o uguale a PV (il cono visivo viene delimitato da un arco di cerchio di raggio PV e centro in O).
+
 ============================================================================
 

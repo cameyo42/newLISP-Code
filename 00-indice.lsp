@@ -3158,6 +3158,7 @@ NOTE LIBERE 32
   Ordinare una lista in base al MCD con un numero k
   Operazioni per rendere due numeri uguali
   Sottostringhe omogenee
+  Punti e angoli di visione
 
 PROBLEMI SUI DADI
 =================
