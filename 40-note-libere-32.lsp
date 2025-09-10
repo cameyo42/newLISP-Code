@@ -4098,5 +4098,130 @@ Proviamo:
 ;->   ("+1" "A" 6 1)))
 ;-> 386633.251
 
+
+----------------------
+Sottostringhe omogenee
+----------------------
+
+Data una stringa determinare tutte le sottostringhe omogenee.
+Una sottostringa omogenea è una sottostringa in cui tutti i caratteri sono identici.
+
+Esempio:
+  stringa = "aaa"
+  sottostringhe omogenee = "a", "a", "a", "aa", "aa" e "aaa".
+
+Esempio:
+  stringa = "abbcccaa", le sottostringhe omogenee sono:
+  Da "a":   1 sottostringa  ("a")
+  Da "bb":  3 sottostringhe ("b", "b", "bb")
+  Da "ccc": 6 sottostringhe ("c", "c", "c", "cc", "cc", "ccc")
+  Da "aa":  3 sottostringhe ("a", "a", "aa")
+
+Osservando l'ultimo esempio ("abbcccaa"), possiamo notare che sottostringhe omogenee possono derivare solo da segmenti continui di caratteri identici.
+Non è possibile formare una sottostringa omogenea utilizzando segmenti con caratteri diversi.
+Inoltre, quando incontriamo n caratteri uguali (es. "aaa") il numero di sottostringhe omogenee che possono essere formate vale:
+
+  n + (n-1) + (n-2) + ... + 1 =  n*(n+1)/2 (che è la somma dei numeri da 1 a n).
+
+Infatti la stringa "aaa" che ha n = 3 genera (3*2)/2 = 6 sottostringhe omogenee:
+  3 Sottostringhe omogenee di lunghezza 1: "a", "a", "a"
+  2 Sottostringhe omogenee di lunghezza 2: "aa", "aa"
+  1 Sottostringa  omogenea di lunghezza 3: "aaa"
+
+Funzione che somma i numeri da 1 a n:
+
+(define (sum-1n n) (/ (* n (+ n 1)) 2))
+
+Funzione che restituisce tutti i segmenti di una stringa con cartteri consecutivi uguali:
+
+(define (segment-string str)
+  (if (= str "") '()
+  ;else
+  (let ( (out '())
+         (cur-char "")
+         (len (length str)))
+    (for (i 0 (- len 1))
+      (if (or (= i 0) (= (str i) (str (- i 1))))
+          (setf cur-char (extend cur-char (string (str i))))
+          (begin
+            (push cur-char out -1)
+            (setf cur-char (string (str i))))))
+    (push cur-char out -1)
+    out)))
+
+Proviamo:
+
+(segment-string "")
+;-> ()
+(segment-string "abbcccaa")
+;-> ("a" "bb" "ccc" "aa")
+(segment-string "aabbcccbbaaf")
+;-> ("aa" "bb" "ccc" "bb" "aa" "f")
+
+Funzione che genera tutte le sottostringhe omogenee di una stringa che ha n caratteri uguali:
+
+(define (omogenee-equal str)
+  (if (= str "") '()
+  ;else
+  (let ( (len (length str)) (ch (str 0)) (out '()) )
+    ; ciclo per ogni segmento di lunghezza: n, (n-1), (n-2), ..., 1
+    (for (i 1 len)
+      ; segmento corrente
+      (setq seg (dup ch i))
+      ; inserimento del segmento corrente nella soluzione
+      (for (k 0 (- len i)) (push seg out -1)))
+    out)))
+
+Proviamo:
+
+(omogenee-equal "aaa")
+;-> ("a" "a" "a" "aa" "aa" "aaa")
+(omogenee-equal "a")
+;-> ("a")
+(omogenee-equal "")
+;-> ()
+Se la stringa non contiene caratteri tutti uguali, allora la funzione usa solo il primo carattere:
+(omogenee-equal "abc")
+;-> ("a" "a" "a" "aa" "aa" "aaa")
+
+Funzione finale che calcola tutte le sottostringhe omogenee di una stringa data:
+all = true --> calcola il numero e la lista delle sottostringhe omogenee
+all = nil  --> calcola il numero delle sottostringhe omogenee
+
+(define (omogenee str all)
+  (let (segs (segment-string str))
+    (cond ((nil? all) ; solo il numero delle sottostringhe
+            (let (totale 0)
+              (dolist (s segs) (++ totale (sum-1n (length s))))
+              totale))
+          ((true? all) ; il numero e il valore delle sottostringhe
+            (let (out '())
+              ;(println segs)
+              (dolist (s segs)
+              ;(print (omogenee-equal s)) (read-line)
+              (extend out (omogenee-equal s)))
+              (list (length out) out))))))
+
+Proviamo:
+
+(omogenee "")
+;-> 0
+(omogenee "" true)
+;-> (0 ())
+(omogenee "abbcccaa")
+;-> 13
+(omogenee "abbcccaa" true)
+;-> (13 ("a" "b" "b" "bb" "c" "c" "c" "cc" "cc" "ccc" "a" "a" "aa"))
+(omogenee "aabbcccbbaaf" true)
+;-> (19 ("a" "a" "aa" "b" "b" "bb" "c" "c" "c" "cc" "cc" "ccc"
+;->      "b" "b" "bb" "a" "a" "aa" "f"))
+(omogenee "xxxxx" true)
+;-> (15 ("x" "x" "x" "x" "x" "xx" "xx" "xx" "xx"
+;->      "xxx" "xxx" "xxx" "xxxx" "xxxx" "xxxxx"))
+(omogenee "1234567890" true)
+;-> (10 ("1" "2" "3" "4" "5" "6" "7" "8" "9" "0"))
+(omogenee "aabb" true)
+;-> (6 ("a" "a" "aa" "b" "b" "bb"))
+
 ============================================================================
 

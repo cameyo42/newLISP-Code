@@ -3157,6 +3157,7 @@ NOTE LIBERE 32
   Coppie di interi divisibili per un numero k
   Ordinare una lista in base al MCD con un numero k
   Operazioni per rendere due numeri uguali
+  Sottostringhe omogenee
 
 PROBLEMI SUI DADI
 =================
