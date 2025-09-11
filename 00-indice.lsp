@@ -3159,6 +3159,8 @@ NOTE LIBERE 32
   Operazioni per rendere due numeri uguali
   Sottostringhe omogenee
   Punti e angoli di visione
+  Divisori vicini
+  K-esimo divisore di un numero
 
 PROBLEMI SUI DADI
 =================

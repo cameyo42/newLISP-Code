@@ -4355,5 +4355,216 @@ Proviamo:
 Nota:
 Se vogliamo inserire il parametro della profondita della visione (PV) del punto O, basta verificare che la distanza tra P e O sia minore o uguale a PV (il cono visivo viene delimitato da un arco di cerchio di raggio PV e centro in O).
 
+
+---------------
+Divisori vicini
+---------------
+
+Dato un numero intero N, trova i due numeri interi più vicini in differenza assoluta il cui prodotto è uguale a N+1 o N+2.
+
+Esempio
+N = 8
+Output = (3 3)
+N + 1 = 9  --> divisori vicini (3 3) --> 3 - 3 = 0 (differenza minima)
+N + 2 = 10 --> divisori vicini (2 5) --> 5 - 2 = 3
+
+I due interi più vicini in differenza assoluta sono inferiori o uguali a sqrt(N).
+Questo perchè i fattori da moltiplicare diventano più "bilanciati" man mano che ci avviciniamo alla radice quadrata.
+
+Algoritmo
+---------
+Per N+1:
+1) Iniziare l'iterazione da i = int(sqrt(N)) fino a 1
+2) Per ogni i, controllare se N % i == 0 (ovvero, i divide x esattamente)
+3) Quando troviamo il primo divisore, restituiamo la coppia (i N/i)
+4) Poiché partiamo da sqrt(x) e procediamo verso il basso, il primo divisore che troviamo ci darà la coppia di fattori con differenza minima 'diff1'.
+Per N+2:
+5) lo stesso procedimento ci porta a calcolare 'diff2'.
+6) Restituire la coppia di fattori per cui la differenza assoluta è minore.
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (close-div N)
+  ; calcolo con N+1
+  (letn ( (num (+ N 1))
+          (idx (int (sqrt num)))
+          (d1 '()) (d2 '()) (diff1 0) (diff2 0) )
+    (if (prime? num) ; se num è primo non occorre effettuare il ciclo
+        (set 'd1 (list 1 num) 'diff1 (- num 1))
+    ;else
+        (while (> idx 0)
+          (when (zero? (% num idx))
+            (setq d1 (list idx (/ num idx)))
+            (setq diff1 (abs (- idx (/ num idx))))
+            (setq idx 0))
+          (-- idx)))
+    (println (apply * d1) { } d1 { } diff1)
+    ; calcolo con N+2
+    (setq num (+ N 2))
+    (if (prime? num) ; se num è primo non occorre effettuare il ciclo
+        (set 'd2 (list 1 num) 'diff2 (- num 1))
+    ;else        
+        (setq idx (int (sqrt num)))
+        (while (> idx 0)
+          (when (zero? (% num idx))
+            (setq d2 (list idx (/ num idx)))
+            (setq diff2 (abs (- idx (/ num idx))))
+            (setq idx 0))
+          (-- idx)))
+    (println (apply * d2) { } d2 { } diff2)
+    (if (<= diff1 diff2)
+        (list (apply * d1) d1 diff1)
+        (list (apply * d2) d2 diff2))))
+
+Proviamo:
+
+(close-div 8)
+;-> ((3 3) 0)
+;-> 9 (3 3) 0
+;-> 10 (2 5) 3
+;-> (9 (3 3) 0)
+
+(close-div 10)
+;-> 11 (1 11) 10
+;-> 12 (3 4) 1
+;-> (12 (3 4) 1)
+
+(close-div 888)
+;-> 889 (7 127) 120
+;-> 890 (10 89) 79
+;-> (890 (10 89) 79)
+
+(close-div 123456789)
+;-> 123456790 (370 333667) 333297
+;-> 123456791 (1 123456791) 123456790
+;-> (123456790 (370 333667) 333297)
+
+
+-----------------------------
+K-esimo divisore di un numero
+-----------------------------
+
+Dato un numero intero positivo N determinare il suo divisore k-esimo.
+Se K è maggiore del numero di divisori di N, allora restituire nil.
+
+Esempi:
+  N = 6
+  K = 3
+  Divisori di 6 = (1 2 3)
+  K-esimo divisore = Terzo divisore = 3
+  
+  N = 12
+  K = 5
+  Divisori di 12 = (1 2 3 4 6 12)
+  K-esimo divisore = Quinto divisore = 6
+
+Algoritmo Brute-Force 1
+-----------------------
+Ciclo per x che va da 1 a num
+  Se x è divisore di num, diminuiamo k di 1.
+  Se k == 0, allora abbiamo trovato la soluzione e usciamo dal ciclo.
+Se usciamo dal ciclo con k > 0, allora restituire nil.
+
+(define (k-divisor num k)
+  (let ( (out 0) (stop nil) )
+    (for (i 1 num 1 stop)
+      (when (zero? (% num i))
+        (-- k)
+        (if (zero? k) (set 'out i 'stop true))))
+    (if stop out nil)))
+
+Proviamo:
+
+(k-divisor 6 3)
+;-> 3
+
+(k-divisor 12 5)
+;-> 6
+
+(k-divisor 11 2)
+;-> 11
+
+(k-divisor 5 5)
+;-> nil
+
+(time (println (k-divisor 123456789 10)))
+;-> 13717421
+;-> 793.625
+
+(time (println (k-divisor 123456789 12)))
+;-> 123456789
+;-> 6979.883
+
+Algoritmo Brute-Force 2
+-----------------------
+Calcoliamo tutti i divisori con un algoritmo più veloce del ciclo da 1 a N.
+Dalla lista dei divisori troviamo, se esiste, il k-esimo divisore (in realtà il (k-1)-esimo della lista perchè gli indici sono zero-based).
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (k-divisore num k)
+  (let (divisori (divisors num))
+    (if (> k (length divisori)) nil (divisori (- k 1)))))
+
+Proviamo:
+
+(k-divisore 6 3)
+;-> 3
+
+(k-divisore 12 5)
+;-> 6
+
+(k-divisore 11 2)
+;-> 11
+
+(k-divisore 5 5)
+;-> nil
+
+(time (println (k-divisore 123456789 10)))
+;-> 13717421
+;-> 0
+
+(time (println (k-divisore 123456789 12)))
+;-> 123456789
+;-> 0
+
+Test di velocità:
+
+(setq nums (rand 10e6 50))
+(setq kappa (map + (rand 10 50) (dup 1 50)))
+
+(time (setq t1 (map (fn(x y) (k-divisor x y)) nums kappa)))
+;-> 4064.888
+
+(time (setq t2 (map (fn(x y) (k-divisore x y)) nums kappa)))
+;-> 0.998
+
 ============================================================================
 
