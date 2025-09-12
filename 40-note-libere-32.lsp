@@ -3404,7 +3404,7 @@ Prima vediamo quali numeri sono nella sequenza fino a 10000:
 (setq seq (filter mirror (sequence 1 1000)))
 ;-> (18 27 36 45 54 63 72 198 297 396 495 594 693 792)
 
-Nota: questa sequenza non esiste in OEIS (7 settembre 2025).
+Nota: questa sequenza non esiste su OEIS (7 settembre 2025).
 
 Adesso vediamo quante coppie hanno ciascun numero della sequenza calcolata:
 
@@ -4565,6 +4565,253 @@ Test di velocità:
 
 (time (setq t2 (map (fn(x y) (k-divisore x y)) nums kappa)))
 ;-> 0.998
+
+
+---------------------------------------------------
+Quanti numeri primi possiamo calcolare con newLISP?
+---------------------------------------------------
+
+La funzione 'primes-to' può calcolare i primi fino al numero 1e8 (con 32 GB RAM).
+Il limite è dovuto alla dimensione del vettore che ha dimensione (1e8 + 1).
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Proviamo:
+
+(time (println (length (primes-to 1e6))))
+;-> 78498
+;-> 140.621
+(time (println (length (primes-to 1e7))))
+;-> 664579
+;-> 1656.263
+(time (println (length (primes-to 1e8))))
+;-> 5761455
+;-> 18329.923
+
+Per ogni potenza il tempo si moltiplica circa per 10.
+
+La funzione 'primiN' può calcolare i primi anche maggiori di 1e8, ma è molto lenta.
+Il limite è dovuto al ciclo 'for' che deve arrivare a 1e8 (con passo 2).
+
+(define (primiN N)
+  (let (tot 1)
+    (for (num 3 N 2) (if (= 1 (length (factor num))) (++ tot)))
+  tot))
+
+Proviamo:
+
+(primiN 100)
+;-> 25
+
+(time (println (primiN 1e6)))
+;-> 78498
+;-> 390.561
+(time (println (primiN 1e7)))
+;-> 664579
+;-> 9438.386
+(time (println (primiN 1e8)))
+;-> 5761455
+;-> 246741.111 ; 247 secondi
+
+Per ogni potenza il tempo si moltiplica circa per 25.
+
+
+-------------------------------------------------------------------------
+Prodotto di cifre uguale al prodotto tra somma di cifre e radice digitale
+-------------------------------------------------------------------------
+
+Sequenza di numeri per cui prodotto di cifre è uguale al prodotto tra la somma delle cifre e la radice digitale.
+
+(define (digit-root num)
+"Calculate the repeated sum of the digits of an integer"
+    (+ 1 (% (- (abs num) 1) 9)))
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+(define (digit-prod num)
+"Calculate the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10))
+        )
+    out)))
+
+(define (check? num) (= (digit-prod num) (* (digit-sum num) (digit-root num))))
+
+(filter check? (sequence 1 1e5))
+;-> (1 66 257 275 369 396 527 572 639 693 725 752 936 963 1236 1263 1326
+;->  1356 1362 1365 1447 1474 1536 1563 1623 1632 1635 1653 1744 2136
+;->  2163 2316 2361 2613 2631 3126 3156 3162 3165 3216 3261 3516 3561
+;->  3612 3615 3621 3651 4147 4174 4417 4471 4714 4741 5136 5163 5316
+;->  5361 5613 5631 6123 6132 6135 6153 6213 6231 6312 6315 6321 6351
+;->  6513 6531 7144 7414 7441 11125 11152 11215 11251 11334 11343 11433
+;->  11512 11521 12115 12151 12247 12274 12339 12393 12427 12472 12511
+;->  12724 12742 12933 13134 13143 13239 13293 13314 13329 13341 13392
+;->  13413 13431 13923 13932 14133 14227 14272 14313 14331 14722 15112
+;->  15121 15211 17224 17242 17422 19233 19323 19332 21115 21151 21247
+;->  21274 21339 21393 21427 21472 21511 21724 21742 21933 22147 22174
+;->  22417 22471 22714 22741 23139 23193 23319 23391 23913 23931 24127
+;->  24172 24217 24271 24712 24721 25111 27124 27142 27214 27241 27412
+;->  27421 29133 29313 29331 31134 31143 31239 31293 31314 31329 31341
+;->  31392 31413 31431 31923 31932 32139 32193 32319 32391 32913 32931
+;->  33114 33129 33141 33192 33219 33291 33411 33912 33921 34113 34131
+;->  34311 39123 39132 39213 39231 39312 39321 41133 41227 41272 41313
+;->  41331 41722 42127 42172 42217 42271 42712 42721 43113 43131 43311
+;->  47122 47212 47221 51112 51121 51211 52111 71224 71242 71422 72124
+;->  72142 72214 72241 72412 72421 74122 74212 74221 91233 91323 91332
+;->  92133 92313 92331 93123 93132 93213 93231 93312 93321)
+
+Nota: questa sequenza non esiste su OEIS (12 settembre 2025).
+
+
+--------------------------------------
+Frequenza delle cifre dei numeri primi
+--------------------------------------
+
+Calcolare la frequenza delle cifre dei numeri primi fino a N.
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Metodo 1
+--------
+Calcola la lista con tutte le cifre dei numeri primi fino a N.
+Calcola le frequenze delle cifre dalla lista.
+
+(define (digit-freq1 N)
+  (local (all cifre primi conta-cifre num-cifre freq)
+    (setq all '())
+    ; lista delle cifre
+    (setq cifre '(0 1 2 3 4 5 6 7 8 9))
+    ; crea una lista con tutti i numeri primi fino a N
+    (setq primi (primes-to N))
+    ; crea una lista 'all' con tutte le cifre dei primi
+    (dolist (p primi) (extend all (int-list p)))
+    ; conta le occorrenze delle cifre 0..9 nella lista delle cifre
+    (setq conta-cifre (count cifre all))
+    ; numero totale di cifre
+    (setq num-cifre (apply + conta-cifre))
+    ; crea una lista 'freq' con la frequenza di ogni cifra (0..9)
+    (setq freq (map (fn(x) (format "%.3f" (div x num-cifre))) conta-cifre))
+    ; crea una lista di elementi (cifra frequenza) per ogni cifra (0..9)
+    (map (fn(x) (list $idx (float x))) freq)))
+
+(digit-freq1 10)
+;-> ((0 0) (1 0) (2 0.25) (3 0.25) (4 0) (5 0.25) (6 0) (7 0.25) (8 0) (9 0))
+
+(digit-freq1 1e4)
+;-> ((0 0.049) (1 0.144) (2 0.083) (3 0.143) (4 0.076) (5 0.076) (6 0.078) (7 0.138) (8 0.074) (9 0.137))
+
+(digit-freq1 1e5)
+;-> ((0 0.059) (1 0.137) (2 0.084) (3 0.134) (4 0.081) (5 0.082) (6 0.080) (7 0.133) (8 0.079) (9 0.132))
+
+(digit-freq1 1e6)
+;-> ((0 0.066) (1 0.130) (2 0.086) (3 0.128) (4 0.085) (5 0.085) (6 0.084) (7 0.127) (8 0.084) (9 0.126))
+
+(time (println (digit-freq1 1e7)))
+;-> ((0 0.071) (1 0.125) (2 0.088) (3 0.124) (4 0.087) (5 0.087) (6 0.087) (7 0.123) (8 0.086) (9 0.123))
+;-> 4562.941
+
+(time (println (digit-freq1 1e8)))
+;-> ((0 0.075) (1 0.122) (2 0.089) (3 0.121) (4 0.089) (5 0.089) (6 0.088) (7 0.120) (8 0.088) (9 0.120))
+;-> 50160.665
+
+Metodo 2
+--------
+Usa un vettore per il conteggio delle cifre.
+Per ogni numero primo aggiorna il vettore delle cifre.
+
+(define (digit-freq2 N)
+  (local (cifre primi conta-cifre num-cifre freq)
+    ; lista delle cifre
+    (setq cifre '(0 1 2 3 4 5 6 7 8 9))
+    ; vettore delle occorrenze delle cifre
+    (setq conta-cifre (array 10 '(0)))
+    ; crea una lista con tutti i numeri primi fino a N
+    (setq primi (primes-to N))
+    ; ciclo che aggiorna la lista delle occorrenze delle cifre
+    ; con tutti i numeri primi
+    (dolist (p primi)
+      (while (!= p 0)
+        (++ (conta-cifre (% p 10)))
+        (setq p (/ p 10))))
+    ; numero totale di cifre
+    (setq num-cifre (apply + conta-cifre))
+    ; crea una lista 'freq' con la frequenza di ogni cifra (0..9)
+    (setq freq (map (fn(x) (format "%.3f" (div x num-cifre))) conta-cifre))
+    ; crea una lista di elementi (cifra frequenza) per ogni cifra (0..9)
+    (map (fn(x) (list $idx (float x))) freq)))
+
+(digit-freq2 10)
+;-> ((0 0) (1 0) (2 0.25) (3 0.25) (4 0) (5 0.25) (6 0) (7 0.25) (8 0) (9 0))
+
+(digit-freq2 1e5)
+;-> ((0 0.059) (1 0.137) (2 0.084) (3 0.134) (4 0.081) (5 0.082) (6 0.08) (7 0.133) (8 0.079) (9 0.132))
+
+(= (digit-freq1 1e6) (digit-freq2 1e6))
+;-> true
+
+(time (println (digit-freq2 1e7)))
+;-> ((0 0.071) (1 0.125) (2 0.088) (3 0.124) (4 0.087) (5 0.087) (6 0.087) (7 0.123) (8 0.086) (9 0.123))
+;-> 2250.191
+
+(time (println (digit-freq2 1e8)))
+;-> ((0 0.075) (1 0.122) (2 0.089) (3 0.121) (4 0.089) (5 0.089) (6 0.088) (7 0.120) (8 0.088) (9 0.120))
+;-> 24330.508
+
+Con l'aumentare del numero dei primi le cifre si comportano nel modo seguente:
+
+  +------ +---------------+
+  | Cifra | Comportamento |
+  +------ +---------------+
+  |   0   | aumenta       |
+  |   1   | diminuisce    |
+  |   2   | aumenta       |
+  |   3   | diminuisce    |
+  |   4   | aumenta       |
+  |   5   | aumenta       |
+  |   6   | aumenta       |
+  |   7   | diminuisce    |
+  |   8   | aumenta       |
+  |   9   | diminuisce    |
+  +------ +---------------+
 
 ============================================================================
 

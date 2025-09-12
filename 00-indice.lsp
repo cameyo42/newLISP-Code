@@ -3161,6 +3161,9 @@ NOTE LIBERE 32
   Punti e angoli di visione
   Divisori vicini
   K-esimo divisore di un numero
+  Quanti numeri primi possiamo calcolare con newLISP?
+  Prodotto di cifre uguale al prodotto tra somma di cifre e radice digitale
+  Frequenza delle cifre dei numeri primi
 
 PROBLEMI SUI DADI
 =================

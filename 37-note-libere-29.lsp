@@ -2055,7 +2055,7 @@ Quindi 26 non è un numero radice.
 ;-> (1 2 3 4 5 6 7 8 9 22 36 58 63 85 99 123 132 156 165 189 198 213 231 246
 ;->  264 279 297 312 321 333 348 357 369 375 384 396 426 438 459 462 483 495)
 
-Nota: questa sequenza non esiste su OEIS.
+Nota: questa sequenza non esiste su OEIS (7 luglio 2025).
 
 (map digit-sum  (filter radice? (sequence 1 500)))
 ;-> (1 2 3 4 5 6 7 8 9 4 9 13 9 13 18 6 6 12 12 18 18 6 6 12 12 18 18
