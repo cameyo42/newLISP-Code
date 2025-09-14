@@ -5007,5 +5007,100 @@ campione:
 ;-> mediana: 2
 ;-> moda: 1
 
+
+--------------
+Numeri confusi
+--------------
+
+Un numero confuso è un numero che diventa un numero diverso quando viene ruotato di 180 gradi, con tutte le cifre che rimangono valide dopo la rotazione.
+Quando ruotiamo le singole cifre di 180 gradi:
+  0 rimane 0
+  1 rimane 1
+  6 diventa 9
+  8 rimane 8
+  9 diventa 6
+  2, 3, 4, 5 e 7 diventano non validi (non possono essere ruotati)
+Il processo di rotazione funziona ruotando ogni cifra singolarmente e poi leggendo il risultato da destra a sinistra.
+
+Il termine "confuso" deriva dalla seguente situazione:
+Supponiamo di avere uno scatolone in cui è scritto un numero su una faccia.
+Se rovesciamo lo scatolone anche il numero viene rovesciato di 180 gradi e genera un altro numero.
+Se entrambi i numeri sono validi, allora entrambi i numeri sono "confusi" (cioè non sappiamo qual è il vero numero dello scatolone).
+
+Esempio 1:
+  N = 16
+  Rotazioni:
+  1 diventa 1
+  6 diventa 9
+  Numero risultante = 91
+  Poichè 16 è diverso da 91, allora 16 è un numero confuso.
+
+Esempio 2:
+  N = 69
+  Rotazioni:
+  6 diventa 9
+  9 diventa 6
+  Numero risultante = 69
+  Poichè 16 è uguale a 69, allora 69 non è un numero confuso.
+
+Esempio 3:
+  N = 126
+  Rotazioni:
+  1 diventa 1
+  2 non può essere ruotato, quindi 126 non è un numero confuso
+
+Sequenza OEIS A272264:
+Numbers that become a different number when flipped upside down.
+  6, 9, 16, 18, 19, 61, 66, 68, 81, 86, 89, 91, 98, 99, 106, 108, 109, 116,
+  118, 119, 161, 166, 168, 169, 186, 188, 189, 191, 196, 198, 199, 601, 606,
+  608, 611, 616, 618, 661, 666, 668, 669, 681, 686, 688, 691, 696, 698, 699,
+  801, 806, 809, 811, 816, 819, 861, 866, 868, 869, 881, 886, 889, ...
+
+(define (confuse? num)
+  (local (out flip str rev stop cifra)
+    ; all'inizio il numero è confuso
+    (setq out true)
+    ; lista delle rotazioni dei numeri
+    (setq flip '(("0" "0") ("1" "1") ("6" "9") ("8" "8") ("9" "6")))
+    (setq str (string num))
+    ; numero ruotato
+    (setq rev "")
+    (setq stop nil)
+    ; ciclo di rotazione per ogni cifra 
+    (dolist (s (explode str) stop)
+      ; ricerca la cifra ruotata
+      (setq cifra (lookup s flip))
+      (if cifra
+          (push cifra rev) ; cifra ruotata
+          (set 'stop true 'out nil))) ; impossibile ruotare cifra. Stop ciclo.
+    ; Adesso per essere confuso deve risultare
+    ; il numero ruotato deve avere un valore
+    ; e la prima cifra del numero ruotato non può essere 0
+    ; e i due numeri non devono essere uguali
+    (if (and out
+             (or (= rev "") (= (rev 0) "0")
+             (= (int rev 0 10) num))) (setq out nil))
+    ;(println (list num rev out))
+    out))
+
+Proviamo:
+
+(confuse? 16)
+;-> true
+(confuse? 69)
+;-> nil
+(confuse? 126)
+;-> nil
+(confuse? 1)
+;-> nil
+
+(filter confuse? (sequence 1 1000))
+;-> (6 9 16 18 19 61 66 68 81 86 89 91 98 99 106 108 109 116
+;->  118 119 161 166 168 169 186 188 189 191 196 198 199 601 606
+;->  608 611 616 618 661 666 668 669 681 686 688 691 696 698 699
+;->  801 806 809 811 816 819 861 866 868 869 881 886 889 891 896
+;->  898 899 901 908 909 911 918 919 961 966 968 969 981 988 989
+;->  991 996 998 999)
+
 ============================================================================
 

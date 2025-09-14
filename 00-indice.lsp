@@ -3166,6 +3166,7 @@ NOTE LIBERE 32
   Frequenza delle cifre dei numeri primi
   Una funzione come "map"
   Statistiche di un campione di interi con le occorrenze degli interi
+  Numeri confusi
 
 PROBLEMI SUI DADI
 =================
