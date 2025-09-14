@@ -3164,6 +3164,8 @@ NOTE LIBERE 32
   Quanti numeri primi possiamo calcolare con newLISP?
   Prodotto di cifre uguale al prodotto tra somma di cifre e radice digitale
   Frequenza delle cifre dei numeri primi
+  Una funzione come "map"
+  Statistiche di un campione di interi con le occorrenze degli interi
 
 PROBLEMI SUI DADI
 =================

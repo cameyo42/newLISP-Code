@@ -4813,5 +4813,199 @@ Con l'aumentare del numero dei primi le cifre si comportano nel modo seguente:
   |   9   | diminuisce    |
   +------ +---------------+
 
+
+-----------------------
+Una funzione come "map"
+-----------------------
+
+Una funzione per modificare i valori di una lista.
+Parametri:
+  lst = lista di elementi
+  func = funzione da applicare
+  val = valore da usare nella funzione
+
+(define (touch lst func val)
+  (if val
+    (map (curry func val) lst)
+    (map func lst)))
+
+Esempi:
+(setq lst '(1 2 3 4 5))
+
+(touch lst + 1)
+;-> (2 3 4 5 6)
+
+(touch lst sin)
+;-> (0.8414709848078965 0.9092974268256817 0.1411200080598672
+;->  -0.7568024953079282 -0.9589242746631385)
+
+(define (f a b) (* a b))
+(touch lst f 2)
+;-> (2 4 6 8 10)
+(touch lst * 2)
+;-> (2 4 6 8 10)
+
+
+-------------------------------------------------------------------
+Statistiche di un campione di interi con le occorrenze degli interi
+-------------------------------------------------------------------
+
+Abbiamo una lista L di N numeri.
+Ogni numero L(k) rappresenta il numero di volte che l'intero k appare in un campione di interi più grande.
+Tutti gli interi nel campione sono compresi nell'intervallo [0, 255].
+Calcolare le seguenti cinque misure statistiche del campione:
+1) Minimo: il valore più piccolo che appare nel campione (con count > 0)
+2) Massimo: il valore più grande che appare nel campione (con count > 0)
+3) Media: il valore medio, calcolato come la somma di tutti gli elementi divisa per il numero totale di elementi
+4) Mediana:
+   se il numero totale di elementi è dispari, la mediana è l'elemento centrale quando tutti gli elementi sono ordinati
+   se il numero totale di elementi è pari, la mediana è la media dei due elementi centrali quando ordinati
+5) Moda: il valore che appare più frequentemente nel campione (univoco garantito)
+
+Esempio:
+lista = (0 1 3 4 0 0 0]
+Il campione vale (1 2 2 2 3 3 3 3) perchè:
+Il valore 0 appare 0 volte
+Il valore 1 appare 1 volta
+Il valore 2 appare 3 volte
+Il valore 3 appare 4 volte
+Il valore 4 appare 0 volte
+Il valore 5 appare 0 volte
+Il valore 6 appare 0 volte
+In questo caso il campione ha 8 elementi.
+
+Una soluzione potrebbe essere quella di ricreare tutti i numeri del campione e poi calcolare le misure statistiche.
+Comunque questo non è fattibile nel caso il campione contenga moltissimi numeri.
+
+Un'altra soluzione potrebbe essere quella di attraversare la lista L ed estrapolare le misure statistiche dalle occorrenze dei numeri del campione.
+Questo è fattibile, ma, poichè la lista L contiene al massimo 256 numeri, proviamo ad utilizzare le primitive di ricerca.
+
+Elementi (Numero di elementi della lista diversi da 0):
+- (length (clean zero? lst)))
+
+Totale (Numero di elementi del campione)
+- (apply + (clean zero? lst)))
+
+Minimo: (Valore minimo dei numeri del campione)
+- (find 0 lst <) trova l'indice del primo elemento che è maggiore di 0.
+
+Massimo: (Valore massimo dei numeri del campione)
+- (reverse (copy lst)) mette l'ultimo elemento in testa.
+- (find 0 (reverse (copy lst)) <) trova l'indice del primo elemento che è maggiore di 0.
+- (- (length lst) 1 ...) trasforma l'indice dalla lista rovesciata a quello originale.
+
+Somma: (Somma di tutti i numeri del campione)
+- (apply + (map (fn(x) (* x $idx)) lst)) moltiplica ogni elemento per il proprio indice e poi somma tutto
+
+Media: (Media dei numeri del campione)
+(div somma totale)
+
+Moda: (Moda dei numeri del campione)
+- (find (apply max lst) lst) trova l'indice del valore massimo della lista data
+
+Mediana: (Mediana dei numeri del campione)
+- per la mediana dobbiamo scrivere una funzione specifica
+
+Funzione che calcola le misure statistiche di un campione di interi partendo dalla lista delle occorrenze degli interi del campione:
+
+(define (stat lst)
+  (local (elementi minimo massimo somma media moda)
+    ; Numero di elementi diversi da 0
+    (setq elementi (length (clean zero? lst)))
+    ; Totale numeri del campione
+    (setq totale (apply + (clean zero? lst)))
+    ; trova il minimo dei numeri
+    (setq minimo (find 0 lst <))
+    (println "minimo: " minimo)
+    ; trova il massimo dei numeri
+    (if (!= (lst -1) 0)
+      (setq massimo (- (length lst) 1))
+      (setq massimo (- (length lst) (find 0 (reverse (copy lst)) <) 1)))
+    (println "massimo: " massimo)
+    ; calcola la somma dei numeri
+    (setq somma (apply + (map (fn(x) (* x $idx)) lst)))
+    (println "somma: " somma)
+    ; calcola la media dei numeri
+    (setq media (div somma totale))
+    (println "media: " media)
+    ; calcola la mediana dei numeri
+    (setq mediana (median lst))
+    (println "mediana: " mediana)
+    ; calcola la moda dei numeri
+    (setq moda (find (apply max lst) lst))
+    (println "moda: " moda)
+  )
+)
+
+Per calcolare la mediana dobbiamo trovare il valore dell'indice centrale del campione.
+Per fare questo attraversiamo la lista fino a che non abbiamo raggiunto l'indice centrale.
+
+(define (median lst)
+  (local (totale mid stop indice mediana)
+    ; Totale numeri del campione
+    (setq totale (apply + (clean zero? lst)))
+    (cond ((odd? totale) ; totale numeri dispari
+            (setq mid (/ totale 2))
+            (setq stop nil)
+            (setq indice 0)
+            ; ciclo su lst per arrivare all'indice corretto...
+            (dolist (el lst stop)
+              ; calcolo indice corrente del campione
+              (setq indice (+ indice el))
+              ;(print $idx { } indice { } mid) (read-line)
+              ; quando superiamo 'mid', abbiamo trovato la mediana
+              (when (>= indice mid)
+                (setq mediana $idx)
+                (setq stop true))))
+          ((even? totale) ; totale numeri pari
+            (setq mid (/ totale 2))
+            (setq stop nil)
+            (setq indice 0)
+            (dolist (el lst stop)
+              ; calcolo indice corrente del campione
+              (setq indice (+ indice el))
+              ;(print $idx { } indice { } mid) (read-line)
+              (cond ((= indice mid)
+                      ; quando 'indice' == 'mid', abbiamo trovato la mediana
+                      ; mid1 = $idx e mid2 = ($idx + 1)
+                      ; mediana = ($idx + ($idx + 1))/2
+                      (setq mediana (div (+ $idx (+ $idx 1)) 2))
+                      (setq stop true))
+                    ((> indice mid)
+                      ; quando superiamo 'mid', abbiamo trovato la mediana
+                      ; mid1 = $idx e mid2 = $idx
+                      ; mediana = ($idx + $idx)/2 = $idx
+                      (setq mediana $idx)
+                      (setq stop true))))))
+    mediana))
+
+Proviamo:
+
+lista:
+(setq a '(0 1 3 4 0 0 0 0))
+campione:
+(setq aa (1 2 2 2 3 3 3 3))
+
+(stat a)
+;-> minimo: 1
+;-> massimo: 3
+;-> somma: 19
+;-> media: 2.375
+;-> mediana: 2.5
+;-> moda: 3
+
+lista:
+(setq b '(0 4 3 2 2 0 0 0))
+campione:
+(setq bb '(1 1 1 1 2 2 2 3 3 4 4))
+
+(stat b)
+;-> minimo: 1
+;-> massimo: 4
+;-> somma: 24
+;-> media: 2.181818181818182
+;-> mediana: 2
+;-> moda: 1
+
 ============================================================================
 
