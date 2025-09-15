@@ -1561,10 +1561,10 @@ Formula di Plouffe:
     ; il numero deve essere arrotondato all'intero più vicino
     (setq p (int (add 0.5 (pow cur (div 5 4)))))
     (print i { } p { })
-    (if (prime? p) 
+    (if (prime? p)
       (println "primo")
       (println "non primo"))))
- 
+
 Proviamo:
 
 (genera 10)
@@ -5894,11 +5894,21 @@ Si può dimostrare, infatti, che se si osserva un gran numero di tali campioni, 
   E[max(X(i))] = -------------
                     (n + 1)
 
-Se poniamo E[max(X(i))] = max(X(i)), cioè supponiamo che il valore atteso sia uguale al valore massimo osservato, allora possiamo stimare il numero N: 
+Se poniamo E[max(X(i))] = max(X(i)), cioè supponiamo che il valore atteso sia uguale al valore massimo osservato, allora possiamo stimare il numero N:
 
                                n*(N + 1)              (n + 1)
   E[max(X(i))] = max(X(i)) = -------------  ==>  N = ---------*max(X(i)) - 1
                                 (n + 1)                  n
+
+La formula può essere riscritta nel modo seguente:
+
+     (n + 1)             (n + 1)*max         n*max     max
+N = ---------*max - 1 = ------------- - 1 = ------- + ----- - 1 =
+        n                    n                 n        k
+
+           max               max - k
+  = max + ----- - 1 = max + ---------
+            k                   k
 
 Scriviamo una funzione per calcolare questo valore e facciamo alcune prove.
 
@@ -6095,6 +6105,56 @@ Per fare questo modifichiamo la nostra funzione in modo che restituisca una list
 ;->  (76 4.75) (78 5.794) (80 3.799) (82 3.829) (84 1.833) (86 2.872)
 ;->  (88 1.886) (90 1.911) (92 1.934) (94 1.957) (96 1.979) (98 0.989)
 ;->  (100 0))
+
+Nota:
+
+Le formule:
+
+       (n + 1)
+  N = ---------*max - 1
+          n
+e
+             max - k
+  N = max + ---------
+                k
+
+sono equivalenti alla seguente formula:
+
+  N = N + media(gaps),
+  dove i gaps sono le 'lacune' tra due numeri consecutivi ordinati (partendo dal numero 0).
+  Una lacuna conta i numeri vuoti tra x e y, cioè lacuna(x y) = (y - x - 1).
+
+Esempio:
+  numeri = (1 15 16 23 30)
+  La lista è già ordinata.
+  Prima lacuna (da 0): 1 - 0 - 1 = 0
+  Seconda lacuna: 15 - 1 - 1 = 13
+  Terza lacuna: 16 - 15 - 1 = 0
+  Quarta lacuna: 23 - 16 - 1 = 6
+  Quinta lacuna: 30 - 23 - 1 = 6
+  media(lacune) = (13 + 6 + 6)/5 = 5
+  N = 30 + 5 = 35
+
+(define (stima1 lst)
+  (local (massimo gaps)
+    (sort lst)
+    (push 0 lst)
+    (setq massimo (apply max lst))
+    (setq gaps (map (fn(x y) (- y x 1)) (chop lst) (rest lst)))
+    (add massimo (div (apply + gaps) (length gaps)))))
+
+(setq a '(1 15 16 23 30))
+(stima a)
+;-> 35
+(stima1 a)
+;-> 35
+
+(setq t (map (curry + 1) (rand 100 10)))
+;-> (78 85 100 100 62 40 27 30 85 3)
+(stima t)
+;-> 109
+(stima1 t)
+;-> 109
 
 
 -----------------------------

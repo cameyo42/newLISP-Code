@@ -5172,5 +5172,236 @@ Proviamo:
 (find-different c 2 true)
 ;-> ()
 
+
+----------------------------------------------------------------------------
+Permutazioni con primi negli indici primi e non-primi negli indici non-primi
+----------------------------------------------------------------------------
+
+Data una lista di interi da 1 a N, trovare quante permutazioni esistono in cui i numeri primi sono posizionati negli indici primi.
+Nota: l'indice inizia con 1.
+I numeri primi devono essere posizionati in posizioni prime.
+I numeri non primi devono essere posizionati in posizioni non prime.
+
+Esempio:
+  Lista = (1 2 3 4 5)
+  Numeri primi: 2 3 5
+  Indici primi: 2 3 5
+  Numeri non primi: 1 4
+  Indici non primi: 1 4
+Le disposizioni valide collocherebbero (2 3 5) nelle posizioni (2 3 5) e (1 4) nelle posizioni (1 4).
+
+Non dobbiamo calcolare tutte le permutazioni.
+Questo è un problema di permutazione vincolato che può essere scomposto in due sottoproblemi indipendenti.
+1) I numeri primi possono andare SOLO in posizioni prime
+2) I numeri non primi possono andare SOLO in posizioni non prime
+I due gruppi sono separati e non interagiscono tra loro.
+Se abbiamo K numeri primi nell'intervallo [1, N], allora abbiamo anche esattamente K posizioni prime.
+In quanti modi possiamo disporre K numeri primi in K posizioni prime?
+  modi = K!
+Analogamente, abbiamo (N - K) numeri non primi e (N - K) posizioni non prime.
+Il numero di modi per disporli è (N - K)!.
+Poiché queste due disposizioni sono indipendenti (scegliere come disporre i numeri primi non influisce su come possiamo disporre i numeri non primi), moltiplichiamo le possibilità: K! * (N - K)!.
+
+Algoritmo
+---------
+1) Contare quanti numeri primi esistono nell'intervallo [1, N]
+2) Calcolare il numero di modi per disporre i numeri primi in posizioni prime: fattoriale(numero_primi)
+3) Calcolare il numero di modi per disporre i numeri non primi in posizioni non prime: fattoriale(N - numero_primi)
+4) Moltiplicare questi due valori per ottenere il numero totale di permutazioni valide
+
+(define (primes-to-count num)
+"Calculate the number of primes less than or equal to a given number"
+  (cond ((< num 2) 0)
+        ((= num 2) 1)
+        (true
+         (let (np 1)
+         (setq arr (array (+ num 1)))
+         (for (x 3 num 2)
+              (when (not (arr x))
+                (++ np)
+                (for (y (* x x) num (* 2 x) (> y num))
+                     (setf (arr y) true)))) np))))
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(define (perm-prime N)
+  (let (K (primes-to-count N))
+    (* (fact-i K) (fact-i (- N K)))))
+
+Proviamo:
+
+(perm-prime 5)
+;-> 12L
+
+(perm-prime 100)
+;-> 38481979412012894561143749751991768407900856981542463736958373544134
+;-> 4644079427866367657953100203395372827017216000000000000000000000000L
+
+
+----------------------
+Matrice delle distanze
+----------------------
+
+Date le dimensioni NxM di una matrice e le coordinate di una cella (row col) che appartiene alla matrice, calcolare la matrice delle distanze (cioè una matrice NxM in cui ogni cella contiene la distanza dalla cella (row col).
+La 'distanza' può essere calcolata in 3 modi diversi:
+1) Distanza cartesiana
+2) Distanza di Manhattan (4 direzioni)
+3) Distanza di Manhattan (8 direzioni)
+
+(define (dist2d x1 y1 x2 y2)
+"Calculate 2D Cartesian distance of two points P1 = (x1 y1) and P2 = (x2 y2)"
+  (sqrt (add (mul (sub x1 x2) (sub x1 x2))
+             (mul (sub y1 y2) (sub y1 y2)))))
+
+(define (dist-manh4 x1 y1 x2 y2)
+"Calculate Manhattan distance (4 directions - rook) of two points P1=(x1 y1) e P2=(x2 y2)"
+  (add (abs (sub x1 x2)) (abs (sub y1 y2))))
+
+(define (dist-manh8 x1 y1 x2 y2)
+"Calculate Manhattan distance (8 directions - queen) of two points P1=(x1 y1) e P2=(x2 y2)"
+  (max (abs (sub x1 x2)) (abs (sub y1 y2))))
+
+(define (print-matrix matrix border)
+"Print a matrix m x n"
+  (local (row col lenmax fmtstr)
+    ; converto matrice in lista?
+    (if (array? matrix) (setq matrix  (array-list matrix)))
+    ; righe della matrice
+    (setq row (length matrix))
+    ; colonne della matrice
+    (setq col (length (first matrix)))
+    ; valore massimo della lunghezza tra gli elementi (come stringa)
+    (setq lenmax (apply max (map length (map string (flat matrix)))))
+    ; creo stringa di formattazione
+    (setq fmtstr (append "%" (string (+ lenmax 1) "s")))
+    ; stampa la matrice
+    (for (i 0 (- row 1))
+      (if border (print "|"))
+      (for (j 0 (- col 1))
+        (print (format fmtstr (string (matrix i j))))
+      )
+      (if border (println " |") (println))
+    ) nil))
+
+Funzione che genera la matrice delle distanze:
+
+(define (distanza-matrice N M row col dist-func)
+    (let (matrix (dup (dup 0 N) M))
+      (for (r 0 (- N 1))
+        (for (c 0 (- M 1))
+          (setf (matrix r c) (dist-func r c row col))))
+      matrix))
+
+Proviamo:
+
+(print-matrix (distanza-matrice 10 10 0 0 dist-manh4))
+;->  0  1  2  3  4  5  6  7  8  9
+;->  1  2  3  4  5  6  7  8  9 10
+;->  2  3  4  5  6  7  8  9 10 11
+;->  3  4  5  6  7  8  9 10 11 12
+;->  4  5  6  7  8  9 10 11 12 13
+;->  5  6  7  8  9 10 11 12 13 14
+;->  6  7  8  9 10 11 12 13 14 15
+;->  7  8  9 10 11 12 13 14 15 16
+;->  8  9 10 11 12 13 14 15 16 17
+;->  9 10 11 12 13 14 15 16 17 18
+
+(print-matrix (distanza-matrice 10 10 0 0 dist-manh8))
+;->  0 1 2 3 4 5 6 7 8 9
+;->  1 1 2 3 4 5 6 7 8 9
+;->  2 2 2 3 4 5 6 7 8 9
+;->  3 3 3 3 4 5 6 7 8 9
+;->  4 4 4 4 4 5 6 7 8 9
+;->  5 5 5 5 5 5 6 7 8 9
+;->  6 6 6 6 6 6 6 7 8 9
+;->  7 7 7 7 7 7 7 7 8 9
+;->  8 8 8 8 8 8 8 8 8 9
+;->  9 9 9 9 9 9 9 9 9 9
+
+(print-matrix
+  (map (fn(riga) (map (fn(el) (format "%2.2f" el)) riga))
+       (distanza-matrice 10 10 0 0 dist2d)))
+;->  0.00  1.00  2.00  3.00  4.00  5.00  6.00  7.00  8.00  9.00
+;->  1.00  1.41  2.24  3.16  4.12  5.10  6.08  7.07  8.06  9.06
+;->  2.00  2.24  2.83  3.61  4.47  5.39  6.32  7.28  8.25  9.22
+;->  3.00  3.16  3.61  4.24  5.00  5.83  6.71  7.62  8.54  9.49
+;->  4.00  4.12  4.47  5.00  5.66  6.40  7.21  8.06  8.94  9.85
+;->  5.00  5.10  5.39  5.83  6.40  7.07  7.81  8.60  9.43 10.30
+;->  6.00  6.08  6.32  6.71  7.21  7.81  8.49  9.22 10.00 10.82
+;->  7.00  7.07  7.28  7.62  8.06  8.60  9.22  9.90 10.63 11.40
+;->  8.00  8.06  8.25  8.54  8.94  9.43 10.00 10.63 11.31 12.04
+;->  9.00  9.06  9.22  9.49  9.85 10.30 10.82 11.40 12.04 12.73
+
+(print-matrix (distanza-matrice 7 7 3 3 dist-manh4))
+;->  6 5 4 3 4 5 6
+;->  5 4 3 2 3 4 5
+;->  4 3 2 1 2 3 4
+;->  3 2 1 0 1 2 3
+;->  4 3 2 1 2 3 4
+;->  5 4 3 2 3 4 5
+;->  6 5 4 3 4 5 6
+
+Per matrici grandi conviene utilizzare un vettore a due dimensioni.
+
+(define (distanza-matrice-v N M row col dist-func)
+    (let (matrix (array N M '(0)))
+      (for (r 0 (- N 1))
+        (for (c 0 (- N 1))
+          (setf (matrix r c) (dist-func r c row col))))
+      matrix))
+
+(print-matrix (distanza-matrice-v 7 7 3 3 dist-manh4))
+;->  6 5 4 3 4 5 6
+;->  5 4 3 2 3 4 5
+;->  4 3 2 1 2 3 4
+;->  3 2 1 0 1 2 3
+;->  4 3 2 1 2 3 4
+;->  5 4 3 2 3 4 5
+;->  6 5 4 3 4 5 6
+
+Test di correttezza:
+
+(= (distanza-matrice 100 100 0 0 dist-manh4)
+   (array-list (distanza-matrice-v 100 100 0 0 dist-manh4)))
+;-> true
+
+Test di velocità:
+
+Con matrici piccole le funzioni sono equivalenti
+(time (distanza-matrice 10 10 5 5 dist-manh4) 1e5)
+;-> 2369.662
+(time (distanza-matrice-v 10 10 5 5 dist-manh4) 1e5)
+;-> 2739.854
+
+Con matrici grandi la funzione che usa il vettore è molto più veloce:
+(time (distanza-matrice 1000 1000 500 500 dist-manh4))
+;-> 3249.45
+(time (distanza-matrice-v 1000 1000 500 500 dist-manh4))
+;-> 235.916
+
+Vediamo quanto guadagniamo in velocità se scriviamo la funzione di distanza direttamente dentro la funzione principale:
+
+(define (distanza-matrice-manh4 N M row col)
+    (let (matrix (array N M '(0)))
+      (for (r 0 (- N 1))
+        (for (c 0 (- N 1))
+          (setf (matrix r c) (add (abs (sub r row)) (abs (sub c col))))))
+      matrix))
+
+(= (distanza-matrice-v 100 100 0 0 dist-manh4)
+   (distanza-matrice-manh4 100 100 0 0))
+;-> true
+
+(time (distanza-matrice-manh4 10 10 5 5 dist-manh4) 1e5)
+;-> 2082.424
+(time (distanza-matrice-manh4 1000 1000 500 500 dist-manh4))
+;-> 183.803
+
 ============================================================================
 
