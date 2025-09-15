@@ -4941,16 +4941,17 @@ Per calcolare la mediana dobbiamo trovare il valore dell'indice centrale del cam
 Per fare questo attraversiamo la lista fino a che non abbiamo raggiunto l'indice centrale.
 
 (define (median lst)
-  (local (totale mid stop indice mediana)
+  (local (totale mid mid1 mid2 stop indice mediana)
     ; Totale numeri del campione
     (setq totale (apply + (clean zero? lst)))
+    (println "totale:" totale)
     (cond ((odd? totale) ; totale numeri dispari
             (setq mid (/ totale 2))
             (setq stop nil)
             (setq indice 0)
             ; ciclo su lst per arrivare all'indice corretto...
             (dolist (el lst stop)
-              ; calcolo indice corrente del campione
+              ; indice corrente
               (setq indice (+ indice el))
               ;(print $idx { } indice { } mid) (read-line)
               ; quando superiamo 'mid', abbiamo trovato la mediana
@@ -4962,14 +4963,20 @@ Per fare questo attraversiamo la lista fino a che non abbiamo raggiunto l'indice
             (setq stop nil)
             (setq indice 0)
             (dolist (el lst stop)
-              ; calcolo indice corrente del campione
               (setq indice (+ indice el))
               ;(print $idx { } indice { } mid) (read-line)
               (cond ((= indice mid)
-                      ; quando 'indice' == 'mid', abbiamo trovato la mediana
-                      ; mid1 = $idx e mid2 = ($idx + 1)
+                      ; quando 'indice' == 'mid', abbiamo trovato mid1
+                      ; mid1 = $idx
+                      ; per trovare mid2 occorre andare avanti nella lista
+                      ; fino a trovare il primo indice valido (non-zero)
+                      ; mid2 = ($idx + 1)
                       ; mediana = ($idx + ($idx + 1))/2
-                      (setq mediana (div (+ $idx (+ $idx 1)) 2))
+                      (setq mid1 $idx)
+                      ; trova l'indice del primo elemento maggiore di 'el'
+                      (setq mid2 (find el lst <))
+                      ;(println mid1 { } mid2)
+                      (setq mediana (div (+ mid1 mid2) 2))
                       (setq stop true))
                     ((> indice mid)
                       ; quando superiamo 'mid', abbiamo trovato la mediana
@@ -5006,6 +5013,34 @@ campione:
 ;-> media: 2.181818181818182
 ;-> mediana: 2
 ;-> moda: 1
+
+lista
+(setq c '(0 1 3 0 0 0 4 0 0 0 0))
+campione:
+(setq cc '(1 2 2 2 6 6 6 6))
+
+(stat c)
+;-> minimo: 1
+;-> massimo: 6
+;-> somma: 31
+;-> media: 3.875
+;-> totale:8
+;-> mediana: 4
+;-> moda: 6
+
+lista
+(setq d '(1 1 3 0 0 0 3 0 0 0 0))
+campione:
+(setq dd '(0 1 2 2 2 6 6 6))
+
+(stat d)
+;-> minimo: 0
+;-> massimo: 6
+;-> somma: 25
+;-> media: 3.125
+;-> totale:8
+;-> mediana: 2
+;-> moda: 2
 
 
 --------------
@@ -5101,6 +5136,41 @@ Proviamo:
 ;->  801 806 809 811 816 819 861 866 868 869 881 886 889 891 896
 ;->  898 899 901 908 909 911 918 919 961 966 968 969 981 988 989
 ;->  991 996 998 999)
+
+
+--------------------------------------------------------------------------
+Trovare valori e indici degli elementi di una lista diversi da un valore k
+--------------------------------------------------------------------------
+
+Data una lista di elementi e un valore k, determinare:
+1) tutti i valori della lista diversi da k 
+2) tutti gli indici dei valori della lista diversi da k 
+
+(define (find-different lst k indexes)
+  (if indexes
+      ; calcola gli indici degli elementi di lst che sono diversi da k
+      (index (fn(x y) (!= x k)) lst)
+      ; else
+      ; calcola i valori degli elementi di lst che sono diversi da k
+      (filter (fn(x) (!= x k)) lst)))
+
+Proviamo:
+
+(setq a '(1 4 3 2 6 7 8 4 3 5 6))
+(find-different a 3)
+(find-different a 3 true)
+
+(setq b '(1 1 1 4 1 2 4 3 4 4 5))
+(find-different b 1)
+;-> (4 2 4 3 4 4 5)
+(find-different b 1 true)
+;-> (3 5 6 7 8 9 10)
+
+(setq c '(2 2 2))
+(find-different c 2)
+;-> ()
+(find-different c 2 true)
+;-> ()
 
 ============================================================================
 

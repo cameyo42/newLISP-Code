@@ -5882,7 +5882,9 @@ perc-medie = ((n1 + n2 + n3)/3)/v
 Quanti sono?
 ------------
 
-Una persona ferma sul ciglio della strada guarda una corsa campestre. Vede passare 6 concorrenti con i seguenti numeri 5, 10, 35 42, 63, 21. Quanti sono, presumibilmente, gli N partecipanti alla corsa?
+Una persona ferma sul ciglio della strada guarda una corsa campestre.
+Vede passare 6 concorrenti con i seguenti numeri 5, 10, 35 42, 63, 21.
+Quanti sono, presumibilmente, gli N partecipanti alla corsa?
 
 Dal punto di vista matematico abbiamo una lista di oggetti 1,2,3,...N con il valore di N sconosciuto.
 Da un campione casuale X1, X2, X3, ... , Xn di dimensione n senza sostituzione da questa popolazione, consideriamo come stimare N.
@@ -5928,9 +5930,12 @@ Comunque la nostra stima compie errori grossolani per alcune liste di osservazio
 a) con N=800 e lst=(1 2 3 4 5), la nostra stima vale N = 5 (troppo bassa)
 b) con N=800 e lst=(1 2 3 4 800), la nostra stima vale N = 959 (troppo alta)
 
-Quindi vogliamo sapere quanto è "precisa" la formula della stima. Per fare questo usiamo una simulazione.
+Quindi vogliamo sapere quanto è "precisa" la formula della stima.
+Per fare questo usiamo una simulazione.
 
-Per un determinato valore di N calcoliamo tante (iter) volte la stima (Ncalc) e il relativo errore percentuale (err%) e infine  calcoliamo l'errore percentuale medio. Questo viene fatto partendo da una percentuale (step) di elementi osservati e aumentando il passo dello stesso valore (step) fino a raggiungere il 100% degli elementi osservati. Alla fine avremo una lista di coppie: "percentuali di elementi selezionati" e il relativo "errore percentuale medio".
+Per un determinato valore di N calcoliamo tante (iter) volte la stima (Ncalc) e il relativo errore percentuale (err%) e infine  calcoliamo l'errore percentuale medio.
+Questo viene fatto partendo da una percentuale (step) di elementi osservati e aumentando il passo dello stesso valore (step) fino a raggiungere il 100% degli elementi osservati.
+Alla fine avremo una lista di coppie: "percentuali di elementi selezionati" e il relativo "errore percentuale medio".
 
 (define (test N step iter)
   (local (ele num-oss sum-err% oss Ncalc med-err% out)
@@ -6097,7 +6102,8 @@ Variabile random esponenziale
 -----------------------------
 
 La funzione primitiva "random" di newLISP restituisce un numero tra 0 e 1 con una distribuzione uniforme (con media 0.0 e deviazione standard pari a 1).
-Questo significa che i numeri generati da "random" sono distribuiti in modo "lineare" tra 0 e 1. Ad esempio, generiamo 10000 numeri casuali, li ordiniamo, li esportiamo in un file csv e infine tracciamo il grafico dei valori (con un foglio elettronico):
+Questo significa che i numeri generati da "random" sono distribuiti in modo "lineare" tra 0 e 1.
+Ad esempio, generiamo 10000 numeri casuali, li ordiniamo, li esportiamo in un file csv e infine tracciamo il grafico dei valori (con un foglio elettronico):
 
 Generiamo i 10000 numeri casuali (con distribuzione uniforme):
 (setq linear '())
@@ -6183,7 +6189,8 @@ Esportiamo in un file ascii comma delimited (.csv):
 
 Il grafico di "espo10.csv" è riportato nella parte inferiore del file "random.png" nella cartella "data" e rappresenta una funzione esponenziale.
 
-Nota: questo metodo di simulare una variabile casuale non uniforme utilizzando una variabile casuale uniforme è valido solo se T(t) è analiticamente invertibile, cioè possiamo passare analiticamente da T(t) a T'(t) (dove T'(t) è la funzione inversa di T(t)). Ad esempio, una distribuzione gaussiana non è invertibile e quindi non possiamo utilizzare un generatore uniforme per simularla.
+Nota: questo metodo di simulare una variabile casuale non uniforme utilizzando una variabile casuale uniforme è valido solo se T(t) è analiticamente invertibile, cioè possiamo passare analiticamente da T(t) a T'(t) (dove T'(t) è la funzione inversa di T(t)).
+Ad esempio, una distribuzione gaussiana non è invertibile e quindi non possiamo utilizzare un generatore uniforme per simularla.
 
 (define (list-csv lst file-str sepchar)
 "Creates a file csv from a list"
@@ -6207,7 +6214,8 @@ Nota: questo metodo di simulare una variabile casuale non uniforme utilizzando u
 Struttura dati: quack
 ---------------------
 
-La struttura dati "quack" combina le proprietà di entrambe le strutture "stack" (pila) e "queue" (coda). Utilizziamo una lista  per simulare il comportamento di una struttura "quack" che ha le seguenti funzioni:
+La struttura dati "quack" combina le proprietà di entrambe le strutture "stack" (pila) e "queue" (coda).
+Utilizziamo una lista per simulare il comportamento di una struttura "quack" che ha le seguenti funzioni:
 
 1) push(x): inserisce un elemento a sinistra della lista
 2) pop():   rimuove l'elemento più a sinistra della lista

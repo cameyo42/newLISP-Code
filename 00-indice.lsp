@@ -3167,6 +3167,7 @@ NOTE LIBERE 32
   Una funzione come "map"
   Statistiche di un campione di interi con le occorrenze degli interi
   Numeri confusi
+  Trovare valori e indici degli elementi di una lista diversi da un valore k
 
 PROBLEMI SUI DADI
 =================
