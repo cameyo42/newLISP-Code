@@ -1472,6 +1472,7 @@ Proviamo:
 ;->  123495 123496 123497 123498)
 
 Nota: la sequenza dei numeri con cifre decimali distinte è una sequenza finita.
+a(8877691) = 9876543210 è l'ultimo termine.
 
 
 --------------------------

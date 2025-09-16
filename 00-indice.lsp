@@ -3173,6 +3173,7 @@ NOTE LIBERE 32
   Contare le cifre dei numeri in un intervallo
   Numeri espressi come somma di numeri consecutivi
   Punto in movimento in un piano cartesiano
+  Numeri con cifre ripetute e numeri con cifre diverse
 
 PROBLEMI SUI DADI
 =================

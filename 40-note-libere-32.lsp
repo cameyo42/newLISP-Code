@@ -5805,5 +5805,134 @@ Proviamo:
 (go '(M D))
 ;-> true
 
+
+----------------------------------------------------
+Numeri con cifre ripetute e numeri con cifre diverse
+----------------------------------------------------
+
+A) Dato un numero intero N, determinare la lista dei numeri interi positivi nell'intervallo [a, b] che hanno almeno una cifra ripetuta.
+
+Esempio 1:
+N = 20
+Lista = (11)
+
+Esempio 2:
+N = 100
+Lista = (11 22 33 44 55 66 77 88 99 100)
+
+Sequenza OEIS A109303:
+Numbers k with at least one duplicate base-10 digit.
+  11, 22, 33, 44, 55, 66, 77, 88, 99, 100, 101, 110, 111, 112, 113, 114,
+  115, 116, 117, 118, 119, 121, 122, 131, 133, 141, 144, 151, 155, 161,
+  166, 171, 177, 181, 188, 191, 199, 200, 202, 211, 212, 220, 221, 222,
+  223, 224, 225, 226, 227, 228, 229, 232, 233, 242, ...
+All numbers greater than 9876543210 (last term of A010784) are terms.
+
+Funzione che verifica se un numero intero ha almeno una cifra doppia:
+
+(define (cifra-doppia? num)
+  (letn ((cifre-viste (array 10 '(nil)))
+         (doppio nil))
+    (while (and (> num 0) (not doppio))
+      (let (cifra (% num 10))
+        (if (cifre-viste cifra)
+            (setq doppio true)
+            (setf (cifre-viste cifra) true)))
+      (setq num (/ num 10)))
+    doppio))
+
+Proviamo:
+
+(cifra-doppia? 11)
+;-> true
+(cifra-doppia? 1234)
+;-> nil
+(cifra-doppia? 1234567891)
+;-> true
+
+(filter cifra-doppia? (sequence 1 100))
+;-> (11 22 33 44 55 66 77 88 99 100)
+
+(filter cifra-doppia? (sequence 1 242))
+;-> (11 22 33 44 55 66 77 88 99 100 101 110 111 112 113 114
+;->  115 116 117 118 119 121 122 131 133 141 144 151 155 161
+;->  166 171 177 181 188 191 199 200 202 211 212 220 221 222
+;->  223 224 225 226 227 228 229 232 233 242)
+
+(length (filter cifra-doppia? (sequence 1 1000)))
+;-> 262
+(length (filter cifra-doppia? (sequence 1001 2000)))
+;-> 496
+
+(time (println (length (filter cifra-doppia? (sequence 1 1e6)))))
+;-> 831430
+;-> 1665.269
+I numeri che non hanno almeno una cifra doppia sono:
+(- 1e6 831430)
+;-> 168570
+
+(time (println (length (filter cifra-doppia? (sequence 1 1e7)))))
+;-> 9287110
+;-> 16911.667
+I numeri che non hanno almeno una cifra doppia sono:
+(- 1e7 9287110)
+;-> 712890
+
+B) Dato un numero intero N, determinare la lista dei numeri interi positivi nell'intervallo [a, b] che hanno tutte cifre diverse.
+
+Sequenza OEIS A010784:
+Numbers with distinct decimal digits.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39, 40,
+  41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 60,
+  61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 78, 79, 80,
+  81, 82, 83, 84, 85, 86, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 102,
+  103, 104, 105, 106, 107, 108, 109, 120, ...
+This sequence is finite: a(8877691) = 9876543210 is the last term.
+
+Funzione che verifica se un numero intero ha tutte cifre diverse:
+
+(define (cifre-diverse? num)
+  (letn ((cifre-viste (array 10 '(nil)))
+         (diverse true))
+    (while (and (> num 0) diverse)
+      (let (cifra (% num 10))
+        (if (cifre-viste cifra)
+            (setq diverse nil)
+            (setf (cifre-viste cifra) true)))
+      (setq num (/ num 10)))
+    diverse))
+
+Proviamo:
+
+(cifre-diverse? 1234)
+;-> true
+(cifre-diverse? 12341)
+;-> nil
+
+(filter cifre-diverse? (sequence 1 120))
+;-> (1 2 3 4 5 6 7 8 9 10 12 13 14 15 16 17 18 19 20
+;->  21 23 24 25 26 27 28 29 30 31 32 34 35 36 37 38 39 40
+;->  41 42 43 45 46 47 48 49 50 51 52 53 54 56 57 58 59 60
+;->  61 62 63 64 65 67 68 69 70 71 72 73 74 75 76 78 79 80
+;->  81 82 83 84 85 86 87 89 90 91 92 93 94 95 96 97 98 102
+;->  103 104 105 106 107 108 109 120)
+
+(length (filter cifre-diverse? (sequence 1 1000)))
+;-> 738
+(length (filter cifre-diverse? (sequence 1001 2000)))
+;-> 504
+
+(time (println (length (filter cifre-diverse? (sequence 1 1e6)))))
+;-> 168570
+;-> 1581.958
+(time (println (length (filter cifre-diverse? (sequence 1 1e7)))))
+;-> 712890
+;-> 15976.968
+
+Nell'intervallo [1,N] esistono:
+- x numeri con almeno una cifra doppia
+- y = (N - x) numeri con tutte cifre diverse (cioè numeri con nessuna cifra doppia)
+
 ============================================================================
 
