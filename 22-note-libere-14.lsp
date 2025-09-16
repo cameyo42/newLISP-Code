@@ -2832,6 +2832,7 @@ Notiamo che quando k è pari, l'espressione (2*n − 1 + k) genera un numero dis
 Quindi S non può essere della forma 2^p.
 
 Vedi anche "Somma di numeri consecutivi" su "Note libere 27".
+Vedi anche "Numeri espressi come somma di numeri consecutivi" su "Note libere 32".
 
 
 -------------------------------

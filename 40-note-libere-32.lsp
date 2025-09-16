@@ -5611,5 +5611,199 @@ La funzione 'digits-count-fast' è praticamente immediata.
 
 Vedi anche "Somma delle cifre dei numeri da 1 a N" su "Note libere 14".
 
+
+------------------------------------------------
+Numeri espressi come somma di numeri consecutivi
+------------------------------------------------
+
+Dato un numero intero N, trovare in quanti modi diversi si può esprimere N come somma di numeri interi positivi consecutivi.
+
+Esempio
+  N = 9
+  Somma1 = 9
+  somma2 = 4 + 5
+  somma3 = 2 + 3 + 4
+
+Esprimiamo N come somma di k numeri consecutivi (partendo da 'a'):
+
+  N =  a + (a+1) + (a+2) + ... + (a+k-1)
+
+Utilizzando la formula della serie aritmetica, questa diventa:
+
+  somma = (primo-termine + ultimo-termine) * number-of-terms / 2*n
+        = (a + (a+k-1))*k/2*n = (2a + k - 1)*k/2
+
+Moltiplicando entrambi i membri per 2:
+
+  2*n = (2*a + k - 1)*k
+
+  2*n = 2*a*k + k*k - k*2n = 2*a*k + k*(k - 1)*2*a = 2*n/k - k + 1
+
+Quindi affinché 'a' sia un numero intero positivo, devono verificarsi due cose:
+
+1) k deve dividere 2*n esattamente (altrimenti 2*n/k non sarebbe un numero intero)
+2) 2*a deve essere un numero pari positivo, il che significa che 2*n/k - k + 1 deve essere pari
+
+Inoltre, poiché 'a' deve essere almeno 1 (abbiamo bisogno di numeri interi positivi), abbiamo:
+
+  2a >= 2*2*n/k - k + 1 >= 2*2n/k >= k + 1*2*n >= k(k + 1)
+
+Questo ci fornisce un limite superiore per k:
+dobbiamo solo controllare i valori in cui k*(k + 1) <= 2*n.
+
+Funzione che trova tutte le sequenze di numeri consecutivi che sommano ad un dato numero:
+(k --> seq-len, a --> start-num)
+
+(define (sequenze-somma n)
+  (local (out doppioN seq-len start-num)
+    (setq out '())
+    ; Raddoppia il valore di n per la formula matematica
+    ; Se abbiamo k numeri consecutivi a partire da 'a', la somma è:
+    ; k * a + k * (k - 1) / 2 = n
+    ; Riordinando: 2*n = k * (2a + k - 1)
+    (setq doppioN (* n 2))
+    ;(setq conta 0)
+    (setq seq-len 1)
+    ; Itera sulle possibili lunghezze k della sequenza
+    ; k * (k + 1) è la somma minima per k numeri consecutivi a partire da 1
+    (while (<= (* seq-len (+ seq-len 1)) doppioN)
+      ; Verifica due condizioni:
+      ; 1. doppioN è divisibile per seq-len
+      ; 2. Il numero iniziale dovrebbe essere un numero intero positivo
+      ; (doppioN // seq-len - seq-len + 1) deve essere pari
+      ; per garantire che il numero iniziale sia un numero intero
+      (when (and (zero? (% doppioN seq-len))
+                 (even? (- (/ doppioN seq-len) seq-len -1)))
+            ; calcola 'a' della sequenza corrente
+            (setq start-num (/ (- (/ doppioN seq-len) seq-len -1) 2))
+            (push (list start-num seq-len) out -1))
+      (++ seq-len))
+    out))
+
+Proviamo:
+
+(sequenze-somma 9)
+;-> ((9 1) (4 2) (2 3))
+
+(sequenze-somma 100)
+;-> ((100 1) (18 5) (9 8))
+
+Vedi anche "Numeri somma di numeri consecutivi" su "Note libere 14".
+Vedi anche "Somma di numeri consecutivi" su "Note libere 27".
+
+
+-----------------------------------------
+Punto in movimento in un piano cartesiano
+-----------------------------------------
+
+In un piano cartesiano infinito, un punto P si trova a (0,0) ed è rivolto inizialmente verso Nord.
+La direzione Nord è la direzione positiva dell'asse y.
+La direzione Sud è la direzione negativa dell'asse y.
+La direzione Est è la direzione positiva dell'asse x.
+La direzione Ovest è la direzione negativa dell'asse x.
+Il punto può effettuare le seguenti tre istruzioni:
+1)  "M": si muove nella direzione corrente di 1 unità.
+2)  "S": ruota di 90 gradi a sinistra (ovvero, in senso antiorario).
+3)  "D": ruota di 90 gradi a destra (ovvero, in senso orario).
+Data una sequenza di istruzioni, il punto le esegue in ordine e le ripete all'infinito.
+
+Nota: la prima istruzione deve essere M, altrimenti occorrebbe impostare la direzione iniziale all'ultima direzione prima della M.
+Per esempio, con la lista istruzioni (S D D M), abbiamo:
+  Direzione iniziale: Nord
+  S: ruota di 90 gradi in senso antiorario. Direzione: Ovest.
+  D: ruota di 90 gradi in senso orario. Direzione: Nord.
+  D: ruota di 90 gradi in senso orario. Direzione: Est.
+  Adesso incontriamo M (il primo movimento) e la direzione iniziale è Est.
+
+Scrivere una funzione che prende una lista di istruzioni e determina se il punto entra in un ciclo infinito.
+
+Esempio 1:
+Lista istruzioni = (M M S S M M)
+Il punto si trova inizialmente a (0, 0) rivolto verso Nord.
+M: muove di un passo. Posizione: (0,1). Direzione: Nord.
+M: muove di un passo. Posizione: (0,2). Direzione: Nord.
+S: ruota di 90 gradi in senso antiorario. Posizione: (0,2). Direzione: Ovest.
+S: ruota di 90 gradi in senso antiorario. Posizione: (0,2). Direzione: Sud.
+M: muove di un passo. Posizione: (0,1). Direzione: Sud.
+M: muove di un passo. Posizione: (0,0). Direzione: Sud.
+Ripetendo le istruzioni, il punto entra nel ciclo:
+(0,0) --> (0,1) --> (0,2) --> (0,1) --> (0,0).
+
+Esempio 2:
+Lista istruzioni = (M M S D)
+Il punto si trova inizialmente a (0, 0) rivolto verso Nord.
+M: muove di un passo. Posizione: (1, 0). Direzione: Nord.
+M: muove di un passo. Posizione: (2, 0). Direzione: Nord.
+D: ruota di 90 gradi in senso orario. Posizione: (2,0). Direzione: Est.
+S: ruota di 90 gradi in senso anti-orario. Posizione: (2,0). Direzione: Nord.
+Ripetendo le istruzioni, il punto continua ad avanzare in direzione Nord e non entra in cicli.
+
+Esempio 3:
+Lista istruzioni = (M D)
+Il punto si trova inizialmente a (0,0) rivolto verso Nord.
+M: muove di un passo. Posizione: (0,1). Direzione: Nord.
+D: ruota di 90 gradi in senso orario. Posizione: (0,1). Direzione: Est.
+M: muove di un passo. Posizione: (1,1). Direzione: Est.
+D: ruota di 90 gradi in senso orario. Posizione: (1,1). Direzione: Sud.
+M: muove di un passo. Posizione: (1,0). Direzione: Sud.
+D: ruota di 90 gradi in senso orario. Posizione: (1,0). Direzione: Ovest.
+M: muove di un passo. Posizione: (0,0). Direzione: Ovest.
+D: ruota di 90 gradi in senso orario. Posizione: (0,0). Direzione: Nord.
+Ripetendo le istruzioni, il punto entra nel ciclo:
+(0,0) --> (0,1) --> (-1,1) --> (-1,0) --> (0,0).
+
+Dopo aver eseguito un ciclo di istruzioni, possiamo avere due casi:
+
+Caso 1: Il punto ritorna nella posizione iniziale dopo un ciclo
+Se dopo un'esecuzione il punto torna a (0, 0), allora non importa in quale direzione sia rivolto, ripetere le istruzioni continuerà a riportarlo all'origine. Il punto traccia un percorso chiuso.
+
+Caso 2: Il punto non ritorna nella posizione iniziale dopo un ciclo
+Se il punto cambia direzione dopo un ciclo, i diversi orientamenti causano l'annullamento dei vettori di spostamento (dopo al massimo 4 cicli).
+Ma se mantiene la direzione originale, continua ad accumulare spostamenti nella stessa direzione per sempre.
+
+Pertanto possiamo risolvere il problema verificando, dopo un ciclo di istruzioni, le seguenti condizioni:
+1) Siamo tornati all'origine?
+   Allora il punto entra in un ciclo.
+2) Abbiamo cambiato direzione?
+   Allora il punto entra in un ciclo.
+Se una delle due condizioni è vera, allora il punto entra in un ciclo.
+
+(define (go lst)
+  ; Indice di direzione: 0=Nord, 1=Ovest, 2=Sud, 3=Est
+  (setq dir 0)
+  ; Distanze di spostamento in ogni direzione
+  (setq dist-dir '(0 0 0 0))
+  ; Ciclo delle istruzioni
+  (dolist (el lst)
+    (cond ((= el 'S)
+            # Gira a Sinistra: ruota di 90 gradi anti-orario
+            (setq dir (% (+ dir 1) 4)))
+          ((= el 'D)
+            # Gira a Destra: ruota di 90 gradi orario
+            (setq dir (% (+ dir 3) 4)))
+          ((= el 'M)
+            # Muove di 1 nella direzione corrente
+            (++ (dist-dir dir)))
+          (true (println el " : istruzione sconosciuta"))))
+  (println dir { } dist-dir)
+  ; Verifica se il punto entra in un ciclo
+  (or
+    ; 1) Ritorna all'origine?
+    ; (distanze Nord-Sud uguali e distanze Est-Ovest uguali)
+    (and (= (dist-dir 0) (dist-dir 2)) (= (dist-dir 1) (dist-dir 3)))
+    ; 2) non è rivolto verso Nord dopo un ciclo
+    (!= dir 0)))
+
+Proviamo:
+
+(go '(M M S S M M))
+;-> true
+
+(go '(M M S D))
+;-> nil
+
+(go '(M D))
+;-> true
+
 ============================================================================
 

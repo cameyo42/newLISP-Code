@@ -2729,6 +2729,7 @@ d(n) (also called tau(n) or sigma_0(n)), the number of divisors of n.
 ;-> true
 
 Vedi anche "Numeri somma di numeri consecutivi" su "Note libere 14".
+Vedi anche "Numeri espressi come somma di numeri consecutivi" su "Note libere 32".
 
 
 ---------------------------

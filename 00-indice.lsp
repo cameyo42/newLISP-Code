@@ -3171,6 +3171,8 @@ NOTE LIBERE 32
   Permutazioni con primi negli indici primi e non-primi negli indici non-primi
   Matrice delle distanze
   Contare le cifre dei numeri in un intervallo
+  Numeri espressi come somma di numeri consecutivi
+  Punto in movimento in un piano cartesiano
 
 PROBLEMI SUI DADI
 =================
