@@ -8425,7 +8425,7 @@ Vediamo la funzione che divide effettivamente la lista in parti uguali (se possi
                      ; cambia il flag della lista attiva
                      (setq flag (not flag)))
                     (true ; numero con 2 occorrenze
-                      ; inserire il numero su entrmbe le liste
+                      ; inserire il numero su entrambe le liste
                       (push (el 0) L1 -1)
                       (push (el 0) L2 -1))))
             (list L1 L2)))))

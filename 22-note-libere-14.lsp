@@ -7695,7 +7695,8 @@ Problema:
   *----*----*----*----*----*----*----*----*----*----*
 
 Se il numero finale è 2000, allora calcoliamo la somma da 1 a 999 con la formula e poi aggiungiamo le cifre dei numeri da 1000 a 2000 uno per uno.
-Se il numero finale è 9000, allora calcoliamo la somma da 1 a 999 con la formula e poi aggiungiamo le cifre dei numeri da 1000 a 9000 uno per uno. In questo secondo caso sarebbe meglio calcolare la somma da 1 a 9999 con la formula e poi sottrarre le cifre dei numeri da 9999 a 9001 uno per uno.
+Se il numero finale è 9000, allora calcoliamo la somma da 1 a 999 con la formula e poi aggiungiamo le cifre dei numeri da 1000 a 9000 uno per uno.
+In questo secondo caso sarebbe meglio calcolare la somma da 1 a 9999 con la formula e poi sottrarre le cifre dei numeri da 9999 a 9001 uno per uno.
 
 Possiamo vedere questo effetto in azione nei seguenti esempi:
 
@@ -7794,6 +7795,8 @@ Verifichiamo la sequenza OEIS:
 ;-> (0 1 3 6 10 15 21 28 36 45 46 48 51 55 60 66 73 81 90 100 102 105 109
 ;->  114 120 127 135 144 154 165 168 172 177 183 190 198 207 217 228 240
 ;->  244 249 255 262 270 279 289 300 312 325 330)
+
+Vedi anche "Contare le cifre dei numeri in un intervallo" su "Note libere 32".
 
 
 ------------------------------

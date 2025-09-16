@@ -3170,6 +3170,7 @@ NOTE LIBERE 32
   Trovare valori e indici degli elementi di una lista diversi da un valore k
   Permutazioni con primi negli indici primi e non-primi negli indici non-primi
   Matrice delle distanze
+  Contare le cifre dei numeri in un intervallo
 
 PROBLEMI SUI DADI
 =================

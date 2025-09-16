@@ -4483,12 +4483,14 @@ La complessità spaziale vale O(n), che viene utilizzata per memorizzare lo stac
 
 Programmazione dinamica
 -----------------------
-Utilizzando la programmazione dinamica memorizziamo le valutazioni di ogni passaggio ricorsivo e riutilizziamo questi  valori qualora dovessimo ricalcolarli di nuovo nei passaggi futuri.
+Utilizzando la programmazione dinamica memorizziamo le valutazioni di ogni passaggio ricorsivo e riutilizziamo questi valori qualora dovessimo ricalcolarli di nuovo nei passaggi futuri.
 
   Chi non ricorda il passato è condannato a ripeterlo.
   - Programmazione dinamica
 
-In questo caso, creiamo una lista bidimensionale di elementi booleani che rappresentano vero (true) o falso (nil) a seconda che si possa creare un sottoinsieme avente somma uguale alla riga e con gli elementi di questo sottoinsieme rappresentati nella colonna. Decidiamo se aggiungere o meno un elemento nel sottoinsieme a seconda che il suo valore sia minore o meno della somma. Riempiamo la lista in modo bottom-up fino a raggiungere l'ultimo elemento dell'array, che sarà la risposta finale.
+In questo caso, creiamo una lista bidimensionale di elementi booleani che rappresentano vero (true) o falso (nil) a seconda che si possa creare un sottoinsieme avente somma uguale alla riga e con gli elementi di questo sottoinsieme rappresentati nella colonna.
+Decidiamo se aggiungere o meno un elemento nel sottoinsieme a seconda che il suo valore sia minore o meno della somma.
+Riempiamo la lista in modo bottom-up fino a raggiungere l'ultimo elemento dell'array, che sarà la risposta finale.
 
 L'algoritmo è il seguente:
 1) Per ogni elemento i nell'array e il valore di somma s (incrementato fino a raggiungere il valore S / 2),

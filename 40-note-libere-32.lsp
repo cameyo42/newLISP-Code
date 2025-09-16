@@ -4766,7 +4766,7 @@ Per ogni numero primo aggiorna il vettore delle cifre.
     (setq conta-cifre (array 10 '(0)))
     ; crea una lista con tutti i numeri primi fino a N
     (setq primi (primes-to N))
-    ; ciclo che aggiorna la lista delle occorrenze delle cifre
+    ; ciclo che aggiorna il vettore delle occorrenze delle cifre
     ; con tutti i numeri primi
     (dolist (p primi)
       (while (!= p 0)
@@ -5399,9 +5399,217 @@ Vediamo quanto guadagniamo in velocità se scriviamo la funzione di distanza dir
 ;-> true
 
 (time (distanza-matrice-manh4 10 10 5 5 dist-manh4) 1e5)
-;-> 2082.424
+;-> 2082.424 ;(35% più veloce)
 (time (distanza-matrice-manh4 1000 1000 500 500 dist-manh4))
-;-> 183.803
+;-> 183.803 ;(22% più veloce)
+
+
+--------------------------------------------
+Contare le cifre dei numeri in un intervallo
+--------------------------------------------
+
+Scrivere una funzione che conta le cifre dei numeri nell'intervallo [a, b].
+La funzione deve restituire il numero totale di cifre oppure una lista con le occorrenze delle cifre da 0 a 9 dei numeri compresi nell'intervallo.
+
+Esempio:
+  Intervallo = [10, 20]
+  Numeri = 11 12 13 14 15 16 17 18 19 20
+  cifre = 2 11 2 1 1 1 1 1 1 1
+  totale numero cifre = 22
+
+Metodo Brute-Force
+------------------
+Per ogni numero dell'intervallo contiamo le sue cifre e le aggiungiamo alla lista finale.
+
+(define (digits-count a b all)
+  (local (conta-cifre num-cifre freq)
+    ; vettore delle occorrenze delle cifre
+    (setq conta-cifre (array 10 '(0)))
+    ; ciclo che, per ogni numero da 'a' a 'b' aggiorna
+    ; il vettore delle occorrenze delle cifre
+    (for (num a b)
+      (while (!= num 0)
+        (++ (conta-cifre (% num 10)))
+        (setq num (/ num 10))))
+    (if all
+        ; numero totale di cifre
+        (apply + conta-cifre)
+        ; lista delle cifre
+        conta-cifre)))
+
+Proviamo:
+
+(digits-count 10 20)
+;-> (2 11 2 1 1 1 1 1 1 1)
+(digits-count 10 20 true)
+;-> 22
+
+Il codice è veloce per piccoli intervalli, ma ovviamente non per intervalli maggiori di 1e6.
+
+(time (println (digits-count 1 1e6)))
+;-> (488895 600001 600000 600000 600000 600000 600000 600000 600000 600000)
+;-> 772.418
+> (time (println (digits-count 1 1e7)))
+;-> (5888896 7000001 7000000 7000000 7000000 7000000
+;->  7000000 7000000 7000000 7000000)
+;-> 8747.777
+
+Analizzando i risultati di alcuni intervalli possiamo notare che esiste una regolarità nei valori ottenuti:
+
+(digits-count 1 9)
+;-> (0 1 1 1 1 1 1 1 1 1)
+(digits-count 10 99)
+;-> (9 19 19 19 19 19 19 19 19 19)
+(digits-count 100 999)
+;-> (180 280 280 280 280 280 280 280 280 280)
+(digits-count 1000 9999)
+;-> (2700 3700 3700 3700 3700 3700 3700 3700 3700 3700)
+(digits-count 10000 99999)
+;-> (36000 46000 46000 46000 46000 46000 46000 46000 46000 46000)
+(digits-count 100000 999999)
+;-> (450000 550000 550000 550000 550000 550000 550000 550000 550000 550000)
+
+Quindi deve esistere un metodo più generale per contare quante volte compare ogni cifra nell'intervallo [a, b].
+
+Metodo veloce
+-------------
+Per un numero N, si conta posizione per posizione (unità, decine, centinaia, ...).
+Ad ogni posizione si vede quante volte ciascuna cifra appare 'ciclicamente'.
+
+Sia N il limite, e consideriamo una certa posizione p (unità = 1, decine = 10, centinaia = 100, ...).
+Dividiamo N in tre parti:
+  1) alto = N // (p*10)      (parte a sinistra di questa posizione)
+  2) corr = (N // p) % 10    (cifra nella posizione corrente)
+  3) basso = N % p           (parte a destra di questa posizione)
+
+Allora il conteggio della cifra d in questa posizione è:
+
+                  (alto)*p,               se d = 0
+  conteggio(d) =  (alto + 1)*p,           se d < corr
+                  (alto)*p + (basso + 1), se d = corr
+                  (alto)*p,               se d > corr
+
+Nota: per la cifra '0' bisogna aggiustare, perché non può essere la cifra più significativa (non contiamo leading zeros).
+Non si possono togliere gli '0' con un'unica sottrazione per posizione dopo il conteggio: lo zero va trattato posizione per posizione (usando 'alto', 'corr', 'basso') perché i leading-zero non si contano nella posizione più significativa.
+La complessità di questo metodo vale O(log10(N)).
+
+Per un l'intervallo [a, b], basta calcolare:
+
+  conteggio(b) - conteggio(a-1)
+
+dove 'conteggio(N)' è la funzione che conta le cifre da '1..N'.
+
+;-----------------------------------------------
+; Conta le occorrenze delle cifre da 1 a N
+; Restituisce un array di 10 elementi:
+; indice = cifra (0..9), valore = occorrenze
+;-----------------------------------------------
+(define (digit-count-up-to N)
+  (if (< N 1) (array 10 '(0))     ; se N < 1 non ci sono cifre
+    (local (conta p alto curr basso d)
+      ; inizializza array delle occorrenze (0 per ogni cifra)
+      (setq conta (array 10 '(0)))
+      ; p rappresenta la posizione corrente (unità=1, decine=10, centinaia=100, ...)
+      (setq p 1)
+      ; ciclo sulle potenze di 10 fino a coprire tutte le cifre di N
+      (while (<= p N)
+        ; parte "a sinistra" della cifra corrente
+        (setq alto (/ N (* p 10)))
+        ; cifra nella posizione corrente
+        (setq curr (% (/ N p) 10))
+        ; parte "a destra" della cifra corrente
+        (setq basso (% N p))
+        ;-----------------------------------------------
+        ; Conta cifre 1..9 per la posizione corrente
+        ;-----------------------------------------------
+        (for (d 1 9)
+          (cond
+            ; se la cifra corrente di N è > d,
+            ; allora la cifra d ha fatto (alto+1) cicli completi in questa posizione
+            ((> curr d)
+              (setf (conta d) (+ (conta d) (* (+ alto 1) p))))
+            ; se la cifra corrente è uguale a d,
+            ; allora la cifra d ha fatto "alto cicli completi" + (basso+1) extra
+            ((= curr d)
+              (setf (conta d) (+ (conta d) (+ (* alto p) (+ basso 1)))))
+            ; se la cifra corrente è < d,
+            ; allora la cifra d ha fatto solo "alto cicli completi"
+            (true
+              (setf (conta d) (+ (conta d) (* alto p))))))
+        ;-----------------------------------------------
+        ; Caso speciale: cifra 0
+        ; Non si contano gli zeri "leading" (più significativi)
+        ; quindi la formula è diversa
+        ;-----------------------------------------------
+        (if (= alto 0)
+            nil ; non ci sono più cifre significative
+          (if (= curr 0)
+              ; se la cifra corrente è 0:
+              ; gli zeri compaiono (alto-1) volte completi + (basso+1)
+              (setf (conta 0) (+ (conta 0) (+ (* (- alto 1) p) (+ basso 1))))
+              ; altrimenti compaiono "alto" volte completi
+              (setf (conta 0) (+ (conta 0) (* alto p)))))
+        ; passa alla posizione successiva (decine -> centinaia -> migliaia ...)
+        (setq p (* p 10)))
+      conta))) ; ritorna array delle frequenze
+
+;-----------------------------------------------
+; Conta le occorrenze delle cifre nell'intervallo [a,b]
+; Calcola differenza: conteggio(1..b) - conteggio(1..a-1)
+;-----------------------------------------------
+(define (digits-count-fast a b)
+  (local (cntA cntB res i)
+    (setq cntA (digit-count-up-to (- a 1)))
+    (setq cntB (digit-count-up-to b))
+    (setq res (array 10 '(0)))
+    (for (i 0 9)
+      (setf (res i) (- (cntB i) (cntA i))))
+    res))
+
+Proviamo:
+
+(digits-count-fast 1 9)
+;-> (0 1 1 1 1 1 1 1 1 1)
+(digits-count-fast 10 99)
+;-> (9 19 19 19 19 19 19 19 19 19)
+(digits-count-fast 100 999)
+;-> (180 280 280 280 280 280 280 280 280 280)
+(digits-count-fast 1000 9999)
+;-> (2700 3700 3700 3700 3700 3700 3700 3700 3700 3700)
+(digits-count-fast 10000 99999)
+;-> (36000 46000 46000 46000 46000 46000 46000 46000 46000 46000)
+(digits-count-fast 100000 999999)
+;-> (450000 550000 550000 550000 550000 550000 550000 550000 550000 550000)
+
+(digits-count 123 12345)
+;-> (4642 8065 5095 4699 4649 4643 4642 4642 4642 4642)
+(digits-count-fast 123 12345)
+;-> (4642 8065 5095 4699 4649 4643 4642 4642 4642 4642)
+
+Test di correttezza:
+
+(= (digits-count 123 1234567) (digits-count-fast 123 1234567))
+;-> true
+
+Test di velocità:
+
+(time (println (digits-count 123 1234567)))
+;-> (713284 1058929 758959 718963 713963 713363 713293 713285 713284 713284)
+;-> 980.047
+(time (println (digits-count-fast 123 1234567)))
+;-> (713284 1058929 758959 718963 713963 713363 713293 713285 713284 713284)
+;-> 3.989
+
+(time (println (digits-count 123 12345678)))
+;-> (8367605 11824361 8824391 8424395 8374395 8368395 8367695 8367615 8367606 8367605)
+;-> 11243.901
+(time (println (digits-count-fast 123 12345678)))
+;-> (8367605 11824361 8824391 8424395 8374395 8368395 8367695 8367615 8367606 8367605)
+;-> 6.504
+
+La funzione 'digits-count-fast' è praticamente immediata.
+
+Vedi anche "Somma delle cifre dei numeri da 1 a N" su "Note libere 14".
 
 ============================================================================
 
