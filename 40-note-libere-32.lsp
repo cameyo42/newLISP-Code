@@ -5934,5 +5934,151 @@ Nell'intervallo [1,N] esistono:
 - x numeri con almeno una cifra doppia
 - y = (N - x) numeri con tutte cifre diverse (cioè numeri con nessuna cifra doppia)
 
+
+------------------------------
+Minima Repunit divisibile da k
+------------------------------
+
+Dato un numero intero positivo k, è necessario trovare la lunghezza del più piccolo numero intero positivo n tale che n sia divisibile per k e n contenga solo la cifra 1.
+
+I numeri che contengono solo la cifra 1 sono chiamati repunit.
+
+Metodo brute-force
+------------------
+Calcoliamo le repunit a partire da 1 fino alla repunit di lunghezza k e verifichiamo quale repunit è divisibile da k..
+Poichè per ogni numero k possono esistere solo k resti (da 0 a (k-1)), se dopo k iterazioni non abbiamo incontrato la repunit divisibile da k, allora abbiamo incontrato un ciclo, quindi non esiste alcuna repunit divisibile da k.
+
+(define (minima-repunit k)
+  (let ( (out nil) (stop nil) (rep nil) )
+  (for (i 1 k 1 stop) 
+    ; costruisce la repunit corrente
+    (setq rep (eval-string (dup "1" i)))
+    (when (zero? (% rep k))
+      (setq out i)
+      (setq stop true))
+  out)))
+
+Proviamo:
+
+(minima-repunit 3)
+;-> 3
+
+(filter minima-repunit (sequence 1 153))
+;-> (1 3 7 9 11 13 17 19 21 23 27 29 31 33 37 39 41 43 47
+;->  49 51 53 57 59 61 63 67 69 71 73 77 79 81 83 87 89 91
+;->  93 97 99 101 103 107 109 111 113 117 119 121 123 127 129
+;->  131 133 137 139 141 143 147 149 151 153)
+
+Metodo matematico
+-----------------
+Ogni repunit può essere formata prendendo la repunit precedente, moltiplicandola per 10 e aggiungendo 1.
+
+  1 = 1
+  11 = 10 + 1 = 1 × 10 + 1
+  111 = 110 + 1 = 11 × 10 + 1
+  1111 = 1110 + 1 = 111 × 10 + 1
+
+Per verificare la divisibiltà per k, possiamo considerare solo i resti.
+Infatti, utilizzando le seguenti proprietà dell'aritmetica modulare:
+
+  (a + b) % k = ((a % k) + (b % k)) % k
+  (a * b) % k = ((a % k) * (b % k)) % k
+
+Ciò significa che, invece di calcolare la repunit completa e poi verificare se è divisibile per k, possiamo memorizzare il resto a ogni passaggio:
+1) Iniziamo con resto = (1 % k)
+2) Per la successiva repunit: resto = (resto * 10 + 1) % k
+Se il resto diventa 0, abbiamo trovato una repunti divisibile per k.
+
+Poichè per ogni numero k possono esistere solo k resti (da 0 a (k-1)), se dopo k iterazioni non abbiamo incontrato lo 0, allora abbiamo incontrato un ciclo di resti di k che non include 0, quindi non esiste alcuna repunit divisibile da k.
+
+(define (min-repunit k)
+  (let ( (out nil) (stop nil) (resto (% 1 k)) )
+    ; k iterazioni, perchè ci sono solo k possibili resti
+    (for (len 1 k 1 stop)
+      (when (zero? resto)
+        (setq out len)
+        (setq stop true))
+      ; calcola il resto della prossima repunit
+      ; repunit = current * 10 + 1
+      ; (a * 10 + 1) % k = ((a % k) * 10 + 1) % k
+      (setq resto (% (+ (* resto 10) 1) k)))
+     out))
+
+Proviamo:
+
+(min-repunit 3)
+;-> 3
+
+(filter min-repunit (sequence 1 153))
+;-> (1 3 7 9 11 13 17 19 21 23 27 29 31 33 37 39 41 43 47
+;->  49 51 53 57 59 61 63 67 69 71 73 77 79 81 83 87 89 91
+;->  93 97 99 101 103 107 109 111 113 117 119 121 123 127 129
+;->  131 133 137 139 141 143 147 149 151 153)
+
+Verifica di correttezza:
+
+(= (filter minima-repunit (sequence 1 1000))
+   (filter min-repunit (sequence 1 1000)))
+;-> true
+
+Test di velocità:
+
+(time (filter minima-repunit (sequence 1 1000)))
+;-> 2062.084
+(time (filter min-repunit (sequence 1 1000)))
+;-> 50.21
+
+Matematicamente le sequenze generate sono uguali alla seguente:
+
+Sequenza OEIS A045572:
+Numbers that are odd but not divisible by 5.
+  1, 3, 7, 9, 11, 13, 17, 19, 21, 23, 27, 29, 31, 33, 37, 39, 41, 43, 47,
+  49, 51, 53, 57, 59, 61, 63, 67, 69, 71, 73, 77, 79, 81, 83, 87, 89, 91,
+  93, 97, 99, 101, 103, 107, 109, 111, 113, 117, 119, 121, 123, 127, 129,
+  131, 133, 137, 139, 141, 143, 147, 149, 151, 153, ...
+
+(define (odd-check num) (not (zero? (% num 5))))
+
+Proviamo:
+
+(odd-check 3)
+;-> true
+
+(filter odd-check (sequence 1 153 2))
+;-> (1 3 7 9 11 13 17 19 21 23 27 29 31 33 37 39 41 43 47
+;->  49 51 53 57 59 61 63 67 69 71 73 77 79 81 83 87 89 91
+;->  93 97 99 101 103 107 109 111 113 117 119 121 123 127 129
+;->  131 133 137 139 141 143 147 149 151 153)
+
+Verifica di correttezza:
+
+(= (filter minima-repunit (sequence 1 1000))
+   (filter min-repunit (sequence 1 1000))
+   (filter odd-check (sequence 1 1000 2)))
+;-> true
+
+Test di velocità:
+
+(time (filter min-repunit (sequence 1 10000)))
+;-> 4031.301
+(time (filter odd-check (sequence 1 10000 2)))
+;-> 0
+
+(time (filter min-repunit (sequence 1 1e5)))
+;-> 391172.578 ; circa 6 minuti e 30 secondi
+(time (filter odd-check (sequence 1 1e5 2)))
+;-> 10.085
+
+Quest'ultimo metodo calcola la sequenza in modo praticamente immediato:
+
+(time (filter odd-check (sequence 1 1e6 2)))
+;-> 104.96
+
+Sequenza OEIS A099679:
+Least m such that repunit R_m is a multiple of A045572(n) (i.e., odd numbers not divisible by 5).
+  1, 3, 6, 9, 2, 6, 16, 18, 6, 22, 27, 28, 15, 6, 3, 6, 5, 21, 46, 42, 48, 13, 18, 58, 60, 18, 33, 66, 35, 8, 6, 13, 81, 41, 84, 44, 6, 15, 96, 18, 4, 34, 53, 108, 3, 112, 18, 48, 22, 15, 42, 21, 130, 18, 8, 46, 138, 6, 42, 148, 75, 144, 78, 39, 66, 81, 166, 78, 18, 43, 174, 178
+
+Vedi anche "Repunit" su "Note libere 31".
+
 ============================================================================
 

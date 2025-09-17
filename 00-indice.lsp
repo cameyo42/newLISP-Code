@@ -3174,6 +3174,7 @@ NOTE LIBERE 32
   Numeri espressi come somma di numeri consecutivi
   Punto in movimento in un piano cartesiano
   Numeri con cifre ripetute e numeri con cifre diverse
+  Minima Repunit divisibile da k
 
 PROBLEMI SUI DADI
 =================

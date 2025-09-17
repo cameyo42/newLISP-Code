@@ -1196,6 +1196,13 @@ Definizione:
   R(1) = 1
   R(n) = (10^n - 1)/9
 
+Altro metodo di costruzione delle repunit:
+  1 = 1
+  11 = 10 + 1 = 1 × 10 + 1
+  111 = 110 + 1 = 11 × 10 + 1
+  1111 = 1110 + 1 = 111 × 10 + 1
+Ogni repunit può essere formata prendendo la repunit precedente, moltiplicandola per 10 e aggiungendo 1.
+
 Sequenza OEIS A002275:
 Repunits: (10^n - 1)/9. Often denoted by R_n.
   0, 1, 11, 111, 1111, 11111, 111111, 1111111, 11111111, 111111111,
@@ -1232,6 +1239,8 @@ Primes of the form (10^k - 1)/9. Also called repunit primes or repdigit primes.
 
 (primi-rep)
 ;-> (11L 1111111111111111111L)
+
+Vedi anche "Minima Repunit divisibile da k" su "Note libere 32".
 
 
 ---------------
