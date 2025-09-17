@@ -3175,6 +3175,7 @@ NOTE LIBERE 32
   Punto in movimento in un piano cartesiano
   Numeri con cifre ripetute e numeri con cifre diverse
   Minima Repunit divisibile da k
+  Numeri da una lista di cifre minori di N
 
 PROBLEMI SUI DADI
 =================

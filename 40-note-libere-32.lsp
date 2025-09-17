@@ -6080,5 +6080,69 @@ Least m such that repunit R_m is a multiple of A045572(n) (i.e., odd numbers not
 
 Vedi anche "Repunit" su "Note libere 31".
 
+
+----------------------------------------
+Numeri da una lista di cifre minori di N
+----------------------------------------
+
+Abbiamo una lista di cifre distinte (0..9).
+Possiamo utilizzare ogni cifra della lista quante volte vogliamo (anche 0 volte).
+Dato un numero N, determinare tutti i numeri <= N che si possono formare con le cifre date.
+
+Esempio:
+  cifre = (1 2 6)
+  N = 77
+  Output  = (1 2 6 11 12 16 21 22 26 61 62 66)
+
+Metodo brute-force
+------------------
+1) Ciclo da 1 a N.
+2) Verificare se le cifre del numero corrente sono tutte nella lista data.
+3) In caso positivo aggiungere il numero corrente alla soluzione.
+
+(define (lowers digits num)
+  (local (out cifre continua tmp cifra)
+    (setq out '())
+    ; crea il vettore booleano delle cifre
+    (setq cifre (array 10 '(nil)))
+    (dolist (d digits) (setq (cifre d) true))
+    ; ciclo da 1 a num...
+    (for (k 1 num)
+      (setq continua true)
+      (setq tmp k)
+      ; verifica se tutte le cifre del numero corrente 'k'
+      ; sono nella lista booleana di cifre 'cifre'
+      (while (and (> tmp 0) continua)
+        (setq cifra (% tmp 10))
+        ; se la cifra corrente di 'k' non è nella lista booleana,
+        ; allora esce dal ciclo
+        (if-not (cifre cifra) (setq continua nil))
+        (setq tmp (/ tmp 10)))
+      ; se tutte le cifre del numero corrente'k' sono nella lista,
+      ; allora inserisce 'k' nella sequenza.
+      (if continua (push k out -1)))
+    out))
+
+Proviamo:
+
+(lowers '(1 2 6) 100)
+;-> (1 2 6 11 12 16 21 22 26 61 62 66)
+
+(lowers '(1 4 9) 1000)
+;-> (1 4 9 11 14 19 41 44 49 91 94 99 111 114 119 141 144 149 191 194 199
+;->  411 414 419 441 444 449 491 494 499 911 914 919 941 944 949 991 994 999)
+
+(length (lowers '(1 2 3 4 5 6 7 8 9 0) 100))
+;-> 100
+
+Test di velocità:
+
+(time (println (length (lowers '(1 4 9) 1e6))))
+;-> 1092
+;-> 348.168
+(time (println (length (lowers '(1 4 9) 1e7))))
+;-> 3279
+;-> 3496.485
+
 ============================================================================
 
