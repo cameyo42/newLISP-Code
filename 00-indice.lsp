@@ -3173,9 +3173,10 @@ NOTE LIBERE 32
   Contare le cifre dei numeri in un intervallo
   Numeri espressi come somma di numeri consecutivi
   Punto in movimento in un piano cartesiano
-  Numeri con cifre ripetute e numeri con cifre diverse
+  Numeri con cifre ripetute, numeri con cifre diverse e numeri con cifre uguali
   Minima Repunit divisibile da k
   Numeri da una lista di cifre minori di N
+  Dividere una lista binaria in tre parti uguali
 
 PROBLEMI SUI DADI
 =================
@@ -3223,7 +3224,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (365 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (366 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

@@ -2728,7 +2728,7 @@ Operazioni: nessuna operazione può creare un 1.
     (setq len (length nums))
     ; conta il numero di 1 nella lista
     (setq ones (first (count '(1) nums)))
-    (cond 
+    (cond
       ; Se ci sono x valori a 1 nella lista ,
       ; allora abbiamo bisogno (N - x) operazioni per convertire
       ; tutti gli elementi diversi da 1 in 1
@@ -2750,7 +2750,7 @@ Operazioni: nessuna operazione può creare un 1.
             ;(println "nums(i): " (nums i) { } "numsj): " (nums j))
             ;(print "cur-gcd: " cur-gcd) (read-line)
             ; Se troviamo una sottolista con MCD = 1, allora...
-            (when (= cur-gcd 1) 
+            (when (= cur-gcd 1)
               ; aggiorna la lunghezza minima
               (setq min-len (min min-len (+ j 1 (- i))))
               ;(println "min-len: " min-len) (read-line)
@@ -2761,7 +2761,7 @@ Operazioni: nessuna operazione può creare un 1.
             ; Se non esiste alcun sottoarray con MCD = 1, restituisce nil
             nil
             ;else
-            ; Totale operazioni = 
+            ; Totale operazioni =
             ;    (min-len - 1) [per creare il primo 1] +
             ;    (len - 1)     [per propagare 1 a tutti gli altri elementi]
             (+ len min-len (- 2)))))))
@@ -2882,8 +2882,8 @@ Errori grossolani:
 
 Errori impercettibili:
 (analyze 0.25 values)
-;-> ((B 1 0 0.28 "0.28") 
-;->  (B 4 0.36 -0.12 "-0.48") 
+;-> ((B 1 0 0.28 "0.28")
+;->  (B 4 0.36 -0.12 "-0.48")
 ;->  (B 8 0.12 -0.36 "-0.48")
 ;->  (N 8 -0.36 0.8 "1.16")
 ;->  (N 9 0.8 1.36 "0.56")
@@ -3066,12 +3066,12 @@ Ad ogni generazione l'automa si riproduce in tutte le celle adiacenti (alto, bas
 Vediamo le prime 4 generazioni:
 
                                                      ██
-                                  ██               ██████  
+                                  ██               ██████
                 ██              ██████           ██████████
   ██          ██████          ██████████       ██████████████
                 ██              ██████           ██████████
                                   ██               ██████
-                                                     ██  
+                                                     ██
   gen 1      gen 2            gen 3            gen 4
   celle=1    celle=5          celle=13         celle=25
 
@@ -4235,7 +4235,7 @@ Un altro punto P si trova in posizione (x1,y1).
 Determinare se il punto O vede il punto P.
 
     Y
-  
+
     |
     |      left-ray
     |        /
@@ -4406,7 +4406,7 @@ Per N+2:
     (setq num (+ N 2))
     (if (prime? num) ; se num è primo non occorre effettuare il ciclo
         (set 'd2 (list 1 num) 'diff2 (- num 1))
-    ;else        
+    ;else
         (setq idx (int (sqrt num)))
         (while (> idx 0)
           (when (zero? (% num idx))
@@ -4455,7 +4455,7 @@ Esempi:
   K = 3
   Divisori di 6 = (1 2 3)
   K-esimo divisore = Terzo divisore = 3
-  
+
   N = 12
   K = 5
   Divisori di 12 = (1 2 3 4 6 12)
@@ -5101,7 +5101,7 @@ Numbers that become a different number when flipped upside down.
     ; numero ruotato
     (setq rev "")
     (setq stop nil)
-    ; ciclo di rotazione per ogni cifra 
+    ; ciclo di rotazione per ogni cifra
     (dolist (s (explode str) stop)
       ; ricerca la cifra ruotata
       (setq cifra (lookup s flip))
@@ -5143,8 +5143,8 @@ Trovare valori e indici degli elementi di una lista diversi da un valore k
 --------------------------------------------------------------------------
 
 Data una lista di elementi e un valore k, determinare:
-1) tutti i valori della lista diversi da k 
-2) tutti gli indici dei valori della lista diversi da k 
+1) tutti i valori della lista diversi da k
+2) tutti gli indici dei valori della lista diversi da k
 
 (define (find-different lst k indexes)
   (if indexes
@@ -5806,9 +5806,9 @@ Proviamo:
 ;-> true
 
 
-----------------------------------------------------
-Numeri con cifre ripetute e numeri con cifre diverse
-----------------------------------------------------
+-----------------------------------------------------------------------------
+Numeri con cifre ripetute, numeri con cifre diverse e numeri con cifre uguali
+-----------------------------------------------------------------------------
 
 A) Dato un numero intero N, determinare la lista dei numeri interi positivi nell'intervallo [a, b] che hanno almeno una cifra ripetuta.
 
@@ -5934,6 +5934,49 @@ Nell'intervallo [1,N] esistono:
 - x numeri con almeno una cifra doppia
 - y = (N - x) numeri con tutte cifre diverse (cioè numeri con nessuna cifra doppia)
 
+C) Dato un numero intero N, determinare la lista dei numeri interi positivi nell'intervallo [a, b] che hanno tutte le cifre uguali.
+
+Sequenza OEIS A010785:
+Repdigit numbers, or numbers whose digits are all equal.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33, 44, 55, 66, 77, 88, 99, 111,
+  222, 333, 444, 555, 666, 777, 888, 999, 1111, 2222, 3333, 4444, 5555,
+  6666, 7777, 8888, 9999, 11111, 22222, 33333, 44444, 55555, 66666, 77777,
+  88888, 99999, 111111, 222222, 333333, 444444, 555555, 666666, ...
+
+Funzione che verifica se un numero intero ha tutte cifre uguali:
+
+(define (cifre-uguali? num)
+  (let ( (cifra-base (% num 10)) (uguali true) (cifra nil))
+    (while (and (> num 0) uguali)
+      (setq cifra (% num 10))
+      (if-not (= cifra cifra-base)
+          (setf uguali nil)
+          (setq num (/ num 10))))
+    uguali))
+
+(filter cifre-uguali? (sequence 1 666666))
+;-> (1 2 3 4 5 6 7 8 9 11 22 33 44 55 66 77 88 99 111
+;->  222 333 444 555 666 777 888 999 1111 2222 3333 4444 5555
+;->  6666 7777 8888 9999 11111 22222 33333 44444 55555 66666 77777
+;->  88888 99999 111111 222222 333333 444444 555555 666666)
+
+Funzione che verifica se un numero intero ha tutte cifre uguali (più veloce):
+
+(define (same-digit? num)
+"Check if an integer has all digits equal"
+  (= num (* (div (- (pow 10 (length num)) 1) 9) (% num 10))))
+
+(= (filter cifre-uguali? (sequence 1 1e6))
+   (filter same-digit? (sequence 1 1e6)))
+;-> true
+
+(time (filter cifre-uguali? (sequence 1 1e6)))
+;-> 831.936
+(time (filter same-digit? (sequence 1 1e6)))
+;-> 590.188
+
+Vedi anche "Numeri con tutte le cifre uguali" su "Note libere 8".
+
 
 ------------------------------
 Minima Repunit divisibile da k
@@ -5950,7 +5993,7 @@ Poichè per ogni numero k possono esistere solo k resti (da 0 a (k-1)), se dopo 
 
 (define (minima-repunit k)
   (let ( (out nil) (stop nil) (rep nil) )
-  (for (i 1 k 1 stop) 
+  (for (i 1 k 1 stop)
     ; costruisce la repunit corrente
     (setq rep (eval-string (dup "1" i)))
     (when (zero? (% rep k))
@@ -6143,6 +6186,88 @@ Test di velocità:
 (time (println (length (lowers '(1 4 9) 1e7))))
 ;-> 3279
 ;-> 3496.485
+
+
+----------------------------------------------
+Dividere una lista binaria in tre parti uguali
+----------------------------------------------
+
+Data una lista contenente solo 0 o 1, scrivere una funzione che divide la lista in tre parti in modo che ogni parte rappresenta lo stesso valore.
+Se la divisione è possibile restituire gli indici della divisione, altrimenti restituire nil.
+Quindi per i due indici da restituire 'i' e 'j', dove i + 1 < j, risulta:
+
+  Prima parte: lst(0), lst(1), ..., lst(i)
+  Seconda parte: lst(i + 1), lst(i + 2), ..., lst(j - 1)
+  Terza parte: lst(j), lst(j + 1), ..., lst(length - 1)
+
+Esempio 1:
+lista = (0 1 0 1 0 1)
+Output = (1 4)  --> (0 1) == (0 1) == (0 1)
+
+Esempio 2:
+lista = (0 1 0 1 0 1 1 0)
+Output = nil  --> Le occorrenze di 1 sono 4 che non è divisibile per 3.
+
+Esempio 3:
+lista = (0 0 1 0 1 0 1 1 1 0 1 0 1 1 0 1 0 1 0 1 1)
+Output = (7 14)  --> (0 0 1 0 1 0 1 1) (1 0 1 0 1 1) (0 1 0 1 0 1 1)
+
+Esempio 4:
+lista = (0 0 1 1 0 0 1)
+Output = 2 4  --> (0 0 1) (1) (0 0 1)
+
+Poichè i leading-zero non contano, ogni parte deve avere lo stesso numero di 1 (cioè il numero di 1 deve essere divisibile per 3).
+Inoltre ogni parte deve avere la stessa disposizione di 1 e 0 (ignorando i leading-zero).
+
+Se la lista contiene solo 0, allora qualunque divisione è valida.
+Se il numero di 1 'unos' non è divisibile per 3, allora non è possibile dividere.
+
+Algoritmo
+1) Trovare:
+   la posizione del primo 1 (inizio della prima parte)
+   la posizione del (unos + 1)-esimo 1 (inizio della seconda parte)
+   la posizione del (unos*2 + 1)-esimo 1 (inizio della terza parte)
+2) Verificare se le tre parti sono tutte uguali, cioè se gli elementi di ogni parte sono uguali per ogni indice.
+
+(define (divide3 lst)
+  ; lunghezza della lista
+  (setq len (length lst))
+  ; indici di tutti gli 1
+  (setq rif (flat (ref-all 1 lst)))
+  ; numero di 1
+  (setq unos (length rif))
+  (cond ((zero? unos) ; tutti 0 --> qualunque divisione è valida
+          (list 0 (- len 1)))
+        ((not (zero? (% unos 3))) ; numero di 1 non divisibile per 3 --> nil
+          nil)
+        (true ; calcolo degli indici della divisione
+          (setq i (rif 0)) ; indice primo 1
+          (setq j (rif (/ unos 3))) ;
+          (setq k (rif (/ (* unos 2) 3)))
+          ; ciclo per verificare se tutte e tre le parti sono uguali
+          (while (and (< k len)
+                      (= (lst i) (lst j) (lst k)))
+            (++ i) (++ j) (++ k))
+          ; Se abbiamo raggiunto la fine della lista,
+          ; allora le parti sono tutte uguali
+          (if (= k len)
+            (list (- i 1) j)
+            ;else
+            nil))))
+
+Proviamo:
+
+(divide3 '(0 1 0 1 0 1))
+;-> (1 4)
+
+(divide3 '(0 1 0 1 0 1 1 0))
+;-> nil
+
+(divide3 '(0 0 1 0 1 0 1 1 1 0 1 0 1 1 0 1 0 1 0 1 1))
+;-> (7 14)
+
+(divide3 '(0 0 1 1 0 0 1))
+;-> (2 4)
 
 ============================================================================
 
