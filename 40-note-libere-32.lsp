@@ -6269,5 +6269,222 @@ Proviamo:
 (divide3 '(0 0 1 1 0 0 1))
 ;-> (2 4)
 
+
+--------------------------------------
+Lancio di uova dai piani di un palazzo
+--------------------------------------
+
+Abbiamo K uova e un palazzo con N piani.
+Esiste un piano P (0 <= P <= N) tale che qualsiasi uovo caduto a un piano più alto di P si romperà, e qualsiasi uovo caduto al piano X o sotto non si romperà.
+A ogni mossa, possiamo prendere un uovo intero e lasciarlo cadere da qualsiasi piano X (dove 1 <= X <= N).
+Se l'uovo si rompe, non possiamo più usarlo.
+Invece, se l'uovo non si rompe, possiamo riutilizzarlo nelle mosse future.
+Scrivere una funzione che restituisce il numero minimo di mosse necessarie per determinare con certezza il valore di P.
+Scrivere una funzione che restituisce le mosse necessarie per determinare con certezza il valore di P.
+
+Esempio:
+K = 1, N = 2
+Output: 2
+Spiegazione:
+Lasciamo cadere l'uovo dal piano 1. Se si rompe, sappiamo che P = 0.
+Altrimenti, lasciamo cadere l'uovo dal piano 2. Se si rompe, sappiamo che P = 1.
+Se non si rompe, sappiamo che P = 2.
+Quindi, abbiamo bisogno di almeno 2 mosse per determinare con certezza qual è il valore di P.
+
+Come calcolare le mosse
+-----------------------
+Usiamo la programmazione dinamica.
+
+1. Inizializzazione
+(let ( (mosse 0) (dp (array (+ n 1) (+ k 1) '(0))) )
+- 'mosse' = 0 (numero di lanci finora).
+- 'dp' = matrice '(n+1) x (k+1)' piena di zeri.
+- 'dp[m][u]' significa:
+con 'm' mosse e 'u' uova, quanti piani possiamo controllare al massimo.
+
+2. Ciclo principale
+   (while (< (dp mosse k) n)
+     (++ mosse)
+     ...)
+Finché con 'mosse' lanci e 'k' uova non possiamo coprire almeno 'n' piani, continuiamo a incrementare il numero di lanci.
+
+3. Aggiornamento della tabella
+   (for (uovo 1 k)
+     (setf (dp mosse uovo)
+           (+ (dp (- mosse 1) (- uovo 1))
+              (dp (- mosse 1) uovo)
+              1))))
+La formula usata è: dp[m][u] = dp[m-1][u-1] + dp[m-1][u] + 1
+- 'dp[m-1][u-1]': se l'uovo si rompe, copre i piani sotto.
+- 'dp[m-1][u]': se l'uovo non si rompe, copre i piani sopra.
+- '+1': il piano corrente da cui abbiamo lanciato.
+Così si riempie la riga 'dp[mosse][..]'.
+
+4. Condizione di uscita
+Quando 'dp[mosse][k] >= n', vuol dire che con 'mosse' lanci e 'k' uova possiamo coprire tutti i 'n' piani.
+A quel punto usciamo dal ciclo e restituiamo 'mosse'.
+
+Esempio:
+(solve 2 6)
+Serve '3' (risultato minimo).
+La tabella 'dp' mostra:
+  m=1: dp[1][2] = 1
+  m=2: dp[2][2] = 3
+  m=3: dp[3][2] = 6
+Quindi con 3 lanci e 2 uova possiamo coprire 6 piani.
+
+; -------------------------
+; solve: calcola mosse min
+; -------------------------
+; Funzione che calcola il numero minimo di mosse necessarie
+; per determinare il piano critico con k uova e n piani.
+; dp[m][k] = massimo numero di piani verificabili con m mosse e k uova
+; Ricorrenza:
+; dp[m][k] = dp[m-1][k-1] + dp[m-1][k] + 1
+; - dp[m-1][k]   = piani che gestiamo se non si rompe (sopra)
+;   ci restano (m-1) mosse e k uova -> copri piani sopra
+; - dp[m-1][k-1] = piani che gestiamo se l'uovo si rompe (sotto)
+;   ci restano (m-1) mosse e (k-1) uova -> copri piani sotto
+; - +1 = il piano corrente testato ora
+; Usiamo un ciclo while: incrementiamo m (mosse) finché dp[m][k] < n
+(define (solve k n)
+  ; inizializza contatore delle mosse e tabella dp (matrice)
+  (let ( (mosse 0) (dp (array (+ n 1) (+ k 1) '(0))) )
+    ; aumenta mosse finché con k uova non copriamo almeno n piani
+    (while (< (dp mosse k) n)
+      (++ mosse)
+      ; riempw riga dp[mosse][..] per tutti i valori di uovo
+      (for (uovo 1 k)
+        (setf (dp mosse uovo)
+              (+ (dp (- mosse 1) (- uovo 1)) ; caso uovo si rompe
+                 (dp (- mosse 1) uovo)       ; caso uovo non si rompe
+                 1))))                       ; piano corrente
+    ; opzionale: stampa la tabella dp per debug
+    ;(println dp)
+    ; ritorna il numero minimo di mosse necessarie
+    mosse))
+
+Proviamo:
+
+(solve 2 6)
+;-> 3
+
+(solve 3 14)
+;-> 4
+
+(solve 7 100)
+;-> 7
+
+(solve 8 100)
+;-> 7
+
+Come ricostruire le mosse
+-------------------------
+Il metodo il seguente:
+1. Sappiamo che servono 'mosse' lanci in totale.
+2. Con 'k' uova e 'mosse' lanci, il primo piano da testare è:
+   dp[mosse-1][k-1] + 1
+   perché se l'uovo si rompe, possiamo coprire 'dp[mosse-1][k-1]' piani sotto,
+   e se non si rompe, possiamo coprire 'dp[mosse-1][k]' piani sopra.
+3. Dopo aver scelto questo piano, aggiorniamo:
+   - Se si rompe --> cercare nei piani inferiori con 'k-1' uova e 'mosse-1' lanci.
+   - Se non si rompe --> cercare nei piani superiori con 'k' uova e 'mosse-1' lanci.
+4. Ripetere fino a terminare le mosse.
+
+Esempio: 
+(solve 2 6)
+
+Abbiamo trovato 'mosse = 3'.
+La tabella 'dp' contiene:
+ m=1, k=2 --> 1
+ m=2, k=2 --> 3
+ m=3, k=2 --> 6
+
+Primo lancio: 'dp[2][1] + 1 = 2' (piano 2).
+Se si rompe --> andiamo sotto con 1 uovo e 2 mosse.
+Se non si rompe --> andiamo sopra (3–6) con 2 uova e 2 mosse.
+
+Dal ramo "non si rompe":
+- Secondo lancio: '2 + dp[1][1] + 1 = 4' (piano 4).
+- Se si rompe --> ci restano i piani 3.
+- Se non si rompe --> ci restano i piani 5–6.
+
+Dal ramo "non si rompe di nuovo":
+- Terzo lancio: '4 + dp[0][1] + 1 = 5'.
+
+Quindi la strategia ottimale è: Lancia da 2 --> poi 4 --> poi 5
+
+Esempio: 
+(solve 3 14)
+
+Abbiamo trovato 'mosse = 4'.
+
+- Primo lancio: 'dp[3][2] + 1 = 7'.
+- Se non si rompe --> copriamo piani 8–14 in 3 mosse con 3 uova.
+- Prossimo lancio: '7 + dp[2][2] + 1 = 11'.
+- Poi da 13, ecc.
+
+Strategia ottimale: Lancia da 7 --> poi 11 --> poi 13 --> ...
+
+La seguente funzione serve a ricostruire i piani effettivi da testare:
+- Primo piano = 'dp[m-1][k-1] + 1'
+  (il più basso che ci permette di coprire bene sopra e sotto).
+- Poi proseguiamo "come se" l'uovo non si rompesse (così ottieniamo la catena dei lanci successivi).
+- Questo genera una sequenza lineare dei lanci ottimali.
+
+; -------------------------
+; strategie: lista piani
+; -------------------------
+; (strategie k n) -> lista dei piani da testare in sequenza
+; Questa funzione costruisce la sequenza "ottimistica" (ramo 'non si rompe'),
+; e rispetta il limite n (non produce piani > n).
+; Procedura:
+; 1) ricostruisce la dp e trova mosse = m
+; 2) mantiene low..high (inizialmente 1..n) e m mosse rimaste
+; 3) ad ogni passo sceglie piano = min(high, low + dp[m-1][k-1])
+;    (quelle dp[...] sono le piani che servono se l'uovo si rompe,
+;    quindi si posiziona il test in modo da garantire copertura)
+; 4) aggiorna low = piano+1 (caso "non si rompe") e --m
+; 5) ripete finché low <= high e m>0
+(define (strategie k n)
+  (letn ((mosse 0) (dp (array (+ n 1) (+ k 1) '(0))))
+    ; costruisce la tabella dp (stessa logica di solve)
+    (while (< (dp mosse k) n)
+      (++ mosse)
+      (for (uovo 1 k)
+        (setf (dp mosse uovo)
+              (+ (dp (- mosse 1) (- uovo 1))
+                 (dp (- mosse 1) uovo)
+                 1))))
+    (let ((lista '()) (low 1) (high n) (m mosse) (u k) (piano 0))
+      ; mentre abbiamo mosse e ancora piani da verificare
+      (while (and (> m 0) (<= low high))
+        ; il prossimo piano è low + dp[m-1][k-1], ma non oltre high
+        (setq piano (+ low (dp (- m 1) (- u 1))))
+        (if (> piano high) (setq piano high))
+        (push piano lista -1)      ; append in coda (ordine di esecuzione)
+        (setq low (+ piano 1))     ; se "non si rompe" cerchiamo sopra piano
+        (-- m))
+      (println "mosse usate (massime disponibili): " mosse)
+      lista)))
+
+Proviamo:
+
+(strategie 2 6)
+;-> mosse usate (massime disponibili): 3
+;-> (3 5 6)
+
+(strategie 3 14)
+;-> mosse usate (massime disponibili): 4
+;-> (7 11 13 14)
+
+(strategie 7 100)
+;-> mosse usate (massime disponibili): 7
+;-> (64 96 100)
+
+(strategie 8 100)
+;-> mosse usate (massime disponibili): 7
+;-> (64 96 100)
+
 ============================================================================
 

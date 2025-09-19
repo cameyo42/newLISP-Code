@@ -4931,7 +4931,7 @@ Algoritmo (forza bruta)
 -----------------------
 1) Per ogni numero n in un certo intervallo (es. da 10 a 999999):
 2) Rimuovere la prima cifra per ottenere x.
-3) Calcolare k = n / x (se x ≠ 0 e n mod x = 0).
+3) Calcolare k = n / x (se x != 0 e n mod x = 0).
 4) Verificare se k * x == n.
 
 (define (rimuovi-prima-cifra n)

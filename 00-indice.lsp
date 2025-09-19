@@ -3177,6 +3177,7 @@ NOTE LIBERE 32
   Minima Repunit divisibile da k
   Numeri da una lista di cifre minori di N
   Dividere una lista binaria in tre parti uguali
+  Lancio di uova dai piani di un palazzo
 
 PROBLEMI SUI DADI
 =================

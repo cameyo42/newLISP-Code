@@ -5179,7 +5179,8 @@ Possiamo usare due hashmap che tengono traccia delle mappature char-char. Se un 
 (isomorfe "nonna" "lilla")
 ;-> true
 
-Questa soluzione risolve questo problema in tempo O(n). Un altro metodo è quello di utilizzare un vettore per memorizzare le mappature dei caratteri elaborati (al posto di due hash-map).
+Questa soluzione risolve questo problema in tempo O(n).
+Un altro metodo è quello di utilizzare un vettore per memorizzare le mappature dei caratteri elaborati (al posto di due hash-map).
 
 1) Se le lunghezze di str1 e str2 non sono uguali, restituire Falso.
 2) Per ogni carattere in str1 e str2

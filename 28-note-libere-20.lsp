@@ -2088,6 +2088,7 @@ Proviamo:
 Numeri di Schlosberg
 --------------------
 
+("Mathematical Reflections", Numero 5, Dorin Andrica)
 I numeri di Schlosberg sono i numeri interi positivi che soddisfano la seguente espressione:
 
   Sum[k=1..n]floor(n/k) = numero intero pari
@@ -2103,7 +2104,6 @@ Sequenza OEIS A280682:
   107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, ...
 
 (define (schlosberg? num) (even? (floor (sqrt num))))
-
 
 (filter schlosberg? (sequence 0 120))
 ;-> (0 4 5 6 7 8 16 17 18 19 20 21 22 23 24 36 37 38 39 40 41 42 43 44
