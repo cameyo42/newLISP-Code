@@ -3179,7 +3179,8 @@ NOTE LIBERE 32
   Dividere una lista binaria in tre parti uguali
   Lancio di uova dai piani di un palazzo
   Srotolare il serpente
-  Somma di elementi adiacenti di una lista
+  Somma degli elementi adiacenti in una lista
+  Caratteri mancanti in una stringa
 
 PROBLEMI SUI DADI
 =================

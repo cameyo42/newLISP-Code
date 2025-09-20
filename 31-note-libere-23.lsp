@@ -4723,7 +4723,7 @@ Una macchina della verità è un semplice programma con il seguente comportament
 
 (verita 1)
 ;-> 111111111111111111111111111111111111111111111111111111111111...
-Premere CTRL-C per terminare il programma
+Premere CTRL-C per terminare il programma.
 
 
 -------------------

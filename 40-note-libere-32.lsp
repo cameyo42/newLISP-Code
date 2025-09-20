@@ -6681,9 +6681,9 @@ Proviamo:
 ;-> "abcdefghijklmnop"
 
 
-----------------------------------------
-Somma di elementi adiacenti di una lista
-----------------------------------------
+-------------------------------------------
+Somma degli elementi adiacenti in una lista
+-------------------------------------------
 
 Data una lista di interi e un numero N, determinare i primi elementi adiacenti la cui somma è uguale a N.
 
@@ -6776,7 +6776,6 @@ Proviamo:
 (prima-somma1 '(2 -3 4 -6 5 3 2) 11)
 ;-> ()
 
-Nota:
 Se la lista contiene solo interi non-negativi, allora possiamo usare la tecnica a due puntatori "sliding window":
 - Espandere 'j' finché la somma è minore di N.
 - Se la somma supera N, spostare avanti 'i'.
@@ -6850,6 +6849,89 @@ Test di velocità:
 ;-> 114.208
 
 La funzione con 'prefix' calcola completamente i cicli per 'i' e 'j', quindi è più lenta.
+
+
+---------------------------------
+Caratteri mancanti in una stringa
+---------------------------------
+
+Data una stringa che contiene caratteri ASCII (32..126), determinare quali caratteri minuscoli (a..z) mancano, quali caratteri maiuscoli (A..Z) mancano e quali cifre (0..9) mancano.
+
+Codici ASCII dei caratteri che delimitano gli intervalli:
+Cifre:
+(char "0") --> 48
+(char "9") --> 57
+Maiuscole:
+(char "A") --> 65
+(char "Z") --> 90
+Minuscole:
+(char "a") --> 97
+(char "z") --> 122
+
+Algoritmo
+---------
+1) Creare un vettore di 127 elementi tutti con valore 0.
+   Creare tre liste vuote per i caratteri mancanti: cifre, upper e lower
+2) Attraversare la stringa e per ogni carattere:
+   impostare a 1 l'elemento del vettore che ha indice pari al valore ASCII
+   del carattere corrente.
+3) Ciclo da 48 a 57 del vettore (valori ASCII delle Cifre)
+   Se l'elemento corrente del vettore ha valore 0, allora aggiungere alle
+   cifre mancanti il carattere che ha valore ASCII pari all'indice corrente.
+4) Ciclo da 65 a 90 del vettore (valori ASCII delle Maiuscole)
+   Se l'elemento corrente del vettore ha valore 0, allora aggiungere alle
+   maiuscole mancanti il carattere che ha valore ASCII pari all'indice corrente.
+5) Ciclo da 97 a 122 del vettore (valori ASCII delle Minuscole)
+   Se l'elemento corrente del vettore ha valore 0, allora aggiungere alle
+   minuscole mancanti il carattere che ha valore ASCII pari all'indice corrente.
+
+Funzione che trova i caratteri mancanti di una stringa (cifre, maiuscole e minuscole):
+
+(define (missing-chars str)
+  (local (chars cifre upper lower)
+    ; vettore con 127 zeri
+    (setq chars (array 127 '(0)))
+    ; Ciclo per ogni carattere della stringa
+    (dostring (ch str)
+      ; Se il carattere corrente è compreso tra 32 (" ") e 126 "~",
+      ; allora imposta a 1 l'elemento del vettore con indice pari
+      ; al valore ASCII del carattere corrente
+      (if (and (>= ch 32) (<= ch 126)) (setf (chars ch) 1)))
+    ; lista cifre mancanti
+    (setq cifre '())
+    ; Ciclo per trovare le Cifre mancanti (0..9)
+    (for (c 48 57)
+      ; Se l'elemento del vettore chars(c) vale 0,
+      ; allora aggiunge il carattere che ha valore ASCII pari a 'c'
+      (if (zero? (chars c)) (push (char c) cifre -1)))
+    ; lista maiuscole mancanti
+    (setq upper '())
+    ; Ciclo per trovare le Maiuscole mancanti (A..Z)
+    (for (u 65 90)
+      ; Se l'elemento del vettore chars(u) vale 0,
+      ; allora aggiunge il carattere che ha valore ASCII pari a 'u'
+      (if (zero? (chars u)) (push (char u) upper -1)))
+    ; lista minuscole mancanti
+    (setq lower '())
+    ; Ciclo per trovare le Minuscole mancanti (a..z)
+    (for (l 97 122)
+      ; Se l'elemento del vettore chars(l) vale 0,
+      ; allora aggiunge il carattere che ha valore ASCII pari a 'l'
+      (if (zero? (chars l)) (push (char l) lower -1)))
+    (list cifre upper lower)))
+
+Proviamo:
+
+(setq str "Data una stringa che contiene CARATTERI ASCII (32..126),")
+
+(missing-chars str)
+;-> (("0" "4" "5" "7" "8" "9")
+;->  ("B" "F" "G" "H" "J" "K" "L" "M" "N" "O" "P" "Q" "U" "V" "W" "X" "Y" "Z")
+;->  ("b" "d" "f" "j" "k" "l" "m" "p" "q" "v" "w" "x" "y" "z"))
+
+(setq test "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+(missing-chars test)
+;-> (() () ())
 
 ============================================================================
 
