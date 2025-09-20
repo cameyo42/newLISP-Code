@@ -6933,5 +6933,78 @@ Proviamo:
 (missing-chars test)
 ;-> (() () ())
 
+
+------------------
+A + B = palindromo
+------------------
+
+Dato un intero positivo A, trovare il più piccolo intero non-negativo B tale che A + B è un numero palindromo.
+
+Sequenza OEIS A052036:
+Smallest number that must be added to n to make or keep n palindromic.
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 10,
+  9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8,
+  7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8, 7, 6,
+  5, 4, 3, 2, 1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8, 7, 6, 5, 4,
+  3, 2, 1, 0, ...
+
+(define (palindrome? num)
+"Check if a non-negative integer is palindrome"
+  (let ((rev 0) (val num))
+    ; crea il numero invertito
+    (until (zero? val)
+      (setq rev (+ (* rev 10) (% val 10)))
+      (setq val (/ val 10)))
+    (= rev num)))
+
+(define (find-B A)
+  (let ( (base A) (found nil) )
+    (until found
+      (if (palindrome? base)
+          (set 'found true 'B (- base A))
+          ;else
+          (++ base)))
+    (list B (+ A B))))
+
+Proviamo:
+
+(find-B 121)
+;-> (0 121)
+(find-B 122)
+;-> (9 131)
+(find-B 138472)
+;-> (359 138831)
+
+La funzione è lenta per numeri con più di 11 cifre (anche se dipende anche dal numero A):
+
+; 12 cifre
+(time (println (find-B 123456789012)))
+;-> (965309 123457754321)
+;-> 1765.664
+
+; 13 cifre
+(time (println (find-B 1234567890123)))
+;-> (764198 1234568654321)
+;-> 1500.16
+
+; 14 cifre
+(time (println (find-B 12345678901234)))
+;-> (9753087 12345688654321)
+;-> 20393.141
+
+; 15 cifre
+(time (println (find-B 123456789012345)))
+;-> (8641976 123456797654321)
+;-> 19189.04
+
+Calcoliamo la sequenza:
+
+(map first (map find-B (sequence 0 100)))
+;-> (0 0 0 0 0 0 0 0 0 0 1 0 10 9 8 7 6 5 4 3 2 1 0 10
+;->  9 8 7 6 5 4 3 2 1 0 10 9 8 7 6 5 4 3 2 1 0 10 9 8
+;->  7 6 5 4 3 2 1 0 10 9 8 7 6 5 4 3 2 1 0 10 9 8 7 6
+;->  5 4 3 2 1 0 10 9 8 7 6 5 4 3 2 1 0 10 9 8 7 6 5 4
+;->  3 2 1 0 1)
+
 ============================================================================
 

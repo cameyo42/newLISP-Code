@@ -3181,6 +3181,7 @@ NOTE LIBERE 32
   Srotolare il serpente
   Somma degli elementi adiacenti in una lista
   Caratteri mancanti in una stringa
+  A + B = palindromo
 
 PROBLEMI SUI DADI
 =================
