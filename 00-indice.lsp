@@ -3178,6 +3178,7 @@ NOTE LIBERE 32
   Numeri da una lista di cifre minori di N
   Dividere una lista binaria in tre parti uguali
   Lancio di uova dai piani di un palazzo
+  Srotolare il serpente
 
 PROBLEMI SUI DADI
 =================

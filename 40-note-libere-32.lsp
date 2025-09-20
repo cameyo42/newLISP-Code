@@ -6486,5 +6486,199 @@ Proviamo:
 ;-> mosse usate (massime disponibili): 7
 ;-> (64 96 100)
 
+
+---------------------
+Srotolare il serpente
+---------------------
+
+Un serpente è un rettangolo di testo come questo (senza considerare gli spazi):
+
+  h g f
+  i l e
+  j k d
+  a b c
+
+Per srotolarlo, si inizia in basso a sinistra e si procede verso destra, a spirale in senso antiorario verso il centro.
+Il serpente qui sopra si srotola formando: abcdefghijkl.
+Scrivere una funzione che srotola un serpente.
+
+Idea:
+(setq a '((h g f) (i l e) (j k d) (a b c)))
+;-> ((h g f) (i l e) (j k d) (a b c)) ; prendere (a b c)
+(pop a -1)
+(setq b (transpose a))
+;-> ((h i j) (g l k) (f e d)) ; prendere il contrario di (f e d)
+(pop b -1)
+(setq c (transpose b))
+;-> ((h g) (i l) (j k)) ; prendere il contrario di (h g)
+(pop c)
+(setq d (transpose c))
+;-> ((i j) (l k)) ; prendere (i j) e prendere il contrario di (k l)
+
+Altro esempio:
+
+  j i h g
+  k p o f
+  l m n e
+  a b c d
+
+Srotolamento --> abcd efg hij kl mn o p --> abcdefghijklmnop
+
+Idea:
+(setq a '((j i h g) (k p o f) (l m n e) (a b c d))) ; prendere (a b c d)
+(pop a -1)
+(setq b (transpose a))
+;-> ((j k l) (i p m) (h o n) (g f e)) ; prendere il contrario di (g f e)
+(pop b -1)
+(setq c (transpose b))
+;-> ((j i h) (k p o) (l m n)) ; prendere il contrario di (j i h)
+(pop c)
+(setq d (transpose c))
+;-> ((k l) (p m) (o n)) ; prendere il contrario di (k l)
+(pop d)
+(setq e (transpose d))
+;-> ((p o) (m n)) ; prendere (m n) e prendere il contrario di (p o)
+
+Lo "srotolamento" del serpente è un percorso a spirale antioraria, e ogni passo della simulazione (pop + transpose) è la tecnica che permette di girare intorno al rettangolo stringendo verso il centro:
+- Ad ogni giro della spirale togliamo una riga o una colonna.
+- Dopo aver tolto, facciamo una rotazione/trasposizione della matrice per riportarci nella stessa situazione iniziale, ma su un rettangolo più piccolo.
+- La direzione (dritto o contrario/reverse) dipende dalla posizione da cui stiamo prendendo l'elemento.
+
+Ci sono quattro fasi cicliche (come le direzioni della spirale):
+
+1. Da sinistra a destra
+   Prendiamo l'ultima riga così com'è.
+   Esempio: (a b c d)
+2. Dal basso verso l'alto
+   Trasponiamo, prendiamo l'ultima riga, ma al contrario.
+   Esempio: reverse (g f e)
+3. Da destra a sinistra
+   Trasponiamo, prendiamo la prima riga, ma al contrario.
+   Esempio: reverse (h g)
+4. Dall'alto verso il basso
+   Trasponiamo, prendiamo la prima riga così com'è.
+   Esempio: (i j)
+Poi si ricomincia il ciclo con il rettangolo ridotto.
+
+Tabella delle "Fasi" (passi del ciclo):
+- Fase 0: ultima riga, dritto.
+- Fase 1: ultima riga, reverse.
+- Fase 2: prima riga, reverse.
+- Fase 3: prima riga, dritto.
+- Poi torna al giro 0.
+
+Esempio 1:
+
+  h g f
+  i l e
+  j k d
+  a b c
+
+Fase 0 --> ultima riga (a b c)
+Fase 1 --> ultima riga trasposta, reversed (f e d)
+Fase 2 --> prima riga trasposta, reversed (h g)
+Fase 3 --> prima riga trasposta, dritto (i j)
+Fase 0 --> ultima riga trasposta, dritto (k l)
+Risultato = a b c d e f g h i j k l
+
+Esempio 2:
+
+  j i h g
+  k p o f
+  l m n e
+  a b c d
+
+Fase 0 --> (a b c d)
+Fase 1 --> (g f e) reversed
+Fase 2 --> (j i h) reversed
+Fase 3 --> (k l) dritto
+Fase 0 --> (m n) dritto
+Fase 1 --> (p o) reversed
+Risultato = a b c d e f g h i j k l m n o p
+
+Algoritmo
+---------
+1. tenere un contatore di fase (0–3),
+2. ogni volta facciamo (pop ...) sul lato giusto,
+3. se siamo nella fase 1 o 2 facciamo 'reverse',
+4. aggiorniamo la matrice con 'transpose' (che gira la visuale della spirale),
+5. continuare fino a svuotare la matrice.
+
+; Funzione che prende una matrice di caratteri (lista di liste)
+; e restituisce il "serpente srotolato" in forma di stringa.
+; Percorriamo la matrice in spirale antioraria partendo dal basso,
+; usando sempre lo schema ciclico di 4 fasi:
+;   fase 0 -> prendi ultima riga, dritto
+;   fase 1 -> prendi ultima riga, reversed
+;   fase 2 -> prendi prima riga, reversed
+;   fase 3 -> prendi prima riga, dritto
+; Dopo ogni fase si fa transpose per "ruotare" la matrice
+; e stringersi verso il centro.
+(define (srotola matrice)
+  (letn ((risultato '())   ; lista di caratteri accumulati
+         (fase 0))         ; contatore ciclico (0–3)
+    (while matrice
+      (cond
+        ; Fase 0: ultima riga, dritto
+        ((= fase 0)
+         (extend risultato (matrice -1))   ; prendi ultima riga
+         (pop matrice -1)                  ; rimuovi ultima riga
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 1: ultima riga, reversed
+        ((= fase 1)
+         (extend risultato (reverse (matrice -1)))
+         (pop matrice -1)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 2: prima riga, reversed
+        ((= fase 2)
+         (extend risultato (reverse (matrice 0)))
+         (pop matrice 0)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 3: prima riga, dritto
+        ((= fase 3)
+         (extend risultato (matrice 0))
+         (pop matrice 0)
+         (if matrice (setq matrice (transpose matrice)))))
+      (println "matrice: " matrice)
+      (print "risultato: " risultato) (read-line)
+      ; aggiorna fase ciclicamente
+      (setq fase (% (+ fase 1) 4)))
+    ; restituisce la lista concatenata come stringa
+    (join (map string risultato))))
+
+Proviamo:
+
+(srotola '((h g f) (i l e) (j k d) (a b c)))
+;-> matrice: ((h i j) (g l k) (f e d))
+;-> risultato: (a b c)
+;-> matrice: ((h g) (i l) (j k))
+;-> risultato: (a b c d e f)
+;-> matrice: ((i j) (l k))
+;-> risultato: (a b c d e f g h)
+;-> matrice: ((l) (k))
+;-> risultato: (a b c d e f g h i j)
+;-> matrice: ((l))
+;-> risultato: (a b c d e f g h i j k)
+;-> matrice: ()
+;-> risultato: (a b c d e f g h i j k l)
+;-> "abcdefghijkl"
+
+(srotola '((j i h g) (k p o f) (l m n e) (a b c d)))
+;-> matrice: ((j k l) (i p m) (h o n) (g f e))
+;-> risultato: (a b c d)
+;-> matrice: ((j i h) (k p o) (l m n))
+;-> risultato: (a b c d e f g)
+;-> matrice: ((k l) (p m) (o n))
+;-> risultato: (a b c d e f g h i j)
+;-> matrice: ((p o) (m n))
+;-> risultato: (a b c d e f g h i j k l)
+;-> matrice: ((p) (o))
+;-> risultato: (a b c d e f g h i j k l m n)
+;-> matrice: ((p))
+;-> risultato: (a b c d e f g h i j k l m n o)
+;-> matrice: ()
+;-> risultato: (a b c d e f g h i j k l m n o p)
+;-> "abcdefghijklmnop"
+
 ============================================================================
 
