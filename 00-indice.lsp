@@ -3179,6 +3179,7 @@ NOTE LIBERE 32
   Dividere una lista binaria in tre parti uguali
   Lancio di uova dai piani di un palazzo
   Srotolare il serpente
+  Somma di elementi adiacenti di una lista
 
 PROBLEMI SUI DADI
 =================

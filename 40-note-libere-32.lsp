@@ -6608,10 +6608,10 @@ Algoritmo
 ; e restituisce il "serpente srotolato" in forma di stringa.
 ; Percorriamo la matrice in spirale antioraria partendo dal basso,
 ; usando sempre lo schema ciclico di 4 fasi:
-;   fase 0 -> prendi ultima riga, dritto
-;   fase 1 -> prendi ultima riga, reversed
-;   fase 2 -> prendi prima riga, reversed
-;   fase 3 -> prendi prima riga, dritto
+;   fase 0 -> prendiamo ultima riga, dritto
+;   fase 1 -> prendiamo ultima riga, reverse
+;   fase 2 -> prendiamo prima riga, reverse
+;   fase 3 -> prendiamo prima riga, dritto
 ; Dopo ogni fase si fa transpose per "ruotare" la matrice
 ; e stringersi verso il centro.
 (define (srotola matrice)
@@ -6679,6 +6679,177 @@ Proviamo:
 ;-> matrice: ()
 ;-> risultato: (a b c d e f g h i j k l m n o p)
 ;-> "abcdefghijklmnop"
+
+
+----------------------------------------
+Somma di elementi adiacenti di una lista
+----------------------------------------
+
+Data una lista di interi e un numero N, determinare i primi elementi adiacenti la cui somma è uguale a N.
+
+Algoritmo
+---------
+Doppio ciclo per generare e verificare tutte le somme degli elementi adiacenti.
+
+(define (prima-somma lst N)
+  (local (out len somma stop1 stop2)
+    (setq out '())
+    (setq len (length lst))
+    (setq stop1 nil)
+    ; ciclo per l'indice 'i' (primo indice)
+    (for (i 0 (- len 1) 1 stop1)
+      ; somma iniziale pari a 0
+      (setq somma 0)
+      (setq stop2 nil)
+      ; ciclo per l'indice 'j' (inizia da 'i') (secondo indice)
+      (for (j i (- len 1) 1 stop2)
+        ; aggiorna la somma corrente
+        (++ somma (lst j))
+        ;(println "i: " i { } "j: " j)
+        ;(println "lst(i): " (lst i) { } "lst(j): " (lst j))
+        ;(println "somma: " somma) (read-line)
+        ; Controllo somma == N...
+        (when (= somma N)
+          ; ricostruzione dei numeri della somma  
+          (for (k i j) (push (lst k) out -1))
+          ; stop primo ciclo 
+          (setq stop1 true)
+          ; stop secondo ciclo 
+          (setq stop2 true))
+        ; se la somma supera N, allora fermiamo il secondo ciclo.
+        (if (> somma N) (setq stop2 true))))
+    out))
+
+Proviamo:
+
+(prima-somma '(1 2 3 4 5 6) 10)
+;-> (1 2 3 4)
+(prima-somma '(2 3 4 6 5) 10)
+;-> (4 6)
+(prima-somma '(2 -3 4 -6 5 3 2) 10)
+;-> (5 3 2)
+(prima-somma '(2 -3 4 -6 5 3 2) 11)
+;-> ()
+
+Comunque quando spostiamo l'indice 'i' di una posizione in avanti, le somme che calcoliamo da 'j = i' in poi sono identiche a quelle che avevamo già calcolato in precedenza, meno il contributo di lst(i-1).
+In pratica, stiamo ricalcolando molte somme da zero, quando in realtà potremmo riutilizzare le somme parziali già fatte.
+
+Somme cumulative (prefix sums)
+Se calcoliamo una lista di somme cumulative:
+
+  prefix(k) = lst(0) + lst(1) + ... + lst(k)
+
+allora la somma di un segmento lst(i..j) si ottiene come:
+
+  somma(i..j) = prefix(j) - prefix(i-1) 
+  (con l'accortezza che prefix(-1) = 0).
+
+Così ogni somma si ricava in tempo O(1) senza dover accumulare in un ciclo interno.
+
+(define (prima-somma1 lst N)
+  (local (len prefisso out stop1)
+    (setq len (length lst))
+    (setq out '())
+    (setq stop1 nil)
+    ; calcola le somme prefisso
+    (setq prefisso (list 0))
+    (for (i 0 (- len 1))
+      (push (+ (last prefisso) (lst i)) prefisso -1))
+    ; cerca la prima sottolista con somma == N
+    (for (i 0 (- len 1) 1 stop1)
+      (for (j i (- len 1) 1 stop1)
+        ; somma(i..j) = prefisso(j+1) - prefisso(i)
+        (if (= (- (prefisso (+ j 1)) (prefisso i)) N)
+            (begin
+              (for (k i j) (push (lst k) out -1))
+              (setq stop1 true)))))
+    out))
+
+Proviamo:
+
+(prima-somma1 '(1 2 3 4 5 6) 10)
+;-> (1 2 3 4)
+(prima-somma1 '(2 3 4 6 5) 10)
+;-> (4 6)
+(prima-somma1 '(2 -3 4 -6 5 3 2) 10)
+;-> (5 3 2)
+(prima-somma1 '(2 -3 4 -6 5 3 2) 11)
+;-> ()
+
+Nota:
+Se la lista contiene solo interi non-negativi, allora possiamo usare la tecnica a due puntatori "sliding window":
+- Espandere 'j' finché la somma è minore di N.
+- Se la somma supera N, spostare avanti 'i'.
+- In questo modo troviamo la prima sottolista in O(n) senza ricalcolare nulla.
+
+(define (prima-somma2 lst N)
+  (local (len inizio fine somma out trovato)
+    (setq len (length lst))
+    (setq inizio 0)
+    (setq fine 0)
+    (setq somma 0)
+    (setq out '())
+    (setq trovato nil)
+    ; scorre con due indici
+    (while (and (< inizio len) (not trovato))
+      (if (< somma N)
+          ; estende la finestra
+          (if (< fine len)
+              (begin
+                (++ somma (lst fine))
+                (++ fine))
+              ; se non ci sono più elementi esce
+              (setq inizio len))
+          (if (> somma N)
+              ; restringe la finestra
+              (begin
+                (-- somma (lst inizio))
+                (++ inizio))
+              ; somma == N -> trovato
+              (begin
+                (for (k inizio (- fine 1)) (push (lst k) out -1))
+                (setq trovato true)))))
+    out))
+
+Come funziona:
+- 'fine' avanza finché 'somma' è minore di N.
+- Se 'somma' supera N, avanza 'inizio' e toglie elementi dalla somma.
+- Se 'somma' == N, ha trovato il primo segmento valido ed esce.
+
+Proviamo:
+
+(prima-somma2 '(1 2 3 4 5 6) 10)
+;-> (1 2 3 4)
+(prima-somma2 '(2 3 4 6 5) 10)
+;-> (4 6)
+
+La funzione 'prima-somma2' non funziona con numeri negativi:
+
+(prima-somma2 '(2 -3 4 -6 5 3 2) 10)
+;-> ()
+
+Test di correttezza:
+
+(for (i 1 1000)
+  (setq t (rand 10 100))
+  (if-not (= (prima-somma t 30) (prima-somma1 t 30) (prima-somma2 t 30))
+    (println t)))
+;-> nil
+
+Test di velocità:
+
+(setq v (rand 10 1000))
+; funzione iniziale (la mia):
+(time (prima-somma v 100) 1e4)
+;-> 141.478
+; funzione con prefix
+(time (prima-somma1 v 100) 1e4)
+;-> 11551.101
+; funzione con sliding window
+(time (prima-somma2 v 100) 1e4)
+;-> 114.208
+
+La funzione con 'prefix' calcola completamente i cicli per 'i' e 'j', quindi è più lenta.
 
 ============================================================================
 
