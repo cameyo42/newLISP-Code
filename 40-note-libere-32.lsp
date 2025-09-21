@@ -6487,200 +6487,6 @@ Proviamo:
 ;-> (64 96 100)
 
 
----------------------
-Srotolare il serpente
----------------------
-
-Un serpente è un rettangolo di testo come questo (senza considerare gli spazi):
-
-  h g f
-  i l e
-  j k d
-  a b c
-
-Per srotolarlo, si inizia in basso a sinistra e si procede verso destra, a spirale in senso antiorario verso il centro.
-Il serpente qui sopra si srotola formando: abcdefghijkl.
-Scrivere una funzione che srotola un serpente.
-
-Idea:
-(setq a '((h g f) (i l e) (j k d) (a b c)))
-;-> ((h g f) (i l e) (j k d) (a b c)) ; prendere (a b c)
-(pop a -1)
-(setq b (transpose a))
-;-> ((h i j) (g l k) (f e d)) ; prendere il contrario di (f e d)
-(pop b -1)
-(setq c (transpose b))
-;-> ((h g) (i l) (j k)) ; prendere il contrario di (h g)
-(pop c)
-(setq d (transpose c))
-;-> ((i j) (l k)) ; prendere (i j) e prendere il contrario di (k l)
-
-Altro esempio:
-
-  j i h g
-  k p o f
-  l m n e
-  a b c d
-
-Srotolamento --> abcd efg hij kl mn o p --> abcdefghijklmnop
-
-Idea:
-(setq a '((j i h g) (k p o f) (l m n e) (a b c d))) ; prendere (a b c d)
-(pop a -1)
-(setq b (transpose a))
-;-> ((j k l) (i p m) (h o n) (g f e)) ; prendere il contrario di (g f e)
-(pop b -1)
-(setq c (transpose b))
-;-> ((j i h) (k p o) (l m n)) ; prendere il contrario di (j i h)
-(pop c)
-(setq d (transpose c))
-;-> ((k l) (p m) (o n)) ; prendere il contrario di (k l)
-(pop d)
-(setq e (transpose d))
-;-> ((p o) (m n)) ; prendere (m n) e prendere il contrario di (p o)
-
-Lo "srotolamento" del serpente è un percorso a spirale antioraria, e ogni passo della simulazione (pop + transpose) è la tecnica che permette di girare intorno al rettangolo stringendo verso il centro:
-- Ad ogni giro della spirale togliamo una riga o una colonna.
-- Dopo aver tolto, facciamo una rotazione/trasposizione della matrice per riportarci nella stessa situazione iniziale, ma su un rettangolo più piccolo.
-- La direzione (dritto o contrario/reverse) dipende dalla posizione da cui stiamo prendendo l'elemento.
-
-Ci sono quattro fasi cicliche (come le direzioni della spirale):
-
-1. Da sinistra a destra
-   Prendiamo l'ultima riga così com'è.
-   Esempio: (a b c d)
-2. Dal basso verso l'alto
-   Trasponiamo, prendiamo l'ultima riga, ma al contrario.
-   Esempio: reverse (g f e)
-3. Da destra a sinistra
-   Trasponiamo, prendiamo la prima riga, ma al contrario.
-   Esempio: reverse (h g)
-4. Dall'alto verso il basso
-   Trasponiamo, prendiamo la prima riga così com'è.
-   Esempio: (i j)
-Poi si ricomincia il ciclo con il rettangolo ridotto.
-
-Tabella delle "Fasi" (passi del ciclo):
-- Fase 0: ultima riga, dritto.
-- Fase 1: ultima riga, reverse.
-- Fase 2: prima riga, reverse.
-- Fase 3: prima riga, dritto.
-- Poi torna al giro 0.
-
-Esempio 1:
-
-  h g f
-  i l e
-  j k d
-  a b c
-
-Fase 0 --> ultima riga (a b c)
-Fase 1 --> ultima riga trasposta, reversed (f e d)
-Fase 2 --> prima riga trasposta, reversed (h g)
-Fase 3 --> prima riga trasposta, dritto (i j)
-Fase 0 --> ultima riga trasposta, dritto (k l)
-Risultato = a b c d e f g h i j k l
-
-Esempio 2:
-
-  j i h g
-  k p o f
-  l m n e
-  a b c d
-
-Fase 0 --> (a b c d)
-Fase 1 --> (g f e) reversed
-Fase 2 --> (j i h) reversed
-Fase 3 --> (k l) dritto
-Fase 0 --> (m n) dritto
-Fase 1 --> (p o) reversed
-Risultato = a b c d e f g h i j k l m n o p
-
-Algoritmo
----------
-1. tenere un contatore di fase (0–3),
-2. ogni volta facciamo (pop ...) sul lato giusto,
-3. se siamo nella fase 1 o 2 facciamo 'reverse',
-4. aggiorniamo la matrice con 'transpose' (che gira la visuale della spirale),
-5. continuare fino a svuotare la matrice.
-
-; Funzione che prende una matrice di caratteri (lista di liste)
-; e restituisce il "serpente srotolato" in forma di stringa.
-; Percorriamo la matrice in spirale antioraria partendo dal basso,
-; usando sempre lo schema ciclico di 4 fasi:
-;   fase 0 -> prendiamo ultima riga, dritto
-;   fase 1 -> prendiamo ultima riga, reverse
-;   fase 2 -> prendiamo prima riga, reverse
-;   fase 3 -> prendiamo prima riga, dritto
-; Dopo ogni fase si fa transpose per "ruotare" la matrice
-; e stringersi verso il centro.
-(define (srotola matrice)
-  (letn ((risultato '())   ; lista di caratteri accumulati
-         (fase 0))         ; contatore ciclico (0–3)
-    (while matrice
-      (cond
-        ; Fase 0: ultima riga, dritto
-        ((= fase 0)
-         (extend risultato (matrice -1))   ; prendi ultima riga
-         (pop matrice -1)                  ; rimuovi ultima riga
-         (if matrice (setq matrice (transpose matrice))))
-        ; Fase 1: ultima riga, reversed
-        ((= fase 1)
-         (extend risultato (reverse (matrice -1)))
-         (pop matrice -1)
-         (if matrice (setq matrice (transpose matrice))))
-        ; Fase 2: prima riga, reversed
-        ((= fase 2)
-         (extend risultato (reverse (matrice 0)))
-         (pop matrice 0)
-         (if matrice (setq matrice (transpose matrice))))
-        ; Fase 3: prima riga, dritto
-        ((= fase 3)
-         (extend risultato (matrice 0))
-         (pop matrice 0)
-         (if matrice (setq matrice (transpose matrice)))))
-      (println "matrice: " matrice)
-      (print "risultato: " risultato) (read-line)
-      ; aggiorna fase ciclicamente
-      (setq fase (% (+ fase 1) 4)))
-    ; restituisce la lista concatenata come stringa
-    (join (map string risultato))))
-
-Proviamo:
-
-(srotola '((h g f) (i l e) (j k d) (a b c)))
-;-> matrice: ((h i j) (g l k) (f e d))
-;-> risultato: (a b c)
-;-> matrice: ((h g) (i l) (j k))
-;-> risultato: (a b c d e f)
-;-> matrice: ((i j) (l k))
-;-> risultato: (a b c d e f g h)
-;-> matrice: ((l) (k))
-;-> risultato: (a b c d e f g h i j)
-;-> matrice: ((l))
-;-> risultato: (a b c d e f g h i j k)
-;-> matrice: ()
-;-> risultato: (a b c d e f g h i j k l)
-;-> "abcdefghijkl"
-
-(srotola '((j i h g) (k p o f) (l m n e) (a b c d)))
-;-> matrice: ((j k l) (i p m) (h o n) (g f e))
-;-> risultato: (a b c d)
-;-> matrice: ((j i h) (k p o) (l m n))
-;-> risultato: (a b c d e f g)
-;-> matrice: ((k l) (p m) (o n))
-;-> risultato: (a b c d e f g h i j)
-;-> matrice: ((p o) (m n))
-;-> risultato: (a b c d e f g h i j k l)
-;-> matrice: ((p) (o))
-;-> risultato: (a b c d e f g h i j k l m n)
-;-> matrice: ((p))
-;-> risultato: (a b c d e f g h i j k l m n o)
-;-> matrice: ()
-;-> risultato: (a b c d e f g h i j k l m n o p)
-;-> "abcdefghijklmnop"
-
-
 -------------------------------------------
 Somma degli elementi adiacenti in una lista
 -------------------------------------------
@@ -7005,6 +6811,363 @@ Calcoliamo la sequenza:
 ;->  7 6 5 4 3 2 1 0 10 9 8 7 6 5 4 3 2 1 0 10 9 8 7 6
 ;->  5 4 3 2 1 0 10 9 8 7 6 5 4 3 2 1 0 10 9 8 7 6 5 4
 ;->  3 2 1 0 1)
+
+
+------------------------------------------------------
+Processare una stringa in base a particolari caratteri
+------------------------------------------------------
+
+Data una stringa di caratteri ASCII, costruire una nuova stringa in base alle seguenti regole:
+1) attraversare la stringa da sinistra a destra
+2) se il carattere corrente vale "@", allora rimuovere l'ultimo carattere dal risultato
+3) se il carattere corrente vale "#", allora duplicare il risultato
+4) se il carattere corrente vale "$", allora invertire il risultato
+5) ogni altro carattere deve essere aggiunto al risultato
+
+Esempio:
+  Stringa = "ab%c$dd@"
+  a --> a        ; copia carattere corrente
+  b --> ab       ; copia carattere corrente
+  % --> ba       ; inverte risultato
+  c --> bac      ; copia carattere corrente
+  $ --> bacbac   ; duplica risultato
+  d --> bacbacd  ; copia carattere corrente
+  d --> bacbacdd ; copia carattere corrente
+  @ --> bacbacd  ; elimina ultimo carattere
+  Output: "bacbacd"
+
+(define (processa str)
+  (let (res "")
+    (dolist (ch (explode str))
+      (cond ((= ch "@") ; elimina ultimo carattere
+              (if-not (null? res) (pop res -1)))
+            ((= ch "$") ; duplica il risultato
+              (extend res res))
+            ((= ch "%") ; inverte il risultato
+              (reverse res))
+            (true       ; aggiunge carattere corrente
+              (push ch res -1))))
+      ;(print ch " --> " res) (read-line))
+    res))
+
+Proviamo:
+
+(processa "ab%c$dd@")
+;-> "bacbacd"
+
+(processa "Da$ta% un%a st%ring%a d@i car@at@te%ri")
+;-> "etaac i ats aataDaD unringri"
+
+
+----------------------------------
+Srotolare e arrotolare il serpente
+----------------------------------
+
+Un serpente è un rettangolo di testo come questo (senza considerare gli spazi):
+
+  h g f
+  i l e
+  j k d
+  a b c
+
+Per srotolarlo, si inizia in basso a sinistra e si procede verso destra, a spirale in senso antiorario verso il centro.
+Il serpente qui sopra si srotola formando: abcdefghijkl.
+Scrivere una funzione che srotola un serpente.
+
+Idea:
+(setq a '((h g f) (i l e) (j k d) (a b c)))
+;-> ((h g f) (i l e) (j k d) (a b c)) ; prendere (a b c)
+(pop a -1)
+(setq b (transpose a))
+;-> ((h i j) (g l k) (f e d)) ; prendere il contrario di (f e d)
+(pop b -1)
+(setq c (transpose b))
+;-> ((h g) (i l) (j k)) ; prendere il contrario di (h g)
+(pop c)
+(setq d (transpose c))
+;-> ((i j) (l k)) ; prendere (i j) e prendere il contrario di (k l)
+
+Altro esempio:
+
+  j i h g
+  k p o f
+  l m n e
+  a b c d
+
+Srotolamento --> abcd efg hij kl mn o p --> abcdefghijklmnop
+
+Idea:
+(setq a '((j i h g) (k p o f) (l m n e) (a b c d))) ; prendere (a b c d)
+(pop a -1)
+(setq b (transpose a))
+;-> ((j k l) (i p m) (h o n) (g f e)) ; prendere il contrario di (g f e)
+(pop b -1)
+(setq c (transpose b))
+;-> ((j i h) (k p o) (l m n)) ; prendere il contrario di (j i h)
+(pop c)
+(setq d (transpose c))
+;-> ((k l) (p m) (o n)) ; prendere il contrario di (k l)
+(pop d)
+(setq e (transpose d))
+;-> ((p o) (m n)) ; prendere (m n) e prendere il contrario di (p o)
+
+Lo "srotolamento" del serpente è un percorso a spirale antioraria, e ogni passo della simulazione (pop + transpose) è la tecnica che permette di girare intorno al rettangolo stringendo verso il centro:
+- Ad ogni giro della spirale togliamo una riga o una colonna.
+- Dopo aver tolto, facciamo una rotazione/trasposizione della matrice per riportarci nella stessa situazione iniziale, ma su un rettangolo più piccolo.
+- La direzione (dritto o contrario/reverse) dipende dalla posizione da cui stiamo prendendo l'elemento.
+
+Ci sono quattro fasi cicliche (come le direzioni della spirale):
+
+1. Da sinistra a destra
+   Prendiamo l'ultima riga così com'è.
+   Esempio: (a b c d)
+2. Dal basso verso l'alto
+   Trasponiamo, prendiamo l'ultima riga, ma al contrario.
+   Esempio: reverse (g f e)
+3. Da destra a sinistra
+   Trasponiamo, prendiamo la prima riga, ma al contrario.
+   Esempio: reverse (h g)
+4. Dall'alto verso il basso
+   Trasponiamo, prendiamo la prima riga così com'è.
+   Esempio: (i j)
+Poi si ricomincia il ciclo con il rettangolo ridotto.
+
+Tabella delle "Fasi" (passi del ciclo):
+- Fase 0: ultima riga, dritto.
+- Fase 1: ultima riga, reverse.
+- Fase 2: prima riga, reverse.
+- Fase 3: prima riga, dritto.
+- Poi torna al giro 0.
+
+Esempio 1:
+
+  h g f
+  i l e
+  j k d
+  a b c
+
+Fase 0 --> ultima riga (a b c)
+Fase 1 --> ultima riga trasposta, reversed (f e d)
+Fase 2 --> prima riga trasposta, reversed (h g)
+Fase 3 --> prima riga trasposta, dritto (i j)
+Fase 0 --> ultima riga trasposta, dritto (k l)
+Risultato = a b c d e f g h i j k l
+
+Esempio 2:
+
+  j i h g
+  k p o f
+  l m n e
+  a b c d
+
+Fase 0 --> (a b c d)
+Fase 1 --> (g f e) reversed
+Fase 2 --> (j i h) reversed
+Fase 3 --> (k l) dritto
+Fase 0 --> (m n) dritto
+Fase 1 --> (p o) reversed
+Risultato = a b c d e f g h i j k l m n o p
+
+Algoritmo
+---------
+1. tenere un contatore di fase (0–3),
+2. ogni volta facciamo (pop ...) sul lato giusto,
+3. se siamo nella fase 1 o 2 facciamo 'reverse',
+4. aggiorniamo la matrice con 'transpose' (che gira la visuale della spirale),
+5. continuare fino a svuotare la matrice.
+
+; ------------------------------------------------------------
+; srotola
+; ------------------------------------------------------------
+; Funzione che prende una matrice di caratteri (lista di liste)
+; e restituisce il "serpente srotolato" in forma di stringa.
+; Percorriamo la matrice in spirale antioraria partendo dal basso,
+; usando sempre lo schema ciclico di 4 fasi:
+;   fase 0 -> prendiamo ultima riga, dritto
+;   fase 1 -> prendiamo ultima riga, reverse
+;   fase 2 -> prendiamo prima riga, reverse
+;   fase 3 -> prendiamo prima riga, dritto
+; Dopo ogni fase si fa transpose per "ruotare" la matrice
+; e stringersi verso il centro.
+(define (srotola matrice show)
+  (letn ((risultato '())   ; lista di caratteri accumulati
+         (fase 0))         ; contatore ciclico (0–3)
+    (while matrice
+      (cond
+        ; Fase 0: ultima riga, dritto
+        ((= fase 0)
+         (extend risultato (matrice -1))   ; prendi ultima riga
+         (pop matrice -1)                  ; rimuovi ultima riga
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 1: ultima riga, reversed
+        ((= fase 1)
+         (extend risultato (reverse (matrice -1)))
+         (pop matrice -1)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 2: prima riga, reversed
+        ((= fase 2)
+         (extend risultato (reverse (matrice 0)))
+         (pop matrice 0)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 3: prima riga, dritto
+        ((= fase 3)
+         (extend risultato (matrice 0))
+         (pop matrice 0)
+         (if matrice (setq matrice (transpose matrice)))))
+      (when show
+        (println "matrice: " matrice)
+        (println "risultato: " risultato))
+      ; aggiorna fase ciclicamente
+      (setq fase (% (+ fase 1) 4)))
+    ; restituisce la lista concatenata come stringa
+    (join (map string risultato))))
+
+Proviamo:
+
+(srotola '((h g f) (i l e) (j k d) (a b c)) true)
+;-> matrice: ((h i j) (g l k) (f e d))
+;-> risultato: (a b c)
+;-> matrice: ((h g) (i l) (j k))
+;-> risultato: (a b c d e f)
+;-> matrice: ((i j) (l k))
+;-> risultato: (a b c d e f g h)
+;-> matrice: ((l) (k))
+;-> risultato: (a b c d e f g h i j)
+;-> matrice: ((l))
+;-> risultato: (a b c d e f g h i j k)
+;-> matrice: ()
+;-> risultato: (a b c d e f g h i j k l)
+;-> "abcdefghijkl"
+
+(srotola '((j i h g) (k p o f) (l m n e) (a b c d)) true)
+;-> matrice: ((j k l) (i p m) (h o n) (g f e))
+;-> risultato: (a b c d)
+;-> matrice: ((j i h) (k p o) (l m n))
+;-> risultato: (a b c d e f g)
+;-> matrice: ((k l) (p m) (o n))
+;-> risultato: (a b c d e f g h i j)
+;-> matrice: ((p o) (m n))
+;-> risultato: (a b c d e f g h i j k l)
+;-> matrice: ((p) (o))
+;-> risultato: (a b c d e f g h i j k l m n)
+;-> matrice: ((p))
+;-> risultato: (a b c d e f g h i j k l m n o)
+;-> matrice: ()
+;-> risultato: (a b c d e f g h i j k l m n o p)
+;-> "abcdefghijklmnop"
+
+Scriviamo la funzione inversa, che prende "abcdefghijkl" e genera la matrice (cioè arrotola il serpente).
+
+; ------------------------------------------------------------
+; srotola-ids
+; ------------------------------------------------------------
+; Data una "matrice di indici" (lista di liste contenente 0..N-1),
+; restituisce la sequenza di indici nell'ordine in cui la funzione
+; 'srotola' li leggerebbe, cioè in spirale antioraria partendo dal basso.
+; Questa funzione è identica a 'srotola', ma invece di concatenare
+; caratteri concatena gli indici numerici.
+; ------------------------------------------------------------
+(define (srotola-ids matrice)
+  (letn ((risultato '())   ; lista degli indici nell'ordine giusto
+         (fase 0))         ; contatore ciclico (0..3)
+    (while matrice
+      (cond
+        ; Fase 0: prendiamo ultima riga, dritto
+        ((= fase 0)
+         (extend risultato (matrice -1))
+         (pop matrice -1)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 1: prendiamo ultima riga, reverse
+        ((= fase 1)
+         (extend risultato (reverse (matrice -1)))
+         (pop matrice -1)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 2: prendiamo prima riga, reverse
+        ((= fase 2)
+         (extend risultato (reverse (matrice 0)))
+         (pop matrice 0)
+         (if matrice (setq matrice (transpose matrice))))
+        ; Fase 3: prendiamo prima riga, dritto
+        ((= fase 3)
+         (extend risultato (matrice 0))
+         (pop matrice 0)
+         (if matrice (setq matrice (transpose matrice)))))
+      (setq fase (% (+ fase 1) 4)))
+    risultato))
+
+; ------------------------------------------------------------
+; arrotola
+; ------------------------------------------------------------
+; Data una stringa 's' e le dimensioni della matrice (rows x cols),
+; ricostruisce la matrice originale (quella che, se passata a
+; 'srotola', restituirebbe proprio 's').
+; Algoritmo:
+; 1. Convertiamo la stringa in lista di caratteri.
+; 2. Creiamo una "matrice di indici" rows x cols con valori 0..N-1.
+; 3. Calcoliamo l'ordine di lettura con 'srotola-ids'.
+; 4. Creiamo un array 'flatta' di lunghezza N (vuoto).
+; 5. Inseriamo i caratteri della stringa nelle posizioni corrette,
+;    seguendo l'ordine trovato al passo 3.
+; 6. Ricostruiamo la matrice finale rows*cols a partire da flatta.
+; ------------------------------------------------------------
+(define (arrotola s rows cols)
+  (letn ((caratteri (explode s))             ; lista dei caratteri
+         (nchars (length caratteri)))        ; numero di caratteri
+    ; controllo: la stringa deve avere dimensione giusta
+    ; altrimenti 'aggiustiamo' la stringa
+    (let (len (* rows cols))
+      (cond ((> len nchars) ; allunghiamo la stringa con gli spazi " "
+             (extend s (dup " " (- len nchars)))
+             (setq caratteri (explode s))
+             (setq nchars (length caratteri)))
+            ((< len nchars) ; tronchiamo la stringa
+             (setq s (chop s (- nchars len)))
+             (setq caratteri (explode s))
+             (setq nchars (length caratteri)))))
+    ; costruiamo matrice di indici 0..N-1
+    (letn ((idx-mat '()) (cnt 0))
+      (for (r 0 (- rows 1))
+        (letn ((row '()))
+          (for (c 0 (- cols 1))
+            (push cnt row -1)
+            (inc cnt))
+          (push row idx-mat -1)))
+      ; ordine di lettura (spirale) sugli indici
+      (let ((order (srotola-ids (copy idx-mat))))
+        ; inizializziamo un vettore flatta con nil
+        (letn ((flatta '()) (res '()))
+          (for (i 0 (- nchars 1))
+            (push nil flatta -1))
+          ; riempiamo flatta mettendo ogni carattere
+          ; nella posizione corretta (secondo order)
+          (for (i 0 (- (length order) 1))
+            (setf (flatta (order i)) (caratteri i)))
+          ; ricostruiamo la matrice rows x cols da flatta
+          (for (r 0 (- rows 1))
+            (letn ((row '()))
+              (for (c 0 (- cols 1))
+                (push (flatta (+ (* r cols) c)) row -1))
+              (push row res -1)))
+          res)))))
+
+Proviamo:
+
+(arrotola "abcdefghijkl" 4 3)
+;-> (("h" "g" "f") ("i" "l" "e") ("j" "k" "d") ("a" "b" "c"))
+
+(arrotola "abcdefghijklm" 4 3)
+;-> (("h" "g" "f") ("i" "l" "e") ("j" "k" "d") ("a" "b" "c"))
+
+(srotola (arrotola "abcdefghijkl" 4 3))
+;-> "abcdefghijkl"
+(srotola (arrotola "abcdefghijkmnop" 4 4))
+;-> "abcdefghijkmnop"
+
+(arrotola "abcdefghijkl" 4 4)
+;-> (("j" "i" "h" "g") ("k" " " " " "f") ("l" " " " " "e") ("a" "b" "c" "d"))
+
+(srotola (arrotola "abcdefghijkl" 4 4))
+;-> "abcdefghijkl    "
 
 ============================================================================
 

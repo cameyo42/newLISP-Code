@@ -8278,6 +8278,10 @@ Sudoku 2:
 (time (solveSudoku sudoku2))
 ;-> 265.557
 
+"Enumerating possible Sudoku grids" di Bertram Felgenhauer e Frazer Jarvis
+Il numero possibile di griglie sudoku (senza riflessioni, simmetrie, ...) vale:
+6670903752021072936960
+
 
 --------------------
 CHESS960 (FREESTYLE)

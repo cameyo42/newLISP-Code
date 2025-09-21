@@ -3178,10 +3178,11 @@ NOTE LIBERE 32
   Numeri da una lista di cifre minori di N
   Dividere una lista binaria in tre parti uguali
   Lancio di uova dai piani di un palazzo
-  Srotolare il serpente
   Somma degli elementi adiacenti in una lista
   Caratteri mancanti in una stringa
   A + B = palindromo
+  Processare una stringa in base a particolari caratteri
+  Srotolare e arrotolare il serpente
 
 PROBLEMI SUI DADI
 =================
