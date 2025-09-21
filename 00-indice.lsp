@@ -3183,6 +3183,7 @@ NOTE LIBERE 32
   A + B = palindromo
   Processare una stringa in base a particolari caratteri
   Srotolare e arrotolare il serpente
+  Inserire caratteri in una stringa
 
 PROBLEMI SUI DADI
 =================

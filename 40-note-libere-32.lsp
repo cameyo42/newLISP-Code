@@ -7169,5 +7169,35 @@ Proviamo:
 (srotola (arrotola "abcdefghijkl" 4 4))
 ;-> "abcdefghijkl    "
 
+
+---------------------------------
+Inserire caratteri in una stringa
+---------------------------------
+
+Abbiamo una stringa S e una lista di coppie (carattere indice).
+Inserire ogni 'carattere' in S alla posizione 'indice'.
+Esempio:
+  S = "domanipiove"
+  lista = ((" " 6) ("!" 11)
+
+(define (insert-chars str lst)
+  (dolist (el lst)
+    ; aggiungiamo $idx perchè abbiamo aggiunto $idx caratteri
+    ; prima di aggiungere il carattere corrente, quindi l'indice
+    ; del carattere corrente si è spostato in avanti di $idx posizioni
+    (push (el 0) str (+ $idx (el 1))))
+  str)
+
+Proviamo:
+
+(insert-chars "domanipiove" '((" " 6) ("!" 11)))
+;-> "domani piove!"
+
+(insert-chars "sinosino" '((" " 2) (" " 4) (" " 6)))
+;-> "si no si no"
+
+(insert-chars "newLISisgrat" '(("P" 6) (" " 6) (" " 8) ("e" 10)))
+;-> "newLISP is great"
+
 ============================================================================
 
