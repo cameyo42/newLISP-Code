@@ -3184,6 +3184,7 @@ NOTE LIBERE 32
   Processare una stringa in base a particolari caratteri
   Srotolare e arrotolare il serpente
   Inserire caratteri in una stringa
+  Intersezione di due punti in movimento lungo linee rette
 
 PROBLEMI SUI DADI
 =================

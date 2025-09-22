@@ -7199,5 +7199,188 @@ Proviamo:
 (insert-chars "newLISisgrat" '(("P" 6) (" " 6) (" " 8) ("e" 10)))
 ;-> "newLISP is great"
 
+
+--------------------------------------------------------
+Intersezione di due punti in movimento lungo linee rette
+--------------------------------------------------------
+
+Abbiamo due punti P1 e P2 che si muovono in linea retta lungo due direzioni u1 e u2 con velocità v1 e v2.
+Scrivere una funzione che determina (se esiste) il punto di incrocio X delle due rette e il tempo trascorso da P1 e P2 per raggiungere X.
+
+Esempio (vedi immagine "traiettorieP1P2.png" nella cartella "data".)
+  A = (0 0)
+  B = (1 2)
+  u1  (1 1) ; direzione diagonale
+  u2 = (-1 0.5)
+  v1 = 2.0
+  v2 = 1.5
+ 
+Poniamo:
+
+  A=(Ax,Ay) posizione iniziale di P1,
+  B=(Bx,By) posizione iniziale di P2,
+  u1=(u1x,u1y) direzione di P1 (può essere non unitaria, la normalizziamo),
+  u2=(u2x,u2y) direzione di P2,
+  v1,v2 le velocità scalari (positive).
+
+Parametrizziamo le rette con le distanze lungo le direzioni (non ancora i tempi):
+
+  X = A + u1*d1 = B + u2*d2
+
+dove d1, d2 sono le distanze positive lungo le direzioni normalizzate u1,u2.
+Se u1,u2 sono unitari, i tempi sono t1 = d1/v1 e t2 = d2/v2.
+
+Risolviamo il sistema lineare (componenti x,y):
+
+  u1x*d1 - u2x*d2 = Bx - Ax
+  u1y*d1 - u2y*d2 = By - Ay
+
+Con il prodotto vettoriale scalare (cross) cross = u1xu2y-u1yu2x.
+
+Se cross=0 le direzioni sono parallele:
+
+  - Se (B-A)*u1 != 0 le rette sono parallele e distinte --> nessuna intersezione.
+
+  - Se (B-A)*u1 = 0 le rette sono collineari --> infinite intersezioni.
+  In caso di rette collineari possiamo vedere se esiste un d1,d2 con d1,d2 > 0:
+  1. Se crossBA != 0 --> rette parallele distinte --> ritorna ("none").
+  2. Se crossBA = 0 --> collineari.
+     Calcoliamo la proiezione di B su u_1:
+     d0 = dx*u1x + dy*u1y
+     questo è lo "scarto iniziale" di P2 rispetto a P1 lungo la retta comune.
+     Ora abbiamo equazioni monodimensionali:
+     s1(t) = v1 * t
+     s2(t) = d0 + v2 * t
+     Uguagliando:
+     v1 * t = d0 + v2 * t
+     t = d0 / (v1 - v2)
+     Poi calcoliamo X = A + u1 * (v1 * t).
+     Restituiamo (list X t t)` se l'incontro avviene.
+     Se v1=v2:
+       - Se d0=0 --> partono insieme --> infiniti incontri.
+       - Altrimenti --> mai.
+
+Se cross != 0 allora:
+  d1 = ((Bx-Ax)*u2y - (By-Ay)*u2x) / cross
+  d2 = ((Bx-Ax)*u1y - (By-Ay)*u1x) / cross
+
+Calcolo del punto di incontro e dei tempi:
+
+  X = A + u1*d1, t1=d1/v1, t2=d2/v2.
+
+Per essere un punto raggiungibile in futuro (dal tempo 0) servono d1 > 0 e d2 > 0.
+Se una delle due è negativa l'intersezione sta dietro il punto di partenza corrispondente (cioè nel passato).
+
+; Funzione per calcolare l'intersezione di due punti in movimento rettilineo uniforme
+; Input:
+;   A: posizione iniziale del punto P1 (lista con coordinate x,y)
+;   B: posizione iniziale del punto P2 (lista con coordinate x,y)
+;   u1: vettore direzione di P1 (non necessariamente unitario)
+;   u2: vettore direzione di P2 (non necessariamente unitario)
+;   v1: velocità scalare di P1 (positiva)
+;   v2: velocità scalare di P2 (positiva)
+; Output:
+;   Lista contenente: punto di intersezione, tempo per P1, tempo per P2
+;   Oppure "none" se rette parallele distinte, o "collinear" per caso collineare
+(define (intersection A B u1 u2 v1 v2)
+  ; Estrae le coordinate dei punti e dei vettori direzione
+  (letn (ax (A 0) ay (A 1) bx (B 0) by (B 1)
+         u1x (u1 0) u1y (u1 1) u2x (u2 0) u2y (u2 1))
+    ; Calcola il vettore che va da A a B
+    (setf dx (sub bx ax) dy (sub by ay))
+    ; Calcola le norme dei vettori direzione per normalizzarli
+    (setf n1 (sqrt (add (mul u1x u1x) (mul u1y u1y)))
+          n2 (sqrt (add (mul u2x u2x) (mul u2y u2y))))
+    ; Controllo per direzioni nulle (caso degenere)
+    (if (or (= n1 0) (= n2 0))
+        (println "Errore: direzione nulla")
+        ;else
+        (begin
+          ; Normalizza i vettori direzione (li rende unitari)
+          (setf u1x (div u1x n1) u1y (div u1y n1)
+                u2x (div u2x n2) u2y (div u2y n2))
+          ; Calcola il prodotto vettoriale u1 × u2 (in 2D: u1x*u2y - u1y*u2x)
+          ; Se cross = 0, le rette sono parallele
+          (setf cross (sub (mul u1x u2y) (mul u1y u2x)))
+          (if (= cross 0)
+              ; CASO RETTE PARALLELE
+              ; Verifica se sono parallele distinte o collineari
+              (let (crossBA (sub (mul dx u1y) (mul dy u1x)))
+                (if (!= crossBA 0)
+                    ; Parallele distinte - nessuna intersezione
+                    (list "none")
+                    ; CASO COLLINEARE - i punti si muovono sulla stessa retta
+                    (let (proj (add (mul dx u1x) (mul dy u1y)))
+                      (cond
+                        ; P2 è già sulla posizione iniziale di P1
+                        ((= proj 0) (list A 0 0))
+                        ; Calcola quando e dove si incontreranno
+                        (true
+                          (setf d1 proj  ; distanza che P1 deve percorrere
+                                d2 (if (> v2 0) (div d1 v2) nil)) ; tempo per P2
+                          (list "collinear"
+                                ; Punto di incontro
+                                (list (add ax (mul u1x d1)) (add ay (mul u1y d1)))
+                                (div d1 v1)  ; tempo per P1
+                                d2))))))     ; tempo per P2
+              ;else
+              ; CASO RETTE INCIDENTI - si intersecano in un punto
+              (begin
+                ; Risolve il sistema lineare usando la regola di Cramer
+                ; Trova le distanze d1 e d2 che P1 e P2 devono percorrere
+                (setf d1 (div (sub (mul dx u2y) (mul dy u2x)) cross))
+                (setf d2 (div (sub (mul dx u1y) (mul dy u1x)) cross))
+                ; Converte distanze in tempi
+                (setf t1 (div d1 v1) t2 (div d2 v2))
+                ; Calcola il punto di intersezione
+                (setf X (list (add ax (mul u1x d1)) (add ay (mul u1y d1))))
+                ; Restituisce: punto di intersezione, tempo per P1, tempo per P2
+                (list X t1 t2)))))))
+
+Proviamo:
+
+(setq A (list 0 0))
+(setq B (list 1 2))
+(setq u1 (list 1 1)) ; direzione diagonale
+(setq u2 (list -1 0.5))
+(setq v1 2.0)
+(setq v2 1.5)
+(intersection A B u1 u2 v1 v2)
+;-> ((1.66666666666667 1.66666666666667) 1.17851130197758 -0.4969039949999533)
+A = (0,0), B = (1,2), u1 = (1,1) normalizzato, u2 = (-1,0.5) normalizzato
+v1 = 2.0, v2 = 1.5
+
+Risultato: ((1.67, 1.67) 1.178 -0.497)
+- Punto di intersezione: (1.67, 1.67)
+- P1 ci arriva in 1.178 secondi (tempo positivo = futuro)
+- P2 ci arriva in -0.497 secondi (tempo negativo = doveva partire prima!)
+
+Questo significa che P2 dovrebbe essere partito circa 0.5 secondi prima
+per incontrare P1 nel punto calcolato. Dal momento attuale (t=0),
+i due punti non si incontreranno mai perché P2 è "in ritardo".
+
+Nota:
+Tempi negativi indicano che il punto doveva partire nel passato per
+raggiungere l'intersezione. In pratica, significa che dal momento t=0
+i due punti non si incontreranno mai seguendo le loro traiettorie.
+
+(setq A (list 0 0))
+(setq B (list 5 0))
+(setq u1 (list 1 0))
+(setq u2 (list -1 0))
+(setq v1 1.0)
+(setq v2 1.0)
+(intersection A B u1 u2 v1 v2)
+;-> ("collinear" (5 0) 5 5)
+
+(setq A (list 0 0))
+(setq B (list 2 0))
+(setq u1 (list 1 0))
+(setq u2 (list 1 0))
+(setq v1 1.0)
+(setq v2 2.0)
+(intersection A B u1 u2 v1 v2)
+;-> ("collinear" (2 0) 2 1)
+
 ============================================================================
 
