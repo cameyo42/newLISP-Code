@@ -7382,5 +7382,178 @@ i due punti non si incontreranno mai seguendo le loro traiettorie.
 (intersection A B u1 u2 v1 v2)
 ;-> ("collinear" (2 0) 2 1)
 
+
+--------------------------------------------
+Numeri dispari in riga e numeri pari in riga
+--------------------------------------------
+
+A) Scriviamo i numeri dispari un numero dispari di volte per riga, in questo modo:
+
+  1
+  3 5 7
+  9 11 13 15 17
+  19 21 23 25 27 29 31
+  ...
+
+La prima riga contiene 1 numero, la riga successiva 3, la successiva 5 e così via, contenenti tutti i numeri dispari in ordine sequenziale.
+
+Funzione per generare un dato numero di righe con numeri dispari:
+
+(define (dispari rows)
+  (local (out start end nums)
+    (setq out '((1)))
+    (setq start 3)
+    (for (r 2 rows)
+      (setq nums (- (* r 2) 1))
+      (setq end (+ start (* (- nums 1) 2)))
+      (push (sequence start end 2) out -1)
+      (setq start (+ end 2)))
+    out))
+
+(map println (dispari 4))
+;-> (1)
+;-> (3 5 7)
+;-> (9 11 13 15 17)
+;-> (19 21 23 25 27 29 31)
+
+Possiamo estrapolare una formula che, data la riga N, restituisce il primo e l'ultimo numero della riga.
+Analizziamo il pattern per trovare le formule per il primo e l'ultimo numero di ogni riga N.
+
+- Riga 1: 1 numero (1)
+- Riga 2: 3 numeri (3, 5, 7)
+- Riga 3: 5 numeri (9, 11, 13, 15, 17)
+- Riga 4: 7 numeri (19, 21, 23, 25, 27, 29, 31)
+
+La riga N contiene (2N-1) numeri dispari consecutivi.
+
+Formula per il Primo Numero:
+----------------------------
+Il primo numero della riga N è il numero dispari che segue tutti i numeri delle righe precedenti.
+
+Numeri totali nelle prime (N-1) righe:
+- Riga 1: 1 numero
+- Riga 2: 3 numeri
+- Riga 3: 5 numeri
+- ...
+- Riga (N-1): (2(N-1)-1) = (2N-3) numeri
+
+Totale = 1 + 3 + 5 + ... + (2N-3) = (N-1)^2
+
+Poiché il k-esimo numero dispari è (2k-1), il primo numero della riga N è:
+
+  Primo numero riga N = 2*(N-1)^2 + 1
+
+Formula per l'Ultimo Numero:
+----------------------------
+Se il primo numero della riga N è 2(N-1)^2 + 1 e la riga N contiene (2N-1) numeri dispari consecutivi, allora:
+
+Ultimo numero = Primo numero + 2 * (numeri nella riga - 1)
+Ultimo numero = 2(N-1)^2 + 1 + 2 * (2N-1-1)
+Ultimo numero = 2(N-1)^2 + 1 + 2(2N-2)
+Ultimo numero = 2(N-1)^2 + 1 + 4N - 4
+Ultimo numero = 2(N-1)^2 + 4N - 3
+
+Espandendo 2(N-1)^2:
+Ultimo numero = 2(N^2 - 2N + 1) + 4N - 3
+Ultimo numero = 2N^2 - 4N + 2 + 4N - 3
+Ultimo numero = 2N^2 - 1
+
+Quindi per la riga dispari N le formule sono:
+
+  Primo numero:  2*(N-1)^2 + 1
+  Ultimo numero: 2*N^2 - 1
+
+(define (primo-dispari n)  (+ (* 2 (- n 1) (- n 1)) 1))
+(define (ultimo-dispari n) (- (* 2 n n) 1))
+
+Verifichiamo se la funzione e le formule producono lo stesso risultato:
+
+(= (map first (dispari 200)) (map primo-dispari (sequence 1 200)))
+;-> true
+(= (map last (dispari 200)) (map ultimo-dispari (sequence 1 200)))
+;-> true
+
+B) Scriviamo i numeri pari un numero pari di volte per riga, in questo modo:
+
+  2 4
+  6 8 10 12
+  14 16 18 20 22 24
+  26 28 30 32 34 36 38 40
+  ...
+
+La prima riga contiene 2 numero, la riga successiva 4, la successiva 6 e così via, contenenti tutti i numeri dispari in ordine sequenziale.
+
+Funzione per generare un dato numero di righe con numeri dispari:
+
+(define (pari rows)
+  (local (out start end nums)
+    (setq out '())
+    (setq start 2)
+    (for (r 1 rows)
+      (setq nums (* r 2))
+      (setq end (+ start (- (* nums 2) 2)))
+      (push (sequence start end 2) out -1)
+      (setq start (+ end 2)))
+    out))
+
+(map println (pari 6))
+;-> (2 4)
+;-> (6 8 10 12)
+;-> (14 16 18 20 22 24)
+;-> (26 28 30 32 34 36 38 40)
+;-> (42 44 46 48 50 52 54 56 58 60)
+;-> (62 64 66 68 70 72 74 76 78 80 82 84)
+
+E quali sono le formule nel caso di righe con numeri pari?
+
+Analizziamo il pattern per i numeri pari seguendo la stessa logica.
+
+- Riga 1: 2 numeri (2, 4)
+- Riga 2: 4 numeri (6, 8, 10, 12)
+- Riga 3: 6 numeri (14, 16, 18, 20, 22, 24)
+- Riga 4: 8 numeri (26, 28, 30, 32, 34, 36, 38, 40)
+
+La riga N contiene `2N` numeri pari consecutivi.
+
+Formula per il Primo Numero:
+----------------------------
+Il primo numero della riga N è il numero pari che segue tutti i numeri delle righe precedenti.
+
+Numeri totali nelle prime (N-1) righe:
+- Riga 1: 2 numeri
+- Riga 2: 4 numeri  
+- Riga 3: 6 numeri
+- ...
+- Riga (N-1): 2(N-1) numeri
+
+Totale = 2 + 4 + 6 + ... + 2(N-1) = 2(1 + 2 + 3 + ... + (N-1)) = 2 * (N-1)N/2 = N(N-1)
+
+Poiché il k-esimo numero pari è 2k, il primo numero della riga N è:
+
+  Primo numero riga N = 2N(N-1) + 2 = 2N^2 - 2N + 2**
+
+Formula per l'Ultimo Numero:
+----------------------------
+L'ultimo numero è il primo numero più 2 * (2N-1):
+
+Ultimo numero = 2N^2 - 2N + 2 + 2(2N-1)
+Ultimo numero = 2N^2 - 2N + 2 + 4N - 2
+Ultimo numero = 2N^2 + 2N
+
+Quindi per la riga pari N le formule sono:
+
+  Primo numero:  2*N^2 - 2*N + 2
+  Ultimo numero: 2*N^2 + 2*N
+
+(define (primo-pari n)  (- (* 2 n n) (* 2 n) -2))
+(define (ultimo-pari n) (+ (* 2 n n) (* 2 n)))
+
+Verifichiamo se la funzione e le formule producono lo stesso risultato:
+
+(= (map first (pari 200)) (map primo-pari (sequence 1 200)))
+;-> true
+(= (map last (pari 200)) (map ultimo-pari (sequence 1 200)))
+;-> true
+
 ============================================================================
 
