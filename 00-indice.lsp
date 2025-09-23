@@ -3186,6 +3186,7 @@ NOTE LIBERE 32
   Inserire caratteri in una stringa
   Intersezione di due punti in movimento lungo linee rette
   Numeri dispari in riga e numeri pari in riga
+  Guardie e ladri in una griglia
 
 PROBLEMI SUI DADI
 =================

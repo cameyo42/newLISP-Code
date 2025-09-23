@@ -7555,5 +7555,225 @@ Verifichiamo se la funzione e le formule producono lo stesso risultato:
 (= (map last (pari 200)) (map ultimo-pari (sequence 1 200)))
 ;-> true
 
+
+------------------------------
+Guardie e ladri in una griglia
+------------------------------
+
+Nelle celle di una matrice MxN sono posizionate alcune Guardie, alcuni Ladri e dei Muri.
+Ogni cella può contenere un solo elemento.
+Ogni guardia 'guarda' nelle quattro direzioni (Nord, Est, Sud e Ovest) fino ad incontrare un muro, un'altra guardia o un ladro.
+In altre parole 'vede' le celle come le mosse possibili di una Torre degli Scacchi.
+Quali ladri sono visibili alle guardie?
+Quali ladri sono invisibili alle guardie?
+
+Esempio:
+
+  M = 5
+  N = 6
+  Guardie = 3
+  Ladri = 2
+  Muri = 4
+
+  +----+----+----+----+----+----+
+  | G1 |    |    |    |    |    |
+  +----+----+----+----+----+----+
+  |    | M1 |    |    | G3 |    |
+  +----+----+----+----+----+----+
+  |    |    |    | M2 | M3 |    |
+  +----+----+----+----+----+----+
+  | L1 | M4 | G2 |    |    |    |
+  +----+----+----+----+----+----+
+  |    |    |    |    | L2 |    |
+  +----+----+----+----+----+----+
+
+  G1 vede L1
+  G2 non vede nessun ladro
+  G3 non vede nessun ladro
+  Solo il ladro L1 è visibile dalle guardie.
+  L2 non è visto da nessuna guardia.
+
+Poniamo:
+
+  0 = cella invisibile
+  1 = cella visibile
+  2 = muro
+  3 = guardia
+  4 = ladro
+
+L'esempio diventa:
+
+  +----+----+----+----+----+----+
+  | 3  |    |    |    |    |    |
+  +----+----+----+----+----+----+
+  |    | 2  |    |    | 3  |    |
+  +----+----+----+----+----+----+
+  |    |    |    | 2  | 2  |    |
+  +----+----+----+----+----+----+
+  | 4  | 2  | 3  |    |    |    |
+  +----+----+----+----+----+----+
+  |    |    |    |    | 4  |    |
+  +----+----+----+----+----+----+
+
+All'inizio non esiste alcuna cella visibile.
+Per ogni guardia controlliamo quali celle 'vede' in tutte e quattro le direzioni e impostiamo a 1 (visibili) le relative celle della griglia.
+Se durante il controllo 'vediamo' un ladro, allora inseriamo il ladro nella lista dei visibili.
+La lista degli invisibili è data dalla differenza tra la lista iniziale dei ladri e la lista dei ladri visibili.
+
+Funzione che stampa la griglia:
+
+(define (print-grid matrix)
+  (local (row col)
+    (setq row (length matrix))
+    (setq col (length (matrix 0)))
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        (print (format "%2d " (matrix i j))))
+      (println)) (println)))
+
+Funzione che trova i ladri visibili e invisibili:
+
+(define (look M N muri guardie ladri show)
+  (local (grid dirs visibili invisibili
+          row col step-row step-col cur-row cur-col)
+    ; crea la griglia
+    (setq grid (array-list (array M N '(0))))
+    ; inserisce i muri nella griglia
+    (dolist (m muri) (setf (grid (m 0) (m 1)) 2))
+    ; inserisce le guardie nella griglia
+    (dolist (g guardie) (setf (grid (g 0) (g 1)) 3))
+    ; inserisce i ladri nella griglia
+    (dolist (l ladri) (setf (grid (l 0) (l 1)) 4))
+    ; stampa la griglia di partenza
+    (if show (print-grid grid))
+    ; lista delle 4 direzioni
+    (setq dirs '((-1 0) (0 1) (1 0) (0 -1)))
+    ; lista dei ladri visibili
+    (setq visibili '())
+    ; lista dei ladri invisibili
+    (setq invisibili '())
+    ; ciclo per ogni guardia
+    (dolist (g guardie)
+      (dolist (dir dirs)
+        (setq row (g 0)) ; riga corrente
+        (setq col (g 1)) ; colonna corrente
+        ;(print "row: " row { } "col: " col) (read-line)
+        ; direzione corrente riga
+        (setq step-row (dir 0))
+        ; direzione corrente colonna
+        (setq step-col (dir 1))
+        ; ciclo finchè non incontriamo un ostacolo
+        (setq continua true)
+        (while (and continua
+                    (>= (+ row step-row) 0)
+                    (<  (+ row step-row) M)
+                    (>= (+ col step-col) 0)
+                    (<  (+ col step-col) N))
+          (setq cur-row (+ row step-row))
+          (setq cur-col (+ col step-col))
+          ;(print cur-row { } cur-col) (read-line)
+          (cond ((< (grid cur-row cur-col) 2)
+                  ; cella con valore minore di 2 (0 = invisibile, 1 = visibile)
+                  (++ row step-row)
+                  (++ col step-col)
+                  ; imposta la cella a visibile
+                  (setf (grid row col) 1))
+                ((or (= (grid cur-row cur-col) 2)
+                     (= (grid cur-row cur-col) 3))
+                  ; cella = 2 --> Muro oppure cella = 3 --> Guardia
+                  ; stop in direzione corrente
+                  (setq continua nil))
+                ; cella con valore 4 --> Ladro
+                ((= (grid cur-row cur-col) 4)
+                  ; inserisce ladro corrente nella lista dei visibili
+                  (push (list cur-row cur-col) visibili -1)
+                  ; stop in direzione corrente
+                  (setq continua nil)))
+        )
+      )
+    )
+    ; rende unici i visibili multipli (i ladri visti da più di una guardia)
+    (setq visibili (unique visibili))
+    ; calcola i ladri invisibili
+    (setq invisibili (difference ladri visibili))
+    ; stampa la griglia finale
+    (if show (print-grid grid))
+    (list visibili invisibili)))
+
+Proviamo con i valori dell'esempio:
+
+(setq m '((1 1) (2 3) (2 4) (3 1)))
+(setq g '((0 0) (1 4) (3 2)))
+(setq l '((3 0) (4 4)))
+
+(look 5 6 m g l true)
+;->  3  0  0  0  0  0
+;->  0  2  0  0  3  0
+;->  0  0  0  2  2  0
+;->  4  2  3  0  0  0
+;->  0  0  0  0  4  0
+;->
+;->  3  1  1  1  1  1
+;->  1  2  1  1  3  1
+;->  1  0  1  2  2  0
+;->  4  2  3  1  1  1
+;->  0  0  1  0  4  0
+;->
+;-> (((3 0)) ((4 4)))
+
+Funzione che genera una griglia MxN con un numero predefinito di muri, guardie e ladri in posizioni casuali:
+
+(define (genera-elementi M N num-m num-g num-l)
+  ; se il numero di celle è inferiore al totale degli elementi da inserire,
+  ; allora restituisce una lista vuota
+  (if (< (* M N) (+ num-m num-g num-l)) '()
+  ;else
+  (let (celle '())
+    ; genera tutte le celle di una matrice N x M
+    (for (r 0 (- M 1))
+      (for (c 0 (- N 1))
+        (push (list r c) celle -1)))
+    ; mischia le celle
+    (setq celle (randomize celle))
+    ; seleziona casualmente le posizioni dei muri
+    (setq m (slice celle 0 num-m))
+    ; seleziona casualmente le posizioni delle guardie
+    (setq g (slice celle num-m num-g))
+    ; seleziona casualmente le posizioni dei ladri
+    (setq l (slice celle (+ num-m num-g) num-l))
+    (list m g l))))
+
+Proviamo:
+
+M=10, N=10, m=25, g=5, l=5
+(setq all (genera-elementi 10 10 25 5 5))
+(setq m (all 0))
+(setq l (all 1))
+(setq g (all 2))
+(look 10 10 m g l true)
+;->  2  2  0  0  0  0  0  0  0  3
+;->  0  0  0  0  0  2  2  0  0  0
+;->  2  3  0  2  2  2  0  0  0  0
+;->  2  2  2  0  0  0  0  3  2  0
+;->  2  3  0  0  0  0  0  2  0  0
+;->  2  0  0  4  0  0  2  2  0  0
+;->  2  0  3  0  0  4  0  0  4  0
+;->  0  4  4  0  2  0  2  0  0  0
+;->  0  2  0  2  0  0  0  2  0  0
+;->  2  0  0  0  0  0  0  0  0  2
+;-> 
+;->  2  2  1  1  1  1  1  1  1  3
+;->  0  1  0  0  0  2  2  1  0  1
+;->  2  3  1  2  2  2  0  1  0  1
+;->  2  2  2  1  1  1  1  3  2  1
+;->  2  3  1  1  1  1  1  2  0  1
+;->  2  1  1  4  0  0  2  2  0  1
+;->  2  1  3  1  1  4  0  0  4  1
+;->  0  4  4  0  2  0  2  0  0  1
+;->  0  2  0  2  0  0  0  2  0  1
+;->  2  0  0  0  0  0  0  0  0  2
+;-> 
+;-> (((7 1) (6 5) (7 2)) ((5 3) (6 8)))
+
 ============================================================================
 
