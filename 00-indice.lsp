@@ -3187,6 +3187,8 @@ NOTE LIBERE 32
   Intersezione di due punti in movimento lungo linee rette
   Numeri dispari in riga e numeri pari in riga
   Guardie e ladri in una griglia
+  Persone e segreti
+  La funzione "reshape" di MATLAB
 
 PROBLEMI SUI DADI
 =================

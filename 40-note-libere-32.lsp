@@ -2943,7 +2943,7 @@ Viene utilizzato un algoritmo diverso che suddivide la stringa sorgente "str-dat
 (parse "one:two:three" ":")
 ;-> ("one" "two" "three")
 
-;; specifying a break string
+; specifying a break string
 (parse "one--two--three" "--")
 ;-> ("one" "two" "three")
 
@@ -7774,6 +7774,216 @@ M=10, N=10, m=25, g=5, l=5
 ;->  2  0  0  0  0  0  0  0  0  2
 ;-> 
 ;-> (((7 1) (6 5) (7 2)) ((5 3) (6 8)))
+
+
+-----------------
+Persone e segreti
+-----------------
+
+Abbiamo un numero indefinito di persone.
+Una persona conosce un segreto che vuole condividere.
+La condivisione del segreto funziona in base alle seguenti regole:
+
+1) Regola di condivisione: dopo che una persona scopre il segreto, attende X giorni prima di poterlo condividere.
+Una volta che può, condivide il segreto con una sola persona al giorno.
+
+2) Regola di dimenticanza: una persona dimentica il segreto esattamente Y giorni dopo averlo scoperto.
+Una volta dimenticato, non può più condividerlo.
+
+3) Vincolo temporale: una persona non può condividere il segreto lo stesso giorno in cui lo dimentica.
+
+In altre parole, ogni persona che conosce il segreto non lo comunica per X giorni e poi, ogni giorno, lo condivide con una nuova persona per (Y - 1) giorni.
+
+Dopo N giorni, quante persone conoscono il segreto?
+
+; Funzione per calcolare quante persone conoscono il segreto dopo N giorni
+; X = giorni di attesa prima di poter condividere
+; Y = giorni totali prima di dimenticare il segreto  
+; N = giorni totali trascorsi
+(define (persone-con-segreto X Y N show)
+  "Calcola il numero di persone che conoscono il segreto al giorno N"
+  (let ((persone-per-giorno (array (+ N 1) '(0))))  ; Array per tracciare persone che scoprono il segreto ogni giorno
+    ; La prima persona scopre il segreto al giorno 1 (non 0)
+    (setf (persone-per-giorno 1) 1)
+    (if show
+      (println (format "Giorno 1, persone che scoprono: %d" (persone-per-giorno 1))))
+    ; Per ogni giorno da 2 a N
+    (for (giorno 2 N)
+      (let ((nuove-persone 0))
+        (if show (println (format "\n=== Giorno %d ===" giorno)))
+        ; Per ogni giorno precedente, verifica se ci sono persone che possono condividere oggi
+        (for (g 1 (- giorno 1))
+          (when (> (persone-per-giorno g) 0) ; se quel giorno qualcuno ha scoperto il segreto
+            ; Calcola quando queste persone possono condividere
+            (let ((inizio-condivisione (+ g X))
+                  (giorno-dimenticanza (+ g Y))
+                  (fine-condivisione (- (+ g Y) 1))) ; non può condividere il giorno in cui dimentica
+              (if show
+                (println (format "Persone del giorno %d (%d persone): possono condividere dal giorno %d al %d, dimenticano al giorno %d"
+                         g (persone-per-giorno g) inizio-condivisione fine-condivisione (+ g Y))))
+              (when (and (>= giorno inizio-condivisione)
+                         (<= giorno fine-condivisione))
+                (if show (println (format "Le %d persone del giorno %d condividono oggi!" (persone-per-giorno g) g)))
+                (setf nuove-persone (+ nuove-persone (persone-per-giorno g)))))))
+        (if show (println (format "Totale nuove persone oggi: %d" nuove-persone)))
+        ; Registra le nuove persone che scoprono il segreto oggi
+        (setf (persone-per-giorno giorno) nuove-persone)))
+    (if show (println "\n=== Calcolo finale ==="))
+    ; Conta tutte le persone che ancora conoscono il segreto al giorno N
+    ; (quelle che l'hanno scoperto e non hanno ancora dimenticato)
+    (let ((totale 0))
+      (for (g 1 N)
+        (when (> (persone-per-giorno g) 0)
+          (let ((giorno-dimenticanza (+ g Y))) ; dimentica Y giorni dopo aver scoperto
+            (if show (println (format "Giorno %d - %d persone, dimenticano al giorno %d"
+                              g (persone-per-giorno g) giorno-dimenticanza)))
+            (when (> giorno-dimenticanza N) ; non hanno ancora dimenticato
+              (if show (println (format "Le persone del giorno %d ancora ricordano al giorno %d" g N)))
+              (setf totale (+ totale (persone-per-giorno g)))))))
+      (if show (println (format "Totale finale: %d" totale)))
+      totale)))
+
+Proviamo:
+
+(persone-con-segreto 2 4 6)
+;-> 5
+
+(persone-con-segreto 2 4 6 true)
+;-> Giorno 1, persone che scoprono: 1
+;-> === Giorno 2 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Totale nuove persone oggi: 0
+;-> === Giorno 3 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Le 1 persone del giorno 1 condividono oggi!
+;-> Totale nuove persone oggi: 1
+;-> === Giorno 4 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Le 1 persone del giorno 1 condividono oggi!
+;-> Persone del giorno 3 (1 persone): possono condividere dal giorno 5 al 6, dimenticano al giorno 7
+;-> Totale nuove persone oggi: 1
+;-> === Giorno 5 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Persone del giorno 3 (1 persone): possono condividere dal giorno 5 al 6, dimenticano al giorno 7
+;-> Le 1 persone del giorno 3 condividono oggi!
+;-> Persone del giorno 4 (1 persone): possono condividere dal giorno 6 al 7, dimenticano al giorno 8
+;-> Totale nuove persone oggi: 1
+;-> === Giorno 6 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Persone del giorno 3 (1 persone): possono condividere dal giorno 5 al 6, dimenticano al giorno 7
+;-> Le 1 persone del giorno 3 condividono oggi!
+;-> Persone del giorno 4 (1 persone): possono condividere dal giorno 6 al 7, dimenticano al giorno 8
+;-> Le 1 persone del giorno 4 condividono oggi!
+;-> Persone del giorno 5 (1 persone): possono condividere dal giorno 7 al 8, dimenticano al giorno 9
+;-> Totale nuove persone oggi: 2
+;-> === Calcolo finale ===
+;-> Giorno 1 - 1 persone, dimenticano al giorno 5
+;-> Giorno 3 - 1 persone, dimenticano al giorno 7
+;-> Le persone del giorno 3 ancora ricordano al giorno 6
+;-> Giorno 4 - 1 persone, dimenticano al giorno 8
+;-> Le persone del giorno 4 ancora ricordano al giorno 6
+;-> Giorno 5 - 1 persone, dimenticano al giorno 9
+;-> Le persone del giorno 5 ancora ricordano al giorno 6
+;-> Giorno 6 - 2 persone, dimenticano al giorno 10
+;-> Le persone del giorno 6 ancora ricordano al giorno 6
+;-> Totale finale: 5
+;-> 5
+
+(persone-con-segreto 1 3 4)
+;-> 6
+
+(persone-con-segreto 1 3 4 true)
+
+; Funzione ausiliaria per mostrare la progressione giorno per giorno
+(define (mostra-progressione X Y N)
+  "Mostra la progressione del segreto giorno per giorno"
+  (println (format "X=%d giorni attesa, Y=%d giorni memoria, N=%d giorni totali\n" X Y N))
+  (println "Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce")
+  (println "-------|-------|----------------------------------|------------------")
+  (let ((persone-per-giorno (array (+ N 1) '(0))))
+    ; La prima persona scopre il segreto al giorno 1
+    (setf (persone-per-giorno 1) 1)
+    ; Mostra il giorno 1
+    (println (format "%6d | %5d | %-32s | %16d" 1 1 "nessuno" 1))
+    (for (giorno 2 N)
+      (let ((nuove-persone 0)
+            (condivisori '()))
+        ; Trova chi può condividere oggi
+        (for (g 1 (- giorno 1))
+          (when (> (persone-per-giorno g) 0)
+            (let ((inizio-condivisione (+ g X))
+                  (giorno-dimenticanza (+ g Y))
+                  (fine-condivisione (- (+ g Y) 1))) ; non può condividere il giorno in cui dimentica
+              (when (and (>= giorno inizio-condivisione)
+                         (<= giorno fine-condivisione))
+                (setf nuove-persone (+ nuove-persone (persone-per-giorno g)))
+                (push g condivisori)))))
+        (setf (persone-per-giorno giorno) nuove-persone)
+        ; Calcola il totale attuale
+        (let ((totale 0))
+          (for (g 1 giorno)
+            (when (> (persone-per-giorno g) 0)
+              (let ((giorno-dimenticanza (+ g Y))) ; dimentica Y giorni dopo aver scoperto
+                (when (> giorno-dimenticanza giorno)
+                  (setf totale (+ totale (persone-per-giorno g)))))))
+          (println (format "%6d | %5d | %-32s | %16d"
+                          giorno
+                          nuove-persone
+                          (if (empty? condivisori) "nessuno" (string condivisori))
+                          totale))))))
+  (println))
+
+Proviamo:
+
+(mostra-progressione 2 4 6)
+;-> X=2 giorni attesa, Y=4 giorni memoria, N=6 giorni totali
+;-> 
+;-> Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce
+;-> -------|-------|----------------------------------|------------------
+;->      1 |     1 | nessuno                          |                1
+;->      2 |     0 | nessuno                          |                1
+;->      3 |     1 | (1)                              |                2
+;->      4 |     1 | (1)                              |                3
+;->      5 |     1 | (3)                              |                3
+;->      6 |     2 | (4 3)                            |                5
+
+(mostra-progressione 1 3 4)
+;-> Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce
+;-> -------|-------|----------------------------------|------------------
+;->      1 |     1 | nessuno                          |                1
+;->      2 |     1 | (1)                              |                2
+;->      3 |     2 | (2 1)                            |                4
+;->      4 |     3 | (3 2)                            |                6
+
+
+-------------------------------
+La funzione "reshape" di MATLAB
+-------------------------------
+
+Il software scientifico MATLAB ha una funzione chiamata 'reshape' che trasforma una matrice MxN in una nuova matrice con una dimensione diversa RxC, mantenendo i dati originali.
+La nuova matrice viene riempita con tutti gli elementi della matrice originale nello stesso ordine di attraversamento delle righe in cui si trovavano.
+Comunque, se MxN != RxC, allora l'operazione di trasformazione non è possibile (il numero di celle delle due matrici è diverso).
+Scrivere una funzione che, data matrice MxN e le dimensioni R e C, restituisce (se possibile) la matrice trasformata.
+
+La funzione 'array-list' svolge tutto il lavoro di trasformazione.
+
+(define (reshape-matrix mtx R C)
+  (let ( (M (length mtx)) (N (length (mtx 0))) )
+    (if-not (= (* M N) (* R C))
+      '()
+    ;else
+      (array-list (array R C (flat mtx))))))
+
+Proviamo:
+
+(reshape-matrix '((1 2) (3 4)) 1 4)
+;-> ((1 2 3 4))
+
+(reshape-matrix '((1 2 3 4) (5 6 7 8) (9 10 11 12)) 2 6)
+;-> ((1 2 3 4 5 6) (7 8 9 10 11 12))
+
+(reshape-matrix '((1 2 3) (4 5 6) (7 8 9)) 3 3)
+;-> ((1 2 3) (4 5 6) (7 8 9))
 
 ============================================================================
 
