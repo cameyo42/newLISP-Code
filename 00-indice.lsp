@@ -3189,6 +3189,7 @@ NOTE LIBERE 32
   Guardie e ladri in una griglia
   Persone e segreti
   La funzione "reshape" di MATLAB
+  Imbottigliare il vino
 
 PROBLEMI SUI DADI
 =================

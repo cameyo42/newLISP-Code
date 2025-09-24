@@ -2390,10 +2390,10 @@ Esempio:
       (let ( (all '()) (minimo 0) (massimo 0) )
         ; per ogni numero di cifre da 1 a k
         (for (i 1 k) ; i = numero di cifre
-          ; calcoliamo minimo e massimo dell’intervallo
+          ; calcoliamo minimo e massimo dell'intervallo
           (setq minimo (pow 10 (sub i 1)))
           (setq massimo (sub (pow 10 i) 1))
-          ; aggiungiamo l’intervallo (minimo, massimo), tagliato da max-num
+          ; aggiungiamo l'intervallo (minimo, massimo), tagliato da max-num
           (push (list minimo massimo) all -1)
         )
         ;(println all { } (length all))
@@ -2438,10 +2438,10 @@ In questo caso dobbiamo calcolare k e considerare quando inserire il valore mass
         (if (= max-num (pow 10 k)) (++ k))
         ; per ogni numero di cifre da 1 a k
         (for (i 1 k) ; i = numero di cifre
-          ; calcoliamo minimo e massimo dell’intervallo
+          ; calcoliamo minimo e massimo dell'intervallo
           (setq minimo (pow 10 (sub i 1)))
           (setq massimo (sub (pow 10 i) 1))
-          ; aggiungiamo l’intervallo (minimo, massimo), tagliato da max-num
+          ; aggiungiamo l'intervallo (minimo, massimo), tagliato da max-num
           (push (list minimo (min max-num massimo)) all -1)
         )
         ;(println all { } (length all))
@@ -7984,6 +7984,79 @@ Proviamo:
 
 (reshape-matrix '((1 2 3) (4 5 6) (7 8 9)) 3 3)
 ;-> ((1 2 3) (4 5 6) (7 8 9))
+
+
+---------------------
+Imbottigliare il vino
+---------------------
+
+Dobbiamo imbottigliare una fila bottiglie di vino con capacità diverse.
+Abbiamo a disposizione un contenitore con una data capacità.
+Il processo di imbottigliamento funziona nel modo seguente:
+1) Si riempie il contenitore da una damigiana.
+2) Si imbottigliano, in ordine della fila, tutte le bottiglie che possono essere riempite completamente.
+3) Quando nel contenitore non c'è vino sufficiente a riempire la prossima bottiglia, allora si ritorna a riempire il contenitore dalla damigiana.
+
+Data una lista contenente le capacità di ogni bottiglia e la capacità del contenitore, calcolare quante volte occorre riempire il contenitore dalla damigiana per poter riempire tutte le bottiglie.
+
+Esempio:
+  bottiglie = (2 2 3 3 1)
+  contenitore = 5
+  Primo riempimento --> con 5 posso riempire 2 e 2
+  Rimane un litro nel contenitore, che non basta per riempire la prossima bottiglia da 3 litri.
+  Secondo riempimento --> con 5 posso riempire solo 3
+  Rimangono due litri nel contenitore, che non basta per riempire la prossima bottiglia da 3 litri.
+  Terzo riempimento --> con 5 posso riempire solo 3 e 1.
+  Fine delle bottiglie.
+  Numero totale riempimenti = 3
+
+Algoritmo:
+  1) si parte dalla prima bottiglia
+  3) ad ogni riempimento si riempie il maggior numero possibile di
+     bottiglie consecutive finché la somma delle capacità non eccede C
+     (per ogni bottiglia controllare se la capacità 
+      della bottiglia è maggiore di C --> nil)
+  4) si incrementa il contatore dei riempimenti
+  5) si avanza all'indice della prossima bottiglia rimasta da riempire
+  6) si ripete fino alla fine della lista
+
+; Funzione che calcola il numero minimo di riempimenti del contenitore
+; per riempire tutte le bottiglie in ordine.
+; Parametri:
+;   bottiglie --> lista delle capacità di ciascuna bottiglia (es. '(2 2 3 3 1))
+;   C         --> capacità del contenitore
+(define (riempimenti bottiglie C)
+  (letn ( (len (length bottiglie)) (idx 0) (conta 0) (continua true) )
+    ; finché ci sono bottiglie da riempire
+    (while (and continua (< idx len))
+      (++ conta)
+      (if (> (bottiglie idx) C)
+          (setq continua nil)
+      ;else  
+          ; nuovo riempimento del contenitore
+          ; vino consumato
+          (let (consumo 0)
+            ; finché restano bottiglie e la prossima entra nel contenitore
+            (while (and (< idx len) (<= (+ consumo (bottiglie idx)) C))
+              ; aggiorna vino consumato
+              (setq consumo (+ consumo (bottiglie idx)))
+              ; passa alla prossima bottiglia
+              (++ idx)))))
+    (if continua conta nil)))
+
+Proviamo: 
+
+(riempimenti '(2 2 3 3 1) 5)
+;-> 3
+
+(riempimenti '(1 1 1 4 2 3) 4)
+;-> 4
+
+(riempimenti '(1 1 1 4 2 3) 3)
+;-> nil
+
+(riempimenti '(4 4 4 4 4 4) 5)
+;-> 6
 
 ============================================================================
 
