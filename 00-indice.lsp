@@ -3191,6 +3191,7 @@ NOTE LIBERE 32
   La funzione "reshape" di MATLAB
   Imbottigliare il vino
   Collisioni di punti
+  Operazioni cicliche su una sequenza
 
 PROBLEMI SUI DADI
 =================

@@ -6391,7 +6391,7 @@ Il metodo il seguente:
    - Se non si rompe --> cercare nei piani superiori con 'k' uova e 'mosse-1' lanci.
 4. Ripetere fino a terminare le mosse.
 
-Esempio: 
+Esempio:
 (solve 2 6)
 
 Abbiamo trovato 'mosse = 3'.
@@ -6414,7 +6414,7 @@ Dal ramo "non si rompe di nuovo":
 
 Quindi la strategia ottimale è: Lancia da 2 --> poi 4 --> poi 5
 
-Esempio: 
+Esempio:
 (solve 3 14)
 
 Abbiamo trovato 'mosse = 4'.
@@ -6516,11 +6516,11 @@ Doppio ciclo per generare e verificare tutte le somme degli elementi adiacenti.
         ;(println "somma: " somma) (read-line)
         ; Controllo somma == N...
         (when (= somma N)
-          ; ricostruzione dei numeri della somma  
+          ; ricostruzione dei numeri della somma
           (for (k i j) (push (lst k) out -1))
-          ; stop primo ciclo 
+          ; stop primo ciclo
           (setq stop1 true)
-          ; stop secondo ciclo 
+          ; stop secondo ciclo
           (setq stop2 true))
         ; se la somma supera N, allora fermiamo il secondo ciclo.
         (if (> somma N) (setq stop2 true))))
@@ -6547,7 +6547,7 @@ Se calcoliamo una lista di somme cumulative:
 
 allora la somma di un segmento lst(i..j) si ottiene come:
 
-  somma(i..j) = prefix(j) - prefix(i-1) 
+  somma(i..j) = prefix(j) - prefix(i-1)
   (con l'accortezza che prefix(-1) = 0).
 
 Così ogni somma si ricava in tempo O(1) senza dover accumulare in un ciclo interno.
@@ -7214,7 +7214,7 @@ Esempio (vedi immagine "traiettorieP1P2.png" nella cartella "data".)
   u2 = (-1 0.5)
   v1 = 2.0
   v2 = 1.5
- 
+
 Poniamo:
 
   A=(Ax,Ay) posizione iniziale di P1,
@@ -7521,7 +7521,7 @@ Il primo numero della riga N è il numero pari che segue tutti i numeri delle ri
 
 Numeri totali nelle prime (N-1) righe:
 - Riga 1: 2 numeri
-- Riga 2: 4 numeri  
+- Riga 2: 4 numeri
 - Riga 3: 6 numeri
 - ...
 - Riga (N-1): 2(N-1) numeri
@@ -7761,7 +7761,7 @@ M=10, N=10, m=25, g=5, l=5
 ;->  0  4  4  0  2  0  2  0  0  0
 ;->  0  2  0  2  0  0  0  2  0  0
 ;->  2  0  0  0  0  0  0  0  0  2
-;-> 
+;->
 ;->  2  2  1  1  1  1  1  1  1  3
 ;->  0  1  0  0  0  2  2  1  0  1
 ;->  2  3  1  2  2  2  0  1  0  1
@@ -7772,7 +7772,7 @@ M=10, N=10, m=25, g=5, l=5
 ;->  0  4  4  0  2  0  2  0  0  1
 ;->  0  2  0  2  0  0  0  2  0  1
 ;->  2  0  0  0  0  0  0  0  0  2
-;-> 
+;->
 ;-> (((7 1) (6 5) (7 2)) ((5 3) (6 8)))
 
 
@@ -7798,7 +7798,7 @@ Dopo N giorni, quante persone conoscono il segreto?
 
 ; Funzione per calcolare quante persone conoscono il segreto dopo N giorni
 ; X = giorni di attesa prima di poter condividere
-; Y = giorni totali prima di dimenticare il segreto  
+; Y = giorni totali prima di dimenticare il segreto
 ; N = giorni totali trascorsi
 (define (persone-con-segreto X Y N show)
   "Calcola il numero di persone che conoscono il segreto al giorno N"
@@ -7965,7 +7965,7 @@ Proviamo:
 
 (mostra-progressione 2 4 6)
 ;-> X=2 giorni attesa, Y=4 giorni memoria, N=6 giorni totali
-;-> 
+;->
 ;-> Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce
 ;-> -------|-------|----------------------------------|-------------------
 ;->      1 |     1 | nessuno                          |                1
@@ -8043,7 +8043,7 @@ Algoritmo:
   1) si parte dalla prima bottiglia
   3) ad ogni riempimento si riempie il maggior numero possibile di
      bottiglie consecutive finché la somma delle capacità non eccede C
-     (per ogni bottiglia controllare se la capacità 
+     (per ogni bottiglia controllare se la capacità
       della bottiglia è maggiore di C --> nil)
   4) si incrementa il contatore dei riempimenti
   5) si avanza all'indice della prossima bottiglia rimasta da riempire
@@ -8061,7 +8061,7 @@ Algoritmo:
       (++ conta)
       (if (> (bottiglie idx) C)
           (setq continua nil)
-      ;else  
+      ;else
           ; nuovo riempimento del contenitore
           ; vino consumato
           (let (consumo 0)
@@ -8073,7 +8073,7 @@ Algoritmo:
               (++ idx)))))
     (if continua conta nil)))
 
-Proviamo: 
+Proviamo:
 
 (riempimenti '(2 2 3 3 1) 5)
 ;-> 3
@@ -8137,53 +8137,60 @@ Esempio
 Algoritmo
 1) Eliminare tutti gli S che si trovano a sinistra.
 2) Eliminare tutti gli D che si trovano a destra.
-3) Ciclo per ogni punto (meno l'ultimo)
-     Controllo Punto Corrente e Prossimo Punto:
-       se PC == D e PP == S --> due collisioni
-       se PC == D e PP == N --> una collisione
-       se PC == N e PP == S --> una collisione
-     Dopo ogni collisione poniamo a N i punti di collisione.
-4) Restituire il numero di collisioni
+3) Ciclo finchè la lista delle mosse non contiene tutte N
+4)   Ciclo per ogni punto (meno l'ultimo)
+       Controllo Punto Corrente e Prossimo Punto:
+         se PC == D e PP == S --> due collisioni
+         se PC == D e PP == N --> una collisione
+         se PC == N e PP == S --> una collisione
+       Dopo ogni collisione poniamo a N i punti di collisione.
+5) Restituire il numero di collisioni
 
 Funzione che calcola le collisioni con un ciclo:
 
 (define (collisioni move show)
   (local (len coll idx curr next)
     ; rimuove gli S a sinistra
-    (while (= (move 0) 'S) (pop move))
+    (while (and move (= (move 0) 'S)) (pop move))
     ; rimuove gli D a destra
-    (while (= (move -1) 'D) (pop move -1))
+    (while (and move (= (move -1) 'D)) (pop move -1))
     ; lunghezza della lista dei movimenti
     (setq len (length move))
     ; numero collisioni
     (setq coll 0)
-    ; indice del ciclo
-    (setq idx 0)
-    ; ciclo sulla lista dei movimenti
-    (while (< idx (- len 1))
-      (setq curr (move idx)) ; punto corrente
-      (setq next (move (+ idx 1))) ; prossimo punto
-      ; controllo collisioni tra i due punti
-      (cond ((and (= curr 'D) (= next 'S))      ; D e S
-              (++ coll 2) ; incrementa collisioni
-              ; imposta i punti di collisione corrente a N
-              (setf (move idx) 'N)
-              (setf (move (+ idx 1)) 'N))
-            ((or (and (= curr 'D) (= next 'N))  ; D e N oppure
-                 (and (= curr 'N) (= next 'S))) ; N e S
-              (++ coll 1) ; incrementa collisioni
-              ; imposta i punti di collisione corrente a N
-              (setf (move idx) 'N)
-              (setf (move (+ idx 1)) 'N)))
-      ; prossimo punto
-      (++ idx)
-      ; stampa progressione delle collisioni
-      (if show (println move { - } coll)))
+    ; condizione di stop dei cicli della lista delle mosse
+    (setq stop (for-all (fn(x) (= x 'N)) move))
+    ; finchè tutti i valori di move non valgono N...
+    (until stop
+      ; indice del ciclo
+      (setq idx 0)
+      ; ciclo sulla lista dei movimenti
+      (while (< idx (- len 1))
+        (setq curr (move idx)) ; punto corrente
+        (setq next (move (+ idx 1))) ; prossimo punto
+        ; controllo collisioni tra i due punti
+        (cond ((and (= curr 'D) (= next 'S))      ; D e S
+                (++ coll 2) ; incrementa collisioni
+                ; imposta i punti di collisione corrente a N
+                (setf (move idx) 'N)
+                (setf (move (+ idx 1)) 'N))
+              ((or (and (= curr 'D) (= next 'N))  ; D e N oppure
+                  (and (= curr 'N) (= next 'S))) ; N e S
+                (++ coll 1) ; incrementa collisioni
+                ; imposta i punti di collisione corrente a N
+                (setf (move idx) 'N)
+                (setf (move (+ idx 1)) 'N)))
+        ; prossimo punto
+        (++ idx)
+        ; stampa progressione delle collisioni
+        (if show (println move { - } coll)))
+        ; se tutti i valori di move valgono N, allora stop
+        (setq stop (for-all (fn(x) (= x 'N)) move)))
     coll))
 
 Proviamo:
 
-(collisioni '(D S D N S S))
+(collisioni '(D S D N S S) true)
 ;-> 5
 
 (collisioni '(D S D N S S) true)
@@ -8199,6 +8206,22 @@ Proviamo:
 ;-> (N N N) - 2
 ;-> 2
 
+(collisioni '(S D))
+;-> 0
+
+(collisioni '(S D D N D S D))
+;-> 4
+(collisioni '(S D D N D S D) true)
+;-> (D D N D S) - 0
+;-> (D N N D S) - 1
+;-> (D N N D S) - 1
+;-> (D N N N N) - 3
+;-> (N N N N N) - 4
+;-> (N N N N N) - 4
+;-> (N N N N N) - 4
+;-> (N N N N N) - 4
+;-> 4
+
 Dopo aver rimosso gli S a sinistra e gli D a destra, qualsiasi punto che non sia fermo ('N') finirà per entrare in collisione e contribuire al conteggio delle collisioni.
 Ogni carattere diverso da 'N' in questa parte centrale contribuisce esattamente per 1 al conteggio totale delle collisioni, poiché rappresenta un punto che si fermerà a causa di una collisione.
 Quindi possiamo calcolare il numero di collisioni senza fare alcun ciclo:
@@ -8207,13 +8230,15 @@ Quindi possiamo calcolare il numero di collisioni senza fare alcun ciclo:
   Numero collisioni = numero di caratteri diversi da N
 
 Funzione che calcola le collisioni con una formula:
+
 (define (collide move)
   ; rimuove gli S a sinistra
-  (while (= (move 0) 'S) (pop move))
+  (while (and move (= (move 0) 'S)) (pop move))
   ; rimuove gli D a destra
-  (while (= (move -1) 'D) (pop move -1))
+  (while (and move (= (move -1) 'D)) (pop move -1))
   ; collisioni = lunghezza della lista - numero di N nella lista
   (- (length move) (length (find-all 'N move))))
+
 
 Proviamo:
 
@@ -8223,7 +8248,125 @@ Proviamo:
 (collide '(S D N S D))
 ;-> 2
 
+(collide '(S D))
+;-> 0
+
 Verifichiamo se le due funzioni producono gli stessi risultati.
+
+(define (rnd-move len)
+  (let (move '(S N D))
+    (map (fn(x) (move (rand 3))) (sequence 1 len))))
+
+(for (i 1 10000)
+  (let (moves (rnd-move (+ (rand 10) 2)))
+    (when (!= (collisioni moves) (collide moves))
+      (print moves) (read-line))))
+;-> nil
+
+
+-----------------------------------
+Operazioni cicliche su una sequenza
+-----------------------------------
+
+Dato un numero N, calcolare il risultato dell'applicazione ciclica degli operatori '*', '/', '+' e '-' sulla sequenza N, N-1, N-2, ..., 1.
+La divisione '/' rappresenta la divisione intera.
+
+Esempio:
+  N = 8
+  Output = 8 * 7 / 6 + 5 - 4 * 3 / 2 + 1 =
+Le operazioni devono essere eseguite con la seguente regola:
+Calcolare tutte le moltiplicazioni e le divisioni prima di qualsiasi addizione o sottrazione (le moltiplicazioni e le divisioni vengono elaborati da sinistra a destra).
+Quindi l'esempio viene calcolato nel modo seguente:
+
+  8 * 7 / 6 = 56/6 = 9
+  - 4 * 3 / 2 = -12/2 = -6
+  + 5 = +5
+  + 1 = +1
+  Risultato = 9 - 6 + 5 + 1 = 9
+
+Poichè alcune operazioni devono essere effettuate subito (* e /) mentre altre (+ e -) devono essere ritardate, possiamo usare una pila per tenre traccia dell'ordine delle operazioni.
+Quindi:
+1) quando incontriamo * o /, dobbiamo valutarla immediatamente con il numero precedente (poiché questi hanno precedenza maggiore).
+2) quando incontriamo + o -, possiamo rimandare il calcolo alla fine.
+
+Algoritmo
+---------
+Mettiamo N nella pila (è il primo numero).
+Quando vediamo *, estraiamo il primo numero, moltiplichiamolo per il numero corrente e lo rimettiamo nella pila.
+Quando vediamo /, estraiamo il primo numero, dividiamo per il numero corrente e lo rimettiamo nella pila.
+Quando vediamo +, inseriamo semplicemente il numero corrente (che verrà aggiunto in seguito).
+Quando vediamo -, inseriamo il negativo del numero corrente (in modo da poter sommare tutto alla fine).
+Le operazioni vengono incrementate utilizzando un contatore k che passa ciclicamente da 0, 1, 2, 3 (che rappresentano *, /, +, -)
+Alla fine, la somma di tutti gli elementi nella pila ci fornisce il risultato perché abbiamo già calcolato le moltiplicazioni e le divisioni e la pila contiene solo termini da aggiungere o sottrarre.
+
+(define (calc N show)
+  (local (pila idx-oper curr)
+    ; creazione di una pila vuota
+    (setq pila '())
+    ; Indice delle operazioni (0:*, 1:/, 2:+, 3:-)
+    (setq idx-oper 0)
+    ; partiamo con N come il primo termone
+    (push N pila)
+    (if show (println pila))
+    ; Ciclo per i numeri da (N-1) a 1...
+    (for (curr (- N 1) 1 -1)
+      (cond ((= idx-oper 0) ; Moltiplicazione
+              ; prende primo valore dalla pila (ultima operazione),
+              ; moltiplica il valore con il numero corrente,
+              ; inserisce il risultato nella pila
+              (push (* (pop pila) curr) pila)
+              (when show (print idx-oper { } pila) (read-line)))
+            ((= idx-oper 1) ; Divisione
+              ; prende primo valore dalla pila (ultima operazione),
+              ; divide il valore con il numero corrente,
+              ; inserisce il risultato nella pila
+              (push (/ (pop pila) curr) pila)
+              (when show (print idx-oper { } pila) (read-line)))
+            ((= idx-oper 2) ; Addizione
+              ; inserisce il numero corrente nella pila
+              (push curr pila)
+              (when show (print idx-oper { } pila) (read-line)))
+            ((= idx-oper 3) ; Sottrazione
+              ; inserisce il negativo del numero corrente nella pila
+              (push (- curr) pila)
+              (when show (print idx-oper { } pila) (read-line))))
+              ; prossimo indice delle operazioni (0, 1, 2, 3, 0, 1, ...)
+    (setq idx-oper (% (+ idx-oper 1) 4)))
+    ; risultato = somma di tutti i valori della pila
+    (apply + pila)))
+
+Proviamo:
+
+(calc 8 true)
+;-> (8)
+;-> 0 (56)
+;-> 1 (9)
+;-> 2 (5 9)
+;-> 3 (-4 5 9)
+;-> 0 (-12 5 9)
+;-> 1 (-6 5 9)
+;-> 2 (1 -6 5 9)
+;-> 9
+
+(calc 4 true)
+;-> (4)
+;-> 0 (12)
+;-> 1 (6)
+;-> 2 (1 6)
+;-> 7
+
+(calc 10)
+;-> 12
+
+(calc 1000)
+;-> 1001
+
+(map calc (sequence 1 100))
+;-> (0 2 6 7 7 8 6 9 11 12 10 13 15 16 14 17 19 20 18 21 23 24 22 25 27
+;->  28 26 29 31 32 30 33 35 36 34 37 39 40 38 41 43 44 42 45 47 48 46 49
+;->  51 52 50 53 55 56 54 57 59 60 58 61 63 64 62 65 67 68 66 69 71 72 70
+;->  73 75 76 74 77 79 80 78 81 83 84 82 85 87 88 86 89 91 92 90 93 95 96
+;->  94 97 99 100 98 101)
 
 ============================================================================
 
