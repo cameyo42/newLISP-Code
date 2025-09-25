@@ -3192,6 +3192,7 @@ NOTE LIBERE 32
   Imbottigliare il vino
   Collisioni di punti
   Operazioni cicliche su una sequenza
+  Primi p per cui (p+6) è primo e/o (p-6) è primo
 
 PROBLEMI SUI DADI
 =================
