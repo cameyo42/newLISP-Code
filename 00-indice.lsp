@@ -3190,6 +3190,7 @@ NOTE LIBERE 32
   Persone e segreti
   La funzione "reshape" di MATLAB
   Imbottigliare il vino
+  Collisioni di punti
 
 PROBLEMI SUI DADI
 =================

@@ -7893,13 +7893,41 @@ Proviamo:
 ;-> 6
 
 (persone-con-segreto 1 3 4 true)
+;-> Giorno 1, persone che scoprono: 1
+;-> === Giorno 2 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 2 al 3, dimenticano al giorno 4
+;-> Le 1 persone del giorno 1 condividono oggi!
+;-> Totale nuove persone oggi: 1
+;-> === Giorno 3 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 2 al 3, dimenticano al giorno 4
+;-> Le 1 persone del giorno 1 condividono oggi!
+;-> Persone del giorno 2 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Le 1 persone del giorno 2 condividono oggi!
+;-> Totale nuove persone oggi: 2
+;-> === Giorno 4 ===
+;-> Persone del giorno 1 (1 persone): possono condividere dal giorno 2 al 3, dimenticano al giorno 4
+;-> Persone del giorno 2 (1 persone): possono condividere dal giorno 3 al 4, dimenticano al giorno 5
+;-> Le 1 persone del giorno 2 condividono oggi!
+;-> Persone del giorno 3 (2 persone): possono condividere dal giorno 4 al 5, dimenticano al giorno 6
+;-> Le 2 persone del giorno 3 condividono oggi!
+;-> Totale nuove persone oggi: 3
+;-> === Calcolo finale ===
+;-> Giorno 1 - 1 persone, dimenticano al giorno 4
+;-> Giorno 2 - 1 persone, dimenticano al giorno 5
+;-> Le persone del giorno 2 ancora ricordano al giorno 4
+;-> Giorno 3 - 2 persone, dimenticano al giorno 6
+;-> Le persone del giorno 3 ancora ricordano al giorno 4
+;-> Giorno 4 - 3 persone, dimenticano al giorno 7
+;-> Le persone del giorno 4 ancora ricordano al giorno 4
+;-> Totale finale: 6
+;-> 6
 
 ; Funzione ausiliaria per mostrare la progressione giorno per giorno
 (define (mostra-progressione X Y N)
   "Mostra la progressione del segreto giorno per giorno"
   (println (format "X=%d giorni attesa, Y=%d giorni memoria, N=%d giorni totali\n" X Y N))
   (println "Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce")
-  (println "-------|-------|----------------------------------|------------------")
+  (println "-------|-------|----------------------------------|-------------------")
   (let ((persone-per-giorno (array (+ N 1) '(0))))
     ; La prima persona scopre il segreto al giorno 1
     (setf (persone-per-giorno 1) 1)
@@ -7939,7 +7967,7 @@ Proviamo:
 ;-> X=2 giorni attesa, Y=4 giorni memoria, N=6 giorni totali
 ;-> 
 ;-> Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce
-;-> -------|-------|----------------------------------|------------------
+;-> -------|-------|----------------------------------|-------------------
 ;->      1 |     1 | nessuno                          |                1
 ;->      2 |     0 | nessuno                          |                1
 ;->      3 |     1 | (1)                              |                2
@@ -7949,7 +7977,7 @@ Proviamo:
 
 (mostra-progressione 1 3 4)
 ;-> Giorno | Nuove | Chi condivide (giorno scoperta)  | Totale che conosce
-;-> -------|-------|----------------------------------|------------------
+;-> -------|-------|----------------------------------|-------------------
 ;->      1 |     1 | nessuno                          |                1
 ;->      2 |     1 | (1)                              |                2
 ;->      3 |     2 | (2 1)                            |                4
@@ -7969,6 +7997,7 @@ La funzione 'array-list' svolge tutto il lavoro di trasformazione.
 
 (define (reshape-matrix mtx R C)
   (let ( (M (length mtx)) (N (length (mtx 0))) )
+    ; controllo del numero di celle delle matrici
     (if-not (= (* M N) (* R C))
       '()
     ;else
@@ -8057,6 +8086,144 @@ Proviamo:
 
 (riempimenti '(4 4 4 4 4 4) 5)
 ;-> 6
+
+
+-------------------
+Collisioni di punti
+-------------------
+
+Lungo l'asse X abbiamo N punti posizionati da 1 a N.
+Inoltre abbiamo una lista di N movimenti, uno per ogni punto.
+I movimenti possono essere di tre tipi:
+  D: il punto si muove a destra di un posto
+  S: il punto si muove a sinistra di un posto
+  N: il punto non si muove (resta fermo)
+
+Quando due punti entrano in collisione:
+1) se i punti si muovono in direzioni opposte, allora le collisioni sono 2.
+2) se un punto collide con un punto fermo, allora abbiamo 1 collisione.
+3) dopo una collisione i punti restano fermi per sempre nei punti di collisione.
+
+Calcolare il numero di collisioni.
+
+Esempio:
+  Movimenti =  (D S D N S S)
+  Punti = 6 --> 1 2 3 4 5 6
+  Numero collisioni = 5
+  Se collisioni che si verificano sulla strada sono:
+  - I punti 1 e 2 si scontreranno tra loro.
+  Poiché si muovono in direzioni opposte, numero di collisioni = 0 + 2 = 2.
+  - I punti 3 e 4 si scontreranno tra loro.
+  Poiché il punto 4 è fermo, numero di collisioni = 2 + 1 = 3.
+  - I punti 4 e 5 si scontreranno tra loro.
+  Poiché il punto 4 è fermo, numero di collisioni = 3 + 1 = 4.
+  - I punti 5 e 6 si scontreranno tra loro.
+  Dopo la collisione del punto 5 con il punto 4, rimarrà nel punto di collisione e verrà colpito dal punto 6.
+  Il numero di collisioni diventa 4 + 1 = 5.
+  Quindi, il numero totale di collisioni che si verificano sull'asse X è 5.
+
+Esempio
+  Movimenti =  (S D N S D)
+  Punti = 5 --> 1 2 3 4 5
+  Numero collisioni = 2
+  Il punto tutto a sinistra S e il punto tutto a destra D non collidono mai con nessuno, perchè procedono in direzioni in cui non esistono altri punti.
+  Se collisioni che si verificano sulla strada sono:
+  - Il punto 2 collide con il punto fermo 3.
+    Una collisione.
+  - Il punto 4 collide con il punto fermo creato dalla collisione di 2 e 3.
+    Una collisione.
+    Quindi, il numero totale di collisioni vale 1 + 1 = 2.
+
+Algoritmo
+1) Eliminare tutti gli S che si trovano a sinistra.
+2) Eliminare tutti gli D che si trovano a destra.
+3) Ciclo per ogni punto (meno l'ultimo)
+     Controllo Punto Corrente e Prossimo Punto:
+       se PC == D e PP == S --> due collisioni
+       se PC == D e PP == N --> una collisione
+       se PC == N e PP == S --> una collisione
+     Dopo ogni collisione poniamo a N i punti di collisione.
+4) Restituire il numero di collisioni
+
+Funzione che calcola le collisioni con un ciclo:
+
+(define (collisioni move show)
+  (local (len coll idx curr next)
+    ; rimuove gli S a sinistra
+    (while (= (move 0) 'S) (pop move))
+    ; rimuove gli D a destra
+    (while (= (move -1) 'D) (pop move -1))
+    ; lunghezza della lista dei movimenti
+    (setq len (length move))
+    ; numero collisioni
+    (setq coll 0)
+    ; indice del ciclo
+    (setq idx 0)
+    ; ciclo sulla lista dei movimenti
+    (while (< idx (- len 1))
+      (setq curr (move idx)) ; punto corrente
+      (setq next (move (+ idx 1))) ; prossimo punto
+      ; controllo collisioni tra i due punti
+      (cond ((and (= curr 'D) (= next 'S))      ; D e S
+              (++ coll 2) ; incrementa collisioni
+              ; imposta i punti di collisione corrente a N
+              (setf (move idx) 'N)
+              (setf (move (+ idx 1)) 'N))
+            ((or (and (= curr 'D) (= next 'N))  ; D e N oppure
+                 (and (= curr 'N) (= next 'S))) ; N e S
+              (++ coll 1) ; incrementa collisioni
+              ; imposta i punti di collisione corrente a N
+              (setf (move idx) 'N)
+              (setf (move (+ idx 1)) 'N)))
+      ; prossimo punto
+      (++ idx)
+      ; stampa progressione delle collisioni
+      (if show (println move { - } coll)))
+    coll))
+
+Proviamo:
+
+(collisioni '(D S D N S S))
+;-> 5
+
+(collisioni '(D S D N S S) true)
+;-> (N N D N S S) - 2
+;-> (N N D N S S) - 2
+;-> (N N N N S S) - 3
+;-> (N N N N N S) - 4
+;-> (N N N N N N) - 5
+;-> 5
+
+(collisioni '(S D N S D) true)
+;-> (N N S) - 1
+;-> (N N N) - 2
+;-> 2
+
+Dopo aver rimosso gli S a sinistra e gli D a destra, qualsiasi punto che non sia fermo ('N') finirà per entrare in collisione e contribuire al conteggio delle collisioni.
+Ogni carattere diverso da 'N' in questa parte centrale contribuisce esattamente per 1 al conteggio totale delle collisioni, poiché rappresenta un punto che si fermerà a causa di una collisione.
+Quindi possiamo calcolare il numero di collisioni senza fare alcun ciclo:
+(dopo aver rimosso gli S a sinistra e gli D a destra):
+
+  Numero collisioni = numero di caratteri diversi da N
+
+Funzione che calcola le collisioni con una formula:
+(define (collide move)
+  ; rimuove gli S a sinistra
+  (while (= (move 0) 'S) (pop move))
+  ; rimuove gli D a destra
+  (while (= (move -1) 'D) (pop move -1))
+  ; collisioni = lunghezza della lista - numero di N nella lista
+  (- (length move) (length (find-all 'N move))))
+
+Proviamo:
+
+(collide '(D S D N S S))
+;-> 5
+
+(collide '(S D N S D))
+;-> 2
+
+Verifichiamo se le due funzioni producono gli stessi risultati.
 
 ============================================================================
 
