@@ -3193,6 +3193,11 @@ NOTE LIBERE 32
   Collisioni di punti
   Operazioni cicliche su una sequenza
   Primi p per cui (p+6) è primo e/o (p-6) è primo
+  N prigionieri
+
+NOTE LIBERE 33
+==============
+
 
 PROBLEMI SUI DADI
 =================

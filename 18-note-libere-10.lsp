@@ -1894,6 +1894,8 @@ Funzione ottimizzata:
 ;-> (33333857 33333261 33332882 1.0000178800388)
 ;-> 6737.767
 
+Vedi anche "N prigionieri" su "Note libere 32".
+
 
 ---------
 Rubamazzo

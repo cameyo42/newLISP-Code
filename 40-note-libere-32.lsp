@@ -8442,5 +8442,218 @@ Funzione che trova i primi p tale che p+6 e p-6 sono primi fino a un dato limite
 ;->  1123 1187 1223 1283 1297 1367 1433 1453 1487 1493 1607 1613
 ;->  1663 1747 1753 1783 1867 1873)
 
+
+-------------
+N prigionieri
+-------------
+
+Ci sono 100 prigionieri (1..100).
+Poi abbiamo 100 carte con i numeri da 1 a 100, che vengono posizionate casualmente in 100 scatole all'interno di una stanza.
+Uno alla volta, ogni prigioniero entra nella stanza e apre 50 delle 100 scatole, cercando il proprio numero.
+Dopodiché, richiude tutte le scatole aperte esce dalla stanza e non comunica in alcun modo con gli altri prigionieri.
+Se tutti e 100 i prigionieri trovano il proprio numero, verranno liberati.
+Ma se anche uno solo di loro non riesce a trovare il proprio numero, rimarranno in carcere.
+I prigionieri possono elaborare una strategia prima di entrare nella stanza.
+Qual è la strategia migliore?
+
+Strategia casuale
+-----------------
+Se ognuno cerca il proprio numero in modo casuale, allora ogni prigioniero ha il 50% di probabilità di trovarlo.
+Quindi la probabilità che tutti i 100 prigionieri trovino il loro numero vale:
+
+  P(100) = (1/2)^100 = 7.888609052210118e-031 (praticamente nulla)
+
+Funzione che simula la strategia casuale:
+
+(define (strategia1 nums show)
+  (local (result scatole aperte indici visitate idx corretti)
+    ; scatole con i numeri all'interno
+    (setq scatole (randomize (sequence 0 (- nums 1))))
+    (if show (println scatole))
+    ; lista dei risultati di ogni prigioniero
+    ; 0 --> non ha trovato il proprio numero
+    ; x --> numero di scatole aperte per di trovare il proprio numero
+    (setq result (array-list (array nums '(0))))
+    ; scatole da aprire
+    (setq aperte (/ nums 2))
+    ; ciclo per ogni prigioniero
+    (for (prig 0 (- nums 1))
+      (if show (println "Prigioniero: " prig))
+      ; selezione casuale delle scatole da aprire
+      (setq indici (randomize (sequence 0 (/ (- nums 1) 2))))
+      ; numeri trovati nelle scatole aperte
+      (setq visitate (select scatole indici))
+      (if show (println "indici: " indici))
+      (if show (println "visitate: " visitate))
+      ; cerca il numero del prigioniero corrente nelle scatole aperte
+      (setq idx (find prig visitate))
+      ; se il numero del prigioniero corrente si trova nelle scatole aperte,
+      ; alloraq aggiorniamo la lista dei risultati
+      (when idx (setf (result prig) idx))
+      (if show (read-line))
+    )
+    (if show (println result))
+    ; restituisce il numero di prigionieri che hanno trovato il proprio numero
+    (- nums (first (count '(0) result)))))
+
+Proviamo:
+
+(strategia1 100 true)
+;-> ...
+;-> (0 34 0 0 0 32 0 0 0 0 4 33 20 8 5 38 4 0 6 34 0 0 0 17 0 0 16 34 3 35 20
+;->  28 25 14 41 43 0 2 0 0 0 18 0 0 0 0 12 0 0 0 0 36 0 8 40 34 41 0 0 0 0 21
+;->  0 35 13 0 0 2 38 21 0 48 27 0 11 0 44 0 8 0 0 43 0 23 0 0 14 0 0 1 6 38 0
+;->  0 21 0 0 0 45 0)
+;-> 49
+
+(define (test1 prove prigionieri)
+  (let (successi 0)
+    (for (i 1 prove) 
+      (if (= (strategia1 prigionieri) prigionieri) (++ successi)))
+    (list successi (div successi prove))))
+
+(test1 1e3 100)
+;-> (0 0)
+
+(time (println (test1 1e4 100)))
+;-> (0 0)
+;-> 3187.693
+
+(time (println (test1 1e5 100)))
+;-> (0 0)
+;-> 31893.66
+
+Strategia a catena
+------------------
+Ogni prigioniero comincia ad aprire la scatola che ha il suo stesso numero.
+Poi guarda la scatola che ha il numero trovato nella scatola precedente.
+E così via fino ad aprire 50 scatole oppure fino a trovare in una scatola il proprio numero.
+
+Questa strategia ha circa il 31% di possibilità che i prigionieri vengano tutti liberati.
+
+Funzione che simula la strategia a catena:
+
+(define (strategia2 nums show)
+  (local (result scatole aperte indici visitate idx)
+    ; scatole con i numeri all'interno
+    (setq scatole (randomize (sequence 0 (- nums 1))))
+    (if show (println scatole))
+    ; lista dei risultati di ogni prigioniero
+    ; 0 --> non ha trovato il proprio numero
+    ; x --> numero di scatole aperte per di trovare il proprio numero
+    (setq result (array-list (array nums '(0))))
+    ; scatole da aprire
+    (setq aperte (/ nums 2))
+    ; ciclo per ogni prigioniero
+    (for (prig 0 (- nums 1))
+      (if show (println "Prigioniero: " prig))
+      (setq found nil)
+      ; scatole aperte
+      (setq k 1)
+      ; scatole iniziale da aprire
+      (setq idx prig)
+      ; ciclo per 50 scatole 
+      ; (o meno se il prigioniero corrente trova il proprio numero)
+      (while (and (<= k aperte) (not found))
+        ; numero trovato nella sctola corrente
+        (setq cur (scatole idx))
+        (if show (println "idx: " idx { } "cur: " cur))
+        ; il numero corrente è uguale al prigioniero corrente?
+        (when (= prig cur)
+          (setq found true)
+          (setf (result prig) k))
+        ; numero della prossima scatola da aprire
+        (setq idx cur)
+        ; aumenta il numero di scatole aperte
+        (++ k)
+      )
+      (if show (read-line))
+    )
+    (if show (println result))
+    ; restituisce il numero di prigionieri che hanno trovato il proprio numero
+    (- nums (first (count '(0) result)))))
+
+Proviamo:
+
+(strategia2 100 true)
+;-> (0 7 1 11 2 0 0 0 0 0 13 0 0 0 0 0 13 0 11 0 7 0 13 0 7 0 0 0 0 0 0 13 0
+;->  0 0 13 13 11 11 11 0 0 0 13 0 13 2 0 0 0 0 0 0 0 11 0 0 0 7 0 0 11 13 0
+;->  0 0 0 0 0 0 11 0 0 0 0 13 0 0 1 13 0 13 11 7 0 0 0 0 7 11 7 0 0 13 0 0
+;->  0 11 0 0)
+;-> 35
+
+(define (test2 prove prigionieri)
+  (let (successi 0)
+    (for (i 1 prove) 
+      (if (= (strategia2 prigionieri) prigionieri) (++ successi)))
+    (list successi (div successi prove))))
+
+(test2 1e3 100)
+;-> (312 31.2)
+
+(time (println (test2 1e4 100)))
+;-> (3129 0.3129)
+;-> 7544.595
+
+(time (println (test2 1e5 100)))
+;-> (31161 0.31161)
+;-> 76076.71400000001
+
+Nota: Se il numero di prigionieri tende ad infinito, allora la percentuale di successo si attesta intorno al 30.7% circa.
+
+(time (println (test2 1e4 1000)))
+
+Matematica della strategia a catena
+-----------------------------------
+Iniziamo contando il numero di configurazioni di scatole (cioè permutazioni di numeri) che danno origine a un ciclo di lunghezza, diciamo, 63.
+Per costruire una tale permutazione, possiamo iniziare scegliendo quali scatole saranno nel ciclo.
+Ci sono 100 modi per scegliere la prima scatola del ciclo, 99 modi per scegliere la seconda scatola del ciclo e così via, fino a 38 modi per scegliere l'ultima scatola del ciclo.
+Ma, ovviamente, questo non è del tutto corretto, perché cosa significa che una scatola è la "prima" del ciclo? Un ciclo non ha un primo elemento, il che significa che ci sono 63 modi per costruire lo stesso ciclo. Dividendo per 63, otteniamo che il numero di modi per costruire un ciclo di lunghezza 63 è:
+
+  100 * 99 * 98 * ... * 38
+  ------------------------
+            63
+
+Una volta costruito il ciclo, dobbiamo ancora determinare dove andranno gli altri numeri.
+Nota che 63 numeri hanno già le loro posizioni determinate dal ciclo che abbiamo costruito.
+Ci rimangono 37 numeri rimanenti e 37 posizioni in cui posizionarli.
+Ordinandoli in modo arbitrario, ci sono:
+
+  37 * 36 * 35 * ... * 1
+
+modi per completare la costruzione della nostra permutazione.
+
+Moltiplicando il numero di modi per scegliere il ciclo per il numero di modi per completare la permutazione, ne consegue che il numero di permutazioni contenenti un ciclo di lunghezza 63 è:
+
+  100 * 99 * 98 * ... * 1
+  -----------------------
+            63
+
+Ma questo è solo il numero totale di permutazioni n! diviso per 63.
+In altre parole, se si sceglie una permutazione a caso, la probabilità che esista un ciclo di lunghezza 63 è 1/63.
+
+Lo stesso vale se sostituiamo 63 con uno qualsiasi dei numeri 51, 52, ..., 100.
+La probabilità che esista un ciclo di lunghezza maggiore di 51, e che quindi i prigionieri perdano la partita, è esattamente:
+
+  1/51 + 1/52 + ... + 1/100
+
+A questo punto, potremmo semplicemente fare la somma a mano per ottenere la risposta.
+Ma c'è un modo più semplice.
+In particolare, sfruttiamo il fatto che l'n-esimo numero armonico H(n), definito come:
+
+  H(n) = 1/1 + 1/2 + 1/3 + ... + 1/n
+
+soddisfa H(n) ~ ln(n).
+Si noti che la probabilità che i prigionieri perdano la partita può essere scritta come H(100) - H(50).
+Inserendo l'approssimazione per H(n), otteniamo che la probabilità che un prigioniero perda è approssimativamente:
+
+  ln(100) - ln(50) = ln(100/50) = ln(2) ~ 0,6931471805599453
+
+Nota: la strategia a catena è una strategia ottimale, cioè per i prigionieri non esiste un'altra strategia che genera una probabilità maggiore di essere liberati.
+
+https://en.wikipedia.org/wiki/100_prisoners_problem
+
+Vedi anche "100 prigionieri" su "Note libere 18".
+
 ============================================================================
 

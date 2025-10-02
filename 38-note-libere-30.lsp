@@ -7385,6 +7385,29 @@ Proviamo:
 ;-> (40 20 40 100)
 ;-> 22814.998
 
+Leone, leopardo, orso e pecora
+------------------------------
+Un leone mangia una pecora in quattro ore, un leopardo la mangia in cinque ore, un orso in sei.
+Se i tre animali mangiano contemporaneamente la stessa pecora, quante ore impiegheranno a finirla?
+
+La velocità totale è la somma delle tre velocità:
+
+  v = 1/4 + 1/5 + 1/6 = 37/60
+
+Il tempo è l'inverso della velocità:
+
+  t = 1/v = 60/37 = 1.621621621621621...
+
+Quindi ci vogliono 1.621 ore per mangiare una pecora.
+
+Calcoliamo i minuti e i secondi:
+
+  0.621 * 60 = 37.26
+
+   0.26 * 60 = 15.6
+
+Quindi la pecora viene mangiata in 1 ora 37 minuti e 16 secondi.
+
 I due serpenti e la torre
 -------------------------
 Un serpente (A) si trova alla base di una torre che è alta a 100 metri e ogni giorno prima sale di 1/3 di metro e poi scende di 1/4.
@@ -7448,6 +7471,7 @@ Risolvendo il problema di Fibonacci utilizzando la formula:
 
 Nel giorno 853 i due serpenti si trovano nella condizione di incontrarsi domani (x+1) dopo il primo movimento (nel giorno 852 sono ancora troppo distanti).
 Quindi i serpenti si incontrano dopo 854 giorni.
+
 
 ---------
 Countdown
