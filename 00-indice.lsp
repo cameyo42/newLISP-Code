@@ -3198,6 +3198,7 @@ NOTE LIBERE 32
 NOTE LIBERE 33
 ==============
   RNA in codoni
+  Griglia di led
 
 PROBLEMI SUI DADI
 =================
