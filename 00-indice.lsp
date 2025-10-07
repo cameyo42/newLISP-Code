@@ -3199,6 +3199,7 @@ NOTE LIBERE 33
 ==============
   RNA in codoni
   Griglia di led
+  Liste che tornano uguali a se stesse
 
 PROBLEMI SUI DADI
 =================

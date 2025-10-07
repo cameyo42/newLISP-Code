@@ -354,5 +354,186 @@ Proviamo:
 (led-accesi 10 1 2)
 ;-> 0
 
+
+------------------------------------
+Liste che tornano uguali a se stesse
+------------------------------------
+
+Data una lista di elementi, applicare le seguenti operazioni:
+1) invertire la lista
+2) raggruppare gli elementi della lista in coppie invertite
+3) ripetere i passi 1) e 2) fino a che non si ottiene nuovamente la lista di partenza.
+
+Scrivere una funzione che conta i passi necessari per ottenere la lista di partenza.
+
+Esempio:
+Lista = (1 2 3 4 5)
+Passo 1:
+  Lista = (1 2 3 4 5)
+  Invertire la lista --> (5 4 3 2 1)
+  Raggruppare le coppie invertite: ((4 5) (2 3) (1))
+  Nel caso gli elementi siano in numero dispari, allora l'ultimo elemento non è una coppia.
+Passo 2:
+Lista = (4 5 2 3 1)
+  Invertire la lista --> (1 3 2 5 4)
+  Raggruppare le coppie invertite: ((3 1) (5 2) (4))
+Passo 3:
+Lista = (3 1 5 2 4)
+  Invertire la lista --> (4 2 5 1 3)
+  Raggruppare le coppie invertite: ((2 4) (1 5) (3))
+Passo 4:
+Lista = (2 4 1 5 3)
+  Invertire la lista --> (3 5 1 4 2)
+  Raggruppare le coppie invertite: ((5 3) (4 1) (2))
+Passo 5:
+Lista = (5 3 4 1 2)
+  Invertire la lista --> (2 1 4 3 5)
+  Raggruppare le coppie invertite: ((1 2) (3 4) (5))
+  Adesso la lista è uguale a quella di partenza: (1 2 3 4 5) --> stop.
+
+Funzione che calcola il numero di passi necessari per completare le operazioni:
+
+(define (ciclo lst show)
+  (local (passi stop lista coppie tmp)
+    ; numero di passi
+    (setq passi 0)
+    ; variabile booleana per il controllo di fine operazioni
+    (setq stop nil)
+    ; lista iniziale
+    (setq lista lst)
+    (when show
+      (println "Passo: " passi)
+      (println lista))
+    (until stop
+      ; inverte la lista
+      (reverse lista)
+      ; genera la lista delle coppie contigue dalla lista corrente
+      (setq coppie (explode lista 2))
+      ; la nuova lista è inizialmente vuota
+      (setq lista '())
+      ; controllo sull'ultimo valore della lista coppie (se è una coppia o no)
+      (setq tmp nil)
+      (if (= (length (e -1)) 1)
+        (setq tmp (first (pop coppie -1))))
+      ; costruzione nuova lista (inserisce le coppie invertite)
+      (dolist (el coppie)
+        (extend lista (reverse el)))
+      ; aggiunge la non-coppia (se necessario)
+      (if tmp (push tmp lista -1))
+      ; incrementa numero di passi
+      (++ passi)
+      (when show
+        (println "Passo: " passi)
+        (println lista))
+      ; controllo fine operazioni
+      (if (= lista lst) (setq stop true)))
+    passi))
+
+Proviamo:
+
+(ciclo '(1 2 3 4 5) true)
+;-> Passo: 0
+;-> (1 2 3 4 5)
+;-> Passo: 1
+;-> (4 5 2 3 1)
+;-> Passo: 2
+;-> (3 1 5 2 4)
+;-> Passo: 3
+;-> (2 4 1 5 3)
+;-> Passo: 4
+;-> (5 3 4 1 2)
+;-> Passo: 5
+;-> (1 2 3 4 5)
+;-> 5
+
+Per le liste con un numero pari di elementi i passi necessari sono sempre 2:
+
+(ciclo '(1 2 3 4) true)
+;-> Passo: 0
+;-> (1 2 3 4)
+;-> Passo: 1
+;-> (3 4 1 2)
+;-> Passo: 2
+;-> (1 2 3 4)
+;-> 2
+
+(ciclo '(1 2 3 4 5 6 7 8 9 10) true)
+;-> Passo: 0
+;-> (1 2 3 4 5 6 7 8 9 10)
+;-> Passo: 1
+;-> (9 10 7 8 5 6 3 4 1 2)
+;-> Passo: 2
+;-> (1 2 3 4 5 6 7 8 9 10)
+;-> 2
+
+(ciclo (sequence 1 1000))
+;-> 2
+
+Per le liste con un numero dispari di elementi i passi necessari sono il numero di elementi:
+
+(ciclo (sequence 1 3))
+;-> 3
+(ciclo (sequence 1 11))
+;-> 11
+(ciclo (sequence 1 1001))
+;-> 1001
+
+Per dimostrare che il periodo è n quando n è dispari, seguiamo dove va l'elemento 1: segue il percorso 1, n, 2, n-2, 4, n-4, 6, n-6, 8, n-8, ... quindi un elemento in posizione pari x si sposta in n-x dopo un passo, e un elemento in posizione dispari x si sposta in n-x+2. 
+Quindi se n=2k+1, allora dopo il 2k-esimo passo 1 sarà a 2k, e al passo successivo a n-2k = 1.
+
+Nota: 
+Se gli elementi della lista sono tutti uguali, allora il numero di operazioni vale sempre 1.
+Se la lista contiene meno di tre elementi, allora il numero di operazioni vale sempre 1.
+
+(ciclo '(5 5 5 5 5))
+;-> 1
+(ciclo '(4 4 4 4))
+;-> 1
+
+Test di correttezza:
+
+(define (test prove)
+  (for (i 1 prove)
+    (letn ( (n (rand 1000))
+            (lst (rand 1000 n))
+            (res (ciclo lst)) )
+    (when (or (and (even? n) (!= res 2))
+              (and (odd? n) (!= res n)))
+      (if (> (length lst) 2)
+        (println n { } res { } lst))))))
+
+(time (println (test 1000)))
+;-> nil
+;-> 8674.452
+
+Quindi possiamo scrivere la seguente funzione:
+
+(define (cicli lst)
+  (let (len (length lst))
+    (if (or (< len 3) (apply = lst))
+        1
+        (if (odd? len) len 2))))
+
+Proviamo:
+
+(cicli '(1 2 3 4 5 6 7 8 9 10 11))
+;-> 11
+(cicli '(1 2 3 4 5))
+;-> 5
+(cicli '(1 2 3 4))
+;-> 2
+(cicli '(1 2))
+;-> 1
+(cicli '())
+;-> 1
+(cicli '(3 3 3))
+;-> 1
+(cicli '(2 2))
+;-> 1
+
+Versione code-golf (73 caratteri):
+
+(define(c l)(let(n(length l))(if(or(< n 3)(apply = l))1(if(odd? n)n 2))))
+
 ============================================================================
 
