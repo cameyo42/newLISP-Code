@@ -42,7 +42,7 @@ Il codone di stop è contrassegnato con +.
 L'output corretto è:
 
   AUG,GAU,GGA,CUG
-  
+
 Per l'input più breve:
 
 ACAUGGAUGGACUGU
@@ -354,6 +354,118 @@ Proviamo:
 (led-accesi 10 1 2)
 ;-> 0
 
+3. Probabilità dei led
+----------------------
+
+Qual è la probabilità di ogni led?
+Cioè, quale probabilità ha ogni led di essere acceso/spento dopo una pressione casuale?
+
+Possiamo calcolare quanti led "vede" ogni led, cioè per una cella (r c) possiamo sommare i led della riga, della colonna e delle diagonali.
+Questa somma rappresenta il numero di led che, se selezionati, modificano lo stato del led della cella (r c).
+Per calcolare la probabilità del led basta dividere questa somma per il totale dei led della griglia.
+
+Calcolo della somma della riga, della colonna e delle diagonali per un led:
+
+1. Diagonale principale (dall’alto a sinistra verso il basso a destra)
+Questa diagonale è composta da tutte le celle (r, c) tali che:
+
+  r - c = i - j
+
+Lunghezza = L1 = 1 + min(i, j) + min(M - 1 - i, N - 1 - j)
+
+- min(i, j) = quanti passi possiamo fare indietro prima di uscire dai limiti.
+- min(M-1-i, N-1-j) = quanti passi possiamo fare avanti.
+- +1 = include la cella centrale stessa.
+
+2. Diagonale secondaria (dall’alto a destra verso il basso a sinistra)
+
+Questa è formata da celle (r, c) tali che:
+
+  r + c = i + j
+
+Lunghezza = L2 = 1 + min(i, N - 1 - j) + min(M - 1 - i, j)
+
+- min(i, N-1-j) = passi indietro (da basso a alto).
+- min(M-1-i, j) = passi avanti (da alto a basso️).
+- +1 = include la cella centrale stessa.
+
+(define (diagonali M N i j)
+  (letn (L1 (+ 1 (min i j) (min (- M 1 i) (- N 1 j)))
+         L2 (+ 1 (min i (- N 1 j)) (min (- M 1 i) j)))
+    (+ L1 L2)))
+
+Funzione che calcola la probabilità dei led:
+
+(define (prob-led grid)
+  (let ( (rows (length grid))
+         (cols (length (grid 0)))
+         (somme '())
+         (prob '()) )
+    ; ciclo per ogni led
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        ; calcolo della somma per il led corrente
+        ; -3 perchè la cella corrente viene conteggiata 4 volte
+        (setf (grid r c) (+ (diagonali rows cols r c) rows cols (- 3)))))
+    ; lista di tutte le somme uniche
+    (setq somme (sort (unique (flat (array-list grid)))))
+    ; calcolo della probabilità dei led
+    (setq prob (map list somme (map (fn(x) (div x (* rows cols))) somme)))
+    (print-grid grid)
+    (println prob) '>))
+
+Proviamo:
+
+(setq g (array 2 2 '(0)))
+(prob-led g)
+;->  4  4
+;->  4  4
+;-> ((4 1))
+
+(setq g (array 3 3 '(0)))
+(prob-led g)
+;->  7  7  7
+;->  7  9  7
+;->  7  7  7
+;-> ((7 0.7777777777777778) (9 1))
+
+(setq g (array 5 7 '(0)))
+(prob-led g)
+;-> 15 16 17 17 17 16 15
+;-> 15 17 18 19 18 17 15
+;-> 15 17 19 19 19 17 15
+;-> 15 17 18 19 18 17 15
+;-> 15 16 17 17 17 16 15
+;-> ((15 0.4285714285714286) (16 0.4571428571428571) (17 0.4857142857142857)
+;->  (18 0.5142857142857142) (19 0.5428571428571428))
+
+(setq g (array 10 10 '(0)))
+(prob-led g)
+;-> 28 28 28 28 28 28 28 28 28 28
+;-> 28 30 30 30 30 30 30 30 30 28
+;-> 28 30 32 32 32 32 32 32 30 28
+;-> 28 30 32 34 34 34 34 32 30 28
+;-> 28 30 32 34 36 36 34 32 30 28
+;-> 28 30 32 34 36 36 34 32 30 28
+;-> 28 30 32 34 34 34 34 32 30 28
+;-> 28 30 32 32 32 32 32 32 30 28
+;-> 28 30 30 30 30 30 30 30 30 28
+;-> 28 28 28 28 28 28 28 28 28 28
+
+(setq g (array 10 4 '(0)))
+(prob-led g)
+;-> 16 16 16 16
+;-> 17 18 18 17
+;-> 18 19 19 18
+;-> 19 19 19 19
+;-> 19 19 19 19
+;-> 19 19 19 19
+;-> 19 19 19 19
+;-> 18 19 19 18
+;-> 17 18 18 17
+;-> 16 16 16 16
+;-> ((28 0.28) (30 0.3) (32 0.32) (34 0.34) (36 0.36))
+
 
 ------------------------------------
 Liste che tornano uguali a se stesse
@@ -478,10 +590,10 @@ Per le liste con un numero dispari di elementi i passi necessari sono il numero 
 (ciclo (sequence 1 1001))
 ;-> 1001
 
-Per dimostrare che il periodo è n quando n è dispari, seguiamo dove va l'elemento 1: segue il percorso 1, n, 2, n-2, 4, n-4, 6, n-6, 8, n-8, ... quindi un elemento in posizione pari x si sposta in n-x dopo un passo, e un elemento in posizione dispari x si sposta in n-x+2. 
+Per dimostrare che il periodo è n quando n è dispari, seguiamo dove va l'elemento 1: segue il percorso 1, n, 2, n-2, 4, n-4, 6, n-6, 8, n-8, ... quindi un elemento in posizione pari x si sposta in n-x dopo un passo, e un elemento in posizione dispari x si sposta in n-x+2.
 Quindi se n=2k+1, allora dopo il 2k-esimo passo 1 sarà a 2k, e al passo successivo a n-2k = 1.
 
-Nota: 
+Nota:
 Se gli elementi della lista sono tutti uguali, allora il numero di operazioni vale sempre 1.
 Se la lista contiene meno di tre elementi, allora il numero di operazioni vale sempre 1.
 
@@ -534,6 +646,75 @@ Proviamo:
 Versione code-golf (73 caratteri):
 
 (define(c l)(let(n(length l))(if(or(< n 3)(apply = l))1(if(odd? n)n 2))))
+
+
+--------------------------------
+Ricostruzione di numeri mancanti
+--------------------------------
+
+Abbiamo una lista di numeri con N+M numeri.
+Conosciamo la media di tutti i numeri e i valori di M numeri.
+Calcolare il valore degli N numeri mancanti.
+
+Conoscendo la media di tutti i numeri e quanti sono i numeri possiamo calcolare la somma di tutti i numeri:
+
+  somma = media * (N + M)
+
+Adesso possiamo calcolare la somma degli N numeri:
+
+  sommaN = somma - sommaM
+
+A questo punto dobbiamo generare N numeri casuali che sommano a sommaN.
+(Naturalmente esistono infinite soluzioni).
+
+Funzione che genera N numeri float che sommano a K:
+
+(define (N-sommano-K N K)
+  (letn (
+          ; Genera una lista di N numeri float casuali tra 0 e 1
+          (nums (random 0 1 N))
+          ; Calcola la somma dei numeri generati
+          (somma (apply add nums))
+          ; Calcola il fattore di scala in modo che
+          ; la somma diventi esattamente K
+          (fattore (div K somma))
+        )
+    ; Moltiplica ogni numero per il fattore di scala,
+    ; in modo che la somma finale sia K
+    (map (fn (x) (mul x fattore)) nums)))
+
+Funzione che calcola N numeri in modo che sommati con M numeri dati producano una media data:
+
+(define (genera-N N lstM media)
+  (local (M numero-elementi somma sommaM sommaN)
+    ; numero di elementi M
+    (setq M (length lstM))
+    ; numero totale di elementi
+    (setq numero-elementi (+ M N))
+    ; somma di tutti gli elementi
+    (setq somma (mul media numero-elementi))
+    ; somma degli M elementi conosciuti
+    (setq sommaM (apply add lstM))
+    ; somma degli N elementi sconosciuti
+    (setq sommaN (sub somma sommaM))
+    ; calcolo degli N elementi sconosciuti
+    ; (esistono infinite soluzioni)
+    (setq lstN (N-sommano-K N sommaN))
+    (setq media-calcolata (div (apply add (append lstN lstM)) (+ M N)))
+    (println media { } media-calcolata)
+    lstN))
+
+Proviamo:
+
+(genera-N 5 '(1.3 4.3 5.3 6.445) 3)
+;-> 3 3
+;-> (1.425365393402948 1.591709766953814 4.498324419923165
+;->  0.1271276253659858 2.012472794354088)
+
+(genera-N 5 '(1.3 4.3 5.3 6.445) -2)
+;-> -2 -2
+;-> (-1.866867527540419 -13.64935434468596 -1.133037886566541
+;->  -0.1771525034371139 -18.51858773776997)
 
 ============================================================================
 
