@@ -874,5 +874,219 @@ Proviamo:
 (coppie-somma-K '(5 1 1 1 1 1 5) 7)
 ;-> ()
 
+
+------------------------
+N numeri che sommano a K
+------------------------
+
+Data una lista di interi, un numero N e una somma K, determinare tutte le combinazioni di N numeri che sommano a K.
+
+Caso 1
+------
+Ogni elemento della lista può essere usato solo una volta per ogni combinazione, ma può essere usato quante volte vogliamo per formare altre combinazioni.
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+Calcoliamo tutte le combinazioni di N numeri e filtriamo quelle che sommano a K.
+
+(define (N-somma-K-all lst N K)
+  (let (combinazioni (comb N lst))
+    (filter (fn(x) (= (apply + x) K)) combinazioni)))
+
+(N-somma-K-all '(1 2 3 4 5 6 6 1 8 6) 2 7)
+;-> ((1 6) (1 6) (1 6) (2 5) (3 4) (6 1) (6 1) (1 6))
+
+(N-somma-K-all '(2 2 2 3 3 4) 3 7)
+;-> ((2 2 3) (2 2 3) (2 2 3) (2 2 3) (2 2 3) (2 2 3))
+
+(N-somma-K-all '(1 2 3 4 5 6 6 1 8 6) 3 12)
+;-> ((1 3 8) (1 5 6) (1 5 6) (1 5 6) (2 4 6) (2 4 6) (2 4 6) (3 4 5)
+;->  (3 1 8) (5 6 1) (5 6 1) (5 1 6))
+
+(N-somma-K-all '(1 1 1) 3 3)
+;-> ((1 1 1))
+
+(setq t (rand 10 100))
+(time (println (length (N-somma-K-all t 3 10))))
+;-> 9188
+;-> 185.799
+
+Caso 2
+------
+Ogni elemento della lista può essere usato solo una volta in assoluto.
+
+;---------------------------------------------------------
+; Funzione: N-somma-K
+; Trova gruppi di N numeri in lst che sommano a K.
+; Ogni elemento viene usato solo una volta (nessuna ripetizione).
+;---------------------------------------------------------
+(define (N-somma-K nums N K)
+  ; nums -> lista di numeri (anche con duplicati)
+  ; N    -> quanti elementi sommare
+  ; K    -> somma desiderata
+  (letn (risultati '()        ; lista delle combinazioni valide trovate
+         usati '()            ; indici già usati in combinazioni precedenti
+         lung (length nums))  ; numero totale di elementi in nums
+    ;------------------------------------------------------------
+    ; Funzione ausiliaria che genera tutte le combinazioni di N indici
+    ; distinti scelti da una lista di indici disponibili
+    ;------------------------------------------------------------
+    (define (combinazioni-indici indici n)
+      (let (ris '())
+        (if (= n 1)
+            ; caso base: ogni indice è una combinazione singola
+            (dolist (x indici)
+              (push (list x) ris -1))
+            ; caso generale: costruiamo combinazioni prendendo il primo
+            ; elemento e combinandolo con le sottocombinazioni del resto
+            (for (i 0 (- (length indici) n))
+              (letn (resto (slice indici (+ i 1)))
+                ; generiamo solo se ci sono abbastanza elementi rimanenti
+                (when (>= (length resto) (- n 1))
+                  (dolist (c (combinazioni-indici resto (- n 1)))
+                    ; aggiunge (indici i) davanti alla sottocombinazione
+                    (push (cons (indici i) c) ris -1))))))
+        ris)) ; restituisce tutte le combinazioni trovate
+    ;------------------------------------------------------------
+    ; Ciclo principale: cerca combinazioni valide e segna gli indici usati
+    ;------------------------------------------------------------
+    (let (trovato true)
+      (while trovato
+        (setq trovato nil) ; assume che non troverà altre combinazioni
+        ; crea la lista degli indici ancora disponibili
+        (letn (disponibili (filter (fn (x) (not (ref x usati)))
+                                   (sequence 0 (- lung 1))))
+          ; se non ci sono abbastanza elementi, interrompi il ciclo
+          (when (>= (length disponibili) N)
+            ; genera tutte le combinazioni di indici disponibili
+            (dolist (c (combinazioni-indici disponibili N))
+              (when (not trovato)
+                ; ottieni i valori corrispondenti ai rispettivi indici
+                (let (valori (map (fn (x) (nums x)) c))
+                  ; verifica se la somma dei valori è uguale a K
+                  (when (= (apply add valori) K)
+                    ; aggiungi la combinazione trovata al risultato
+                    (push valori risultati -1)
+                    ; segna tutti gli indici come usati globalmente
+                    (dolist (idx c)
+                      (push idx usati -1))
+                    ; indica che è stata trovata almeno una combinazione
+                    (setq trovato true)))))))))
+    ;------------------------------------------------------------
+    risultati)) ; restituisce la lista di tutte le combinazioni valide
+
+Spiegazione:
+
+1) combinazioni-indici
+Genera tutte le combinazioni possibili di N indici distinti da una lista di indici disponibili.
+Viene usata per evitare di ripetere lo stesso elemento più volte.
+
+2) Lista usati
+Tiene traccia di tutti gli indici già coinvolti in combinazioni precedenti, garantendo che ogni elemento della lista originale sia usato una sola volta in tutto il risultato.
+
+3) Ciclo while
+Continua a cercare nuove combinazioni finché ne trova almeno una.
+Quando non è più possibile formare somme esatte, termina.
+
+Proviamo:
+
+(N-somma-K '(1 2 3 4 5 6 6 1 8 6) 2 7)
+;-> ((1 6) (2 5) (3 4) (6 1))
+
+(N-somma-K '(2 2 2 3 3 4) 3 7)
+;-> ((2 2 3))
+
+(N-somma-K '(1 2 3 4 5 6 6 1 8 6) 3 12)
+;-> ((1 3 8) (2 4 6) (5 6 1))
+
+(N-somma-K '(1 1 1) 3 3)
+;-> ((1 1 1))
+
+La funzione è molto lenta:
+
+(setq t (rand 10 100))
+(time (println (N-somma-K t 3 10)))
+;-> ((8 0 2) (8 2 0) (8 2 0) (2 2 6) (8 1 1) (8 1 1) (8 2 0) (8 1 1) (3 4 3)
+;->  (8 0 2) (6 3 1) (5 5 0) (9 0 1) (7 2 1) (9 0 1) (6 2 2) (6 2 2) (4 4 2)
+;->  (5 3 2) (5 3 2) (3 3 4))
+;-> 47836.434
+
+Proviamo a scrivere una versione iterativa:
+
+;---------------------------------------------------------
+; Funzione: N-somma-K-iter
+; Trova gruppi di N numeri in lst che sommano a K.
+; Ogni elemento viene usato solo una volta (nessuna ripetizione).
+;---------------------------------------------------------
+(define (N-somma-K-iter lst N K)
+  ; lst = lista dei numeri
+  ; N   = lunghezza della combinazione
+  ; K   = somma desiderata
+  (letn (risultati '()
+         lung (length lst)
+         usati '()) ; lista di indici già utilizzati
+    ; generiamo tutte le combinazioni di N indici non ancora usati
+    (define (combinazioni indici n)
+      (let (ris '())
+        (if (= n 1)
+            (dolist (x indici) (push (list x) ris -1))
+            (for (i 0 (- (length indici) n))
+              (letn (resto (slice indici (+ i 1)))
+                (when (>= (length resto) (- n 1))
+                  (dolist (c (combinazioni resto (- n 1)))
+                    (push (cons (indici i) c) ris -1))))))
+        ris))
+    ; ciclo principale: continua finché ci sono combinazioni disponibili
+    (let (trovato true) ; booleano per continuare il ciclo
+      (while trovato
+        (setq trovato nil)
+        (letn (disponibili (filter (fn (x) (not (ref x usati)))
+                                   (sequence 0 (- lung 1))))  ; indici liberi
+          (when (>= (length disponibili) N)
+            (dolist (c (combinazioni disponibili N)) ; tutte le combinazioni di indici liberi
+              (when (not trovato)
+                (let (valori (map (fn (i) (lst i)) c)) ; valori corrispondenti agli indici
+                  (when (= (apply add valori) K)
+                    (push valori risultati -1) ; aggiunge combinazione valida
+                    ; marca gli indici come usati globalmente
+                    (dolist (idx c) (push idx usati -1))
+                    (setq trovato true)))))))))
+    risultati))
+
+Proviamo:
+
+(N-somma-K-iter '(1 2 3 4 5 6 6 1 8 6) 2 7)
+;-> ((1 6) (2 5) (3 4) (6 1))
+
+(N-somma-K-iter '(2 2 2 3 3 4) 3 7)
+;-> ((2 2 3))
+
+(N-somma-K-iter '(1 2 3 4 5 6 6 1 8 6) 3 12)
+;-> ((1 3 8) (2 4 6) (5 6 1))
+
+(N-somma-K-iter '(1 1 1) 3 3)
+;-> ((1 1 1))
+
+(setq t (rand 10 100))
+(time (println (N-somma-K-iter t 3 10)))
+;-> ((8 0 2) (8 2 0) (8 2 0) (2 2 6) (8 1 1) (8 1 1) (8 2 0) (8 1 1) (3 4 3)
+;->  (8 0 2) (6 3 1) (5 5 0) (9 0 1) (7 2 1) (9 0 1) (6 2 2) (6 2 2) (4 4 2)
+;->  (5 3 2) (5 3 2) (3 3 4))
+;-> 27621.018
+
+La versione iterativa è più veloce.
+
+Test di correttezza:
+
+(= (sort (N-somma-K-iter t 3 10)) (sort (N-somma-K t 3 10)))
+;-> true
+
 ============================================================================
 

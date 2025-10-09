@@ -3203,6 +3203,7 @@ NOTE LIBERE 33
   Ricostruzione di numeri mancanti
   Coppie uguali in una lista
   Coppie di interi con somma predefinita
+  N numeri che sommano a K
 
 PROBLEMI SUI DADI
 =================
