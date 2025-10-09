@@ -3201,6 +3201,8 @@ NOTE LIBERE 33
   Griglia di led
   Liste che tornano uguali a se stesse
   Ricostruzione di numeri mancanti
+  Coppie uguali in una lista
+  Coppie di interi con somma predefinita
 
 PROBLEMI SUI DADI
 =================

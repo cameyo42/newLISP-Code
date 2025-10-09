@@ -716,5 +716,163 @@ Proviamo:
 ;-> (-1.866867527540419 -13.64935434468596 -1.133037886566541
 ;->  -0.1771525034371139 -18.51858773776997)
 
+
+--------------------------
+Coppie uguali in una lista
+--------------------------
+
+Abbiamo una lista i cui elementi sono coppie di cifre (0..9).
+Due coppie sono uguali se risulta:
+1) (x y) == (x y)
+oppure
+2) (x y) == (y x), perchè la coppia può essere invertita (tessera del domino)
+
+Determinare le coppie uguali e i relativi numeri di occorrenze.
+
+Esempio:
+lista = ((1 3) (2 4) (0 0) (3 1) (2 4) (3 2) (4 2))
+coppie uguali: (0 0) 1  --> (0 0)
+               (3 2) 1  --> (3 2)
+               (1 3) 2  --> (1 3) (3 1)
+               (2 4) 3  --> (2 4) (2 4) (4 2)
+
+Codifichiamo le coppie in modo che le codifiche di (x y) e (y x) siano identiche.
+Meccanismo di codifica:
+1) se x == 0 e y == 0, codice = 0
+2) se x == 0 e y != 0, codice = y
+3) se x != 0 e y == 0, codice = x
+4) se x > y,  codice = (10 * y) + x
+5) se x <= y, codice = (10 * x) + y
+
+Esempi:
+  x = 2, y = 4  -->  24
+  x = 4, y = 2  -->  24
+  x = 0, y = 0  -->  0
+  x = 0, y = 3  -->  3
+  x = 2, y = 0  -->  2
+  x = 6, y = 5  -->  56
+
+(define (codifica coppia)
+  (let ( (x (coppia 0)) (y (coppia 1)) )
+    (cond ((and (zero? x) (zero? y)) 0)
+          ((zero? x) y)
+          ((zero? y) x)
+          (true
+            (if (> x y) (+ (* 10 y) x) (+ (* 10 x) y))))))
+
+(codifica '(2 4))
+;-> 24
+(codifica '(4 2))
+;-> 24
+(codifica '(0 0))
+;-> 0
+(codifica '(0 3))
+;-> 3
+(codifica '(2 0))
+;-> 2
+(codifica '(6 5))
+;-> 56
+
+Dopo la codifica possiamo calcolare le occorrenze di tutte le coppie uniche.
+
+(define (coppie-uniche lst)
+  (local (codici unici)
+    ; codifica delle coppie
+    (dolist (el lst) (push (codifica el) codici))
+    ; calcolo dei codici unici
+    (setq unici (unique codici))
+    ; conteggio delle occorrenze dei codici unici
+    (map list unici (count unici codici))))
+
+Proviamo:
+
+(setq L '((1 3) (2 4) (0 0) (3 1) (2 4) (3 2) (4 2)))
+(coppie-uniche L)
+;-> ((24 3) (23 1) (13 2) (0 1))
+
+Possiamo anche calcolare tutto con un ciclo unico utilizzando una lista associativa per memorizzare le coppie uniche e le relative occorrenze.
+
+(define (couple lst)
+  (local (alst codice)
+    (setq alst '())
+    (dolist (el lst)
+      ; codifica la coppia corrente
+      (setq codice (codifica el))
+      ; se il codice corrente esiste nella lista associativa...
+      (if (lookup codice alst)
+          ; allora aumenta di 1 le sue occorrenze
+          (setf (lookup codice alst) (+ $it 1))
+          ; altrimenti inserisce il (codice 1) nella lista associativa
+          (push (list codice 1) alst -1)))
+    alst))
+
+Proviamo:
+
+(setq L '((1 3) (2 4) (0 0) (3 1) (2 4) (3 2) (4 2)))
+(couple L)
+;-> ((13 2) (24 3) (0 1) (23 1))
+
+Test di correttezza:
+
+(setq c (map list (rand 10 100) (rand 10 100)))
+(= (sort (couple c)) (sort (coppie-uniche c)))
+;-> true
+
+Test di velocità:
+
+(setq c (map list (rand 10 100) (rand 10 100)))
+(time (couple c) 1e4)
+;-> 578.106
+(time (coppie-uniche c) 1e4)
+;-> 609.223
+
+(silent (setq c (map list (rand 10 10000) (rand 10 10000))))
+(time (couple c) 100)
+;-> 687.625
+(time (coppie-uniche c) 100)
+;-> 734.264
+
+(silent (setq c (map list (rand 10 100000) (rand 10 100000))))
+(time (couple c) 10)
+;-> 703.247
+(time (coppie-uniche c) 10)
+;-> 812.571
+
+
+--------------------------------------
+Coppie di interi con somma predefinita
+--------------------------------------
+
+Data una lista di interi trovare tutte le coppie di numeri che sommano a K.
+Ogni elemento della lista può essere usato una sola volta per formare una coppia.
+
+(define (coppie-somma-K nums K)
+  ; nums -> lista di numeri
+  ; K    -> somma desiderata
+  (letn (risultati '()   ; lista dove salveremo le coppie valide
+         usati '())      ; lista degli indici già usati in altre coppie
+    (for (i 0 (- (length nums) 2))  ; ciclo sul primo elemento della coppia
+      (unless (ref i usati)         ; verifica che questo elemento non sia già stato usato
+        (let (trovato nil)          ; variabile booleana per interrompere il ciclo interno
+          (for (j (+ i 1) (- (length nums) 1))  ; ciclo sul secondo elemento
+            (when (and (not trovato) (not (ref j usati))
+                       (= (+ (nums i) (nums j)) K)) ; verifica la somma
+              (push (list (nums i) (nums j)) risultati -1) ; salva la coppia
+              (push i usati -1)   ; segna il primo elemento come usato
+              (push j usati -1)   ; segna il secondo elemento come usato
+              (setq trovato true)))))) ; interrompe il ciclo interno appena trovato un abbinamento
+    risultati)) ; restituisce tutte le coppie valide
+
+Proviamo:
+
+(coppie-somma-K '(1 2 3 4 5 6 6 1 8 6) 7)
+;-> ((1 6) (2 5) (3 4) (6 1))
+
+(coppie-somma-K '(1 2 3 4 5 1 2 3 4 5 1 6) 6)
+;-> ((1 5) (2 4) (3 3) (1 5) (2 4))
+
+(coppie-somma-K '(5 1 1 1 1 1 5) 7)
+;-> ()
+
 ============================================================================
 
