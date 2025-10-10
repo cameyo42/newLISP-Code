@@ -3204,6 +3204,8 @@ NOTE LIBERE 33
   Coppie uguali in una lista
   Coppie di interi con somma predefinita
   N numeri che sommano a K
+  Lo Stack size di newLISP
+  Conversione IPv4 <--> Intero
 
 PROBLEMI SUI DADI
 =================

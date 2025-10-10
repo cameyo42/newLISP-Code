@@ -1088,5 +1088,139 @@ Test di correttezza:
 (= (sort (N-somma-K-iter t 3 10)) (sort (N-somma-K t 3 10)))
 ;-> true
 
+
+------------------------
+Lo Stack size di newLISP
+------------------------
+
+newlisp -s 4000
+newlisp -s 100000 aprog bprog
+newlisp -s 6000 myprog
+newlisp -s 6000 http://asite.com/example.lsp
+
+The above examples show starting newLISP with different stack sizes using the -s option, as well as loading one or more newLISP source files and loading files specified by an URL.
+When no stack size is specified, the stack defaults to 2048.
+Per stack position about 80 bytes of memory are preallocated.
+
+
+----------------------------
+Conversione IPv4 <--> Intero
+----------------------------
+
+Un indirizzo IPv4 è formato da 32 bit, normalmente rappresentati in notazione decimale puntata, cioè divisi in 4 gruppi da 8 bit (ottetti) separati da punti (".").
+
+Ecco la struttura:
+
+  xxxxxxxx.xxxxxxxx.xxxxxxxx.xxxxxxxx
+
+Ogni gruppo (ottetto) viene convertito in un numero decimale tra 0 e 255.
+
+Esempio:
+
+  IPv4 = 192.168.1.10
+
+  | Parte      | Bit | Range | Esempio |
+  | ---------- | --- | ----- | ------- |
+  | 1° ottetto | 8   | 0–255 | 192     |
+  | 2° ottetto | 8   | 0–255 | 168     |
+  | 3° ottetto | 8   | 0–255 | 1       |
+  | 4° ottetto | 8   | 0–255 | 10      |
+
+L'indirizzo 192.168.1.10 in binario è:
+
+  11000000.10101000.00000001.00001010
+
+Formula per convertire un indirizzo IPv4 nella sua rappresentazione intera:
+
+  (Ottetto1 * 16777216) + (Ottetto2 * 65536) + (Ottetto3 * 256) + (Ottetto4)
+  dove: 16777216 = 256^3, 65536 = 256^2
+
+Esempi:
+
+  IPv4 = 192.168.1.1
+  Intero = (192 * 16777216) + (168 * 65536) + (1 * 256) + 1 = 3232235777
+
+  IPv4 = 10.10.104.36
+  Intero = (10 * 16777216) + (10 * 65536) + (104 * 256) + 36 = 168454180
+
+  IPv4 = 8.8.8.8
+  Intero = (8 * 16777216) + (8 * 65536) + (8 * 256) + 8 = 134744072
+
+(define (ip4-int str)
+  (apply + (map * (map int (parse str ".")) '(16777216 65536 256 1))))
+
+(ip4-int "192.168.1.1")
+;-> 3232235777
+(ip4-int "10.10.104.36")
+;-> 168454180
+(ip4-int "8.8.8.8")
+;-> 134744072
+(ip4-int "255.255.255.255")
+;-> 4294967295
+
+Oppure con gli operatori bitwise:
+
+  num = (a << 24) | (b << 16) | (c << 8) | d
+
+(define (ip4-int-bit str)
+  (letn ((lst (map int (parse str "."))))
+    (| (<< (lst 0) 24)
+       (<< (lst 1) 16)
+       (<< (lst 2) 8)
+       (lst 3))))
+
+(ip4-int-bit "192.168.1.1")
+;-> 3232235777
+(ip4-int-bit "10.10.104.36")
+;-> 168454180
+(ip4-int-bit "8.8.8.8")
+;-> 134744072
+(ip4-int-bit "255.255.255.255")
+;-> 4294967295
+
+Formula per convertire un intero IPv4 nella sua rappresentazione in ottetti:
+
+  a = (num / 16777216)
+  b = (num / 65536) % 256
+  b = (num / 256) % 256
+  c = num % 256
+
+(define (int-ip4 num)
+  (join (map string (list (/ num 16777216)
+                          (% (/ num 65536) 256)
+                          (% (/ num 256) 256)
+                          (% num 256))) "."))
+
+(int-ip4 168454180)
+;-> "10.10.104.36"
+(int-ip4 134744072)
+;-> "8.8.8.8"
+(int-ip4 4294967295)
+;-> "255.255.255.255"
+
+Oppure con gli operatori bitwise:
+
+  a = (ip >> 24) & 255
+  b = (ip >> 16) & 255
+  c = (ip >> 8)  & 255
+  d = ip & 255
+
+(define (int-ip4-bit num)
+  (join (map string (list (& (>> num 24) 255)
+                          (& (>> num 16) 255)
+                          (& (>> num 8)  255)
+                          (& num 255))) "."))
+
+(int-ip4-bit 3232235777)
+;-> "192.168.1.1"
+(int-ip4-bit 168454180)
+;-> "10.10.104.36"
+(int-ip4-bit 134744072)
+;-> "8.8.8.8"
+(int-ip4-bit 4294967295)
+;-> "255.255.255.255"
+
+Le due funzioni sono perfettamente inverse tra loro e non perdono precisione, poiché usano solo operazioni su interi a 32 bit.
+
 ============================================================================
 

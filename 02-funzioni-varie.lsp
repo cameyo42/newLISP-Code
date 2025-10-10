@@ -4646,6 +4646,48 @@ Esempio:
 (length (powerset-i L))
 ;-> 8
 
+Scriviamo una funzione con backtracking:
+
+(define (powerset-backtrack lst)
+  (local (current out)
+    (define (dfs idx)
+            ; Caso base: raggiunta la fine della lista
+      (cond ((= idx (length lst))
+              (push current out))
+            (true
+              ; Scelta 1: Esclude l'elemento corrente
+              (dfs (+ idx 1))
+              (push (lst idx) current)
+              ; Scelta 2: Include l'elemento corrente
+              (dfs (+ idx 1))
+              ; Backtrack: rimuove l'elemento che abbiamo appena aggiunto
+              (pop current))))
+    ; Lista risultato finale
+    (setq out '())
+    ; Sottolista temporanea
+    (setq current '())
+    ; Inizia il processo di backtracking process dall'indice 0
+    (dfs 0)
+    out))
+
+(powerset-backtrack '(1 2 3 4 5 6 7 8 9 10 15 16))
+;-> ((16 15 10 9 8 7 6 5 4 3 2 1)
+;->  (15 10 9 8 7 6 5 4 3 2 1)
+;->  (16 10 9 8 7 6 5 4 3 2 1)
+;->  ...
+;->  (16 15)
+;->  (15)
+;->  (16)
+;->  ())
+
+(length (powerset-backtrack '(1 2 3 4 5 6 7 8 9 10 15 16)))
+;-> 4096
+
+Questa funzione è molto lenta:
+
+(time (powerset-backtrack '(1 2 3 4 5 6 7 8 9 10 15 16)))
+;-> 515.706
+
 Scriviamo una funzione ricorsiva cha calcola l'insieme potenza:
 
 (define (powerset lst)
