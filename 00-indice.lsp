@@ -3206,6 +3206,8 @@ NOTE LIBERE 33
   N numeri che sommano a K
   Lo Stack size di newLISP
   Conversione IPv4 <--> Intero
+  Ricostruzione IPv4
+  Dividere in tutti i modi una lista o una stringa in K parti
 
 PROBLEMI SUI DADI
 =================

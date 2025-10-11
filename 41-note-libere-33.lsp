@@ -1222,5 +1222,374 @@ Oppure con gli operatori bitwise:
 
 Le due funzioni sono perfettamente inverse tra loro e non perdono precisione, poiché usano solo operazioni su interi a 32 bit.
 
+
+------------------
+Ricostruzione IPv4
+------------------
+
+Abbiamo degli indirizzi IPv4 senza il punto "." che separa i numeri.
+Scrivere una funzione che determina tutti gli IPv4 validi del numero dato.
+
+Esempio:
+ numero = "25425411224"
+ IPv4 validi = "254.254.11.224", "254.254.112.24")
+
+Algoritmo
+---------
+1) Divisione della stringa in tutti i modi possibili
+2) Selezione delle divisioni che hanno esattamente 4 elementi (stringhe)
+   in cui ogni elemento deve valere "0" oppure non iniziare con "0".
+3) Selezione degli elementi i cui 4 valori sono minori di 256
+
+(define (split-string str)
+"Generate all the splits of a string in order"
+(if (= (length str) 1) (list (list str))
+  ;else
+  (local (out len max-tagli taglio fmt cur-str)
+    (setq out '())
+    (setq len (length str))
+    ; numero massimo di tagli
+    (setq max-tagli (- len 1))
+    ; formattazione con 0 davanti
+    (setq fmt (string "%0" max-tagli "s"))
+    (for (i 0 (- (pow 2 max-tagli) 1))
+      ; taglio corrente
+      (setq taglio (format fmt (bits i)))
+      ; taglia la stringa con taglio corrente
+      (setq cur-str (split-aux str taglio))
+      ; inserisce la stringa tagliata corrente nella soluzione
+      (push cur-str out -1)
+    )
+    out)))
+;Funzione ausiliaria
+(define (split-aux str binary)
+  (let (out "")
+    (for (i 0 (- (length binary) 1))
+      (if (= (binary i) "1")
+          ; taglio
+          (extend out (string (str i) { }))
+          ; nessun taglio
+          (extend out (str i))))
+    ; inserisce caratteri finali
+    (extend out (str -1))
+    out))
+
+Proviamo:
+
+(define (make-ip str)
+  (local (out parts)
+    (setq out '())
+    ; calcola tutte le divisioni della stringa
+    (setq parts (map parse (split-string str)))
+    ; Prende solo le parti con 4 elementi i quali devono tutti :
+    ; valere "0" oppure non iniziare con "0"
+    (setq parts (filter 
+                  (fn(x) (and (= (length x) 4)
+                              (for-all (fn(y) (or (= y "0") (!= (y 0) "0"))) x))) parts))
+    ;(print parts) (read-line)
+    ; ciclo sulle parti per determinare gli ip validi
+    (dolist (el parts)
+      ; converte in interi le stringhe dell'elemento corrente
+      (setq el (map (fn(x) (int x 0 10)) el))
+      ; se tutti numeri sono minori di 256,
+      ; allora è un ip valido e lo inseriamo nella soluzione
+      (if (for-all (fn(x) (< x 256)) el) (begin
+          (push (join (map string el) ".") out))))
+    out))
+
+Proviamo:
+
+(make-ip "25425411224")
+;-> ("254.254.11.224" "254.254.112.24")
+
+(make-ip "192168110")
+;-> ("1.92.168.110" "19.2.168.110" "19.21.68.110" "19.216.8.110"
+;->  "19.216.81.10" "192.1.68.110" "192.16.8.110" "192.16.81.10"
+;->  "192.168.1.10" "192.168.11.0")
+
+(make-ip "0000")
+;-> ("0.0.0.0")
+
+(make-ip "202034")
+;-> ("2.0.20.34" "2.0.203.4" "20.2.0.34" "20.20.3.4" "202.0.3.4")
+
+Possiamo scrivere una funzione che divide la stringa solo in quattro parti in tutti i modi possibili.
+
+Algoritmo
+---------
+Ci sono n−1 possibili punti di taglio nella stringa.
+Per ottenere K parti, servono K−1 tagli.
+Si generano tutte le combinazioni crescenti di tagli.
+Ogni combinazione (p1, p2, ..., p(K-1)) produce le sottostringhe:
+
+  [0,p1), [p1,p2), ..., [p(K-1), fine)
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+(define (divide-string str K)
+  ; divide la stringa str in tutte le possibili K parti non vuote
+  (letn (n (length str)
+         tagli (comb (- K 1) (sequence 1 (- n 1)))
+         risultati '())
+    (dolist (pos tagli)
+      (let (start 0 parti '())
+        (dolist (p pos)
+          (push (slice str start (- p start)) parti -1)
+          (setq start p))
+        (push (slice str start) parti -1)
+        (push parti risultati -1)))
+    risultati))
+
+(define (make-ip2 str)
+  ; divide la stringa str in tutte le possibili 4 parti non vuote
+  (letn ( (n (length str))
+          (tagli (comb (- 4 1) (sequence 1 (- n 1))))
+          (four '()) 
+          (out '()) )
+    (dolist (pos tagli)
+      (let ( (start 0) (parti '()) )
+        (dolist (p pos)
+          (push (slice str start (- p start)) parti -1)
+          (setq start p))
+        (push (slice str start) parti -1)
+        ; Prende solo le parti i cui tutti i 4 elementi
+        ; valgono "0" oppure non iniziano con "0"
+        (if (for-all (fn(x) (or (= x "0") (!= (x 0) "0"))) parti)
+            (push parti four -1))))
+    ; ciclo sulla lista four parti per determinare gli ip validi
+    (dolist (el four)
+      ; converte in interi le stringhe dell'elemento corrente
+      (setq el (map (fn(x) (int x 0 10)) el))
+      ; se tutti numeri sono minori di 256,
+      ; allora è un ip valido e lo inseriamo nella soluzione
+      (if (for-all (fn(x) (< x 256)) el) (begin
+          (push (join (map string el) ".") out))))
+    out))
+
+(make-ip2 "25425411224")
+;-> ("254.254.11.224" "254.254.112.24")
+
+(make-ip2 "192168110")
+;-> ("1.92.168.110" "19.2.168.110" "19.21.68.110" "19.216.8.110"
+;->  "19.216.81.10" "192.1.68.110" "192.16.8.110" "192.16.81.10"
+;->  "192.168.1.10" "192.168.11.0")
+
+(make-ip2 "0000")
+;-> ("0.0.0.0")
+
+(make-ip2 "202034")
+;-> ("2.0.20.34" "2.0.203.4" "20.2.0.34" "20.20.3.4" "202.0.3.4")
+
+
+-----------------------------------------------------------
+Dividere in tutti i modi una lista o una stringa in K parti
+-----------------------------------------------------------
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+(define (divide-parts obj K)
+  ;-----------------------------------------------------------
+  ; Funzione: divide-parts
+  ; Scopo   : dividere una lista/stringa 'obj' in tutte le possibili
+  ;           K sottoliste/sottostringhe non vuote, mantenendo l'ordine.
+  ;
+  ; Argomenti:
+  ;   obj -> la lista/stringa di partenza (es. '(a b c d e))
+  ;   K   -> numero di parti desiderate (es. 3 -> ((a)(b)(c d e)) ecc.)
+  ;
+  ; Metodo:
+  ;   1. La lista/stringa di lunghezza n può essere tagliata in (n-1) punti.
+  ;   2. Per ottenere K parti, servono (K-1) tagli.
+  ;   3. Si generano tutte le combinazioni crescenti di (K-1) indici
+  ;      da 1 a (n-1).
+  ;   4. Ogni combinazione rappresenta dove tagliare la lista/stringa.
+  ;   5. Si costruiscono le sottoliste/sottostringhe corrispondenti e 
+  ;      si aggiungono al risultato.
+  ;
+  ; Dipendenze: richiede la funzione (comb k lista).
+  ;-----------------------------------------------------------
+  (letn ( (n (length obj))                             ; lunghezza della lista
+          (tagli (comb (- K 1) (sequence 1 (- n 1))))  ; tutte le combinazioni di tagli
+          (out '()) )                            ; lista dei out finali
+    ; per ogni combinazione di posizioni di taglio
+    (dolist (pos tagli)
+      (let ( (start 0) (parti '()) )   ; posizione iniziale e lista delle parti
+        ; per ogni posizione di taglio nella combinazione
+        (dolist (p pos)
+          (push (slice obj start (- p start)) parti -1) ; aggiunge sottolista [start,p)
+          (setq start p))                 ; aggiorna inizio per la prossima
+        (push (slice obj start) parti -1) ; aggiunge ultima parte fino alla fine
+        (push parti out -1)))       ; aggiunge la decomposizione trovata
+    out))                           ; restituisce tutte le suddivisioni
+
+Proviamo:
+
+(divide-parts '(a b c d e) 4)
+;-> (((a) (b) (c) (d e)) ((a) (b) (c d) (e)) 
+;->  ((a) (b c) (d) (e)) ((a b) (c) (d) (e)))
+
+(divide-parts "abcde" 4)
+;-> (("a" "b" "c" "de") ("a" "b" "cd" "e") 
+;->  ("a" "bc" "d" "e") ("ab" "c" "d" "e"))
+
+(divide-parts "abcde" 5)
+;-> (("a" "b" "c" "d" "e"))
+
+(divide-parts "abcde" 6)
+;-> ()
+
+Nota: numero combinazioni = C(n-1, K-1)
+
+Ecco la versione che non costruisce l'intera lista dei risultati, ma restituisce una partizione alla volta tramite una funzione fornita come call-back.
+Questo approccio è utile se vogliamo elaborare molte partizioni senza consumare troppa memoria.
+
+(define (divide-parts-one obj K call-back)
+  ;-----------------------------------------------------------
+  ; Funzione: divide-parts-one
+  ; Scopo   : generare tutte le possibili divisioni di una lista/stringa obj
+  ;           in K sottoliste/sottostringhe non vuote, chiamando 'call-back'
+  ;           su ciascuna partizione trovata.
+  ;
+  ; Argomenti:
+  ;   obj       -> lista/stringa di partenza (es. '(a b c d e))
+  ;   K         -> numero di sottoliste/sottostringhe desiderate
+  ;   call-back -> funzione che riceve una singola partizione
+  ;                (verrà invocata con una lista di K sottoliste/sottostringhe)
+  ;
+  ; Esempio:
+  ;   (divide-parts-on '(a b c d) 3 println)
+  ;
+  ; Metodo:
+  ;   identico alla versione base, ma invece di accumulare i risultati
+  ;   li invia direttamente alla funzione call-back.
+  ;
+  ; Nota: richiede la funzione (comb k lista).
+  ;-----------------------------------------------------------
+  (letn ( (n (length obj))
+          (tagli (comb (- K 1) (sequence 1 (- n 1)))) )
+    (dolist (pos tagli)
+      (let ( (start 0) (parti '()) )
+        (dolist (p pos)
+          (push (slice obj start (- p start)) parti -1)
+          (setq start p))
+        (push (slice obj start) parti -1)
+        (call-back parti)))))
+
+(divide-parts-one '(a b c d e) 4 println)
+;-> ((a) (b) (c) (d e))
+;-> ((a) (b) (c d) (e))
+;-> ((a) (b c) (d) (e))
+;-> ((a b) (c) (d) (e))
+
+(divide-parts-one '(1 2 3 4 5) 3 println)
+;-> ((1) (2) (3 4 5))
+;-> ((1) (2 3) (4 5))
+;-> ((1) (2 3 4) (5))
+;-> ((1 2) (3) (4 5))
+;-> ((1 2) (3 4) (5))
+;-> ((1 2 3) (4) (5))
+;-> ((1 2 3) (4) (5))
+
+Questo metodo permette di filtrare solo certe partizioni:
+
+(divide-parts-one '(1 2 3 4 5) 3
+  (fn(x) (when (> (apply + (first x)) 1) (println x))))
+;-> ((1 2) (3) (4 5))
+;-> ((1 2) (3 4) (5))
+;-> ((1 2 3) (4) (5))
+;-> ((1 2 3) (4) (5))  
+
+In questo modo la funzione si comporta come un generatore controllato che produce tutte le suddivisioni, ma permette di decidere se usarle o scartarle.
+
+Adesso scriviamo una versione che restituisce un iteratore vero e proprio (cioè una funzione che possiamo chiamare più volte per ottenere la prossima partizione).
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+;(context 'divide-parts-gen)
+;-----------------------------------------
+; Generatore che divide una lista o stringa
+; in tutte le possibili partizioni in K parti.
+; Usa un contesto per mantenere lo stato.
+;-----------------------------------------
+(define (divide-parts-gen:init seq K)
+  (letn (n (length seq))
+    (if (or (< K 2) (< n K))
+        (begin (setq divide-parts-gen:partitions nil) false)
+        (begin
+          ; Tutte le combinazioni di posizioni di taglio
+          (setq divide-parts-gen:cuts (comb (- K 1) (sequence 1 (- n 1))))
+          (setq divide-parts-gen:seq seq)
+          (setq divide-parts-gen:index 0)
+          true))))
+
+;-----------------------------------------------------------
+; Funtore del contesto: genera la prossima partizione
+;-----------------------------------------------------------
+(define (divide-parts-gen:divide-parts-gen)
+  (if (or (not divide-parts-gen:cuts)
+          (>= divide-parts-gen:index (length divide-parts-gen:cuts)))
+      nil
+      (letn (seq divide-parts-gen:seq
+             cuts (divide-parts-gen:cuts divide-parts-gen:index)
+             start 0 parts '())
+        (dolist (p (append cuts (list (length seq))))
+          (push (slice seq start (- p start)) parts -1)
+          (setq start p))
+        (inc divide-parts-gen:index)
+        parts)))
+
+;(context MAIN)
+
+Proviamo:
+
+Lista:
+(divide-parts-gen:init "abcde" 4)
+;-> true
+(divide-parts-gen)
+;-> ("a" "b" "c" "de")
+(divide-parts-gen)
+;-> ("a" "b" "cd" "e")
+(divide-parts-gen)
+;-> ("a" "bc" "d" "e")
+(divide-parts-gen)
+;-> ("ab" "c" "d" "e")
+(divide-parts-gen)
+;-> nil
+
+Stringa:
+(divide-parts-gen:init "abcde" 4)
+;-> true
+(divide-parts-gen)
+;-> ("a" "b" "c" "de")
+(divide-parts-gen)
+;-> ("a" "b" "cd" "e")
+(divide-parts-gen)
+;-> ("a" "bc" "d" "e")
+(divide-parts-gen)
+;-> ("ab" "c" "d" "e")
+(divide-parts-gen)
+;-> nil
+
 ============================================================================
 
