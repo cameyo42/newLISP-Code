@@ -1591,5 +1591,182 @@ Stringa:
 (divide-parts-gen)
 ;-> nil
 
+
+----------------
+Sequenza a*b + 1
+----------------
+
+Determinare la sequenza definita nel modo seguente:
+  a(0) = 2
+  se a e b appartengono alla sequenza, allora anche (a*b + 1) ne fa parte.
+
+Sequenza OEIS A009293:
+If a, b in sequence, so is a*b+1.
+  2, 5, 11, 23, 26, 47, 53, 56, 95, 107, 113, 116, 122, 131, 191, 215, 227,
+  233, 236, 245, 254, 263, 266, 281, 287, 383, 431, 455, 467, 473, 476, 491,
+  509, 518, 527, 530, 533, 536, 563, 566, 575, 581, 584, 599, 611, 617, 656,
+  677, 767, 863, 911, 935, 947, 953, 956, 983, ...
+
+Algoritmo
+- Si parte dal numero 2,
+- Si considerano tutte le coppie ((a,b)) appartenenti all'insieme corrente,
+- Si aggiungono i nuovi valori (a*b + 1) che rispettano la condizione,
+- E si ripete fino a stabilità.
+
+;------------------------------------------------------------
+; Generatore della sequenza OEIS A009293
+; Se a e b appartengono alla sequenza, allora anche (a*b + 1) ne fa parte.
+; Si parte dal valore iniziale 2 e si aggiungono nuovi termini
+; fino a quando non si generano più numeri minori o uguali a 'limite'.
+;------------------------------------------------------------
+(define (sequenza limite)
+  ; 'out' contiene la sequenza generata (inizialmente con solo 2)
+  ; 'finito' serve per capire se in un ciclo non vengono trovati nuovi elementi
+  (letn ( (out '(2 5)) (finito nil) )
+    (setq finito nil)    ; inizializza la variabile di controllo
+    ; ciclo principale: continua finché vengono aggiunti nuovi numeri
+    (while (not finito)
+      (setq finito true) ; assume che non si trovino nuovi numeri
+      ; esplora tutte le coppie (a,b) della sequenza corrente
+      (for (i 0 (- (length out) 1))
+        (for (j i (- (length out) 1))
+          (letn (a (out i) b (out j) x (+ 1 (* a b)))  ; calcola x = a*b + 1
+            (when (<= x limite)          ; considera solo i valori <= limite
+              (when (not (ref x out))   ; se x non è già nella sequenza
+                (push x out -1)         ; aggiungilo alla fine
+                (setq finito nil))))))) ; è stato trovato un nuovo numero
+    ; ordina la sequenza in ordine crescente prima di restituirla
+    (sort out (fn (u v) (< u v)))))
+
+(sequenza 1000)
+;-> (2 5 11 23 26 47 53 56 95 107 113 116 122 131 191 215 227
+;->  233 236 245 254 263 266 281 287 383 431 455 467 473 476 491
+;->  509 518 527 530 533 536 563 566 575 581 584 599 611 617 656
+;->  677 767 863 911 935 947 953 956 983)
+
+Da notare che la regola di definizione della sequenza:
+
+ "if a,b in sequence, then a*b + 1 is also in the sequence"
+
+richiede almeno una coppia iniziale (a,b) per cominciare a generare nuovi termini.
+Comunque in questo caso il motivo per cui basta partire solo da '2' è che la sequenza è definita come la chiusura minima rispetto all'operazione (a,b --> a*b + 1) contenente il numero 2.
+Quindi l'intera sequenza si auto-genera partendo dal singolo seme '2', proprio perché l'operazione è chiusa:
+il singolo elemento 2 basta perché genera da solo la prima coppia utile (2,2).
+
+
+-----------------------------
+Generatore di intervalli IPv4
+-----------------------------
+
+Dati due indirizzi IPv4 a e b, restituire tutti gli indirizzi compresi in quell'intervallo.
+
+Primo metodo
+------------
+Conversione degli IP in interi a 32 bit
+
+Algoritmo
+1) 'ip4-int' converte un indirizzo in formato "a.b.c.d" in un intero a 32 bit:
+             a * 256^3 + b * 256^2 + c * 256 + d
+2) 'int-ip4' fa l'inverso: da un numero intero ricava i 4 byte corrispondenti.
+3) 'intervallo-ip':
+   - Converte i due indirizzi 'a' e 'b' in interi.
+   - Crea una lista di tutti i numeri da 'start' a 'end'.
+   - Li riconverte in stringhe IP e li accumula in 'out'.
+   - Restituisce la lista completa.
+
+Nota: l'intervallo tra "124.0.200.0" e "125.0.0.0" contiene più di 16 milioni di indirizzi IP, quindi la funzione genererà una lista enorme.
+
+; Funzione per convertire un indirizzo IP (stringa) in intero
+(define (ip4-int str)
+  (apply + (map * (map int (parse str ".")) '(16777216 65536 256 1))))
+
+; Funzione per convertire un intero in indirizzo IP (stringa)
+(define (int-ip4 num)
+  (join (map string (list (/ num 16777216)
+                          (% (/ num 65536) 256)
+                          (% (/ num 256) 256)
+                          (% num 256)))
+        "."))
+
+; Funzione principale: restituisce tutti gli IP compresi tra a e b inclusi
+(define (intervallo-ip a b)
+  (letn ( (start (ip4-int a)) (end (ip4-int b)) (out '()) )
+    (for (i start end)
+      ;(print (int-ip4 i)) (read-line)
+      (push (int-ip4 i) out -1))
+    out))
+
+Proviamo:
+
+(intervallo-ip "123.0.0.0" "123.0.0.10")
+;-> ("123.0.0.0" "123.0.0.1" "123.0.0.2" "123.0.0.3" "123.0.0.4" "123.0.0.5"
+;->  "123.0.0.6" "123.0.0.7" "123.0.0.8" "123.0.0.9" "123.0.0.10")
+
+(length (intervallo-ip "123.0.200.0" "123.0.201.10"))
+;-> 267
+(length (intervallo-ip "123.0.200.0" "123.1.0.0"))
+;-> 14437
+(length (intervallo-ip "10.6.0.0" "10.6.255.255"))
+;-> 65536
+
+Secondo metodo
+--------------
+Questa è una versione completamente aritmetica che incrementa i quattro ottetti senza convertire in intero.
+
+Algoritmo
+1) 'inc-ip' incrementa manualmente i 4 ottetti, gestendo i "riporti" come in un contatore in base 256.
+2) 'intervallo-ip':
+    - Converte le stringhe iniziale e finale in liste di interi (a b c d).
+    - Usa un ciclo 'while' che aggiunge ogni IP alla lista 'out' fino a raggiungere l'ultimo ('end').
+    - Riconverte ogni IP in stringa con 'join'.
+
+; Funzione che incrementa di 1 un indirizzo IP rappresentato come lista di 4 ottetti
+(define (inc-ip ip)
+  (letn ((a (ip 0)) (b (ip 1)) (c (ip 2)) (d (ip 3)))
+    (++ d)
+    (when (> d 255) (setq d 0) (++ c))
+    (when (> c 255) (setq c 0) (++ b))
+    (when (> b 255) (setq b 0) (++ a))
+    (list a b c d)))
+
+; Funzione principale: genera tutti gli indirizzi da a a b (inclusi)
+(define (intervallo-ip-arit a b)
+  (letn ((start (map int (parse a ".")))
+         (end (map int (parse b ".")))
+         (curr start)
+         (out '())
+         (finito nil))
+    (while (not finito)
+      (push (join (map string curr) ".") out -1)
+      (if (= curr end)
+          (setq finito true)
+          (setq curr (inc-ip curr))))
+    out))
+
+Proviamo:
+
+(intervallo-ip-arit "123.0.0.0" "123.0.0.10")
+;-> ("123.0.0.0" "123.0.0.1" "123.0.0.2" "123.0.0.3" "123.0.0.4" "123.0.0.5"
+;->  "123.0.0.6" "123.0.0.7" "123.0.0.8" "123.0.0.9" "123.0.0.10")
+
+(length (intervallo-ip-arit "123.0.200.0" "123.0.201.10"))
+;-> 267
+(length (intervallo-ip-arit "123.0.200.0" "123.1.0.0"))
+;-> 14437
+(length (intervallo-ip-arit "10.6.0.0" "10.6.255.255"))
+;-> 65536
+
+Test di correttezza:
+
+(= (intervallo-ip "10.6.0.0" "10.6.255.255")
+   (intervallo-ip-arit "10.6.0.0" "10.6.255.255"))
+;-> true
+
+Test di velocità:
+(time (intervallo-ip "10.6.0.0" "10.6.255.255") 10)
+;-> 1250.202
+(time (intervallo-ip-arit "10.6.0.0" "10.6.255.255") 10)
+;-> 1336.475
+
 ============================================================================
 
