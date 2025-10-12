@@ -3210,6 +3210,7 @@ NOTE LIBERE 33
   Dividere in tutti i modi una lista o una stringa in K parti
   Sequenza a*b + 1
   Generatore di intervalli IPv4
+  Ricerca di una stringa in una matrice di caratteri
 
 PROBLEMI SUI DADI
 =================

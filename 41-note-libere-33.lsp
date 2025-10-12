@@ -1768,5 +1768,78 @@ Test di velocità:
 (time (intervallo-ip-arit "10.6.0.0" "10.6.255.255") 10)
 ;-> 1336.475
 
+
+--------------------------------------------------
+Ricerca di una stringa in una matrice di caratteri
+--------------------------------------------------
+
+Data una matrice di caratteri e una stringa determinare se la stringa si trova nella matrice.
+Una stringa si trova nella matrice se i suoi caratteri formano un percorso contiguo nella matrice (nelle 4 direzioni Nord, Est, Sud, Ovest oppure nelle 8 direzioni N, E, S, O, SE, SO, NE, NO).
+
+Algoritmo
+1) Si esplora la matrice partendo da ogni cella che corrisponde alla prima lettera della stringa.
+2) Si usa una funzione interna cerca che segue i 4 o 8 movimenti possibili.
+3) La lista visitati evita di riutilizzare la stessa cella nel percorso corrente.
+4) Se si raggiunge l’ultimo carattere (k = len-1), la stringa è trovata
+
+; Funzione che verifica se una stringa è presente in una matrice di caratteri
+; La stringa è considerata presente se i suoi caratteri formano un percorso
+; contiguo nelle 4 direzioni cardinali: Nord, Est, Sud, Ovest,
+; oppure nelle 8 direzioni cardinali: S, N, E, O, SE, SO, NE, NO (diag -> true)
+; Ogni cella può essere usata una sola volta nello stesso percorso.
+(define (stringa-in-matrice matrice stringa diag)
+  (letn ( (righe (length matrice)) ; numero di righe della matrice
+          (colonne (length (matrice 0))) ; numero di colonne della matrice
+          (trovato nil) ; variabile booleana per segnalare se la stringa è stata trovata
+          (len (length stringa)) ; lunghezza della stringa da cercare
+          (direzioni '((1 0) (-1 0) (0 1) (0 -1))) ) ; vettori spostamento (Sud, Nord, Est, Ovest)
+    (if diag ; 8 direzioni: S, N, E, O, SE, SO, NE, NO
+        (setq direzioni '((1 0) (-1 0) (0 1) (0 -1) (1 1) (1 -1) (-1 1) (-1 -1))))
+    ; funzione ricorsiva che esplora la matrice a partire da una cella (i,j)
+    ; e verifica se è possibile completare la stringa a partire dal carattere indice k
+    ; "visitati" è la lista delle coordinate già utilizzate nel percorso corrente
+    (define (cerca i j k visitati)
+      ; controllo che la posizione sia dentro la matrice, non ancora visitata
+      ; e che il carattere della cella corrisponda al carattere della stringa in posizione k
+      (if (and (>= i 0) (< i righe) (>= j 0) (< j colonne)
+               (= ((matrice i) j) (stringa k))
+               (not (ref (list i j) visitati)))
+          ; se l’ultimo carattere corrisponde, la stringa è stata trovata
+          (if (= k (- len 1))
+              (set 'trovato true)
+              ; altrimenti continua la ricerca nelle quattro direzioni adiacenti
+              (dolist (d direzioni)
+                (if (not trovato)
+                    (cerca (+ i (d 0)) (+ j (d 1)) (+ k 1)
+                           (append visitati (list (list i j)))))))))
+    ; avvia la ricerca da ogni cella della matrice che contiene il primo carattere della stringa
+    (for (i 0 (- righe 1))
+      (for (j 0 (- colonne 1))
+        (if (and (not trovato) (= ((matrice i) j) (stringa 0)))
+            (cerca i j 0 '()))))
+    ; restituisce true se la stringa è stata trovata, altrimenti nil
+    trovato))
+
+Proviamo:
+
+(setq M '(("A" "B" "C" "E")
+          ("S" "F" "C" "S")
+          ("A" "D" "E" "E")))
+
+(stringa-in-matrice M "ABCCED")
+;-> true
+(stringa-in-matrice M "SEE")
+;-> true
+(stringa-in-matrice M "SCFS")
+;-> true
+(stringa-in-matrice M "ABCB")
+;-> nil
+(stringa-in-matrice M "AFE")
+;-> nil
+(stringa-in-matrice M "AFE" true)
+;-> true
+(stringa-in-matrice M "AFECBCESE" true)
+;-> true
+
 ============================================================================
 
