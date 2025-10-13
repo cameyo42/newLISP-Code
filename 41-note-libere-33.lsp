@@ -1841,5 +1841,111 @@ Proviamo:
 (stringa-in-matrice M "AFECBCESE" true)
 ;-> true
 
+
+-------------------------------------------------------
+Numero di occorrenze delle sottostringhe di una stringa
+-------------------------------------------------------
+
+Data una stringa di N caratteri e un intero K <= N, determinare tutte le sottostringhe contigue di lunghezza K e le relative occorrenze nella stringa.
+
+Esempio:
+  Stringa = "ABCFGABCFGAH"
+  K = 3
+  Sottostringhe = ("ABC" "BCF" "CFG" "FGA" "GAB" "ABC" "BCF" "CFG" "FGA" "GAH")
+  Occorrenze: ("ABC" 2) ("BCF" 2) ("CFG" 2) ("FGA" 2) ("GAB" 1) ("GAH" 1)
+
+(define (group-block obj num)
+"Create a list with blocks of elements: (0..num) (1..num+1) (n..num+n)"
+  (local (out items len)
+    (setq out '())
+    (setq len (length obj))
+    (if (>= len num) (begin
+        ; numero di elementi nella lista di output (numero blocchi)
+        (setq items (- len num (- 1)))
+        (for (k 0 (- items 1))
+          (push (slice obj k num) out -1)
+        )))
+    out))
+
+Algoritmo
+---------
+; Input
+(setq str "ABCFGABCFGAH")
+(setq K 3)
+; genera tutte le sottostringhe (uniche) di lunghezza K
+(setq blocks (unique (group-block str K)))
+;-> ("ABC" "BCF" "CFG" "FGA" "GAB" "GAH")
+; conta le occorrenze di ogni sottostringa
+(setq occorrenze (map (fn(x) (length (find-all x str))) blocks))
+; Crea le coppie (sottostringa occorrenze)
+(setq result (map list blocks occorrenze))
+
+Funzione che trova tutte le sottostringhe di lunghezza K e le relative occorrenze in una stringa data:
+
+(define (conta-substr str K)
+  (letn (blocks (unique (group-block str K)))
+    (map list blocks (map (fn(x) (length (find-all x str))) blocks))))
+
+Proviamo:
+
+(conta-substr "ABCFGABCFGAH" 3)
+;-> (("ABC" 2) ("BCF" 2) ("CFG" 2) ("FGA" 2) ("GAB" 1) ("GAH" 1))
+
+(conta-substr "ABCGHDRKABCHFJIGABCHGJIHDRKABJIGABCKEBGAB" 3)
+;-> (("ABC" 4) ("BCG" 1) ("CGH" 1) ("GHD" 1) ("HDR" 2) ("DRK" 2) ("RKA" 2)
+;->  ("KAB" 2) ("BCH" 2) ("CHF" 1) ("HFJ" 1) ("FJI" 1) ("JIG" 2) ("IGA" 2)
+;->  ("GAB" 3) ("CHG" 1) ("HGJ" 1) ("GJI" 1) ("JIH" 1) ("IHD" 1) ("ABJ" 1)
+;->  ("BJI" 1) ("BCK" 1) ("CKE" 1) ("KEB" 1) ("EBG" 1) ("BGA" 1))
+
+(conta-substr "abc" 1)
+;-> (("a" 1) ("b" 1) ("c" 1))
+
+(conta-substr "123456123" 1)
+;-> (("1" 2) ("2" 2) ("3" 2) ("4" 1) ("5" 1) ("6" 1))
+
+(conta-substr "ABCGHDRKABCHFJIGABCHGJIHDRKABJIGABCKEBGAB" 41)
+;-> (("ABCGHDRKABCHFJIGABCHGJIHDRKABJIGABCKEBGAB" 1))
+
+Proviamo ad scrivere una funzione unica:
+
+(define (conta-substr2 str K)
+  (local (out len items blocco occorrenze)
+    (setq out '())
+    (setq len (length str))
+    (when (>= len K)
+      ; numero di elementi nella lista di output (numero blocchi)
+      (setq items (- len K (- 1)))
+      (for (i 0 (- items 1))
+        (setq blocco (slice str i K))
+        (setq occorrenze (length (find-all blocco str)))
+        (push (list blocco occorrenze) out -1)))
+    (unique out)))
+
+(conta-substr2 "123456123" 1)
+;-> (("1" 2) ("2" 2) ("3" 2) ("4" 1) ("5" 1) ("6" 1) ("1" 2) ("2" 2) ("3" 2))
+
+(setq s "ABCGHDRKABCHFJIGABCHGJIHDRKABJIGABCKEBGABAUNCBABCDHGFJKGHUTHGABAHUAB")
+
+Test di correttezza:
+
+(= (conta-substr s 2) (conta-substr2 s 2))
+;-> true
+
+Test di velocità:
+
+Con K piccolo è più veloce "conta-str":
+
+(time (conta-substr s 2) 1e4)
+;-> 647.24
+(time (conta-substr2 s 2) 1e4)
+;-> (978.15)
+
+Con K grande è più veloce "conta-str2":
+
+(time (conta-substr s 10) 1e4)
+;-> 875.325
+(time (conta-substr2 s 10) 1e4)
+;-> 763.611
+
 ============================================================================
 

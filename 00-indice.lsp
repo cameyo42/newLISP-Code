@@ -3211,6 +3211,7 @@ NOTE LIBERE 33
   Sequenza a*b + 1
   Generatore di intervalli IPv4
   Ricerca di una stringa in una matrice di caratteri
+  Numero di occorrenze delle sottostringhe di una stringa
 
 PROBLEMI SUI DADI
 =================
