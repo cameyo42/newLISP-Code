@@ -1947,5 +1947,98 @@ Con K grande è più veloce "conta-str2":
 (time (conta-substr2 s 10) 1e4)
 ;-> 763.611
 
+
+----------------------------
+Bitwise AND di un intervallo
+----------------------------
+
+Dato un intervallo di numeri interi [a, b], calcolare il bitwise AND di tutti i numeri da 'a' a 'b'.
+
+Metodo brute-force
+------------------
+Generiamo la sequenza di numeri e applichiamo l'AND a tutti.
+
+(define (and-all1 a b) (apply & (sequence a b)))
+
+Proviamo:
+
+(and-all1 26 31)
+;-> 24
+(and-all1 4 7)
+;-> 4
+(and-all1 33 44)
+;-> 32
+
+Metodo veloce (shift comune)
+----------------------------
+Esiste un modo molto più efficiente per calcolare il bitwise AND di tutti i numeri in un intervallo [a, b] senza scorrere tutti i valori.
+Il risultato dell'AND di tutti i numeri tra 'a' e 'b' è dato dai bit comuni più alti di 'a' e 'b' (cioè la parte del prefisso binario uguale).
+Appena 'a' e 'b' differiscono in qualche bit, tutti i bit meno significativi diventano 0 nel risultato.
+Finchè 'a' != 'b', facciamo uno shift a destra di entrambi fino a quando diventano uguali, contando gli shift.
+Alla fine rispostiamo a sinistra del numero di bit rimossi.
+
+Esempio:
+  a = 26 -> 11010
+  b = 30 -> 11110
+  Prefisso comune: 11000 -> risultato = 24.
+
+ 26 = 11010
+ 30 = 11110
+ differiscono a bit 3 -> shift finché uguali
+ a = 110  b = 111  -> shift = 2
+ a = 11   b = 11   -> uguali -> risultato = 11 << 2 = 11000 = 24
+
+L'AND diventa 0 non appena tra 'a' e 'b' si attraversa una potenza di 2.
+Questo significa che i due numeri hanno il bit più significativo diverso.
+Matematicamente, l'AND di tutti i numeri in [a, b] vale 0 se e solo se:
+
+  floor(log2 a) != floor(log2 b) 
+
+cioè quando 'a' e 'b' appartengono a intervalli di potenze di 2 diversi.
+
+; Funzione che calcola il bitwise AND di tutti i numeri compresi tra a e b
+; Individua il prefisso binario comune tra a e b:
+; finché a e b differiscono in qualche bit, vengono shiftati a destra
+; ogni shift elimina un bit meno significativo che diventa sicuramente 0 nell'AND finale
+; quando a e b diventano uguali, si risposta il valore a sinistra per ricostruire il risultato
+(define (and-all2 a b)
+  (if (!= (floor (log a 2)) (floor (log b 2)))
+      0
+      ;else
+      (let (shift 0)        ; contatore di bit eliminati
+        (while (!= a b)     ; finché a e b sono diversi
+          (setq a (>> a 1)) ; elimina un bit da a
+          (setq b (>> b 1)) ; elimina un bit da b
+          (++ shift))       ; incrementa il numero di shift effettuati
+        (<< a shift)))) ; ricostruisce il risultato rispostando a sinistra
+
+Proviamo:
+
+(and-all2 26 31)
+;-> 24
+(and-all2 4 7)
+;-> 4
+(and-all2 33 44)
+;-> 32
+
+Test di correttezza:
+
+(for (i 1 1000)
+  (setq a (rand 100))
+  (setq b (+ a (rand 100) 1))
+  (if (!= (and-all1 a b) (and-all2 a b)) (println a { } b)))
+;-> nil
+
+Test di velocità:
+
+(time (and-all1 16777220 33554000))
+;-> 369.808
+(time (and-all2 16777220 33554000))
+;-> 0
+(time (and-all1 16777220 33555555))
+;-> 355.411
+(time (and-all2 16777220 33555555))
+;-> 0
+
 ============================================================================
 

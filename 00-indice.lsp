@@ -3212,6 +3212,7 @@ NOTE LIBERE 33
   Generatore di intervalli IPv4
   Ricerca di una stringa in una matrice di caratteri
   Numero di occorrenze delle sottostringhe di una stringa
+  Bitwise AND di un intervallo
 
 PROBLEMI SUI DADI
 =================
