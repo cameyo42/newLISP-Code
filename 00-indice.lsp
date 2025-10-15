@@ -3213,6 +3213,9 @@ NOTE LIBERE 33
   Ricerca di una stringa in una matrice di caratteri
   Numero di occorrenze delle sottostringhe di una stringa
   Bitwise AND di un intervallo
+  Flag of Palestine
+  Numeri ordinali in lettere
+  Griglie e sensori (Distanza di Chebyshev)
 
 PROBLEMI SUI DADI
 =================

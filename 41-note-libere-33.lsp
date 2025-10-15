@@ -1806,7 +1806,7 @@ Algoritmo
                (not (ref (list i j) visitati)))
           ; se l’ultimo carattere corrisponde, la stringa è stata trovata
           (if (= k (- len 1))
-              (set 'trovato true)
+              (setq trovato true)
               ; altrimenti continua la ricerca nelle quattro direzioni adiacenti
               (dolist (d direzioni)
                 (if (not trovato)
@@ -1840,6 +1840,64 @@ Proviamo:
 ;-> true
 (stringa-in-matrice M "AFECBCESE" true)
 ;-> true
+
+Adesso scriviamo una funzione che restituisce le celle (i j) dei caratteri della stringa trovata.
+
+; Funzione che verifica se una stringa è presente in una matrice di caratteri
+; Restituisce la lista delle celle (coordinate) che formano la stringa trovata
+; oppure nil se la stringa non è presente
+(define (stringa-in-matrice2 matrice stringa diag)
+  (letn ( (righe (length matrice))            ; numero di righe della matrice
+          (colonne (length (matrice 0)))      ; numero di colonne della matrice
+          (len (length stringa))              ; lunghezza della stringa da cercare
+          (direzioni '((1 0) (-1 0) (0 1) (0 -1))) ; direzioni cardinali: S, N, E, O
+          (percorso-trovato nil) )            ; memorizza il percorso trovato
+    (if diag ; se abilitate le diagonali
+        (setq direzioni '((1 0) (-1 0) (0 1) (0 -1) (1 1) (1 -1) (-1 1) (-1 -1))))
+    ; funzione ricorsiva che esplora la matrice da (i,j)
+    (define (cerca i j k visitati)
+      (if (and (>= i 0) (< i righe) (>= j 0) (< j colonne)
+               (= ((matrice i) j) (stringa k))
+               (not (ref (list i j) visitati)))
+          (begin
+            (setq visitati (append visitati (list (list i j))))
+            ; se siamo all'ultimo carattere -> percorso trovato
+            (if (= k (- len 1))
+                (setq percorso-trovato visitati)
+                ; continua a cercare nelle direzioni
+                (dolist (d direzioni)
+                  (if (not percorso-trovato)
+                      (cerca (+ i (d 0)) (+ j (d 1)) (+ k 1) visitati)))))))
+    ; avvia la ricerca da ogni cella che contiene il primo carattere
+    (for (i 0 (- righe 1))
+      (for (j 0 (- colonne 1))
+        (if (and (not percorso-trovato) (= ((matrice i) j) (stringa 0)))
+            (cerca i j 0 '()))))
+    ; restituisce il percorso trovato oppure nil
+    percorso-trovato))
+
+Proviamo:
+
+(setq M '(("A" "B" "C" "E")
+          ("S" "F" "C" "S")
+          ("A" "D" "E" "E")))
+
+(stringa-in-matrice2 M "ABCCED")
+;-> ((0 0) (0 1) (0 2) (1 2) (2 2) (2 1))
+(stringa-in-matrice2 M "ABCCED")
+;-> ((0 0) (0 1) (0 2) (1 2) (2 2) (2 1))
+(stringa-in-matrice2 M "SEE")
+;-> ((1 3) (2 3) (2 2))
+(stringa-in-matrice2 M "SCFS")
+;-> ((1 3) (1 2) (1 1) (1 0))
+(stringa-in-matrice2 M "ABCB")
+;-> nil
+(stringa-in-matrice2 M "AFE")
+;-> nil
+(stringa-in-matrice2 M "AFE" true)
+;-> ((0 0) (1 1) (2 2))
+(stringa-in-matrice2 M "AFECBCESE" true)
+;-> ((0 0) (1 1) (2 2) (1 2) (0 1) (0 2) (0 3) (1 3) (2 3))
 
 
 -------------------------------------------------------
@@ -2039,6 +2097,372 @@ Test di velocità:
 ;-> 355.411
 (time (and-all2 16777220 33555555))
 ;-> 0
+
+
+-----------------
+Flag of Palestine
+-----------------
+
+  +--------+-----------+--------+-------------+----------+
+  | Colore |     Rosso | Bianco |        Nero |    Verde |
+  +--------+-----------+--------+-------------+----------+
+  | DOS    |       160 |      0 |         255 |       28 |
+  +--------+-----------+--------+-------------+----------+
+  | RGB    | 238 42 53 |  0 0 0 | 255 255 255 | 0 151 54 |
+  +--------+-----------+--------+-------------+----------+
+
+  p*****************************
+  **p***************************
+  ****p*************************
+  ******p***********************
+  ********p*********************
+  ******p***********************
+  ****p*************************
+  **p***************************
+  p*****************************
+
+(define (fore color)
+"Change the color of terminal foreground (text) (ANSI sequence)"
+  (let (f (string "\027[38;5;" color "m"))
+    ;(print f "\r" "")))
+    (print f)))
+
+(define (back color)
+"Change the color of terminal background (ANSI sequence)"
+  (let (b (string "\027[48;5;" color "m"))
+    ;(print b "\r" "")))
+    (print b)))
+
+(define (palestine ch)
+  ; set background color (gray)
+  (println (back 145) "\n")
+  ; print flag line x line
+  (print (fore 160) ch) (println (fore 16) (dup ch 28))
+  (print (fore 160) (dup ch 3)) (println (fore 16) (dup ch 26))
+  (print (fore 160) (dup ch 5)) (println (fore 16) (dup ch 24))
+  (print (fore 160) (dup ch 7)) (println (fore 255) (dup ch 22))
+  (print (fore 160) (dup ch 9)) (println (fore 255) (dup ch 20))
+  (print (fore 160) (dup ch 7)) (println (fore 255) (dup ch 22))
+  (print (fore 160) (dup ch 5)) (println (fore 28) (dup ch 24))
+  (print (fore 160) (dup ch 3)) (println (fore 28) (dup ch 26))
+  (print (fore 160) ch) (println (fore 28) (dup ch 28))
+  ; reset foreground and background colors
+  (println "\027[39;49m")'>)
+
+Proviamo:
+
+(palestine "*")
+(palestine "■")
+(palestine "▀")
+(palestine "█")
+
+
+--------------------------
+Numeri ordinali in lettere
+--------------------------
+
+Scrivere una funzione che prende un intero positivo e restituisce il relativo numero ordinale in lettere.
+
+Esempio:
+16 -> Sedicesimo
+44 -> Quarantaquattresimo
+
+Sequenza OEIS A372204:
+a(n) is the number of letters in the Italian name of the n-th ordinal number.
+  5, 7, 5, 6, 6, 5, 7, 6, 4, 6, 10, 10, 11, 15, 12, 10, 15, 12, 14, 9, 11,
+  12, 13, 16, 15, 13, 14, 12, 13, 10, 12, 13, 14, 17, 16, 14, 15, 13, 14,
+  12, 14, 15, 16, 19, 18, 16, 17, 15, 16, 13, 15, 16, 17, 20, 19, 17, 18,
+  16, 17, 12, 14, 15, 16, 19, 18, 16, 17, 15, 16, 12, ...
+
+Esempi:
+  Zeresimo, Primo, secondo, terzo, quarto, quinto,
+  sesto, settimo, ottavo, nono, decimo, ...
+
+Ad eccezione dei primi 10 numeri, che hanno una denominazione propria, per trasformare un numero cardinale in numero ordinale basta togliere l'ultima lettera e aggiungere:
+
+           Femminile   Maschile
+Singolare  -esima      -esimo
+Plurale    -esime      -esimi
+
+La caduta della vocale finale del cardinale non avviene per quei numeri terminanti con -tré, perché l'ultima vocale è accentata:
+ventitré + -esimo --> ventitreesimo, quarantatré + -esimo -->quarantatreesimo.
+Non avviene, inoltre, per i composti con sei: ventisei + -esimo -> ventiseiesimo.
+Queste ultime regole non valgono per 13 -> Tredicesimo e 16 -> Sedicesimo.
+
+;---------------------------------------------------------------------------
+; Funzioni per la conversione da numero intero a lettere (italiano)
+;---------------------------------------------------------------------------
+(define (numero num)
+  (local (lst tri val out)
+    ; la cifra 1
+    (setq un "Un")
+    ; le dieci cifre - codeA
+    (setq cifre '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+      "Otto" "Nove"))
+    ; i primi venti numeri - code
+    (setq venti '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+      "Otto" "Nove" "Dieci" "Undici" "Dodici" "Tredici" "Quattordici"
+      "Quindici" "Sedici" "Diciassette" "Diciotto" "Diciannove"))
+    ; le decine - codeB
+    (setq decine '("" "" "Venti" "Trenta" "Quaranta" "Cinquanta"
+      "Sessanta" "Settanta" "Ottanta" "Novanta"))
+    ; le decine senza vocali - codeB1
+    (setq dcn    '("" "" "Vent" "Trent" "Quarant" "Cinquant"
+      "Sessant" "Settant" "Ottant" "Novant"))
+    ; il numero 100
+    (setq cento "Cento")
+    ; multipli con la cifra 1 - codeC
+    (setq multiplo '("" "Mille" "Milione" "Miliardo" "Bilione" "Biliardo"
+      "Trilione" "Triliardo" "Quadrilione" "Quadriliardo"))
+    ; multipli con la cifra diversa da 1 - codeC1
+    (setq multipli '("" "Mila" "Milioni" "Miliardi" "Bilioni" "Biliardi"
+      "Trilioni" "Triliardi" "Quadrilioni" "Quadriliardi"))
+    (setq out "")
+    (if (= (string num) "0")
+      (setq out "Zero")
+      (begin
+        ; calcola il numero di triplette
+        (if (zero? (% (length (string num)) 3))
+            (setq tri (/ (length (string num)) 3))
+            (setq tri (+ (/ (length (string num)) 3) 1))
+        )
+        ; formatta in stringa il numero (padding)
+        ; e crea una lista con tutte le triplette
+        (setq lst (explode (pad (string num) (* 3 tri) "0") 3))
+        ; ciclo per la creazione della stringa finale
+        (dolist (el lst)
+          ; creazione del numero rappresentato dalla tripletta
+          (setq val (triple el))
+          ; controllo se tale numero vale "Uno"
+          (if (= val "Uno")
+            (cond ((= $idx (- (length lst) 1)) ; primo gruppo a destra ?
+                  (setq out (append out val))) ; aggiungo solo "Uno"
+                  ((= $idx (- (length lst) 2)) ; secondo gruppo a destra ?
+                  (setq out (string out (multiplo (- tri 1))))) ;aggiungo solo "Mille"
+                  ;altrimenti aggiungo "Un" e il codice corrispondente
+                  (true (setq out (string out "Un" (multiplo (- tri 1)))))
+            )
+            (if (!= val "") ; se la tripletta vale "000" --> val = ""
+              (setq out (string out val (multipli (- tri 1)))))
+          )
+          (-- tri)
+          ;(println (triple el))
+        )
+        out))))
+;----------------------------------------
+(define (triple num)
+  (local (lst res)
+    (setq res "")
+    ; lista delle cifre
+    (setq lst (map int (explode (string num))))
+    (dolist (el lst)
+      (cond ((= el 0) nil)
+            (true (cond ((= $idx 2) ; cifra unita ?
+                          (if (!= 1 (lst 1)) ; ultime 2 cifre > 19 ?
+                              (setq res (append res (cifre el)))))
+                        ((= $idx 1) ; cifra decine ?
+                          (if (= el 1) ; ultime 2 cifre < 20 ?
+                            ; prendo il numero da 11 a 19
+                            (setq res (append res (venti (+ 9 el (lst 2)))))
+                            ; oppure prendo le decine
+                            (if (or (= 1 (lst 2)) (= 8 (lst 2))) ; numero finisce con 1 o con 8?
+                              ; prendo le decine senza vocale finale
+                              (setq res (append res (dcn el)))
+                              ; oppure prendo le decine con vocale finale
+                              (setq res (append res (decine el))))))
+                        ((= $idx 0) ; cifra centinaia ?
+                          (if (= el 1) ; cifra centinaia = 1 ?
+                              ; prendo solo "cento"
+                              (setq res (append res cento))
+                              ; prendo il numero e "cento"
+                              (setq res (append res (venti el) cento))))))
+      )
+    )
+    res))
+;----------------------------------------
+(define (pad num len ch)
+  (local (out)
+    (setq out (string num))
+    (while (> len (length out))
+      (setq out (string ch out)))
+  out))
+;---------------------------------------------------------------------------
+
+Funzione che converte un intero positivo nel relativo ordinale in lettere:
+
+(define (ordinale num)
+  (cond ((= num 1) "Primo")
+        ((= num 2) "Secondo")
+        ((= num 3) "Terzo")
+        ((= num 4) "Quarto")
+        ((= num 5) "Quinto")
+        ((= num 6) "Sesto")
+        ((= num 7) "Settimo")
+        ((= num 8) "Ottavo")
+        ((= num 9) "Nono")
+        ((= num 10) "Decimo")
+        ((= num 13) "Tredicesimo")
+        ((= num 16) "Sedicesimo")
+        (true
+          (let ( (last-digit (% num 10))
+                 (lettere (numero num)) )
+            (if (and (!= last-digit 3) (!= last-digit 6))
+              (pop lettere -1))
+            (extend lettere "esimo")))))
+
+Proviamo:
+
+(ordinale 16)
+;-> "Sedicesimo"
+(ordinale 42)
+;-> "QuarantaDuesimo"
+
+(map ordinale (sequence 1 21))
+;-> ("Primo" "Secondo" "Terzo" "Quarto" "Quinto" "Sesto" "Settimo" "Ottavo"
+;->  "Nono" "Decimo" "Undicesimo" "Dodicesimo" "Tredicesimo" "Quattordicesimo"
+;->  "Quindicesimo" "Sedicesimo" "Diciassettesimo" "Diciottesimo"
+;->  "Diciannovesimo" "Ventesimo" "VentUnesimo")
+  
+Calcoliamo la sequenza OEIS:
+
+(map (fn(x) (length (ordinale x))) (sequence 1 50))
+;-> (5 7 5 6 6 5 7 6 4 6 10 10 11 15 12 10 15 12 14 9 11
+;->  12 13 16 15 13 14 12 13 10 12 13 14 17 16 14 15 13 14
+;->  12 14 15 16 19 18 16 17 15 16 13)
+
+
+-----------------------------------------
+Griglie e sensori (Distanza di Chebyshev)
+-----------------------------------------
+
+Abbiamo una griglia N × M e un numero intero K.
+Un sensore posizionato sulla cella (r, c) copre tutte le celle la cui distanza di Chebyshev da (r, c) è al massimo K.
+La distanza di Chebyshev tra due celle (r1, c1) e (r2, c2) è max(|r1 − r2|,|c1 − c2|).
+Il numero minimo di sensori necessari per coprire una griglia N x M con raggio di copertura K si trova calcolando separatamente il numero di sensori necessari per righe e colonne e poi moltiplicandoli.
+La formula è: ceil(N/(2*K+1)) * ceil(M/(2*K+1))
+Questo perché ogni sensore copre un'area quadrata di lato 2*K + 1 sotto la distanza di Chebyshev.
+
+Funzione che restituisce il numero minimo di sensori necessari per coprire ogni cella della griglia:
+
+(define (sensori N M K)
+  (letn ( (copertura (+ (* 2 K) 1))
+          ;(sensori-riga (/ (+ N copertura -1) copertura))
+          (sensori-riga (ceil (div N copertura)))
+          ;(sensori-colonna (/ (+ M copertura -1) copertura))
+          (sensori-colonna (ceil (div M copertura))) )
+    (int (mul sensori-riga sensori-colonna))))
+
+Proviamo:
+
+(sensori 3 3 1)
+;-> 1
+
+(sensori 5 5 1)
+;-> 4
+
+(sensori 7 10 2)
+;-> 4
+
+(sensori 8 11 2)
+;-> 6
+
+Adesso calcoliamo le posizioni (r, c) di ogni sensore.
+Dato che ogni sensore copre un quadrato di lato (2*K + 1), possiamo distribuirli in modo uniforme con passo 'copertura' = 2*K + 1 lungo righe e colonne, a partire dalla cella (K, K) (cioè centrando il primo sensore nel primo quadrato coperto).
+La posizione dei sensori sarà quindi:
+
+  r = (K, 3*K+1, 5*K+2, ... ) fino a < N
+  c = (K, 3*K+1, 5*K+2, ... ) fino a < M
+
+ossia con incremento di 'copertura' in entrambe le direzioni.
+
+Quindi:
+- 'copertura' = 2*K + 1 è la dimensione del quadrato coperto da un sensore.
+- Ogni sensore successivo si posiziona a distanza 'copertura' per evitare sovrapposizioni inutili.
+- I sensori sono posizionati al centro dei blocchi di copertura.
+
+Nel caso in cui N o M non sono multipli esatti di 'copertura', allora piazziamo sensori fino a coprire l'intera griglia.
+Per farlo, basta controllare se l'ultimo sensore non copre fino al bordo della griglia, e in tal caso aggiungerne uno finale centrato vicino all'ultimo bordo.
+
+(define (posizioni-sensori N M K)
+  (letn ( (copertura (+ (* 2 K) 1))
+          (righe '())
+          (colonne '())
+          (posizioni '())
+          (r 0) (c 0) )
+    ; calcola gli indici centrali dei sensori lungo righe
+    (for (r K (- N 1) copertura)
+      (push r righe -1))
+    ; se l'ultima copertura non arriva al fondo,
+    ; allora aggiunge un sensore vicino al bordo
+    (if (< (+ (last righe) K) (- N 1))
+        (push (- N K 1) righe -1))
+    ; calcola gli indici centrali dei sensori lungo le colonne
+    (for (c K (- M 1) copertura)
+      (push c colonne -1))
+    ; se l'ultima copertura non arriva al fondo,
+    ; allora aggiunge un sensore vicino al bordo
+    (if (< (+ (last colonne) K) (- M 1))
+        (push (- M K 1) colonne -1))
+    ; --- combina tutte le coppie (r,c) ---
+    (dolist (r righe)
+      (dolist (c colonne)
+        (push (list r c) posizioni -1)))
+    posizioni))
+
+Proviamo:
+
+(posizioni-sensori 3 3 1)
+;-> ((1 1))
+
+(posizioni-sensori 5 5 1)
+;-> ((1 1) (1 4) (4 1) (4 4))
+
+(posizioni-sensori 7 10 2)
+;-> ((2 2) (2 7) (4 2) (4 7))
+
+(posizioni-sensori 8 11 2)
+;-> ((2 2) (2 7) (2 8) (7 2) (7 7) (7 8))
+
+Scriviamo una funzione che stampa la griglia e i sensori:
+
+(define (print-grid N M K sensors)
+  (letn ( (grid (array N M '("."))) ) ; creazione della griglia
+    ; per ogni sensore: marca le celle coperte
+    ; cioè marca le celle del quadrato di lato (2*K + 1) centrato in (r c)
+    (dolist (el sensors)
+      (letn ( (r (el 0)) (c (el 1)) )
+        (for (dr (- K) K)
+          (for (dc (- K) K)
+            (letn ( (nr (+ r dr)) (nc (+ c dc)) )
+              (when (and (>= nr 0) (< nr N) (>= nc 0) (< nc M))
+                (setf (grid nr nc) "*")))))
+        ; centro = 1
+        (setf (grid r c) "1")))
+    ; stampa la griglia
+    (for (r 0 (- N 1))
+      (for (c 0 (- M 1))
+        (print (format "%2s " (grid r c))))
+      (println)))'>)
+
+Proviamo:
+
+(print-grid 6 7 2 '((4 3)))
+;->  .  .  .  .  .  .  .
+;->  .  .  .  .  .  .  .
+;->  .  *  *  *  *  *  .
+;->  .  *  *  *  *  *  .
+;->  .  *  *  1  *  *  .
+;->  .  *  *  *  *  *  .
+
+(print-grid 8 11 2 (posizioni-sensori 8 11 2))
+;->  *  *  *  *  *  *  *  *  *  *  *
+;->  *  *  *  *  *  *  *  *  *  *  *
+;->  *  *  1  *  *  *  *  *  1  *  *
+;->  *  *  *  *  *  *  *  *  *  *  *
+;->  *  *  *  *  *  *  *  *  *  *  *
+;->  *  *  *  *  *  *  *  *  *  *  *
+;->  *  *  *  *  *  *  *  *  *  *  *
+;->  *  *  1  *  *  *  *  *  1  *  *
 
 ============================================================================
 

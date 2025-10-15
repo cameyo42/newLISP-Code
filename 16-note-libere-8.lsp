@@ -1905,7 +1905,11 @@ Algoritmo Round-Robin
 ---------------------
 
 Round Robin è un algoritmo di scheduling di processi in cui ad ogni processo viene assegnato un tempo prefissato in modo ciclico.
-Per schedulare i processi in modo equo, uno scheduler round-robin generalmente impiega la tecnica di time-sharing, assegnando a ciascun lavoro un determinato intervallo di tempo (in tempo di CPU) chiamato quantum e interrompendo il lavoro anche se non è stato completato al termine del tempo disponibile. Il lavoro viene ripreso la prossima volta che viene assegnato un altro quantum a quel processo. Se il processo termina  durante il quantum di tempo attribuito, lo scheduler seleziona il primo processo nella coda di pronto per l'esecuzione. In assenza di time-sharing o se i quanti fossero grandi rispetto alle dimensioni dei lavori, un processo che necessita più tempo sarebbe favorito rispetto ad altri processi. L'algoritmo round-robin è un algoritmo "preemptive" poiché lo scheduler forza il processo fuori dalla CPU una volta scaduta la quota di tempo.
+Per schedulare i processi in modo equo, uno scheduler round-robin generalmente impiega la tecnica di time-sharing, assegnando a ciascun lavoro un determinato intervallo di tempo (in tempo di CPU) chiamato quantum e interrompendo il lavoro anche se non è stato completato al termine del tempo disponibile.
+Il lavoro viene ripreso la prossima volta che viene assegnato un altro quantum a quel processo.
+Se il processo termina  durante il quantum di tempo attribuito, lo scheduler seleziona il primo processo nella coda di pronto per l'esecuzione.
+In assenza di time-sharing o se i quanti fossero grandi rispetto alle dimensioni dei lavori, un processo che necessita più tempo sarebbe favorito rispetto ad altri processi.
+L'algoritmo round-robin è un algoritmo "preemptive" poiché lo scheduler forza il processo fuori dalla CPU una volta scaduta la quota di tempo.
 
 (define (round-robin exec-time quantum)
 (catch
@@ -2404,7 +2408,7 @@ Vediamo come calcolarli:
 (silent
   (setq pado (padovan-seq 1000))
   (setq plastici (map div (rest pado) (chop pado))))
-  
+
 (plastici 10)
 ;-> 1.333333333333333
 (plastici 100)
@@ -4793,7 +4797,7 @@ Il vettore per un segmento può essere calcolato come:
   vettoreB = (x4 - x3, y4 - y3)
 
 Il prodotto scalare è:
-  
+
   prodotto scalare = (x2 - x1)*(x4 - x3) + (y2 - y1)*(y4 - y3)
 
 Se il prodotto scalare vale 0, allora i due segmenti sono ortogonali.
@@ -5926,8 +5930,8 @@ Ordinamento per anno di nascita crescente:
 
 (define (comp x y) (<= (x 1) (y 1)))
 (sort cs comp)
-;-> (("Norbert Wiener" 1894 1964) 
-;->  ("John Atanasoff" 1903 1995) 
+;-> (("Norbert Wiener" 1894 1964)
+;->  ("John Atanasoff" 1903 1995)
 ;->  ("John von Neumann" 1903 1957)
 ;->  ("Alonzo Church" 1903 1995)
 ;->  ("Test 1" 1903 1996)
@@ -5945,7 +5949,7 @@ Ordinamento per anno di nascita crescente e anno di morte decrescente:
       (<= (x 1) (y 1))))
 
 (sort cs comp)
-;-> (("Norbert Wiener" 1894 1964) 
+;-> (("Norbert Wiener" 1894 1964)
 ;->  ("Test 2" 1903 1904)
 ;->  ("John von Neumann" 1903 1957)
 ;->  ("John Atanasoff" 1903 1995)

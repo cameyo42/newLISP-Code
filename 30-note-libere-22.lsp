@@ -5927,7 +5927,7 @@ Codici ANSI ESCape (ESCAPE ANSI CODE)
 ; Restore color to default
 ; 39 = foreground, 49 = background
 (define _reset-cols "\027[39;49m")
-;(println _reset-all)
+;(println _reset-cols)
 ;
 ; Restore all attribute to default
 ; 0 = normal attribute (ex. color),; 0 = extended attribute (ex. underline)
