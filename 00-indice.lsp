@@ -3216,6 +3216,7 @@ NOTE LIBERE 33
   Flag of Palestine
   Numeri ordinali in lettere
   Griglie e sensori (Distanza di Chebyshev)
+  Codifica di N numeri
 
 PROBLEMI SUI DADI
 =================

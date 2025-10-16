@@ -2464,5 +2464,140 @@ Proviamo:
 ;->  *  *  *  *  *  *  *  *  *  *  *
 ;->  *  *  1  *  *  *  *  *  1  *  *
 
+Se abbiamo degli ostacoli nella griglia che impediscono ai sensori di 'vedere oltre', il problema cambia completamente.
+Nota: un l'ostacolo blocca la visone di un sensore solo in riga, in colonna e nelle diagonali a 45 gradi.
+
+Vediamo semplicemente una funzione che permette di calcolare le celle di copertura di un sensore in una griglia con ostacoli nei casi:
+1) K rappresenta il lato del quadrato di copertura del sensore (copertura quadrata)
+2) K rappresenta il raggio del cerchio (approssimato) di copertura del sensore (copertura circolare)
+3) K non viene fornito e la visione è fino al bordo
+
+; Funzione che restituisce tutte le celle coperte da un sensore in posizione (r c)
+; su una griglia NxM, considerando eventuali ostacoli e un parametro K che definisce
+; il tipo e la portata della copertura:
+; 1) Se K rappresenta il lato del quadrato -> copertura quadrata
+; 2) Se K rappresenta il raggio -> copertura circolare (approssimata)
+; 3) Se K è nil -> visione fino al bordo
+; Gli ostacoli bloccano la visione lungo righe, colonne e diagonali a 45°.
+(define (celle-coperte N M ostacoli r c K)
+  (letn ((celle '())                                      ; lista delle celle coperte
+         (direzioni '((-1 0) (1 0) (0 -1) (0 1) (-1 -1) (-1 1) (1 -1) (1 1))) ) ; 8 direzioni
+    (push (list r c) celle -1)                            ; aggiunge la cella del sensore
+    (dolist (d direzioni)
+      (letn ((dr (d 0)) (dc (d 1)) (rr r) (cc c) (finito nil))
+        (while (not finito)
+          (setq rr (+ rr dr))
+          (setq cc (+ cc dc))
+          (cond
+            ((or (< rr 0) (>= rr N) (< cc 0) (>= cc M)) (setq finito true)) ; fuori bordo
+            ((ref (list rr cc) ostacoli) (setq finito true))                ; ostacolo blocca visione
+            (true
+              (cond
+                ; Caso 1: copertura quadrata
+                ((and (integer? K) (>= K 1))
+                  (if (and (<= (abs (- rr r)) (/ (- K 1) 2))
+                           (<= (abs (- cc c)) (/ (- K 1) 2)))
+                      (push (list rr cc) celle -1)
+                      (setq finito true)))
+                ; Caso 2: copertura circolare (approssimata)
+                ((and (float? K) (>= K 1))
+                  (if (<= (sqrt (+ (mul (- rr r) (- rr r)) (mul (- cc c) (- cc c)))) K)
+                      (push (list rr cc) celle -1)
+                      (setq finito true)))
+                ; Caso 3: K non fornito -> visione fino al bordo
+                ((nil? K) (push (list rr cc) celle -1))
+                (true (setq finito true))))))))
+    celle))
+
+Proviamo:
+
+(celle-coperte 5 5 '((1 1) (3 2)) 2 2 4)
+;-> ((2 2) (1 2) (2 1) (2 3) (1 3) (3 1) (3 3))
+
+
+--------------------
+Codifica di N numeri
+--------------------
+
+Abbiamo N numeri interi positivi num1, num2, ..., numN.
+La codifica degli N numeri è un numero intero definita nel modo seguente:
+1) se i numeri non sono della stessa lunghezza si aggiungono degli zeri iniziali fino a raggiungere la lunghezza massima.
+2) La i-esima cifra (1 <= i <= N) del codice è data dalla cifra più piccola tra le i-esime cifre degli N numeri.
+Il valore massimo dei numeri vale 1 bilione = 1000 miliardi = 10^12 = 1.000.000.000.000.
+
+Esempio:
+  N = 3
+  Numeri = (287 34 99)
+  1) padding con 0 iniziali: 287 034 099
+  2) cifre minime: 2 8 7
+                   0 3 4
+                   0 9 9
+                   -----
+                   0 3 4                   
+  Codice: 34 (senza zeri iniziali)
+
+Scrivere una funzione che prende una lista di numeri N interi positivi e restituisce il codice degli N numeri.
+
+(define (codice nums)
+  (apply + (map * (map (fn(x) (apply min x))
+                       (transpose 
+                        (map (fn(x) (map int (explode (format "%012s" (string x))))) nums)))
+                  (reverse (series 1 10 12)))))
+
+Proviamo:
+
+(codice '(287 34 99))
+;-> 34
+
+(codice '(987 879 798 749))
+;-> 747
+
+Come funziona:
+;converte i numeri in stringa
+(string x) --> ("287" "34" "99")
+; pad con 12 zeri
+(format "%012s" --> ("000000000287" "000000000034" "000000000099")
+; converte le stringhe in caratteri
+(explode '("000000000287" "000000000034" "000000000099"))
+--> (("0" "0" "0" "0" "0" "0" "0" "0" "0" "2" "8" "7")
+-->  ("0" "0" "0" "0" "0" "0" "0" "0" "0" "0" "3" "4")
+-->  ("0" "0" "0" "0" "0" "0" "0" "0" "0" "0" "9" "9"))
+; converte i caratteri in interi
+int
+--> ((0 0 0 0 0 0 0 0 0 2 8 7)
+-->  (0 0 0 0 0 0 0 0 0 0 3 4)
+-->  (0 0 0 0 0 0 0 0 0 0 9 9))
+; calcola la trasposta
+(transpose '((0 0 0 0 0 0 0 0 0 2 8 7)
+             (0 0 0 0 0 0 0 0 0 0 3 4)
+             (0 0 0 0 0 0 0 0 0 0 9 9)))
+--> ((0 0 0) (0 0 0) (0 0 0) (0 0 0) (0 0 0) (0 0 0)
+--> (0 0 0) (0 0 0) (0 0 0) (2 0 0) (8 3 9) (7 4 9))
+; prende il minimo di ogni elemento
+(map (fn(x) (apply min x)) '((0 0 0) (0 0 0) (0 0 0) (0 0 0) (0 0 0) (0 0 0)
+ (0 0 0) (0 0 0) (0 0 0) (2 0 0) (8 3 9) (7 4 9)))
+--> (0 0 0 0 0 0 0 0 0 0 3 4)
+; moltiplica questa lista con (reverse (series 1 10 12)):
+(map * '(0 0 0 0 0 0 0 0 0 0 3 4)
+       '(100000000000 10000000000 1000000000 100000000 10000000 1000000
+         100000 10000 1000 100 10 1))
+--> (0 0 0 0 0 0 0 0 0 0 30 4)
+; somma tutti gli elementi
+(apply + '(0 0 0 0 0 0 0 0 0 0 30 4))
+--> 34
+
+Versione code-golf (one-line): 147 caratteri
+
+(define(f N)
+(apply +(map *(map(fn(x)(apply min x))
+(transpose(map(fn(x)(map int(explode(format "%012s"(string x)))))N)))
+(reverse(series 1 10 12)))))
+
+(f'(287 34 99))
+;-> 34
+
+(f '(987 879 798 749))
+;-> 747
+
 ============================================================================
 
