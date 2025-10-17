@@ -863,7 +863,7 @@ NOTE LIBERE 4
   Generazione di una lista di numeri casuali che sommano a 1
   Numeri disarium
   Numeri pronici
-  Formula di Erone
+  Formula di Erone - Area triangolo
   Tre funzioni per calcolare la potenza di un numero intero
   Numeri Armstrong (narcisistici)
   Evoluzione dell'algoritmo per la moltiplicazione di due numeri interi
@@ -2048,7 +2048,7 @@ NOTE LIBERE 19
   Generazione di tutte le sottoliste contigue di una lista
   Percorsi in una matrice
   Equipaggio di volo
-  Triangoli in una lista
+  Triangoli in una lista di lunghezze
   Teorema di Zeckendorf
   Modello abeliano del mucchio di sabbia (Abelian sandpile model)
   Topi e tane
@@ -3217,6 +3217,8 @@ NOTE LIBERE 33
   Numeri ordinali in lettere
   Griglie e sensori (Distanza di Chebyshev)
   Codifica di N numeri
+  Tornei con sistema svizzero
+  Triangolo con perimetro massimo e area massima
 
 PROBLEMI SUI DADI
 =================

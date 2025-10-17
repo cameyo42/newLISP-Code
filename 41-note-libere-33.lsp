@@ -2599,5 +2599,504 @@ Versione code-golf (one-line): 147 caratteri
 (f '(987 879 798 749))
 ;-> 747
 
+
+---------------------------
+Tornei con sistema svizzero
+---------------------------
+
+Il sistema svizzero è un metodo di gestione di tornei (usato negli scacchi, go, bridge, ecc.) pensato per ridurre il numero di turni necessari per classificare i giocatori, evitando eliminazioni dirette.
+
+Regole fondamentali
+-------------------
+1. Tutti i giocatori partecipano a ogni turno.
+   Nessuno viene eliminato.
+2. I giocatori vengono accoppiati con altri di punteggio simile.
+   Dopo ogni turno, i partecipanti sono ordinati per punteggio e accoppiati a due a due.
+3. Nessun incontro viene ripetuto.
+   Ogni coppia di giocatori si affronta al massimo una volta.
+4. Colori alternati (negli scacchi):
+   Si cerca di bilanciare il numero di partite con il bianco e con il nero.
+5. In caso di numero dispari di giocatori, uno riceve un "bye" (un punto automatico, senza giocare).
+
+Punteggi
+--------
+- Vittoria -> 1 punto
+- Patta -> 0.5 punti
+- Sconfitta -> 0 punti
+- Bye -> 1 punto
+
+Il programma simula un torneo svizzero completo, generando accoppiamenti, risultati casuali e aggiornando la classifica dopo ogni turno.
+
+;;;'ultimo-colore'
+(define (ultimo-colore g)
+  (if (and (list? g) (>= (length g) 4) (list? (g 3)) (> (length (g 3)) 0))
+      (last (g 3))
+      nil))
+Restituisce l'ultimo colore giocato da un giocatore 'g', se disponibile.
+Serve per bilanciare il colore (bianco/nero) nel turno successivo.
+
+;;;'accoppiamento-svizzero'
+(define (accoppiamento-svizzero)
+  (let ((sorted (sort giocatori (fn (a b) (> (a 1) (b 1))))) (accoppiamenti '()))
+    ...
+    accoppiamenti))
+Crea gli accoppiamenti del turno secondo il sistema svizzero.
+
+Funzionamento:
+- I giocatori ('giocatori') sono ordinati per punteggio decrescente.
+- Si prende il primo ('g1') e si cerca un avversario ('g2') che:
+  - non sia già stato incontrato ('not (ref (cand 0) (g1 2))'),
+  - sia disponibile nella lista ordinata.
+- Se non ci sono avversari validi -> 'g1' ottiene un bye.
+- Quando si trova 'g2', viene rimosso dalla lista dei disponibili.
+- Il colore (B/N) viene scelto cercando di:
+  1. Bilanciare il numero di partite giocate con bianco e nero,
+  2. Alternare il colore rispetto all'ultimo turno.
+L'output è una lista del tipo:
+  ((G1 G2 Colore1 Colore2) (G3 'bye) ...)
+
+;;;'aggiorna-colori'
+(define (aggiorna-colori accoppiamenti)
+  (dolist (a accoppiamenti)
+    (when (and (list? a) (>= (length a) 4))
+      ...
+      (setf ((giocatori i) 3) (append (g 3) (list c1))))))
+Aggiunge i colori appena giocati (B/N) alla cronologia di ciascun giocatore.
+Ignora i bye.
+
+;;;'aggiorna-punteggi'
+(define (aggiorna-punteggi risultati)
+  (dolist (r risultati)
+    (letn ((g1 (r 0)) (g2 (r 1)) (ris (r 2))) ...)))
+Aggiorna i punteggi dei giocatori dopo ogni turno.
+
+Funzionamento:
+- Ogni elemento di 'risultati' è del tipo '(Giocatore1 Giocatore2 risultato)'.
+- Se 'risultato = 1' -> 'Giocatore1' vince.
+  Se 'risultato = 0.5' -> patta.
+  Se 'risultato = 0' -> perde.
+- Aggiorna anche la lista degli avversari affrontati per evitare ripetizioni.
+
+;;;'simula-risultati'
+(define (simula-risultati accoppiamenti)
+  (let ((ris '()))
+    ...
+    (push (list (a 0) (a 1) (nth (rand 3) '(1 0.5 0))) ris)))
+Genera risultati casuali per gli accoppiamenti.
+Dettagli:
+- '(rand 3)' sceglie casualmente un indice -> '1', '0.5' o '0'.
+- I bye ricevono automaticamente un punto.
+
+;;;'stampa-classifica'
+(define (stampa-classifica)
+  (println "\nClassifica:")
+  (dolist (g (sort giocatori (fn (a b) (>= (a 1) (b 1)))))
+    (println (format "%s - %.1f punti" (string (g 0)) (g 1)))))
+Ordina e mostra la classifica corrente.
+
+;;;'simula-turno'
+(define (simula-turno n)
+  (println (format "\n--- Turno %d ---" n))
+  (setq acc (accoppiamento-svizzero))
+  (setq risultati (simula-risultati acc))
+  ...
+  (aggiorna-punteggi risultati)
+  (aggiorna-colori acc)
+  (stampa-classifica))
+Simula un turno completo del torneo:
+1. Genera accoppiamenti.
+2. Simula risultati.
+3. Stampa le partite e i risultati.
+4. Aggiorna punteggi e colori.
+5. Mostra la nuova classifica.
+
+;;;'simula-torneo'
+(define (simula-torneo turni)
+  (for (t 1 turni) (simula-turno t))
+  (println "\nTorneo terminato!")
+  (stampa-classifica)
+  giocatori)
+Gestisce l'intero torneo per 'turni' turni consecutivi, richiamando 'simula-turno' e stampando la classifica finale.
+Ogni giocatore è rappresentato come:
+  (Nome punteggio avversari colori)
+E al termine, il sistema mostra sia la classifica sia la cronologia di ciascun giocatore.
+
+Riassunto
+---------
+| Funzione                 | Scopo principale                                  |
+| ------------------------ | ------------------------------------------------- |
+| 'ultimo-colore'          | Controlla l'ultimo colore giocato                 |
+| 'accoppiamento-svizzero' | Crea accoppiamenti evitando ripetizioni           |
+| 'aggiorna-colori'        | Aggiorna la lista dei colori di ciascun giocatore |
+| 'aggiorna-punteggi'      | Somma i punti ottenuti e registra avversari       |
+| 'simula-risultati'       | Genera esiti casuali                              |
+| 'stampa-classifica'      | Mostra la graduatoria ordinata                    |
+| 'simula-turno'           | Gestisce un turno completo                        |
+| 'simula-torneo'          | Simula l'intero torneo                            |
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SIMULAZIONE TORNEO CON SISTEMA SVIZZERO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; DESCRIZIONE GENERALE
+;;
+;; Il sistema svizzero è una modalità di torneo utilizzata in scacchi e giochi
+;; da tavolo per gestire competizioni con molti giocatori e pochi turni.
+;;
+;; Regole principali:
+;; 1. Tutti i giocatori partecipano a ogni turno (non ci sono eliminazioni).
+;; 2. I giocatori vengono accoppiati in base al punteggio attuale: chi ha
+;;    punteggi simili gioca contro altri con punteggi simili.
+;; 3. Nessun giocatore può affrontare lo stesso avversario più di una volta.
+;; 4. Quando il numero di partecipanti è dispari, uno riceve un "bye" (vince
+;;    automaticamente il turno con 1 punto).
+;; 5. Si cerca di alternare i colori (B/N) nel caso degli scacchi.
+;;
+;; Struttura dei dati:
+;; Ogni giocatore è rappresentato da una lista:
+;; (ID punteggio avversari colori)
+;;
+;; Dove:
+;;  - ID = simbolo identificativo (es. A, B, C...)
+;;  - punteggio = totale dei punti ottenuti
+;;  - avversari = lista dei giocatori già affrontati
+;;  - colori = lista dei colori giocati (B o N)
+;;
+;; Esempio:
+;; (A 2.5 (B C D) (B N B))
+;; -> Il giocatore A ha 2.5 punti, ha giocato contro B, C, D e ha usato i colori
+;;   Bianco, Nero, Bianco nei tre turni.
+;;
+;; Struttura del programma:
+;; - ultimo-colore      -> restituisce l'ultimo colore giocato da un giocatore
+;; - accoppiamento-svizzero -> genera gli accoppiamenti del turno
+;; - aggiorna-colori    -> aggiorna la cronologia dei colori dei giocatori
+;; - aggiorna-punteggi  -> assegna i punti in base ai risultati
+;; - simula-risultati   -> genera esiti casuali (vittoria, pareggio, sconfitta)
+;; - stampa-classifica  -> mostra la classifica corrente
+;; - simula-turno       -> esegue un turno completo (accoppiamento + risultati)
+;; - simula-torneo      -> esegue tutti i turni del torneo
+;;
+;; Esempio di simulazione:
+;; (simula-torneo 4)
+;; Simula un torneo di 4 turni con abbinamenti, punteggi e colori automatici.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Funzione che restituisce l'ultimo colore usato da un giocatore
+(define (ultimo-colore g)
+  (if (and (list? g) (>= (length g) 4) (list? (g 3)) (> (length (g 3)) 0))
+      (last (g 3))
+      nil))
+
+;; Funzione principale per l'accoppiamento dei giocatori secondo il sistema svizzero
+(define (accoppiamento-svizzero)
+  ;; Ordina i giocatori per punteggio decrescente e prepara la lista degli accoppiamenti
+  (let ((sorted (sort giocatori (fn (a b) (> (a 1) (b 1))))) (accoppiamenti '()))
+    ;; Finché ci sono giocatori da accoppiare
+    (while (> (length sorted) 0)
+      ;; Estrae il primo (miglior) giocatore
+      (let ((g1 (pop sorted)))
+        ;; Se è rimasto solo, ottiene un bye
+        (if (= (length sorted) 0)
+            (push (list (g1 0) 'bye) accoppiamenti)
+            ;; Altrimenti cerca un avversario valido
+            (let ((g2 nil) (idx -1) (len (length sorted)))
+              ;; Scorre i rimanenti per trovare qualcuno che non ha già incontrato
+              (for (j 0 (- len 1))
+                (let ((cand (sorted j)))
+                  (when (not (ref (cand 0) (g1 2)))
+                    (setq g2 cand)
+                    (setq idx j)
+                    (setq j len))))
+              ;; Se non trova nessuno, assegna un bye
+              (if (nil? g2)
+                  (push (list (g1 0) 'bye) accoppiamenti)
+                  ;; Altrimenti crea l'accoppiamento
+                  (begin
+                    ;; Rimuove l'avversario scelto dalla lista
+                    (let ((newsorted '()))
+                      (for (k 0 (- (length sorted) 1))
+                        (unless (= k idx) (push (sorted k) newsorted)))
+                      (setq sorted (reverse newsorted)))
+                    ;; Determina i colori da assegnare ai due giocatori
+                    (letn ((ultimo1 (ultimo-colore g1))
+                           (bcount1 (count '(B) (g1 3)))
+                           (ncount1 (count '(N) (g1 3)))
+                           (colore1 nil) (colore2 nil))
+                      ;; Assegna colore opposto a quello più frequente
+                      (cond
+                        ((> bcount1 ncount1) (setq colore1 'N colore2 'B))
+                        ((> ncount1 bcount1) (setq colore1 'B colore2 'N))
+                        ;; Se uguali, alterna rispetto all'ultimo colore
+                        (true
+                          (if (= ultimo1 'B) (setq colore1 'N colore2 'B)
+                                             (setq colore1 'B colore2 'N))))
+                      ;; Salva l'accoppiamento con i colori assegnati
+                      (push (list (g1 0) (g2 0) colore1 colore2) accoppiamenti))))))))
+    ;; Restituisce la lista degli accoppiamenti
+    accoppiamenti))
+
+;; Aggiorna i colori dei giocatori dopo il turno (ignora i bye)
+(define (aggiorna-colori accoppiamenti)
+  (dolist (a accoppiamenti)
+    (when (and (list? a) (>= (length a) 4))
+      (letn ((g1 (a 0)) (g2 (a 1)) (c1 (a 2)) (c2 (a 3)))
+        ;; Aggiorna i colori giocati da ciascun giocatore
+        (for (i 0 (- (length giocatori) 1))
+          (let ((g (giocatori i)))
+            (when (= (g 0) g1)
+              (setf ((giocatori i) 3) (append (g 3) (list c1))))
+            (when (= (g 0) g2)
+              (setf ((giocatori i) 3) (append (g 3) (list c2))))))))))
+
+;; Aggiorna i punteggi e i giocatori già incontrati
+(define (aggiorna-punteggi risultati)
+  (dolist (r risultati)
+    (letn ((g1 (r 0)) (g2 (r 1)) (ris (r 2)))
+      ;; Aggiorna punteggi e avversari per ciascun giocatore
+      (for (i 0 (- (length giocatori) 1))
+        (let ((g (giocatori i)))
+          (cond
+            ;; Caso del primo giocatore
+            ((= (g 0) g1)
+              (setf ((giocatori i) 1) (+ (g 1) ris))
+              (when (and g2 (not (= g2 'bye)))
+                (setf ((giocatori i) 2) (append (g 2) (list g2)))))
+            ;; Caso del secondo giocatore
+            ((and g2 (not (= g2 'bye)) (= (g 0) g2))
+              (setf ((giocatori i) 1) (+ (g 1) (- 1 ris)))
+              (setf ((giocatori i) 2) (append (g 2) (list g1))))))))))
+
+;; Genera risultati casuali per ogni accoppiamento
+(define (simula-risultati accoppiamenti)
+  (let ((ris '()))
+    (dolist (a accoppiamenti)
+      ;; Gestisce i bye (1 punto automatico)
+      (cond
+        ((= (length a) 2)
+          (push (list (a 0) 'bye 1) ris))
+        ;; Altrimenti genera risultato casuale tra 1, 0.5 e 0
+        ((= (length a) 4)
+          (push (list (a 0) (a 1) (nth (rand 3) '(1 0.5 0))) ris))))
+    ris))
+
+;; Stampa la classifica corrente
+(define (stampa-classifica)
+  (println "\nClassifica:")
+  (dolist (g (sort giocatori (fn (a b) (>= (a 1) (b 1)))))
+    (println (format "%s - %.1f punti" (string (g 0)) (g 1)))))
+
+;; Simula un turno completo (accoppiamento, risultati, aggiornamenti)
+(define (simula-turno n)
+  (println (format "\n--- Turno %d ---" n))
+  (setq acc (accoppiamento-svizzero))
+  (setq risultati (simula-risultati acc))
+  ;; Stampa gli incontri del turno
+  (dolist (a acc)
+    (cond
+      ;; Caso del bye
+      ((= (length a) 2)
+        (println (format "%s ha il bye (+1 punto)" (string (a 0)))))
+      ;; Caso partita normale
+      ((= (length a) 4)
+        (letn ((idx (ref (list (a 0) (a 1))
+                         (map (fn (x) (list (x 0) (x 1))) risultati)))
+               (ris (if idx ((risultati idx) 2) "?")))
+          (println (format "%s (%s) vs %s (%s) -> risultato: %s"
+                           (string (a 0)) (string (a 2)) (string (a 1)) (string (a 3)) (string ris)))))))
+  ;; Aggiorna i dati dei giocatori
+  (aggiorna-punteggi risultati)
+  (aggiorna-colori acc)
+  (stampa-classifica))
+
+;; Simula un intero torneo per un numero dato di turni
+(define (simula-torneo turni)
+  (for (t 1 turni) (simula-turno t))
+  (println "\nTorneo terminato!")
+  ;(stampa-classifica)
+  (map println giocatori) '>)
+
+;; ESEMPIO
+(setq giocatori '(
+  (A 0.0 () () )
+  (B 0.0 () () )
+  (C 0.0 () () )
+  (D 0.0 () () )
+  (E 0.0 () () )
+  (F 0.0 () () )
+  (G 0.0 () () )
+))
+
+(simula-torneo 4)
+;-> --- Turno 1 ---
+;-> D ha il bye (+1 punto)
+;-> E (B) vs C (N) -> risultato: 1
+;-> F (B) vs B (N) -> risultato: 0.5
+;-> G (B) vs A (N) -> risultato: 0.5
+;-> 
+;-> Classifica:
+;-> E - 1.0 punti
+;-> D - 1.0 punti
+;-> B - 1.0 punti
+;-> A - 1.0 punti
+;-> G - 0.0 punti
+;-> F - 0.0 punti
+;-> C - 0.0 punti
+;-> 
+;-> --- Turno 2 ---
+;-> E ha il bye (+1 punto)
+;-> D (B) vs C (N) -> risultato: 0.5
+;-> B (B) vs G (N) -> risultato: 0.5
+;-> A (B) vs F (N) -> risultato: 0.5
+;-> 
+;-> Classifica:
+;-> E - 2.0 punti
+;-> A - 1.0 punti
+;-> B - 1.0 punti
+;-> D - 1.0 punti
+;-> C - 1.0 punti
+;-> F - 1.0 punti
+;-> G - 1.0 punti
+;-> 
+;-> --- Turno 3 ---
+;-> B ha il bye (+1 punto)
+;-> F (B) vs C (N) -> risultato: 1
+;-> G (B) vs D (N) -> risultato: 0.5
+;-> E (N) vs A (B) -> risultato: 0.5
+;-> 
+;-> Classifica:
+;-> E - 2.0 punti
+;-> F - 2.0 punti
+;-> D - 2.0 punti
+;-> B - 2.0 punti
+;-> A - 2.0 punti
+;-> G - 1.0 punti
+;-> C - 1.0 punti
+;-> 
+;-> --- Turno 4 ---
+;-> G ha il bye (+1 punto)
+;-> D (B) vs F (N) -> risultato: 0.5
+;-> B (N) vs E (B) -> risultato: 1
+;-> A (N) vs C (B) -> risultato: 0.5
+;-> 
+;-> Classifica:
+;-> B - 3.0 punti
+;-> F - 3.0 punti
+;-> A - 2.0 punti
+;-> D - 2.0 punti
+;-> E - 2.0 punti
+;-> C - 2.0 punti
+;-> G - 2.0 punti
+;-> 
+;-> Torneo terminato!
+;-> (B 3 (F G E) (N B N))
+;-> (F 3 (B A C D) (B N B N))
+;-> (A 2 (G F E C) (N B B N))
+;-> (D 2 (C G F) (B N B))
+;-> (E 2 (C A B) (B N B))
+;-> (C 2 (E D F A) (N N N B))
+;-> (G 2 (A B D) (B N B))
+
+Nota: questo è solo un programma di base per la gestione di un torneo con sistema svizzero.
+Per la gestione di un torneo vero e proprio consiglio di utilizzare programmi specifici.
+
+
+----------------------------------------------
+Triangolo con perimetro massimo e area massima
+----------------------------------------------
+
+Data una lista di punti 2D con coordinate intere e positive determinare il triangolo con perimetro massimo e il triangolo con area massima.
+
+Algoritmo
+---------
+1) Generare tutte le combinazioni di 3 punti con la lista dei punti.
+   Ogni combinazione rappresenta un triangolo.
+2) Ciclo su tutti i triangoli
+   Calcolare area e perimetro del triangolo corrente
+   Aggiornare area massima e perimetro massimo (e relativi triangoli)
+3) Restituire i risultati
+
+Nota: quando aggiorniamo il perimetro massimo dobbiamo verificare che il triangolo corrente sia un triangolo valido, cioè che abbia un'area maggiore di 0 (altrimenti sono tre punti allineati).
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+; Funzione che calcola l'area di un triangolo dati i 3 vertici (x1 y1), (x2 y2), (x3 y3)
+; Usa la formula determinante:
+; area = |x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2)| / 2
+(define (area-triangolo x1 y1 x2 y2 x3 y3)
+  (abs (div (add (mul x1 (sub y2 y3))
+                 (mul x2 (sub y3 y1))
+                 (mul x3 (sub y1 y2))) 2)))
+
+Nota: nel caso di 3 punti allineati l'area vale 0.
+
+; Funzione che calcola il perimetro di un triangolo dati i 3 vertici (x1 y1), (x2 y2), (x3 y3)
+; Usa la formula della distanza euclidea tra i vertici: sqrt((x2-x1)^2 + (y2-y1)^2)
+; Perimetro = lato1 + lato2 + lato3
+(define (perimetro-triangolo x1 y1 x2 y2 x3 y3)
+  (letn ( (l1 (sqrt (add (mul (sub x2 x1) (sub x2 x1))
+                         (mul (sub y2 y1) (sub y2 y1)))))
+          (l2 (sqrt (add (mul (sub x3 x2) (sub x3 x2))
+                         (mul (sub y3 y2) (sub y3 y2)))))
+          (l3 (sqrt (add (mul (sub x1 x3) (sub x1 x3))
+                         (mul (sub y1 y3) (sub y1 y3))))) )
+    (add l1 l2 l3)))
+
+Funzione che calcola il triangolo con area massima e il triangolo con area minima di una lista di punti 2D:
+
+(define (triangolo-massimo pts)
+  (local (area-max triangolo-area-max perimetro-max triangolo-perimetro-max
+          triangoli area perimetro)
+  (setq area-max -1) ; valore area massima
+  (setq triangolo-area-max '()) ; punti del triangolo con area massima
+  (setq perimetro-max -1) ; valore perimetro massimo
+  (setq triangolo-perimetro-max '()) ; punti del triangolo con perimetro massimo
+  ; crea la lista di tutti i triangoli utilizzando i punti della lista
+  (setq triangoli (comb 3 pts))
+  ; ciclo per calcolare area e perimetro di ogni triangolo...
+  (dolist (tri triangoli)
+    ; calcolo area del triangolo corrente
+    (setq area (apply area-triangolo (flat tri)))
+    ; aggiornamento area massima
+    (when (> area area-max)
+      (setq area-max area)
+      (setq triangolo-area-max tri))
+    ; calcolo perimetro del triangolo corrente
+    (setq perimetro (apply perimetro-triangolo (flat tri)))
+    ; aggiornamento perimetro massimo
+    ; controllare che sia un triangolo valido (area > 0)
+    (when (and (> area 0) (> perimetro perimetro-max))
+      (setq perimetro-max perimetro)
+      (setq triangolo-perimetro-max tri))
+  )
+  (println "Area massima = " area-max)
+  (println "Triangolo = " triangolo-area-max)
+  (println "Perimetro massimo = " perimetro-max)
+  (println "Triangolo = " triangolo-perimetro-max) '>))
+
+Proviamo:
+
+(setq pts '((1 1) (1 2) (3 2) (3 3) (4 5) (3 5)))
+(triangolo-massimo pts)
+;-> Area massima = 3
+;-> Triangolo = ((1 1) (3 2) (3 5))
+;-> Perimetro massimo = 10.47213595499958
+;-> Triangolo = ((1 1) (4 5) (3 5))
+
+(setq pts (map list (rand 100 100) (rand 100 100)))
+(triangolo-massimo pts)
+;-> Area massima = 3827
+;-> Triangolo = ((99 11) (62 95) (7 13))
+;-> Perimetro massimo = 288.8465489274908
+;-> Triangolo = ((23 95) (99 11) (7 13))
+
+Vedi anche "Triangoli in una lista" su "Note libere 19".
+
 ============================================================================
 

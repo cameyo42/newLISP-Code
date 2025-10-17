@@ -1148,9 +1148,9 @@ Ora assegniamo i nomi ai ruoli sulla base di queste informazioni:
   David navigatore
 
 
-----------------------
-Triangoli in una lista
-----------------------
+-----------------------------------
+Triangoli in una lista di lunghezze
+-----------------------------------
 
 Data una lista non ordinata di numeri interi positivi scrivere una funzione per generare/contare il numero di possibili triangoli che possono essere formati con tre elementi qualsiasi della lista.
 I tre elementi che rappresentano le lunghezze dei lati di un triangolo devono soddisfare la disuguaglianza del triangolo: la somma di due lati qualsiasi deve essere maggiore del terzo lato.
@@ -1203,9 +1203,10 @@ Soluzione con due puntatori
 ---------------------------
 Ordinare la lista ed eseguire un ciclo annidato che preso un indice poi prova a trovare un indice superiore e inferiore all'interno del quale tutte le lunghezze formano un triangolo con quell'indice preso.
 
-Ordinare la lista e utilizzare tre variabili sx dx e i che puntano all'inizio alla fine e all'elemento della lista a partire dalla fine.
+Ordinare la lista e utilizzare tre variabili sx, dx e i che puntano all'inizio, alla fine e all'elemento della lista a partire dalla fine.
 Attraversare l'array dalla fine (da n-1 a 2) e per ogni iterazione mantieni il valore di sx = 0 e dx = i-1.
-Ora se è possibile formare un triangolo utilizzando lst(x) e lst(dx), è ovvio che si possano formare dei triangoli da lst[sx+1], lst[sx+2]...lst[r-1], con la coppia lst(dx) e ls(ti), perché la lista è ordinata,. Il numero di questi triangoli vale (dx - sx).
+Ora se è possibile formare un triangolo utilizzando lst(sx) e lst(dx), è ovvio che si possano formare dei triangoli da lst[sx+1], lst[sx+2]...lst[dx-1], con la coppia lst(dx) e lst(i), perché la lista è ordinata.
+Il numero di questi triangoli vale (dx - sx).
 A questo punto diminuire il valore di dx e continuare il ciclo finché sx è inferiore a dx.
 Se non è possibile formare un triangolo utilizzando lst(sx) e lst(dx), incrementare il valore di sx e continuare il ciclo finché sx è inferiore a dx.
 
@@ -1269,14 +1270,17 @@ Vediamo la velocità delle due funzioni:
 (test 10 100)
 ;-> 2.991
 ;-> 0.998
+;-> ------------
 
 (test 100 100)
 ;-> 85.798
 ;-> 5.985
+;-> ------------
 
 (test 100 1000)
 ;-> 36187.195
 ;-> 779.916
+;-> ------------
 
 
 ---------------------

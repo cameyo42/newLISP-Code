@@ -8327,9 +8327,9 @@ Per trovare tutti i numeri pronici fino ad un certo limite la funzione è la seg
 ;->  1806 1892 1980 2070 2162 2256 2352 2450 2550)
 
 
-----------------
-Formula di Erone
-----------------
+---------------------------------
+Formula di Erone - Area triangolo
+---------------------------------
 
 La formula di Erone permette di calcolare l'area di un triangolo di cui sono note le misure dei lati.
 Indichiamo co n a,b,c i lati di untriangolo qualsiasi e sia sp il suo semiperimetro:
@@ -8354,6 +8354,16 @@ Nota: l'altezza di un triangolo conoscendo i lati a,b,c vale:
                   (a^2 + c^2 - b^2)^2
   h = sqrt(a^2 - ---------------------)
                         4*c^2
+
+Scriviamo anche una funzione che calcola l'area di un triangolo dati i 3 vertici (x1 y1), (x2 y2), (x3 y3).
+
+; Funzione che calcola l'area di un triangolo dati i 3 vertici (x1 y1), (x2 y2), (x3 y3)
+; Usa la formula determinante:
+; area = |x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2)| / 2
+(define (area-triangolo x1 y1 x2 y2 x3 y3)
+  (abs (div (add (mul x1 (sub y2 y3))
+                 (mul x2 (sub y3 y1))
+                 (mul x3 (sub y1 y2))) 2)))
 
 
 ---------------------------------------------------------
