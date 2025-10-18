@@ -3219,6 +3219,7 @@ NOTE LIBERE 33
   Codifica di N numeri
   Tornei con sistema svizzero
   Triangolo con perimetro massimo e area massima
+  Il barista solitario
 
 PROBLEMI SUI DADI
 =================

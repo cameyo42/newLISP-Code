@@ -3098,5 +3098,63 @@ Proviamo:
 
 Vedi anche "Triangoli in una lista" su "Note libere 19".
 
+
+--------------------
+Il barista solitario
+--------------------
+
+Un bar ha un solo barista che può servire un cliente alla volta.
+Data una lista di clienti in cui ogni elemento cliente(i) = (arrivo, tempo) rappresenta:
+  arrivo: tempo di arrivo dell'i-esimo cliente (ordinato non decrescente)
+  tempo: quanto tempo ci vuole per servire l'i-esimo cliente
+Il processo lavoarativo è il seguente:
+Quando un cliente arriva, l'ordine viene inserito immadiatamente.
+- Il barista inizia a servire solo quando non sta servendo un altro cliente.
+- I clienti devono attendere che il loro ordine sia completamente preparato.
+- Il barista deve servire i clienti nell'ordine in cui appaiono.
+- Il tempo di attesa per ciascun cliente è calcolato come:
+  l'ora in cui il suo ordine è completato meno l'ora del suo arrivo.
+
+Calcolare il tempo di attesa di ogni cliente e il tempo di attesa medio.
+
+Per risolvere il problema dobbiamo monitorare il "tempo di disponibilità" del barista durante tutto il processo lavorativo.
+Quando arriva un nuovo cliente, possono verificarsi due casi:
+1) Il barista è inattivo: cioè ha terminato l'ordine precedente prima dell'arrivo del cliente attuale e quindi può iniziare a cucinare immediatamente. 
+Il nuovo tempo di disponibilità dello chef diventa (tempo-arrivo + tempo-servizio).
+2) Il barista è occupato: cioè sta ancora cucinando quando arriva il cliente e quindi quest'ultimo deve attendere.
+Il barista inizia questo ordine subito dopo aver terminato quello precedente, quindi il suo nuovo tempo di disponibilità diventa (tempo-corrente + tempo-servizio).
+
+Possiamo rappresentare entrambi gli scenari con una singola espressione: t = max(t, tempo-arrivo) + tempo-servizio, dove t tiene traccia di quando il barista termina l'ordine attuale.
+Infatti, se t > tempo-arrivo (barista occupato), usiamo t, mntre se (t <= tempo-arrivo) (barista inattivo), usiamo tempo-arrivo.
+Per calcolare il tempo di attesa, ogni cliente attende dal suo arrivo fino al completamento dell'ordine.
+Questo vale (t - tempo-arrivo) dopo l'elaborazione di ciascun cliente.
+
+(define (bar clienti)
+  (local (attesa tempo-corrente tempo-attesa)
+    ; lista del tempo di attesa di ogni cliente
+    (setq attesa '())
+    ; tempo diponibile --> quando il barista finirà l'ordine corrente
+    (setq tempo-corrente 0)
+    ; ciclo per ogni cliente...
+    (dolist (cl clienti)
+      ; Il barista inizia a servire quando arriva il cliente o quando è libero,
+      ; a seconda di quale evento si verifica più tardi.
+      (setq tempo-corrente (+ (max tempo-corrente (cl 0)) (cl 1)))
+      ; Tempo di attesa = tempo in cui l'ordine è pronto - tempo di arrivo
+      (setq tempo-attesa (- tempo-corrente (cl 0)))
+      ; Inserisce il tempo di attesa del cliente corrente
+      ; nella lista dei tempi di attesa
+      (push tempo-attesa attesa -1))
+    (list attesa (div (apply add attesa) (length attesa)))))
+
+Proviamo:
+
+(bar '((1 2) (2 1) (2 2) (3 2)))
+;-> (2 2 4 5)
+;-> 3.25
+
+(bar '((1 2) (2 1) (3 4)))
+;-> ((2 2 5) 3)
+
 ============================================================================
 
