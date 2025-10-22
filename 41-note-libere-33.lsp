@@ -3107,7 +3107,7 @@ Un bar ha un solo barista che può servire un cliente alla volta.
 Data una lista di clienti in cui ogni elemento cliente(i) = (arrivo, tempo) rappresenta:
   arrivo: tempo di arrivo dell'i-esimo cliente (ordinato non decrescente)
   tempo: quanto tempo ci vuole per servire l'i-esimo cliente
-Il processo lavoarativo è il seguente:
+Il processo lavorativo è il seguente:
 Quando un cliente arriva, l'ordine viene inserito immadiatamente.
 - Il barista inizia a servire solo quando non sta servendo un altro cliente.
 - I clienti devono attendere che il loro ordine sia completamente preparato.
@@ -3155,6 +3155,56 @@ Proviamo:
 
 (bar '((1 2) (2 1) (3 4)))
 ;-> ((2 2 5) 3)
+
+
+---------------------
+La sequenza Inventory
+---------------------
+
+A Number Sequence with Everything - Numberphile
+https://www.youtube.com/watch?v=rBU9E-ZOZAI
+
+Sequenza OEIS A342585:
+Inventory sequence: record the number of zeros thus far in the sequence, then the number of ones thus far, then the number of twos thus far and so on, until a zero is recorded; the inventory then starts again, recording the number of zeros.
+  0, 1, 1, 0, 2, 2, 2, 0, 3, 2, 4, 1, 1, 0, 4, 4, 4, 1, 4, 0, 5, 5, 4, 1, 6,
+  2, 1, 0, 6, 7, 5, 1, 6, 3, 3, 1, 0, 7, 9, 5, 3, 6, 4, 4, 2, 0, 8, 9, 6, 4,
+  9, 4, 5, 2, 1, 3, 0, 9, 10, 7, 5, 10, 6, 6, 3, 1, 4, 2, 0, 10, 11, 8, 6,
+  11, 6, 9, 3, 2, 5, 3, 2, 0, 11, 11, 10, ...
+
+Per iniziare, ci chiediamo: quanti termini zero ci sono? 
+Poiché non ci sono ancora termini nella sequenza, registriamo uno '0' e, dopo aver registrato uno '0', ricominciamo: Quanti termini zero ci sono?
+Ora c'è uno 0, quindi registriamo un '1' e continuiamo.
+Quanti 1 ci sono? Attualmente c'è un '1' nella sequenza, quindi registriamo un '1' e continuiamo.
+Quanti 2 ci sono? Non ci sono ancora 2, quindi registriamo uno '0' e, dopo aver registrato uno 0, ricominciamo con la domanda "Quanti termini zero ci sono?" E così via.
+
+(define (seq n)
+  (let ( (valori '())        ; Lista che conterrà la sequenza
+         (numero-corrente 0) ; Numero corrente da cercare
+         (valore-corrente 0) ; Il primo numero da aggiungere (inizialmente 0)
+       )
+    ; Ciclo che genera la sequenza fino al numero richiesto di elementi (n)
+    (for (i 0 (- n 1))
+      ; Calcola il valore corrente come:
+      ; il numero di occorrenze di 'numero-corrente' nella lista 'valori'
+      (setq valore-corrente (length (ref-all numero-corrente valori)))
+      ; Aggiunge il valore corrente alla fine della lista 'valori'
+      (push valore-corrente valori -1)
+      ; Se il valore corrente è 0...
+      (if (zero? valore-corrente)
+          ; Allora azzera il numero-corrente
+          (setq numero-corrente 0)
+          ; Altrimenti, incrementa il numero-corrente
+          (++ numero-corrente)))
+    ; Restituisce la lista dei valori della sequenza
+    valori))
+
+Proviamo:
+
+(seq 85)
+;-> (0 1 1 0 2 2 2 0 3 2 4 1 1 0 4 4 4 1 4 0 5 5 4 1 6
+;->  2 1 0 6 7 5 1 6 3 3 1 0 7 9 5 3 6 4 4 2 0 8 9 6 4
+;->  9 4 5 2 1 3 0 9 10 7 5 10 6 6 3 1 4 2 0 10 11 8 6
+;->  11 6 9 3 2 5 3 2 0 11 11 10)
 
 ============================================================================
 

@@ -3220,6 +3220,7 @@ NOTE LIBERE 33
   Tornei con sistema svizzero
   Triangolo con perimetro massimo e area massima
   Il barista solitario
+  La sequenza Inventory
 
 PROBLEMI SUI DADI
 =================
