@@ -3221,6 +3221,7 @@ NOTE LIBERE 33
   Triangolo con perimetro massimo e area massima
   Il barista solitario
   La sequenza Inventory
+  Equazione a^3 + b^3 + c^3 = k
 
 PROBLEMI SUI DADI
 =================

@@ -3206,5 +3206,136 @@ Proviamo:
 ;->  9 4 5 2 1 3 0 9 10 7 5 10 6 6 3 1 4 2 0 10 11 8 6
 ;->  11 6 9 3 2 5 3 2 0 11 11 10)
 
+
+-----------------------------
+Equazione a^3 + b^3 + c^3 = k
+-----------------------------
+
+L'equazione
+
+  a^3 + b^3 + c^3 = k
+
+è un classico problema di teoria dei numeri, noto come problema della somma di tre cubi (sum of three cubes problem).
+L'obiettivo è trovare interi (a, b, c) tali che la somma dei loro cubi dia un numero prefissato (k).
+
+L'equazione è un caso particolare delle equazioni diofantee, cioè equazioni in cui si cercano soluzioni intere.
+La forma generale (a^3 + b^3 + c^3 = k) è particolarmente interessante perché:
+- i cubi crescono rapidamente → lo spazio delle soluzioni è molto sparso;
+- non esiste una formula generale per trovarle;
+- alcune soluzioni sono enormi (centinaia o migliaia di cifre).
+
+Numeri impossibili da scomporre come somma di 3 cubi:
+ciascun cubo (x^3) mod 9 può assumere solo tre possibili resti:
+
+  x^3 ≡ 0, 1, 8 (mod 9)
+
+Poiché (8 ≡ -1), allora
+
+  x^3 ≡ 0, -1, 1 (mod 9)
+
+Quindi la somma (a^3 + b^3 + c^3) può dare solo i valori (0, +-1, +-2, +-3, +-4) modulo 9.
+Allora, se k ≡ 4 o 5 (mod 9), non esiste alcuna soluzione intera.
+Esempi impossibili: (k = 4, 5, 13, 14, 22, 23, ...)
+
+Esempi:
+
+| k   | Soluzione (a,b,c)                                              |
+| --- | ---------------------------------------------------------------|
+| 1   | (1, 0, 0)                                                      |
+| 2   | (1, 1, 0)                                                      |
+| 3   | (1, 1, 1)                                                      |
+| 6   | (2, -1, -1)                                                    |
+| 9   | (4, 4, -5)                                                     |
+| 33  | a=8866128975287528,  b=-8778405442862239, c=-2736111468807040  | 2019
+| 42  | a=80435758145817515, b=80435758145817515, c=-80538738812075974 | 2019
+
+Queste ultime due soluzioni sono state trovate grazie a calcoli distribuiti su supercomputer.
+
+L'equazione può essere riscritta come:
+
+  a^3 + b^3 = k - c^3
+
+Cioè, si cerca una coppia di cubi la cui somma sia un certo valore.
+In pratica:
+1. si fissano due variabili e si cerca la terza;
+2. si riduce il problema a un cuboide ellittico (curva ellittica di Mordell tipo (x^3 + y^3 = k));
+3. si utilizzano algoritmi di ricerca per valori residui modulari e ottimizzazione su GPU.
+
+L'equazione (x^3 + y^3 = k) definisce una curva ellittica.
+Molti strumenti moderni (come la discesa di Selmer o la teoria dei gruppi di Mordell–Weil) si applicano anche qui.
+In effetti, la ricerca di soluzioni intere o razionali per (a^3 + b^3 + c^3 = k) è profondamente legata alla teoria delle curve ellittiche.
+Per k da 1 a 100, tutte le soluzioni sono note tranne per pochi valori (alcuni ancora non risolti fino al 2024).
+Gli ultimi numeri risolti sono stati proprio (k = 33) e (k = 42), trovati nel 2019 da Andrew Booker e Andrew Sutherland.
+
+Ecco un semplice algoritmo di ricerca brute-force (solo per piccoli numeri):
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (somma-tre-cubi k limite)
+  (for (a (- limite) limite)
+    (for (b (- limite) limite)
+      (for (c (- limite) limite)
+        (when (= (+ (** a 3) (** b 3) (** c 3)) k)
+            (println a "^3 + " b "^3 + " c "^3 = " k))))))
+
+(time (somma-tre-cubi 6 100))
+;-> -58^3 + -43^3 + 65^3 = 6
+;-> -58^3 + 65^3 + -43^3 = 6
+;-> -43^3 + -58^3 + 65^3 = 6
+;-> -43^3 + 65^3 + -58^3 = 6
+;-> -1^3 + -1^3 + 2^3 = 6
+;-> -1^3 + 2^3 + -1^3 = 6
+;-> 2^3 + -1^3 + -1^3 = 6
+;-> 65^3 + -58^3 + -43^3 = 6
+;-> 65^3 + -43^3 + -58^3 = 6
+;-> 19420.574
+
+Naturalmente inefficiente per valori grandi di k, ma utile per sperimentare con numeri piccoli.
+
+Vediamo una versione ottimizzata che utilizza una hash-map e cerca soluzioni con a <= b <= c.
+
+(define (somma-tre-cubi2 k limite passo)
+  ; verifica dei numeri impossibili da scomporre come somma di 3 cubi
+  (if (or (= (% k 9) 4) (= (% k 9) 5)) nil
+      ; else
+      (begin
+        ; crea hash-map
+        (new Tree 'tab)
+        (letn ( (out '())
+                (cubi (array (+ (* 2 limite) 1))) )
+          ; precalcolo cubi
+          (for (i (- limite) limite passo)
+            (setf (cubi (+ i limite)) (* i i i)))
+          ; tabella a^3 + b^3 con a <= b
+          (for (a (- limite) limite passo)
+            (for (b a limite passo)
+              (tab (+ (cubi (+ a limite)) (cubi (+ b limite))) (list a b))))
+          ; cerca soluzioni con a <= b <= c
+          (for (c (- limite) limite passo)
+            (letn ((t (- k (cubi (+ c limite)))) (pair (tab t)))
+              (if (and pair (<= (pair 1) c))
+                (push (list (pair 0) (pair 1) c) out -1))))
+          ; elimina hash-map
+          (delete 'tab)
+          out))))
+
+Proviamo:
+
+(somma-tre-cubi2 22 100 1)
+;-> nil
+
+(time (println (somma-tre-cubi2 6 100 1)))
+;-> ((-1 -1 2) (-58 -43 65))
+;-> 15.622
+
+(time (println (somma-tre-cubi2 9 100 1)))
+;-> ((0 1 2))
+;-> 31.231
+
 ============================================================================
 
