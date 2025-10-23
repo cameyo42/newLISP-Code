@@ -1064,7 +1064,8 @@ Utilizzando queste due funzioni possiamo scrivere la funzione che risolve il pro
 (convert-base '(1 1 2 0) 3 2)
 ;-> (1 0 1 0 1 0)
 
-Nota: la conversione non passa attraverso una rappresentazione in base 10. Abbiamo convertito la rappresentazione di base b nel numero, quindi il numero in base c. Il numero non era in nessuna rappresentazione (a parte quella interna del computer).
+Nota: la conversione non passa attraverso una rappresentazione in base 10. Abbiamo convertito la rappresentazione di base b nel numero, quindi il numero in base c.
+Il numero non era in nessuna rappresentazione (a parte quella interna del computer).
 
 Per rappresentare le cifre contenute in digits in una simbologia standard (0..Z) possiamo usare la funzione seguente:
 

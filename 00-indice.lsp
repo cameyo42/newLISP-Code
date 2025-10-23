@@ -3222,6 +3222,8 @@ NOTE LIBERE 33
   Il barista solitario
   La sequenza Inventory
   Equazione a^3 + b^3 + c^3 = k
+  Numeri primi in base B
+  Primi di Paterson
 
 PROBLEMI SUI DADI
 =================

@@ -3337,5 +3337,167 @@ Proviamo:
 ;-> ((0 1 2))
 ;-> 31.231
 
+
+----------------------
+Numeri primi in base B
+----------------------
+
+Per verificare se un numero è primo non importa la base in cui è scritto: la primalità dipende dal valore numerico, non dalla rappresentazione.
+Quindi, poichè un numero primo in base 10 è primo in qualunque base, per verificare se un numero in base B è primo possiamo convertirlo in base 10 e poi verificare la sua primalità.
+
+Funzione che verifica se un numero in base B è primo
+
+(define (is-prime? num B)
+  (let (val (int num 0 B))
+    (if (< val 2)
+        nil
+        (= 1 (length (factor val))))))
+
+Prima convertiamo un numero (stringa) dalla base 'base' alla base 10:
+(int num 0 base) 
+
+Poi verifichiamo se il numero in base 10 è primo:
+(if (< val 2)
+    nil
+    (= 1 (length (factor val))))))
+
+Proviamo:
+
+(is-prime? "1F" 16)
+;-> true
+(is-prime? "10" 16)
+;-> nil
+(is-prime? "B" 16)
+;-> true
+(is-prime? "20" 10)
+;-> nil
+(is-prime? "17" 10)
+;-> true
+(is-prime? "1000" 2)
+;-> nil
+(is-prime? "1011" 2)
+;-> true
+(is-prime? "101" 2)
+;-> true
+(is-prime? "101" 2)
+;-> true
+(is-prime? "1011" 2)
+;-> true
+(is-prime? "1000" 2)
+;-> nil
+
+Nota: nella funzione 'int' il parametro base ha valore massimo 36.
+Se abbiamo bisogno di un valore maggiore per la base possiamo usare la funzione seguente:
+
+(define (baseN-base10 number-string base)
+"Convert a number from base N (<=62) to base 10"
+  (let ((charset "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+        (result 0)
+        (len (length number-string)))
+    (dolist (digit (explode number-string))
+      (setq result (+ (* result base) (find digit charset)))
+    )
+    result))
+
+
+-----------------
+Primi di Paterson
+-----------------
+
+I primi di Paterson sono quei numeri primi che, se scritti in base 4 e poi reinterpretati in base 10, danno di nuovo numeri primi.
+
+Esempio:
+  Numero primo (base10) = 11
+  11 (base 4) = 23
+  23 è un numero primo in base 10, quindi 11 è un primo di Paterson
+
+Sequenza OEIS A065722:
+Primes that when written in base 4, then reinterpreted in base 10, again give primes.
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 37, 43, 47, 53, 61, 71, 73, 79, 83,
+  97, 103, 107, 109, 113, 131, 149, 151, 157, 163, 167, 181, 191, 193, 197,
+  227, 233, 241, 251, 277, 293, 307, 311, 313, 317, 349, 359, 373, 389, 401,
+  419, 421, 433, 443, 449, 463, 467, 503, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (base10-baseN number base)
+"Convert a number from base 10 to base N (<=62)"
+  (let ((charset "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+        (result '())
+        (quotient number))
+    (while (>= quotient base)
+      (push (charset (% quotient base)) result)
+      (setq quotient (/ quotient base))
+    )
+    (push (charset quotient) result)
+    (join result)))
+
+Funzione che calcola la sequenza dei primi di Paterson:
+
+(define (sequenza-paterson limite)
+  (let (seq '(2))
+    (for (num 3 limite 2)
+      (if (and (prime? num) (prime? (int (base10-baseN num 4) 0 10)))
+          (push num seq -1)))
+    seq))
+
+(sequenza-paterson 503)
+(2 3 5 7 11 13 17 19 23 29 37 43 47 53 61 71 73 79 83
+ 97 103 107 109 113 131 149 151 157 163 167 181 191 193 197
+ 227 233 241 251 277 293 307 311 313 317 349 359 373 389 401
+ 419 421 433 443 449 463 467 503)
+
+Funzione che calcola il rapporto tra il numero di primi di Paterson e il numero degli altri primi:
+
+(define (paterson limite)
+  (let ( (pat '(2)) (other '()) (len-pat 0) (len-other 0) )
+    (for (num 3 limite 2)
+      (if (and (prime? num) (prime? (int (base10-baseN num 4) 0 10)))
+          (push num pat -1)
+          ; else
+          (if (prime? num) (push num other -1))))
+    (setq len-pat (length pat))
+    (setq len-other (length other))
+    ; (println pat)
+    (println "Numero primi di Paterson  = " len-pat)
+    (println "Numero primi non Paterson = " len-other)
+    (println "Rapporto = " (format "%2.4f" (div len-pat len-other)))))
+
+Proviamo:
+
+(paterson 100)
+;-> Numero primi di Paterson  = 20
+;-> Numero primi non Paterson = 5
+;-> Rapporto = 4.0000
+
+(paterson 1000)
+;-> Numero primi di Paterson  = 94
+;-> Numero primi non Paterson = 74
+;-> Rapporto = 1.2703
+
+(paterson 10000)
+;-> Numero primi di Paterson  = 459
+;-> Numero primi non Paterson = 770
+;-> Rapporto = 0.5961
+
+(paterson 100000)
+;-> Numero primi di Paterson  = 2477
+;-> Numero primi non Paterson = 7115
+;-> Rapporto = 0.3481
+
+(paterson 1000000)
+;-> Numero primi di Paterson  = 16259
+;-> Numero primi non Paterson = 62239
+;-> Rapporto = 0.2612
+
+(time (paterson 10000000))
+;-> Numero primi di Paterson  = 116209
+;-> Numero primi non Paterson = 548370
+;-> Rapporto = 0.2119
+;-> 142800.22
+
 ============================================================================
 
