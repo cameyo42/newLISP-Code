@@ -3225,6 +3225,7 @@ NOTE LIBERE 33
   Numeri primi in base B
   Primi di Paterson
   Primi in base 10 e in altra base
+  Numeri primi in una matrice di cifre
 
 PROBLEMI SUI DADI
 =================

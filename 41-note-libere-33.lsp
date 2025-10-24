@@ -1283,7 +1283,7 @@ Proviamo:
     (setq parts (map parse (split-string str)))
     ; Prende solo le parti con 4 elementi i quali devono tutti :
     ; valere "0" oppure non iniziare con "0"
-    (setq parts (filter 
+    (setq parts (filter
                   (fn(x) (and (= (length x) 4)
                               (for-all (fn(y) (or (= y "0") (!= (y 0) "0"))) x))) parts))
     ;(print parts) (read-line)
@@ -1351,7 +1351,7 @@ Ogni combinazione (p1, p2, ..., p(K-1)) produce le sottostringhe:
   ; divide la stringa str in tutte le possibili 4 parti non vuote
   (letn ( (n (length str))
           (tagli (comb (- 4 1) (sequence 1 (- n 1))))
-          (four '()) 
+          (four '())
           (out '()) )
     (dolist (pos tagli)
       (let ( (start 0) (parti '()) )
@@ -1417,7 +1417,7 @@ Dividere in tutti i modi una lista o una stringa in K parti
   ;   3. Si generano tutte le combinazioni crescenti di (K-1) indici
   ;      da 1 a (n-1).
   ;   4. Ogni combinazione rappresenta dove tagliare la lista/stringa.
-  ;   5. Si costruiscono le sottoliste/sottostringhe corrispondenti e 
+  ;   5. Si costruiscono le sottoliste/sottostringhe corrispondenti e
   ;      si aggiungono al risultato.
   ;
   ; Dipendenze: richiede la funzione (comb k lista).
@@ -1439,11 +1439,11 @@ Dividere in tutti i modi una lista o una stringa in K parti
 Proviamo:
 
 (divide-parts '(a b c d e) 4)
-;-> (((a) (b) (c) (d e)) ((a) (b) (c d) (e)) 
+;-> (((a) (b) (c) (d e)) ((a) (b) (c d) (e))
 ;->  ((a) (b c) (d) (e)) ((a b) (c) (d) (e)))
 
 (divide-parts "abcde" 4)
-;-> (("a" "b" "c" "de") ("a" "b" "cd" "e") 
+;-> (("a" "b" "c" "de") ("a" "b" "cd" "e")
 ;->  ("a" "bc" "d" "e") ("ab" "c" "d" "e"))
 
 (divide-parts "abcde" 5)
@@ -1511,7 +1511,7 @@ Questo metodo permette di filtrare solo certe partizioni:
 ;-> ((1 2) (3) (4 5))
 ;-> ((1 2) (3 4) (5))
 ;-> ((1 2 3) (4) (5))
-;-> ((1 2 3) (4) (5))  
+;-> ((1 2 3) (4) (5))
 
 In questo modo la funzione si comporta come un generatore controllato che produce tutte le suddivisioni, ma permette di decidere se usarle o scartarle.
 
@@ -2050,7 +2050,7 @@ L'AND diventa 0 non appena tra 'a' e 'b' si attraversa una potenza di 2.
 Questo significa che i due numeri hanno il bit più significativo diverso.
 Matematicamente, l'AND di tutti i numeri in [a, b] vale 0 se e solo se:
 
-  floor(log2 a) != floor(log2 b) 
+  floor(log2 a) != floor(log2 b)
 
 cioè quando 'a' e 'b' appartengono a intervalli di potenze di 2 diversi.
 
@@ -2322,7 +2322,7 @@ Proviamo:
 ;->  "Nono" "Decimo" "Undicesimo" "Dodicesimo" "Tredicesimo" "Quattordicesimo"
 ;->  "Quindicesimo" "Sedicesimo" "Diciassettesimo" "Diciottesimo"
 ;->  "Diciannovesimo" "Ventesimo" "VentUnesimo")
-  
+
 Calcoliamo la sequenza OEIS:
 
 (map (fn(x) (length (ordinale x))) (sequence 1 50))
@@ -2533,14 +2533,14 @@ Esempio:
                    0 3 4
                    0 9 9
                    -----
-                   0 3 4                   
+                   0 3 4
   Codice: 34 (senza zeri iniziali)
 
 Scrivere una funzione che prende una lista di numeri N interi positivi e restituisce il codice degli N numeri.
 
 (define (codice nums)
   (apply + (map * (map (fn(x) (apply min x))
-                       (transpose 
+                       (transpose
                         (map (fn(x) (map int (explode (format "%012s" (string x))))) nums)))
                   (reverse (series 1 10 12)))))
 
@@ -2932,7 +2932,7 @@ Riassunto
 ;-> E (B) vs C (N) -> risultato: 1
 ;-> F (B) vs B (N) -> risultato: 0.5
 ;-> G (B) vs A (N) -> risultato: 0.5
-;-> 
+;->
 ;-> Classifica:
 ;-> E - 1.0 punti
 ;-> D - 1.0 punti
@@ -2941,13 +2941,13 @@ Riassunto
 ;-> G - 0.0 punti
 ;-> F - 0.0 punti
 ;-> C - 0.0 punti
-;-> 
+;->
 ;-> --- Turno 2 ---
 ;-> E ha il bye (+1 punto)
 ;-> D (B) vs C (N) -> risultato: 0.5
 ;-> B (B) vs G (N) -> risultato: 0.5
 ;-> A (B) vs F (N) -> risultato: 0.5
-;-> 
+;->
 ;-> Classifica:
 ;-> E - 2.0 punti
 ;-> A - 1.0 punti
@@ -2956,13 +2956,13 @@ Riassunto
 ;-> C - 1.0 punti
 ;-> F - 1.0 punti
 ;-> G - 1.0 punti
-;-> 
+;->
 ;-> --- Turno 3 ---
 ;-> B ha il bye (+1 punto)
 ;-> F (B) vs C (N) -> risultato: 1
 ;-> G (B) vs D (N) -> risultato: 0.5
 ;-> E (N) vs A (B) -> risultato: 0.5
-;-> 
+;->
 ;-> Classifica:
 ;-> E - 2.0 punti
 ;-> F - 2.0 punti
@@ -2971,13 +2971,13 @@ Riassunto
 ;-> A - 2.0 punti
 ;-> G - 1.0 punti
 ;-> C - 1.0 punti
-;-> 
+;->
 ;-> --- Turno 4 ---
 ;-> G ha il bye (+1 punto)
 ;-> D (B) vs F (N) -> risultato: 0.5
 ;-> B (N) vs E (B) -> risultato: 1
 ;-> A (N) vs C (B) -> risultato: 0.5
-;-> 
+;->
 ;-> Classifica:
 ;-> B - 3.0 punti
 ;-> F - 3.0 punti
@@ -2986,7 +2986,7 @@ Riassunto
 ;-> E - 2.0 punti
 ;-> C - 2.0 punti
 ;-> G - 2.0 punti
-;-> 
+;->
 ;-> Torneo terminato!
 ;-> (B 3 (F G E) (N B N))
 ;-> (F 3 (B A C D) (B N B N))
@@ -3119,7 +3119,7 @@ Calcolare il tempo di attesa di ogni cliente e il tempo di attesa medio.
 
 Per risolvere il problema dobbiamo monitorare il "tempo di disponibilità" del barista durante tutto il processo lavorativo.
 Quando arriva un nuovo cliente, possono verificarsi due casi:
-1) Il barista è inattivo: cioè ha terminato l'ordine precedente prima dell'arrivo del cliente attuale e quindi può iniziare a cucinare immediatamente. 
+1) Il barista è inattivo: cioè ha terminato l'ordine precedente prima dell'arrivo del cliente attuale e quindi può iniziare a cucinare immediatamente.
 Il nuovo tempo di disponibilità dello chef diventa (tempo-arrivo + tempo-servizio).
 2) Il barista è occupato: cioè sta ancora cucinando quando arriva il cliente e quindi quest'ultimo deve attendere.
 Il barista inizia questo ordine subito dopo aver terminato quello precedente, quindi il suo nuovo tempo di disponibilità diventa (tempo-corrente + tempo-servizio).
@@ -3171,7 +3171,7 @@ Inventory sequence: record the number of zeros thus far in the sequence, then th
   9, 4, 5, 2, 1, 3, 0, 9, 10, 7, 5, 10, 6, 6, 3, 1, 4, 2, 0, 10, 11, 8, 6,
   11, 6, 9, 3, 2, 5, 3, 2, 0, 11, 11, 10, ...
 
-Per iniziare, ci chiediamo: quanti termini zero ci sono? 
+Per iniziare, ci chiediamo: quanti termini zero ci sono?
 Poiché non ci sono ancora termini nella sequenza, registriamo uno '0' e, dopo aver registrato uno '0', ricominciamo: Quanti termini zero ci sono?
 Ora c'è uno 0, quindi registriamo un '1' e continuiamo.
 Quanti 1 ci sono? Attualmente c'è un '1' nella sequenza, quindi registriamo un '1' e continuiamo.
@@ -3354,7 +3354,7 @@ Funzione che verifica se un numero in base B è primo
         (= 1 (length (factor val))))))
 
 Prima convertiamo un numero (stringa) dalla base 'base' alla base 10:
-(int num 0 base) 
+(int num 0 base)
 
 Poi verifichiamo se il numero in base 10 è primo:
 (if (< val 2)
@@ -3702,6 +3702,174 @@ Proviamo:
 ;->  (6 158777) (6 131581) (6 112627) (6 87187) (6 77001))
 
 Non credo che esista alcun numero primo in base 10 che sia anche primo in tutte le basi da 2 a 9 (quando viene considerato in base 10 dopo la conversione in altra base).
+
+
+------------------------------------
+Numeri primi in una matrice di cifre
+------------------------------------
+
+Data una matrice di cifre (0..9) trovare il percorso che genera il primo più grande.
+Il percorso considera 4 direzioni (N, S, E, O).
+Ogni cifra può essere usata solo una volta.
+
+Esempio:
+ 1 2 3
+ 3 2 2
+ 3 3 2
+ Primo maggiore = 33322321 con percorso = (3 3 3 2 2 3 2 1))
+
+Algoritmo
+- La funzione 'esplora' genera ricorsivamente tutti i numeri possibili concatenando cifre adiacenti.
+- Ogni cella è marcata come "visitata" per il percorso corrente.
+- A ogni passo, se il numero formato è primo, viene confrontato con il massimo trovato.
+- Al termine, 'max-primo' contiene il numero primo più grande, e 'miglior-percorso' la sequenza di cifre che lo genera.
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+; Funzione che trova il numero primo più grande generabile da una matrice di cifre (0..9)
+; Ogni cella può essere usata solo una volta nel percorso.
+; Sono considerate le 4 direzioni (N, S, E, O)
+(define (primo-maggiore matrice show-all)
+  (letn ( (righe (length matrice))
+          (colonne (length (matrice 0)))
+          ; 8 direzioni (N, S, E, O, NE, NO, SE, SO)
+          ;(direzioni '((1 0) (-1 0) (0 1) (0 -1) (1 1) (1 -1) (-1 1) (-1 -1)))
+          ; 4 direzioni (N, S, E, O)
+          (direzioni '((1 0) (-1 0) (0 1) (0 -1)))
+          (primi '())
+          (max-primo 0)
+          (miglior-percorso '()) )
+    ; funzione ricorsiva per esplorare tutti i percorsi
+    (define (esplora i j numero percorso visitati)
+      (if (and (>= i 0) (< i righe) (>= j 0) (< j colonne)
+               (not (ref (list i j) visitati)))
+          (letn ((nuovo-numero (+ (* numero 10) ((matrice i) j)))
+                 (nuovo-percorso (append percorso (list ((matrice i) j))))
+                 (nuovi-visitati (append visitati (list (list i j)))))
+            ; se è primo, controlla se è il più grande trovato
+            (when (and (> nuovo-numero 1) (prime? nuovo-numero))
+                (push nuovo-numero primi)
+                (if (> nuovo-numero max-primo)
+                    (setq max-primo nuovo-numero miglior-percorso nuovo-percorso)))
+            ; continua l’esplorazione nelle 8 direzioni
+            (dolist (d direzioni)
+              (esplora (+ i (d 0)) (+ j (d 1)) nuovo-numero nuovo-percorso nuovi-visitati)))))
+    ; avvia la ricerca da ogni cella della matrice
+    (for (i 0 (- righe 1))
+      (for (j 0 (- colonne 1))
+        (esplora i j 0 '() '())))
+    (if show-all (println primi))
+    (list max-primo miglior-percorso)))
+
+Proviamo:
+
+(setq matrice '((1 2 3)
+                (3 2 2)
+                (3 3 2)))
+
+(primo-maggiore matrice true)
+;-> (2333 233 23 2232133 223 2 33322321 3331 32232133 3223223 323123 32232133
+;->  32213 3221 3 33223 3323 33223 33223 33223 33223 3323 331 3 223 2221333
+;->  2221 22333123 223331 223 23223331 23 22333123 223331 223 2 2333 233
+;->  23 2232133 223 22133 2213 223 2333 233 23 2 3221 3223223 312233 31223
+;->  31 33322321 33322321 3 3213233 321323 32233 32233 32233 322213 32233
+;->  32233 3 213223 21323 23223331 23223331 23 223 2222333 223331 223
+;->  2 12322333 12322333 12322333 1223 1223 13)
+;-> (33322321 (3 3 3 2 2 3 2 1))
+
+Per interi a 64 bit il valore massimo è 9223372036854775807, che ha 19 cifre.
+Quindi la matrice di cifre può avere al massimo 18 elementi.
+Vediamo una funzione che limita la lunghezza massima dei primi da considerare utilizzando un parametro N.
+Inoltre la funzione calcola anche il numero totale di tutti i percorsi esplorati, cioè di tutte le sequenze di cifre generate da 'esplora', con lunghezza da 1 a N, indipendentemente dal fatto che formino primi o no.
+
+; Funzione che trova il numero primo più grande generabile da una matrice di cifre (0..9)
+; Ogni cella può essere usata solo una volta nel percorso.
+; Sono considerate le 4 direzioni (N, S, E, O)
+; Il parametro N limita la lunghezza massima del numero generato (max N = 18).
+; Restituisce anche il numero totale di percorsi esplorati (lunghezza 1..N)
+(define (primo-maggiore matrice N show-all)
+  (letn ( (righe (length matrice))
+          (colonne (length (matrice 0)))
+          (direzioni '((1 0) (-1 0) (0 1) (0 -1)))
+          (primi '())
+          (max-primo 0)
+          (miglior-percorso '())
+          (conteggio 0) )
+    (define (esplora i j numero percorso visitati)
+      (if (and (>= i 0) (< i righe) (>= j 0) (< j colonne)
+               (not (ref (list i j) visitati))
+               ; controllo lunghezza del numero corrente
+               (< (length percorso) N))
+          (letn ((nuovo-numero (+ (* numero 10) ((matrice i) j)))
+                 (nuovo-percorso (append percorso (list ((matrice i) j))))
+                 (nuovi-visitati (append visitati (list (list i j)))))
+            ; ogni percorso valido (di almeno 1 cifra) incrementa il contatore
+            (++ conteggio)
+            ; se è primo, controlla se è il più grande trovato
+            (when (and (> nuovo-numero 1) (prime? nuovo-numero))
+                (push nuovo-numero primi)
+                (if (> nuovo-numero max-primo)
+                    (setq max-primo nuovo-numero miglior-percorso nuovo-percorso)))
+            ; continua solo se la lunghezza è ancora < N
+            (dolist (d direzioni)
+              (esplora (+ i (d 0)) (+ j (d 1)) nuovo-numero nuovo-percorso nuovi-visitati)))))
+    (for (i 0 (- righe 1))
+      (for (j 0 (- colonne 1))
+        (esplora i j 0 '() '())))
+    (if show-all (println primi))
+    (list max-primo miglior-percorso conteggio)))
+
+Proviamo:
+
+(setq matrice '((1 2 3)
+                (3 2 2)
+                (3 3 2)))
+
+(primo-maggiore matrice 8)
+;-> (33322321 (3 3 3 2 2 3 2 1) 613)
+
+(primo-maggiore matrice 6 true)
+;-> (2333 233 23 223 2 3331 323123 32213 3221 3 33223 3323 33223 33223
+;->  33223 33223 3323 331 3 223 2221 223331 223 23 223331 223 2 2333 233
+;->  23 223 22133 2213 223 2333 233 23 2 3221 312233 31223 31 3 321323
+;->  32233 32233 32233 322213 32233 32233 3 213223 21323 23 223 223331
+;->  223 2 1223 1223 13)
+;-> (323123 (3 2 3 1 2 3) 389)
+
+(setq matrice '((1 2 3 4 5 6)
+                (3 2 2 7 9 8)
+                (8 3 4 3 3 2)
+                (1 7 6 3 9 1)))
+
+(primo-maggiore matrice 6 true)
+;-> (19333 193379 1933 193 193379 19333 1933 193 19 123379 123973 128939
+;->  ...
+;->  2 123479 12347 1223 122279 122273 12227 1223 132371 138371 1381 13)
+;-> (986543 (9 8 6 5 4 3) 3408)
+
+Aumentando N aumentano anche i percorsi da considerare e la funzione rallenta (anche perchè 'prime?' deve verificare numeri più grandi).
+Nota: N non può essere maggiore di 18 (cioè non possiamo usare numeri più grandi di quelli consentiti da Int64).
+
+(time (println (primo-maggiore matrice 10)))
+;-> (9865473437 (9 8 6 5 4 7 3 4 3 7) 45924)
+;-> 1060.107
+
+(time (println (primo-maggiore matrice 11)))
+;-> (98654724323 (9 8 6 5 4 7 2 4 3 2 3) 78716)
+;-> 4323.084
+
+(time (println (primo-maggiore matrice 12)))
+;-> (986547342223 (9 8 6 5 4 7 3 4 2 2 2 3) 131492)
+;-> 18921.877
+
+(time (println (primo-maggiore matrice 13)))
+;-> (9865473422381 (9 8 6 5 4 7 3 4 2 2 3 8 1) 207540)
+;-> 78916.385
+
+Anche aumentare le dimensioni della matrice influisce sulla velocità della funzione.
 
 ============================================================================
 
