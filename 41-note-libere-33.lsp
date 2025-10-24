@@ -3499,5 +3499,209 @@ Proviamo:
 ;-> Rapporto = 0.2119
 ;-> 142800.22
 
+
+--------------------------------
+Primi in base 10 e in altra base
+--------------------------------
+
+Dato un numero primo in base 10, convertirlo in base 2..9 e verificare se il numero ottenuto è primo in base 10.
+
+Esempio:
+  numero primo (base10) = 23
+  23 (base2) = 10111 --> primo (base 10)
+  23 (base3) = 212   --> composto (base 10)
+  23 (base4) = 113   --> primo (base 10)
+  23 (base5) = 43    --> primo (base 10)
+  23 (base6) = 35    --> composto (base 10)
+  23 (base7) = 32    --> composto (base 10)
+  23 (base8) = 27    --> composto (base 10)
+  23 (base9) = 25    --> composto (base 10)
+  Il numero 23 è primo in base 10 e primo in base 2, 4 e 5 quando viene considerato in base 10.
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (base10-baseN number base)
+"Convert a number from base 10 to base N (<=62)"
+  (let ((charset "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+        (result '())
+        (quotient number))
+    (while (>= quotient base)
+      (push (charset (% quotient base)) result)
+      (setq quotient (/ quotient base))
+    )
+    (push (charset quotient) result)
+    (join result)))
+
+Funzione che calcola la sequenza dei numeri che sono primi in base 10 e in base B fino ad un dato limite:
+
+(define (sequenza B limite)
+  (let (seq '())
+    (if (prime? (int (base10-baseN 2 B) 0 10)) (push 2 seq -1))
+    (for (num 3 limite 2)
+      (when (odd? num)
+        (if (and (prime? num) (prime? (int (base10-baseN num B) 0 10)))
+            (push num seq -1))))
+    seq))
+
+Sequenza OEIS A065720:
+Primes whose binary representation is also the decimal representation of a prime.
+  3, 5, 23, 47, 89, 101, 149, 157, 163, 173, 179, 199, 229, 313, 331, 367,
+  379, 383, 443, 457, 523, 587, 631, 643, 647, 653, 659, 709, 883, 947,
+  997, 1009, 1091, 1097, 1163, 1259, 1277, 1283, 1289, 1321, 1483, 1601,
+  1669, 1693, 1709, 1753, 1877, 2063, 2069, 2099, ...
+
+(sequenza 2 2099)
+;-> (3 5 23 47 89 101 149 157 163 173 179 199 229 313 331 367
+;->  379 383 443 457 523 587 631 643 647 653 659 709 883 947
+;->  997 1009 1091 1097 1163 1259 1277 1283 1289 1321 1483 1601
+;->  1669 1693 1709 1753 1877 2063 2069 2099)
+
+Sequenza OEIS A065721:
+Primes p whose base-3 expansion is also the decimal expansion of a prime.
+  2, 67, 79, 103, 139, 157, 181, 193, 199, 211, 229, 277, 283, 307, 313,
+  349, 367, 373, 409, 421, 433, 439, 463, 523, 541, 547, 571, 577, 751,
+  829, 883, 919, 1021, 1033, 1039, 1087, 1171, 1249, 1303, 1429, 1483,
+  1579, 1597, 1621, 1741, 1783, 1789, 1873, ...
+
+(sequenza 3 1873)
+;-> (2 67 79 103 139 157 181 193 199 211 229 277 283 307 313
+;->  349 367 373 409 421 433 439 463 523 541 547 571 577 751
+;->  829 883 919 1021 1033 1039 1087 1171 1249 1303 1429 1483
+;->  1579 1597 1621 1741 1783 1789 1873)
+
+Sequenza OEIS A065722:
+Primes that when written in base 4, then reinterpreted in base 10, again give primes.
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 37, 43, 47, 53, 61, 71, 73, 79, 83,
+  97, 103, 107, 109, 113, 131, 149, 151, 157, 163, 167, 181, 191, 193, ...
+
+(sequenza 4 193)
+;-> (2 3 5 7 11 13 17 19 23 29 37 43 47 53 61 71 73 79 83
+;->  97 103 107 109 113 131 149 151 157 163 167 181 191 193)
+
+Sequenza OEIS A065723:
+Primes that when written in base 5, then reinterpreted in base 10, again give primes.
+  2, 3, 13, 23, 41, 71, 83, 101, 163, 191, 211, 281, 283, 311, 331, 463,
+  503, 571, 613, 653, 701, 743, 823, 863, 881, 983, 1091, 1213, 1231,
+  1283, 1301, 1373, 1381, 1423, 1471, 1493, 1531, 1543, 1621, 1741,
+  1783, 1861, 1873, 1931, 2063, 2203, 2213, 2221, ...
+
+(sequenza 5 2221)
+;-> (2 3 13 23 41 71 83 101 163 191 211 281 283 311 331 463
+;->  503 571 613 653 701 743 823 863 881 983 1091 1213 1231
+;->  1283 1301 1373 1381 1423 1471 1493 1531 1543 1621 1741
+;->  1783 1861 1873 1931 2063 2203 2213 2221)
+
+Sequenza OEIS A065724:
+Primes p such that the decimal expansion of its base-6 conversion is also prime.
+  2, 3, 5, 7, 19, 37, 67, 79, 97, 103, 127, 157, 163, 193, 229, 283, 307,
+  337, 439, 487, 547, 571, 601, 631, 643, 673, 733, 751, 757, 853, 877,
+  907, 937, 1021, 1033, 1039, 1087, 1093, 1117, 1171, 1249, 1279, 1423,
+  1567, 1627, 1663, 1723, 1753, 1831, 1873, ...
+
+(sequenza 6 1873)
+;-> (2 3 5 7 19 37 67 79 97 103 127 157 163 193 229 283 307
+;->  337 439 487 547 571 601 631 643 673 733 751 757 853 877
+;->  907 937 1021 1033 1039 1087 1093 1117 1171 1249 1279 1423
+;->  1567 1627 1663 1723 1753 1831 1873)
+
+Sequenza OEIS A065725:
+Primes p such that the decimal expansion of its base-7 conversion is also prime.
+  2, 3, 5, 17, 29, 31, 43, 59, 71, 127, 157, 197, 211, 227, 239, 241, 337,
+  353, 367, 379, 409, 463, 491, 563, 577, 619, 647, 743, 757, 773, 787,
+  857, 911, 953, 967, 1093, 1123, 1163, 1193, 1249, 1303, 1373, 1429,
+  1459, 1471, 1499, 1583, 1597, 1613, 1627, 1669, ...
+
+(sequenza 7 1669)
+;-> (2 3 5 17 29 31 43 59 71127 157 197 211 227 239 241 337
+;->  353 367 379 409 463 491 563 577 619 647 743 757 773 787
+;->  857 911 953 967 1093 1123 1163 1193 1249 1303 1373 1429
+;->  1459 1471 1499 1583 1597 1613 1627 1669)
+
+Sequenza OEIS A065726:
+Primes p whose base-8 expansion is also the decimal expansion of a prime.
+  2, 3, 5, 7, 11, 19, 31, 43, 59, 67, 71, 89, 137, 151, 179, 191, 199, 223,
+  251, 257, 281, 283, 307, 311, 337, 353, 359, 367, 383, 409, 419, 433,
+  443, 449, 523, 563, 617, 619, 641, 659, 727, 787, 809, 811, 857, 887,
+  907, 919, 947, 977, 1033, 1039, 1097, 1123, ...
+
+(sequenza 8 1123)
+;-> (2 3 5 7 11 19 31 43 59 67 71 89 137 151 179 191 199 223
+;->  251 257 281 283 307 311 337 353 359 367 383 409 419 433
+;->  443 449 523 563 617 619 641 659 727 787 809 811 857 887
+;->  907 919 947 977 1033 1039 1097 1123)
+
+Sequenza OEIS A065727:
+Primes p such that the decimal expansion of its base-9 conversion is also prime.
+  2, 3, 5, 7, 37, 43, 61, 109, 127, 199, 271, 277, 379, 457, 487, 523, 541,
+  613, 619, 673, 727, 757, 883, 907, 919, 991, 997, 1033, 1117, 1249, 1447,
+  1483, 1531, 1549, 1567, 1627, 1693, 1699, 1747, 1753, 1987, 2053, 2161,
+  2221, 2287, 2341, 2347, 2437, 2473, ...
+
+(sequenza 9 2473)
+;-> (2 3 5 7 37 43 61 109 127 199 271 277 379 457 487 523 541
+;->  613 619 673 727 757 883 907 919 991 997 1033 1117 1249 1447
+;->  1483 1531 1549 1567 1627 1693 1699 1747 1753 1987 2053 2161
+;->  2221 2287 2341 2347 2437 2473)
+
+Vediamo se esiste qualche numero che è primo in tutte le basi (se considerato in base 10 dopo la conversione).
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (base10-baseX number base)
+  "Convert a number from base 10 to base N (<=10) e restituisce un intero"
+  (letn ((result 0) (power 1))
+    (while (> number 0)
+      (setq result (+ result (* (% number base) power)))
+      (setq number (/ number base))
+      (setq power (* power 10)))
+    result))
+
+(define (primiN limite)
+  (local (out primi conta val)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (dolist (p primi)
+      (setq conta 1) ; p è primo in base 10
+      (for (base 2 9)
+        (setq val (base10-baseX p base))
+        (if (prime? val) (++ conta)))
+      (push (list conta val) out)
+    )
+    (sort out >)))
+
+Proviamo:
+
+(primiN 100)
+;-> ((8 3) (8 2) (7 5) (5 78) (5 47) (5 7)
+;->  (4 87) (4 74) (4 41) (4 25) (4 21)
+;->  (3 117) (3 108) (3 102) (3 67) (3 65)
+;->  (3 52) (3 34) (3 32) (3 18) (3 14) (3 12)
+;->  (2 81) (2 58) (2 45))
+
+(time (primiN 10000))
+;-> 766.301
+
+(time (setq p100 (primiN 100000)))
+;-> 182345.123
+(slice p100 0 10)
+;-> ((8 3) (8 2)
+;->  (7 26357) (7 13607) (7 5)
+;->  (6 158777) (6 131581) (6 112627) (6 87187) (6 77001))
+
+Non credo che esista alcun numero primo in base 10 che sia anche primo in tutte le basi da 2 a 9 (quando viene considerato in base 10 dopo la conversione in altra base).
+
 ============================================================================
 

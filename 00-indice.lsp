@@ -3224,6 +3224,7 @@ NOTE LIBERE 33
   Equazione a^3 + b^3 + c^3 = k
   Numeri primi in base B
   Primi di Paterson
+  Primi in base 10 e in altra base
 
 PROBLEMI SUI DADI
 =================
