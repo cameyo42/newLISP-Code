@@ -5262,7 +5262,8 @@ Proviamo:
 Un altro bug della versione 10.7.6
 ----------------------------------
 
-Un bug di "rotate" quando le rotazioni sono negative e il numero di rotazioni assolute sono multiple della lunghezza della lista.
+Un bug di "rotate" quando le rotazioni sono negative (a sinistra) e il numero di rotazioni assolute sono multiple della lunghezza della lista.
+
 Per esempio:
 
 (rotate '("1" "A" "B" "2") 8)

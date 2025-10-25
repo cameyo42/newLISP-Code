@@ -3227,6 +3227,8 @@ NOTE LIBERE 33
   Primi in base 10 e in altra base
   Numeri primi in una matrice di cifre
   Scheduling di processi
+  Cifra maggiore e minore di un numero
+  Rebasing a number
 
 PROBLEMI SUI DADI
 =================

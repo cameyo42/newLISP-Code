@@ -4068,5 +4068,142 @@ Proviamo:
 ;-> Termine processo 9: 18
 ;-> ((1 2 3 4 5 6 7 8 9) (1 2 3 5 7 9 12 15 18))
 
+
+------------------------------------
+Cifra maggiore e minore di un numero
+------------------------------------
+
+Dato un numero intero determinare la cifra più grande e la più piccola.
+
+Sequenza OEIS A054055:
+Largest digit of n.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 2, 2, 3,
+  4, 5, 6, 7, 8, 9, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9, 4, 4, 4, 4, 4, 5, 6, 7,
+  8, 9, 5, 5, 5, 5, 5, 5, 6, 7, 8, 9, 6, 6, 6, 6, 6, 6, 6, 7, 8, 9, 7, 7,
+  7, 7, 7, 7, 7, 7, 8, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 1, 1, 2, 3, 4, ...
+
+Sequenza OEIS A054054:
+Smallest digit of n.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 2, 2,
+  2, 2, 2, 2, 2, 2, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 0, 1, 2, 3, 4, 4, 4, 4,
+  4, 4, 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 0, 1, 2, 3, 4, 5, 6, 6, 6, 6, 0, 1,
+  2, 3, 4, 5, 6, 7, 7, 7, 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 0, 1, 2, 3, 4, 5,
+  6, 7, 8, 9, 0, 0, 0, 0, 0, ...
+
+Metodo1:
+
+(define (min-max1 num)
+  (let (cifre (map int (explode (string (abs num)))))
+    (list (apply min cifre) (apply max cifre))))
+
+(min-max1 1234)
+;-> (1 4)
+(min-max1 55555)
+;-> (5 5)
+(min-max1 -64718)
+;-> (1 8)
+
+(map last (map min-max1 (sequence 0 50)))
+;-> (0 1 2 3 4 5 6 7 8 9 1 1 2 3 4 5 6 7 8 9 2 2 2 3
+;->  4 5 6 7 8 9 3 3 3 3 4 5 6 7 8 9 4 4 4 4 4 5 6 7
+;->  8 9 5)
+
+Metodo2:
+
+(define (min-max2 num)
+  (setq num (abs num)) ; per gestire anche i numeri negativi
+  (if (< num 10) ; numeri con una cifra
+      (list num num)
+  ;else
+      (let ( (min-val 10) (max-val -1) (cifra 0) )
+        (while (!= num 0)
+          (setq cifra (% num 10))
+          (setq min-val (min cifra min-val))
+          (setq max-val (max cifra max-val))
+          (setq num (/ num 10)))
+        (list min-val max-val))))
+
+(min-max2 1234)
+;-> (1 4)
+(min-max2 55555)
+;-> (5 5)
+(min-max2 -64718)
+;-> (1 8)
+
+(map first (map min-max2 (sequence 0 50)))
+;-> (0 1 2 3 4 5 6 7 8 9 0 1 1 1 1 1 1 1 1 1 0 1 2 2
+;->  2 2 2 2 2 2 0 1 2 3 3 3 3 3 3 3 0 1 2 3 4 4 4 4
+;->  4 4 0)
+
+Test di velocità:
+
+(silent (setq nums (rand 1e12 10000)))
+(time (map min-max1 nums) 100)
+;-> 2750.12
+(time (map min-max2 nums) 100)
+;-> 2743.54
+
+Le due funzioni hanno la stessa velocità.
+
+
+-----------------
+Rebasing a number
+-----------------
+
+Definiamo l'operazione di "Rebasing a number" come la scrittura delle sue cifre in forma decimale, quindi la loro interpretazione nella base N più piccola possibile (2 <= N <= 10) e la sua conversione in base 10.
+Esempio:
+  numero = 1234
+  La base più piccola vale 5.
+  La conversione di 1234 da base 5 a base 10 vale 194
+
+Sequenza OEIS A068505:
+Decimal representation of n interpreted in base b+1, where b=A054055(n) is the largest digit in decimal representation of n.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 5, 7, 9, 11, 13, 15, 17, 19, 6, 7, 8,
+  11, 14, 17, 20, 23, 26, 29, 12, 13, 14, 15, 19, 23, 27, 31, 35, 39, 20,
+  21, 22, 23, 24, 29, 34, 39, 44, 49, 30, 31, 32, 33, 34, 35, 41, 47, 53,
+  59, 42, 43, 44, 45, 46, 47, 48, 55, 62, 69, 56, 57, 58, 59, 60, 61, ...
+
+(define (base10-baseX number base)
+  "Convert a number from base 10 to base N<=10 (return integer)"
+  (letn ((result 0) (power 1))
+    (while (> number 0)
+      (setq result (+ result (* (% number base) power)))
+      (setq number (/ number base))
+      (setq power (* power 10)))
+    result))
+
+(define (baseX-base10 number base)
+  "Convert a number from base N<=10 to base 10 (return integer)"
+  (letn ((result 0) (power 1) (n number))
+    (while (> n 0)
+      (setq result (+ result (* (% n 10) power)))
+      (setq n (/ n 10))
+      (setq power (* power base)))
+    result))
+
+Funzione che restituisce la cifra più grande di un numero intero:
+
+(define (cifra-maggiore num)
+  (let (cifre (map int (explode (string (abs num)))))
+    (apply max cifre)))
+
+Funzione che effettua il processo 'rebasing a number':
+
+(define (rebase num)
+  (let (base-minore (+ (cifra-maggiore num) 1))
+    (baseX-base10 num base-minore)))
+
+Proviamo:
+
+(rebase 1234)
+;-> 194
+
+(map rebase (sequence 1 75))
+;-> (1 2 3 4 5 6 7 8 9 2 3 5 7 9 11 13 15 17 19 6 7 8
+;->  11 14 17 20 23 26 29 12 13 14 15 19 23 27 31 35 39 20
+;->  21 22 23 24 29 34 39 44 49 30 31 32 33 34 35 41 47 53
+;->  59 42 43 44 45 46 47 48 55 62 69 56 57 58 59 60 61)
+
 ============================================================================
 
