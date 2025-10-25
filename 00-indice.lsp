@@ -3226,6 +3226,7 @@ NOTE LIBERE 33
   Primi di Paterson
   Primi in base 10 e in altra base
   Numeri primi in una matrice di cifre
+  Scheduling di processi
 
 PROBLEMI SUI DADI
 =================

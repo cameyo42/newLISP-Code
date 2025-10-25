@@ -3871,5 +3871,202 @@ Nota: N non può essere maggiore di 18 (cioè non possiamo usare numeri più gra
 
 Anche aumentare le dimensioni della matrice influisce sulla velocità della funzione.
 
+
+----------------------
+Scheduling di processi
+----------------------
+
+Abbiamo N interi che rappresentano il tempo di esecuzione di N processi.
+Un computer con M core esegue in parallelo un processo per ogni core.
+Determinare l'ordine di completamento dei processi e il tempo reale (attesa + esecuzione) di ogni processo.
+
+Esempio:
+  N = 4
+  M = 2
+  tempi = (5 3 4 6)
+  Il computer prende i primi 2 processi (5 e 3) e dopo 3 unità di tempo termina il secondo processo.
+  Adesso il computer prende il terzo processo (4) e cominica la sua esecuzione.
+  Dopo 2 secondi termina il primo processo, mentre il terzo processo ha ancora 2 unità di tempo.
+  Il computer prende il quarto processo.
+  Dopo 2 secondi termina il terzo processo.
+  Dopo 4 secondi termina il quarto processo.
+  Ordine di completamento (durate): (3 5 4 6)
+  Tempi reali di completamento per processo (ordine originale): (5 3 7 11)
+  Spiegazione: i processi terminano ai tempi 3, 5, 7, 11.
+  Quindi:
+  il processo con durata 5 (primo nell'input) finisce a t = 5,
+  quello con durata 3 finisce a t = 3,
+  quello con durata 4 finisce a t = 7,
+  quello con durata 6 finisce a t = 11.
+
+Algoritmo
+---------
+Si tratta di simulare un scheduling a più processori (M core), dove i processi vengono gestiti in modo non preemptive, cioè ogni processo viene eseguito fino al termine una volta iniziato.
+1. Inizializzazione
+   Tutti i processi sono messi nella coda 'queue', contenente gli indici (da 0 a n−1).
+   I primi 'M' processi vengono avviati contemporaneamente:
+   - 'run-idx' tiene traccia degli indici dei processi in esecuzione
+   - 'run-rem' conserva i tempi rimanenti per ciascuno
+2. Avanzamento del tempo
+   A ogni iterazione si calcola 'minr', il tempo minimo rimanente tra i processi in corso.
+   Il tempo globale 'adesso' viene incrementato di 'minr'.
+3. Aggiornamento processi attivi
+   Tutti i processi attivi riducono il loro tempo rimanente di 'minr'.
+   Chi arriva a 0 viene considerato terminato:
+   - viene stampato (se 'show' è true)
+   - viene registrato in 'comp-order' e 'comp-pairs'
+   - rimosso da 'run-idx' e 'run-rem'
+4. Gestione nuovi processi
+   Ogni volta che un processo termina, se ci sono ancora elementi in 'queue',
+   vengono avviati nuovi processi fino a riempire i 'M' core disponibili.
+5. Calcolo dei tempi finali
+   Al termine, 'real-times' contiene per ogni processo il tempo di completamento.
+   L'ordine corrisponde all'ordine originale dei processi.
+6. Risultato finale
+   La funzione restituisce:
+   - 'comp-order': i tempi originali nell'ordine in cui i processi sono finiti
+   - 'real-times': i tempi di completamento effettivi, indicizzati per processo
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; FUNZIONE: scheduler
+; Simula l'esecuzione di più processi su M core paralleli (CPU)
+; Ogni processo ha un tempo di esecuzione specificato in ‘tempi'.
+; I processi vengono eseguiti in ordine di arrivo (round-robin senza preemption).
+; Quando un core termina un processo, ne prende subito uno nuovo dalla coda.
+; Parametri:
+;   tempi -> lista dei tempi di esecuzione dei processi
+;   M -> numero di core disponibili
+;   show -> se true, stampa inizio e termine dei processi
+; Output:
+;   una lista composta da:
+;     1. ordine di completamento dei processi (lista di tempi)
+;     2. lista dei tempi effettivi di completamento
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (scheduler tempi M show)
+  (letn (n (length tempi) ; numero di processi
+         queue '()        ; coda dei processi in attesa
+         run-idx '()      ; indici dei processi attivi
+         run-rem '()      ; tempi rimanenti dei processi attivi
+         comp-order '()   ; tempi originali nell'ordine di completamento
+         comp-pairs '()   ; coppie (indice processo, tempo di completamento)
+         adesso 0)        ; tempo globale corrente
+    ; inizializza la coda con tutti i processi
+    ;(for (i 0 (- n 1) 1) (push i queue -1))
+    (setq queue (sequence 0 (- n 1)))
+    ; avvia i primi M processi
+    (for (k 0 (- M 1) 1)
+      (if (> (length queue) 0)
+        (begin
+          (push (queue 0) run-idx -1)
+          (push (tempi (queue 0)) run-rem -1)
+          (if show (println "Inizio processo " (+ (queue 0) 1) ": " adesso))
+          (pop queue 0))))
+    ; ciclo principale: continua finché ci sono processi attivi
+    (while (> (length run-idx) 0)
+      ; trova il tempo minimo rimanente tra i processi attivi
+      (letn (minr (apply min run-rem))
+        ; avanza il tempo globale
+        (setq adesso (+ adesso minr))
+        ; aggiorna i tempi rimanenti
+        (for (j 0 (- (length run-rem) 1) 1)
+          (setf (run-rem j) (- (run-rem j) minr)))
+        ; controlla i processi che sono terminati
+        (let ((i 0))
+          (while (< i (length run-idx))
+            (if (= (run-rem i) 0)
+              (begin
+                (if show (println "Termine processo " (+ (run-idx i) 1) ": " adesso))
+                (push (tempi (run-idx i)) comp-order -1)
+                (push (list (run-idx i) adesso) comp-pairs -1)
+                (pop run-idx i)
+                (pop run-rem i))
+              (++ i))))
+        ; riempi i core liberi con nuovi processi dalla coda
+        (while (and (> (length queue) 0) (< (length run-idx) M))
+          (if show (println "Inizio processo " (+ (queue 0) 1) ": " adesso))
+          (push (queue 0) run-idx -1)
+          (push (tempi (queue 0)) run-rem -1)
+          (pop queue 0))))
+    ; calcolo dei tempi di completamento effettivi
+    (let ((real-times '()))
+      (for (i 0 (- n 1) 1)
+        (let ((found nil) (k 0))
+          (while (and (not found) (< k (length comp-pairs)))
+            (let ((p (comp-pairs k)))
+              (if (= (p 0) i)
+                (begin
+                  (push (p 1) real-times -1)
+                  (setq found true)))
+              (++ k)))
+          (if (not found) (push nil real-times -1))))
+      (list comp-order real-times))))
+
+Proviamo:
+
+(setq tempi '(5 3 4 6))
+(scheduler tempi 2 true)
+;-> Inizio processo 1: 0
+;-> Inizio processo 2: 0
+;-> Termine processo 2: 3
+;-> Inizio processo 3: 3
+;-> Termine processo 1: 5
+;-> Inizio processo 4: 5
+;-> Termine processo 3: 7
+;-> Termine processo 4: 11
+;-> ((3 5 4 6) (5 3 7 11))
+
+(setq tempi '(5 3 4 6))
+(scheduler tempi 1 true)
+;-> Inizio processo 1: 0
+;-> Termine processo 1: 5
+;-> Inizio processo 2: 5
+;-> Termine processo 2: 8
+;-> Inizio processo 3: 8
+;-> Termine processo 3: 12
+;-> Inizio processo 4: 12
+;-> Termine processo 4: 18
+;-> ((5 3 4 6) (5 8 12 18))
+
+(setq tempi '(5 3 4 6))
+(scheduler tempi 4 true)
+;-> Inizio processo 1: 0
+;-> Inizio processo 2: 0
+;-> Inizio processo 3: 0
+;-> Inizio processo 4: 0
+;-> Termine processo 2: 3
+;-> Termine processo 3: 4
+;-> Termine processo 1: 5
+;-> Termine processo 4: 6
+;-> ((3 4 5 6) (5 3 4 6))
+
+(setq tempi '(5))
+(scheduler tempi 2 true)
+;-> Inizio processo 1: 0
+;-> Termine processo 1: 5
+;-> ((5) (5))
+
+(setq tempi (sequence 1 9))
+(scheduler tempi 3 true)
+;-> Inizio processo 1: 0
+;-> Inizio processo 2: 0
+;-> Inizio processo 3: 0
+;-> Termine processo 1: 1
+;-> Inizio processo 4: 1
+;-> Termine processo 2: 2
+;-> Inizio processo 5: 2
+;-> Termine processo 3: 3
+;-> Inizio processo 6: 3
+;-> Termine processo 4: 5
+;-> Inizio processo 7: 5
+;-> Termine processo 5: 7
+;-> Inizio processo 8: 7
+;-> Termine processo 6: 9
+;-> Inizio processo 9: 9
+;-> Termine processo 7: 12
+;-> Termine processo 8: 15
+;-> Termine processo 9: 18
+;-> ((1 2 3 4 5 6 7 8 9) (1 2 3 5 7 9 12 15 18))
+
 ============================================================================
 
