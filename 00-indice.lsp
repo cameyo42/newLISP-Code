@@ -3231,6 +3231,8 @@ NOTE LIBERE 33
   Rebasing a number
   Shift degli elementi di una matrice
   Lista da ordinare con un processo predefinito
+  Numeri divisibili dalla somma delle cifre maggiore e minore
+  Viaggi in treno
 
 PROBLEMI SUI DADI
 =================
@@ -3278,7 +3280,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (366 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (370 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

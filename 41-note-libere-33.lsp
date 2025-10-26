@@ -2734,52 +2734,52 @@ Riassunto
 | 'simula-turno'           | Gestisce un turno completo                        |
 | 'simula-torneo'          | Simula l'intero torneo                            |
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; SIMULAZIONE TORNEO CON SISTEMA SVIZZERO
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DESCRIZIONE GENERALE
-;;
-;; Il sistema svizzero è una modalità di torneo utilizzata in scacchi e giochi
-;; da tavolo per gestire competizioni con molti giocatori e pochi turni.
-;;
-;; Regole principali:
-;; 1. Tutti i giocatori partecipano a ogni turno (non ci sono eliminazioni).
-;; 2. I giocatori vengono accoppiati in base al punteggio attuale: chi ha
-;;    punteggi simili gioca contro altri con punteggi simili.
-;; 3. Nessun giocatore può affrontare lo stesso avversario più di una volta.
-;; 4. Quando il numero di partecipanti è dispari, uno riceve un "bye" (vince
-;;    automaticamente il turno con 1 punto).
-;; 5. Si cerca di alternare i colori (B/N) nel caso degli scacchi.
-;;
-;; Struttura dei dati:
-;; Ogni giocatore è rappresentato da una lista:
-;; (ID punteggio avversari colori)
-;;
-;; Dove:
-;;  - ID = simbolo identificativo (es. A, B, C...)
-;;  - punteggio = totale dei punti ottenuti
-;;  - avversari = lista dei giocatori già affrontati
-;;  - colori = lista dei colori giocati (B o N)
-;;
-;; Esempio:
-;; (A 2.5 (B C D) (B N B))
-;; -> Il giocatore A ha 2.5 punti, ha giocato contro B, C, D e ha usato i colori
-;;   Bianco, Nero, Bianco nei tre turni.
-;;
-;; Struttura del programma:
-;; - ultimo-colore      -> restituisce l'ultimo colore giocato da un giocatore
-;; - accoppiamento-svizzero -> genera gli accoppiamenti del turno
-;; - aggiorna-colori    -> aggiorna la cronologia dei colori dei giocatori
-;; - aggiorna-punteggi  -> assegna i punti in base ai risultati
-;; - simula-risultati   -> genera esiti casuali (vittoria, pareggio, sconfitta)
-;; - stampa-classifica  -> mostra la classifica corrente
-;; - simula-turno       -> esegue un turno completo (accoppiamento + risultati)
-;; - simula-torneo      -> esegue tutti i turni del torneo
-;;
-;; Esempio di simulazione:
-;; (simula-torneo 4)
-;; Simula un torneo di 4 turni con abbinamenti, punteggi e colori automatici.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; -----------------------------------------------------------------------------
+; SIMULAZIONE TORNEO CON SISTEMA SVIZZERO
+; -----------------------------------------------------------------------------
+; DESCRIZIONE GENERALE
+;
+; Il sistema svizzero è una modalità di torneo utilizzata in scacchi e giochi
+; da tavolo per gestire competizioni con molti giocatori e pochi turni.
+;
+; Regole principali:
+; 1. Tutti i giocatori partecipano a ogni turno (non ci sono eliminazioni).
+; 2. I giocatori vengono accoppiati in base al punteggio attuale: chi ha
+;    punteggi simili gioca contro altri con punteggi simili.
+; 3. Nessun giocatore può affrontare lo stesso avversario più di una volta.
+; 4. Quando il numero di partecipanti è dispari, uno riceve un "bye" (vince
+;    automaticamente il turno con 1 punto).
+; 5. Si cerca di alternare i colori (B/N) nel caso degli scacchi.
+;
+; Struttura dei dati:
+; Ogni giocatore è rappresentato da una lista:
+; (ID punteggio avversari colori)
+;
+; Dove:
+;  - ID = simbolo identificativo (es. A, B, C...)
+;  - punteggio = totale dei punti ottenuti
+;  - avversari = lista dei giocatori già affrontati
+;  - colori = lista dei colori giocati (B o N)
+;
+; Esempio:
+; (A 2.5 (B C D) (B N B))
+; -> Il giocatore A ha 2.5 punti, ha giocato contro B, C, D e ha usato i colori
+;   Bianco, Nero, Bianco nei tre turni.
+;
+; Struttura del programma:
+; - ultimo-colore      -> restituisce l'ultimo colore giocato da un giocatore
+; - accoppiamento-svizzero -> genera gli accoppiamenti del turno
+; - aggiorna-colori    -> aggiorna la cronologia dei colori dei giocatori
+; - aggiorna-punteggi  -> assegna i punti in base ai risultati
+; - simula-risultati   -> genera esiti casuali (vittoria, pareggio, sconfitta)
+; - stampa-classifica  -> mostra la classifica corrente
+; - simula-turno       -> esegue un turno completo (accoppiamento + risultati)
+; - simula-torneo      -> esegue tutti i turni del torneo
+;
+; Esempio di simulazione:
+; (simula-torneo 4)
+; Simula un torneo di 4 turni con abbinamenti, punteggi e colori automatici.
+; -----------------------------------------------------------------------------
 
 ;; Funzione che restituisce l'ultimo colore usato da un giocatore
 (define (ultimo-colore g)
@@ -3927,11 +3927,11 @@ Si tratta di simulare un scheduling a più processori (M core), dove i processi 
    - 'comp-order': i tempi originali nell'ordine in cui i processi sono finiti
    - 'real-times': i tempi di completamento effettivi, indicizzati per processo
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; -----------------------------------------------------------------------------
 ; FUNZIONE: scheduler
 ; Simula l'esecuzione di più processi su M core paralleli (CPU)
 ; Ogni processo ha un tempo di esecuzione specificato in ‘tempi'.
-; I processi vengono eseguiti in ordine di arrivo (round-robin senza preemption).
+; I processi vengono eseguiti in ordine di arrivo (round-robin no preemption).
 ; Quando un core termina un processo, ne prende subito uno nuovo dalla coda.
 ; Parametri:
 ;   tempi -> lista dei tempi di esecuzione dei processi
@@ -3941,8 +3941,7 @@ Si tratta di simulare un scheduling a più processori (M core), dove i processi 
 ;   una lista composta da:
 ;     1. ordine di completamento dei processi (lista di tempi)
 ;     2. lista dei tempi effettivi di completamento
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+; -----------------------------------------------------------------------------
 (define (scheduler tempi M show)
   (letn (n (length tempi) ; numero di processi
          queue '()        ; coda dei processi in attesa
@@ -4370,6 +4369,141 @@ Con le funzioni 'dispose' e 'processo' possiamo ordinare qualunque lista:
 ;->  49 50 51 51 51 53 53 56 57 57 58 58 59 60 60 60 60 61 65 66 67 69
 ;->  69 71 72 72 73 74 74 74 75 77 78 80 80 80 82 83 84 84 85 86 87 89
 ;->  91 92 94 95 98 98 99 99)
+
+
+-----------------------------------------------------------
+Numeri divisibili dalla somma delle cifre maggiore e minore
+-----------------------------------------------------------
+
+Determinare la sequenza dei numeri che sono divisibili per la somma della cifra maggiore e della cifra minore.
+
+(define (seq num)
+  (letn ( (digits (map int (explode (string num)))) ; lista delle cifre
+          (divisore (+ (apply min digits) (apply max digits))) )
+    (zero? (% num divisore))))
+
+(filter seq (sequence 1 1000))
+;-> (10 12 18 20 21 24 27 30 36 40 42 45 48 50 54 60 63 70 72 80 81 84
+;->  90 100 101 102 104 105 110 120 126 132 140 150 161 176 200 202 204
+;->  205 208 210 220 234 240 245 250 252 256 264 280 297 300 303 304 305
+;->  306 312 324 330 340 342 343 350 360 385 396 400 404 405 408 420 429
+;->  432 434 440 450 468 480 494 500 505 510 520 525 530 532 540 550 576
+;->  583 585 600 606 608 616 624 630 632 638 648 651 660 676 680 684 686
+;->  700 707 712 756 767 770 792 800 808 836 840 858 864 868 880 900 909
+;->  924 936 949 990 1000)
+
+Nota: questa sequenza non esiste su OEIS (26 ottobre 2025).
+
+
+---------------
+Viaggi in treno
+---------------
+
+Un treno che può trasportare N passeggeri parte dalla stazione di partenza e viaggia fino al capolinea.
+Durante il viaggio il treno si ferma in M stazioni.
+In ogni stazione ci sono dei passeggeri che salgono e altri che scendono.
+Abbiamo una lista di passeggeri i cui elementi sono del tipo:
+  (numero-passeggeri stazione-di-salita stazione-di-discesa)
+La lista dei passeggeri è del tipo: '((2 0 3) (1 4 5) ...)
+La stazione di partenza è 0 e il capolinea è (M - 1).
+
+Scrivere una funzione che simula il processo del viaggio del treno e determina se è possibile trasportare tutti i passeggeri a destinazione.
+
+; -----------------------------------------------------------------------------
+; SIMULA-TRENO
+; Simula il viaggio di un treno con capacità N che attraversa M stazioni.
+; Ogni viaggio è rappresentato da:
+;   (numero-passeggeri stazione-salita stazione-discesa).
+; La funzione restituisce true se tutti i passeggeri possono essere trasportati
+; senza superare la capacità massima, altrimenti nil.
+; Se 'show' è true, stampa i dettagli del viaggio per ogni stazione.
+; -----------------------------------------------------------------------------
+
+(define (simula-treno N M passeggeri show)
+  ; inizializza le liste per salite e discese, uno per ogni stazione
+  (letn ((a-salita (array-list (array M '(0))))
+         (a-discesa (array-list (array M '(0))))
+         ; numero di passeggeri attualmente a bordo
+         (a-bordo 0)
+         ; flag che indica se la capacità non è mai stata superata
+         (possibile true))
+    ; calcola quanti passeggeri salgono e scendono in ciascuna stazione
+    (dolist (p passeggeri)
+      (letn ((num (p 0)) (salita (p 1)) (discesa (p 2)))
+        (++ (a-salita salita) num)
+        (++ (a-discesa discesa) num)))
+    ; simula il viaggio del treno stazione per stazione
+    (for (st 0 (- M 1) 1 (not possibile))
+      ; numero di passeggeri che scendono e salgono in questa stazione
+      (letn ((scendono (a-discesa st))
+             (salgono (a-salita st)))
+        ; aggiorna il numero di passeggeri a bordo dopo le discese
+        (setq a-bordo (- a-bordo scendono))
+        ; se il numero diventa negativo, riportalo a zero (caso anomalo)
+        (if (< a-bordo 0) (setq a-bordo 0))
+        ; aggiorna i passeggeri a bordo dopo le salite
+        (setq a-bordo (+ a-bordo salgono))
+        ; se richiesto, mostra i dettagli della stazione
+        (when show
+          (println "Stazione " st ":")
+          (println "  Saliti: " salgono)
+          (println "  Discesi: " scendono)
+          (println "  Totale passeggeri: " a-bordo)
+          (if (> a-bordo N)
+            (println "ERRORE: superata la capacità del treno (" N ")")))
+        ; se la capacità è superata, segnala impossibilità
+        (if (> a-bordo N) (setq possibile nil))))
+    ; restituisce true se la capacità non è stata superata, nil altrimenti
+    (if possibile true nil)))
+
+Proviamo:
+
+(simula-treno 10 6 '((2 0 3) (3 1 5) (4 2 4) (2 3 2) (1 4 5)))
+;-> true
+(simula-treno 10 6 '((2 0 3) (3 1 5) (4 2 4) (2 0 2) (1 4 5)) true)
+;-> Stazione 0:
+;->   Passeggeri saliti: 4
+;->   Passeggeri discesi: 0
+;->   Totale passeggeri: 4
+;-> Stazione 1:
+;->   Passeggeri saliti: 3
+;->   Passeggeri discesi: 0
+;->   Totale passeggeri: 7
+;-> Stazione 2:
+;->   Passeggeri saliti: 4
+;->   Passeggeri discesi: 2
+;->   Totale passeggeri: 9
+;-> Stazione 3:
+;->   Passeggeri saliti: 0
+;->   Passeggeri discesi: 2
+;->   Totale passeggeri: 7
+;-> Stazione 4:
+;->   Passeggeri saliti: 1
+;->   Passeggeri discesi: 4
+;->   Totale passeggeri: 4
+;-> Stazione 5:
+;->   Passeggeri saliti: 0
+;->   Passeggeri discesi: 4
+;->   Totale passeggeri: 0
+;-> true
+
+(simula-treno 5 6 '((4 0 4) (1 1 3) (4 2 3) (0 3 0)))
+;-> nil
+(simula-treno 5 6 '((4 0 4) (1 1 3) (4 2 3) (0 3 0)) true)
+;-> Stazione 0:
+;->   Saliti: 4
+;->   Discesi: 0
+;->   Totale passeggeri: 4
+;-> Stazione 1:
+;->   Saliti: 1
+;->   Discesi: 0
+;->   Totale passeggeri: 5
+;-> Stazione 2:
+;->   Saliti: 4
+;->   Discesi: 0
+;->   Totale passeggeri: 9
+;-> ERRORE: superata la capacità del treno (5)
+;-> nil
 
 ============================================================================
 
