@@ -4146,6 +4146,16 @@ Test di velocità:
 
 Le due funzioni hanno la stessa velocità.
 
+Cifra più piccola e più grande separate in due funzioni:
+
+(define (min-digit num)
+"Find the smallest digit of an integer"
+  (apply min (map int (explode (string (abs num))))))
+
+(define (max-digit num)
+"Find the largest digit of an integer"
+  (apply max (map int (explode (string (abs num))))))
+
 
 -----------------
 Rebasing a number
@@ -4204,6 +4214,162 @@ Proviamo:
 ;->  11 14 17 20 23 26 29 12 13 14 15 19 23 27 31 35 39 20
 ;->  21 22 23 24 29 34 39 44 49 30 31 32 33 34 35 41 47 53
 ;->  59 42 43 44 45 46 47 48 55 62 69 56 57 58 59 60 61)
+
+
+-----------------------------------
+Shift degli elementi di una matrice
+-----------------------------------
+
+Data una matrice MxN e un intero k, scrivere una funzione che spostare gli elementi della matrice k volte.
+Le regole per le operazioni di spostamento sono le seguenti:
+- l'elemento in matrice[i][j] si sposta in matrice[i][j + 1]
+- l'elemento in matrice[i][n - 1] si sposta in matrice[i + 1][0]
+- l'elemento in matrice[m - 1][n - 1] si sposta in matrice[0][0]
+
+Possiamo osservare che le operazioni di spostamento descritte sono equivalenti alla una rotazione circolare (a destra) di elementi quando consideriamo la matrice MxN come una lista appiattita.
+Per esempio:
+matrice = ((1 2 3)
+           (4 5 6)
+           (7 8 9))
+k = 1
+lista appiattita = (1 2 3 4 5 6 7 8 9)
+rotazione di 1 posizione = (9 1 2 3 4 5 6 7 8)
+nuova matrice = ((9 1 2)
+                 (3 4 5)
+                 (6 7 8))
+
+Algoritmo
+1) Appiattire la matrice in una lista
+2) shiftare a destra la lista k volte
+3) ricostruire la matrice dalla lista shiftata
+
+(define (shift-matrix matrix k)
+  (let ( (cols (length (matrix 0)))
+         (lst (flat matrix)) )
+    (rotate lst k)
+    (explode lst cols)))
+
+Proviamo:
+
+(shift-matrix '((1 2 3) (4 5 6) (7 8 9)) 1)
+;-> ((9 1 2) (3 4 5) (6 7 8))
+
+(shift-matrix '((1 2 3) (4 5 6) (7 8 9)) 9)
+;-> ((1 2 3) (4 5 6) (7 8 9))
+
+(shift-matrix '((1 2 3 4) (5 6 7 8)) 3)
+;-> ((6 7 8 1) (2 3 4 5))
+
+Versione code-golf (54 caratteri):
+
+(define(f m k)(explode(rotate(flat m)k)(length(m 0))))
+
+(f '((1 2 3) (4 5 6) (7 8 9)) 1)
+;-> ((9 1 2) (3 4 5) (6 7 8))
+(f '((1 2 3) (4 5 6) (7 8 9)) 9)
+;-> ((1 2 3) (4 5 6) (7 8 9))
+(f '((1 2 3 4) (5 6 7 8)) 3)
+
+
+---------------------------------------------
+Lista da ordinare con un processo predefinito
+---------------------------------------------
+
+Data una lista di interi positivi, ordinare la lista in modo che il seguente processo produca i numeri in ordine non decrescente:
+1) Prendere il primo elemento della lista come primo numero e inserire il secondo numero in fondo alla lista
+2) Prendere il primo elemento della lista come secondo numero e inserire il secondo numero in fondo alla lista
+3) continuare in questo modo fino a terminare la lista.
+I numeri presi devono essere in ordine non decrescente.
+Scrivere una funzione che ordina la lista in modo opportuno.
+
+Esempio:
+ Lista: (4 3 7 1)
+ Ordiniamo la lista nel modo opportuno: (1 4 3 7)
+ Adesso applichiamo il processo:
+ Prendiamo il primo numero e inseriamo il secondo alla fine: (1) e (3 7 4)
+ Prendiamo il primo numero e inseriamo il secondo alla fine: (1 3) e (4 7)
+ Prendiamo il primo numero e inseriamo il secondo alla fine: (1 3 4) e (7)
+ Prendiamo il primo numero e fine della lista: (1 3 4 7) e (7)
+ La lista generata dal processo vale (1 3 4 7).
+
+Il processo di ordinamento funziona come segue:
+1) Rimuovere il primo numero della lista e metterlo nella lista di output.
+2) Se rimangono numeri nella lista, spostare il primo numero in fondo alla lista.
+3) Ripetere i passaggi 1-2 finché ci sono elementi nella lista.
+
+La funzione deve trovare la disposizione iniziale della lista che permette al processo di generare una lista di output i cui numeri sono in ordine non decrescente.
+
+Per risolvere il problema possiamo simulare il processo al contrario.
+Per invertire il processo dobbiamo invertire i passaggi 2) e 1):
+Iniziamo con il numero più grande (poiché è stato preso per ultimo)
+Per "non-spostare" un numero dal fondo della lista alla cima, prendiamo l'ultimo numero e lo mettiamo in cima.
+Per "non-rimuovere" un numero, lo mettiamo in cima alla lista.
+
+Algoritmo
+---------
+1) Iniziamo con una lista di output vuota
+2) Ordiniamo la lista data in ordine non-crescente (dal più grande al più piccolo).
+3) Per ogni numero della lista ordinata:
+   3a) Se la lista di output non è vuota, prendere il numero in fondo e spostarlo in cima alla lista.
+   3b) Mettere il numero corrente in cima alla lista.
+
+(define (dispose lst)
+  (let (coda '()) ; lista di output
+    (sort lst >)  ; ordina la lista di input (non-decrescente)
+    ; Ciclo per ogni elemento della lista ordinata...
+    (dolist (el lst)
+      ; Se la lista di output non è vuota, sposta l'ultima numero in cima
+      ; Questo inverte l'operazione 2) "sposta il numero dalla cima al fondo"
+      ;(rotate coda)
+      (if coda (push (pop coda -1) coda))
+      ; Inserisce l'elemento corrente nella lista di output
+      ; Questo inverte l'operazione 1) "Rimuovere il numero in cima"
+      (push el coda))
+    coda))
+
+Proviamo:
+
+(dispose '(4 3 7 1))
+;-> (1 4 3 7)
+
+(dispose '(1 2 3 4 5 6 7 8 9))
+;-> (1 9 2 6 3 8 4 7 5)
+
+Nota: (rotate coda) è equivalente a (if coda (push (pop coda -1) coda)).
+
+Versione code-golf (69 caratteri):
+
+(define(f l)(let(c '())(sort l >)(dolist(e l)(rotate c)(push e c))c))
+(f '(4 3 7 1))
+;-> (1 4 3 7)
+(f '(1 2 3 4 5 6 7 8 9))
+;-> (1 9 2 6 3 8 4 7 5)
+
+Adesso scriviamo una funzione che simula il processo:
+
+(define (processo lst)
+  (let (out '())
+    (dolist (el lst)
+      ; prende il primo elemento e lomette nella lista di output
+      (push (pop lst) out -1)
+      ; sposta il primo elemento in fondo alla lista
+      (rotate lst -1))
+    out))
+
+Proviamo:
+
+(processo '(1 4 3 7))
+;-> (1 3 4 7)
+
+Con le funzioni 'dispose' e 'processo' possiamo ordinare qualunque lista:
+
+(setq test (rand 100 100))
+(processo (dispose test))
+;-> (0 0 0 0 1 2 5 5 6 9 9 10 11 14 14 15 16 16 16 17 19 20 20 22 23 26
+;->  27 27 29 30 30 34 35 35 36 36 37 37 38 39 42 44 45 45 46 46 47 48
+;->  49 50 51 51 51 53 53 56 57 57 58 58 59 60 60 60 60 61 65 66 67 69
+;->  69 71 72 72 73 74 74 74 75 77 78 80 80 80 82 83 84 84 85 86 87 89
+;->  91 92 94 95 98 98 99 99)
 
 ============================================================================
 

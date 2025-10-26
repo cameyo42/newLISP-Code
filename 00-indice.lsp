@@ -3229,6 +3229,8 @@ NOTE LIBERE 33
   Scheduling di processi
   Cifra maggiore e minore di un numero
   Rebasing a number
+  Shift degli elementi di una matrice
+  Lista da ordinare con un processo predefinito
 
 PROBLEMI SUI DADI
 =================
