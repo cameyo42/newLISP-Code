@@ -4673,5 +4673,118 @@ Nota: gestione hash-map con big-integer
 (h "12345678901234567890L" 12345678901234567890L)
 (h "12345678901234567890L")
 
+
+--------------------------------------------------------
+Modificare una lista per rendere il suo MCD diverso da 1
+--------------------------------------------------------
+
+Dato una lista di interi positivi, determinare il numero minimo di elementi da togliere affinchè il MCD (gcd) della lista rimanente sia diverso da 1.
+
+Esempio:
+  lista = (2 4 3 6 2 5)
+  Togliendo il 3 e il 5 otteniamo: (2 4 6 2)
+  gcd(2 4 6 2) = 2
+
+Algoritmo
+---------
+1. Inizializzazione
+   Se la lista è vuota → termina con messaggio `"Lista vuota"`.
+   Crea una lista associativa 'counts' per contare quante volte compare ciascun fattore primo nei numeri della lista.
+2. Fattorizzazione
+   Per ogni elemento 'x' della lista:
+     a) Ignora (x <= 1)' (non contribuisce al gcd).
+     b) Calcola la lista dei fattori primi distinti: '(unique (factor x))'.
+     c) Per ciascun fattore 'p', aggiorna il contatore in 'counts':
+        c1) Se 'p' non è presente, aggiungilo con conteggio '0'.
+        c1) Incrementa il conteggio '(lookup p counts)'.
+3. Selezione del miglior fattore
+   Dopo aver costruito 'counts', cerca il fattore 'best-p' con conteggio massimo 'best-c'.
+   Questo fattore rappresenta il primo divisore comune al numero massimo di elementi.
+   Mantenendo solo gli elementi divisibili per 'best-p', si ottiene 'gcd != 1'.
+4. Determinazione degli elementi da rimuovere
+   Tutti i numeri non divisibili per 'best-p' devono essere rimossi.
+   '(- n best-c)' indica quanti elementi devono essere tolti.
+   Ritorna la lista '(numero_da_togliere valori_da_togliere)'.
+5. Caso limite
+   Se non esiste alcun fattore comune ('best-p = nil' o 'best-c = 0'), significa che non si può ottenere 'gcd != 1' (es. tutti '1').
+
+; -----------------------------------------------------------------------------
+; GCD-NOT-1
+; Data una lista di interi positivi, la funzione calcola:
+; - il numero di elementi da togliere
+; - il valore degli elementi da togliere
+; - la lista risultante dopo aver eliminato gli elementi da togliere
+; - il gcd della nuova lista
+; affinchè la lista risultante abbia gcd diverso da 1.
+; -----------------------------------------------------------------------------
+(define (gcd-not-1 lst)
+  (let (n (length lst))
+    ; se la lista è vuota termina
+    (if (= n 0)
+      (begin
+        (println "Lista vuota")
+        nil)
+      ; altrimenti crea la lista associativa dei contatori
+      (let (counts '())
+        ; per ogni elemento della lista
+        (dolist (x lst)
+          ; considera solo numeri > 1
+          (if (> x 1)
+            (letn (pfs (unique (factor x)))
+              ; per ogni fattore primo distinto
+              (dolist (p pfs)
+                ; se non presente in counts, aggiungilo con 0
+                (unless (ref p (map first counts))
+                  (push (list p 0) counts -1))
+                ; incrementa il conteggio per quel fattore
+                (setf (lookup p counts) (inc (lookup p counts)))))))
+        ; trova il fattore più frequente
+        (let ((best-p nil) (best-c 0))
+          (dolist (pair counts)
+            (letn ((p (pair 0)) (c (pair 1)))
+              (if (> c best-c)
+                (begin (setq best-c c) (setq best-p p)))))
+          ; se non esiste fattore comune, termina
+          (if (or (nil? best-p) (= best-c 0))
+            (begin
+              (println "Impossibile ottenere gcd != 1 (es. tutti 1).")
+              nil)
+            ; altrimenti trova gli elementi da togliere
+            (let (to-remove '())
+              (dolist (x lst)
+                (if (not (= (% x best-p) 0))
+                  (push x to-remove -1)))
+              ; elimina dalla lista gli elementi da togliere
+              (dolist (el to-remove)
+                (pop lst (ref el lst)))
+              ; restituisce:
+              ; (numero_da_togliere valori_da_togliere lista-finale gcd(lista-finale))
+              (list (- n best-c) to-remove lst (apply gcd lst)))))))))
+
+(setq lista '(2 4 3 6 2 5))
+(gcd-not-1 lista)
+;-> (2 (3 5) (2 4 6 2) 2)
+
+(gcd-not-1 '(3 5 7 11))
+;-> (3 (5 7 11) (3) 3)
+
+(setq t (rand 100 100))
+;-> (76 74 11 8 30 62 14 41 79 60 19 29 14 24 22 29 88 77 47 56 49 42
+;->  96 36 56 81 94 6 33 66 49 18 22 26 68 34 67 3 46 42 12 77 61 5 33
+;->  75 9 61 93 29 87 81 34 1 87 13 0 40 83 19 2 85 89 22 19 78 70 83
+;->  57 15 74 17 36 78 79 68 44 85 12 61 41 12 42 35 16 11 1 95 9 75 38
+;->  63 93 81 50 92 27 76 8 6)
+
+(gcd-not-1 t)
+;-> (52 (11 41 79 19 29 29 77 47 49 81 33 49 67 3 77 61 5 33 75 9 61 93
+;->   29 87 81 1 87 13 83 19 85 89 19 83 57 15 17 79 85 61 41 35 11 1
+;->   95 9 75 63 93 81 27)
+;->  (76 74 8 30 62 14 60 14 24 22 88 56 42 96 36 56 94 6 66 18 22 26
+;->   68 34 46 42 12 34 0 40 2 22 78 70 74 36 78 68 44 12 12 42 16 38
+;->   50 92 76 8 6) 2)
+
+(gcd-not-1 '(2 4 6))
+;-> (0 () (2 4 6) 2)
+
 ============================================================================
 

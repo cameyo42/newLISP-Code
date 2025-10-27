@@ -3234,6 +3234,7 @@ NOTE LIBERE 33
   Numeri divisibili dalla somma delle cifre maggiore e minore
   Viaggi in treno
   Moltiplicare i numeri di una sequenza
+  Modificare una lista per rendere il suo MCD diverso da 1
 
 PROBLEMI SUI DADI
 =================
