@@ -4505,5 +4505,173 @@ Proviamo:
 ;-> ERRORE: superata la capacità del treno (5)
 ;-> nil
 
+
+-------------------------------------
+Moltiplicare i numeri di una sequenza
+-------------------------------------
+
+Data una sequenza numerica 1,2,...,N effettuare le seguenti operazioni:
+1) scegliere due numeri a caso e moltiplicarli tra loro
+2) se il risultato della moltiplicazione non si trova nella sequenza, allora inserirlo in fondo alla sequenza
+3) eliminare dalla sequenza e numeri scelti
+4) continuare con i passi 1,2 e 3 fino a che non rimane un solo numero nella sequenza.
+Con un dato N, quali sono i risultati più probabili del processo.
+
+Funzione che simula le operazioni del processo:
+
+(define (multic N)
+  (local (seq val)
+    ; genera la sequenza (big-integer)
+    (setq seq (map bigint (sequence 1 N)))
+    ; ciclo fino a ridurre la sequenza ad un solo numero...
+    (until (= N 1)
+      ; mischia la sequenza
+      (setq seq (randomize seq))
+      ; toglie i primi due numeri dalla sequenza e
+      ; calcola la loro moltiplicazione
+      (setq val (* (pop seq) (pop seq)))
+      ; aggiorna la lunghezza della sequenza
+      (-- N 2)
+      ; se il risultato della moltiplicazione non esiste nella sequenza...
+      (unless (ref val seq)
+        ; inserisce il risultato nella sequenza
+        (push val seq -1)
+        ; aggiorna la lunghezza della sequenza
+        (++ N))
+    (first seq))))
+
+Proviamo:
+
+(multic 6)
+;-> 120L
+(multic 6)
+;-> 720L
+
+Poichè la scelta dei due numeri da moltiplicare è casuale, la funzione 'multic' non genera sempre lo stesso risultato.
+Quindi scriviamo una funzione che simula il processo un certo numero di volte e quindi genera diversi risultati.
+Memorizziamo i risultati diversi e contiamo le relative occorrenze.
+
+(define (calc N iter)
+  (local (alst cur)
+    ; lista associativa
+    (setq alst '())
+    ; ciclo per simulare 'iter' volte il processo...
+    (for (i 1 iter)
+      ; simulazione del processo corrente
+      (setq cur (multic N))
+      ; se cur esiste nella lista associativa...
+      (if (lookup cur alst)
+          ; allora aumenta di 1 le sue occorrenze
+          (setf (lookup cur alst) (+ $it 1))
+          ; altrimenti inserisce il (cur 1) nella lista associativa
+          (push (list cur 1) alst -1)))
+    alst))
+
+Proviamo:
+
+Nei due casi N=4 e N=5, il processo genera sempre lo stesso risultato.
+
+(calc 4 10000)
+;-> ((24L 10000))
+(calc 5 10000)
+;-> ((120L 10000))
+
+Al crescere di N aumenta il numero di risultati diversi:
+
+(calc 6 10000)
+;-> ((120L 1164) (720L 8513) (60L 323))
+(calc 6 100000)
+;-> ((120L 1164) (720L 8513) (60L 323))
+(calc 7 10000)
+;-> ((5040L 8933) (840L 892) (420L 175))
+(calc 7 1000000)
+;-> ((5040L 8933) (840L 892) (420L 175))
+
+Con N > 10 non siamo certi di generare tutti i risultati possibili:
+(length (calc 10 10000))
+;-> 18
+(length (calc 10 100000))
+;-> 19
+(length (calc 10 1000000))
+;-> 19
+
+(length (calc 20 10000))
+;-> 111
+(length (calc 20 100000))
+;-> 187
+(time (println (length (calc 20 1000000))))
+;-> 259
+;-> 26642.992 ms
+(time (println (length (calc 20 10000000))))
+;-> 262374.182 ms
+;-> 333
+
+Cioè aumentando il numero di iterazioni del processo è possibile scoprire nuovi risultati.
+
+Comunque la funzione genera sempre i risultati più probabili:
+
+(setq res (calc 20 1000000))
+(sort res (fn (x y) (>= (last x) (last y))))
+;-> ((2432902008176640000L 694047) (202741834014720000L 38669)
+;->  (121645100408832000L 37799) (135161222676480000L 37347)
+;->  (405483668029440000L 21307) (304112751022080000L 20800)
+;->  ...
+;->  (25141596480000L 1)
+;->  (271529241984000L 1)
+;->  (5279735260800L 1))
+
+Scriviamo la funzione 'calc2' che usa una hash-map al posto della lista associativa:
+
+(define (calc2 N iter)
+  ; creazione hash-map
+  (new Tree 'hash)
+  (local (cur out)
+    ; ciclo per simulare 'iter' volte il processo...
+    (for (i 1 iter)
+      ; simulazione del processo corrente
+      (setq cur (multic N))
+      ; se il numero 'cur' non esiste nella hash-map...
+      (if (= (hash (string cur)) nil)
+          ; allora inserisce il numero con conteggio 1
+          (hash (string cur) 1L)
+          ; else
+          ; altrimenti aumenta il conteggio esistente
+          (hash (string cur) (+ 1L $it))))
+    ; copia hash-map su una lista
+    (setq out (hash))
+    ; elimina la hash-map (operazione lenta)
+    (delete 'hash)      
+    out))
+
+Proviamo:
+
+(calc2 4 10000)
+;-> (("24" 10000L))
+(calc2 5 10000)
+;-> (("120" 10000L))
+(calc2 7 1000000)
+;-> ((5040L 8933) (840L 892) (420L 175))
+
+(length (calc2 10 1000000))
+;-> 19
+(time (println (length (calc2 20 1000000))))
+;-> 265
+;-> 27439.793
+
+La velocità è la stessa, quindi bisognerebbe ottimizzare la funzione 'multic'.
+
+Nota: gestione hash-map con big-integer
+(new Tree 'h)
+(h 1L 1L)
+;-> 1L
+(h)
+;-> (("1" 1L))
+(h "1L" 1L)
+;-> 1L
+(h)
+;-> (("1" 1L) ("1L" 1L))
+(h "12345678901234567890L" 12345678901234567890L)
+(h "12345678901234567890L")
+
 ============================================================================
 
