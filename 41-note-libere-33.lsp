@@ -4786,5 +4786,102 @@ Algoritmo
 (gcd-not-1 '(2 4 6))
 ;-> (0 () (2 4 6) 2)
 
+
+----------------------------------
+Numeri con somma delle cifre prima
+----------------------------------
+
+Sequenza OEIS A028834:
+Numbers whose sum of digits is a prime.
+  2, 3, 5, 7, 11, 12, 14, 16, 20, 21, 23, 25, 29, 30, 32, 34, 38, 41, 43,
+  47, 49, 50, 52, 56, 58, 61, 65, 67, 70, 74, 76, 83, 85, 89, 92, 94, 98,
+  101, 102, 104, 106, 110, 111, 113, 115, 119, 120, 122, 124, 128, 131,
+  133, 137, 139, 140, 142, 146, 148, 151, 155, 157, 160, 164, 166, 173,
+  175, 179, 182, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+(define (seq? num) (prime? (digit-sum num)))
+
+(filter seq? (sequence 1 182))
+;-> (2 3 5 7 11 12 14 16 20 21 23 25 29 30 32 34 38 41 43
+;->  47 49 50 52 56 58 61 65 67 70 74 76 83 85 89 92 94 98
+;->  101 102 104 106 110 111 113 115 119 120 122 124 128 131
+;->  133 137 139 140 142 146 148 151 155 157 160 164 166 173
+;->  175 179 182)
+
+
+-------------------------------------------
+Numeri con somma delle cifre + numero prima
+-------------------------------------------
+
+Sequenza OEIS A047791:
+Numbers n such that n plus digit sum of n equals a prime.
+  1, 10, 11, 13, 14, 16, 19, 32, 34, 35, 37, 52, 53, 56, 58, 59, 71, 73,
+  76, 91, 92, 94, 95, 97, 100, 101, 103, 104, 106, 122, 124, 127, 128,
+  142, 143, 146, 149, 160, 163, 166, 167, 181, 182, 184, 185, 215, 217,
+  218, 232, 233, 238, 250, 253, 256, 257, 271, 272, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+(define (seq? num) (prime? (+ num (digit-sum num))))
+
+(filter seq? (sequence 1 272))
+;-> (1 10 11 13 14 16 19 32 34 35 37 52 53 56 58 59 71 73
+;->  76 91 92 94 95 97 100 101 103 104 106 122 124 127 128
+;->  142 143 146 149 160 163 166 167 181 182 184 185 215 217
+;->  218 232 233 238 250 253 256 257 271 272)
+
+
+-----------------------------------------
+"You are not expected to understand this"
+-----------------------------------------
+
+"Non ci si aspetta che tu capisca questo"
+
+The famous program comment "You are not expected to understand this" occurs at line 325 of the file slp.c (UNIX Sixth Edition):
+
+/*
+ * If the new process paused because it was
+ * swapped out, set the stack level to the last call
+ * to savu(u_ssav).  This means that the return
+ * which is executed immediately after the call to aretu
+ * actually returns from the last routine which did
+ * the savu.
+ *
+ * You are not expected to understand this.
+ */
+if(rp->p_flag&SSWAP) {
+        rp->p_flag =& ~SSWAP;
+        aretu(u.u_ssav);
+}
+
+A major reason why this piece of code was hard to understand was that it depended on a quirk of the way the C compiler for the PDP-11 saved registers in procedure calls.
+This code failed when ported to other machines and had to be redesigned in Version 7 UNIX.
+
 ============================================================================
 

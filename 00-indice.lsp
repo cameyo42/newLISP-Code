@@ -3235,6 +3235,9 @@ NOTE LIBERE 33
   Viaggi in treno
   Moltiplicare i numeri di una sequenza
   Modificare una lista per rendere il suo MCD diverso da 1
+  Numeri con somma delle cifre prima
+  Numeri con somma delle cifre + numero prima
+  "You are not expected to understand this"
 
 PROBLEMI SUI DADI
 =================
