@@ -3238,6 +3238,7 @@ NOTE LIBERE 33
   Numeri con somma delle cifre prima
   Numeri con somma delle cifre + numero prima
   "You are not expected to understand this"
+  Micro spreadsheet
 
 PROBLEMI SUI DADI
 =================

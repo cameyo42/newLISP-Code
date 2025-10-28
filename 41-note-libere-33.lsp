@@ -4883,5 +4883,314 @@ if(rp->p_flag&SSWAP) {
 A major reason why this piece of code was hard to understand was that it depended on a quirk of the way the C compiler for the PDP-11 saved registers in procedure calls.
 This code failed when ported to other machines and had to be redesigned in Version 7 UNIX.
 
+
+-----------------
+Micro spreadsheet
+-----------------
+
+Implementazione di funzioni per la gestione di un semplice spreedsheet (foglio elettronico).
+
+Specifiche:
+- Solo numeri interi e formule
+- Solo un operatore (+,-,*,/) per ogni formula
+- Solo 2 termini per ogni formula (es. A1 + B3)
+
+Funzione che crea uno spreadsheet rows x cols (con tutti i valori a 0):
+
+(define (make-ss rows cols)
+  (setq righe rows)   ; righe spreadsheet (globale)
+  (setq colonne cols) ; colonne spreadsheet (globale)
+  ; foglio dei valori (globale)
+  (setq ss-values (array-list (array rows cols '(0))))
+  ; foglio delle funzioni (globale)
+  (setq ss-func (array-list (array rows cols '(0))))
+  ; foglio delle funzioni valutate (globale) (per 'eval-spread')
+  (setq ss-eval (array-list (array rows cols '(nil)))) '>)
+
+(make-ss 4 5)
+
+Funzioni per la stampa dello spreadsheet:
+
+(define (print-spread)
+  (let ( (tmp-values ss-values)
+         (tmp-func ss-func) )
+    ; inserisce le lettere per le colonne "A", "B", ...
+    (setq chars '())
+    (for (col 0 (- colonne 1))
+      (push (char (+ col 65)) chars -1))
+    (push chars tmp-values)
+    (push chars tmp-func)
+    ; inserisce i numeri per le righe
+    (for (row 0 righe)
+      (push row (tmp-values row))
+      (push row (tmp-func row)))
+    ; stampa il foglio dei valori
+    (print-table tmp-values true)
+    ; stampa il foglio delle funzioni
+    (print-table tmp-func true)))
+
+(define (print-table lst fixed)
+"Print a matrix (list) m x n as a table"
+  (local (tab plus minus ver rows cols col-len-max len-max
+          line-len line ind)
+    ; conversione di tutti i valori della lista in stringa
+    (setq tab (map-all string lst))
+    ; caratteri grafici
+    (setq plus "+")
+    (setq minus "-")
+    (setq ver "|")
+    ; calcolo righe e colonne della lista
+    (setq rows (length tab))
+    (setq cols (length (tab 0)))
+    ; vettore per le lunghezze massime dei valori di ogni colonna
+    (setq col-len-max (array cols '(0)))
+    ; calcola la lunghezza massima dei valori di ogni colonna
+    (for (c 0 (- cols 1))
+      (setq len-max 0)
+      (for (r 0 (- rows 1))
+        (setf len-max (max len-max (length (tab r c))))
+      )
+      (setf (col-len-max c) len-max)
+    )
+    ; column with same width (max)
+    (if fixed
+        (let (cmax (apply max col-len-max))
+          (setq col-len-max (array-list (array (length col-len-max) (list cmax))))))
+    ;(println col-len-max)
+    ; lunghezza della linea =
+    ; (somma delle lunghezze massime) +
+    ; (2 spazi x ogni colonna) +
+    ; (colonne + 1 per "|")
+    (setq line-len (+ (apply + col-len-max) (* cols 2) (+ cols 1)))
+    (setq line (dup minus line-len))
+    (setf (line 0) plus)
+    (setf (line -1) plus)
+    ; calcola i limiti di stampa dei valori
+    ; (inserisce "+" nella linea "line")
+    (setq ind 1)
+    (dolist (c col-len-max)
+      (setq ind (+ ind 2 c))
+      (setf (line ind) plus)
+      (++ ind)
+    )
+    ; stampa della lista come tabella
+    (dolist (r tab)
+      (println line)
+      (dolist (c r)
+        (print ver { } c (dup " " (- (col-len-max $idx) (length c))) { })
+      )
+      (println ver)
+    )
+    (println line)
+  '>))
+
+(define (map-all func lst)
+"Apply a function to all the elements of annidate list"
+  (let (result '())
+    (dolist (el lst)
+      (if (list? el)
+        (push (map-all func el) result -1)
+        (push (func el) result -1)))
+    result))
+
+Funzione che prende le coordinate di una cella (es. "A1") e restituisce (riga colonna):
+
+(define (decode cell)
+  (let ( (s1 (cell 0))
+         (s2 (slice cell 1)) )
+  ; (list row col)
+  (list (- (int s2) 1) (- (char s1) 65))))
+
+Funzione che prende riga e colonna (es. 0 0) e restituisce le coordinate di una cella:
+
+(define (encode row col)
+  (let ( (num (+ col 1)) (ch (char (+ row 65))) )
+    ; CarattereNumero
+    (string ch num)))
+
+(decode "A1")
+;-> (0 ())
+(encode 0 0)
+;-> "A1"
+
+(decode "B2")
+;-> (1 1)
+(encode 1 1)
+;-> "B2"
+(apply encode '(1 1))
+;-> "B2"
+(decode "B2")
+;-> (1 1)
+(apply encode (decode "B2"))
+;-> "B2"
+
+Funzione che inserisce un numero intero o una formula (stringa) in una cella:
+Le formule devono essere del tipo:
+  "= <termine1> <operatore> <termine2>"
+Esempio: "= A1 + B2"
+
+(define (insert cell obj)
+  (let (idx (decode cell))
+    (cond ((string? obj) ; formula
+            (setf (ss-func idx) obj))
+          ((integer? obj) ; numero intero
+            (setf (ss-values idx) obj)
+            (setf (ss-func idx) 0)))
+    obj))
+
+Popoliamo lo spreadsheet con alcuni numeri e formule:
+
+(insert "A1" 10)
+(insert "B2" 2)
+(insert "C3" "= A1 + B2")
+(insert "D1" "= C3 + A1")
+(insert "D2" "= C3 * A1")
+
+(print-spread)
+;-> +----+----+----+----+----+----+
+;-> | 0  | A  | B  | C  | D  | E  |
+;-> +----+----+----+----+----+----+
+;-> | 1  | 10 | 0  | 0  | 0  | 0  |
+;-> +----+----+----+----+----+----+
+;-> | 2  | 0  | 2  | 0  | 0  | 0  |
+;-> +----+----+----+----+----+----+
+;-> | 3  | 0  | 0  | 0  | 0  | 0  |
+;-> +----+----+----+----+----+----+
+;-> | 4  | 0  | 0  | 0  | 0  | 0  |
+;-> +----+----+----+----+----+----+
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 0         | A         | B         | C         | D         | E         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 1         | 0         | 0         | 0         | = C3 + A1 | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 2         | 0         | 0         | 0         | = C3 * A1 | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 3         | 0         | 0         | = A1 + B2 | 0         | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 4         | 0         | 0         | 0         | 0         | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+
+Funzione che calcola il valore di una formula.
+Se le celle della formula da valutare contengono altre formule non valutate, allora restituisce nil.
+
+(define (calc-fn str)
+  (local (tokens op odx1 val1 idx2 val2 expr)
+    ; parsing della formula (stringa)
+    (setq tokens (parse str))
+    (cond ((= (tokens 0) "=")
+            ; operatore
+            (setq op (tokens 2))
+            (setq idx1 (decode (tokens 1)))
+            ; valore 1
+            (setq val1 (ss-values idx1))
+            (setq idx2 (decode (tokens 3)))
+            ; valore 2
+            (setq val2 (ss-values idx2))
+            ; se le celle della formula contengono altre formule non valutate,
+            ; allora restituisce nil
+            (if (or (and (string? (ss-func idx1)) (nil? (ss-eval idx1)))
+                    (and (string? (ss-func idx2)) (nil? (ss-eval idx2))))
+                nil
+                ; altrimenti restituisce il valore della formula
+                (let (expr (string "(" op " " val1 " " val2 ")"))
+                  (eval-string expr)))))))
+
+(calc-fn "= A1 + B2")
+;-> 12
+
+Funzione che valuta (calcola le formule) del foglio elettronico.
+Restituisce true se la valutazione viene fatta per tutte le formule.
+Restituisce nil se la valutazione non è possibile (es. riferimento circolare).
+
+(define (eval-spread)
+  (local (continua formule valutazioni res)
+    ; numero di formule nel foglio delle formule
+    (setq formule (length (filter string? (flat ss-func))))
+    ; foglio delle formule valutate (inizialmente tutte nil)
+    (setq ss-eval (array-list (array righe colonne '(nil))))
+    (setq continua true)
+    ; numero di valutazioni effettuate
+    (setq valutazioni 0)
+    ; ordine di valutazione delle formule per righe
+    (while (and continua (<= valutazioni formule))
+      (setq continua nil)
+      (for (r 0 (- righe 1))
+        (for (c 0 (- colonne 1))
+          (when (string? (ss-func r c))
+            (setq res (calc-fn (ss-func r c)))
+            ;(print (ss-func r c) { } res) (read-line)
+            ; se abbiamo un risultato valido...
+            (if res (begin
+                ; aggiorniamo il foglio dei valori e
+                ; il foglio delle formula valutate
+                (setf (ss-values r c) res)
+                (setf (ss-eval r c) true))
+                ; altrimenti dobbiamo fare una nuova valutazione
+                ; al termine del ciclo corrente
+                (begin
+                  (setq continua true)
+                  ; aumenta il numero di valutazioni
+                  (++ valutazioni)))))))
+    ; se le valutazioni fatte sono maggiori del numero di formule,
+    ; allora abbiamo un 'riferimento ciclico' nelle formule.
+    (>= formule valutazioni)))
+
+Proviamo:
+
+(eval-spread)
+;-> true
+(print-spread)
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 0   | A   | B   | C   | D   | E   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 1   | 10  | 0   | 0   | 22  | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 2   | 0   | 2   | 0   | 120 | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 3   | 0   | 0   | 12  | 0   | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 4   | 0   | 0   | 0   | 0   | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 0         | A         | B         | C         | D         | E         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 1         | 0         | 0         | 0         | = C3 + A1 | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 2         | 0         | 0         | 0         | = C3 * A1 | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 3         | 0         | 0         | = A1 + B2 | 0         | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 4         | 0         | 0         | 0         | 0         | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+
+Inseriamo un riferimento circolare e valutiamo lo spreadsheet:
+
+(insert "A1" "= C3 + A1")
+(eval-spread)
+;-> nil ; valutazione non effettuata correttamente
+(print-spread)
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 0   | A   | B   | C   | D   | E   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 1   | 10  | 0   | 0   | 22  | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 2   | 0   | 2   | 0   | 120 | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 3   | 0   | 0   | 12  | 0   | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> | 4   | 0   | 0   | 0   | 0   | 0   |
+;-> +-----+-----+-----+-----+-----+-----+
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 0         | A         | B         | C         | D         | E         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 1         | = C3 + A1 | 0         | 0         | = C3 + A1 | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 2         | 0         | 0         | 0         | = C3 * A1 | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 3         | 0         | 0         | = A1 + B2 | 0         | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+;-> | 4         | 0         | 0         | 0         | 0         | 0         |
+;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+
 ============================================================================
 
