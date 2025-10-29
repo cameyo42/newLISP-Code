@@ -3241,6 +3241,8 @@ NOTE LIBERE 33
   Micro spreadsheet
   Numeri in una matrice che sommano a K
   Numeri come somma di potenze miste
+  Subfactorial o derangement
+  Ordinare una lista in base agli indici pari e dispari
 
 PROBLEMI SUI DADI
 =================

@@ -5454,8 +5454,149 @@ Proviamo:
 
 Per N grandi e s > 8 la funzione è molto lenta.
 
-(time (find-powers 1234567890 8))
+(time (find-powers 12345678 8))
 
+
+--------------------------
+Subfactorial o derangement
+--------------------------
+
+Sequenza OEIS A000166:
+Subfactorial or rencontres numbers, or derangements: number of permutations of n elements with no fixed points.
+  1, 0, 1, 2, 9, 44, 265, 1854, 14833, 133496, 1334961, 14684570,
+  176214841, 2290792932, 32071101049, 481066515734, 7697064251745,
+  130850092279664, 2355301661033953, 44750731559645106,
+  895014631192902121, 18795307255050944540, 413496759611120779881,
+  9510425471055777937262, ...
+
+Formule (Eulero):
+
+  a(n) = (n-1) * (a(n-1) + a(n-2)) oppure a(n) = n*a(n-1) + (-1)^n
+  con: a(0) = 1
+       a(1) = 0
+
+Si tratta della sequenza dei 'subfattoriali', anche chiamati 'numeri di derangements' o 'numeri di rencontres'.
+È il numero di permutazioni di n elementi in cui nessun elemento resta nella sua posizione originale.
+
+Esempio:
+Supponiamo di avere 3 lettere e 3 buste:
+
+Lettere: A, B, C
+Buste:   1, 2, 3
+
+Vogliamo mettere ogni lettera in una busta, ma nessuna lettera deve finire nella sua busta corretta (A non in 1, B non in 2, C non in 3).
+Le permutazioni possibili di 3 elementi sono 6: ABC ACB BAC BCA CAB CBA
+
+Solo 2 di queste non hanno elementi al posto giusto:
+  BCA --> A->2, B->3, C->1
+  CAB --> A->3, B->1, C->2
+
+Quindi:
+  !3 = 2 (il simbolo "!" davanti indica 'subfattoriale')
+
+Possiamo calcolare il numero di derangements con:
+
+  !n = n! * Sum[k=0,n]((-1)^k/k!)
+
+oppure in forma ricorsiva:
+  
+  !n = (n - 1) * (!(n - 1) + !(n - 2))
+
+con condizioni iniziali: !0 = 1, !1 = 0.
+
+È il numero di modi per 'mischiare' una lista senza lasciare nessuno al proprio posto.
+Compare in problemi classici come:
+  - Il problema dei cappelli (nessuno riceve il proprio cappello)
+  - Il problema delle buste (nessuna lettera va nella busta giusta)
+
+(define (sequenza limite)
+  (let (seq '(1L 0L))
+    (for (i 2 limite)
+      (push (* (+ (seq (- i 1)) (seq (- i 2))) (- i 1)) seq -1))
+    seq))
+
+(sequenza 23)
+;-> (1L 0L 1L 2L 9L 44L 265L 1854L 14833L 133496L 1334961L 14684570L
+;->  176214841L 2290792932L 32071101049L 481066515734L 7697064251745L
+;->  130850092279664L 2355301661033953L 44750731559645106L
+;->  895014631192902121L 18795307255050944540L 413496759611120779881L
+;->  9510425471055777937262L)
+
+Vedi anche "Dismutazioni (Derangements)" su "Funzioni varie".
+Vedi anche "Sequenze, dismutazioni, rotazioni" su "Note libere 31".
+
+
+-----------------------------------------------------
+Ordinare una lista in base agli indici pari e dispari
+-----------------------------------------------------
+
+Data una lista di elementi, scrivere una funzione che restituisce una lista ordinata in base agli indici: prima tutti gli indici pari in ordine crescente e poi gli indici dispari in ordine crescente.
+
+Esempi:
+  lista = (0 1 2 3 4 5)
+  output = (0 2 4 1 3 5)
+
+  lista = (1 10 2 5 8)
+  output = (1 2 8 10 5)
+
+(define (select-even lst)
+"Extract the elements of a list that have even index"
+  (let (len (length lst))
+    (if (odd? len)
+        (select lst (sequence 0 len 2))
+        (select lst (sequence 0 (- len 1) 2)))))
+
+(define (select-odd lst)
+"Extract the elements of a list that have odd index"
+  (let (len (length lst))
+    (if (even? len)
+        (select lst (sequence 1 len 2))
+        (select lst (sequence 1 (- len 1) 2)))))
+
+Versione 1
+----------
+(define (sort-index1 lst)
+ (append (select-even lst) (select-odd lst)))
+
+(sort-index1 '(0 1 2 3 4 5))
+;-> (0 2 4 1 3 5)
+(sort-index1 '(1 10 2 5 8))
+;-> (1 2 8 10 5)
+
+Versione 2
+----------
+(define (sort-index2 lst)
+  (let (len (length lst))
+    (if (odd? len)
+        (append (select lst (sequence 0 len 2)) (select lst (sequence 1 (- len 1) 2)))
+        (append (select lst (sequence 0 (- len 1) 2)) (select lst (sequence 1 len 2))))))
+
+(sort-index2 '(0 1 2 3 4 5))
+;-> (0 2 4 1 3 5)
+(sort-index2 '(1 10 2 5 8))
+;-> (1 2 8 10 5)
+
+Versione 3
+----------
+(define (sort-index3 lst)
+  (local (pari dispari)
+    (dolist (el lst)
+      (if (odd? $idx) (push el dispari -1) (push el pari -1)))
+    (append pari dispari)))
+
+(sort-index3 '(0 1 2 3 4 5))
+;-> (0 2 4 1 3 5)
+(sort-index3 '(1 10 2 5 8))
+;-> (1 2 8 10 5)
+
+Versione code-golf (91 caratteri):
+
+(define(f l)(local(p d)(dolist(e l)(if(odd? $idx)(push e d -1)(push e p -1)))(append p d)))
+
+(f '(0 1 2 3 4 5))
+;-> (0 2 4 1 3 5)
+(f '(1 10 2 5 8))
+;-> (1 2 8 10 5)
 
 ============================================================================
 

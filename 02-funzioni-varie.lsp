@@ -9049,7 +9049,7 @@ Vediamo il tempo di esecuzione:
 ;-> 7603.603
 
 Vedi anche "Sequenze, dismutazioni, rotazioni" su "Note libere 31".
-
+Vedi anche "Subfactorial o derangement"  su "Note libere 33".
 
 -------------------------
 Stampa lista come tabella

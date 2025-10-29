@@ -713,7 +713,7 @@ Risulta che:
 Quindi la lista è una dismutazione (derangement) della sequenza.
 In altre parole è una permutazione della sequenza tale che nessun elemento appare nella sua posizione originale.
 
-Vedi "Dismutazioni (Derangements)" su "Funzioni varie".
+Vedi anche "Dismutazioni (Derangements)" su "Funzioni varie".
 
 Se facciamo ruotare la lista di una posizione alla volta, qual è il valore minimo e massimo di numeri nella stessa posizione tra la lista e la sequenza?
 Esempio:
@@ -829,6 +829,9 @@ Proviamo:
 Il risultato è intuitivo:
 1) con N diverso 3 il minimo è sempre 2, perchè qualunque dismutazione riporta almeno due elementi nella posizione originale.
 2) il massimo vale sempre N, perchè esiste sempre una dismutazione che è uguale alla rotazione di un posto della sequenza.
+
+Vedi anche "Dismutazioni (Derangements)" su "Funzioni varie".
+Vedi anche "Subfactorial o derangement"  su "Note libere 33".
 
 
 -------------------------------
