@@ -5598,5 +5598,71 @@ Versione code-golf (91 caratteri):
 (f '(1 10 2 5 8))
 ;-> (1 2 8 10 5)
 
+
+----------
+Led on/off
+----------
+
+Abbiamo N led disposti in fila, inizialmente tutti spenti. 
+Applichiamo ai led le seguenti N operazioni:
+  Operazione 1: Accende tutti i led
+  Operazione 2: Accende/Spegne un led ogni 2 (spegne se è acceso, accende se è spento)
+  Operazione 3: Accende/Spegne un led ogni 3
+  Operazione i: Accende/Spegne ogni i-esimo led
+  Operazione n: Accende/Spegne solo l'ultimo led
+
+Dopo aver completato tutte le N operazioni, determinare quanti led rimangono accesi.
+
+Un led in posizione k si accende/spegne all'operazione d se e solo se d è un divisore di k.
+Ad esempio, il led 6 si accende/spegne nelle operazioni 1, 2, 3 e 6 (poiché sono tutti divisori di 6).
+Poiché ogni led inizia spento, si accenderà dopo tutte le oprazioni viene acceso un numero dispari di volte, il che accade quando la posizione del led ha un numero dispari di divisori.
+Solo i numeri quadrati perfetti hanno un numero dispari di divisori (perché per i quadrati perfetti, un divisore è accoppiato a se stesso).
+Quindi, il problema si riduce a contare quanti quadrati perfetti esistono da 1 a n, che è uguale a floor(sqrt N).
+
+(define (led-accesi n) (floor (sqrt n)))
+
+(map led-accesi (sequence 2 50))
+;-> (1 1 2 2 2 2 2 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4
+;->  5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7)
+
+Scriviamo una funzione che simula il processo.
+
+(define (led? n show)
+  (let 
+    (led (dup 1 (+ n 1))) ; Partiamo con tutti i led accesi (1) - primo passo
+    ; Il led 0 che non ci serve
+    (setf (led 0) 0)
+    (if show 
+        (println (format "%3d" 1) { -> } led { } (length (ref-all 1 led))))
+    ; Ciclo di passi da 2 a n...
+    (for (passo 2 n)
+      ; per ogni led multiplo di passo...
+      (for (l passo n passo)
+        ; cambiamo lo stato del led
+        (setf (led l) (- 1 (led l))))
+      ; stampa dello stato dei led ogni passaggio
+      (if show 
+          (println (format "%3d" passo) { -> } led { } 
+                   (length (ref-all 1 led)))))
+    (length (ref-all 1 led))))
+
+Proviamo:
+
+(led? 10 true)
+;->   1 -> (0 1 1 1 1 1 1 1 1 1 1) 10
+;->   2 -> (0 1 0 1 0 1 0 1 0 1 0) 5
+;->   3 -> (0 1 0 0 0 1 1 1 0 0 0) 4
+;->   4 -> (0 1 0 0 1 1 1 1 1 0 0) 6
+;->   5 -> (0 1 0 0 1 0 1 1 1 0 1) 6
+;->   6 -> (0 1 0 0 1 0 0 1 1 0 1) 5
+;->   7 -> (0 1 0 0 1 0 0 0 1 0 1) 4
+;->   8 -> (0 1 0 0 1 0 0 0 0 0 1) 3
+;->   9 -> (0 1 0 0 1 0 0 0 0 1 1) 4
+;->  10 -> (0 1 0 0 1 0 0 0 0 1 0) 3
+;-> 3
+
+(= (map led? (sequence 2 50)) (map led-accesi (sequence 2 50)))
+;-> true
+
 ============================================================================
 
