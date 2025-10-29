@@ -4888,12 +4888,21 @@ This code failed when ported to other machines and had to be redesigned in Versi
 Micro spreadsheet
 -----------------
 
-Implementazione di funzioni per la gestione di un semplice spreedsheet (foglio elettronico).
+Implementazione di funzioni di base per la gestione di un semplice spreedsheet (foglio elettronico).
 
 Specifiche:
 - Solo numeri interi e formule
 - Solo un operatore (+,-,*,/) per ogni formula
 - Solo 2 termini per ogni formula (es. A1 + B3)
+- Solo riferimenti ad altre celle in ogni formula (no numeri)
+
+Le formule devono essere del tipo:
+  "= <termine1> <operatore> <termine2>"
+
+Esempi:
+ "= A1 + B2" (corretta)
+ "= A1 + 1"  (errata: no numeri nelle formule)
+ "= A1 + B1 + C2"  (errata: solo due termini)
 
 Funzione che crea uno spreadsheet rows x cols (con tutti i valori a 0):
 
@@ -5191,6 +5200,262 @@ Inseriamo un riferimento circolare e valutiamo lo spreadsheet:
 ;-> +-----------+-----------+-----------+-----------+-----------+-----------+
 ;-> | 4         | 0         | 0         | 0         | 0         | 0         |
 ;-> +-----------+-----------+-----------+-----------+-----------+-----------+
+
+
+-------------------------------------
+Numeri in una matrice che sommano a K
+-------------------------------------
+
+Abbiamo una matrice MxN di numeri naturali e un numero intero K.
+Trovare tutte le combinazioni di numeri scelti dalla matrice (al massimo un numero per riga) la cui somma sia uguale a K.
+
+Esempio:
+matrice = 1 2 3
+          3 4 5
+          8 2 9
+K = 12
+
+Primo modo:
+dalla riga 0 -> 3
+dalla riga 2 -> 9
+3 + 9 = 12
+
+Secondo modo:
+dalla riga 0 -> 1
+dalla riga 1 -> 3
+dalla riga 2 -> 8
+1 + 3 + 8 = 12
+etc.
+
+Algoritmo
+---------
+Simuliamo una ricerca in profondità (DFS) usando uno stack esplicito, invece della ricorsione.
+Ogni elemento dello stack rappresenta uno stato:
+  (riga somma selezioni)
+  'riga': indice della riga corrente da considerare
+  'somma': somma parziale finora ottenuta
+  'selezioni': lista delle triple (riga colonna valore) scelte fino a questo punto
+
+1. Inizializzazione
+   Lo stack inizia con uno stato vuoto: '(0 0 '())', cioè nessuna riga ancora scelta e somma parziale 0.
+2. Ciclo principale
+   Finché lo stack non è vuoto:
+       Estrai uno stato (pop)
+       Se 'r == R' (ultima riga superata):
+         Se 'somma == K', aggiungi la selezione tra le soluzioni.
+       Altrimenti:
+         Crea due nuovi stati:
+         a. Salta la riga r → la somma non cambia.
+         b. Scegli un elemento della riga r → per ogni colonna 'i', aggiungi il valore 'v' e aggiorna la somma.
+3. Potatura
+   Se '(+ somma v) > K', lo stato non viene espanso (ottimizzazione valida poiché i numeri sono naturali).
+4. Terminazione
+   Quando lo stack è vuoto, 'solutions' contiene tutte le combinazioni valide.
+
+; Funzione che trova tutte le combinazioni in una matrice di
+; numeri (al massimo uno per riga) che sommano a K.
+; Ogni soluzione è una lista di triple (riga colonna valore).
+; La funzione esplora tutte le possibilità tramite una ricerca iterativa
+; in profondità (DFS) simulata con uno stack esplicito.
+; Se all = true, la funzione trova tutte le soluzioni, altrimenti solo una.
+(define (trova-somme matrice K all)
+  (letn ( ; Numero di righe nella matrice
+          (R (length matrice))
+          ; Lista che accumula le soluzioni trovate
+          (solutions '())
+          ; Stack iniziale con lo stato di partenza:
+          ; (riga corrente, somma parziale, selezioni effettuate)
+          (stack (list (list 0 0L '()))) )
+    ; Continua finché ci sono stati da esplorare
+    (while (not (null? stack))
+      ; Estrae il primo stato dallo stack
+      (let ((state (first stack)) (remain (rest stack)))
+        ; Aggiorna lo stack rimuovendo lo stato appena estratto
+        (setq stack remain)
+        ; Estrae i campi dello stato corrente
+        (let ((r (state 0)) (s (state 1)) (sel (state 2)))
+          ; Caso base: abbiamo superato l’ultima riga
+          (if (= r R)
+              ; Se la somma parziale è esattamente K,
+              ; e almeno un elemento è stato scelto, salva la soluzione
+              (if (= s K)
+                  (if (not (null? sel))
+                      (begin
+                        (push (reverse sel) solutions)
+                        ; se vogliamo solo la prima soluzione (all = nil),
+                        ; allora fermiamo il ciclo azzerando lo stack
+                        (if (not all) (setq stack '())))
+                      nil)
+                   nil)
+            ; Caso ricorsivo: riga non ancora terminata
+            (begin
+              ; 1) Possibilità: non scelgo alcun elemento da questa riga
+              (push (list (+ r 1) s sel) stack)
+              ; 2) Possibilità: scelgo un elemento (uno solo per riga)
+              (for (i 0 (- (length (matrice r)) 1) 1)
+                (let ((v ((matrice r) i)))
+                  ; Potatura: ignora i percorsi che superano K
+                  (if (<= (+ s v) K)
+                    ; Aggiunge nuovo stato allo stack:
+                    ; riga successiva, nuova somma, aggiunta della tripla
+                    (push (list (+ r 1) (+ s v) (cons (list r i v) sel)) stack)
+                    nil))))))))
+    ; Restituisce la lista completa delle soluzioni trovate
+    solutions))
+
+Proviamo:
+
+(setq matrice '((1L 2L 3L) (3L 4L 5L) (8L 2L 9L)))
+(setq K 12)
+
+Tutte le soluzioni:
+(trova-somme matrice K true)
+;-> (((1 0 3) (2 2 9))
+;->  ((1 1 4) (2 0 8))
+;->  ((0 0 1) (1 0 3) (2 0 8))
+;->  ((0 2 3) (2 2 9)))
+
+Solo la prima soluzione:
+(trova-somme matrice K)
+;-> (((0 2 3L) (2 2 9L)))
+
+(setq matrice '((1 2 3) (3 4 5) (8 2 9)))
+(setq K 100)
+(trova-somme matrice K true)
+;-> ()
+
+(setq matrice '((1 2 3) (3 4 5) (8 2 9)))
+(setq K 9)
+(trova-somme matrice K true)
+;-> (((2 2 9))
+;->  ((0 0 1) (2 0 8))
+;->  ((0 1 2) (1 2 5) (2 1 2))
+;->  ((0 2 3) (1 1 4) (2 1 2)))
+
+
+----------------------------------
+Numeri come somma di potenze miste
+----------------------------------
+
+Tutti i numeri naturali sufficientemente grandi sono scrivibili nella forma:
+
+  a(1)^2 + a(2)^3 + ... + a(s)^(s+1)
+
+dove a(i) sono numeri naturali.
+
+Briidern ha dimostrato che con s = 18 si possono calcolare tutti i numeri naturali.
+J. Briidern, Sums of squares and higher powers I, II, J. London Math. Soc. 35 (1987) 233-250. 
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+; Funzione che trova tutte le combinazioni in una matrice di
+; numeri (al massimo uno per riga) che sommano a K.
+; Ogni soluzione è una lista di triple (riga colonna valore).
+; La funzione esplora tutte le possibilità tramite una ricerca iterativa
+; in profondità (DFS) simulata con uno stack esplicito.
+; Se all = true, la funzione trova tutte le soluzioni, altrimenti solo una.
+(define (trova-somme matrice K all)
+  (letn ( ; Numero di righe nella matrice
+          (R (length matrice))
+          ; Lista che accumula le soluzioni trovate
+          (solutions '())
+          ; Stack iniziale con lo stato di partenza:
+          ; (riga corrente, somma parziale, selezioni effettuate)
+          (stack (list (list 0 0L '()))) )
+    ; Continua finché ci sono stati da esplorare
+    (while (not (null? stack))
+      ; Estrae il primo stato dallo stack
+      (let ((state (first stack)) (remain (rest stack)))
+        ; Aggiorna lo stack rimuovendo lo stato appena estratto
+        (setq stack remain)
+        ; Estrae i campi dello stato corrente
+        (let ((r (state 0)) (s (state 1)) (sel (state 2)))
+          ; Caso base: abbiamo superato l’ultima riga
+          (if (= r R)
+              ; Se la somma parziale è esattamente K,
+              ; e almeno un elemento è stato scelto, salva la soluzione
+              (if (= s K)
+                  (if (not (null? sel))
+                      (begin
+                        (push (reverse sel) solutions)
+                        ; se vogliamo solo la prima soluzione (all = nil),
+                        ; allora fermiamo il ciclo azzerando lo stack
+                        (if (not all) (setq stack '())))
+                      nil)
+                   nil)
+            ; Caso ricorsivo: riga non ancora terminata
+            (begin
+              ; 1) Possibilità: non scelgo alcun elemento da questa riga
+              (push (list (+ r 1) s sel) stack)
+              ; 2) Possibilità: scelgo un elemento (uno solo per riga)
+              (for (i 0 (- (length (matrice r)) 1) 1)
+                (let ((v ((matrice r) i)))
+                  ; Potatura: ignora i percorsi che superano K
+                  (if (<= (+ s v) K)
+                    ; Aggiunge nuovo stato allo stack:
+                    ; riga successiva, nuova somma, aggiunta della tripla
+                    (push (list (+ r 1) (+ s v) (cons (list r i v) sel)) stack)
+                    nil))))))))
+    ; Restituisce la lista completa delle soluzioni trovate
+    solutions))
+
+Ricostruzione dell'espressione:
+
+  a(1)^2 + a(2)^3 + ... + a(s)^(s+1)
+
+  riga = x --> potenza = (x+2)
+  colonna = y --> base = (y+1)
+  numero = (y+1)^(x+2)
+
+(define (find-powers N s)
+  (local (power sommaN base potenza)
+    ; s è l'indice massimo --> potenza massima = indice-massimo + 1
+    ; lista delle potenze
+    (setq power '())
+    ; crea la matrice 'power' con:
+    ; riga1 = 1^2, 2^2, 3^2, ... 18^2
+    ; riga2 = 1^3, 2^3, 3^3, ... 18^3
+    ; ...
+    ; riga18 = 1^19, 2^19, 3^19, ... 18^19
+    (for (row 2 (+ s 1))
+      (push (map (fn(x) (** x row)) (sequence 1 s)) power -1))
+    ; Trova un elemento (al massimo) da ogni riga che sommati danno N
+    (setq sommaN (first (trova-somme power N)))
+    (println sommaN)
+    ; Ricostruisce l'espressione e calcola il valore totale
+    (setq somma 0)
+    (dolist (el sommaN)
+      (setq base (+ (el 1) 1))
+      (setq potenza (+ (el 0) 2))
+      (++ somma (** base potenza))
+      ;(print "(" base "^" potenza " = " (** base potenza) ")")
+      (print base "^" potenza)
+      (if (= $idx (- (length sommaN) 1))
+        (print " = ")
+        (print " + ")))
+    (println somma)))
+
+Proviamo:
+
+(find-powers 120 8)
+;-> ((0 7 64L) (1 1 8L) (2 1 16L) (3 1 32L))
+;-> 8^2 + 2^3 + 2^4 + 2^5 = 120
+;-> 120
+
+(find-powers 12345 8)
+;-> ((0 7 64L) (1 6 343L) (2 7 4096L) (3 5 7776L) (4 1 64L) (5 0 1L) (6 0 1L))
+;-> 8^2 + 7^3 + 8^4 + 6^5 + 2^6 + 1^7 + 1^8 = 12345
+;-> 12345
+
+Per N grandi e s > 8 la funzione è molto lenta.
+
+(time (find-powers 1234567890 8))
+
 
 ============================================================================
 

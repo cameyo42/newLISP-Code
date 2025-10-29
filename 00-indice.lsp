@@ -3239,6 +3239,8 @@ NOTE LIBERE 33
   Numeri con somma delle cifre + numero prima
   "You are not expected to understand this"
   Micro spreadsheet
+  Numeri in una matrice che sommano a K
+  Numeri come somma di potenze miste
 
 PROBLEMI SUI DADI
 =================
