@@ -5664,5 +5664,112 @@ Proviamo:
 (= (map led? (sequence 2 50)) (map led-accesi (sequence 2 50)))
 ;-> true
 
+
+--------------------------------------
+Numeri palindromi in base10 e in base2
+--------------------------------------
+
+Determinare i numeri che sono palindromi sia in base10 che in base2.
+
+Sequenza OEIS A007632:
+Numbers that are palindromic in bases 2 and 10.
+  0, 1, 3, 5, 7, 9, 33, 99, 313, 585, 717, 7447, 9009, 15351, 32223,
+  39993, 53235, 53835, 73737, 585585, 1758571, 1934391, 1979791, 3129213,
+  5071705, 5259525, 5841485, 13500531, 719848917, 910373019, 939474939,
+  1290880921, 7451111547, ...
+
+(define (palindrome? obj)
+"Check if a list or a string or a number is palindrome"
+  (if (integer? obj)
+      (let (str (string obj)) (= str (reverse (copy str))))
+      (= obj (reverse (copy obj)))))
+
+(define (base10-baseX number base)
+  "Convert a number from base 10 to base X <= 10 (return integer)"
+  (letn ((result 0) (power 1))
+    (while (> number 0)
+      (setq result (+ result (* (% number base) power)))
+      (setq number (/ number base))
+      (setq power (* power 10)))
+    result))
+
+Funzione che verifica se un numero intero è palindromo sia in base10 che in base2:
+
+(define (pali-dec-bin? num)
+  (and (palindrome? num) (palindrome? (base10-baseX num 2))))
+
+(filter pali-dec-bin? (sequence 1 1e6))
+;-> (1 3 5 7 9 33 99 313 585 717 7447 9009 15351 32223 39993 53235 53835 73737)
+
+Comunque questa funzione è lenta per numeri grandi.
+
+Possiamo allora generare tutti i numeri binari palindromi di lunghezza k (k=1..N) e poi verificare quali sono palindromi anche in base10.
+
+Scriviamo una funzione che genera tutti i numeri binari palindromi di lunghezza 'K' che non iniziano con '0'.
+
+(define (palindromi-binari K bin)
+  ; Genera tutti i numeri binari palindromi di lunghezza K
+  ; Se bin = true, 
+  ; allora restituisce una lista di binari
+  ; altrimenti restituisce una lista di interi (valori decimali dei binari)
+  (letn ((risultato '())        ; lista per accumulare i palindromi
+         (half (floor (/ K 2))) ; metà sinistra (escludendo il bit centrale se K dispari)
+         (pari? (= (% K 2) 0))  ; flag se K è pari
+         (limite (pow 2 half))) ; numero totale di combinazioni per la metà sinistra
+    (if (= K 1)
+        ; caso speciale K=1: unici palindromi sono "0" e "1"
+        (setq risultato '("0" "1"))
+        ; else: generazione per K>1
+        (for (i 0 (- limite 1))
+          (letn ((sx (bits i)) ; metà sinistra in binario
+                 ; aggiunge padding a sinistra per garantire lunghezza "half"
+                 (sx (string (dup "0" (- half (length sx))) sx)))
+            ; costruzione del palindromo
+            (if pari?
+                ; K pari: palindromo = sx + reverse(sx)
+                (let ((s (string sx (reverse (copy sx)))))
+                  ; inserisce solo se il palindromo non inizia con "0"
+                  (if (and s (= (s 0) "1")) (push s risultato -1)))
+                ; K dispari: palindromo = sx + bit centrale + reverse(sx)
+                (for (mid 0 1)
+                  (let ((s (string sx mid (reverse (copy sx)))))
+                    (if (and s (= (s 0) "1")) (push s risultato -1))))))))
+    (if bin
+        ; restituisce una lista con tutte le stringhe binarie palindrome
+        risultato
+        ; converte tutte le stringhe binarie in valori decimali
+        (map (fn (s) (int s 0 2)) risultato))))
+
+Proviamo:
+
+(palindromi-binari 2 true)
+;-> ("11")
+(palindromi-binari 4 true)
+;-> ("1001" "1111")
+(palindromi-binari 7 true)
+;-> ("1000001" "1001001" "1010101" "1011101" 
+;->  "1100011" "1101011" "1110111" "1111111")
+(palindromi-binari 7)
+;-> (65 73 85 93 99 107 119 127)
+
+Adesso possiamo generare la sequenza dei numeri palindromi in base10 e in base2:
+
+Costruiamo una lista con tutti i palindromi in base2 da 1 a N bit (in formato decimale).
+Li ordianiamo e poi eliminiamo i doppioni.
+Infine prendiamo solo i numeri che sono palindromi anche in base10.
+
+N = 16 (numeri binari palindromi da 1 a 16 cifre)
+(time (println (filter palindrome? (unique (sort (flat (map palindromi-binari (sequence 0 16))))))))
+;-> (0 1 3 5 7 9 33 99 313 585 717 7447 9009 15351 32223 39993 53235 53835)
+;-> 9.737
+
+N = 32 (numeri binari palindromi da 1 a 16 cifre
+(time (println (filter palindrome? (unique (sort (flat (map palindromi-binari (sequence 0 32))))))))
+;-> (0 1 3 5 7 9 33 99 313 585 717 7447 9009 15351 32223
+;->  39993 53235 53835 73737 585585 1758571 1934391 1979791 3129213
+;->  5071705 5259525 5841485 13500531 719848917 910373019 939474939
+;->  1290880921)
+;-> 85445.635
+
 ============================================================================
 

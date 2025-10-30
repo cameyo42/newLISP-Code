@@ -3244,6 +3244,7 @@ NOTE LIBERE 33
   Subfactorial o derangement
   Ordinare una lista in base agli indici pari e dispari
   Led on/off
+  Numeri palindromi in base10 e in base2
 
 PROBLEMI SUI DADI
 =================
