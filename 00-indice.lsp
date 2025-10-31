@@ -3246,6 +3246,7 @@ NOTE LIBERE 33
   Led on/off
   Numeri palindromi in base10 e in base2
   Punteggio di una lista
+  Sequenza uguale con tre formule diverse
 
 PROBLEMI SUI DADI
 =================

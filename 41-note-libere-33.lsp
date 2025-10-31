@@ -5884,5 +5884,95 @@ Conclusione:
 
 Questo ragionamento ci permette di affermare che se la lista iniziale contiene almeno due numeri pari e due numeri dispari, allora il punteggio della lista vale LCM(lista), perchè GCD(lista) = 1.
 
+
+---------------------------------------
+Sequenza uguale con tre formule diverse
+---------------------------------------
+
+Sequenza OEIS A192960:
+Constant term of the reduction by x^2 -> x+1 of the polynomial p(n,x) defined at Comments.
+  1, 3, 7, 15, 29, 53, 93, 159, 267, 443, 729, 1193, 1945, 3163, 5135,
+  8327, 13493, 21853, 35381, 57271, 92691, 150003, 242737, 392785, 635569,
+  1028403, 1664023, 2692479, 4356557, 7049093, 11405709, 18454863, 29860635,
+  48315563, 78176265, ...
+
+Comments:
+The titular polynomials are defined recursively: p(n,x) = x*p(n-1,x) + 2 + n^2, with p(0,x)=1.
+For an introduction to reductions of polynomials by substitutions such as x^2 -> x+1, see A192232 and A192744.
+
+Formula 1: a(n) = 3*a(n-1) - 2*a(n-2) - a(n-3) + a(n-4)
+
+(define (sequenza1 limite)
+  (let (seq '(1L 3L 7L 15L 29L))
+    (for (i 5 limite)
+      (push (+ (* 3L (seq (- i 1))) (* -2L (seq (- i 2)))
+               (* -1L (seq (- i 3))) (seq (- i 4))) seq -1))
+    seq))
+
+(sequenza 35)
+;-> (1L 3L 7L 15L 29L 53L 93L 159L 267L 443L 729L 1193L 1945L 3163L 5135L
+;->  8327L 13493L 21853L 35381L 57271L 92691L 150003L 242737L 392785L 635569L
+;->  1028403L 1664023L 2692479L 4356557L 7049093L 11405709L 18454863L 29860635L
+;->  48315563L 78176265L 126491897L)
+
+Formula 2: a(n) = 2*Fibonacci(n+4) - (2*n + 5)
+
+(define (fibo-i num)
+"Calculate the Fibonacci number of an integer number"
+  (if (zero? num) 0L
+  ;else
+  (local (a b c)
+    (setq a 0L b 1L c 0L)
+    (for (i 0 (- num 1))
+      (setq c (+ a b))
+      (setq a b)
+      (setq b c)
+    )
+    a)))
+
+(define (sequenza2 limite)
+  (let (seq '())
+    (for (i 0 limite)
+      (push (- (* 2L (fibo-i (+ i 4))) (+ (* 2 i) 5)) seq -1))
+    seq))
+
+(sequenza2 35)
+;-> (1L 3L 7L 15L 29L 53L 93L 159L 267L 443L 729L 1193L 1945L 3163L 5135L
+;->  8327L 13493L 21853L 35381L 57271L 92691L 150003L 242737L 392785L 635569L
+;->  1028403L 1664023L 2692479L 4356557L 7049093L 11405709L 18454863L 29860635L
+;->  48315563L 78176265L 126491897L)
+
+Formula 3: a(n) (a(n-1) + (n-1)) * (a(n-2) + (n-2))
+           con a(0) = 1, a(1) = 1
+(togliere il primo termine che ha indice 0)
+
+Questa formula non compare in OEIS.
+
+(define (sequenza3 limite)
+  (let (seq '(1L 1L))
+    (for (i 2 (+ limite 1))
+      (push (+ (+ (seq (- i 1)) (- i 1)) (+ (seq (- i 2)) (- i 2))) seq -1))
+    (slice seq 1)))
+
+(sequenza2 35)
+;-> (1L 3L 7L 15L 29L 53L 93L 159L 267L 443L 729L 1193L 1945L 3163L 5135L
+;->  8327L 13493L 21853L 35381L 57271L 92691L 150003L 242737L 392785L 635569L
+;->  1028403L 1664023L 2692479L 4356557L 7049093L 11405709L 18454863L 29860635L
+;->  48315563L 78176265L)
+
+Test di correttezza:
+
+(= (sequenza1 10000) (sequenza2 10000) (sequenza3 10000))
+;-> true
+
+Test di velocità:
+
+(time (sequenza1 10000))
+;-> 320.196
+(time (sequenza2 10000))
+;-> 19947.285
+(time (sequenza3 10000))
+;-> 159.945
+
 ============================================================================
 
