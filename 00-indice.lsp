@@ -3245,6 +3245,7 @@ NOTE LIBERE 33
   Ordinare una lista in base agli indici pari e dispari
   Led on/off
   Numeri palindromi in base10 e in base2
+  Punteggio di una lista
 
 PROBLEMI SUI DADI
 =================

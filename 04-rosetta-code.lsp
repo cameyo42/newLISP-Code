@@ -5849,7 +5849,9 @@ Un numero intero è un numero eureka se la somma delle potenze delle sue cifre, 
 Scrivere una funzione per calcolare i numeri eureka fino al milione.
 Maggiori informazioni:
 
-https://oeis.org/A032799
+Sequenza OEIS A032799:
+Numbers k such that k equals the sum of its digits raised to the consecutive powers (1,2,3,...).
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 89, 135, 175, 518, 598, 1306, 1676, 2427, 2646798, 12157692622039623539
 
 Precalcoliamo i valori delle potenze (da 1 a 9) di ogni cifra. Per comodità creiamo una lista/matrice 10x10 "pot" in modo che si possa scrivere:
 
@@ -6475,16 +6477,16 @@ Adesso possiamo scrivere la nuova funzione che calcola i numeri vampiri fino a n
 
 Questo metodo è molto più veloce e la funzione potrebbe essere ottimizzata, oppure si potrebbe utilizzare un importante risultato teorico trovato da Pete Hartley:
 
-  Se x · y è un numero vampiro, allora x · y == x + y (mod 9)
+  Se x * y è un numero vampiro, allora x * y == x + y (mod 9)
 
 Prova:
 Sia mod l'operatore modulo binario e d(x) la somma delle cifre decimali di x.
 È noto che d(x) mod 9 = x mod 9, per tutti i valori di x.
-Supponiamo che x · y sia un vampiro. Quindi contiene le stesse cifre di xey, in particolare d(x · y) = d(x) + d(y). Questo porta a:
-(x · y) mod 9 = d(x · y) mod 9 = (d(x) + d(y)) mod 9 = (d(x) mod 9 + d(y) mod 9) mod 9
+Supponiamo che x * y sia un vampiro. Quindi contiene le stesse cifre di xey, in particolare d(x * y) = d(x) + d(y). Questo porta a:
+(x * y) mod 9 = d(x * y) mod 9 = (d(x) + d(y)) mod 9 = (d(x) mod 9 + d(y) mod 9) mod 9
               = (x mod 9 + y mod 9) mod 9 = (x + y) mod 9
 
-Le soluzioni alla congruenza sono (x mod 9, y mod 9) in ((0 0) (2 2) (3 6) (5 8) (6 3) (8 5)). Solo questi casi (6 su 81) devono essere testati nella ricerca di vampiri basata sul test di x · y per valori diversi di x e y.
+Le soluzioni alla congruenza sono (x mod 9, y mod 9) in ((0 0) (2 2) (3 6) (5 8) (6 3) (8 5)). Solo questi casi (6 su 81) devono essere testati nella ricerca di vampiri basata sul test di x * y per valori diversi di x e y.
 
 Esempio:
 

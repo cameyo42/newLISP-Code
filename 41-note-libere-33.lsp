@@ -5771,5 +5771,118 @@ N = 32 (numeri binari palindromi da 1 a 16 cifre
 ;->  1290880921)
 ;-> 85445.635
 
+
+----------------------
+Punteggio di una lista
+----------------------
+
+Definiamo il punteggio di una lista di numeri interi positivi come il prodotto del minimo comune multiplo (mcm) e del massimo comune diviso (mcd) di tutti gli elementi della lista.
+Determinare il punteggio massimo di una lista dopo aver rimosso al massimo un elemento oppure nessuno.
+Il minimo comune multiplo (mcd) che il massimo diviso (mcd) di un singolo numero sono il numero stesso e il punteggio fattoriale di una lista vuota vale 0.
+
+(define (lcm_ a b) (/ (* a b) (gcd a b)))
+(define-macro (lcm)
+"Calculate the lcm of two or more number"
+  (apply lcm_ (map eval (args)) 2))
+
+(define (score lst)
+  (let (len (length lst))
+    (cond ((= len 0) 0)
+          ((= len 1) (* (lst 0) (lst 0)))
+          (true
+            (* (apply gcd lst) (apply lcm lst))))))
+
+(score '(1 2 3 4 5))
+;-> 60
+
+Funziona che calcola il punteggio massimo di una lista di interi positivi:
+
+(define (max-score lst)
+  (local (len massimo out lista punteggio)
+    ; lunghezza delle list
+    (setq len (length lst))
+    ; il massimo iniziale è dato da GCD*LCM della lista intera
+    (setq massimo (score lst))
+    (setq out (list massimo nil))
+    ; ciclo per ogni numero della lista
+    (for (i 0 (- len 1))
+      ; crea una lista senza il numero corrente
+      (setq lista (append (slice lst 0 i) (slice lst (+ i 1))))
+      ;(println lista)
+      ; calcolo del punteggio della lista corrente
+      (setq punteggio (score lista))
+      ; eventuale aggiornamento del valore massimo
+      (when (> punteggio massimo)
+        (setq out (list punteggio (lst i)))))
+    out))
+
+Proviamo:
+(max-score '(1 2 3 4 5))
+;-> (60 nil)
+(max-score '(5))
+;-> (25 nil)
+(max-score '(1 2 4 64 512))
+;-> (1024 1)
+(max-score '(1 2 3 4 64 512))
+;-> (1536 nil)
+(max-score '(1 2 4 6 8 10))
+;-> (240 1)
+(max-score '(1 2 4 6 8 10))
+;-> (240 1)
+(max-score '(3 6 12 72))
+;-> (432 3)
+(max-score '(1 3 6 12 72))
+;-> (216 1)
+(max-score '(5 3 6 12 72))
+;-> (360 nil)
+(max-score '(5 3 3 6 12 72))
+;-> (360 nil)
+(max-score '(5 3 7 6 12 72))
+;-> (2520 nil)
+
+Abbiamo una lista di interi positivi nell'intervallo [1..K].
+Quanti interi ci possono essere al massimo nella lista che non sono coprimi tra loro?
+Il massimo è floor(K/2).
+
+Costruzione ottima: 
+prendere tutti i numeri pari in [1..K] (hanno tutti gcd ≥ 2 a coppie).
+
+Funzione che restituisce il numero massimo di numeri coprimi (la lista dei pari):
+
+(define (max-not-coprime K)
+  (let (pari (sequence 2 10 2))
+    (list (length pari) pari)))
+
+(max-not-coprime 11)
+;-> (5 (2 4 6 8 10))
+
+Quindi in una lista con numeri pari, se aggiungiamo un numeri dispari, allora esiste sicuramente una coppia di numeri coprimi.
+Se prendiamo tutti i numeri pari in [1..K], essi hanno tutti un fattore comune (2), quindi nessuna coppia è coprima.
+Ma appena aggiungiamo un numero dispari, succede che quel numero è coprimo con almeno un pari (infatti un dispari e un pari hanno sempre gcd = 1).
+Quindi la proprietà "nessuna coppia coprima" si rompe immediatamente.
+In altre parole:
+- Insieme massimo di interi in [1..K] tali che nessuna coppia sia coprima -> tutti i multipli di un numero (d>1).
+- Per (d=2), ottieni il caso ottimo (massimo numero di elementi):
+  (2,4,6,8,10,...,) (floor(K/2) * 2)
+- Aggiungere qualsiasi numero non multiplo di 2 introduce almeno una coppia coprima.
+Quindi aggiungere un dispari -> esiste almeno una coppia coprima.
+Quindi se abbiamo tutti numeri dispari, basta aggiungere un numero pari per avere almeno una coppia coprima.
+Quindi se ci sono un solo numero pari e un solo numero dispari nella lista, qualunque altro numero aggiunto crea una coppia coprima.
+In modo più formale e intuitivo:
+
+Abbiamo una lista con:
+- un solo pari (= 2a)
+- un solo dispari (= 2b+1)
+Il loro gcd è 1 -> già una coppia coprima esiste.
+Quindi anche solo due numeri, uno pari e uno dispari, bastano per avere almeno una coppia coprima.
+- Se aggiungiamo un altro pari, sarà coprimo con l’unico dispari (perché ogni dispari e pari hanno gcd = 1).
+- Se aggiungiamo un altro dispari, sarà coprimo con l’unico pari.
+- Se aggiungiamo qualunque numero che non sia multiplo comune di tutti, inevitabilmente comparirà una nuova coppia coprima.
+Conclusione:
+-️ Se la lista contiene almeno un pari e almeno un dispari, allora esiste sempre almeno una coppia coprima.
+-️ Per evitare coppie coprime, tutti i numeri devono condividere almeno un fattore comune > 1, quindi devono essere tutti multipli dello stesso numero (tipicamente 2 per il massimo caso).
+
+Questo ragionamento ci permette di affermare che se la lista iniziale contiene almeno due numeri pari e due numeri dispari, allora il punteggio della lista vale LCM(lista), perchè GCD(lista) = 1.
+
 ============================================================================
 
