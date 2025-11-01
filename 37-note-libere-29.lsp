@@ -4092,6 +4092,8 @@ Eseguiamo il programma bc con il nostro file:
 
 I risultati (di tipo stringa) vengono restituiti come lista.
 
+Vedi anche "Espansione digitale di un numero generato da una formula" su "Note libere 33".
+
 
 ------------------------------------------
 Numero massimo e minimo con gli stessi bit

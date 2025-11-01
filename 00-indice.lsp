@@ -3248,6 +3248,7 @@ NOTE LIBERE 33
   Punteggio di una lista
   Sequenza uguale con tre formule diverse
   Serbatoi comunicanti
+  Espansione digitale di un numero generato da una formula (con BC)
 
 PROBLEMI SUI DADI
 =================

@@ -366,7 +366,7 @@ Per calcolare la probabilità del led basta dividere questa somma per il totale 
 
 Calcolo della somma della riga, della colonna e delle diagonali per un led:
 
-1. Diagonale principale (dall’alto a sinistra verso il basso a destra)
+1. Diagonale principale (dall'alto a sinistra verso il basso a destra)
 Questa diagonale è composta da tutte le celle (r, c) tali che:
 
   r - c = i - j
@@ -377,7 +377,7 @@ Lunghezza = L1 = 1 + min(i, j) + min(M - 1 - i, N - 1 - j)
 - min(M-1-i, N-1-j) = quanti passi possiamo fare avanti.
 - +1 = include la cella centrale stessa.
 
-2. Diagonale secondaria (dall’alto a destra verso il basso a sinistra)
+2. Diagonale secondaria (dall'alto a destra verso il basso a sinistra)
 
 Questa è formata da celle (r, c) tali che:
 
@@ -1780,7 +1780,7 @@ Algoritmo
 1) Si esplora la matrice partendo da ogni cella che corrisponde alla prima lettera della stringa.
 2) Si usa una funzione interna cerca che segue i 4 o 8 movimenti possibili.
 3) La lista visitati evita di riutilizzare la stessa cella nel percorso corrente.
-4) Se si raggiunge l’ultimo carattere (k = len-1), la stringa è trovata
+4) Se si raggiunge l'ultimo carattere (k = len-1), la stringa è trovata
 
 ; Funzione che verifica se una stringa è presente in una matrice di caratteri
 ; La stringa è considerata presente se i suoi caratteri formano un percorso
@@ -1804,7 +1804,7 @@ Algoritmo
       (if (and (>= i 0) (< i righe) (>= j 0) (< j colonne)
                (= ((matrice i) j) (stringa k))
                (not (ref (list i j) visitati)))
-          ; se l’ultimo carattere corrisponde, la stringa è stata trovata
+          ; se l'ultimo carattere corrisponde, la stringa è stata trovata
           (if (= k (- len 1))
               (setq trovato true)
               ; altrimenti continua la ricerca nelle quattro direzioni adiacenti
@@ -3754,7 +3754,7 @@ Algoritmo
                 (push nuovo-numero primi)
                 (if (> nuovo-numero max-primo)
                     (setq max-primo nuovo-numero miglior-percorso nuovo-percorso)))
-            ; continua l’esplorazione nelle 8 direzioni
+            ; continua l'esplorazione nelle 8 direzioni
             (dolist (d direzioni)
               (esplora (+ i (d 0)) (+ j (d 1)) nuovo-numero nuovo-percorso nuovi-visitati)))))
     ; avvia la ricerca da ogni cella della matrice
@@ -5274,7 +5274,7 @@ Ogni elemento dello stack rappresenta uno stato:
         (setq stack remain)
         ; Estrae i campi dello stato corrente
         (let ((r (state 0)) (s (state 1)) (sel (state 2)))
-          ; Caso base: abbiamo superato l’ultima riga
+          ; Caso base: abbiamo superato l'ultima riga
           (if (= r R)
               ; Se la somma parziale è esattamente K,
               ; e almeno un elemento è stato scelto, salva la soluzione
@@ -5375,7 +5375,7 @@ J. Briidern, Sums of squares and higher powers I, II, J. London Math. Soc. 35 (1
         (setq stack remain)
         ; Estrae i campi dello stato corrente
         (let ((r (state 0)) (s (state 1)) (sel (state 2)))
-          ; Caso base: abbiamo superato l’ultima riga
+          ; Caso base: abbiamo superato l'ultima riga
           (if (= r R)
               ; Se la somma parziale è esattamente K,
               ; e almeno un elemento è stato scelto, salva la soluzione
@@ -5875,8 +5875,8 @@ Abbiamo una lista con:
 - un solo dispari (= 2b+1)
 Il loro gcd è 1 -> già una coppia coprima esiste.
 Quindi anche solo due numeri, uno pari e uno dispari, bastano per avere almeno una coppia coprima.
-- Se aggiungiamo un altro pari, sarà coprimo con l’unico dispari (perché ogni dispari e pari hanno gcd = 1).
-- Se aggiungiamo un altro dispari, sarà coprimo con l’unico pari.
+- Se aggiungiamo un altro pari, sarà coprimo con l'unico dispari (perché ogni dispari e pari hanno gcd = 1).
+- Se aggiungiamo un altro dispari, sarà coprimo con l'unico pari.
 - Se aggiungiamo qualunque numero che non sia multiplo comune di tutti, inevitabilmente comparirà una nuova coppia coprima.
 Conclusione:
 -️ Se la lista contiene almeno un pari e almeno un dispari, allora esiste sempre almeno una coppia coprima.
@@ -5942,7 +5942,7 @@ Formula 2: a(n) = 2*Fibonacci(n+4) - (2*n + 5)
 ;->  1028403L 1664023L 2692479L 4356557L 7049093L 11405709L 18454863L 29860635L
 ;->  48315563L 78176265L 126491897L)
 
-Formula 3: a(n) (a(n-1) + (n-1)) * (a(n-2) + (n-2))
+Formula 3: a(n) (a(n-1) + (n-1)) + (a(n-2) + (n-2))
            con a(0) = 1, a(1) = 1
 (togliere il primo termine che ha indice 0)
 
@@ -5954,7 +5954,7 @@ Questa formula non compare in OEIS.
       (push (+ (+ (seq (- i 1)) (- i 1)) (+ (seq (- i 2)) (- i 2))) seq -1))
     (slice seq 1)))
 
-(sequenza2 35)
+(sequenza3 35)
 ;-> (1L 3L 7L 15L 29L 53L 93L 159L 267L 443L 729L 1193L 1945L 3163L 5135L
 ;->  8327L 13493L 21853L 35381L 57271L 92691L 150003L 242737L 392785L 635569L
 ;->  1028403L 1664023L 2692479L 4356557L 7049093L 11405709L 18454863L 29860635L
@@ -6096,6 +6096,142 @@ Proviamo:
 ;-> Serbatoi: (2.4 2.4 2.4 2.4 2.4)
 (vasi S R)
 ;-> (2.4 2.4 2.4 2.4 2.4)
+
+
+-----------------------------------------------------------------
+Espansione digitale di un numero generato da una formula (con BC)
+-----------------------------------------------------------------
+
+Vediamo come calcolare l'espansione digitale di un numero generato da una formula, ad esempio del rapporto aureo phi = (1 + sqrt(5))/2.
+
+Per ottenere l'espansione digitale corretta, bisogna usare aritmetica a precisione arbitraria (bigfloat o razionale esatta).
+newLISP però non supporta bigfloat o frazioni simboliche native, quindi non può calcolare cifre oltre la precisione dei double.
+
+Per risolvere il problema possiamo utilizzare un programma esterno come bc.exe (Basic Calculator)
+
+Cambiamo la cartella di lavoro (se BC non è nel PATH):
+(change-dir "C:\\util\\BC")
+
+Creiamo un file (es phi.bc) con i comandi che devono essere eseguiti da bc:
+# file: phi.bc
+# line comment
+# set input and output base to 10 (A=10)
+obase=ibase=A
+# set precision (at start scale = 0)
+scale=50
+# calculate phi
+(1+sqrt(5))/2
+# quit bc
+quit
+
+Salviamo il file nella cartella di lavoro "C:\\util\\BC".
+
+Eseguiamo il programma bc passando come parametro il nostro file phi.bc:
+(exec "bc.exe -l phi.bc")
+;-> ("1.61803398874989484820458683436563811772030917980576")
+
+Scriviamo una funzione che calcola l'espansione digitale di una formula utilizzando bc.exe.
+
+; Funzione che crea un file per bc.exe
+; func-str: funzione da calcolare (stringa in notazione infissa)
+; digits: cifre di precisione (meglio se è maggiore delle cifre volute)
+; file-str: nome del file (es.test.bc) per bc.exe (stringa)
+(define (file-bc func-str digits file-str)
+"Create a file to run with BC (Basic Calculator)"
+  (local (outfile)
+    (setq outfile (open file-str "write"))
+    (write-line outfile "obase=ibase=A") ; Input e output: base 10 
+    (write-line outfile (string "scale=" digits))
+    (write-line outfile func-str)
+    (write-line outfile "quit")
+    ;(print outfile { })
+    (close outfile)))
+
+Esempio:
+(file-bc "sqrt(2)" 50 "sqrt2.bc")
+;-> true
+
+; Funzione che calcola l'espansione decimale di una formula
+; func-str: funzione da calcolare (stringa in notazione infissa)
+; digits: cifre di precisione (meglio se è maggiore delle cifre volute)
+; file-str: nome del file (es.test.bc) per bc.exe (stringa)
+(define (espansione func-str digits file-str)
+  ; imposta la cartella di lavoro
+  (change-dir "C:\\util\\BC")
+  ; crea il file per bc.exe
+  (file-bc func-str digits file-str)
+  (let (result (exec (string "bc.exe -l " file-str)))
+    ; il risultato è una stringa all'interno di una lista
+    ; es. ("1.6180339887498948482045868343")
+    ; se result supera una riga, allora otteniamo una lista con più elementi:
+    ; ("1.6180339887498948482045868343\\" "7892347824627893462")
+    ;(println res)
+    ; converte result in una stringa unica
+    (setq result (join result))
+    ; rimuove il punto "." e "\\" (se esistono)
+    (if (find "." result)
+        (pop result (find "." result)))
+    (while (find "\\" result) ; ci possono essere più elementi
+        (pop result (find "\\" result)))
+    ; trasforma le cifre (stringhe) in cifre intere
+    (map int (explode result))))
+
+Proviamo:
+
+(espansione "(1+sqrt(5))/2" 10 "phi.bc")
+;-> (1 6 1 8 0 3 3 9 8 8 7)
+
+(espansione "(1+sqrt(5))/2" 104 "phi.bc")
+;-> (1 6 1 8 0 3 3 9 8 8 7 4 9 8 9 4 8 4 8 2 0 4 5 8
+;->  6 8 3 4 3 6 5 6 3 8 1 1 7 7 2 0 3 0 9 1 7 9 8 0
+;->  5 7 6 2 8 6 2 1 3 5 4 4 8 6 2 2 7 0 5 2 6 0 4 6
+;->  2 8 1 8 9 0 2 4 4 9 7 0 7 2 0 7 2 0 4 1 8 9 3 9
+;->  1 1 3 7 4 8 4 7 5)
+
+Sequenza OEIS A001622:
+Decimal expansion of golden ratio phi (or tau) = (1 + sqrt(5))/2.
+  1, 6, 1, 8, 0, 3, 3, 9, 8, 8, 7, 4, 9, 8, 9, 4, 8, 4, 8, 2, 0, 4, 5, 8,
+  6, 8, 3, 4, 3, 6, 5, 6, 3, 8, 1, 1, 7, 7, 2, 0, 3, 0, 9, 1, 7, 9, 8, 0,
+  5, 7, 6, 2, 8, 6, 2, 1, 3, 5, 4, 4, 8, 6, 2, 2, 7, 0, 5, 2, 6, 0, 4, 6,
+  2, 8, 1, 8, 9, 0, 2, 4, 4, 9, 7, 0, 7, 2, 0, 7, 2, 0, 4, 1, 8, 9, 3, 9,
+  1, 1, 3, 7, 4, 8, 4, 7, 5, ...
+  
+In 'bc' possiamo ottenere pi greco usando la funzione arcotangente 'a()'.
+Infatti, con 'bc -l', la libreria matematica definisce 'a(x)' come arctan(x) in radianti.
+E siccome:
+  pi = 4 * arctan(1)
+basta scrivere la formula:
+  4*a(1)
+
+(espansione "4*a(1)" 104 "pi.bc")
+;-> (3 1 4 1 5 9 2 6 5 3 5 8 9 7 9 3 2 3 8 4 6 2 6 4
+;->  3 3 8 3 2 7 9 5 0 2 8 8 4 1 9 7 1 6 9 3 9 9 3 7
+;->  5 1 0 5 8 2 0 9 7 4 9 4 4 5 9 2 3 0 7 8 1 6 4 0
+;->  6 2 8 6 2 0 8 9 9 8 6 2 8 0 3 4 8 2 5 3 4 2 1 1
+;->  7 0 6 7 9 8 2 1 2)
+
+Sequenza OEIS A000796:
+Decimal expansion of Pi (or digits of Pi).
+  3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3, 2, 3, 8, 4, 6, 2, 6, 4,
+  3, 3, 8, 3, 2, 7, 9, 5, 0, 2, 8, 8, 4, 1, 9, 7, 1, 6, 9, 3, 9, 9, 3, 7,
+  5, 1, 0, 5, 8, 2, 0, 9, 7, 4, 9, 4, 4, 5, 9, 2, 3, 0, 7, 8, 1, 6, 4, 0,
+  6, 2, 8, 6, 2, 0, 8, 9, 9, 8, 6, 2, 8, 0, 3, 4, 8, 2, 5, 3, 4, 2, 1, 1,
+  7, 0, 6, 7, 9, 8, 2, 1, 4
+
+In questo caso l'ultima cifra calcolata è errata (vale 2, ma dovrebbe essere 4).
+Allora possiamo usare più cifre di precisione e poi prendere solo le cifre volute:
+
+(setq decimali (espansione "4*a(1)" 115 "pi.bc"))
+(slice decimali 0 105)
+;-> (3 1 4 1 5 9 2 6 5 3 5 8 9 7 9 3 2 3 8 4 6 2 6 4
+;->  3 3 8 3 2 7 9 5 0 2 8 8 4 1 9 7 1 6 9 3 9 9 3 7
+;->  5 1 0 5 8 2 0 9 7 4 9 4 4 5 9 2 3 0 7 8 1 6 4 0
+;->  6 2 8 6 2 0 8 9 9 8 6 2 8 0 3 4 8 2 5 3 4 2 1 1
+;->  7 0 6 7 9 8 2 1 4)
+
+Il risultato è corretto.
+
+Vedi anche "newLISP e BC (Basic Calculator)" su "Note libere 29".
 
 ============================================================================
 
