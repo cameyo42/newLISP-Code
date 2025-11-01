@@ -5974,5 +5974,128 @@ Test di velocità:
 (time (sequenza3 10000))
 ;-> 159.945
 
+
+--------------------
+Serbatoi comunicanti
+--------------------
+
+Ci sono n serbatoi collegati in fila con un tubo (0..n-1).
+Ogni tubo ha un rubinetto, quindi ci sono (n - 1) rubinetti.
+
+  |    |       |    |                   |    |
+  |    |  R(0) |    |  R(1)      R(n-2) |    |
+  |    |===~===|    |===~===     ===~===|    |
+  +----+       +----+        ...        +----+
+   S(0)         S(1)                    S(n-1)
+
+In ogni serbatoio ci possono essere da 0 a K litri d'acqua e inizialmente i rubinetti sono tutti chiusi.
+
+Data una lista con i litri di acqua in ogni serbatoio e una lista di rubinetti da aprire in sequenza, determinare la situazione dei serbatoi dopo l'apertura di ogni rubinetto (uno alla volta).
+I serbatoi seguono il principio dei vasi comunicanti.
+
+; Funzione che prende una lista di rubinetti aperti e restituisce le coppie di serbatoi collegate:
+(define (coppie-connesse R-index)
+  (let (connesse '())
+    (dolist (idx R-index)
+      (extend connesse (list idx (+ idx 1))))
+    (explode (sort connesse) 2)))
+
+; Funzione che prende la lista delle coppie dei serbatoi connessi e restituisce una lista di gruppi di serbatoi connessi:
+(define (gruppi-connessi coppie)
+  (local (gruppi len gruppo-corrente k a1 a2 b1 b2 last-connesso)
+    (setq gruppi '())
+    (setq len (length coppie))
+    (setq gruppo-corrente '())
+    (setq k 0)
+    (setq last-connesso nil)
+    (while (< k (- len 1))
+      (setq a1 (coppie k 0))
+      (setq a2 (coppie k 1))
+      (setq b1 (coppie (+ k 1) 0))
+      (setq b2 (coppie (+ k 1) 1))
+      ;(println a1 { } a2 { } b1 { } b2)
+      (cond ((= a2 b1)
+              (extend gruppo-corrente (list a1 a2 b1 b2))
+              (setq last-connesso true)
+              (++ k))
+            ((!= a2 b1)
+              (extend gruppo-corrente (list a1 a2))
+              (push (sort (unique gruppo-corrente)) gruppi -1)
+              (setq last-connesso nil)
+              (setq gruppo-corrente '())
+              (++ k)))
+    )
+  ; inserimento ultima coppia
+  (if last-connesso 
+    (push (sort (unique gruppo-corrente)) gruppi -1)
+    (push (sort (unique (coppie -1))) gruppi -1))
+  gruppi))
+
+; Funzione che prende i gruppi di serbatoi connessi e ridistribuisce l'acqua di ogni gruppo nella lista dei serbatoi:
+(define (distribuisce lst gruppi)
+  (local (media)
+    (dolist (g gruppi)
+      ; valore medio del gruppo corrente
+      (setq media (div (apply add (select lst g)) (length g)))
+      ; aggiornamento dei valori di acqua dei serbatoi del gruppo corrente
+      (dolist (idx g) (setf (lst idx) media)))
+    lst))
+
+; Funzione che simula il processo:
+(define (vasi S R step)
+  (local (coppie gruppi aperti)
+    ; numero di serbatoi
+    (setq lenS (length S))
+    ; numero di rubinetti
+    (setq lenR (length R))
+    ; lista delle coppie di serbatoi collegate
+    (setq coppie '())
+    ; lista dei gruppi di serbatoi collegati
+    (setq gruppi '())
+    (cond ((true? step) ; Apertura rubinetti: step-by-step
+            (setq aperti '())
+            ; ciclo per ogni rubinetto da aprire
+            (dolist (rub R)
+              (push rub aperti -1)
+              (setq coppie (coppie-connesse aperti))
+              (setq gruppi (gruppi-connessi coppie))
+              (println "Rubinetti aperti: " aperti)
+              (setq S (distribuisce S gruppi))
+              (println "Serbatoi: " S)))
+          (true         ; Apertura rubinetti: tutti insieme
+            (setq coppie (coppie-connesse R))
+            ;(println coppie)
+            (setq gruppi (gruppi-connessi coppie))
+            ;(println gruppi)
+            (distribuisce S gruppi)))))
+
+Proviamo:
+
+(setq S '(6 0 5 1 0))
+(setq R '(0 2 3))
+(vasi S R true)
+;-> Rubinetti aperti: (0)
+;-> Serbatoi: (3 3 5 1 0)
+;-> Rubinetti aperti: (0 2)
+;-> Serbatoi: (3 3 3 3 0)
+;-> Rubinetti aperti: (0 2 3)
+;-> Serbatoi: (3 3 2 2 2)
+(vasi S R)
+;-> (3 3 2 2 2)
+
+(setq S '(6 0 5 1 0))
+(setq R '(0 1 2 3))
+(vasi S R true)
+;-> Rubinetti aperti: (0)
+;-> Serbatoi: (3 3 5 1 0)
+;-> Rubinetti aperti: (0 1)
+;-> Serbatoi: (3.666666666666667 3.666666666666667 3.666666666666667 1 0)
+;-> Rubinetti aperti: (0 1 2)
+;-> Serbatoi: (3 3 3 3 0)
+;-> Rubinetti aperti: (0 1 2 3)
+;-> Serbatoi: (2.4 2.4 2.4 2.4 2.4)
+(vasi S R)
+;-> (2.4 2.4 2.4 2.4 2.4)
+
 ============================================================================
 

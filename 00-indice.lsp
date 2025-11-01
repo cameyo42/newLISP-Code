@@ -3247,6 +3247,7 @@ NOTE LIBERE 33
   Numeri palindromi in base10 e in base2
   Punteggio di una lista
   Sequenza uguale con tre formule diverse
+  Serbatoi comunicanti
 
 PROBLEMI SUI DADI
 =================
