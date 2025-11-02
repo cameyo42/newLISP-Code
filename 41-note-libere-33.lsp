@@ -4640,7 +4640,7 @@ Scriviamo la funzione 'calc2' che usa una hash-map al posto della lista associat
     ; copia hash-map su una lista
     (setq out (hash))
     ; elimina la hash-map (operazione lenta)
-    (delete 'hash)      
+    (delete 'hash)
     out))
 
 Proviamo:
@@ -5344,7 +5344,7 @@ Tutti i numeri naturali sufficientemente grandi sono scrivibili nella forma:
 dove a(i) sono numeri naturali.
 
 Briidern ha dimostrato che con s = 18 si possono calcolare tutti i numeri naturali.
-J. Briidern, Sums of squares and higher powers I, II, J. London Math. Soc. 35 (1987) 233-250. 
+J. Briidern, Sums of squares and higher powers I, II, J. London Math. Soc. 35 (1987) 233-250.
 
 (define (** num power)
 "Calculate the integer power of an integer"
@@ -5499,7 +5499,7 @@ Possiamo calcolare il numero di derangements con:
   !n = n! * Sum[k=0,n]((-1)^k/k!)
 
 oppure in forma ricorsiva:
-  
+
   !n = (n - 1) * (!(n - 1) + !(n - 2))
 
 con condizioni iniziali: !0 = 1, !1 = 0.
@@ -5603,7 +5603,7 @@ Versione code-golf (91 caratteri):
 Led on/off
 ----------
 
-Abbiamo N led disposti in fila, inizialmente tutti spenti. 
+Abbiamo N led disposti in fila, inizialmente tutti spenti.
 Applichiamo ai led le seguenti N operazioni:
   Operazione 1: Accende tutti i led
   Operazione 2: Accende/Spegne un led ogni 2 (spegne se è acceso, accende se è spento)
@@ -5628,11 +5628,11 @@ Quindi, il problema si riduce a contare quanti quadrati perfetti esistono da 1 a
 Scriviamo una funzione che simula il processo.
 
 (define (led? n show)
-  (let 
+  (let
     (led (dup 1 (+ n 1))) ; Partiamo con tutti i led accesi (1) - primo passo
     ; Il led 0 che non ci serve
     (setf (led 0) 0)
-    (if show 
+    (if show
         (println (format "%3d" 1) { -> } led { } (length (ref-all 1 led))))
     ; Ciclo di passi da 2 a n...
     (for (passo 2 n)
@@ -5641,8 +5641,8 @@ Scriviamo una funzione che simula il processo.
         ; cambiamo lo stato del led
         (setf (led l) (- 1 (led l))))
       ; stampa dello stato dei led ogni passaggio
-      (if show 
-          (println (format "%3d" passo) { -> } led { } 
+      (if show
+          (println (format "%3d" passo) { -> } led { }
                    (length (ref-all 1 led)))))
     (length (ref-all 1 led))))
 
@@ -5709,7 +5709,7 @@ Scriviamo una funzione che genera tutti i numeri binari palindromi di lunghezza 
 
 (define (palindromi-binari K bin)
   ; Genera tutti i numeri binari palindromi di lunghezza K
-  ; Se bin = true, 
+  ; Se bin = true,
   ; allora restituisce una lista di binari
   ; altrimenti restituisce una lista di interi (valori decimali dei binari)
   (letn ((risultato '())        ; lista per accumulare i palindromi
@@ -5747,7 +5747,7 @@ Proviamo:
 (palindromi-binari 4 true)
 ;-> ("1001" "1111")
 (palindromi-binari 7 true)
-;-> ("1000001" "1001001" "1010101" "1011101" 
+;-> ("1000001" "1001001" "1010101" "1011101"
 ;->  "1100011" "1101011" "1110111" "1111111")
 (palindromi-binari 7)
 ;-> (65 73 85 93 99 107 119 127)
@@ -5844,7 +5844,7 @@ Abbiamo una lista di interi positivi nell'intervallo [1..K].
 Quanti interi ci possono essere al massimo nella lista che non sono coprimi tra loro?
 Il massimo è floor(K/2).
 
-Costruzione ottima: 
+Costruzione ottima:
 prendere tutti i numeri pari in [1..K] (hanno tutti gcd ≥ 2 a coppie).
 
 Funzione che restituisce il numero massimo di numeri coprimi (la lista dei pari):
@@ -6026,7 +6026,7 @@ I serbatoi seguono il principio dei vasi comunicanti.
               (++ k)))
     )
   ; inserimento ultima coppia
-  (if last-connesso 
+  (if last-connesso
     (push (sort (unique gruppo-corrente)) gruppi -1)
     (push (sort (unique (coppie -1))) gruppi -1))
   gruppi))
@@ -6053,6 +6053,7 @@ I serbatoi seguono il principio dei vasi comunicanti.
     ; lista dei gruppi di serbatoi collegati
     (setq gruppi '())
     (cond ((true? step) ; Apertura rubinetti: step-by-step
+            ; lista dei rubinetti aperti
             (setq aperti '())
             ; ciclo per ogni rubinetto da aprire
             (dolist (rub R)
@@ -6140,7 +6141,7 @@ Scriviamo una funzione che calcola l'espansione digitale di una formula utilizza
 "Create a file to run with BC (Basic Calculator)"
   (local (outfile)
     (setq outfile (open file-str "write"))
-    (write-line outfile "obase=ibase=A") ; Input e output: base 10 
+    (write-line outfile "obase=ibase=A") ; Input e output: base 10
     (write-line outfile (string "scale=" digits))
     (write-line outfile func-str)
     (write-line outfile "quit")
@@ -6195,7 +6196,7 @@ Decimal expansion of golden ratio phi (or tau) = (1 + sqrt(5))/2.
   5, 7, 6, 2, 8, 6, 2, 1, 3, 5, 4, 4, 8, 6, 2, 2, 7, 0, 5, 2, 6, 0, 4, 6,
   2, 8, 1, 8, 9, 0, 2, 4, 4, 9, 7, 0, 7, 2, 0, 7, 2, 0, 4, 1, 8, 9, 3, 9,
   1, 1, 3, 7, 4, 8, 4, 7, 5, ...
-  
+
 In 'bc' possiamo ottenere pi greco usando la funzione arcotangente 'a()'.
 Infatti, con 'bc -l', la libreria matematica definisce 'a(x)' come arctan(x) in radianti.
 E siccome:
@@ -6232,6 +6233,67 @@ Allora possiamo usare più cifre di precisione e poi prendere solo le cifre volu
 Il risultato è corretto.
 
 Vedi anche "newLISP e BC (Basic Calculator)" su "Note libere 29".
+
+
+----------------------------------------------
+Numero massimo che ha il minor numero di cifre
+----------------------------------------------
+
+Dato una lista di numeri interi positivi, determinare il numero più grande che ha il minor numero di cifre.
+
+Esempio:
+  lista = (3 4 56 8 978)
+  output = 8 (i numeri con il minor numero di cifre sono 3, 4 e 8 e il massimo vale 8)
+
+Metodo 1
+--------
+Semplice ciclo che verifica le proprietà di ogni numero della lista e aggiorna il valore massimo.
+
+(define (max-num1 lst)
+  (let ( (min-digits (length (lst 0)))  ; lunghezza minima del numero
+         (max-num (lst 0)) )            ; numero massimo
+    ; ciclo per ogni numero...
+    (dolist (el lst)
+            ; se lunghezza numero corrente uguale lunghezza minima
+      (cond ((= (length el) min-digits)
+              ; aggiornare numero massimo con il valore maggiore
+              (setq max-num (max max-num el)))
+            ; se lunghezza numero corrente minore lunghezza minima
+            ((< (length el) min-digits)
+              ; aggiornare lunghezza minima e numero massimo
+              (setq min-digits (length el))
+              (setq max-num el))))
+    max-num))
+
+(max-num1 '(2 3 56 8 978))
+;-> 8
+(max-num1 '(1 1 1))
+;-> 1
+
+Metodo 2
+--------
+Questo metodo converte i numeri in stringhe una sola volta e filtra quelli con la lunghezza minima.
+
+(define (max-num2 lst)
+  (letn ((lunghezze (map (fn(x) (length (string x))) lst))
+         (minlen (apply min lunghezze)))
+    (apply max (filter (fn(x) (= (length (string x)) minlen)) lst))))
+
+(max-num2 '(2 3 56 8 978))
+;-> 8
+(max-num2 '(1 1 1))
+;-> 1
+
+Versione code-golf (120 caratteri, one-line):
+
+(define(f L)
+(letn((o(map(fn(x)(length(string x)))L))(m(apply min o)))
+(apply max(filter(fn(x)(=(length(string x))m))L))))
+
+(f '(2 3 56 8 978))
+;-> 8
+(f '(1 1 1))
+;-> 1
 
 ============================================================================
 

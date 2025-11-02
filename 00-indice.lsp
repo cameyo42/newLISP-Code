@@ -3249,6 +3249,7 @@ NOTE LIBERE 33
   Sequenza uguale con tre formule diverse
   Serbatoi comunicanti
   Espansione digitale di un numero generato da una formula (con BC)
+  Numero massimo che ha il minor numero di cifre
 
 PROBLEMI SUI DADI
 =================
