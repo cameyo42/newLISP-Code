@@ -2160,6 +2160,8 @@ Adesso scriviamo la funzione:
 88 ha 4 (quattro) buchi
 ...
 
+Vedi anche "Sequenza e buchi delle cifre numeriche" su "Note libere 33".
+
 
 -------------------
 Ordinare tre numeri

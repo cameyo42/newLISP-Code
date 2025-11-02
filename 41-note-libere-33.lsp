@@ -6523,5 +6523,123 @@ Matrice 4x4
 Matrice 5x5 (non provare)
 (time (println (length (tutti-numeri (explode (rand 10 25) 5)))))
 
+
+--------------------------------------
+Sequenza e buchi delle cifre numeriche
+--------------------------------------
+
+Lisat delle cifre con buchi (loop):
+1) (0 4 6 8 9) Holey   (il 4 viene considerato con un buco)
+2) (0 6 8 9) Non-Holey (il 4 viene considerato senza buco)
+
+  . . . . . . . . . . . .       . . . . . . . . . . . .
+  .                     .       .                     .
+  .           XXXX      .       .    XX       XX      .
+  .          XX XX      .       .    XX       XX      .
+  .         XX  XX      .       .    XX       XX      .
+  .        XX   XX      .       .    XX       XX      .
+  .       XX    XX      .       .    XX       XX      .
+  .      XX     XX      .       .    XX       XX      .
+  .     XX      XX      .       .    XX       XX      .
+  .    XX       XX      .       .    XX       XX      .
+  .    XXXXXXXXXXXXX    .       .    XXXXXXXXXXXXX    .
+  .             XX      .       .             XX      .
+  .             XX      .       .             XX      .
+  .             XX      .       .             XX      .
+  .             XX      .       .             XX      .
+  .             XX      .       .             XX      .
+  .                     .       .                     .
+  .       "Holey"       .       .     "Non-Holey"     .
+  . . . . . . . . . . . .       . . . . . . . . . . . .
+
+Sequenza OEIS A001743:
+Numbers in which every digit contains at least one loop (version 1, Non-Holey).
+  0, 6, 8, 9, 60, 66, 68, 69, 80, 86, 88, 89, 90, 96, 98, 99, 600, 606,
+  608, 609, 660, 666, 668, 669, 680, 686, 688, 689, 690, 696, 698, 699,
+  800, 806, 808, 809, 860, 866, 868, 869, 880, 886, 888, 889, 890, 896,
+  898, 899, 900, 906, 908, 909, 960, 966, 968, 969, ...
+
+Sequenza OEIS A001744:
+Numbers n such that every digit contains a loop (version 2, Holey).
+  0, 4, 6, 8, 9, 40, 44, 46, 48, 49, 60, 64, 66, 68, 69, 80, 84, 86, 88,
+  89, 90, 94, 96, 98, 99, 400, 404, 406, 408, 409, 440, 444, 446, 448,
+  449, 460, 464, 466, 468, 469, 480, 484, 486, 488, 489, 490, 494, 496,
+  498, 499, 600, 604, 606, 608, 609, 640, 644, 646, ...
+
+(define (seq limite holey)
+  (local (out buchi)
+    (setq out '())
+    (if holey
+        (setq buchi '((0 1) (4 1) (6 1) (8 2) (9 1)))
+        (setq buchi '((0 1) (6 1) (8 2) (9 1))))
+    (for (num 0 limite)
+      (if (for-all (fn(x) (lookup x buchi)) (map int (explode (string num))))
+          (push num out -1)))
+    out))
+
+Sequenza Non-Holey (senza il 4)
+(seq 969)
+;-> (0 6 8 9 60 66 68 69 80 86 88 89 90 96 98 99 600 606
+;->  608 609 660 666 668 669 680 686 688 689 690 696 698 699
+;->  800 806 808 809 860 866 868 869 880 886 888 889 890 896
+;->  898 899 900 906 908 909 960 966 968 969)
+
+Sequenza Holey (con il 4)
+(seq 646 true)
+;-> (0 4 6 8 9 40 44 46 48 49 60 64 66 68 69 80 84 86 88
+;->  89 90 94 96 98 99 400 404 406 408 409 440 444 446 448
+;->  449 460 464 466 468 469 480 484 486 488 489 490 494 496
+;->  498 499 600 604 606 608 609 640 644 646)
+
+Sequenza OEIS A249572:
+Least positive integer whose decimal digits divide the plane into n+1 regions.
+Equivalently, least positive integer with n holes in its decimal digits.
+  1, 4, 8, 48, 88, 488, 888, 4888, 8888, 48888, 88888, 488888, 888888,
+  4888888, 8888888, 48888888, 88888888, 488888888, 888888888, 4888888888,
+  8888888888, 48888888888, 88888888888, 488888888888, 888888888888,
+  4888888888888, 8888888888888, 48888888888888 ...
+
+(define (n-holes limite)
+  (let ( (val 0) (out '())
+         (buchi '((0 1) (1 0) (2 0) (3 0) (4 1)
+                  (5 0) (6 1) (7 0) (8 2) (9 1))) )
+    (dotimes (num limite)
+      ;somma dei buchi di tutte le cifre che compongono il numero n
+      (if (= val (apply +
+            (map (fn (x) (lookup x buchi)) (map int (explode (string num))))))
+          ;(begin (push (list val n) out -1) (++ val)))
+          (begin (push num out -1) (++ val))))
+    out))
+
+(n-holes 100000)
+;-> (1 4 8 48 88 488 888 4888 8888 48888 88888)
+
+Vediamo una versione che sfrutta la costruzione:
+1) da 48 cambiare 4 in 8 --> 88
+2) da 88 aggiungere 4 davanti --> 488
+3) vai al passo 1) con il numero corrente
+
+(define (n-buchi termini)
+  (let ( (out '("1" "4" "8" "48")) (k 0)
+         (buchi '((0 1) (1 0) (2 0) (3 0) (4 1)
+                  (5 0) (6 1) (7 0) (8 2) (9 1))) )
+    (setq num "48")
+    (while (< (length out) termini)
+      ;(setq num (dup "8" (length num)))
+      (setf (num 0) "8") ; la prima cifra del numero corrente passa da 4 a 8
+      ;(println "num1: " num)
+      (push num out -1)
+      (setq num (push "4" num)) ; aggiunge 4 davanti al numero corrente
+      ;(println "num2: " num)
+      (push num out -1))
+    out))
+
+(n-buchi 20)
+;-> ("1" "4" "8" "48" "88" "488" "888" "4888" "8888" "48888" "88888" "488888"
+;->  "888888" "4888888" "8888888" "48888888" "88888888" "488888888" "888888888"
+;->  "4888888888")
+
+Vedi anche "I delle cifre numeriche" su "Note libere 1".
+
 ============================================================================
 
