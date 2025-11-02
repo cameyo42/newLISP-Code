@@ -6272,7 +6272,7 @@ Semplice ciclo che verifica le proprietà di ogni numero della lista e aggiorna 
 
 Metodo 2
 --------
-Questo metodo converte i numeri in stringhe una sola volta e filtra quelli con la lunghezza minima.
+Questo metodo converte i numeri in stringhe e filtra quelli con la lunghezza minima.
 
 (define (max-num2 lst)
   (letn ((lunghezze (map (fn(x) (length (string x))) lst))
@@ -6294,6 +6294,234 @@ Versione code-golf (120 caratteri, one-line):
 ;-> 8
 (f '(1 1 1))
 ;-> 1
+
+Metodo 3
+--------
+1) Creiamo una lista di coppie (a b) tali che:
+   a = lunghezza del numero
+   b = negativo del numero (facilita il successivo ordinamento)
+2) Ordiniamo la lista di coppie in modo non decrescente
+3) Il risultato è il neagativo del valore 'b' della prima coppia
+
+Esempio:
+(setq lista '(2 3 56 8 978))
+; crea la lista di coppie
+(setq coppie (map list (map length lista) (map - lista)))
+;-> ((1 -2) (1 -3) (2 -56) (1 -8) (3 -978))
+; ordina la lista di coppie (non decrescente)
+(setq ordinata (sort coppie))
+;-> ((1 -8) (1 -3) (1 -2) (2 -56) (3 -978))
+; Prende il negativo di 'b' della prima coppia della lista ordinata
+(- (ordinata 0 1))
+;-> 8
+
+(define(max-num3 lst)
+  (- ((sort (map list (map length lst) (map - lst))) 0 1)))
+
+(max-num3 '(2 3 56 8 978))
+;-> 8
+(max-num3 '(1 1 1))
+;-> 1
+
+Versione code-golf (60 caratteri, one-line):
+
+(define(g L)(-((sort(map list(map length L)(map - L)))0 1)))
+
+(g '(2 3 56 8 978))
+;-> 8
+(g '(1 1 1))
+;-> 1
+
+Test di correttezza:
+
+(setq t (rand 1e6 1e3))
+(= (max-num1 t) (max-num2 t) (max-num3 t))
+;-> true
+
+Test di velocità:
+
+Lista con pochi numeri (10)
+(silent (setq t (rand 1e6 10)))
+(time (max-num1 t) 1e5)
+;-> 260.184
+(time (max-num2 t) 1e5)
+;-> 1005.566
+(time (max-num3 t) 1e5)
+;-> 259.615
+
+Lista con tanti numeri (1000)
+(setq t (rand 1e6 1e4))
+(time (max-num1 t) 1e2)
+;-> 235.188
+(time (max-num2 t) 1e2)
+;-> 949.583
+(time (max-num3 t) 1e2)
+;-> 539.995
+
+La prima funzione è la più veloce (attraversa la lista soltanto una volta).
+
+
+------------------------------
+Numeri in una matrice di cifre
+------------------------------
+
+Data una matrice MxN di cifre, determinare tutti i numeri che si possono ottenere partendo da ogni cella.
+Ogni cella può essere usata solo una volta nel percorso.
+Sono da considerare le 4 direzioni (N, S, E, O).
+
+Esempio:
+  matrice = 1 2 3
+            4 5 6
+            7 8 9
+  Partendo da 1: 1, 12, 14, 123, 147, 125, ecc.
+  Partendo da 4: 4, 41, 412, 47852369, ecc.
+  ecc.
+
+;------------------------------------------------------------
+; Funzione: tutti-numeri
+; Scopo:
+;   Generare tutti i numeri che si possono ottenere partendo
+;   da ciascuna cella di una matrice di cifre (0..9).
+; Regole:
+;   - Da ogni cella si può muovere solo in 4 direzioni:
+;     NORD, SUD, EST, OVEST.
+;   - Ogni cella può essere usata una sola volta nello stesso percorso.
+;   - Ogni percorso genera un numero concatenando le cifre visitate.
+;   - Il risultato è una lista con tutti i numeri generabili.
+; Esempio:
+;   matrice = ((1 2 3)
+;              (4 5 6)
+;              (7 8 9))
+;   -> numeri generabili: 1, 12, 14, 125, 147, 45, 78, 98, ecc.
+;------------------------------------------------------------
+(define (tutti-numeri matrice)
+  (letn ((righe (length matrice))       ; numero di righe della matrice
+         (colonne (length (matrice 0))) ; numero di colonne della matrice
+         ; 8 direzioni (N, S, E, O, NE, NO, SE, SO)
+         ;(direzioni '((1 0) (-1 0) (0 1) (0 -1) (1 1) (1 -1) (-1 1) (-1 -1)))
+         (direzioni '((1 0) (-1 0) (0 1) (0 -1))) ; 4 direzioni (S, N, E, O)
+         (numeri '())) ; lista che conterrà tutti i numeri generabili
+;--------------------------------------------------------
+; Funzione interna: esplora
+;   Esegue una ricerca in profondità (DFS) partendo da
+;   una cella (i, j) e costruendo tutti i possibili numeri.
+; Parametri:
+;   i, j         -> coordinate correnti nella matrice
+;   numero       -> valore numerico costruito fino a qui
+;   visitati     -> lista di celle già usate nel percorso
+;--------------------------------------------------------
+(define (esplora i j numero visitati)
+  ; Controlla che la cella sia dentro i limiti della matrice
+  ; e che non sia già stata visitata.
+  (if (and (>= i 0) (< i righe)
+           (>= j 0) (< j colonne)
+           (not (ref (list i j) visitati)))
+      (letn (
+             ; Crea un nuovo numero concatenando la cifra corrente
+             ; (es. numero=12, cifra=3 -> nuovo-numero=123)
+             (nuovo-numero (+ (* numero 10) (matrice i j)))
+             ; Aggiorna la lista delle celle visitate
+             (nuovi-visitati (append visitati (list (list i j))))
+             ;(nuovi-visitati (push (list (list i j)) visitati)) ;più lenta
+            )
+        ; Aggiunge il nuovo numero alla lista dei risultati
+        (push nuovo-numero numeri -1)
+        ; Prosegue l'esplorazione in tutte le 4 direzioni
+        (dolist (d direzioni)
+          (esplora (+ i (d 0)) (+ j (d 1)) nuovo-numero nuovi-visitati)))))
+;--------------------------------------------------------
+; Avvio dell'esplorazione:
+; Per ogni cella della matrice, chiama 'esplora'.
+;--------------------------------------------------------
+(for (i 0 (- righe 1))
+  (for (j 0 (- colonne 1))
+    (esplora i j 0 '())))
+; Restituisce la lista di tutti i numeri generabili
+numeri))
+
+Proviamo:
+
+(setq matrice '((1 2 3) (4 5 6) (7 8 9)))
+;-> (tutti-numeri matrice)
+;-> (1 14 147 1478 14785 147852 1478523 14785236 147852369
+;->  ...
+;->  9874521 987456 9874563 98745632 987456321)
+(length (tutti-numeri matrice))
+;-> 653
+(length (unique (tutti-numeri matrice)))
+;-> 653
+
+(setq matrice '((1 1 3) (4 4 6) (7 8 9)))
+(tutti-numeri matrice)
+;-> (1 14 147 1478 14784 147841 1478413 14784136 147841369
+;->  ...
+;->  98744136 9874411 987446 9874463 98744631 987446311)
+(length (tutti-numeri matrice))
+;-> 653
+(length (unique (tutti-numeri matrice)))
+;-> 639
+
+; Funzione senza commenti
+(define (tutti-numeri2 matrice)
+  (letn ( (righe (length matrice))
+          (colonne (length (matrice 0)))
+          (direzioni '((1 0) (-1 0) (0 1) (0 -1)))
+          (numeri '()) )
+    (define (esplora i j numero visitati)
+      (if (and (>= i 0) (< i righe)
+               (>= j 0) (< j colonne)
+               (not (ref (list i j) visitati)))
+          (letn ( (nuovo-numero (+ (* numero 10) (matrice i j)))
+                  (nuovi-visitati (append visitati (list (list i j)))) )
+            (push nuovo-numero numeri -1)
+            (dolist (d direzioni)
+              (esplora (+ i (d 0)) (+ j (d 1)) nuovo-numero nuovi-visitati)))))
+(for (i 0 (- righe 1))
+  (for (j 0 (- colonne 1))
+    (esplora i j 0 '())))
+numeri))
+
+Nota:
+Se volessimo la somma dei percorsi (invece di concatenare le cifre) basta modificare la riga:
+  (nuovo-numero (+ (* numero 10) ((matrice i j))))
+con
+  (nuovo-numero (+ numero ((matrice i j))))
+Questo trasforma la funzione da "costruzione di cifre concatenate" a "somma dei numeri lungo il percorso".
+In questo caso una cella potrebbe contenere anche un numero con più cifre.
+
+Quanti numeri vengono generati con una matrice MxN?
+
+Se la matrice ha (M x N = K) celle (cioè K elementi totali), allora:
+a) ogni cella può essere punto di partenza
+b) usando solo celle adiacenti e mai ripetute da ciascuna cella si possono formare percorsi al massimo di lunghezza 1, 2, ..., K.
+Il numero esatto di numeri generabili dipende dalla forma della matrice (quali celle confinano con quali), quindi non esiste una formula chiusa generale.
+1. Limite superiore (senza restrizioni di adiacenza):
+   Se potessi usare qualunque cella in qualunque ordine, ogni cella iniziale genererebbe:
+   Sum[i=1,K] P(K-1, i-1), dove P(n, k) = n!/(n - k)!
+   (cioè tutte le permutazioni di lunghezza variabile da 1 a K.
+   Il totale sarebbe quindi: K * Sum[i=1,K] P(K-1, i-1)
+   Si tratta di un numero enorme anche per matrici piccole.
+2. Con restrizione di adiacenza (solo N, S, E, O):
+   Qui le possibilità diminuiscono molto, perché da ogni cella si può proseguire in al massimo 4 direzioni, poi 3, poi 2, ecc., a seconda del bordo e dei percorsi precedenti.
+   Il numero cresce comunque esponenzialmente con K, ma con un coefficiente inferiore.
+3. In pratica:
+   La funzione esplorativa fa una ricerca in profondità (DFS) che genera tutti i cammini semplici (cioè senza ripetizioni di nodi) in un grafo di adiacenza 4-connesso.
+   Quindi, il numero totale dei numeri generati = numero di cammini semplici nel grafo formato dalle celle.
+
+Vediamo il numero di elementi generati per diverse matrici:
+
+Matrice 2x2
+(length (tutti-numeri (explode (rand 10 4) 2)))
+;-> 28
+Matrice 3x3
+(length (tutti-numeri (explode (rand 10 9) 3)))
+;-> 653
+Matrice 4x4
+(time (println (length (tutti-numeri (explode (rand 10 16) 4)))))
+;-> 28512
+;-> 9577.982
+Matrice 5x5 (non provare)
+(time (println (length (tutti-numeri (explode (rand 10 25) 5)))))
 
 ============================================================================
 

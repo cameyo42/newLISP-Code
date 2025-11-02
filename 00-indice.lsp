@@ -3250,6 +3250,7 @@ NOTE LIBERE 33
   Serbatoi comunicanti
   Espansione digitale di un numero generato da una formula (con BC)
   Numero massimo che ha il minor numero di cifre
+  Numeri in una matrice di cifre
 
 PROBLEMI SUI DADI
 =================
