@@ -6525,7 +6525,7 @@ Matrice 5x5 (non provare)
 
 
 --------------------------------------
-Sequenza e buchi delle cifre numeriche
+Sequenze e buchi delle cifre numeriche
 --------------------------------------
 
 Lisat delle cifre con buchi (loop):
@@ -6639,7 +6639,56 @@ Vediamo una versione che sfrutta la costruzione:
 ;->  "888888" "4888888" "8888888" "48888888" "88888888" "488888888" "888888888"
 ;->  "4888888888")
 
-Vedi anche "I delle cifre numeriche" su "Note libere 1".
+Vedi anche "I buchi delle cifre numeriche" su "Note libere 1".
+
+
+----------------
+ILD di un intero
+----------------
+
+Dato un numero intero N il suo ILD (Integer-Length-Digits) viene calcolato nel modo seguente:
+
+  N + lunghezza(N) + Somma-Cifre(N)
+
+Esempi:
+
+N positivo
+  N = 125
+  ILD = 125 + 3 + (1+2+5) = 136
+
+N negativo
+  N = -125
+  ILD = -125 + 4 + (-1 + 2 + 5) = -115
+In questo caso il "-" fa parte della lunghezza del numero (4) e della prima cifra (-1).
+
+(define (ild num)
+  (let ( (digit (map int (explode (string (abs num)))))
+         (len (length num)) )
+    (when (< num 0)
+           (setf (digit 0) (* -1 (digit 0)))
+           (setq len (++ len)))
+    (+ num len (apply + digit))))
+
+(ild 125)
+;-> 136
+(ild -125)
+;-> -115
+
+(map ild (sequence -10 10))
+(-8 -16 -14 -12 -10 -8 -6 -4 -2 0 1 3 5 7 9 11 13 15 17 19 13)
+
+Versione code-golf (128 caratteri, one-line)
+(define(f n)
+(letn((d(map int(explode(string(abs n)))))(l(length d)))
+(if(< n 0)(setf(d 0)(* -1(d 0))l(++ l)))
+(+ n l(apply + d))))
+
+(f 125)
+;-> 136
+(f -125)
+;-> -115
+(map f (sequence -10 10))
+;-> (-8 -16 -14 -12 -10 -8 -6 -4 -2 0 1 3 5 7 9 11 13 15 17 19 13)
 
 ============================================================================
 

@@ -3251,7 +3251,8 @@ NOTE LIBERE 33
   Espansione digitale di un numero generato da una formula (con BC)
   Numero massimo che ha il minor numero di cifre
   Numeri in una matrice di cifre
-  Sequenza e buchi delle cifre numeriche
+  Sequenze e buchi delle cifre numeriche
+  ILD di un intero
 
 PROBLEMI SUI DADI
 =================
