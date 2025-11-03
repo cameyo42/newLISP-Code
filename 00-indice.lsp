@@ -3253,6 +3253,8 @@ NOTE LIBERE 33
   Numeri in una matrice di cifre
   Sequenze e buchi delle cifre numeriche
   ILD di un intero
+  Lista di coefficienti --> polinomio
+  Distanze di visibilità
 
 PROBLEMI SUI DADI
 =================

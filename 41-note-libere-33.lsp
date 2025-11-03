@@ -6690,5 +6690,198 @@ Versione code-golf (128 caratteri, one-line)
 (map f (sequence -10 10))
 ;-> (-8 -16 -14 -12 -10 -8 -6 -4 -2 0 1 3 5 7 9 11 13 15 17 19 13)
 
+
+-----------------------------------
+Lista di coefficienti --> polinomio
+-----------------------------------
+
+Abbiamo una lista di numeri che rappresentano i coefficienti di un polinomio partendo dal termine di grado massimo fino al termine noto.
+Sono presenti, con valore 0, anche i coefficienti delle potenze mancanti nel polinomio.
+In questo modo la potenza massima del polinomio vale: lunghezza(lista) - 1.
+
+Esempi:
+  lista = (3 0 2 -1 0)
+  grado = 5 - 1 = 4
+  polinomio = 3*x^4 + 2*x^2 - x
+
+  lista = (-1 2 3 4 -5)
+  grado = 5 - 1 = 4
+  polinomio = -x^4 + 2*x^3 + 3*x^2 + 4*x - 5
+
+Scriviamo una funzione che prende la lista dei coefficienti e restituisce il polinomio (stringa).
+
+(define (coeff-poly lst)
+  ;-------------------------------------------------------------
+  ; Converte una lista di coefficienti in un polinomio in forma testuale.
+  ; Ogni elemento della lista rappresenta un coefficiente, partendo dal termine
+  ; di grado massimo fino al termine noto.
+  ;
+  ; Esempi:
+  ;   (3 0 -2 -1 -4) -> "3*x^4 - 2*x^2 - x - 4"
+  ;   (0 -1 -2 -3)   -> "-x^2 - 2*x - 3"
+  ;   (0 0 2)        -> "2*x"
+  ;   (0 0 0 5)      -> "5"
+  ;
+  ; Regole:
+  ;  - I coefficienti nulli (0) vengono ignorati.
+  ;  - Se il primo coefficiente non nullo è negativo, inizia con il segno "-".
+  ;  - I coefficienti 1 e -1 vengono omessi (eccetto per il termine costante).
+  ;  - Gli operatori e le potenze sono scritti come ("*x", "x^n").
+  ;  - Gestione degli spazi e dei segni "+" e "-".
+  ;-------------------------------------------------------------
+  (letn ((grado (- (length lst) 1)) ; grado massimo del polinomio
+         (ris "")                   ; stringa risultato
+         (iniziato nil))            ; flag per sapere se è stato trovato il primo termine non nullo
+    ;---------------------------------------------
+    ; Ciclo per ogni coefficiente...
+    ;---------------------------------------------
+    (for (i 0 grado)
+      (letn ((coef (lst i))         ; coefficiente corrente
+             (expr (- grado i)))    ; grado del termine
+        (if (!= coef 0)             ; ignora coefficienti nulli
+          (begin
+            ;---------------------------------------------
+            ; Gestione del segno
+            ;---------------------------------------------
+            (cond
+              ; se non è il primo termine e il coefficiente è positivo
+              ((and iniziato (> coef 0)) (extend ris " + "))
+              ; se non è il primo termine e il coefficiente è negativo
+              ((and iniziato (< coef 0)) (extend ris " - "))
+              ; se è il primo termine e negativo
+              ((and (not iniziato) (< coef 0)) (extend ris "-")))
+            ; ora sappiamo che abbiamo iniziato a scrivere il polinomio
+            (set 'iniziato true)
+            ; valore assoluto del coefficiente per evitare doppio segno
+            (let (abscoef (abs coef))
+              ;---------------------------------------------
+              ; Costruzione della parte testuale del termine
+              ;---------------------------------------------
+              (cond
+                ; termine costante (grado 0)
+                ((= expr 0)
+                  (extend ris (string abscoef)))
+                ; termine lineare (grado 1)
+                ((= expr 1)
+                  (extend ris (cond
+                    ; se coefficiente = 1 o -1 scrive solo "x"
+                    ((= abscoef 1) "x")
+                    ; altrimenti scrive "coef*x"
+                    (true (string abscoef "*x")))))
+                ; termine di grado > 1
+                (true
+                  (extend ris (cond
+                    ; se coefficiente = 1 o -1 scrive solo "x^n"
+                    ((= abscoef 1) (string "x^" expr))
+                    ; altrimenti "coef*x^n"
+                    (true (string abscoef "*x^" expr)))))))))))
+    ; restituisce il polinomio completo come stringa
+    ris))
+
+Proviamo:
+
+(coeff-poly '(3 0 2 -1 0))
+;-> "3*x^4 + 2*x^2 - x"
+(coeff-poly '(-1 2 3 4 -5))
+;-> "-x^4 + 2*x^3 + 3*x^2 + 4*x - 5"
+(coeff-poly '(3 0 -2 -1 -4))
+;-> "3*x^4 - 2*x^2 - x - 4"
+(coeff-poly '(1 2 0))
+;-> "x^2 + 2*x"
+(coeff-poly '(-2 2 0))
+;-> "-2*x^2 + 2*x"
+(coeff-poly '(0 -1 2 0))
+;-> "-x^2 + 2*x"
+(coeff-poly '(0 -1 -2 -3))
+;-> "-x^2 - 2*x - 3"
+(coeff-poly '(0 1 -2 -3))
+;-> "x^2 - 2*x - 3"
+(coeff-poly '(0 -1 0 -3))
+;-> "-x^2 - 3"
+(coeff-poly '(0 2 -3))
+;-> "2*x - 3"
+(coeff-poly '(0 0 -3))
+;-> "-3"
+(coeff-poly '(-3))
+;-> "-3"
+(coeff-poly '(-5 0 0 0 0))
+;-> "-5*x^4"
+
+
+----------------------
+Distanze di visibilità
+----------------------
+
+Supponiamo di avere una lista di numeri (es. (3 2 5 3 3 4 1 3)) che rappresentano l'altezza delle linee di un istogramma.
+Per ogni linea di istogramma tracciamo una linea orizzontale partendo dalla cima della linea fino ad incontrare o l'asse Y oppure una linea precedente (vedi diagramma seguente).
+```
+    Y
+    |
+  6 |   3    
+  5 |--------|   3          
+  4 |1       |--------|  2   
+  3 |--|1    |--|--|  |-----|
+  2 |  |--|  |1 |1 |  |1    |
+  1 |  |  |  |  |  |  |--|  |
+    +----------------------------- X
+    0  1  2  3  4  5  6  7  8  9
+```
+La linea 1 (valore 3) vede Y --> distanza = 1
+La linea 2 (valore 2) vede la linea 1 --> distanza = 1
+La linea 3 (valore 5) vede Y --> distanza = 3
+La linea 4 (valore 3) vede la linea 3 --> distanza = 1
+La linea 5 (valore 3) vede la linea 4 --> distanza = 1
+La linea 6 (valore 4) vede la linea 3 --> distanza = 3
+La linea 7 (valore 1) vede la linea 6 --> distanza = 1
+La linea 8 (valore 3) vede la linea 6 --> distanza = 2
+
+In questo caso la lista delle distanze vale: (1 1 3 1 1 3 1 2)
+
+Scrivere una funzione che prende una lista di interi positivi e restituisce la lista delle distanze.
+
+Algoritmo
+Per ogni i-esima barra (tranne la prima che ha sempre distanza pari a 1), si guarda a sinistra fino a trovare la prima con altezza >= dell'attuale.
+Se trovata -> distanza = i - j.
+Se non trovata -> "vede" Y -> distanza = i + 1.
+
+
+(define (distanze lst)
+  (letn ( (len (length lst)) ; numero di barre
+          (cur-dist 0)       ; distanza barra corrente
+          (precedente nil)   ; flag barra precedente
+          (out '(1))         ; lista delle distanze (la prima barra ha sempre distanza 1)
+        )
+    ; ciclo per ogni barra (tranne la prima)...
+    (for (i 1 (- len 1))
+      (setq cur-dist 0)
+      (setq precedente nil)
+      ; ricerca della prima barra precedente a
+      ; quella corrente che ha altezza >=
+      (for (j (- i 1) 0 -1 precedente)
+        (if (>= (lst j) (lst i))
+            ; barra trovata --> vede la barra trovata
+            (set 'cur-dist (- i j) 'precedente true)
+            ; barra non trovata --> vede Y
+            (setq cur-dist (+ i 1))))
+      ; aggiorna la lista delle distanze
+      ; con la distanza della barra corrente
+      (push cur-dist out -1))
+    out))
+
+Proviamo:
+
+(distanze '(3 2 5 3 3 4 1 3))
+;-> (1 1 3 1 1 3 1 2)
+(distanze '(3 2 1))
+;-> (1 1 1)
+(distanze '(3 4 1))
+;-> (1 2 1)
+(distanze '(3 3 1))
+;-> (1 1 1)
+(distanze (sequence 1 9))
+;-> (1 2 3 4 5 6 7 8 9)
+(distanze (sequence 9 1))
+;-> (1 1 1 1 1 1 1 1 1)
+
 ============================================================================
 
