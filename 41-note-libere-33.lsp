@@ -3220,7 +3220,7 @@ L'obiettivo è trovare interi (a, b, c) tali che la somma dei loro cubi dia un n
 
 L'equazione è un caso particolare delle equazioni diofantee, cioè equazioni in cui si cercano soluzioni intere.
 La forma generale (a^3 + b^3 + c^3 = k) è particolarmente interessante perché:
-- i cubi crescono rapidamente → lo spazio delle soluzioni è molto sparso;
+- i cubi crescono rapidamente -> lo spazio delle soluzioni è molto sparso;
 - non esiste una formula generale per trovarle;
 - alcune soluzioni sono enormi (centinaia o migliaia di cifre).
 
@@ -4688,7 +4688,7 @@ Esempio:
 Algoritmo
 ---------
 1. Inizializzazione
-   Se la lista è vuota → termina con messaggio `"Lista vuota"`.
+   Se la lista è vuota -> termina con messaggio "Lista vuota".
    Crea una lista associativa 'counts' per contare quante volte compare ciascun fattore primo nei numeri della lista.
 2. Fattorizzazione
    Per ogni elemento 'x' della lista:
@@ -5245,8 +5245,8 @@ Ogni elemento dello stack rappresenta uno stato:
          Se 'somma == K', aggiungi la selezione tra le soluzioni.
        Altrimenti:
          Crea due nuovi stati:
-         a. Salta la riga r → la somma non cambia.
-         b. Scegli un elemento della riga r → per ogni colonna 'i', aggiungi il valore 'v' e aggiorna la somma.
+         a. Salta la riga r -> la somma non cambia.
+         b. Scegli un elemento della riga r -> per ogni colonna 'i', aggiungi il valore 'v' e aggiorna la somma.
 3. Potatura
    Se '(+ somma v) > K', lo stato non viene espanso (ottimizzazione valida poiché i numeri sono naturali).
 4. Terminazione
@@ -6814,7 +6814,7 @@ Distanze di visibilità
 
 Supponiamo di avere una lista di numeri (es. (3 2 5 3 3 4 1 3)) che rappresentano l'altezza delle linee di un istogramma.
 Per ogni linea di istogramma tracciamo una linea orizzontale partendo dalla cima della linea fino ad incontrare o l'asse Y oppure una linea precedente (vedi diagramma seguente).
-```
+
     Y
     |
   6 |   3    
@@ -6825,7 +6825,7 @@ Per ogni linea di istogramma tracciamo una linea orizzontale partendo dalla cima
   1 |  |  |  |  |  |  |--|  |
     +----------------------------- X
     0  1  2  3  4  5  6  7  8  9
-```
+
 La linea 1 (valore 3) vede Y --> distanza = 1
 La linea 2 (valore 2) vede la linea 1 --> distanza = 1
 La linea 3 (valore 5) vede Y --> distanza = 3
@@ -6882,6 +6882,320 @@ Proviamo:
 ;-> (1 2 3 4 5 6 7 8 9)
 (distanze (sequence 9 1))
 ;-> (1 1 1 1 1 1 1 1 1)
+
+
+---------------
+Numeri di Schur
+---------------
+
+Consideriamo i numeri naturali (1,2,3,...).
+Ora supponiamo di colorare i numeri da 1 fino a N con k colori (ad esempio rosso, blu, verde, ...), in modo che:
+- Ogni numero da 1 a N riceve uno dei k colori.
+- E stiami tentando che in nessun colore ci sia una tripla (x,y,z) (non necessariamente tutti distinti) tale che:
+  x + y = z (cioè siano tutti e tre dello stesso colore).
+
+La domanda è: fino a che valore massimo di N è possibile farlo?
+In altre parole: qual è il più grande N tale che esiste una colorazione con k colori che evita completamente nel suo dominio la presenza di tre numeri dello stesso colore che soddisfano x + y = z?
+Quel massimo N viene chiamato numero di Schur per k colori.
+
+Sequenza dei numeri di Schur:
+ per 1 colore: Schur(1) = 2
+ per 2 colori: Schur(2) = 5
+ per 3 colori: Schur(3) = 14
+ per 4 colori: Schur(4) = 45
+ per 5 colori: Schur(5) = 161
+
+Quindi i numeri di Schur esprimono "quanto a lungo" si può colorare consecutivamente (1,2,3,...) con k colori senza forzare l'esistenza di una somma monocromatica (x + y = z).
+
+La matematica Issai Schur nel 1916-17 dimostrò che non importa quanti colori usi, alla fine se colori abbastanza numeri consecutivi comparirà sempre una tripla monochromatica con (x + y = z).
+
+Nota: per più di 4 colori (k > 4) questi numeri sono molto difficili da calcolare e richiedono enormi risorse computazionali.
+
+Sequenza OEIS A030126:
+Schur's numbers (version 1)
+  2, 5, 14, 45, 161
+Smallest number such that for any n-coloring of the integers 1, ..., a(n) no color is sum-free, that is, some color contains a triple x + y = z.
+
+Esempio:
+  a(4) = 45 (Baumert & Golomb)
+  A = (1 3 5 15 17 19 26 28 40 42 44)
+  B = (2 7 8 18 21 24 27 37 38 43)
+  C = (4 6 13 20 22 23 25 30 32 39 41)
+  D = (9 10 11 12 14 16 29 31 33 34 35 36)
+che dimostra che a(4) > 44.
+Questa è la costruzione esplicita di Baumert & Golomb (1965) per mostrare che
+a(4) > 44, cioè che esiste una colorazione di [1..44] con 4 colori senza triple x + y = z nello stesso colore.
+In altre parole, le 4 liste A, B, C, D sono insiemi sum-free che partizionano [1..44].
+Si noti che l'unione di questi insiemi è (1, ..., 44) e nessuno degli insiemi contiene tre numeri (forse non tutti distinti) tali che uno sia la somma degli altri due.
+
+Esempio:
+  a(5) = 161 (Exoo)
+  A = (1 6 10 18 21 23 26 30 34 38 43 45 50 54 65 74 87 96 107
+       111 116 118 123 127 131 135 138 140 143 151 155 160)
+  B = (2 3 8 14 19 20 24 25 36 46 47 51 62 73 88 99 110 114 115
+       125 136 137 141 142 147 153 158 159)
+  C = (4 5 15 16 22 28 29 39 40 41 42 48 49 59 102 112 113 119
+       120 121 122 132 133 139 145 146 156 157)
+  D = (7 9 11 12 13 17 27 31 32 33 35 37 53 56 57 61 79 82 100 104
+       105 108 124 126 128 129 130 134 144 148 149 150 152 154)
+  E = (44 52 55 58 60 63 64 66 67 68 69 70 71 72 75 76 77 78 80 81
+       83 84 85 86 89 90 91 92 93 94 95 97 98 101 103 106 109 117)
+  che dimostra che a(5) > 160.
+
+Possiamo scrivere una funzione che verifica le costruzioni/partizioni.
+Per verificare se una partizione (A B C D) di (1..N) è sum-free:
+  1) per ogni insieme S in (A B C D)
+  2) non devono esistere (x y z) in S tali che (x + y = z).
+     (x e y possono anche essere uguali)
+
+;-------------------------------------------------------------
+; Funzione: sum-free?
+; Scopo: verifica se un insieme è "sum-free"
+; cioè se NON esistono x, y, z in insieme tali che x + y = z
+; (x e y possono anche essere uguali)
+; Parametri:
+;   insieme  -> lista di numeri da controllare
+;   show     -> se true, stampa le violazioni trovate
+; Restituisce:
+;   true  se l'insieme è sum-free
+;   nil   se è presente almeno una violazione
+;-------------------------------------------------------------
+(define (sum-free? insieme show)
+  (letn ((len (length insieme))  ; numero di elementi dell'insieme
+         (ok true))              ; flag di validità
+    ; scorre tutte le coppie (x, y)
+    (for (i 0 (- len 1) 1 (not ok))
+      (for (j 0 (- len 1) 1 (not ok))
+        (letn ((x (insieme i))   ; primo elemento
+               (y (insieme j))   ; secondo elemento
+               (z (+ x y)))      ; somma dei due
+          ; se z appartiene allo stesso insieme -> violazione
+          (when (ref z insieme)
+            (if show
+              (println "Errore: " x " + " y " = " z " in " insieme))
+            (setq ok nil)))))    ; marca come non valido
+    ok))                         ; restituisce il risultato finale
+
+;-------------------------------------------------------------
+; Funzione: verifica-partizione
+; Scopo: verifica che una partizione sia corretta
+; cioè:
+;   1) contenga tutti i numeri consecutivi da 1 a N senza duplicati
+;   2) ogni sottoinsieme sia "sum-free"
+; Parametri:
+;   part  -> lista di sottoinsiemi (es. ((1 3 5 7) (2 6) (4)))
+;   show  -> se true, stampa dettagli sugli errori trovati
+; Restituisce:
+;   true  se la partizione è valida
+;   nil   se è presente almeno un errore
+;-------------------------------------------------------------
+(define (verifica-partizione part show)
+  (let ((nums (sort (flat part)))  ; tutti gli elementi ordinati
+        (ok true))                 ; flag di validità
+    (cond
+      ;---------------------------------------------
+      ; 1) verifica che i numeri siano consecutivi da 1 a N
+      ;---------------------------------------------
+      ((!= nums (sequence 1 (nums -1)))
+        (if show
+          (println
+            "Errore elementi: "
+            (difference (sequence 1 (nums -1)) nums) " "  ; mancanti
+            (difference nums (sequence 1 (nums -1)))))    ; in eccesso
+        (setq ok nil))
+      ;---------------------------------------------
+      ; 2) verifica la proprietà "sum-free" per ogni sottoinsieme
+      ;---------------------------------------------
+      (true
+        (dolist (s part (not ok))
+          (unless (sum-free? s show)
+            (setq ok nil)))))
+    ok)) ; restituisce il risultato complessivo
+
+Versioni senza commenti:
+
+(define (sum-free? insieme show)
+  (letn ((len (length insieme)) (ok true))
+    (for (i 0 (- len 1) 1 (not ok))
+      (for (j 0 (- len 1) 1 (not ok))
+        (letn ((x (insieme i))
+               (y (insieme j))
+               (z (+ x y)))
+          (when (ref z insieme)
+            (if show (println "Errore: " x " + " y " = " z " in " insieme))
+            (setq ok nil)))))
+    ok))
+
+(define (verifica-partizione part show)
+  (let ((nums (sort (flat part))) (ok true))
+    (cond ((!= nums (sequence 1 (nums -1)))
+            (if show (println "Errore elementi: "
+                      (difference (sequence 1 (nums -1)) nums) { }
+                      (difference nums (sequence 1 (nums -1)))))
+            (setq ok nil))
+          (true
+            (dolist (s part (not ok))
+              (unless (sum-free? s show)
+                (setq ok nil)))))
+    ok))
+
+Proviamo:
+
+(verifica-partizione '((1 3 5 7) (2 6) (4)))
+;-> true
+(verifica-partizione '((1 2 3) (4 5 6)))
+;-> nil
+(verifica-partizione '((1 2 3) (4 5 6)) true)
+;-> Errore: 1 + 1 = 2 in (1 2 3)
+;-> nil
+(verifica-partizione '((1 2 3) (4 5 7)) true)
+;-> Errore elementi: (6) ()
+;-> nil
+
+Verifichiamo gli esempi:
+
+a(4) = 45
+(setq A '(1 3 5 15 17 19 26 28 40 42 44))
+(setq B '(2 7 8 18 21 24 27 37 38 43))
+(setq C '(4 6 13 20 22 23 25 30 32 39 41))
+(setq D '(9 10 11 12 14 16 29 31 33 34 35 36))
+(setq partizione (list A B C D))
+(verifica-partizione partizione) 
+;-> true
+
+a(5) = 160
+(setq A '(1 6 10 18 21 23 26 30 34 38 43 45 50 54 65 74 87 96 107 111 116
+          118 123 127 131 135 138 140 143 151 155 160))
+(setq B '(2 3 8 14 19 20 24 25 36 46 47 51 62 73 88 99 110 114 115 125 136
+          137 141 142 147 153 158 159))
+(setq C '(4 5 15 16 22 28 29 39 40 41 42 48 49 59 102 112 113 119 120 121
+          122 132 133 139 145 146 156 157))
+(setq D '(7 9 11 12 13 17 27 31 32 33 35 37 53 56 57 61 79 82 100 104 105
+          108 124 126 128 129 130 134 144 148 149 150 152 154))
+(setq E '(44 52 55 58 60 63 64 66 67 68 69 70 71 72 75 76 77 78 80 81 83 84
+          85 86 89 90 91 92 93 94 95 97 98 101 103 106 109 117))
+(setq partizione (list A B C D E))
+(verifica-partizione partizione)
+;-> true
+
+Per calcolare a(n) invece di verificarlo, potremmo effettuare una ricerca completa (backtracking):
+1) Si parte con n insiemi vuoti.
+2) Si aggiunge 1..N tentando tutte le assegnazioni possibili.
+3) Si conserva la colorazione più lunga senza violazioni di x + y = z.
+
+
+--------------------------------
+Combinazioni cartesiane di liste
+--------------------------------
+
+Abbiamo una lista composta da sottoliste del tipo:
+  (a b c ... z), dove a, b, c, ..., z sono numeri interi.
+Le sottoliste possono avere lunghezze diverse.
+Vogliamo trovare tutte le combinazioni di numeri scelti (un numero per riga).
+
+Esempi:
+
+lista = '((1 2 3) (4 5 6) (7 8))
+Output = ((1 4 7) (1 5 7) (1 6 7)...(3 6 8))
+
+lista = ((1 1) (1 1))
+Output = ((1 1) (1 1) (1 1) (1 1))
+
+Algoritmo
+---------
+Costruisce tutte le combinazioni cartesiane delle sottoliste, scegliendo un elemento per ogni riga.
+Usa uno stack che simula la ricorsione:
+  - Ogni volta che si sceglie un valore, si spinge un nuovo stato sullo stack con 'r+1' e la lista aggiornata.
+  - Quando 'r' arriva a 'len', la combinazione è completa e viene salvata.
+
+Nota: il numero di elementi della lista di output è il prodotto delle lunghezze di ogni sottolista.
+
+(define (tutte-combinazioni lista)
+"Genera tutte le combinazioni scegliendo un elemento da ogni sottolista"
+  (letn (
+         ; Numero totale di sottoliste (righe)
+         (len (length lista))
+         ; Lista che conterrà tutte le combinazioni finali
+         (risultati '())
+         ; Stack per la ricerca iterativa in profondità (DFS)
+         ; Ogni elemento dello stack è una coppia:
+         ;   (riga_corrente selezioni_parziali)
+         ; Inizialmente siamo alla riga 0 e non abbiamo ancora scelto nulla
+         (stack (list (list 0 '())))
+        )
+    ; Continua finchè ci sono stati da esplorare
+    (while (not (null? stack))
+      ; Estrae uno stato dallo stack
+      (letn (
+             ; Rimuove e restituisce il primo elemento dello stack
+             (stato (pop stack))
+             ; Estrae i due campi dallo stato corrente:
+             ; r = indice della riga corrente
+             ; sel = lista delle scelte parziali effettuate finora
+             (r (stato 0))
+             (sel (stato 1))
+            )
+        ; Se abbiamo raggiunto la fine (cioè r = len),
+        ; significa che abbiamo scelto un elemento per ogni riga
+        (if (= r len)
+            ; Aggiunge la combinazione completa all'elenco dei risultati
+            ; ('reverse' perché le scelte sono state accumulate al contrario)
+            (push (reverse sel) risultati)
+            ; Altrimenti, esplora tutti i possibili valori nella riga corrente
+            (dolist (v (lista r))
+              ; Per ogni valore v, crea un nuovo stato da esplorare:
+              ; - sposta alla riga successiva (r + 1)
+              ; - aggiunge v alla lista parziale di scelte (cons v sel)
+              (push (list (+ r 1) (cons v sel)) stack)))))
+    ; Quando lo stack è vuoto, abbiamo trovato tutte le combinazioni
+    risultati))
+
+Proviamo:
+
+(tutte-combinazioni '((1 2 3) (4 5 6) (7 8)))
+;-> ((1 4 7) (1 4 8) (1 5 7) (1 5 8) (1 6 7) (1 6 8)
+;->  (2 4 7) (2 4 8) (2 5 7) (2 5 8) (2 6 7) (2 6 8)
+;->  (3 4 7) (3 4 8) (3 5 7) (3 5 8) (3 6 7) (3 6 8))
+
+(tutte-combinazioni '((1 1) (1 1)))
+;-> ((1 1) (1 1) (1 1) (1 1))
+
+(tutte-combinazioni '((1 2) () (3 4)))
+;-> ()
+
+Versione senza commenti:
+
+(define (comb-list lst)
+"Generate all combinations by choosing one element from each sublist"
+  (letn ( (len (length lst))
+          (risultati '())
+          (stack (list (list 0 '()))) )
+    (while (not (null? stack))
+      (letn ( (stato (pop stack))
+              (r (stato 0))
+              (sel (stato 1)) )
+        (if (= r len)
+            (push (reverse sel) risultati)
+            ;else
+            (dolist (v (lst r))
+              (push (list (+ r 1) (cons v sel)) stack)))))
+    risultati))
+
+(comb-list '((1 2 3) (4 5 6) (7 8)))
+;-> ((1 4 7) (1 4 8) (1 5 7) (1 5 8) (1 6 7) (1 6 8)
+;->  (2 4 7) (2 4 8) (2 5 7) (2 5 8) (2 6 7) (2 6 8)
+;->  (3 4 7) (3 4 8) (3 5 7) (3 5 8) (3 6 7) (3 6 8))
+
+(comb-list '((1 1) (1 1)))
+;-> ((1 1) (1 1) (1 1) (1 1))
+
+(comb-list '((-1 2) (1 -2) (-1 -2) (1 2)))
+;-> ((-1 1 -1 1) (-1 1 -1 2) (-1 1 -2 1) (-1 1 -2 2) (-1 -2 -1 1) (-1 -2 -1 2)
+;->  (-1 -2 -2 1) (-1 -2 -2 2) (2 1 -1 1) (2 1 -1 2) (2 1 -2 1) (2 1 -2 2)
+;->  (2 -2 -1 1) (2 -2 -1 2) (2 -2 -2 1) (2 -2 -2 2))
+
+(comb-list '((1 2) () (3 4)))
+;-> ()
 
 ============================================================================
 

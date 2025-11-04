@@ -3255,6 +3255,8 @@ NOTE LIBERE 33
   ILD di un intero
   Lista di coefficienti --> polinomio
   Distanze di visibilità
+  Numeri di Schur
+  Combinazioni cartesiane di liste
 
 PROBLEMI SUI DADI
 =================
