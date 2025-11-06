@@ -6817,9 +6817,9 @@ Per ogni linea di istogramma tracciamo una linea orizzontale partendo dalla cima
 
     Y
     |
-  6 |   3    
-  5 |--------|   3          
-  4 |1       |--------|  2   
+  6 |   3
+  5 |--------|   3
+  4 |1       |--------|  2
   3 |--|1    |--|--|  |-----|
   2 |  |--|  |1 |1 |  |1    |
   1 |  |  |  |  |  |  |--|  |
@@ -7060,7 +7060,7 @@ a(4) = 45
 (setq C '(4 6 13 20 22 23 25 30 32 39 41))
 (setq D '(9 10 11 12 14 16 29 31 33 34 35 36))
 (setq partizione (list A B C D))
-(verifica-partizione partizione) 
+(verifica-partizione partizione)
 ;-> true
 
 a(5) = 160
@@ -7081,7 +7081,7 @@ a(5) = 160
 Per calcolare a(n) invece di verificarlo, potremmo effettuare una ricerca completa (backtracking):
 1) Si parte con n insiemi vuoti.
 2) Si aggiunge 1..N tentando tutte le assegnazioni possibili.
-3) Si conserva la colorazione più lunga senza violazioni di x + y = z.
+3) Si mantiene la colorazione più lunga senza violazioni di x + y = z.
 
 
 --------------------------------
@@ -7107,8 +7107,10 @@ Costruisce tutte le combinazioni cartesiane delle sottoliste, scegliendo un elem
 Usa uno stack che simula la ricorsione:
   - Ogni volta che si sceglie un valore, si spinge un nuovo stato sullo stack con 'r+1' e la lista aggiornata.
   - Quando 'r' arriva a 'len', la combinazione è completa e viene salvata.
+  - Se una sottolista è vuota, allora il risultato è una lista vuota.
 
-Nota: il numero di elementi della lista di output è il prodotto delle lunghezze di ogni sottolista.
+Il numero di elementi della lista di output è il prodotto delle lunghezze di ogni sottolista:
+Il numero di elementi di ogni sottolista (di output) sono pari al numero di sottoliste della lista data.
 
 (define (tutte-combinazioni lista)
 "Genera tutte le combinazioni scegliendo un elemento da ogni sottolista"
@@ -7196,6 +7198,241 @@ Versione senza commenti:
 
 (comb-list '((1 2) () (3 4)))
 ;-> ()
+
+
+---------------------------
+Velocità di liste e vettori
+---------------------------
+
+Test di velocità di lettura/scrittura delle liste e dei vettori.
+
+(define (test-list len)
+  (let (lista (randomize (sequence 0 (- len 1))))
+    (println "Lista con " len " elementi:")
+    (when (<= len 50000)
+      (print "Accesso sequenziale (for) (max 50000 elementi): ")
+      (println (time (for (i 0 (- len 1)) (setq val (lista i))))))
+    (print "Accesso sequenziale (dolist): ")
+    (println (time (dolist (el lista) (setq val el))))
+    (when (<= len 50000)
+      (print "Accesso casuale (max 50000 elementi): ")
+      (println (time (for (i 0 (- len 1)) (setq val (lista (rand len))))))
+      (print "Scrittura sequenziale (for) (max 50000 elementi): ")
+      (println (time (for (i 0 (- len 1)) (setq (lista i) i)))))
+    (print "Scrittura sequenziale (dolist): ")
+    (println (time (dolist (el lista) (setq (lista $idx) $idx))))
+'>))
+
+(test-list 100)
+;-> Lista con 100 elementi:
+;-> Accesso sequenziale (for) (max 50000 elementi): 0
+;-> Accesso sequenziale (dolist): 0
+;-> Accesso casuale (max 50000 elementi): 0
+;-> Scrittura sequenziale (for) (max 50000 elementi): 0
+;-> Scrittura sequenziale (dolist): 0
+(test-list 12000)
+;-> Lista con 12000 elementi:
+;-> Accesso sequenziale (for) (max 50000 elementi): 406.144
+;-> Accesso sequenziale (dolist): 0
+;-> Accesso casuale (max 50000 elementi): 421.776
+;-> Scrittura sequenziale (for) (max 50000 elementi): 406.147
+;-> Scrittura sequenziale (dolist): 406.596
+(test-list 50000)
+;-> Lista con 50000 elementi:
+;-> Accesso sequenziale (for) (max 50000 elementi): 12782.543
+;-> Accesso sequenziale (dolist): 0
+;-> Accesso casuale (max 50000 elementi): 12220.163
+;-> Scrittura sequenziale (for) (max 50000 elementi): 12735.293
+;-> Scrittura sequenziale (dolist): 12719.964
+
+(define (test-array len)
+  (let (vettore (array len (randomize (sequence 0 (- len 1)))))
+    (println "Vettore con " len " elementi:")
+    (print "Accesso sequenziale (for): ")
+    (println (time (for (i 0 (- len 1)) (setq val (vettore i)))))
+    (print "Accesso sequenziale (dolist): ")
+    (println (time (dolist (el vettore) (setq val el))))
+    (print "Accesso casuale: ")
+    (println (time (for (i 0 (- len 1)) (setq val (vettore (rand len))))))
+    (print "Scrittura sequenziale (for): ")
+    (println (time (for (i 0 (- len 1)) (setq (vettore i) i))))
+    (print "Scrittura sequenziale (dolist): ")
+    (println (time (dolist (el vettore) (setq (vettore $idx) $idx))))
+'>))
+
+(test-array 12000)
+;-> Vettore con 12000 elementi:
+;-> Accesso sequenziale (for): 0
+;-> Accesso sequenziale (dolist): 0
+;-> Accesso casuale: 0
+;-> Scrittura sequenziale (for): 0
+;-> Scrittura sequenziale (dolist): 0
+
+(test-array 50000)
+;-> Vettore con 50000 elementi:
+;-> Accesso sequenziale (for): 0
+;-> Accesso sequenziale (dolist): 0
+;-> Accesso casuale: 0
+;-> Scrittura sequenziale (for): 15.649
+;-> Scrittura sequenziale (dolist): 0
+
+(test-array 1e6)
+;-> Vettore con 1000000 elementi:
+;-> Accesso sequenziale (for): 46.859
+;-> Accesso sequenziale (dolist): 218.702
+;-> Accesso casuale: 93.726
+;-> Scrittura sequenziale (for): 47.055
+;-> Scrittura sequenziale (dolist): 218.731
+
+Nota: i vettori non hanno le funzioni di ricerca delle liste (find, ref, ecc.).
+In alcuni casi (pochi) è conveniente convertire la lista in vettore (o viceversa) ed effettuare le operazioni.
+
+
+-------------------------------------------------------------------
+Ordinare una lista di coppie in base alla differenza degli elementi
+-------------------------------------------------------------------
+
+Data una lista che contiene coppie di numeri interi, ordinare in modo non decrescente le coppie in base alla differenza tra il primo elemento e il secondo elemento della coppia.
+
+Esempio:
+  lista = ((3 2) (1 3) (4 5) (6 2))
+  differenze = 3 - 2 = 1
+               1 - 3 = -2
+               4 - 5 = -1
+               6 - 2 = 4
+  Ordinamento differenze: (-2 -1 1 4)
+  Ordinamento coppie: ((1 3) (4 5) (3 2) (6 2)
+
+(define (sort-coppie lst)
+  ; funzione di comparazione tra due coppie
+  (define (comp x y)
+    (<= (sub (first x) (last x)) (sub (first y) (last y))))
+  (let (sorted (sort lst comp)) ; coppie ordinate
+    ; stampa le differenze delle coppie ordinate
+    (println (map (fn(x) (sub (first x) (last x))) sorted))
+    sorted))
+
+Proviamo:
+
+(sort-coppie '((3 2) (1 3) (4 5) (6 2)))
+;-> (-2 -1 1 4)
+;-> ((1 3) (4 5) (3 2) (6 2))
+
+(setq lst '((1 3) (4 4) (1 1) (2 5) (6 3) (8 5) (6 1) (6 5) (3 2) (2 4)))
+(sort-coppie lst)
+;-> (-3 -2 -2 0 0 1 1 3 3 5)
+;-> ((2 5) (1 3) (2 4) (4 4) (1 1) (6 5) (3 2) (6 3) (8 5) (6 1))
+
+
+---------------------------------------------------------
+Ricerca di elementi uguali (valore e indice) in due liste
+---------------------------------------------------------
+
+Date due liste di numeri interi, anche di lunghezze diverse, determinare gli indici degli elementi che sono uguali e hanno lo stesso indice nelle due liste.
+
+Esempio:
+  Lista1 = (4 6 2 7 3 9 4 5 6)
+  Lista2 = (2 6 1 5 3 9 8 5)
+  Indici =  0 1 2 3 4 5 6 7
+  Numeri uguali allo stesso indice:
+                6 (indice 1), 3 (indice 4), 9 (indice 5), 5 (indice 7)
+  Indici = (1 4 5 7)
+
+Algoritmo
+---------
+(setq L1 '(4 6 2 7 3 9 4 5 6))
+(setq L2 '(2 6 1 5 3 9 8 5))
+(map = L1 L2)
+;-> (nil true nil nil true true nil true nil)
+(map = L2 L1)
+;-> (nil true nil nil true true nil true)
+Calcolo degli indici:
+(index true? (map = L1 L2))
+;-> (1 4 5 7)
+(index true? (map = L2 L1))
+;-> (1 4 5 7)
+Calcolo dei valori:
+(select L1 (index true? (map = L1 L2)))
+;-> (6 3 9 5)
+(select L1 (index true? (map = L2 L1)))
+;-> (6 3 9 5)
+
+; Funzione che restituisce gli indici degli elementi uguali (valore e indice)
+(define (twin-index lst1 lst2)
+  (index true? (map = lst1 lst2)))
+
+; Funzione che restituisce i valori degli elementi uguali (valore e indice)
+(define (twin-values lst1 lst2)
+  (select lst1 (index true? (map = lst1 lst2))))
+
+; Funzione che restituisce le coppie (indice valore) degli elementi uguali (valore e indice)
+(define (twin lst1 lst2)
+  (letn ( (equal (map = lst1 lst2))
+          (indexes (index true? equal)) )
+    (map list indexes (select lst1 indexes))))
+
+Proviamo:
+
+(twin-index L1 L2)
+;-> (1 4 5 7)
+(twin-index L2 L1)
+;-> (1 4 5 7)
+(twin-values L1 L2)
+;-> (6 3 9 5)
+(twin-values L2 L1)
+;-> (6 3 9 5)
+
+(twin L1 L2)
+;-> ((1 6) (4 3) (5 9) (7 5))
+(twin L2 L1)
+;-> ((1 6) (4 3) (5 9) (7 5))
+
+Vediamo una funzione iterativa.
+
+(define (gemelli lst1 lst2)
+  (local (out len1 len2 arr1 arr2)
+    (setq out '())
+    (setq len1 (length lst1))
+    (setq len2 (length lst2))
+    (if (> len1 len2)
+      (begin
+        (setq arr1 (array len2 lst2))
+        (setq arr2 (array len1 lst1))
+        (setq len len2))
+      (begin
+        (setq arr1 (array len2 lst2))
+        (setq arr2 (array len1 lst1))
+        (setq len len1)))
+    (for (i 0 (- len 1))
+      (if (= (arr1 i) (arr2 i)) (push (list i (arr1 i)) out -1)))
+    out))
+
+Proviamo:
+
+(gemelli L1 L2)
+;-> ((1 6) (4 3) (5 9) (7 5))
+(gemelli L2 L1)
+;-> ((1 6) (4 3) (5 9) (7 5))
+
+Test di correttezza:
+
+(let ( (T1 (rand 1000 1e3)) (T2 (rand 1000 1e3)) )
+  (= (twin T1 T2) (gemelli T1 T2)))
+;-> true
+
+Test di velocità:
+
+(silent (setq T1 (rand 1000 1e3)) (setq T2 (rand 1000 1e3)))
+(time (twin T1 T2) 1000)
+;-> 95.342
+(time (gemelli T1 T2) 1000)
+;-> 105.12
+
+(silent (setq T1 (rand 1000 1e5)) (setq T2 (rand 1000 1e5)))
+(time (twin T1 T2) 100)
+;-> 1206.506
+(time (gemelli T1 T2) 100)
+;-> 1359.498
 
 ============================================================================
 

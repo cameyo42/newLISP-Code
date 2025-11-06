@@ -5887,6 +5887,7 @@ Ordinamento per la coordinata x crescente:
 Nota: per x uguali viene ordinata anche la y.
 
 Ordinamento per la coordinata y crescente:
+
 (setq lst '((1 3) (4 4) (1 1) (2 5) (6 3) (8 5) (6 1) (6 5) (3 2) (2 4)))
 (define (comp x y)
     (<= (last x) (last y)))

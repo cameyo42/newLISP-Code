@@ -7872,6 +7872,21 @@ Una funzione più semplice stampa il nome del simbolo passato (quotato) e il suo
 (dbg 'ww)
 ;-> ww: (1 2 3 4)
 
+Versione che accetta un numero di parametri variabile:
+
+(define (dbg2)
+  (dolist (_s (args))
+    (println (string _s ": ") (eval _s))))
+
+(dbg2 'xx)
+;-> xx: 1234
+(dbg2 'xx 'yy "test" 123 'ww)
+;-> xx: 1234
+;-> yy: 1.234
+;-> test: test
+;-> 123: 123
+;-> ww: (1 2 3 4)
+
 Un altro metodo è quello proposto da Fanda:
 
 ;; Copyright © 2007, Frantisek Sodomka. All rights reserved.
@@ -7908,6 +7923,11 @@ Un altro metodo è quello proposto da Fanda:
 
 ; screen
 (dprint  'x 123 'str "test" '(0 1 2))
+;-> x = 10
+;-> 123
+;-> str = Hi!
+;-> test
+;-> (0 1 2)
 
 ; file
 (dfprint 'x 123 'str "test" '(0 1 2))

@@ -3257,6 +3257,9 @@ NOTE LIBERE 33
   Distanze di visibilità
   Numeri di Schur
   Combinazioni cartesiane di liste
+  Velocità di liste e vettori
+  Ordinare una lista di coppie in base alla differenza degli elementi
+  Ricerca di elementi uguali (valore e indice) in due liste
 
 PROBLEMI SUI DADI
 =================
@@ -3304,7 +3307,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (370 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (374 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

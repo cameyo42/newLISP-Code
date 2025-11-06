@@ -6529,7 +6529,7 @@ Vediamo la velocità dei due metodi:
 (time (vector (find 123 a6)) 10)
 ;-> 1463.227
 
-Invece la ricerca su una lista uguale ad a6:
+Invece la ricerca su una lista uguale al vettore 'a6':
 
 (silent (setq lst (array-list a6)))
 (time (find 123 lst) 10)
