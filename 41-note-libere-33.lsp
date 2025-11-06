@@ -7434,5 +7434,458 @@ Test di velocità:
 (time (gemelli T1 T2) 100)
 ;-> 1359.498
 
+
+--------------------------------------------------
+Rilevamento dei cicli (Algoritmi di Floyd e Brent)
+--------------------------------------------------
+
+Il rilevamento dei cicli è un problema che riguarda la ricerca di un ciclo in una sequenza di valori di una funzione iterata.
+Per ogni funzione 'f' che mappa un insieme finito S su se stesso, ed ogni valore iniziale x0 in S, la sequenza dei valori della funzione iterata:
+
+ x(0), x(1)=f(x(0)), x(2)=f(x(1)), ... x(i)=f(x(i-1))
+
+deve infine usare lo stesso valore 2 volte: deve esserci una coppia di indici distinti i e j tali che xi = xj.
+Una volta che ciò accade, la sequenza deve continuare dal ciclo ripetuto di valori da x(i) a x(j-1).
+La rilevazione dei cicli è il problema di trovare i e j dato 'f' e x(0).
+
+Esistono due algoritmi per risolvere questo problema:
+1) Floyd's algorithm: tortoise and hare (tartaruga e lepre)
+2) Brent's algorithm
+
+1) Floyd algorithm (1967)
+-------------------------
+
+Questa è la versione newlisp del codice python a:
+https://en.wikipedia.org/wiki/Cycle_detection#Floyd's_tortoise_and_hare
+
+(define (floyd f x0)
+    # Main phase of algorithm: finding a repetition x(i) = x(2i).
+    # The hare moves twice as quickly as the tortoise and
+    # the distance between them increases by 1 at each step.
+    # Eventually they will both be inside the cycle and then,
+    # at some point, the distance between them will be
+    # divisible by the period λ.
+    (setq tortoise (f x0)) # f(x0) is the element/node next to x0.
+    (setq hare (f (f x0)))
+    (while (!= tortoise hare)
+        (setq tortoise (f tortoise))
+        (setq hare (f (f hare))))
+    # At this point the tortoise position, ν, which is also equal
+    # to the distance between hare and tortoise, is divisible by
+    # the period λ. So hare moving in cycle one step at a time,
+    # and tortoise (reset to x0) moving towards the cycle, will
+    # intersect at the beginning of the cycle. Because the
+    # distance between them is constant at 2ν, a multiple of λ,
+    # they will agree as soon as the tortoise reaches index μ.
+    # Find the position μ of first repetition.
+    (setq mu 0)
+    (setq tortoise x0)
+    (while (!= tortoise hare)
+        (setq tortoise (f tortoise))
+        (setq hare (f hare))   # Hare and tortoise move at same speed
+        (++ mu))
+    # Find the length of the shortest cycle starting from x(μ)
+    # The hare moves one step at a time while tortoise is still.
+    # lam is incremented until λ is found.
+    (setq lam 1)
+    (setq hare (f tortoise))
+    (while (!= tortoise hare)
+        (setq hare (f hare))
+        (++ lam))
+    (list lam mu))
+
+L'algoritmo serve per trovare:
+
+a) λ (lambda) -> la lunghezza del ciclo
+b) μ (mu) -> la posizione di inizio del ciclo
+
+Dato un processo iterativo del tipo:
+
+ x(0), x(1)=f(x(0)), x(2)=f(x(1)), ... x(i)=f(x(i-1))
+
+Il principio è che se la sequenza è finita o periodica, a un certo punto due iterazioni diverse 'i' e '2i' portano allo stesso valore (il punto di incontro del "tartaruga e lepre").
+Da lì si ricava dove comincia il ciclo e quanto dura.
+
+Come funziona:
+La tartaruga e la lepre percorrono la sequenza con velocità diversa.
+Dopo alcuni passi si incontrano -> c'è un ciclo.
+Riavviando la tartaruga da x(0) e facendole camminare alla stessa velocità, si trova μ.
+Calcolando quanto dura il giro completo del ciclo si trova λ.
+
+Esempio 1
+---------
+; Funzione che genera 0 -> 1 -> 2 -> 3 -> 4 -> 0 -> ...
+(define (f x) (% (+ x 1) 5))
+x(0) = 0
+(series 0 f 10)
+;-> (0 1 2 3 4 0 1 2 3 4)
+
+Ricerchiamo la lunghezza del ciclo (λ) e la posizione di inizio del ciclo (μ):
+(floyd f 0)
+;-> (5 0)
+
+Questo significa che nella sequenza 0,1,2,3,4,0,1,... il ciclo inizia subito (μ = 0) e ha lunghezza 5 (λ = 5).
+Il ciclo vale (0 1 2 3 4).
+
+Esempio 2
+---------
+; Funzione
+(define (f x) (% (+ (* x x) 1) 255))
+x(0) = 0
+(series 0 f 20)
+;-> (0 1 2 5 26 167 95 101 2 5 26 167 95 101 2 5 26 167 95 101)
+(floyd f 0)
+;-> (6 2)
+
+Il ciclo comincia dall'indice 2 ed è lungo 6: (2 5 26 167 95 101).
+
+| X | Significato         | Descrizione                                      |
+|---|---------------------|--------------------------------------------------|
+| λ | Lunghezza del ciclo | Passi per tornare al punto di partenza del ciclo |
+| μ | Offset d'inizio     | Passi iniziali per entrare nel ciclo             |
+
+Se usiamo un valore iniziale diverso potremmo ottenere una risultato diverso:
+
+x(0) = 5
+(series 5 f 20)
+;-> (5 26 167 95 101 2 5 26 167 95 101 2 5 26 167 95 101 2 5 26)
+(floyd f 5)
+;-> (6 0)
+Il ciclo comincia dall'indice 0 ed è lungo 6: (5 26 167 95 101 2).
+
+Esempio 3
+---------
+In questo caso la funzione opera su una coppia, e il ciclo sarà scoperto esattamente nello stesso modo.
+Il principio resta identico, indipendentemente dal tipo di dati.
+; Funzione
+(define (f x) (list (% (+ (x 0) 1) 3) (x 1)))
+x(0)=0
+(floyd f '(0 1))
+;-> (3 0)
+
+Vediamo una versione che mostra passo per passo come la lepre e la tartaruga si muovono fino a trovare il ciclo.
+
+(define (floyd-traccia f x0)
+"Versione con stampa passo-passo dell'algoritmo di Floyd"
+  (setq tortoise (f x0))
+  (setq hare (f (f x0)))
+  (println "Fase 1: ricerca ciclo")
+  (while (!= tortoise hare)
+    (println "  Tartaruga=" tortoise "  Lepre=" hare)
+    (setq tortoise (f tortoise))
+    (setq hare (f (f hare))))
+  (println "Incontro: " tortoise)
+  (setq mu 0)
+  (setq tortoise x0)
+  (println "\nFase 2: ricerca inizio ciclo (mu)")
+  (while (!= tortoise hare)
+    (println "  Tartaruga=" tortoise "  Lepre=" hare)
+    (setq tortoise (f tortoise))
+    (setq hare (f hare))
+    (++ mu))
+  (println "Inizio ciclo a mu = " mu)
+  (setq lam 1)
+  (setq hare (f tortoise))
+  (println "\nFase 3: calcolo lunghezza ciclo (lambda)")
+  (while (!= tortoise hare)
+    (println "  Hare=" hare)
+    (setq hare (f hare))
+    (++ lam))
+  (println "Lunghezza ciclo = " lam)
+  (list lam mu))
+
+Proviamo:
+
+(define (f x) (mod (+ (* x x) 1) 255))
+(floyd-traccia f 0)
+;-> Fase 1: ricerca ciclo
+;->   Tartaruga=1  Lepre=2
+;->   Tartaruga=2  Lepre=26
+;->   Tartaruga=5  Lepre=95
+;->   Tartaruga=26  Lepre=2
+;->   Tartaruga=167  Lepre=26
+;-> Incontro: 95
+;->
+;-> Fase 2: ricerca inizio ciclo (mu)
+;->   Tartaruga=0  Lepre=95
+;->   Tartaruga=1  Lepre=101
+;-> Inizio ciclo a mu = 2
+;->
+;-> Fase 3: calcolo lunghezza ciclo (lambda)
+;->   Hare=5
+;->   Hare=26
+;->   Hare=167
+;->   Hare=95
+;->   Hare=101
+;-> Lunghezza ciclo = 6
+;-> (6 2)
+
+(define (f x) (list (% (+ (x 0) 1) 3) (x 1)))
+(floyd-traccia f '(0 1))
+;-> Fase 1: ricerca ciclo
+;->   Tartaruga=(1 1)  Lepre=(2 1)
+;->   Tartaruga=(2 1)  Lepre=(1 1)
+;-> Incontro: (0 1)
+;->
+;-> Fase 2: ricerca inizio ciclo (mu)
+;-> Inizio ciclo a mu = 0
+;->
+;-> Fase 3: calcolo lunghezza ciclo (lambda)
+;->   Hare=(1 1)
+;->   Hare=(2 1)
+;-> Lunghezza ciclo = 3
+;-> (3 0)
+
+Versione Floyd senza commenti:
+
+(define (floyd f x0)
+    (setq tortoise (f x0))
+    (setq hare (f (f x0)))
+    (while (!= tortoise hare)
+        (setq tortoise (f tortoise))
+        (setq hare (f (f hare))))
+    (setq mu 0)
+    (setq tortoise x0)
+    (while (!= tortoise hare)
+        (setq tortoise (f tortoise))
+        (setq hare (f hare))
+        (++ mu))
+    (setq lam 1)
+    (setq hare (f tortoise))
+    (while (!= tortoise hare)
+        (setq hare (f hare))
+        (++ lam))
+    (list lam mu))
+
+2) Brent algorithm (1973)
+-------------------------
+
+Questa è la versione newlisp del codice python a:
+https://en.wikipedia.org/wiki/Cycle_detection#Brent's_algorithm
+
+(define (brent f x0)
+    # main phase: search successive powers of two
+    (set 'power 1 'lam 1)
+    (setq tortoise x0)
+    (setq hare (f x0))  # f(x0) is the element/node next to x0.
+    # this assumes there is a cycle; otherwise this loop won't terminate
+    (while (!= tortoise hare)
+        (when (= power lam)  # time to start a new power of two?
+          (setq tortoise hare)
+          (setq power (* power 2))
+          (setq lam 0))
+        (setq hare (f hare))
+        (++ lam))
+    # Find the position of the first repetition of length λ
+    (set 'tortoise x0 'hare x0)
+    (for (i 0 (- lam 1))
+        (setq hare (f hare)))
+    # The distance between the hare and tortoise is now λ.
+    # Next, the hare and tortoise move at same speed until they agree
+    (setq mu 0)
+    (while (!= tortoise hare)
+        (setq tortoise (f tortoise))
+        (setq hare (f hare))
+        (++ mu))
+    (list lam mu))
+
+Proviamo:
+
+; Funzione che genera 0 -> 1 -> 2 -> 3 -> 4 -> 0 -> ...
+(define (f x) (% (+ x 1) 5))
+x(0) = 0
+(series 0 f 10)
+;-> (0 1 2 3 4 0 1 2 3 4)
+(brent f 0)
+;-> (5 0)
+
+; Funzione
+(define (f x) (% (+ (* x x) 1) 255))
+x(0) = 0
+(series 0 f 20)
+;-> (0 1 2 5 26 167 95 101 2 5 26 167 95 101 2 5 26 167 95 101)
+(brent f 0)
+;-> (6 2)
+
+; Funzione
+(define (f x) (list (% (+ (x 0) 1) 3) (x 1)))
+x(0) = 0
+(brent f '(0 1))
+;-> (3 0)
+
+Vediamo una versione che mostra che mostra tutte le fasi dell'algoritmo di Brent:
+i blocchi di potenze di due, l'avanzamento della lepre e della tartaruga, e la ricerca finale di μ e λ.
+
+(define (brent-traccia f x0)
+"Versione tracciata dell'algoritmo di Brent per la rilevazione dei cicli"
+  (set 'power 1 'lam 1)
+  (setq tortoise x0)
+  (setq hare (f x0))
+  (println "Fase 1: ricerca del ciclo con potenze di due")
+  (while (!= tortoise hare)
+    (when (= power lam)
+      (println "\n--- Nuovo blocco di lunghezza " power " ---")
+      (println "  tortoise diventa " hare)
+      (setq tortoise hare)
+      (setq power (* power 2))
+      (setq lam 0))
+    (println "  hare=" hare)
+    (setq hare (f hare))
+    (++ lam))
+  (println "\nIncontro trovato a valore: " hare)
+  (println "Lunghezza ciclo stimata λ=" lam)
+  ; Trova l'inizio del ciclo (mu)
+  (println "\nFase 2: ricerca dell'inizio ciclo (μ)")
+  (set 'tortoise x0 'hare x0)
+  (for (i 0 (- lam 1))
+    (setq hare (f hare)))
+  (setq mu 0)
+  (while (!= tortoise hare)
+    (println "  tortoise=" tortoise " hare=" hare)
+    (setq tortoise (f tortoise))
+    (setq hare (f hare))
+    (++ mu))
+  (println "Inizio ciclo a mu=" mu)
+  (list lam mu))
+
+; Funzione
+(define (f x) (% (+ (* x x) 1) 255))
+x(0) = 0
+(series 0 f 20)
+;-> (0 1 2 5 26 167 95 101 2 5 26 167 95 101 2 5 26 167 95 101)
+(brent-traccia f 0)
+;-> Fase 1: ricerca del ciclo con potenze di due
+;->
+;-> --- Nuovo blocco di lunghezza 1 ---
+;->   tortoise diventa 1
+;->   hare=1
+;->   hare=2
+;->
+;-> --- Nuovo blocco di lunghezza 2 ---
+;->   tortoise diventa 5
+;->   hare=5
+;->   hare=26
+;->   hare=167
+;->   hare=95
+;->
+;-> --- Nuovo blocco di lunghezza 4 ---
+;->   tortoise diventa 101
+;->   hare=101
+;->   hare=2
+;->   hare=5
+;->   hare=26
+;->   hare=167
+;->   hare=95
+;->
+;-> Incontro trovato a valore: 101
+;-> Lunghezza ciclo stimata ?=6
+;->
+;-> Fase 2: ricerca dell'inizio ciclo (µ)
+;->   tortoise=0 hare=95
+;->   tortoise=1 hare=101
+;-> Inizio ciclo a mu=2
+;-> (6 2)
+
+Fase 1:
+La variabile 'power' controlla la lunghezza dei blocchi di esplorazione.
+Ogni volta che 'lam' (passi fatti nel blocco corrente) raggiunge 'power', la distanza raddoppia -> nuova fase.
+
+power=1 -> blocco da 1 elemento
+power=2 -> blocco da 2 elementi
+power=4 -> blocco da 4 elementi
+...
+
+In ciascun blocco:
+'tortoise' resta ferma al punto di partenza del blocco,
+'hare' avanza fino a che non trova un valore uguale a 'tortoise'.
+
+Fase 2:
+Una volta trovata la lunghezza del ciclo (λ), si sposta 'hare' in avanti di λ passi e poi si muovono entrambi a pari velocità fino a incontrarsi -> quello è l'inizio del ciclo (μ).
+
+Versione Brent senza commenti:
+
+(define (brent f x0)
+    (set 'power 1 'lam 1)
+    (setq tortoise x0)
+    (setq hare (f x0))
+    (while (!= tortoise hare)
+        (when (= power lam)
+          (setq tortoise hare)
+          (setq power (* power 2))
+          (setq lam 0))
+        (setq hare (f hare))
+        (++ lam))
+    (set 'tortoise x0 'hare x0)
+    (for (i 0 (- lam 1))
+        (setq hare (f hare)))
+    (setq mu 0)
+    (while (!= tortoise hare)
+        (setq tortoise (f tortoise))
+        (setq hare (f hare))
+        (++ mu))
+    (list lam mu))
+
+Differenze tra i due algoritmi
+------------------------------
+
+L'algoritmo di Brent (1973) e quello di Floyd (1967) risolvono lo stesso problema:
+trovare il ciclo (lunghezza λ e offset μ) in una sequenza generata da una funzione iterativa ( x_{i+1} = f(x_i) ).
+
+Tuttavia, Brent e Floyd differiscono molto nel modo in cui rilevano il ciclo e nel costo computazionale.
+
+Vediamo le differenze:
+
+a) Idea Base
+Floyd: Due puntatori si muovono con velocità diversa: la lepre fa due passi ogni volta che la tartaruga ne fa uno.
+Brent: Si raddoppia progressivamente un "intervallo di ricerca" (potenze di due) per trovare quando il ciclo si manifesta.
+
+b) Rilevazione ciclo
+Floyd: Si verifica quando tortoise == hare.
+Brent:Si verifica quando hare == tortoise, ma la distanza tra loro è monitorata aumentando il limite (power).
+
+c) Movimento
+Floyd:
+Due passi per la lepre, uno per la tartaruga in ogni iterazione.
+Brent:
+La lepre avanza a ogni passo, la tartaruga resta ferma fino a che non si supera un blocco di lunghezza power.
+
+d) Iterazioni
+Floyd:
+Movimento continuo, costante.
+Brent:
+Suddivisione in blocchi di lunghezza 1, 2, 4, 8, ....
+Ogni volta che si raggiunge power == lam, si raddoppia power e si "resettano" i contatori.
+
+e) Uso di memoria
+Floyd: O(1)
+Brent: O(1)
+
+f) Velocità
+Floyd: Buona
+Brent: Migliore (~33% meno chiamate a f)
+
+e) Funzionamento intuitivo
+Floyd:
+Immaginiamo due corridori su una pista circolare: la lepre corre al doppio della velocità della tartaruga.
+Quando la lepre entra nel ciclo, presto raggiunge la tartaruga -> incontro = esistenza di ciclo.
+Brent:
+Immaginiamo un solo corridore che parte e segna il punto di partenza.
+Dopo aver corso 1 passo, poi 2, poi 4, poi 8, ... confronta il punto di arrivo con il segnaposto iniziale.
+Quando trova una ripetizione, ha trovato la lunghezza del ciclo.
+Poi, con un secondo passaggio, trova dove il ciclo inizia.
+
+f) Efficienza:
++----------------------+-----------------+-----------------------------------+
+| Caratteristica       | Floyd           | Brent                             |
++----------------------+-----------------+-----------------------------------+
+| Valutazioni di f(x)  | Fino a 3λ + μ   | Fino a 2λ + μ                     |
+| Uso di memoria       | O(1)            | O(1)                              |
+| Velocità media       | Buona           | Migliore (~33% meno chiamate a f) |
+| Semplicità           | Molto intuitivo | Più complesso ma più efficiente   |
++----------------------+-----------------+-----------------------------------+
+
+Brent è generalmente più veloce perché la funzione 'f' viene valutata meno volte:
+fa una singola chiamata per iterazione, non due come Floyd (la lepre non raddoppia il passo realmente, ma "a blocchi").
+
 ============================================================================
 

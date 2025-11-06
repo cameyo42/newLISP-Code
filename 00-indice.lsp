@@ -3260,6 +3260,7 @@ NOTE LIBERE 33
   Velocità di liste e vettori
   Ordinare una lista di coppie in base alla differenza degli elementi
   Ricerca di elementi uguali (valore e indice) in due liste
+  Rilevamento dei cicli (Algoritmi di Floyd e Brent)
 
 PROBLEMI SUI DADI
 =================
