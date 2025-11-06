@@ -3261,6 +3261,7 @@ NOTE LIBERE 33
   Ordinare una lista di coppie in base alla differenza degli elementi
   Ricerca di elementi uguali (valore e indice) in due liste
   Rilevamento dei cicli (Algoritmi di Floyd e Brent)
+  Ricerca di un ciclo in una lista di elementi
 
 PROBLEMI SUI DADI
 =================

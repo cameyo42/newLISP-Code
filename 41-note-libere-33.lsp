@@ -7387,7 +7387,7 @@ Proviamo:
 (twin L2 L1)
 ;-> ((1 6) (4 3) (5 9) (7 5))
 
-Vediamo una funzione iterativa.
+Vediamo una funzione iterativa con vettori.
 
 (define (gemelli lst1 lst2)
   (local (out len1 len2 arr1 arr2)
@@ -7886,6 +7886,109 @@ f) Efficienza:
 
 Brent è generalmente più veloce perché la funzione 'f' viene valutata meno volte:
 fa una singola chiamata per iterazione, non due come Floyd (la lepre non raddoppia il passo realmente, ma "a blocchi").
+
+
+--------------------------------------------
+Ricerca di un ciclo in una lista di elementi
+--------------------------------------------
+
+Data una lista di elementi scrivere una funzione che trova, se esiste, un "ciclo" nella lista.
+
+Individuare un "ciclo" in una lista di elementi significa capire se una sottosequenza di valori si ripete regolarmente.
+Ad esempio nella lista (1 2 3 4 2 3 4 2 3 4 ...) il ciclo inizia dall'indice 1 ed è lungo 3 -> (2 3 4).
+L'indice di inizio del ciclo viene chiamato μ (mu).
+La lunghezza del ciclo viene chiamata λ (lambda).
+
+Algoritmo
+---------
+L'obiettivo è trovare una parte della lista che si ripete ciclicamente.
+
+1) Scorrere tutte le possibili origini del ciclo
+Si prova ogni indice 'μ' come possibile inizio della zona periodica.
+Da quel punto in poi la lista viene analizzata per verificare se segue uno schema ripetuto.
+
+2) Testare tutte le lunghezze possibili del ciclo
+Per ciascun 'μ', si provano diverse lunghezze 'λ' (da 1 a 'n - μ - 1').
+Un ciclo valido deve apparire almeno due volte consecutive, quindi si impone
+che la porzione rimanente della lista sia lunga almeno '2*λ'.
+
+3) Verificare la periodicità
+Si confrontano i valori successivi:
+ogni elemento 'lst[i]' dev'essere uguale a 'lst[μ + ((i - μ) mod λ)]'.
+Se questa condizione è vera per tutti gli 'i', allora la sottosequenza è ciclica.
+
+4) Arresto anticipato
+Appena si trova una "periodicità perfetta", la ricerca si interrompe.
+'found' diventa 'true' e i cicli 'for' terminano automaticamente.
+Il termine "periodicità perfetta" significa che, a partire da un certo indice μ e con un certo periodo λ, la sequenza "fino alla fine della lista" rispetta la relazione: ogni elemento coincide con quello di indice '(μ + ((i - μ) mod λ))'.
+
+5) Costruzione del risultato
+Il risultato finale è una lista: (λ μ pattern)
+dove 'pattern' è estratto esplicitamente elemento per elemento,
+garantendo che abbia esattamente 'λ' valori.
+
+(define (trova-ciclo-lista lst)
+; Individua un ciclo (ripetizione regolare) all'interno di una lista di interi.
+; Restituisce una lista contenente:
+;   ('lambda' 'mu' 'pattern')
+; dove:
+;   'lambda' = lunghezza del ciclo
+;   'mu' = indice di inizio del ciclo
+;   'pattern' = sottolista che si ripete
+; La funzione cerca un blocco che si ripete almeno due volte consecutive.
+; Per ogni possibile posizione iniziale 'mu' e per ogni possibile
+; lunghezza 'lambda', la funzione verifica se, partendo da 'mu',
+; la sequenza segue lo stesso schema ogni 'lambda' elementi.
+; Appena trova una ripetizione perfetta, termina.
+  (letn ((n (length lst))   ; lunghezza della lista
+         (res nil)          ; risultato ('lambda' 'mu' 'pattern')
+         (found nil))       ; flag di ciclo trovato
+    ; ciclo esterno: prova tutti i possibili punti di inizio del ciclo (mu)
+    (for (mu 0 (- n 2) 1 found)
+      ; ciclo intermedio: prova tutte le possibili lunghezze del ciclo (lambda)
+      (for (lam 1 (- n mu) 1 found)
+        ; la lista deve contenere almeno due ripetizioni complete del blocco
+        (if (>= (- n mu) (* 2 lam))
+          (let ((ok true))
+            ; verifica se la sequenza a partire da 'mu' è periodica
+            ; con periodo 'lambda' confrontando ciascun elemento
+            ; con quello spostato di 'lambda'
+            (for (i mu (- n 1) 1 (or (not ok) found))
+              (if (!= (lst i) (lst (+ mu (mod (- i mu) lam))))
+                (setq ok nil)))
+            ; se la sequenza è realmente periodica, salva il risultato
+            (when ok
+              ; costruiamo il pattern esatto di lunghezza 'lambda'
+              (let ((pattern '()))
+                (for (k 0 (- lam 1) 1 nil)
+                  (extend pattern (list (lst (+ mu k)))))
+                (setq res (list lam mu pattern))
+                (setq found true)))))))
+    res))
+
+Proviamo:
+
+(trova-ciclo-lista '(1 2 3 4 2 3 4 2 3 4))
+;-> (3 1 (2 3 4))
+
+(trova-ciclo-lista '(1 2 3 4 2 3 4 2 3 4 5))
+;-> ()
+
+(trova-ciclo-lista '(1 2 3 4 5 6 7 8 9 7 8 9))
+;-> (3 6 (7 8 9))
+
+(trova-ciclo-lista '(1 2 1 2 1 2 3))
+;-> nil
+
+(trova-ciclo-lista '(1 1 1 1))
+;-> (1 0 (1))
+
+La funzione accetta anche liste con qualunque tipo di elementi:
+
+(trova-ciclo-lista (map string '(0 2 1 2 1 2)))
+;-> (2 1 ("2" "1"))
+(trova-ciclo-lista '(1.1 2.2 3.3 2.2 3.3))
+;-> (2 1 (2.2 3.3))
 
 ============================================================================
 
