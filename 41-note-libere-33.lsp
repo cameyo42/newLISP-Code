@@ -7829,7 +7829,7 @@ Differenze tra i due algoritmi
 ------------------------------
 
 L'algoritmo di Brent (1973) e quello di Floyd (1967) risolvono lo stesso problema:
-trovare il ciclo (lunghezza λ e offset μ) in una sequenza generata da una funzione iterativa ( x_{i+1} = f(x_i) ).
+trovare il ciclo (lunghezza λ e offset μ) in una sequenza generata da una funzione iterativa ( x(i+1) = f(x(i)) ).
 
 Tuttavia, Brent e Floyd differiscono molto nel modo in cui rilevano il ciclo e nel costo computazionale.
 
@@ -8093,6 +8093,173 @@ Il motivo è questo:
 
 Vedi anche "Somma di quadrati" su "Note libere 3".
 Vedi anche "Numeri somma di due quadrati" su "Note libere 16".
+
+
+------------------------------------
+Somma più probabile lanciando N dadi
+------------------------------------
+
+Sequenza OEIS A030123:
+Most likely total for a roll of n 6-sided dice, choosing the smallest if there is a choice.
+  0, 1, 7, 10, 14, 17, 21, 24, 28, 31, 35, 38, 42, 45, 49, 52, 56, 59, 63,
+  66, 70, 73, 77, 80, 84, 87, 91, 94, 98, 101, 105, 108, 112, 115, 119,
+  122, 126, 129, 133, 136, 140, 143, 147, 150, 154, 157, 161, 164, 168,
+  171, 175, 178, 182, 185, 189, 192, ...
+
+Vediamo cosa significa:
+"Most likely total for a roll of n 6-sided dice, choosing the smallest if there is a choice."
+"Somma più probabile ottenuta lanciando n dadi a 6 facce, scegliendo quella più piccola in caso di parità."
+a) Si lanciano n dadi normali (1–6).
+b) Si calcola tutte le somme possibili e quante combinazioni producono ciascuna somma.
+c) La somma con il numero massimo di combinazioni è la "più probabile".
+d) Se ci sono due somme con uguale probabilità massima, si sceglie la più piccola
+
+Quindi la sequenza rappresenta:
+la somma più probabile quando si lanciano n dadi a 6 facce, scegliendo quella più piccola in caso di doppio massimo.
+
+Esempi:
+
++---+-----------------+------------------------------+---------------+
+| n | possibili somme | somma/e più probabile/i      | valore minimo |
++---+-----------------+------------------------------+---------------+
+| 0 | 0               | 0                            | 0             |
+| 1 | 1–6             | tutte uguali                 | 1             |
+| 2 | 2–12            | 7 (unico massimo)            | 7             |
+| 3 | 3–18            | 10 e 11 (stessa probabilità) | 10            |
+| 4 | 4–24            | 14 (unico massimo)           | 14            |
+| 5 | 5–30            | 17 (unico massimo)           | 17            |
+| 6 | 6–36            | 21 (unico massimo)           | 21            |
+| 7 | 7–42            | 24 (unico massimo)           | 24            |
++---+-----------------+------------------------------+---------------+
+
+La distribuzione della somma di n dadi segue una distribuzione triangolare/convolutiva, simmetrica intorno al valore medio:
+
+  media = n(6+1)/2 = 3.5n
+
+Ma poiché i valori sono discreti, per n dispari il picco della distribuzione è doppio (due somme centrali con uguale probabilità).
+La regola dice di prendere quella più piccola, cioè la somma "sinistra" del picco.
+
+La formula per generare l'n-esimo termine è:
+
+  a(n) = floor(7*n/2)
+
+(define (a n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (true (floor (div (mul 7 n) 2)))))
+
+Calcoliamo i valori della sequenza:
+
+(map a (sequence 0 55))
+;-> (0 1 7 10 14 17 21 24 28 31 35 38 42 45 49 52 56 59 63
+;->  66 70 73 77 80 84 87 91 94 98 101 105 108 112 115 119
+;->  122 126 129 133 136 140 143 147 150 154 157 161 164 168
+;->  171 175 178 182 185 189 192)
+
+Scriviamo una funzione che genera i valorei della sequenza calcolando tutte le somme possibili.
+
+Algoritmo
+---------
+1) Si parte da un solo dado: 6 possibili risultati (1..6), tutti con frequenza 1.
+2) Per aggiungere un dado, si sommano tutte le combinazioni possibili:
+   ogni vecchia somma S genera 6 nuove somme (S+1 .. S+6).
+3) Questo processo è una convoluzione discreta applicata ripetutamente alla distribuzione iniziale (1 1 1 1 1 1).
+4) Alla fine, l'array 'conteggi' contiene, per ogni somma possibile, quante combinazioni la producono.
+5) Si prende la somma con frequenza massima, e in caso di parità si sceglie la più piccola.
+
+(define (most-likely-sum n show)
+; Calcola la somma più probabile per il lancio di n dadi a 6 facce.
+; Se ci sono due somme con uguale probabilità massima, sceglie la più piccola.
+; Se 'show' è true, mostra i conteggi delle somme e gli indici dei massimi.
+  (cond
+    ; caso banale: nessun dado -> somma 0
+    ((= n 0) 0)
+    ; caso base: un dado -> tutte facce equiprobabili -> somma più piccola = 1
+    ((= n 1) 1)
+    (true
+      (letn ((max-somma (* 6 n)) ; valore massimo ottenibile con n dadi
+             ; array di conteggi inizialmente con valori 0L (big-integer)
+             (conteggi (array (+ 1 max-somma) '(0L))))
+        ; -------------------------------
+        ; 1. Inizializzazione (un dado)
+        ; -------------------------------
+        ; con un solo dado, ogni faccia (1..6) può comparire una volta
+        (for (faccia 1 6)
+          (inc (conteggi faccia)))
+        ; -----------------------------------------
+        ; 2. Costruzione ricorsiva (convoluzione)
+        ; -----------------------------------------
+        ; A ogni nuovo dado, ogni somma possibile si "espande" sommando 1..6
+        ; In pratica si effettua la convoluzione discreta
+        ; della distribuzione precedente
+        (for (dado 2 n)
+          (let ((nuovi (array (+ 1 max-somma) '(0L))))
+            ; per ogni somma ottenibile con (dado-1) dadi
+            (for (somma dado (* 6 (- dado 1)))
+              ; si aggiungono le 6 possibilità del nuovo dado
+              (for (faccia 1 6)
+                ; ogni combinazione aumenta il conteggio della nuova somma
+                (inc (nuovi (+ somma faccia)) (conteggi somma))))
+            (setq conteggi nuovi))) ; aggiorna la distribuzione
+        ; -----------------------------------------
+        ; 3. Individuazione del valore più probabile
+        ; -----------------------------------------
+        (setq conteggi (array-list conteggi)) ; converte in lista (ref-all)
+        (if show (println "conteggi: " conteggi))
+        ; trova tutti gli indici in cui il conteggio è massimo
+        (setq indici (flat (ref-all (apply max conteggi) conteggi)))
+        (if show (println indici))
+        ; se c'è un solo massimo, restituisce la somma corrispondente
+        ; se ce ne sono due (distribuzione simmetrica), prende la più piccola
+        (if (= (length indici) 1)
+            (- (indici 0) 1) ; correzione d'indice
+            (indici 0))))))  ; prima somma tra i massimi (cioè la più piccola)
+
+Versione senza commenti:
+
+(define (most-likely-sum n show)
+  (cond
+    ((= n 0) 0)
+    ((= n 1) 1)
+    (true
+      (letn ((max-somma (* 6 n))
+             (conteggi (array (+ 1 max-somma) '(0L))))
+        (for (faccia 1 6)
+          (++ (conteggi faccia)))
+        (for (dado 2 n)
+          (let ((nuovi (array (+ 1 max-somma) '(0L))))
+            (for (somma dado (* 6 (- dado 1)))
+              (for (faccia 1 6)
+                (++ (nuovi (+ somma faccia)) (conteggi somma))))
+            (setq conteggi nuovi)))
+        (setq conteggi (array-list conteggi))
+        (if show (println "conteggi: " conteggi))
+        (setq indici (flat (ref-all (apply max conteggi) conteggi)))
+        (if show (println indici))
+        (if (= (length indici) 1)
+            (- (indici 0) 1)
+            (indici 0))))))
+
+Proviamo:
+
+(most-likely-sum 2 true)
+;-> conteggi: (0 0 0 1 2 3 4 5 5 4 3 2 1)
+;-> (7 8)
+;-> 7
+(most-likely-sum 3 true)
+;-> conteggi: (0 0 0 0 1 3 6 10 15 20 23 24 23 20 15 10 6 3 1)
+;-> (11)
+;-> 10
+(map most-likely-sum (sequence 0 55))
+;-> (0 1 7 10 14 17 21 24 28 31 35 38 42 45 49 52 56 59 63
+;->  66 70 73 77 80 84 87 91 94 98 101 105 108 112 115 119
+;->  122 126 129 133 136 140 143 147 150 154 157 161 164 168
+;->  171 175 178 182 185 189 192)
+
+Test di correttezza:
+
+(= (map a (sequence 0 100)) (map most-likely-sum (sequence 0 100)))
+;-> true
 
 ============================================================================
 

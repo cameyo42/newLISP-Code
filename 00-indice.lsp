@@ -3263,6 +3263,7 @@ NOTE LIBERE 33
   Rilevamento dei cicli (Algoritmi di Floyd e Brent)
   Ricerca di un ciclo in una lista di elementi
   Numeri somma di due quadrati (nulli e non nulli)
+  Somma più probabile lanciando N dadi
 
 PROBLEMI SUI DADI
 =================
