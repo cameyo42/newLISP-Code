@@ -3164,7 +3164,7 @@ NOTE LIBERE 32
   Quanti numeri primi possiamo calcolare con newLISP?
   Prodotto di cifre uguale al prodotto tra somma di cifre e radice digitale
   Frequenza delle cifre dei numeri primi
-  Una funzione come "map"
+  Una funzione come "map" (semplificata)
   Statistiche di un campione di interi con le occorrenze degli interi
   Numeri confusi
   Trovare valori e indici degli elementi di una lista diversi da un valore k
@@ -3262,6 +3262,7 @@ NOTE LIBERE 33
   Ricerca di elementi uguali (valore e indice) in due liste
   Rilevamento dei cicli (Algoritmi di Floyd e Brent)
   Ricerca di un ciclo in una lista di elementi
+  Numeri somma di due quadrati (nulli e non nulli)
 
 PROBLEMI SUI DADI
 =================

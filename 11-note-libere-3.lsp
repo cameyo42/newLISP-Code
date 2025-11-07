@@ -3786,6 +3786,7 @@ Vediamo nei primi 100000 numeri:
 ;->  (257 76) (260 65) (265 40) (268 1))
 
 Vedi anche "Numeri somma di due quadrati" su "Note libere 16".
+Vedi anche "Numeri somma di due quadrati (nulli e non nulli)" su "Note libere 33".
 
 
 -----------------------

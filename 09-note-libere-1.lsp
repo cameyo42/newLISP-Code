@@ -4462,7 +4462,8 @@ Allora usiamo la seguente funzione (ralph.ronnquist):
 La funzione map semplificata
 ----------------------------
 
-Definiamo una funzione che simula la funzione "map". Per semplificare esaminiamo solo la situazione unaria, cioè scriveremo una funzione "mappa" che applica una funzione unaria (es. sin, log, ecc.) ad una sola lista.
+Definiamo una funzione che simula la funzione "map".
+Per semplificare esaminiamo solo la situazione unaria, cioè scriveremo una funzione "mappa" che applica una funzione unaria (es. sin, log, ecc.) ad una sola lista.
 
 (define (mappa func lst)
   (if (null? lst) '()
@@ -7055,6 +7056,7 @@ Vedi anche "Il metodo middle-square per generare numeri casuali" su "Note libere
 Vedi anche "Generatore casuale di Neumann" su "Note libere 26".
 Vedi anche "Generatore casuale di Engel" su "Note libere 26".
 Vedi anche "Generatore casuale LCG (Linear Congruential Generator)" su "Note libere 26".
+
 
 ---------------------
 Liste di associazione

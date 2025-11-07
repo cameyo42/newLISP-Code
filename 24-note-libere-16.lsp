@@ -6357,14 +6357,16 @@ Numeri somma di due quadrati
 Determinare se un numero intero N può essere espresso come somma dei quadrati di due numeri interi.
 
 Sequenza OEIS A001481:
+  Numbers that are the sum of 2 squares.
   0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 26, 29, 32, 34, 36, 37,
   40, 41, 45, 49, 50, 52, 53, 58, 61, 64, 65, 68, 72, 73, 74, 80, 81, 82,
   85, 89, 90, 97, 98, 100, 101, 104, 106, 109, 113, 116, 117, 121, 122,
   125, 128, 130, 136, 137, 144, 145, 146, 148, 149, 153, 157, 160, ...
 
-La sequenza complementare è quella di tutti i numeri che non possono essere espressi come somma  dei quadrati di due numeri interi.
+La sequenza complementare è quella di tutti i numeri che non possono essere espressi come somma dei quadrati di due numeri interi.
 
 Sequenza OEIS A022544:
+  Numbers that are not the sum of 2 squares.
   3, 6, 7, 11, 12, 14, 15, 19, 21, 22, 23, 24, 27, 28, 30, 31, 33, 35, 38,
   39, 42, 43, 44, 46, 47, 48, 51, 54, 55, 56, 57, 59, 60, 62, 63, 66, 67, 
   69, 70, 71, 75, 76, 77, 78, 79, 83, 84, 86, 87, 88, 91, 92, 93, 94, 95, 
@@ -6424,7 +6426,7 @@ Ecco un teorema, dovuto a Fermat, che risolve il problema:
 
 Un numero N è esprimibile come somma di 2 quadrati se e solo se nella scomposizione in fattori primi di N ogni numero primo della forma (4k+3) ricorre un numero pari di volte!
 
-Esempi: 245 = 5*7*7. L'unico numero primo della forma 4k+3 è 7, e compare due volte. Quindi dovrebbe essere possibile scrivere 245 come somma di 2 quadrati (infatti, prova i quadrati di 14 e 7). Ma poiché 7 compare solo una volta in 42=2*3*7, è impossibile scrivere 42 come somma di due quadrati.
+Esempi: 245 = 5*7*7. L'unico numero primo della forma 4k+3 è 7, e compare due volte. Quindi dovrebbe essere possibile scrivere 245 come somma di 2 quadrati (infatti, 14^2 + 7^2 = 245). Ma poiché 7 compare solo una volta in 42=2*3*7, è impossibile scrivere 42 come somma di due quadrati.
 
 Un corollario di questo fatto è che ogni numero primo della forma (4k+1) può essere scritto come somma di due quadrati.
 
@@ -6437,15 +6439,12 @@ Nota: un numero N è nella forma (4k+3) se (N mod 4) = 3.
           ((= (length f) 1)
             ; primo in forma (4k+3) --> nil
             ; primo non in forma (4k+3) --> true
-            (if (= (% (f 0) 4) 3) nil true)
-          )
+            (if (= (% (f 0) 4) 3) nil true))
           (true
             (setq out true)
             (dolist (el f (not out))
               (if (and (= (% el 4) 3) (odd? (first (count (list el) f))))
-                  (setq out nil)
-              )
-            )
+                  (setq out nil)))
             out))))
 
 (sum-quad3 17)
@@ -6473,6 +6472,7 @@ Vediamo la velocità delle funzioni:
 ;-> 17.007
 
 Vedi anche "Somma di quadrati" in "Note libere 3".
+Vedi anche "Numeri somma di due quadrati (nulli e non nulli)" su "Note libere 33".
 
 
 ------------------------------------------

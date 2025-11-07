@@ -4814,36 +4814,78 @@ Con l'aumentare del numero dei primi le cifre si comportano nel modo seguente:
   +------ +---------------+
 
 
------------------------
-Una funzione come "map"
------------------------
+--------------------------------------
+Una funzione come "map" (semplificata)
+--------------------------------------
 
-Una funzione per modificare i valori di una lista.
+Una funzione per semplificare l'applicazione di una funzione agli elementi di una lista:
 Parametri:
   lst = lista di elementi
   func = funzione da applicare
   val = valore da usare nella funzione
 
-(define (touch lst func val)
+(define (touch1 lst func val)
+    (if val
+      (map (fn(x) (func val x)) lst)
+      (map func lst)))
+
+(setq lst '(1 2 3 4 5))
+(touch1 lst + 2)
+;-> (3 4 5 6)
+
+(touch1 lst mul 1.5)
+;-> (1.5 3 4.5 6)
+
+(touch1 lst sin)
+;-> (0.8414709848078965 0.9092974268256817 0.1411200080598672
+;->  -0.7568024953079282 -0.9589242746631385)
+
+Con una funzione utente:
+(define (f x) (sin (cos x)))
+(touch1 lst f)
+;-> (0.5143952585235492 -0.4042391538522658 -0.8360218615377305
+;->  -0.6080830096407656 0.2798733507685274)
+
+Un'altra funzione per modificare i valori di una lista.
+Parametri:
+  lst = lista di elementi
+  func = funzione da applicare
+  val = valore da usare nella funzione
+
+(define (touch2 lst func val)
   (if val
     (map (curry func val) lst)
     (map func lst)))
 
 Esempi:
 (setq lst '(1 2 3 4 5))
-
-(touch lst + 1)
+(touch2 lst + 2)
 ;-> (2 3 4 5 6)
 
-(touch lst sin)
+(touch2 lst mul 1.5)
+
+(touch2 lst sin)
 ;-> (0.8414709848078965 0.9092974268256817 0.1411200080598672
 ;->  -0.7568024953079282 -0.9589242746631385)
 
-(define (f a b) (* a b))
-(touch lst f 2)
-;-> (2 4 6 8 10)
-(touch lst * 2)
-;-> (2 4 6 8 10)
+Con una funzione utente:
+(define (f x) (sin (cos x)))
+(touch2 lst f)
+;-> (0.5143952585235492 -0.4042391538522658 -0.8360218615377305
+;->  -0.6080830096407656 0.2798733507685274)
+
+Nota: Funzione utente in map
+
+(setq lst1 '(1 2 3 4 5))
+(setq lst2 '(9 8 7 6 5))
+
+(define (f x y) (* x (+ x y)))
+(define fs "(define (f x y) (* x (+ x y)))")
+
+(map f lst1 lst2)
+;-> (10 20 30 40 50)
+(map (eval-string fs) lst1 lst2)
+;-> (10 20 30 40 50)
 
 
 -------------------------------------------------------------------

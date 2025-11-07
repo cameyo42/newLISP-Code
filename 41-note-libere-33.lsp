@@ -7990,5 +7990,109 @@ La funzione accetta anche liste con qualunque tipo di elementi:
 (trova-ciclo-lista '(1.1 2.2 3.3 2.2 3.3))
 ;-> (2 1 (2.2 3.3))
 
+
+------------------------------------------------
+Numeri somma di due quadrati (nulli e non nulli)
+------------------------------------------------
+
+Sequenza dei numeri che sono esprimibili come somma di due quadrati:
+  N = a^2 + b^2
+
+Esempi:
+ 10 = 1^2 + 3^2
+ 13 = 2^2 + 3^2
+  4 = 2^2 + 0^2
+
+Sequenza OEIS A001481:
+Numbers that are the sum of 2 squares.
+  0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 26, 29, 32, 34, 36, 37,
+  40, 41, 45, 49, 50, 52, 53, 58, 61, 64, 65, 68, 72, 73, 74, 80, 81, 82,
+  85, 89, 90, 97, 98, 100, 101, 104, 106, 109, 113, 116, 117, 121, 122,
+  125, 128, 130, 136, 137, 144, 145, 146, 148, 149, 153, 157, 160, ...
+
+Sequenza OEIS A000404:
+Numbers that are the sum of 2 nonzero squares.
+  2, 5, 8, 10, 13, 17, 18, 20, 25, 26, 29, 32, 34, 37, 40, 41, 45, 50, 52,
+  53, 58, 61, 65, 68, 72, 73, 74, 80, 82, 85, 89, 90, 97, 98, 100, 101,
+  104, 106, 109, 113, 116, 117, 122, 125, 128, 130, 136, 137, 145, 146,
+  148, 149, 153, 157, 160, 162, 164, 169, 170, 173, 178, ...
+
+Un numero N è esprimibile come somma di 2 quadrati se e solo se nella scomposizione in fattori primi di N ogni numero primo della forma (4k+3) ricorre un numero pari di volte.
+Nota: un numero N è nella forma (4k+3) se (N mod 4) = 3.
+Comunque questo considera anche i numeri in cui uno dei quadrati vale 0 (es 4 = 2^2 + 0^2).
+
+; Funzione che verifica se un numero è somma di due quadrati (anche nulli)
+(define (sum-squares num)
+  (local (f out)
+    ; calcola i fattori primi
+    (setq f (factor num))
+    (cond ((or (= num 0) (= num 1)) true)
+          ((= (length f) 1) ; numero primo
+            ; primo in forma (4k+3) --> nil
+            ; primo non in forma (4k+3) --> true
+            (if (= (% (f 0) 4) 3) nil true))
+          (true
+            (setq out true)
+            ; controlla se ogni numero primo della scomposizione di N
+            ; è della forma (4k+3) un numero pari di volte
+            (dolist (el f (not out))
+              (if (and (= (% el 4) 3) (odd? (first (count (list el) f))))
+                  (setq out nil)))
+            out))))
+
+(filter sum-squares (sequence 0 160))
+;-> (0 1 2 4 5 8 9 10 13 16 17 18 20 25 26 29 32 34 36 37
+;->  40 41 45 49 50 52 53 58 61 64 65 68 72 73 74 80 81 82
+;->  85 89 90 97 98 100 101 104 106 109 113 116 117 121 122
+;->  125 128 130 136 137 144 145 146 148 149 153 157 160)
+
+; Funzione che calcola (a b) in modo che N = a^2 + b^2
+(define (find-ab num)
+  (let ((a nil) (b nil) (break nil) (sq '()) (q 0))
+    ; Ciclo da 0 a sqrt(num)...
+    (for (i 0 (int (+ (sqrt num) 1)) 1 break)
+      (setq q (* i i))
+      ; Memorizza i quadrati calcolati in 'sq', per evitare ricalcoli inutili
+      (push q sq)
+      ; Verifica se (N - a^2) è anch'esso un quadrato già trovato
+      (if (ref (- num q) sq)
+        ; si ferma al primo riscontro (break -> true)
+        (set 'a i 'b (sqrt (- num q)) 'break true))
+    )
+    (list num a b)))
+
+(map find-ab (sequence 0 10))
+;-> ((0 0 0) (1 1 0) (2 1 1) (3 nil nil) (4 2 0) (5 2 1)
+;->  (6 nil nil) (7 nil nil) (8 2 2) (9 3 0) (10 3 1))
+
+; Funzione che verifica se un numero è somma di due quadrati (non nulli)
+(define (sum-squares-not-zero num)
+  ; se il numero corrente è somma di due quadrati...
+  (if (sum-squares num)
+    ; allora calcola i valori i due quadrati (a e b)
+    (let (ab (find-ab num))
+      ; se a e b sono diversi da 0, allora ritorna true, altrimenti nil
+      (and (!= (ab 1) 0) (!= (ab 2) 0)))
+    ; altrimenti il numero non è somma di due quadrati
+    nil))
+
+(filter sum-squares-not-zero (sequence 0 178))
+;-> (2 5 8 10 13 17 18 20 25 26 29 32 34 37 40 41 45 50 52
+;->  53 58 61 65 68 72 73 74 80 82 85 89 90 97 98 100 101
+;->  104 106 109 113 116 117 122 125 128 130 136 137 145 146
+;->  148 149 153 157 160 162 164 169 170 173 178)
+
+La funzione 'find-ab' restituisce una sola coppia (a, b).
+In alcuni casi un numero può avere più rappresentazioni (una di esse potrebbe avere (a=0), ma un'altra no.
+In teoria potremmo scartare un numero che avrebbe anche una rappresentazione valida con entrambi 'a' e 'b' diversi 0.
+Nella pratica, però, la ricerca parte da (a=0) e cresce, quindi la prima soluzione trovata è quella con 'a' minimo e i casi ambigui non cambiano il risultato finale.
+Il motivo è questo:
+- Se un numero può essere scritto come somma di due quadrati con entrambi non nulli, allora esiste almeno una rappresentazione con (a>0, b>0).
+- La funzione 'find-ab' parte da (a=0) e cresce e non appena trova una combinazione valida la restituisce.
+- Se la prima soluzione è del tipo (a,0), significa che nessuna altra soluzione con (b > 0) esiste — perché per numeri che hanno anche una coppia (a, (b > 0)) quella coppia verrebbe intercettata prima di arrivare alla forma (a, 0).
+
+Vedi anche "Somma di quadrati" su "Note libere 3".
+Vedi anche "Numeri somma di due quadrati" su "Note libere 16".
+
 ============================================================================
 
