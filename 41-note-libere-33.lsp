@@ -8261,5 +8261,137 @@ Test di correttezza:
 (= (map a (sequence 0 100)) (map most-likely-sum (sequence 0 100)))
 ;-> true
 
+
+-------------------------------------------------------
+Eliminare elementi di una lista con una lista di indici
+-------------------------------------------------------
+
+Data una lista di elementi e una lista di indici, eliminare tutti gli elementi dalla lista che hanno indici uguali a quelli della lista.
+
+Esempio:
+  lista = (3 5 1 8 6 3)
+  indici = (3 0 5)
+  output = (5 1 6)
+Indice = 3 --> Elemento da eliminare = lista(3) = 8
+Indice = 0 --> Elemento da eliminare = lista(0) = 3
+Indice = 5 --> Elemento da eliminare = lista(5) = 3
+
+Per eliminare gli elementi in modo sequenziale bisogna partire dall'indice più grande fino all'indice più piccolo (indici ordinati in modo non crescente).
+Questo perchè se cominciassimo l'eliminazione da un indice minore, allora cambierebbero gli indici degli altri elementi.
+Inoltre gli indici devono essere univoci (cioè comparire al massimo una volta).
+
+Questa funzione è simile a "select", solo che invece di selezionare gli elementi da una lista, li elimina.
+
+Nota: non viene fatto alcun controllo sulla correttezza degli indici
+
+(define (remove-at lst indexes)
+"Remove elements from a list with a list of indexes"
+  (map (fn(x) (pop lst x)) (unique (sort indexes >)))
+  lst)
+
+Proviamo:
+
+(setq L '(3 5 1 8 6 3))
+(remove-at L '(3 0 5))
+;-> (5 1 6)
+
+(remove-at L '(0 1))
+;-> (1 8 6 3)
+(remove-at L '(0 0 1 1))
+;-> (1 8 6 3)
+
+(remove-at L '(0 1 7))
+;-> ERR: invalid list index in function pop
+;-> called from user function (remove-at L '(0 1 7))
+
+Questa funzione: 
+1) non modifica la lista originale (restituisce una copia)
+2) solleva errori se gli indici sono fuori intervallo (deve essere cosi)
+3) non solleva errori se gli indici sono duplicati (se sono nell'intervallo)
+4) è stabile rispetto all'ordine degli elementi restanti
+
+
+-----------------------------------------
+Generazione di una matrice con un pattern
+-----------------------------------------
+
+Dato un numero intero 1 < n < 10, generare una matrice come quelle seguenti:
+
+Per n = 2:
+   (1 2)
+   (2 2)
+
+Per n = 5:
+  (1 2 3 4 5)
+  (2 2 3 4 5)
+  (3 3 3 4 5)
+  (4 4 4 4 5)
+  (5 5 5 5 5)
+
+Per n = 9
+  (1 2 3 4 5 6 7 8 9)
+  (2 2 3 4 5 6 7 8 9)
+  (3 3 3 4 5 6 7 8 9)
+  (4 4 4 4 5 6 7 8 9)
+  (5 5 5 5 5 6 7 8 9)
+  (6 6 6 6 6 6 7 8 9)
+  (7 7 7 7 7 7 7 8 9)
+  (8 8 8 8 8 8 8 8 9)
+  (9 9 9 9 9 9 9 9 9)
+
+Costruiamo ogni riga con il pattern seguente:
+
+  (ripetizioni numero) + (sequenza numeri)
+
+dove:
+
+  (ripetizione numero) --> (dup riga (- riga 1))
+  (sequenza numeri)    --> (sequence riga n))
+
+Per esempio per la matrice con n = 5:
+
+ riga 1 = (1 2 3 4 5) --> pattern = () + (sequenza da 1 a 5)
+ riga 2 = (2 2 3 4 5) --> pattern = (2) + (sequenza da 2 a 5)
+ riga 3 = (3 3 3 4 5) --> pattern = (3 3) + (sequenza da 3 a 5)
+ riga 4 = (4 4 4 4 5) --> pattern = (4 4 4) + (sequenza da 4 a 5)
+ riga 5 = (5 5 5 5 5) --> pattern = (5 5 5 5) + (sequenza da 5 a 5)
+
+(define (pattern n)
+  (let (out '())
+    (for (row 1 n)
+      (push (extend (dup row (- row 1)) (sequence row n)) out -1))
+    out))
+
+Proviamo:
+
+(map println (pattern 5))
+;-> (1 2 3 4 5)
+;-> (2 2 3 4 5)
+;-> (3 3 3 4 5)
+;-> (4 4 4 4 5)
+;-> (5 5 5 5 5)
+
+(map println (pattern 9))
+;-> (1 2 3 4 5 6 7 8 9)
+;-> (2 2 3 4 5 6 7 8 9)
+;-> (3 3 3 4 5 6 7 8 9)
+;-> (4 4 4 4 5 6 7 8 9)
+;-> (5 5 5 5 5 6 7 8 9)
+;-> (6 6 6 6 6 6 7 8 9)
+;-> (7 7 7 7 7 7 7 8 9)
+;-> (8 8 8 8 8 8 8 8 9)
+;-> (9 9 9 9 9 9 9 9 9)
+
+Versione code-golf (74 caratteri):
+
+(define(f n o)(for(r 1 n)(push(extend(dup r(- r 1))(sequence r n))o -1))o)
+
+(map println (f 5))
+;-> (1 2 3 4 5)
+;-> (2 2 3 4 5)
+;-> (3 3 3 4 5)
+;-> (4 4 4 4 5)
+;-> (5 5 5 5 5)
+
 ============================================================================
 

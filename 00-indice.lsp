@@ -3264,6 +3264,8 @@ NOTE LIBERE 33
   Ricerca di un ciclo in una lista di elementi
   Numeri somma di due quadrati (nulli e non nulli)
   Somma più probabile lanciando N dadi
+  Eliminare elementi di una lista con una lista di indici
+  Generazione di una matrice con un pattern
 
 PROBLEMI SUI DADI
 =================
