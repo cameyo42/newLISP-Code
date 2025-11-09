@@ -3338,6 +3338,35 @@ Per liste che danno come risultato true, la versione con "difference" è leggerm
 Per liste che danno come risultato nil, la versione con "for-all" è mediamente molto più veloce.
 Questo perchè "for-all" restituisce nil appena un elemento non soddisfa la condizione, mentre restituisce true solo dopo aver controllato tutti gli elementi.
 
+Terzo metodo:
+-------------
+La corrispondenza tra gli elementi delle due liste deve essere di 1:1.
+Esempio:
+A = (1 2 2 3 5)
+B = (1 2 3 4 5)
+La funzione deve restituire 'nil', perchè il numero 2 è presente due volte in A e solo una in B.
+
+(define (sublists-all? A B)
+  (let ( (pos nil) (stop nil) )
+    ; Per ogni numero di A...
+    (dolist (elem A)
+      ; se esiste in B...
+      (if (setq pos (ref elem B))
+          ; lo elimina da B
+          (pop B pos)
+          ; altrimenti ferma il ciclo e restituisce nil
+          (setq stop true)))
+    (not stop)))
+
+(setq A '(1 2 2 3 5))
+(setq B '(1 2 3 4 5))
+(sublists-all? A B)
+;-> nil
+
+(setq B '(2 1 3 5 2 2))
+(sublists-all? A B)
+;-> true
+
 
 -----------------------------
 Numeri binari in basi diverse

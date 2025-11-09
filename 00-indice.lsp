@@ -3268,6 +3268,7 @@ NOTE LIBERE 33
   Generazione di una matrice con un pattern
   Powerset iterativo (maschere binarie)
   Problema con "let" e "letn" annidati
+  Sottoinsiemi non sovrapposti che sommano ad un numero
 
 PROBLEMI SUI DADI
 =================

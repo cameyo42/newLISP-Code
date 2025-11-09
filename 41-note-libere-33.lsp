@@ -8540,5 +8540,186 @@ Lo stesso discorso vale per 'letn'.
 
 Per evitare questo problema usare 'let' o 'letn' solo all'inizio della funzione, oppure usare 'local' con tutte le variabili necessarie.
 
+
+-----------------------------------------------------
+Sottoinsiemi non sovrapposti che sommano ad un numero
+-----------------------------------------------------
+
+Data una lista L di interi positivi e un intero positivo K, trovare tutti i gruppi di sottoinsiemi non sovrapposti T(1),T(2),...,T(n) di L, tali che la somma di ogni T(i) sia uguale a K.
+"Sottoinsiemi non sovrapposti" significa che i numeri della lista possono essere usati solo una volta.
+
+Esempio:
+  L = (1 1 2 2 3 3 3 5 6 8)
+  K = 6
+  Primo gruppo di sottoinsiemi (N=3):
+  T(1)=(1 1 2 2)
+  T(2)=(3 3)
+  T(3)=(6)
+  Questo lascia (3 5 8) inutilizzati.
+
+  Secondo gruppo di sottoinsiemi (N=4):
+  T(1)=(1 2 3)
+  T(2)=(1 5)
+  T(3)=(3 3)
+  T(4)=(6)
+  Questo lascia (2 8) inutilizzati.
+
+Algoritmo
+---------
+1. Generiamo tutti i sottoinsiemi unici di L che sommano a K` con 'sublists-sum-to'.
+2. Generiamo tutte le combinazioni possibili di questi sottoinsiemi usando una maschera binaria.
+3. Per ogni combinazione:
+   - Uniamo i sottoinsiemi in una lista 'unione'.
+   - Controlliamo che ogni elemento di 'unione' sia presente in 'L' usando `sublist?`.
+4. Se la combinazione è valida, la aggiungiamo alla lista dei risultati `ris`.
+5. Alla fine, usiamo 'unique' su 'ris' per eliminare duplicati.
+
+(define (sublists-sum-to lst sum)
+"Generate all sublists that sum to a given number"
+  (local (limit val len out)
+    (setq out '())
+    (setq len (length lst))
+    ; numero di subset (2^len)
+    (setq limit (<< 1 len))
+    (for (i 0 (- limit 1))
+      (setq val 0)
+      (setq tmp '())
+      (setq stop nil)
+      (for (j 0 (- len 1) 1 stop)
+        ; usa la rappresentazione binaria di "i"
+        ; per decidere quali elementi prendere.
+        (if (!= (& i (<< 1 j)))
+          (begin
+            (push (lst j) tmp -1)
+            (setq val (+ val (lst j)))
+            ; stop se somma del sottoinsieme corrente
+            ; supera il valore sum
+            (if (> val sum) (setq stop true)))))
+      ; controlla se deve aggiungere un sottoinsieme che somma a sum
+      (if (= val sum) (push tmp out -1)))
+    out))
+
+(define (sublist? lst1 lst2 all)
+"Check if all elements of a list (lst1) are in another list (lst2)"
+  (if all
+    ; check presence of numbers
+    (for-all (fn(x) (ref x lst2)) lst1))
+    ;else (corrispondece 1:1)
+    ; checks presence and occurrence of numbers
+    (let ( (pos nil) (stop nil) )
+      ; Per ogni numero di lst1...
+      (dolist (elem lst1)
+        ; se esiste in lst2...
+        (if (setq pos (ref elem lst2))
+            ; lo elimina da lst2
+            (pop lst2 pos)
+            ; altrimenti ferma il ciclo e restituisce nil
+            (setq stop true)))
+      (not stop)))
+
+(define (sublist? lst1 lst2 all)
+"Check if all elements of a list (lst1) are in another list (lst2)"
+  (if all
+    ; check presence of numbers
+    (for-all (fn(x) (ref x lst2)) lst1))
+    ;else (corrispondece 1:1)
+    ; checks presence and occurrence of numbers
+    (let ( (pos nil) (stop nil) )
+      ; Per ogni numero di lst1...
+      (dolist (elem lst1)
+        ; se esiste in lst2...
+        (if (setq pos (ref elem lst2))
+            ; lo elimina da lst2
+            (pop lst2 pos)
+            ; altrimenti ferma il ciclo e restituisce nil
+            (setq stop true)))
+      (not stop)))
+
+; Funzione che trova i gruppi di sottoinsiemi non sovrapposti
+(define (trova-gruppi L K)
+  (letn ((ssa (subset-sum-all L K))
+         (ris '())
+         (n 0)
+         (gruppo '())
+         (unione '()))
+    ; calcola tutti i sottoinsiemi che sommano a K
+    (setq ssa (sort (unique (map sort ssa))))
+    (setq L (sort L))
+    (setq n (length ssa))
+    ; ciclo su tutte le combinazioni di sottoinsiemi usando maschera binaria
+    (for (mask 1 (- (<< 1 n) 1))
+        (setq gruppo '())
+        (for (i 0 (- n 1))
+          (if (!= (& mask (<< 1 i)))
+              (push (ssa i) gruppo -1)))
+        (setq unione (flat gruppo))
+        ; verifica se tutti gli elementi di unione sono presenti in L 
+        (if (sublist? unione L true)
+            (push gruppo ris -1)))
+    (unique ris)))
+
+Proviamo:
+
+(setq L '(1 1 2 2 3))
+(setq K 4)
+(trova-gruppi L K)
+;-> (((1 1 2)) ((1 3)) ((2 2)) ((1 3) (2 2)))
+
+(setq L '(1 1 2 2 3 3 3 5 6 8))
+(setq K 6)
+(trova-gruppi L K)
+;-> (((1 1 2 2))
+;->  ((1 2 3)) 
+;->  ((1 2 3) (1 2 3))
+;->  ((1 5)) 
+;->  ((1 2 3) (1 5))
+;->  ((3 3))
+;->  ((1 1 2 2) (3 3))
+;->  ((1 2 3) (3 3))
+;->  ((1 5) (3 3))
+;->  ((1 2 3) (1 5) (3 3))
+;->  ((6))
+;->  ((1 1 2 2) (6))
+;->  ((1 2 3) (6))
+;->  ((1 2 3) (1 2 3) (6))
+;->  ((1 5) (6))
+;->  ((1 2 3) (1 5) (6))
+;->  ((3 3) (6))
+;->  ((1 1 2 2) (3 3) (6))
+;->  ((1 2 3) (3 3) (6))
+;->  ((1 5) (3 3) (6))
+;->  ((1 2 3) (1 5) (3 3) (6)))
+
+(setq L '(2 2 2 2 3 3 4 5 5 6 8 9 9 11 12))
+(length L)
+;-> 15
+(setq K 13)
+(time (setq sol (trova-gruppi-disgiunti L K)))
+;-> 124.631
+(apply max (map length sol))
+;-> 5
+
+(setq L '(1 1 2 3 3 3 3 3 4 4 4 5 6 6 7 7))
+(length L)
+;-> 16
+(setq K 10)
+(time (setq sol (trova-gruppi-disgiunti L K)))
+;-> 270.654
+(length sol)
+;-> 194
+(apply max (map length sol))
+;-> 5
+
+(setq L '(1 1 2 3 3 3 3 3 4 4 4 5 6 6 7 7 7 8 9 9))
+(length L)
+;-> 20
+(setq K 10)
+(time (setq sol (trova-gruppi-disgiunti L K)))
+;-> 3267.516
+(length sol)
+;-> 393
+(apply max (map length sol))
+;-> 6
+
 ============================================================================
 
