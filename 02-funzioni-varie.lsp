@@ -4700,7 +4700,7 @@ Scriviamo una funzione ricorsiva cha calcola l'insieme potenza:
 (powerset '(a b c))
 ;-> ((a b c) (a b) (a c) (a) (b c) (b) (c) ())
 
-Adesso scriviamo una funzione iterativa cha calcola l'insieme potenza:
+Adesso scriviamo una funzione iterativa/ricorsiva cha calcola l'insieme potenza:
 
 (define (powerset-i lst)
   (define (loop res s)
@@ -4718,6 +4718,8 @@ Vediamo la differenza di velocità tra le due funzioni:
 ;-> 3672.166
 
 Il numero di elementi dell'insieme potenza vale 2^n, dove n è il numero di elementi della lista.
+
+Vedi anche "Powerset iterativo (maschere binarie)" su "Note libere 33".
 
 
 -----------------

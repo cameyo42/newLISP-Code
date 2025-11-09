@@ -8393,5 +8393,152 @@ Versione code-golf (74 caratteri):
 ;-> (4 4 4 4 5)
 ;-> (5 5 5 5 5)
 
+
+-------------------------------------
+Powerset iterativo (maschere binarie)
+-------------------------------------
+
+Calcoliamo il powerset di una lista utilizzando il metodo delle maschere binarie per generare tutte le sottoliste della lista data.
+Il numero di elementi (sottoliste) del powerset è dato dalla formula 2^N, dove N sono il numero di elementi della lista data.
+
+(define (powerset-i lst)
+  (let ((out '(())) (n (length lst)) (group '()))
+    (for (mask 1 (- (<< 1 n) 1))
+      (setq group '())
+      (for (i 0 (- n 1))
+        (if (!= (& mask (<< 1 i))) (push (lst i) group -1)))
+      (push group out -1))
+    out))
+
+(powerset-i (sequence 1 5))
+;-> (() (1) (2) (1 2) (3) (1 3) (2 3) (1 2 3) (4) (1 4) (2 4) (1 2 4) (3 4)
+;->  (1 3 4) (2 3 4) (1 2 3 4) (5) (1 5) (2 5) (1 2 5) (3 5) (1 3 5) (2 3 5)
+;->  (1 2 3 5) (4 5) (1 4 5) (2 4 5) (1 2 4 5) (3 4 5) (1 3 4 5) (2 3 4 5)
+;->  (1 2 3 4 5))
+
+(time (println (length (powerset-i (sequence 1 10)))))
+;-> 1024
+
+Vediamo come funziona il doppio 'for' con le maschere binarie.
+Primo ciclo (esterno):
+
+(for (mask 1 (- (<< 1 n) 1)) ...)
+
+- 'n' è il numero di elementi della lista 'L'.
+- '<<' è lo shift a sinistra: (<< 1 n) = 2^n.
+  Quindi stiamo scorrendo tutti i numeri da 1 a (2^n - 1).
+- Ogni numero 'mask' rappresenta una maschera binaria, cioè una combinazione di sottoliste.
+
+Esempio:
+  n = 3
+  mask = 1  -> 001  -> prende solo L(0)
+  mask = 2  -> 010  -> prende solo L(1)
+  mask = 3  -> 011  -> prende L(0) e L(1)
+  mask = 4  -> 100  -> prende solo L(2)
+  ...
+  mask = 7  -> 111  -> prende L(0), L(1), L(2)
+
+Quindi il ciclo esterno genera tutte le combinazioni di sottoliste.
+
+Secondo ciclo (interno):
+
+(for (i 0 (- n 1))
+  (if (!= (& mask (<< 1 i)))
+    (push (L i) gruppo -1)))
+
+- 'i' scorre tutti gli indici dei sottoinsiemi (0 ... n-1).
+- (<< 1 i) genera una "bandierina" con un solo bit attivo:
+  per i=0 -> '1'  -> '...0001'
+  per i=1 -> '2'  -> '...0010'
+  per i=2 -> '4'  -> '...0100'
+  ecc.
+- (& mask (<< 1 i)) fa un AND bit a bit:
+  restituisce zero se il bit 'i' di 'mask' è spento
+  restituisce diverso da zero se il bit 'i' è acceso
+
+Ecco perchè usiamo:
+
+(if (!= (& mask (<< 1 i)))
+  (push (L i) group -1))
+
+Significa:
+"se il bit 'i' è acceso nella maschera 'mask', aggiungi 'L(i)' a 'group'".
+
+Nota: il powerset iterativo è più lento del powerset ricorsivo, ma offre il vantaggio di poter processare ogni singola sottolista nel momento in cui viene creata.
+
+Vedi anche "Insieme delle parti (powerset)" su "Funzioni varie".
+
+
+------------------------------------
+Problema con "let" e "letn" annidati
+------------------------------------
+
+L'uso delle espressioni 'let' e 'letn' annidate nelle funzioni rallenta molto l'esecuzione.
+Vediamo come e perchè usando una funzione che calcola il powerset di una lista in modo iterativo.
+Il powerset di una lista è la lista di tutte le sottoliste possibili.
+
+La prima funzione utilizza 'let' all'inizio della funzione:
+
+  (let ((out '(())) (n (length lst)))
+
+e all'interno del primo ciclo 'for':
+
+    (for (mask 1 (- (<< 1 n) 1))
+      (let (group '())
+
+(define (sublists1 lst)
+  (let ((out '(())) (n (length lst)))
+    (for (mask 1 (- (<< 1 n) 1))
+      (let (group '())
+        (for (i 0 (- n 1))
+          (if (!= (& mask (<< 1 i))) (push (lst i) group -1)))
+        (push group out -1)))
+    out))
+
+La seconda funzione usa 'let' soltanto all'inizio della funzione:
+
+  (let ((out '(())) (n (length lst)) (group '()))
+
+(define (sublists2 lst)
+  (let ((out '(())) (n (length lst)) (group '()))
+    (for (mask 1 (- (<< 1 n) 1))
+      (setq group '())
+      (for (i 0 (- n 1))
+        (if (!= (& mask (<< 1 i))) (push (lst i) group -1)))
+      (push group out -1))
+    out))
+
+Proviamo:
+
+(sublists1 '(1 2 3 4))
+;-> (() (1) (2) (1 2) (3) (1 3) (2 3) (1 2 3) (4) (1 4) (2 4)
+;->  (1 2 4) (3 4) (1 3 4) (2 3 4) (1 2 3 4))
+
+(sublists2 '(1 2 3 4))
+;-> (() (1) (2) (1 2) (3) (1 3) (2 3) (1 2 3) (4) (1 4) (2 4)
+;->  (1 2 4) (3 4) (1 3 4) (2 3 4) (1 2 3 4))
+
+(= (sublists1 '(1 2 3 4 5 6 7 8 9)) (sublists2 '(1 2 3 4 5 6 7 8 9)))
+;-> true
+
+Il numero di tutte le sottoliste di una lista di N elementi è dato da 2^N.
+
+Vediamo la velocità delle funzioni:
+
+(setq t (rand 10 12))
+(time (sublists1 t) 10)
+;-> 9250.824
+
+(time (sublists2 t) 10)
+;-> 78.099
+
+La prima funzione (quella con il 'let' interno al ciclo 'for') è molto lenta rispetto alla seconda funzione.
+Questo è dovuto al fatto che il meccanismo di gestione della memoria deve disallocare la memoria occupata dalla lista 'group' ogni volta che termina il ciclo 'for'.
+Poichè questo viene ripetuto tante volte, allora il tempo di esecuzione aumenta.
+Più grande è la memoria utilizzata da 'group' e maggiore sarà il tempo di disallocazione.
+Lo stesso discorso vale per 'letn'.
+
+Per evitare questo problema usare 'let' o 'letn' solo all'inizio della funzione, oppure usare 'local' con tutte le variabili necessarie.
+
 ============================================================================
 

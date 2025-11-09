@@ -3266,6 +3266,8 @@ NOTE LIBERE 33
   Somma più probabile lanciando N dadi
   Eliminare elementi di una lista con una lista di indici
   Generazione di una matrice con un pattern
+  Powerset iterativo (maschere binarie)
+  Problema con "let" e "letn" annidati
 
 PROBLEMI SUI DADI
 =================
