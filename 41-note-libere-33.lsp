@@ -8721,5 +8721,110 @@ Proviamo:
 (apply max (map length sol))
 ;-> 6
 
+
+------------------------
+Moltiplicazione marziana
+------------------------
+
+I marziani moltiplicano due numeri interi con la procedura seguente:
+
+1) Aggiungono zeri iniziali per far corrispondere le lunghezze
+2) moltiplicano le corripondenti cifre in base-10
+3) aggiungono zeri iniziali ai prodotti per ottenere numeri a 2 cifre
+4) concatenano i prodotti a due cifre
+5) tolgono gli zeri iniziali
+
+Esempio:
+
+  A = 1302
+  B = 76942
+
+  1. Aggiunge gli zeri iniziali
+     A = 01302
+     B = 76942
+  2. Moltiplica le cifre corrispondenti
+     A = 0  1  3  0  2
+     B = 7  6  9  4  2
+     ->  0  6 27  0  4
+  3. Aggiunge zeri fino a 2 cifre
+     -> 00 06 27 00 04
+  4. Concatena
+     -> 0006270004
+  5. Elimina gli zeri iniziali
+     -> 6270004
+
+L'operazione viene estesa a tutti gli interi con le consuete regole del segno:
+  (+ x -) -> -
+  (- x +) -> -
+  (+ x +) -> +
+  (- x -) -> +
+
+Scrivere una funzione che moltiplica due interi (anche big-integer) con la procedura marziana.
+
+(define (marte-mul A B)
+  (local (minus len-a len-b as bs al bl prod z)
+    ; calcola il segno della moltiplicazione
+    (setq minus (or (and (< A 0) (> B 0)) (and (> A 0) (< B 0))))
+    ; valore assoluto di A
+    (setq A (abs A))
+    ; valore assoluto di B
+    (setq B (abs B))
+    ; lunghezza di A
+    (setq len-a (length A))
+    ; lunghezza di A
+    (setq len-b (length B))
+    ; A deve essere più corto o uguale a B
+    (when (> len-a len-b) (swap A B) (swap len-a len-b))
+    ; converte A in stringa
+    (setq as (string A))
+    ; converte B in stringa
+    (setq bs (string B))
+    ; toglie (da sinistra) le cifre di B che non servono
+    ; in modo che A e B hanno lo stesso numero di cifre
+    (pop bs 0 (- len-b len-a))
+    ; toglie la 'L' finale da A se big-integer
+    (if (= (as -1) "L") (pop as -1))
+    ; toglie la 'L' finale da B se big-integer
+    (if (= (bs -1) "L") (pop bs -1))
+    ; converte la stringa di A in lista di cifre intere
+    (setq al (map int (explode as)))
+    ; converte la stringa di B in lista di cifre intere
+    (setq bl (map int (explode bs)))
+    ; calcola i prodotti delle cifre delle due liste
+    ; li formatta con due cifre (0 davanti)
+    ; e li concatena in un intero-stringa
+    (setq prod (join (map (fn(x) (format "%02d" x)) (map * al bl))))
+    ; elimina gli zeri iniziali
+    (while (= (prod 0) "0") (pop prod))
+    ; converte l'intero-stringa in intero o big-integer
+    (setq z (eval-string prod))
+    ; applica il segno della moltiplicazione
+    (if minus (- z) z)))
+
+Proviamo:
+
+(setq A 1302)
+(setq B 76942)
+(marte-mul A B)
+;-> 6270004
+(marte-mul B A)
+;-> 6270004
+
+(setq A 351245)
+(setq B 96247)
+(marte-mul A B)
+;-> 4506041635
+(marte-mul A (- B))
+;-> -4506041635
+(marte-mul B (- A))
+;-> -4506041635
+(marte-mul (- A) (- B))
+;-> 4506041635
+
+(setq A 12345678901234567890)
+(setq B -98765432109876543210)
+(marte-mul A B)
+;-> -916212425242116090009162124252421160900L
+
 ============================================================================
 

@@ -3269,6 +3269,7 @@ NOTE LIBERE 33
   Powerset iterativo (maschere binarie)
   Problema con "let" e "letn" annidati
   Sottoinsiemi non sovrapposti che sommano ad un numero
+  Moltiplicazione marziana
 
 PROBLEMI SUI DADI
 =================
