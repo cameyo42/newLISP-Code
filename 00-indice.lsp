@@ -3270,6 +3270,9 @@ NOTE LIBERE 33
   Problema con "let" e "letn" annidati
   Sottoinsiemi non sovrapposti che sommano ad un numero
   Moltiplicazione marziana
+  Matrice con sequenze da una lista
+  Iperesponenziazione (tetrazione)
+  Algoritmo di Pollard-Rho
 
 PROBLEMI SUI DADI
 =================

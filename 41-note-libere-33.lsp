@@ -8304,7 +8304,7 @@ Proviamo:
 ;-> ERR: invalid list index in function pop
 ;-> called from user function (remove-at L '(0 1 7))
 
-Questa funzione: 
+Questa funzione:
 1) non modifica la lista originale (restituisce una copia)
 2) solleva errori se gli indici sono fuori intervallo (deve essere cosi)
 3) non solleva errori se gli indici sono duplicati (se sono nell'intervallo)
@@ -8653,7 +8653,7 @@ Algoritmo
           (if (!= (& mask (<< 1 i)))
               (push (ssa i) gruppo -1)))
         (setq unione (flat gruppo))
-        ; verifica se tutti gli elementi di unione sono presenti in L 
+        ; verifica se tutti gli elementi di unione sono presenti in L
         (if (sublist? unione L true)
             (push gruppo ris -1)))
     (unique ris)))
@@ -8669,9 +8669,9 @@ Proviamo:
 (setq K 6)
 (trova-gruppi L K)
 ;-> (((1 1 2 2))
-;->  ((1 2 3)) 
+;->  ((1 2 3))
 ;->  ((1 2 3) (1 2 3))
-;->  ((1 5)) 
+;->  ((1 5))
 ;->  ((1 2 3) (1 5))
 ;->  ((3 3))
 ;->  ((1 1 2 2) (3 3))
@@ -8825,6 +8825,275 @@ Proviamo:
 (setq B -98765432109876543210)
 (marte-mul A B)
 ;-> -916212425242116090009162124252421160900L
+
+
+---------------------------------
+Matrice con sequenze da una lista
+---------------------------------
+
+Data una lista L di numeri interi positivi scrivere una funzione che crea una matrice in cui l'n-esima colonna contiene il vettore 1:L(n), dove le colonne più corte vengono riempite con zeri.
+
+Esempio:
+
+L = (4 5 3 1 6)
+matrice = 1 1 1 1 1
+          2 2 2 0 2
+          3 3 3 0 3
+          4 4 0 0 4
+          0 5 0 0 5
+          0 0 0 0 6
+
+(define (crea-matrice L)
+  (let ( (max-val (apply max L)) (matrix '()) )
+    (dolist (el L)
+      (push (append (sequence 1 el) (dup 0 (- max-val el))) matrix -1))
+    (transpose matrix)))
+
+(setq L '(4 5 3 1 6))
+(map println (crea-matrice L))
+;-> (1 1 1 1 1)
+;-> (2 2 2 0 2)
+;-> (3 3 3 0 3)
+;-> (4 4 0 0 4)
+;-> (0 5 0 0 5)
+;-> (0 0 0 0 6)
+
+(map println (crea-matrice '(1 2 3 4)))
+;-> (1 1 1 1)
+;-> (0 2 2 2)
+;-> (0 0 3 3)
+;-> (0 0 0 4)
+
+(crea-matrice '(1))
+;-> ((1))
+
+Versione code-golf (97 caratteri):
+(define(f L m)(dolist(e L)(push(append(sequence 1 e)(dup 0(-(apply max L)e)))m -1))(transpose m))
+(map println (f L))
+;-> (1 1 1 1 1)
+;-> (2 2 2 0 2)
+;-> (3 3 3 0 3)
+;-> (4 4 0 0 4)
+;-> (0 5 0 0 5)
+;-> (0 0 0 0 6)
+
+
+--------------------------------
+Iperesponenziazione (tetrazione)
+--------------------------------
+
+L'iperesponenziazione o tetrazione di un numero a per un intero positivo b, denotato da a↑↑b o (b)^a, è definita ricorsivamente da:
+
+  a↑↑1 = a,
+  a↑↑(k+1) = a(a↑↑k).
+
+dove "↑↑" è la notazione a frecce di Donald Knuth.
+
+  a↑↑x = a^(a^(a^(a^...)))
+         ---- x volte ----
+
+Esempi:
+  3↑↑2 = 3^3 = 27
+  3↑↑3 = 3^(3^3) = 3^27 = 7625597484987 
+  3↑↑4 = 3^(3^(3^3)) = 3^7625597484987 ~ 10^(3.6383346400240996*10^12)
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (hyper base iper)
+  (let (out base)
+    ; calcola base↑↑iper mediante esponenziazione modulare ripetuta
+    ; (associativa a destra)
+    (for (i 1 (- iper 1))
+      (setq out (** base out)))
+    out))
+
+Proviamo:
+
+(hyper 3 2)
+;-> 27L
+(hyper 3 3)
+;-> 7625597484987L
+; (hyper 3 3) non è calcolabile...
+
+(define (hyper-list base iper)
+  (series base (fn(x) (** base x)) iper))
+
+(hyper-list 3 3)
+;-> (3 27L 7625597484987L)
+(hyper-list 2 4)
+;-> (2 4L 16L 65536L)
+
+(length (hyper 2 5))
+;-> 19729
+
+
+------------------------
+Algoritmo di Pollard-Rho
+------------------------
+
+(define (g x num) (% (+ (* x x) 1) num))
+
+(define (pollard-rho num)
+  (letn ( (x 2) (y x) (d 1) )
+    (while (= d 1)
+        (setq x (g x num))
+        (setq y (g (g y num) num))
+        (setq d (gcd (abs (- x y)) num)))
+    (if (= d num) nil d)))
+
+(pollard-rho 1345637128345127835)
+;-> 21
+
+Il codice mostra una semplice implementazione dell'algoritmo Pollard–Rho per la fattorizzazione dei numeri compositi.
+
+L'algoritmo si basa sul principio del "cycle detection" (rilevamento di cicli) in sequenze pseudo–casuali modulo 'num'.
+
+1. Generazione della sequenza
+Si genera una sequenza: x(i+1) = f(x(i)) mod num
+dove f(x) è una funzione polinomiale semplice, spesso f(x) = (x^2 + c) mod num.
+Nel caso in esempio: (g x num) -> (x² + 1) mod num
+
+2. Collisione e ciclo
+Dato che i valori sono presi modulo 'num', la sequenza prima o poi entra in un ciclo (pigeonhole principle).
+Pollard notò che se 'num' è composto, allora la sequenza 'mod p' (dove 'p' è un fattore di 'num') può entrare in ciclo prima della sequenza 'mod num'.
+Questo squilibrio produce un GCD non banale tra due termini della sequenza.
+
+3. Metodo di Floyd (lepre e tartaruga)
+Si usano due variabili (x e y) che avanzano rispettivamente con velocità diversa:
+  x = f(x)
+  y = f(f(y))
+Quando il ciclo si manifesta, la differenza '|x - y|' ha un fattore comune con 'num'.
+
+4. Controllo GCD
+Ad ogni iterazione si calcola: d = gcd(|x - y|, num)
+Se (d > 1) e (d < num), allora 'd' è un fattore non banale di 'num'.
+
+Il codice iniziale è corretto come struttura base, ma può essere migliorato con le seguenti modifiche:
+a) Funzione di iterazione parametrizzabile
+   Attualmente f(x) = x^2 + 1.
+   Per certi numeri può entrare in cicli "cattivi" che non portano a fattori.
+   Possiamo usare un parametro 'c' casuale, ad esempio:
+   (define (g x c num) (% (+ (* x x) c) num))
+   e passalo a 'pollard-rho'.
+b) Reinizializzazione casuale
+   Se (d = num)`, significa che il tentativo ha fallito.
+   Si può riprovare con un altro 'x' o 'c'.
+   Altrimenti 'nil' non è informativo:
+   (if (= d num) (pollard-rho num) d)
+c) Controllo dei casi banali
+   Prima di iniziare, conviene controllare:
+   (if (even? num) 2)
+   o anche se 'num' è primo, per fermarsi subito.
+d) Tentativi multipli
+   Tentare automaticamente più volte con semi casuali e restituire più fattori (non solo uno).
+e) Gestione di grandi numeri
+   newLISP supporta grandi interi, ma per numeri enormi può convenire usare moduli casuali per diversificare la ricerca.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ALGORITMO DI POLLARD–RHO PER LA FATTORIZZAZIONE DI INTERI
+;;
+;; Dato un numero composito n, generiamo una sequenza pseudo–casuale:
+;;     x(0) = valore iniziale
+;;     x(i+1) = (x(i)^2 + c) mod n
+;; dove c è una costante scelta casualmente.
+;;
+;; Questa sequenza viene calcolata "mod n", 
+;; quindi è ciclica (pigeonhole principle).
+;; Tuttavia, se n ha un fattore primo p, la sequenza "mod p" potrebbe
+;; entrare in ciclo PRIMA di quella "mod n".
+;; Questo disallineamento crea una differenza tra due termini
+;; della sequenza che condividono un divisore comune con n.
+;;
+;; Pollard ha proposto di rilevare questo ciclo con il metodo di Floyd
+;; ("lepre e tartaruga"), e di calcolare ad ogni passo:
+;;     d = gcd(|x - y|, n)
+;; Se 1 < d < n, allora d è un fattore non banale di n.
+;;
+;; Vantaggi:
+;;   - Non richiede divisioni dirette per testare fattori.
+;;   - È molto veloce per fattori piccoli o medi (~30-50 bit).
+;;   - Funziona bene con numeri grandi quando si combina con 
+;;     trial division o altre tecniche.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Funzione f(x) = (x² + c) mod n
+;; Produce la sequenza pseudo–casuale usata per rilevare il ciclo.
+(define (g x c n)
+  (% (+ (* x x) c) n))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; rho-step
+;; Esegue UN tentativo di Pollard–Rho con parametri casuali.
+;; Se trova un divisore non banale di n, lo restituisce.
+;; Se fallisce (cioè il ciclo non genera un divisore utile entro max-iter),
+;; restituisce nil.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (rho-step n)
+  (letn ((x (+ 2 (rand 10)))    ; punto iniziale pseudo–casuale
+         (y x)                  ; y è la "lepre", parte dallo stesso punto
+         (c (+ 1 (rand 10)))    ; costante casuale per f(x)
+         (d 1)                  ; fattore trovato (inizialmente 1)
+         (max-iter 10000)       ; limite per evitare loop infiniti
+         (i 0))
+    ;; ciclo principale: avanza x e y a velocità diverse
+    (while (and (= d 1) (< i max-iter))
+      (setq x (g x c n))             ; tartaruga: un passo
+      (setq y (g (g y c n) c n))     ; lepre: due passi
+      (setq d (gcd (abs (- x y)) n)) ; calcola il GCD
+      (inc i))
+    ;; se non si è trovato nulla o se d = n → tentativo fallito
+    (if (or (= d n) (= d 1)) nil d)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; pollard-rho
+;; Versione che tenta più volte con diversi semi casuali
+;; e restituisce TUTTI i fattori (non solo uno).
+;; - Se n è pari, restituisce (2 ...) e continua su n/2.
+;; - Se rho-step fallisce, riprova con nuovi parametri fino a un massimo
+;;   di 50 tentativi.
+;; - Quando trova un fattore d, fattorizza ricorsivamente d e n/d.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (pollard-rho n)
+  (cond
+    ;; casi banali
+    ((< n 2) '())          ; niente da fattorizzare
+    ((= n 2) '(2))         ; 2 è primo
+    ((even? n)             ; se n è pari → fattorizza 2 e continua
+      (cons 2 (pollard-rho (/ n 2))))
+    (true
+      (letn ((d nil) (tentativi 0))
+        ;; ripeti rho-step con diversi semi casuali
+        (while (and (or (nil? d) (= d n)) (< tentativi 50))
+          (setq d (rho-step n))
+          (inc tentativi))
+        ;; se dopo 50 tentativi non troviamo nulla → probabilmente primo
+        (if (or (nil? d) (= d 1) (= d n))
+            (list n)
+            ;; fattorizza ricorsivamente i due fattori trovati
+            (append (pollard-rho d) (pollard-rho (/ n d))))))))
+
+Proviamo:
+
+(pollard-rho 1345637128345127835)
+;-> (3 5 7 12815591698525027)
+(factor 1345637128345127835)
+;-> (3 5 7 1937077 6615943351)
+(* 3 5 7 12815591698525027))
+;-> 1345637128345127835
+
+(pollard-rho 12533)
+;-> (151 83)
+
+(pollard-rho 1234567)
+;-> (127 9721)
+(factor 1234567)
+
+Nota: Il metodo è probabilistico: non garantisce la fattorizzazione in tempo finito oppure con tutti i fattori, ma in pratica funziona rapidamente per la maggior parte dei numeri composti.
 
 ============================================================================
 
