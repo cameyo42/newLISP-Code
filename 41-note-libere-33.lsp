@@ -9095,5 +9095,82 @@ Proviamo:
 
 Nota: Il metodo è probabilistico: non garantisce la fattorizzazione in tempo finito oppure con tutti i fattori, ma in pratica funziona rapidamente per la maggior parte dei numeri composti.
 
+
+---------------------------
+Probabilità e il numero 'e'
+---------------------------
+
+Ci sono 40 persone ognuna con un mazzo da 40 carte (napoletane).
+Ogni persona estrae a caso una carta dal proprio mazzo di carte.
+Qual è la probabilità che nessuno estragga l'asso di Coppe?
+
+In un mazzo qualsiasi, c'è una probabilità del 39/40 che l'asso di Coppe non venga pescato.
+Poiché ogni persona estrae la carta in modo indipendente, c'è una probabilità del (39/40)^40 ≈ 36,4% che nessuno estragga l'asso di picche:
+
+(pow (div 39 40) 40)
+;-> 0.3632324398878802
+
+Ma c'è un significato interessante in questa risposta.
+È molto vicina a 1/e, infatti:
+Il numero 'e' vale 2.7182818284590451...
+L'inverso 1/e vale 0.3678794411714423...
+
+Qual è la connessione?
+In un mazzo di n carte, la probabilità che una particolare carta non venga estratta è (1 - 1/n).
+La probabilità che nessuna delle n persone estragga la carta è il prodotto:
+
+ (1 - 1/n)*(1 - 1/n)* ... *(1 - 1/n) = (1 - 1/n)^n
+
+Il limite di questa quantità per n che tende all'infinito è esattamente 1/e.
+
+(define (e n) (pow (sub 1 (div n)) n))
+(e 40)
+;-> 0.3632324398878802
+(e 1000)
+;-> 0.367695424770967
+(e 100000)
+;-> 0.3678776017684444
+
+Quindi la costante di Eulero compare in un problema di probabilità.
+
+
+------------------------------------
+(N^2 + 1) punti in un quadrato N x N
+------------------------------------
+
+Sequenza OEIS A002522:
+a(n) = n^2 + 1
+  1, 2, 5, 10, 17, 26, 37, 50, 65, 82, 101, 122, 145, 170, 197, 226, 257,
+  290, 325, 362, 401, 442, 485, 530, 577, 626, 677, 730, 785, 842, 901,
+  962, 1025, 1090, 1157, 1226, 1297, 1370, 1445, 1522, 1601, 1682, 1765,
+  1850, 1937, 2026, 2117, 2210, 2305, 2402, 2501, ...
+
+(define (seq n) (+ (* n n) 1))
+
+(map seq (sequence 0 30))
+;-> (1 2 5 10 17 26 37 50 65 82 101 122 145 170 197 226 257
+;->  290 325 362 401 442 485 530 577 626 677 730 785 842 901)
+
+For n > 0, if a(n) points are placed inside an n X n square, it will always be the case that at least two of the points will be a distance of sqrt(2) units apart or less. - Melvin Peralta, Jan 21 2017
+
+Per n > 0, se a(n) punti sono posizionati all'interno di un quadrato n X n, sarà sempre il caso che almeno due dei punti saranno a una distanza di sqrt(2) unità l'uno dall'altro o inferiore.
+
+Ecco una dimostrazione semplice e rigorosa con il principio dei cassetti (pigeonhole principle).
+Sia (n > 0) un intero e sia il quadrato considerato il quadrato ([0,n] x [0,n]) di lato n.
+Dividiamo questo quadrato in n^2 sottoquadrati congruenti di lato (1):
+ad esempio le celle:
+
+  C(i,j) = [i,i+1] x [j,j+1], per i,j in (0,...,n-1).
+
+Ogni cella ha diagonale di lunghezza sqrt(1^2 + 1^2) = sqrt(2).
+Quindi due punti qualsiasi contenuti nella stessa cella C(i,j) distano al più sqrt(2) (la massima distanza all'interno della cella è la sua diagonale).
+
+Ora, se poniamo (n^2 + 1) punti nel quadrato, ci ritroviamo ad avere più punti che celle.
+Per il principio dei cassetti esisteranno due punti che cadono nella stessa cella C(i,j).
+Da quanto sopra, la loro distanza è <= sqrt(2).
+Questo dimostra la tesi.
+
+Nota: per togliere ogni ambiguità dovuta a punti esattamente sui bordi delle celle si può prendere una partizione in celle semiaperte del tipo ([i,i+1) x [j,j+1)) per tutti tranne l'ultima riga/colonna dove si usa la chiusura — ma il risultato non cambia: due punti finiscono necessariamente nella stessa cella e quindi sono a distanza <= sqrt(2).
+
 ============================================================================
 
