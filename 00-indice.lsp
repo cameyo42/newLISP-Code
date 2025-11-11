@@ -3273,8 +3273,10 @@ NOTE LIBERE 33
   Matrice con sequenze da una lista
   Iperesponenziazione (tetrazione)
   Algoritmo di Pollard-Rho
-  (N^2 + 1) punti in un quadrato N x N
   Probabilità e il numero 'e'
+  (N^2 + 1) punti in un quadrato N x N
+  Monete e numeri primi
+  Somma e differenza alternata dei numeri di una lista
 
 PROBLEMI SUI DADI
 =================

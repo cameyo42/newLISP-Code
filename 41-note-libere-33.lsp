@@ -9172,5 +9172,147 @@ Questo dimostra la tesi.
 
 Nota: per togliere ogni ambiguità dovuta a punti esattamente sui bordi delle celle si può prendere una partizione in celle semiaperte del tipo ([i,i+1) x [j,j+1)) per tutti tranne l'ultima riga/colonna dove si usa la chiusura — ma il risultato non cambia: due punti finiscono necessariamente nella stessa cella e quindi sono a distanza <= sqrt(2).
 
+
+---------------------
+Monete e numeri primi
+---------------------
+
+Abbiamo due monete con il valore di due numeri primi diversi (p1 e p2).
+Con queste due monete possiamo generare tutti i valori dati dalla seguente combinazione lineare:
+
+ a*p1 + b*p2, dove a e b sono numeri interi non negativi.
+
+Determinare il più grande numero intero positivo che non può essere generato dalla combinazione lineare.
+
+Esempio
+  p1 = 2
+  p2 = 5
+  Numeri generabili = 0,2,4,5,6,7,...
+  Non possiamo generare 1,3,...
+
+(define (genera p1 p2 max-a max-b show)
+  (let ( (nums '()) (massimo 0) )
+    (for (a 0 max-a)
+      (for (b 0 max-b)
+        (push (+ (* a p1) (* b p2)) out)))
+    (setq nums (unique (sort out)))
+    (setq massimo (nums -1))
+    (if show (println nums))
+    (difference (sequence 0 massimo) nums)))
+
+(genera 2 5 10 10 true)
+;-> (0 2 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29
+;->  30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54
+;->  55 56 57 58 59 60 61 62 63 64 65 66 68 70)
+;-> (1 3 67 69) ; numeri non generabili
+
+(genera 2 5 100 100)
+;-> (1 3 697 699)
+(genera 2 5 1000 1000)
+;-> (1 3 6997 6999)
+(genera 2 5 10000 10000)
+
+Per risolvere il problema usiamo il teorema di Chicken McNugget, che afferma che per due numeri interi positivi coprimi (e i primi distinti sono sempre coprimi), il numero più grande che non può essere espresso con una loro combinazione lineare con coefficienti non negativi è dato da:
+
+  (p1 - 1) * (p2 - 1) - 1 = p1*p2 - p1 - p2 + 1 - 1 = p1*p2 - p1 - p2
+
+Inoltre, il numero di interi positivi che non possono essere generati nella forma a*p1 + b*p2 vale:
+
+  (p1 - 1)*(p2 - 1)/2
+
+(define (solve p1 p2)
+  (let ( (max-num (- (* p1 p2) p1 p2))
+         (no-nums (/ (* (- p1 1) (- p2 1)) 2)) )
+    (list max-num no-nums)))
+
+(solve 2 5)
+;-> (3 2)
+
+(map (curry solve 2)  '(3 5 7 11))
+;-> ((1 1) (3 2) (5 3) (9 5))
+
+
+----------------------------------------------------
+Somma e differenza alternata dei numeri di una lista
+----------------------------------------------------
+
+Data una lista di interi scrivere una funzione che calcola la somma/differenza alternata dei numeri.
+La somma/differenza alternata può essere definita in due modi:
+
+1) Segni alternati dal primo termine
+  lista = (a1 a2 a3 a4 a5 ...)
+  sum-diff = + a1 - a2 + a3 - a4 + a5 - ...
+
+2) Segni alternati dopo il primo termine
+  lista = (a1 a2 a3 a4 a5 ...)
+  sum-diff = a1 + a2 - a3 + a4 - a5 + ...
+
+Esempio:
+ lista = (3 7 2 3 1)
+ (1) somma-differenza = + 3 - 7 + 2 - 3 + 1 = -4
+ (2) somma-differenza =   3 + 7 - 2 + 3 - 1 = 10
+
+(define (sum-diff lst after)
+  (if (null? lst '()) 0
+  ;else
+    (let ( (s-d 0) )
+      ; after = true --> segni alternati dopo il primo termine
+      (if after (setq s-d (pop lst)))
+      (dolist (el lst)
+        (if (even? $idx)
+            (++ s-d el)
+            (-- s-d el)))
+      s-d)))
+
+Proviamo:
+
+(setq L '(3 7 2 3 1))
+(sum-diff L true)
+;-> 10
+(sum-diff L)
+;-> -4
+
+Vediamo alcune implementazioni che applicano solo i segni alternati dal primo termine:
+
+1) Versione ricorsiva elegante
+Questa sfrutta il fatto che la somma alternata può essere vista come: `a - (b - (c - (d - ...)))`
+
+(define (sum-diff1 lst)
+  (cond 
+    ((null? lst) 0)
+    ((null? (rest lst)) (first lst))
+    (true (- (first lst) (sum-diff (rest lst))))))
+
+(setq L '(3 7 2 3 1))
+(sum-diff1 L)
+;-> -4
+
+2) Versione con fold/reduce
+Qui $idx parte da 0 per gli elementi di `(rest lst)`, quindi gli indici pari corrispondono a sottrazioni.
+
+(define (sum-diff2 lst)
+  (if (null? lst) 0
+    (let ((result (first lst)))
+      (dolist (el (rest lst))
+        (if (even? $idx)
+            (-- result el)
+            (++ result el)))
+      result)))
+
+(setq L '(3 7 2 3 1))
+(sum-diff2 L)
+;-> -4
+
+3) Versione funzionale con map
+Questa moltiplica alternativamente per +1 e -1, poi somma tutto.
+
+(define (sum-diff3 lst)
+  (apply + (map (fn (el idx) (if (even? idx) el (- el)))
+                lst 
+                (sequence 0 (- (length lst) 1)))))
+
+(setq L '(3 7 2 3 1))
+(sum-diff3 L);-> -4
+
 ============================================================================
 

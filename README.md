@@ -46,7 +46,8 @@ Problem Solving e Matematica ricreativa con newLISP
 38) Note libere 30 (80)
 39) Note libere 31 (80)
 40) Note libere 32 (80)
-41) Note libere 33 (78)
+41) Note libere 33 (80)
+42) Note libere 34 (0)
 96) Problemi sui dadi (80)
 97) Appendici (34)
 98) Bibliografia
