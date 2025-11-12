@@ -3278,6 +3278,11 @@ NOTE LIBERE 33
   Monete e numeri primi
   Somma e differenza alternata dei numeri di una lista
 
+NOTE LIBERE 34
+==============
+  Somme e differenze alternate del powerset di una lista
+  Segni alternati nelle liste di numeri
+
 PROBLEMI SUI DADI
 =================
   Problemi 1,...,80

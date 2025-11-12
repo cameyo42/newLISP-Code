@@ -9256,7 +9256,7 @@ Esempio:
   (if (null? lst '()) 0
   ;else
     (let ( (s-d 0) )
-      ; after = true --> segni alternati dopo il primo termine
+      ; after = true --> segni alternati (+ - + ...) dopo il primo termine
       (if after (setq s-d (pop lst)))
       (dolist (el lst)
         (if (even? $idx)
@@ -9272,7 +9272,7 @@ Proviamo:
 (sum-diff L)
 ;-> -4
 
-Vediamo alcune implementazioni che applicano solo i segni alternati dal primo termine:
+Vediamo alcune implementazioni che applicano solo i segni alternati (+ - + ...) dal primo termine:
 
 1) Versione ricorsiva elegante
 Questa sfrutta il fatto che la somma alternata può essere vista come: `a - (b - (c - (d - ...)))`
@@ -9312,7 +9312,28 @@ Questa moltiplica alternativamente per +1 e -1, poi somma tutto.
                 (sequence 0 (- (length lst) 1)))))
 
 (setq L '(3 7 2 3 1))
-(sum-diff3 L);-> -4
+(sum-diff3 L)
+;-> -4
+
+Infine scriviamo una versione che calcola la differenza/somma alternata.
+
+(define (diff-sum lst after)
+  (if (null? lst '()) 0
+  ;else
+    (let ( (d-s 0) )
+      ; after = true --> segni alternati (- + - ...) dopo il primo termine
+      (if after (setq d-s (pop lst)))
+      (dolist (el lst)
+        (if (even? $idx)
+            (-- d-s el)
+            (++ d-s el)))
+      d-s)))
+
+(setq L '(3 7 2 3 1))
+(diff-sum L)
+;-> 4
+(diff-sum L true)
+;-> -4
 
 ============================================================================
 
