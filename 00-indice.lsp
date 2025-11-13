@@ -3282,6 +3282,10 @@ NOTE LIBERE 34
 ==============
   Somme e differenze alternate del powerset di una lista
   Segni alternati nelle liste di numeri
+  Monete e banconote Euro
+  Modi di ottenere N moltiplicando K numeri
+  Alberi trie
+  Funzione inversa di una funzione razionale lineare
 
 PROBLEMI SUI DADI
 =================

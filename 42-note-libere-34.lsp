@@ -241,5 +241,277 @@ Proviamo:
 (alt-seq 10 true)
 ;-> (-1 2 -3 4 -5 6 -7 8 -9 10)
 
+
+-----------------------
+Monete e banconote Euro
+-----------------------
+
+I tagli delle monete in Euro sono:
+
+  0.01  0.02  0.05  0.10  0.20  0.50  1.00  2.00
+
+I tagli delle banconote in Euro sono:
+
+  5.00  10.00  20.00  50.00  100.00  200.00  500.00
+
+Scrivere una funzione che stampa i i tagli delle monete e delle banconote utilizzando come separatore decimale la virgola "," (quello in uso nella maggior parte delle nazioni europee).
+
+  Monete = 0,01 0,02 0,05 0,10 0,20 0,50 1,00 2,00
+  Banconote = 5,00 10,00 20,00 50,00 100,00 200,00 500,00
+
+(map (fn(x) (replace "." x ",")) (map (fn(y) (format "%.2f" y)) '(.1 .2 .5 .1 .5 1 2)))
+;-> ("0,10" "0,20" "0,50" "0,10" "0,50" "1,00" "2,00")
+
+(map (fn(x) (replace "." x ",")) (map (fn(y) (format "%.2f" y)) '(5 10 20 50 100 200 500)))
+;-> ("5,00" "10,00" "20,00" "50,00" "100,00" "200,00" "500,00")
+
+
+-----------------------------------------
+Modi di ottenere N moltiplicando K numeri
+-----------------------------------------
+
+Dato un numero intero N <= 10000 e un numero intero K, scrivere una funzione che determina i modi in cui è possibile ottenere N moltiplicando K numeri.
+Non è possibile utilizzare 1 come moltiplicando.
+
+(define (factorizations num)
+"Calculate all the factorizations of an integer number"
+  (let (afc '())
+    (factorizations-aux num '() num)))
+; funzione ausiliaria
+(define (factorizations-aux num parfac parval)
+  (let ((newval parval) (i (- num 1)))
+    (while (>= i 2)
+      (cond ((zero? (% num i))
+              (if (> newval 1) (setq newval i))
+              (if (and (<= (/ num i) parval) (<= i parval) (>= (/ num i) i))
+                  (begin
+                    (push (append parfac (list i (/ num i))) afc -1)
+                    (setq newval (/ num i))))
+              (if (<= i parval)
+                  (factorizations-aux (/ num i) (append parfac (list i)) newval)
+              )))
+      (-- i))
+    (sort (unique (map sort afc)))))
+
+(factorizations 100)
+;-> ((2 2 5 5) (2 2 25) (2 5 10) (2 50) (4 5 5) (4 25) (5 20) (10 10))
+
+Funzione che restituisce i modi in cui è possibile ottenere N moltiplicando K numeri.
+(define (multi N K)
+  (let ( (out '()) (factorize (factorizations N)) )
+    (dolist (f factorize)
+      (if (= (length f) K)
+          (push f out -1)))
+    out))
+
+Proviamo:
+
+(multi 100 2)
+;-> ((2 50) (4 25) (5 20) (10 10))
+
+(multi 100 3)
+;-> ((2 2 25) (2 5 10) (4 5 5))
+
+(multi 120 4)
+;-> ((2 2 2 15) (2 2 3 10) (2 2 5 6) (2 3 4 5))
+
+Se volessimo considerare anche 1 come moltiplicando dobbiamo aggiungere alla soluzione precedente:
+1) la lista (1 1 ... N) (con (K-1) numeri 1)
+2) le liste di lunghezza (K - 1) aggiungendo (1)
+3) le liste di lunghezza (K - 2) aggiungendo (1 1)
+...
+
+
+-----------
+Alberi trie
+-----------
+
+Un albero trie è una struttura dati ad albero utilizzata per memorizzare e recuperare in modo efficiente le chiavi in un insieme di stringhe.
+Le funzioni principali sono:
+1) Crea Trie: crea un trie vuoto
+2) Insert: inserisce una stringa nel trie
+3) Delete: elimina una stringa dal trie
+4) Search: verifica se una data stringa esiste nel trie
+5) Start-with-prefix: verifica se un esiste nel trie almeno una stringa che inizia con un dato prefisso
+
+Come esempio vediamo una funzione di ricerca.
+
+; trie con le parole: an, ant, all, allot, alloy, aloe, are, ate, be
+(set 'aTrie '(
+  (a (n () (t)) (l (l () (o (t) (y))) (o (e))) (r (e)) (t (e)))
+  (b (e))))
+
+; Funzione di ricerca di una stringa nel trie
+(define (search-trie trie word)
+  ;(println word { } trie)
+  (cond
+      ( (and (empty? trie) (not (empty? word))) nil)
+      ( (and (empty? trie) (empty? word)) true)
+      ( (and (empty? (first trie)) (empty? word)) true)
+      ( (and (empty? (first trie)) (empty? word)) true)
+      ( (empty? word) nil)
+      ( (and
+          (set 'tail (assoc (first word) trie))
+          (search-trie (rest tail) (rest word))) true)))
+
+Proviamo:
+
+(search-trie aTrie '(a l))
+;-> nil
+(search-trie aTrie '(a l l))
+;-> true
+(search-trie aTrie '(a n t))
+;-> true
+(search-trie aTrie '(a n t s))
+;-> nil
+(search-trie aTrie '(a l l o))
+;-> nil
+(search-trie aTrie '(a l l o t))
+;-> true
+(search-trie aTrie '(a l l o y))
+;-> true
+(search-trie aTrie '(a l o))
+;-> nil
+(search-trie aTrie '(a l o e))
+;-> true
+(search-trie aTrie '(b e))
+;-> true
+(search-trie aTrie '(b))
+;-> nil
+
+
+--------------------------------------------------
+Funzione inversa di una funzione razionale lineare
+--------------------------------------------------
+
+Per trovare l'inversa di una funzione razionale lineare f(x) = (a*x + b)/(c*x + d), il procedimento generale è puramente algebrico:
+
+  si scambia il ruolo di x e y e si risolve rispetto a y.
+
+Vediamo un esempio:
+
+  f(x) = (2x - 1)/(x - 3)
+
+1. Sostituire f(x) con y:
+   y = (2x - 1) / (x - 3)
+2. Scambiare x e y:
+   x = (2y - 1) / (y - 3)
+3. Moltiplicare entrambi i lati per (y - 3):
+   x * (y - 3) = 2y - 1
+4. Espandere:
+   xy - 3x = 2y - 1
+5. Portare i termini con y da una parte:
+   xy - 2y = 3x - 1
+6. Fattorizzare y:
+   y * (x - 2) = 3x - 1
+7. Isolare y:
+   y = (3x - 1) / (x - 2)
+Risultato finale:
+   f-inv(x) = (3x - 1) / (x - 2)
+
+In generale l'inversa di una funzione razionale lineare:
+
+          (a*x + b)
+  f(x) = -----------
+          (c*x + d)
+
+si ottiene risolvendo x = (a*y + b) / (c*y + d) rispetto a y.
+
+Algebricamente:
+
+1. Moltiplicare entrambi i lati per (c*y + d):
+   x*(c*y + d) = a*y + b
+2. Raggruppare i termini con y:
+   x*(c*y - a*y) = b - x*d
+3. Fattorizzare y:
+   y*(c*x - a) = b - d*x
+4. Isolare y:
+   y = (b - d*x)/(c*x - a) = (-d*x + b)/(-c*x + a)
+
+Quindi, se la funzione originale ha coefficienti (a b c d), i coefficienti dell'inversa (e f g h) sono:
+
+  (e, f, g, h) = (-d, b, -c, a)
+
+(define (inverse-coeffs coeffs)
+  ;; coeffs = (a b c d)
+  ;; restituisce (e f g h) per l'inversa
+  (list (- (coeffs 3)) (coeffs 1) (- (coeffs 2)) (coeffs 0)))
+
+(inverse-coeffs '(2 -1 1 -3))
+; -> (-3 1 -1 2)
+che corrisponde all'inversa: y = (-3x + 1)/(-x +2) = (1 - 3x)/(2 - x)
+
+(inverse-coeffs '(2 -3 -5 4))
+;-> (-4 -3 5 2)
+
+(inverse-coeffs '(1 4 -1 3))
+;-> (-3 4 1 1)
+
+Vediamo una funzione che calcola l'inversa partendo da una formula scritta in stringa (come "f(x) = (2x - 1)/(x - 3)") e la restituisce in modo formattato:
+
+(define (inversa-ascii fx)
+  (local (coeffs a b c d fx-inv)
+    ; elimina gli spazi
+    (replace " " fx "")
+    ; rimuove "f(x) ="
+    (setq fx (slice fx (+ (find "=" fx) 1)))
+    ; inserisce 1 a x
+    (replace "(x" fx "(1x")
+    ; inserisce -1 a -x
+    (replace "(-x" fx "(-1x")
+    ; toglie il + a x
+    (replace "(+x" fx "(1x")
+    (replace "(+1x" fx "(1x")
+    ; elimina parentesi
+    (replace "(" fx "")
+    (replace ")" fx "")
+    ; estrae i coefficienti dalla stringa fx (interi e float)
+    (setq coeffs (map float (find-all {-?.?\d+(\.\d+)?} fx)))
+    ; estrae i coefficienti dalla stringa fx (solo interi)
+    ;(setq coeff (map (fn(x) (int x 0 10)) (find-all {-?\d+} fx)))
+    ; coefficienti della funzione inversa
+    (setq a (- (coeffs 3)))
+    (setq b (coeffs 1))
+    (setq c (- (coeffs 2)))
+    (setq d (coeffs 0))
+    ; crea la stringa di output: "f(x) = ..."
+    (setq fx-inv "f(x) = (")
+    ; crea il numeratore
+    (cond ((= a 1)  (extend fx-inv "x"))
+          ((= a -1) (extend fx-inv "-x"))
+          ((> a 0)  (extend fx-inv (string a "x")))
+          ((< a 0)  (extend fx-inv (string "-" (abs a) "x"))))
+    (cond ((> b 0)  (extend fx-inv (string " + " b)))
+          ((< b 0)  (extend fx-inv (string " - " (abs b)))))
+    (extend fx-inv ")/(")
+    ; crea il denominatore
+    (cond ((= c 1)  (extend fx-inv "x"))
+          ((= c -1) (extend fx-inv "-x"))
+          ((> c 0)  (extend fx-inv (string c "x")))
+          ((< c 0)  (extend fx-inv (string "-" (abs c) "x"))))
+    (cond ((> d 0)  (extend fx-inv (string " + " d)))
+          ((< d 0)  (extend fx-inv (string " - " (abs d)))))
+    (extend fx-inv ")")
+    fx-inv))
+
+Proviamo:
+
+(inversa-ascii "f(x) = (x + 4)/(- x + 3)")
+;-> "f(x) = (-3x + 4)/(x + 1)"
+(inversa-ascii "f(x) =(x +4)/(-x + 3)")
+;-> "f(x) = (-3x + 4)/(x + 1)"
+(inversa-ascii "f(x) =(+x +4.2)/(-1.1x + 3.2)")
+;-> "f(x) = (-3x + 4.2)/(x + 1)"
+(inversa-ascii "f(x) = (2x - 3)/ (- 5 x + 3)")
+;-> "f(x) = (-3x - 3)/(5x + 2)"
+(inversa-ascii "f(x) = (- x +4.2)/(-1.1x + 3.2)")
+;-> "f(x) = (-3x + 4.2)/(x - 1)"
+(inversa-ascii "f(x) = (+2x - 3)/ (- 5 x + 3)")
+;-> "f(x) = (-3x - 3)/(5x + 2)"
+
+Nota: equazioni funzionali
+Per un'equazione del tipo f(g(x)) = h(x) la soluzione è f(x) = h(g-inv(x))dove g-inv(x) è l'inversa di g(x) (quando esiste).
+Se g(x) è una funzione razionale lineare, allora possiamo usare la funzione 'inversa-ascii' per calcolare la funzione inversa g-inv(x).
+
 ============================================================================
 
