@@ -2215,6 +2215,24 @@ output = 4 6 10
 (ordina 10 6 4)
 ;-> 4 6 10
 
+Altri metodi senza limitazioni sulle primitive utilizzabili:
+
+(define (ordina-1 a b c) (sort (list a b c)))
+
+(define (ordina-2 a b c)
+  (let ( (x (min a b c)) (z (max a b c)) )
+    ; (list x y z) --> y = a + b + c - x - z
+    (list x (+ a b c (- x) (- z)) z)))
+
+(define (ordina-3 a b c) (map set '(a b c) (sort (list a b c))))
+
+(ordina-1 5 2 8)
+;-> 2 5 8
+(ordina-2 5 2 8)
+;-> 2 5 8
+(ordina-3 5 2 8)
+;-> 2 5 8
+
 Vedi anche "Massimo di tre numeri" su "Note libere 24".
 
 

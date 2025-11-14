@@ -3286,6 +3286,8 @@ NOTE LIBERE 34
   Modi di ottenere N moltiplicando K numeri
   Alberi trie
   Funzione inversa di una funzione razionale lineare
+  i^i
+  Spostamenti di 3 punti lungo la retta numerica
 
 PROBLEMI SUI DADI
 =================

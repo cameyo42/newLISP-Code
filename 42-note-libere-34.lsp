@@ -513,5 +513,149 @@ Nota: equazioni funzionali
 Per un'equazione del tipo f(g(x)) = h(x) la soluzione è f(x) = h(g-inv(x))dove g-inv(x) è l'inversa di g(x) (quando esiste).
 Se g(x) è una funzione razionale lineare, allora possiamo usare la funzione 'inversa-ascii' per calcolare la funzione inversa g-inv(x).
 
+
+---
+i^i
+---
+
+  i^i = e^(-2*pi*n - pi/2), per n elemento di Z
+
+La scelta di n è determinata dal ramo del logaritmo utilizzato per l'esponenziale complesso.
+
+(define (i^i n)
+  (let ( (e 2.7182818284590451)
+         (pi 3.1415926535897931) )
+    (pow e (sub (mul -2 pi n) (div pi 2)))))
+
+(i^i 0)
+;-> 0.2078795763507619
+
+Sequenza OEIS A049006:
+Decimal expansion of i^i = exp(-pi/2).
+  2, 0, 7, 8, 7, 9, 5, 7, 6, 3, 5, 0, 7, 6, 1, 9, 0, 8, 5, 4, 6, 9, 5, 5, 6,
+  1, 9, 8, 3, 4, 9, 7, 8, 7, 7, 0, 0, 3, 3, 8, 7, 7, 8, 4, 1, 6, 3, 1, 7, 6,
+  9, 6, 0, 8, 0, 7, 5, 1, 3, 5, 8, 8, 3, 0, 5, 5, 4, 1, 9, 8, 7, 7, 2, 8, 5,
+  4, 8, 2, 1, 3, 9, 7, 8, 8, 6, 0, 0, 2, 7, 7, 8, 6, 5, 4, 2, 6, 0, 3, 5, ...
+
+Dimostrazione
+Per definizione generale, per z complesso ed esponente complesso w si ha:
+  z^w = e^(w * Log(z))
+  dove Log(z) = ln|z| + i*Arg(z), e Arg(z) e' multivalore:
+  Arg(z) = theta + 2*pi*n  con n intero.
+Prendiamo z = i.
+Il modulo di i e' |i| = 1, quindi ln|i| = 0.
+Gli argomenti possibili di i sono:
+  Arg(i) = pi/2 + 2*pi*n
+  con n intero.
+Quindi:
+  Log(i) = i * (pi/2 + 2*pi*n)
+Ora calcoliamo i^i:
+  i^i = e^(i * Log(i))
+      = e^(i * i * (pi/2 + 2*pi*n))
+      = e^(-(pi/2 + 2*pi*n))
+Pertanto, per ogni n intero:
+  i^i = e^(-pi/2 - 2*pi*n)
+Il valore principale (cioe' per n = 0) e':
+  i^i = e^(-pi/2)
+che è un numero reale positivo (0.2078795763507619...).
+
+Vedi anche "Espansione digitale di un numero generato da una formula (con BC)" su "Note libere 33".
+
+
+----------------------------------------------
+Spostamenti di 3 punti lungo la retta numerica
+----------------------------------------------
+
+Abbiamo tre punti in posizioni diverse su una retta numerica.
+Le posizioni sono date da tre numeri interi a, b e c.
+Ad ogni mossa dobbiamo:
+Prendere un punto dalla posizione più a sinistra o più a destra e metterlo in qualsiasi posizione intera vuota compresa tra i punti estremi.
+Ad esempio, se i punti si trovano nelle posizioni x, y, z dove x < y < z:
+Possiamo prendere il punto nella posizione x e spostarlo in qualsiasi posizione p dove x < p < z e p != y.
+Oppure possiamo prendere il punto nella posizione z e spostarlo in qualsiasi posizione p dove x < p < z e p != y.
+Le mosse possibili terminano quando i tre punti occupano posizioni consecutive (es. 3, 4, 5).
+Detrminare:
+1) Il numero massimo di mosse possibili per terminare il gioco
+2) Il numero minimo di mosse necessarie per terminare il gioco
+
+1) Calcolo del numero massimo di passi
+
+Possiamo continuare a spostare i punti finali una posizione alla volta verso il punto centrale, utilizzando tutte le posizioni vuote disponibili finché i tre punti non saranno finalmente consecutive.
+
+Esempio:
+
+  x = 2, y = 4, z = 7
+
+      x   y     z
+  - - - - - - - - - - -
+  0 1 2 3 4 5 6 7 8 9
+
+a) Sposta x vicino a y (cioè x va in posizione 3)
+   mosse = y - x - 1 = 4 - 2 - 1 = 1
+
+        x y     z
+  - - - - - - - - - - -
+  0 1 2 3 4 5 6 7 8 9
+
+b) Sposta z vicino a y (cioè z va in posizione 5):
+   mosse = z - y - 1 = 7 - 4 - 1 = 2 passi
+
+      x y z
+  - - - - - - - - - - -
+  0 1 2 3 4 5 6 7 8 9
+
+c) Numero massimo mosse = (y - x - 1) + (z - y - 1) = z - x - 2
+
+2) Calcolo del numero minimo di passi
+
+Ordiniamo i punti in modo crescente nelle posizioni x, y, z, dove x < y < z.
+Se i punti sono già consecutivi (z - x = 2), non servono mosse.
+Se due punti sono già consecutivi o hanno un solo spazio tra loro (es 2,3,5), possiamo terminare in una sola mossa posizionando il terzo punto accanto a loro (es. 5 in 4).
+Altrimenti, servono 2 mosse: prima avviciniamo un punto estremo per creare uno spazio di dimensione 2 o inferiore, poi terminiamo con la seconda mossa.
+Se y - x <= 2 oppure z - y <= 2, allora, possiamo terminare in una sola mossa.
+
+Esempio:
+
+  x = 2, y = 4, z = 7
+
+      x   y     z
+  - - - - - - - - - - -
+  0 1 2 3 4 5 6 7 8 9
+
+Poichè (y - x) = 1 < 2, allora basta una sola mossa: spostare z in 3.
+
+     x z y
+ - - - - - - - - - - -
+ 0 1 2 3 4 5 6 7 8 9
+
+(define (mosse a b c)
+  (local (x y z massimo minimo)
+    ; ordina a, b, c in modo crescente --> x, y, z
+    (map set '(x y z) (sort (list a b c)))
+    ;(println x { } y { } z)
+    (setq massimo 0)
+    (setq minimo 0)
+    ; verifica se due punti sono consecutivi
+    (when (> (- z x) 2)
+        ; Calcolo del massimo
+        ; Possiamo spostare i punti una posizione alla volta
+        ; Numero degli spazi vuoti tra i punti x e z
+        (setq massimo (- z x 2))
+        ; Calcolo del minimo
+        ; Se uno dei due gap (y-x o z-y) è <= 2, possiamo farlo in 1 mossa
+        ; Altrimenti, abbiamo bisogno di 2 mosse
+        (if (or (<= (- y x) 2) (<= (- z y) 2))
+            (setq minimo 1)
+        ;else
+            (setq minimo 2)))
+    (list massimo minimo)))
+
+Proviamo:
+
+(mosse 7 2 4)
+;-> (3 1)
+(mosse 2 3 1)
+;-> (0 0)
+
 ============================================================================
 
