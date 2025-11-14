@@ -657,5 +657,127 @@ Proviamo:
 (mosse 2 3 1)
 ;-> (0 0)
 
+
+-------------------------------------------------------
+Rettangoli che coprono esattamente un'area rettangolare
+-------------------------------------------------------
+
+Abbiamo una lista di rettangoli in cui ogni rettangolo è rappresentato come:
+ rettangolo[i] = (x1 y1 x2 y2).
+Ogni rettangolo è allineato agli assi (parallelo agli assi x e y) con:
+  (x1, y1) coordinate dell'angolo in basso a sinistra
+  (x2, y2) coordinate dell'angolo in alto a destra
+Determinare se tutti questi rettangoli insieme formano una copertura esatta di un'area rettangolare.
+
+Affinchè i rettangoli formino una copertura esatta:
+a) I rettangoli devono combinarsi per formare un unico rettangolo più grande senza spazi vuoti.
+b) Non devono esserci aree sovrapposte tra i rettangoli.
+c) Ogni punto all'interno del rettangolo più grande deve essere coperto esattamente una volta.
+
+Per verificare questo usiamo due condizioni:
+1) Verifica dell'area
+La somma delle aree di tutti i singoli rettangoli deve essere uguale all'area del rettangolo di delimitazione (formato dalle coordinate minima e massima).
+
+2) Conteggio dei vertici:
+Ogni vertice di un rettangolo viene conteggiato in base al numero di rettangoli che condividono quel vertice
+Deve risultare:
+- Per i quattro vertici del rettangolo complessivo --> conteggio = 1.
+- Per tutti i vertici interni (dove i rettangoli si incontrano) --> conteggio = 2 oppure 4.
+  Questo perchè i vertici interni sono condivisi da rettangoli adiacenti.
+
+Algoritmo
+- Calcolare l'area totale e trovare le coordinate del rettangolo di delimitazione (min-x, min-y) e (max-x, max-y).
+- Contare quante volte ogni vertice appare in tutti i rettangoli.
+- Verificare che l'area totale corrisponda all'area del rettangolo di delimitazione.
+- Verificare che i quattro vertici esterni appaiano esattamente una volta.
+- Verificare che tutti i vertici interni appaiano 2 o 4 volte (condivisione valida tra rettangoli).
+- Se tutte le condizioni sono soddisfatte:
+  allora i rettangoli formano una copertura esatta,
+  altrimenti, non formano una copertura esatta.
+
+Quindi l'algoritmo verifica due condizioni:
+1. L'area totale di tutti i rettangoli è uguale all'area del rettangolo di delimitazione
+2. I punti d'angolo compaiono con le frequenze corrette:
+- I 4 angoli del rettangolo di delimitazione compaiono esattamente una volta
+- Tutti gli altri angoli compaiono 2 o 4 volte (condivisi dai rettangoli adiacenti)
+
+(define (cover rects)
+  (local (out vertici area min-x min-y max-x max-y cur-vert)
+    (setq out true)
+    ; lista associativa con elementi: ((x y) occorrenze)
+    (setq vertici '())
+    ; area del rettangolo di delimitazione
+    (setq area 0)
+    ; coordinate vertice basso-sinistra del rettangolo di delimitazione
+    (setq min-x (rects 0 0)) (setq min-y (rects 0 1))
+    ; coordinate vertice alto-destra del rettangolo di delimitazione
+    (setq max-x (rects 0 2)) (setq max-y (rects 0 3))
+    ; ciclo per ogni rettangolo...
+    (dolist (r rects)
+      (map set '(x1 y1 x2 y2) r)
+      ;(println x1 { } y1 { } x2 { } y2)
+      ; aggiorna area totale
+      (++ area (* (- x2 x1) (- y2 y1)))
+      ; aggiorna le coordinate del rettangolo di delimitazione
+      (setq min-x (min min-x x1))
+      (setq min-y (min min-y y1))
+      (setq max-x (max max-x x2))
+      (setq max-y (max max-y y2))
+      ; vertici del rettangolo corrente
+      (setq cur-vert (list (list x1 y1) (list x1 y2) (list x2 y2) (list x2 y1)))
+      ;(println cur-vert)
+      ; aggiornamento delle occorrenze dei vertici
+      (dolist (v cur-vert)
+        (if (lookup (list v) vertici)
+            ; aggiorna le occorrenze del vertice (+ 1)
+            (setf (lookup (list v) vertici) (+ $it 1))
+            ;altrimenti inserisce il vertice nella lista associativa
+            (push (list v 1) vertici -1))))
+    ;(println vertici)
+    ; Verifica area
+    (if (!= area (* (- max-x min-x) (- max-y min-y))) (setq out nil))
+    ; Verifica del conteggio dei vertici del rettangolo di delimitazione (= 1)
+    (if (or (!= (lookup (list (list min-x min-y)) vertici) 1)
+            (!= (lookup (list (list min-x max-y)) vertici) 1)
+            (!= (lookup (list (list max-x max-y)) vertici) 1)
+            (!= (lookup (list (list max-x min-y)) vertici) 1))
+        (setq out nil))
+    ; elimina i vertici con occorrenza uguale a 1
+    ; (i vertici del rettangolo di delimitazione)
+    (pop-assoc (list (list min-x min-y)) vertici)
+    (pop-assoc (list (list min-x max-y)) vertici)
+    (pop-assoc (list (list max-x max-y)) vertici)
+    (pop-assoc (list (list max-x min-y)) vertici)
+    (println vertici)
+    ; Verifica del conteggio dei vertici interni al rettangolo (= 2 o = 4)
+    (if-not (for-all (fn(x) (or (= (x 1) 2) (= (x 1) 4))) vertici) (setq out nil))
+    out))
+
+Proviamo:
+
+(setq R1 '((1 1 3 3) (3 1 4 2) (3 2 4 4) (1 3 2 4) (2 3 3 4)))
+(cover R1)
+;-> true
+
+(setq R2 '((1 1 2 3) (1 3 2 4) (3 1 4 2) (3 2 4 4)))
+(cover R2)
+;-> nil
+
+(setq R3 '((1 1 2 3) (1 3 2 4) (3 1 4 2) (3 2 4 4)))
+(cover R3)
+;-> nil
+
+(setq R4 '((0 0 2 2) (2 2 4 4) (0 2 2 4) (2 0 4 2)))
+(cover R4)
+;-> true
+
+(setq R5 '((0 0 2 2) (2 2 4 4) (0 2 2 4) (2 0 4 2) (2 0 4 2)))
+(cover R5)
+;-> nil
+
+(setq R6 '((0 0 2 2) (2 2 4 4) (0 2 2 4) (2 0 4 2) (1 1 3 3)))
+(cover R6)
+;-> nil
+
 ============================================================================
 

@@ -3288,6 +3288,7 @@ NOTE LIBERE 34
   Funzione inversa di una funzione razionale lineare
   i^i
   Spostamenti di 3 punti lungo la retta numerica
+  Rettangoli che coprono esattamente un'area rettangolare
 
 PROBLEMI SUI DADI
 =================
