@@ -779,5 +779,156 @@ Proviamo:
 (cover R6)
 ;-> nil
 
+
+-------------------------------------------------------
+Palindromi che sommati/moltiplicati generano palindromi
+-------------------------------------------------------
+
+; Funzione che verifica se un intero positivo (Int64) è palindromo:
+(define (pali? num) (= (string num) (reverse (string num))))
+
+Sequenza OEIS A057135:
+Palindromes whose square is a palindrome
+Also palindromes whose sum of squares of digits is less than 10.
+  0, 1, 2, 3, 11, 22, 101, 111, 121, 202, 212, 1001, 1111, 2002, 10001,
+  10101, 10201, 11011, 11111, 11211, 20002, 20102, 100001, 101101,
+  110011, 111111, 200002, 1000001, 1001001, 1002001, 1010101, 1011101,
+  1012101, 1100011, 1101011, 1102011, 1110111, 1111111, ...
+
+(define (pali-square limite)
+  (let ( (out '(0 1)) )
+    (for (num 2 limite)
+      (if (and (pali? num) (pali? (* num num)))
+          (push num out -1)))
+    out))
+
+(setq a057135 (pali-square 1111111))
+;-> (0 1 2 3 11 22 101 111 121 202 212 1001 1111 2002 10001
+;->  10101 10201 11011 11111 11211 20002 20102 100001 101101
+;->  110011 111111 200002 1000001 1001001 1002001 1010101 1011101
+;->  1012101 1100011 1101011 1102011 1110111 1111111)
+
+Sequenza OEIS A118596:
+Palindromes in base 5 (written in base 5).
+  0, 1, 2, 3, 4, 11, 22, 33, 44, 101, 111, 121, 131, 141, 202, 212, 222,
+  232, 242, 303, 313, 323, 333, 343, 404, 414, 424, 434, 444, 1001, 1111,
+  1221, 1331, 1441, 2002, 2112, 2222, 2332, 2442, 3003, 3113, 3223, 3333,
+  3443, 4004, 4114, 4224, 4334, 4444, 10001, ...
+Equivalently, palindromes k (written in base 10) such that 2*k is a palindrome.
+Bruno Berselli, Sep 12 2018
+
+Sequenza OEIS A118595:
+Palindromes in base 4 (written in base 4).
+  0, 1, 2, 3, 11, 22, 33, 101, 111, 121, 131, 202, 212, 222, 232, 303,
+  313, 323, 333, 1001, 1111, 1221, 1331, 2002, 2112, 2222, 2332, 3003,
+  3113, 3223, 3333, 10001, 10101, 10201, 10301, 11011, 11111, 11211,
+  11311, 12021, 12121, 12221, 12321, 13031, ...
+Equivalently, palindromes k (written in base 10) such that 3*k is a palindrome.
+Bruno Berselli, Sep 12 2018
+
+Sequenza OEIS A118594:
+Palindromes in base 3 (written in base 3).
+  0, 1, 2, 11, 22, 101, 111, 121, 202, 212, 222, 1001, 1111, 1221, 2002,
+  2112, 2222, 10001, 10101, 10201, 11011, 11111, 11211, 12021, 12121,
+  12221, 20002, 20102, 20202, 21012, 21112, 21212, 22022, 22122, 22222,
+  100001, 101101, 102201, 110011, 111111, 112211, 120021, ...
+Equivalently, palindromes k (written in base 10) such that 4*k is a palindrome.
+Bruno Berselli, Sep 12 2018
+
+(define (pali-mul-K limite k)
+  (let ( (out '(0 1)) )
+    (for (num 2 limite)
+      (if (and (pali? num) (pali? (* k num)))
+          (push num out -1)))
+    out))
+
+(setq a118596 (pali-mul-K 10001 2))
+;-> (0 1 2 3 4 11 22 33 44 101 111 121 131 141 202 212 222
+;->  232 242 303 313 323 333 343 404 414 424 434 444 1001 1111
+;->  1221 1331 1441 2002 2112 2222 2332 2442 3003 3113 3223 3333
+;->  3443 4004 4114 4224 4334 4444 10001)
+
+(setq a118595 (pali-mul-K 13031 3))
+;-> (0 1 2 3 11 22 33 101 111 121 131 202 212 222 232 303
+;->  313 323 333 1001 1111 1221 1331 2002 2112 2222 2332 3003
+;->  3113 3223 3333 10001 10101 10201 10301 11011 11111 11211
+;->  11311 12021 12121 12221 12321 13031)
+ 13031)
+
+(setq a118594 (pali-mul-K 120021 4))
+;-> (0 1 2 11 22 101 111 121 202 212 222 1001 1111 1221 2002
+;->  2112 2222 10001 10101 10201 11011 11111 11211 12021 12121
+;->  12221 20002 20102 20202 21012 21112 21212 22022 22122 22222
+;->  100001 101101 102201 110011 111111 112211 120021)
+
+Sequenza OEIS A069748:
+Numbers k such that k and k^3 are both palindromes.
+  0, 1, 2, 7, 11, 101, 111, 1001, 10001, 10101, 11011, 100001, 101101,
+  110011, 1000001, 1001001, 1100011, 10000001, 10011001, 10100101,
+  11000011, 100000001, 100010001, 100101001, 101000101, 110000011,
+  1000000001, 1000110001, 1010000101, 1100000011, 10000000001, ...
+
+Sequenza OEIS A056810:
+Numbers whose fourth power is a palindrome.
+  0, 1, 11, 101, 1001, 10001, 100001, 1000001, 10000001, 100000001,
+  1000000001, 10000000001, 100000000001, ...
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+          
+; Funzione che verifica se un intero positivo (Int64 o Big-Integer) è palindromo:
+(define (pali-big? num)
+  (let ( (str (string num)) )
+    ; remove final "L" (if exists)
+    (if (= (str -1) "L") (pop str -1))
+    (= str (reverse (copy str)))))
+
+(pali-big? "123411111111111111111111111111111111111114321L")
+(pali-big? "1234114321")
+;-> true
+
+(define (pali-pow-K limite k)
+  (let ( (out '(0 1)) )
+    (for (num 2 limite)
+      (if (and (pali-big? num) (pali-big? (** num k)))
+          (push num out -1)))
+    out))
+
+(= (pali-pow-K 1111111 2) a057135)
+;-> true
+
+(setq a069748 (pali-pow-K 1e7 3))
+;-> (0 1 2 7 11 101 111 1001 10001 10101 11011 100001 101101
+;->  110011 1000001 1001001 1100011)
+
+(setq a056810 (pali-pow-K 1e7 4))
+;-> (0 1 11 101 1001 10001 100001 1000001)
+
+Sequenza OEIS A057148:
+Palindromes only using 0 and 1 (i.e., base-2 palindromes).
+  0, 1, 11, 101, 111, 1001, 1111, 10001, 10101, 11011, 11111, 100001,
+  101101, 110011, 111111, 1000001, 1001001, 1010101, 1011101, 1100011,
+  1101011, 1110111, 1111111, 10000001, 10011001, 10100101, 10111101,
+  11000011, 11011011, 11100111, 11111111, 100000001, ...
+
+; Funzione che calcola i palindromi binari fino ad un dato limite
+(define (pali-binary limite)
+  (let ( (out '(0 1)) )
+    (for (num 2 limite)
+      (setq bin (bits num))
+      (if (= bin (reverse (copy bin)))
+          (push (int bin 0 10) out -1)))
+    out))
+
+(pali-binary 257)
+;-> (0 1 11 101 111 1001 1111 10001 10101 11011 11111 100001
+;->  101101 110011 111111 1000001 1001001 1010101 1011101 1100011
+;->  1101011 1110111 1111111 10000001 10011001 10100101 10111101
+;->  11000011 11011011 11100111 11111111 100000001)
+
 ============================================================================
 
