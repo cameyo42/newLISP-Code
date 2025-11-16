@@ -1040,5 +1040,206 @@ Test di velocità:
 
 Nota: le liste associative vanno bene fino ad un migliaio di elementi.
 
+
+----------------------------
+Divisione solo con addizioni
+----------------------------
+
+Scrivere una funzione che effettua la divisione intera tra due numeri interi utilizzando solo l'addizione.
+
+(define (divide a b)
+  (let ( (step b) (res 0) )
+    (while (<= b a) (++ b step) (++ res))
+    res))
+
+(divide 10 3)
+;-> 3
+(divide 24 6)
+;-> 4
+(divide 30 7)
+;-> 4
+
+Test di correttezza:
+
+(for (i 1 1000) 
+  (setq a (+ (rand 1000) 1))
+  (setq b (+ (rand 1000) 1))
+  (if (!= (divide a b) (/ a b))
+      (println a { } b)))
+
+Vesione code-golf (61 caratteri):
+
+(define(d a b)(let((s b)(r 0))(until(> b a)(++ b s)(++ r))r))
+
+
+--------------
+Fibonattoriale
+--------------
+
+Il Fibonattoriale di un numero N è il prodotto dei prini N numneri di Fibonacci.
+
+Sequenza OEIS A003266:
+Product of first n nonzero Fibonacci numbers F(1), ..., F(n).
+  1, 1, 1, 2, 6, 30, 240, 3120, 65520, 2227680, 122522400, 10904493600,
+  1570247078400, 365867569267200, 137932073613734400, 84138564904377984000,
+  83044763560621070208000, 132622487406311849122176000,
+  342696507457909818131702784000, ...
+
+Versione 1 (fibonacci + fattoriale):
+
+(define (fibo-i num)
+"Calculate the Fibonacci number of an integer number"
+  (if (zero? num) 0L
+  ;else
+  (local (a b c)
+    (setq a 0L b 1L c 0L)
+    (for (i 0 (- num 1))
+      (setq c (+ a b))
+      (setq a b)
+      (setq b c))
+    a)))
+
+(define (f! n) 
+  (if (zero? n) 0
+      ;else
+      (apply * (map fibo-i (sequence 1 n)))))
+
+(map f! (sequence 1 18))
+;-> (1L 1L 2L 6L 30L 240L 3120L 65520L 2227680L 122522400L 10904493600L
+;->  1570247078400L 365867569267200L 137932073613734400L 84138564904377984000L
+;->  83044763560621070208000L 132622487406311849122176000L
+;->  342696507457909818131702784000L)
+
+Versione 2 (formula):
+
+Formula: 
+  a(n+3) = a(n+1)*a(n+2)/a(n) + a(n+2)^2/a(n+1)
+
+Ponendo m = n+3 otteniamo:
+
+  a(m) = a(m-2)*a(m-1)/a(m-3) + a(m-1)^2/a(m-2)
+
+(define (a003266 limite)
+  (let (a '(1L 1L 1L))
+    (for (m 3 limite)
+      (push (+ (/ (* (a (- m 2)) (a (- m 1))) (a (- m 3)))
+               (/ (* (a (- m 1)) (a (- m 1))) (a (- m 2)))) a -1))
+    a))
+
+(a003266 18)
+;-> (1L 1L 2L 6L 30L 240L 3120L 65520L 2227680L 122522400L 10904493600L
+;->  1570247078400L 365867569267200L 137932073613734400L 84138564904377984000L
+;->  83044763560621070208000L 132622487406311849122176000L
+;->  342696507457909818131702784000L)
+
+
+------------------
+(a! * b!) / c! = 1
+------------------
+
+Trovare tutte le triple (a, b, c) che soddisfano (a! * b!) / c! = 1, con a,b,c distinti.
+
+La condizione: (a! * b!) / c! = 1 è equivalente a:  (a! * b!) = c!
+
+; Funzione che restituisce un vettore con i numeri fattoriali da 0 a limit:
+(define (factorial limit)
+  (let (f (array (+ limit 1) '(1L)))
+    (for (n 2 limit)
+      (setf (f n) (* (f (- n 1)) n)))
+    f))
+
+(setq f (factorial 10))
+;-> (1L 1L 2L 6L 24L 120L 720L 5040L 40320L 362880L 3628800L)
+
+; Funzione che cerca tutte le triple (a,b,c) che soddisfano:
+; (a! * b!) / c! = 1 con a,b,c che variano da 1 a limite
+; (a! * b!) = c!
+(define (triple limite)
+  (let ( (out '()) (f (factorial limite)) )
+    (for (a 1 (- limite 2))
+      (for (b (+ a 1) (- limite 1))
+        (for (c (+ b 1) limite)
+          (if (= (* (f a) (f b)) (f c))
+              (push (list a b c) out -1)))))
+    out))
+
+Proviamo:
+
+(triple 100)
+;-> ((3 5 6) (4 23 24) (6 7 10))
+
+Test di velocità:
+
+(time (triple 100))
+;-> 38.205
+(time (triple 150))
+;-> 187.257
+(time (triple 200))
+;-> 660.562
+(length (triple 200))
+;-> 4
+
+Test di correttezza:
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+; Funzione che verifica una soluzione (a b c)
+(define (check sol)
+  (= (* (fact-i (sol 0)) (fact-i (sol 1))) (fact-i (sol 2))))
+
+(filter nil? (map check (triple 100)))
+;-> ()
+
+Versione ottimizzata (esce dal ciclo 'for' 'c' quando (a!*b! < c!):
+
+(define (triples limite)
+  (let ( (out '()) (f (factorial limite)) )
+    (for (a 1 (- limite 2))
+      (for (b (+ a 1) (- limite 1))
+        (setq prod (* (f a) (f b)))
+        (setq stop nil)
+        (for (c (+ b 1) limite 1 stop)
+          (if (< prod (f c))
+              (setq stop true)
+              ;else
+              (if (= prod (f c)) (push (list a b c) out -1))))))
+    out))
+
+Proviamo:
+
+(triples 100)
+;-> ((3 5 6) (4 23 24) (6 7 10))
+
+Test di velocità:
+
+(time (triples 100))
+;-> 12.1
+(time (triples 150))
+;-> 30.015
+(time (triples 200))
+;-> 71.05
+(length (triples 200))
+;-> 4
+
+Test di correttezza:
+
+(= (triple 200) (triples 200))
+;-> true
+
+(filter nil? (map check (triples 100)))
+;-> ()
+
+(time (println (length (triples 500))))
+;-> 4
+;-> 1653.657
+
+(time (println (length (triples 1000))))
+
 ============================================================================
 

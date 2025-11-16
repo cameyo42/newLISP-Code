@@ -3291,6 +3291,9 @@ NOTE LIBERE 34
   Rettangoli che coprono esattamente un'area rettangolare
   Palindromi che sommati/moltiplicati generano palindromi
   Elementi con determinate frequenze
+  Divisione solo con addizioni
+  Fibonattoriale
+  (a! * b!) / c! = 1
 
 PROBLEMI SUI DADI
 =================
