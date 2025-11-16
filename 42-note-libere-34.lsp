@@ -880,7 +880,7 @@ Numbers whose fourth power is a palindrome.
       (let (out 1L)
         (dotimes (i power)
           (setq out (* out num))))))
-          
+
 ; Funzione che verifica se un intero positivo (Int64 o Big-Integer) è palindromo:
 (define (pali-big? num)
   (let ( (str (string num)) )
@@ -1061,7 +1061,7 @@ Scrivere una funzione che effettua la divisione intera tra due numeri interi uti
 
 Test di correttezza:
 
-(for (i 1 1000) 
+(for (i 1 1000)
   (setq a (+ (rand 1000) 1))
   (setq b (+ (rand 1000) 1))
   (if (!= (divide a b) (/ a b))
@@ -1099,7 +1099,7 @@ Versione 1 (fibonacci + fattoriale):
       (setq b c))
     a)))
 
-(define (f! n) 
+(define (f! n)
   (if (zero? n) 0
       ;else
       (apply * (map fibo-i (sequence 1 n)))))
@@ -1112,7 +1112,7 @@ Versione 1 (fibonacci + fattoriale):
 
 Versione 2 (formula):
 
-Formula: 
+Formula:
   a(n+3) = a(n+1)*a(n+2)/a(n) + a(n+2)^2/a(n+1)
 
 Ponendo m = n+3 otteniamo:
@@ -1235,11 +1235,13 @@ Test di correttezza:
 (filter nil? (map check (triples 100)))
 ;-> ()
 
-(time (println (length (triples 500))))
-;-> 4
-;-> 1653.657
+(time (println (triples 500))))
+;-> ((3 5 6) (4 23 24) (5 119 120) (6 7 10))
+;-> 1646.005
 
-(time (println (length (triples 1000))))
+(time (println (triples 1000))))
+;-> ((3 5 6) (4 23 24) (5 119 120) (6 7 10) (6 719 720))
+;-> 22608.996
 
 ============================================================================
 
