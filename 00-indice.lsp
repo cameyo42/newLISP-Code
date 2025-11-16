@@ -3290,6 +3290,7 @@ NOTE LIBERE 34
   Spostamenti di 3 punti lungo la retta numerica
   Rettangoli che coprono esattamente un'area rettangolare
   Palindromi che sommati/moltiplicati generano palindromi
+  Elementi con determinate frequenze
 
 PROBLEMI SUI DADI
 =================

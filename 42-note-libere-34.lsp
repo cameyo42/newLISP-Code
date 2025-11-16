@@ -728,6 +728,7 @@ Quindi l'algoritmo verifica due condizioni:
       ;(println cur-vert)
       ; aggiornamento delle occorrenze dei vertici
       (dolist (v cur-vert)
+        ; se il vertice corrente è stato già incontrato...
         (if (lookup (list v) vertici)
             ; aggiorna le occorrenze del vertice (+ 1)
             (setf (lookup (list v) vertici) (+ $it 1))
@@ -929,6 +930,115 @@ Palindromes only using 0 and 1 (i.e., base-2 palindromes).
 ;->  101101 110011 111111 1000001 1001001 1010101 1011101 1100011
 ;->  1101011 1110111 1111111 10000001 10011001 10100101 10111101
 ;->  11000011 11011011 11100111 11111111 100000001)
+
+
+----------------------------------
+Elementi con determinate frequenze
+----------------------------------
+
+Data una lista di N elementi e un intero K, scrivere una funzione che trova tutti gli elementi che:
+  1) compaiono K volte          (=)  oppure
+  2) compaiono più di K volte   (>)  oppure
+  3) compaiono meno di K volte  (<)  oppure
+  4) compaiono minimo K volte   (>=) oppure
+  5) compaiono massimo K volte  (<=) oppure
+  6) non compaiono K volte      (!=)
+
+Esempi:
+  lista = (1 2 2 3 3 3 4 4 5)
+  K = 2
+  1) (=)  2  (2 4)
+  2) (>)  2  (3)
+  3) (<)  2  (1 5)
+  4) (>=) 2  (2 3 4)
+  5) (<=) 2  (1 2 4 5)
+  6) (!=) 2  (1 3 5)
+
+Versione 1 (lista associativa):
+-------------------------------
+
+(define (freq1 lst k op)
+  (let (nums '()) ; lista associativa con elementi: (numero occorrenze)
+    ; operatore di default: op --> =
+    (setq op (or op =))
+    ; ciclo per ogni elemento della lista...
+    (dolist (el lst)
+      ; se l'elemento corrente è stato già incontrato...
+      ; (cioè esiste nella lista associativa)
+      (if (lookup el nums)
+          ; allora aggiorna le occorrenze dell'elemento (+1)
+          (setf (lookup el nums) (+ $it 1))
+          ; altrimenti inserisce l'elemento '(el 1)'
+          ; nella lista associativa 'nums'
+          (push (list el 1) nums -1)))
+    ; estrae dalla lista associativa i numeri le cui occorrenze
+    ; verificano le condizioni richieste
+    (map first (filter (fn(x) (op (x 1) k)) nums))))
+
+Proviamo:
+
+(setq L '(1 2 2 3 3 3 4 4 5))
+(freq1 L 2 =)
+;-> (2 4)
+(freq1 L 2 >)
+;-> (3)
+(freq1 L 2 <)
+;-> (1 5)
+(freq1 L 2 >=)
+;-> (2 3 4)
+(freq1 L 2 <=)
+;-> (1 2 4 5)
+(freq1 L 2 !=)
+;-> (1 3 5)
+
+Versione 2 (primitive unique e count):
+--------------------------------------
+
+(define (freq2 lst k op)
+  (let ( (unici (unique lst)) ; elementi unici della lista
+         (op (or op =)) ) ; operatore di default: op --> =
+    (map first (filter (fn(x) (op (x 1) k))
+                        (map list unici (count unici lst))))))
+
+Test di correttezza:
+
+(define (test lst k)
+  (if (!= (freq1 lst k)    (freq2 lst k))    (println "u"))
+  (if (!= (freq1 lst k =)  (freq2 lst k =))  (println "="))
+  (if (!= (freq1 lst k >=) (freq2 lst k >=)) (println ">="))
+  (if (!= (freq1 lst k <=) (freq2 lst k <=)) (println "<="))
+  (if (!= (freq1 lst k >)  (freq2 lst k >))  (println ">"))
+  (if (!= (freq1 lst k <)  (freq2 lst k <))  (println "<"))
+  (if (!= (freq1 lst k !=) (freq2 lst k !=)) (println "!=")))
+
+(setq L (rand 10 100))
+(map (curry test L) (sequence 1 5))
+;-> (nil nil nil nil nil)
+
+Test di velocità:
+
+100 elementi:
+(setq L (rand 10 100))
+(time (freq1 L) 1e4)
+;-> 164.383
+(time (freq2 L) 1e4)
+;-> 196.915
+
+1000 elementi:
+(setq L (rand 100 1000))
+(time (freq1 L) 1e3)
+;-> 540.112
+(time (freq2 L) 1e3)
+;-> 354.558
+
+10000 elementi:
+(setq L (rand 1000 10000))
+(time (freq1 L) 1e2)
+;-> 4730.804
+(time (freq2 L) 1e2)
+;-> 514.975
+
+Nota: le liste associative vanno bene fino ad un migliaio di elementi.
 
 ============================================================================
 
