@@ -3295,6 +3295,7 @@ NOTE LIBERE 34
   Fibonattoriale
   (a! * b!) / c! = 1
   Ricerca delle componenti connesse in un grafo
+  Isole nelle matrici binarie
 
 PROBLEMI SUI DADI
 =================

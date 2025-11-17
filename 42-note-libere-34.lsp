@@ -1334,5 +1334,216 @@ Proviamo:
 ;-> (1 ((0 1 2 3)))
 
 
+---------------------------
+Isole nelle matrici binarie
+---------------------------
+
+Abbiamo una matrice binaria M x N.
+Un'isola è un gruppo celle con valore 1 collegate in 4 (orizzontali o verticali) o 8 direzioni (anche le diagonali).
+L'area di un'isola è il numero di celle con valore 1 nell'isola.
+Scrivere una funzione che calcola il numero di 1 per ogni isola e le coordinate di ogni 1.
+Se non ci sono isole, restituisce 0.
+
+Le 4 direzioni ortogonali (su, giù, sinistra, destra):
+  (-1 0)  --> su        -->  riga sopra, stessa colonna
+  (1 0)   --> giù       -->  riga sotto, stessa colonna
+  (0 -1)  --> sinistra  -->  stessa riga, colonna a sinistra
+  (0 1))  --> destra    -->  stessa riga, colonna a destra
+
+Le 4 direzioni diagonali (senza includere le ortogonali) sono:
+  (-1 -1)  --> alto a sinistra   -->  riga sopra, colonna a sinistra
+  (-1 1)   --> alto a destra     -->  riga sopra, colonna a destra
+  (1 -1)   --> basso a sinistra  -->  riga sotto, colonna a sinistra
+  (1 1))   --> basso a destra    -->  riga sotto, colonna a destra
+
+Versione iterativa (ricorsione con stack esplicito)
+---------------------------------------------------
+Algoritmo:
+1) Scansiona tutta la matrice.
+2) Quando trova un '1' non visitato avvia una DFS iterativa con uno stack.
+3) DFS iterativa:
+   - Marca la cella come visitata.
+   - Aggiunge le coordinate alla lista dell'isola.
+   - Chiama sé stessa per tutte le 4/8 celle vicine che siano ancora '1' e non visitate.
+   - Quando la DFS finisce, si è ottenuta un'intera isola.
+4) Alla fine della chiamata ricorsiva, aggiunge '(area coords)' alla lista dei risultati.
+5) Se non ci sono isole, restituisce '0'.
+
+(define (isole-I matrix diag)
+  (letn ( (R (length matrix))
+          (C (length (matrix 0)))
+          (visited (array R C '(nil)))
+          (ris '())
+          (i 0) (j 0)
+          (stack '())
+          (coords '())
+          (r 0) (c 0)
+          (cell '())
+          (nr 0) (nc 0)
+          (d '((-1 0) (1 0) (0 -1) (0 1))) )
+    ; diag = true --> 8 direzioni
+    (if diag (setq d '((-1 0) (1 0) (0 -1) (0 1) (-1 -1) (-1 1) (1 -1) (1 1))))
+    (for (i 0 (- R 1))
+      (for (j 0 (- C 1))
+        (when (and (= ((matrix i) j) 1) (not (visited i j)))
+          ; nuova isola -> inizializza coords e stack
+          (setq coords '())
+          (setq stack (list (list i j)))
+          (setf (visited i j) true) ; marca subito la cella iniziale
+          (while stack
+            (setq cell (pop stack))
+            (setq r (cell 0))
+            (setq c (cell 1))
+            (push (list r c) coords -1)
+            ; esplora tutte le 8 direzioni
+            (dolist (dir d)
+              (setq nr (+ r (dir 0)))
+              (setq nc (+ c (dir 1)))
+              (when (and (>= nr 0) (< nr R) (>= nc 0) (< nc C)
+                         (= ((matrix nr) nc) 1)
+                         (not (visited nr nc)))
+                (push (list nr nc) stack -1)
+                (setf (visited nr nc) true))))
+          (push (list (length coords) coords) ris -1))))
+    (if (null? ris) 0 ris)))
+
+Proviamo:
+
+(setq M '((0 0 1 0 0 0 0 1 0 0 0 0 0)
+          (0 0 0 0 0 0 0 1 1 1 0 0 0)
+          (0 1 1 0 1 0 0 0 0 0 0 0 0)
+          (0 1 0 0 1 1 0 0 1 0 1 0 0)
+          (0 1 0 0 1 1 0 0 1 1 1 0 0)
+          (0 0 0 0 0 0 0 0 0 0 1 0 0)
+          (0 0 0 0 0 0 0 1 1 1 0 0 0)
+          (0 0 0 0 0 0 0 1 1 0 0 0 0)))
+
+(isole-I M)
+;-> ((1 ((0 2)))
+;->  (4 ((0 7) (1 7) (1 8) (1 9)))
+;->  (4 ((2 1) (3 1) (2 2) (4 1)))
+;->  (5 ((2 4) (3 4) (4 4) (3 5) (4 5)))
+;->  (6 ((3 8) (4 8) (4 9) (4 10) (3 10) (5 10)))
+;->  (5 ((6 7) (7 7) (6 8) (7 8) (6 9))))
+
+(isole-I M true)
+;-> ((1 ((0 2)))
+;->  (4 ((0 7) (1 7) (1 8) (1 9)))
+;->  (4 ((2 1) (3 1) (2 2) (4 1)))
+;->  (5 ((2 4) (3 4) (3 5) (4 4) (4 5)))
+;->  (11 ((3 8) (4 8) (4 9) (4 10) (3 10) (5 10) (6 9) (6 8) (7 8) (6 7) (7 7))))
+
+Ricorsione con uno stack esplicito
+----------------------------------
+1. Stack di chiamate
+- Ogni volta che una funzione chiama sé stessa, il computer salva lo stato attuale (valori delle variabili locali, punto di esecuzione) nello stack delle chiamate.
+- Poi passa a eseguire la nuova chiamata con i nuovi parametri.
+2. Esecuzione
+- La chiamata più recente va in cima allo stack.
+- La funzione ricorsiva continua a chiamare sé stessa finché non raggiunge un caso base.
+- Il caso base non fa ulteriori chiamate: allora la funzione termina e lo stack "si svuota" iniziando a tornare indietro.
+3. Tornare indietro
+- Quando una chiamata termina, il computer riprende lo stato salvato nello stack e continua da dove era rimasto.
+- Questo processo continua fino a tornare alla prima chiamata originale.
+
+Esempio concettuale: DFS ricorsiva
+- Ogni cella visitata chiama 'dfs' sulle celle vicine.
+- Ogni chiamata 'dfs' non termina finché tutte le celle vicine non sono state esplorate.
+- Lo stack delle chiamate tiene traccia di tutte le celle "in attesa" di essere completate.
+- Quando non ci sono più celle vicine da visitare, lo stack inizia a "scaricarsi" restituendo i risultati delle singole chiamate.
+
+In pratica: una ricorsione usa implicitamente uno stack, mentre in una versione iterativa crei tu stesso uno stack esplicito (lista o array) per gestire le celle da visitare.
+
+Versione ricorsiva pura
+-----------------------
+Algoritmo:
+1) Scansiona tutta la matrice.
+2) Quando trovs un '1' non visitato chiama la funzione ricorsiva 'dfs'.
+3) dfs:
+   - Marca la cella come visitata.
+   - Aggiunge le coordinate alla lista dell'isola.
+   - Chiama sé stessa per tutte le 4/8 celle vicine che siano ancora '1' e non visitate.
+4) Alla fine della chiamata ricorsiva, aggiunge '(area coords)' alla lista dei risultati.
+5) Se non ci sono isole, restituisce '0'.
+
+(define (isole-R matrix diag)
+  (letn ( (R (length matrix))
+          (C (length (matrix 0)))
+          (visited (array R C '(nil)))
+          (ris '())
+          (i 0) (j 0)
+          (r 0) (c 0)
+          (coords '())
+          (d '((-1 0) (1 0) (0 -1) (0 1))) )
+    (define (dfs r c coords)
+      (when (and (>= r 0) (< r R) (>= c 0) (< c C) 
+                 (not (visited r c)) (= ((matrix r) c) 1))
+        (setf (visited r c) true)
+        (push (list r c) coords -1)
+        (dolist (dir d)
+          (setq coords (dfs (+ r (dir 0)) (+ c (dir 1)) coords))))
+      coords)
+    ; diag = true --> 8 direzioni
+    (if diag (setq d '((-1 0) (1 0) (0 -1) (0 1) (-1 -1) (-1 1) (1 -1) (1 1))))
+    (for (i 0 (- R 1))
+      (for (j 0 (- C 1))
+        (when (and (= ((matrix i) j) 1) (not (visited i j)))
+          (setq coords (dfs i j '()))
+          (push (list (length coords) coords) ris -1))))
+    (if (null? ris) 0 ris)))
+
+Proviamo:
+
+(setq M '((0 0 1 0 0 0 0 1 0 0 0 0 0)
+          (0 0 0 0 0 0 0 1 1 1 0 0 0)
+          (0 1 1 0 1 0 0 0 0 0 0 0 0)
+          (0 1 0 0 1 1 0 0 1 0 1 0 0)
+          (0 1 0 0 1 1 0 0 1 1 1 0 0)
+          (0 0 0 0 0 0 0 0 0 0 1 0 0)
+          (0 0 0 0 0 0 0 1 1 1 0 0 0)
+          (0 0 0 0 0 0 0 1 1 0 0 0 0)))
+
+(isole-R M)
+;-> ((1 ((0 2)))
+;->  (4 ((0 7) (1 7) (1 8) (1 9)))
+;->  (4 ((2 1) (3 1) (4 1) (2 2)))
+;->  (5 ((2 4) (3 4) (4 4) (4 5) (3 5)))
+;->  (6 ((3 8) (4 8) (4 9) (4 10) (3 10) (5 10)))
+;->  (5 ((6 7) (7 7) (7 8) (6 8) (6 9))))
+
+(isole-R M true)
+;-> ((1 ((0 2)))
+;->  (4 ((0 7) (1 7) (1 8) (1 9)))
+;->  (4 ((2 1) (3 1) (4 1) (2 2)))
+;->  (5 ((2 4) (3 4) (4 4) (4 5) (3 5)))
+;->  (11 ((3 8) (4 8) (4 9) (4 10) (3 10) (5 10) (6 9) (6 8) (7 8) (7 7) (6 7))))
+
+Test di correttezza:
+
+(= (sort (map first (isole-R M))) (sort (map first (isole-I M))))
+;-> true
+(= (sort (map first (isole-R M true))) (sort (map first (isole-I M true))))
+;-> true
+
+(= (sort (map length (isole-R M))) (sort (map length (isole-I M))))
+;-> true
+(= (sort (map length (isole-R M true))) (sort (map length (isole-I M true))))
+;-> true
+
+(= (sort (flat (sort (isole-R M)))) (sort (flat (sort (isole-I M)))))
+;-> true
+(= (sort (flat (sort (isole-R M true)))) (sort (flat (sort (isole-I M true)))))
+;-> true
+
+Test di velocità:
+
+(setq T (array 20 20 (rand 2 400)))
+(time (isole-I T) 1000)
+;-> 385.327
+(time (isole-R T) 1000)
+;-> 784.001
+
+La versione ricorsiva pura è più lenta e con matrici molto grandi può causare stack overflow.
+
 ============================================================================
 
