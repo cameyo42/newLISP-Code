@@ -1243,5 +1243,96 @@ Test di correttezza:
 ;-> ((3 5 6) (4 23 24) (5 119 120) (6 7 10) (6 719 720))
 ;-> 22608.996
 
+
+---------------------------------------------
+Ricerca delle componenti connesse in un grafo
+---------------------------------------------
+
+Data una matrice che rappresenta un grafo (matrice di adiacenza), scrivere una funzione che restituisce il numero delle componenti connesse e la lista di elementi di ogni componente.
+
+; ------------------------------------------------------------------
+; Funzione che identifica tutte le componenti connesse di un grafo
+; rappresentato tramite matrice di adiacenza.
+; ------------------------------------------------------------------
+(define (disjoint-graph matrix)
+  (local (len visited components current-comp)
+    ; ------------------------------------------------------------------
+    ; DFS (Depth-First Search)
+    ; Questa procedura esplora in profondità un'intera componente
+    ; connessa a partire dal nodo "current". Oltre a segnare il nodo come
+    ; visitato, inserisce ogni nodo raggiungibile nella lista temporanea
+    ; "current-comp", che rappresenta l'isola attualmente in esplorazione.
+    ; L'algoritmo ricalca il comportamento tradizionale del DFS:
+    ;   - si entra in un nodo
+    ;   - si marcano come visitati tutti i nodi connessi
+    ;   - si prosegue ricorsivamente fino ad esaurire la componente
+    ; ------------------------------------------------------------------
+    (define (dfs current)
+      (setf (visited current) true)
+      (push current current-comp -1)
+      (for (next 0 (- (length matrix) 1))
+        (when (and (not (visited next))
+                   (= ((matrix current) next) 1))
+          (dfs next))))
+    ; ------------------------------------------------------------------
+    ; Scopo: identificare tutte le componenti connesse di un grafo
+    ; rappresentato tramite matrice di adiacenza.
+    ; Struttura del processo:
+    ;   1. Prepara un array "visited" per ricordare quali nodi sono già
+    ;      stati esplorati.
+    ;   2. Scansiona tutti i nodi. Ogni nodo non visitato è l'inizio di
+    ;      una nuova componente connessa.
+    ;   3. Prima di chiamare DFS, si azzera "current-comp", la lista che
+    ;      accumula i nodi della componente corrente.
+    ;   4. Dopo che DFS ha esplorato completamente l'isola, "current-comp"
+    ;      contiene tutti i nodi raggiungibili dal nodo iniziale.
+    ;   5. Si aggiunge questa lista all'elenco globale "components".
+    ;   6. Al termine, il numero di componenti è la lunghezza della lista
+    ;      "components".
+    ; Risultato finale: (numero-delle-componenti, lista-di-tutte-le-isole)
+    ; ------------------------------------------------------------------
+    (setq len (length matrix))
+    (setq visited (array len '(nil)))
+    (setq components '())
+    (for (i 0 (- len 1))
+      (when (not (visited i))
+        ; nuova isola: si prepara la lista dei nodi che la compongono
+        (setq current-comp '())
+        ; DFS visita tutta la componente a partire da i
+        (dfs i)
+        ; si aggiunge la componente trovata alla lista totale
+        (push current-comp components -1)))
+    ; Ritorna sia il numero delle isole che la lista stessa
+    (list (length components) components)))
+
+Proviamo:
+
+(setq M '((1 1 0)
+          (1 1 0)
+          (0 0 1)))
+(disjoint-graph M)
+;-> (2 ((0 1) (2)))
+
+(setq M '((1 0 0)
+          (0 1 0)
+          (0 0 1)))
+(disjoint-graph M)
+;-> (3 ((0) (1) (2)))
+
+(setq M '((1 1 0 0)
+          (1 1 0 0)
+          (0 0 1 1)
+          (0 0 1 1)))
+(disjoint-graph M)
+;-> (2 ((0 1) (2 3)))
+
+(setq M '((1 1 1 1)
+          (1 1 1 1)
+          (1 1 1 1)
+          (1 1 1 1)))
+(disjoint-graph M)
+;-> (1 ((0 1 2 3)))
+
+
 ============================================================================
 

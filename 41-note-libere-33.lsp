@@ -1,4 +1,4 @@
-================
+N numeri che sommano a K================
 
  NOTE LIBERE 33
 
@@ -1996,7 +1996,7 @@ Con K piccolo è più veloce "conta-str":
 (time (conta-substr s 2) 1e4)
 ;-> 647.24
 (time (conta-substr2 s 2) 1e4)
-;-> (978.15)
+;-> 978.15
 
 Con K grande è più veloce "conta-str2":
 
@@ -8599,23 +8599,8 @@ Algoritmo
       (if (= val sum) (push tmp out -1)))
     out))
 
-(define (sublist? lst1 lst2 all)
-"Check if all elements of a list (lst1) are in another list (lst2)"
-  (if all
-    ; check presence of numbers
-    (for-all (fn(x) (ref x lst2)) lst1))
-    ;else (corrispondece 1:1)
-    ; checks presence and occurrence of numbers
-    (let ( (pos nil) (stop nil) )
-      ; Per ogni numero di lst1...
-      (dolist (elem lst1)
-        ; se esiste in lst2...
-        (if (setq pos (ref elem lst2))
-            ; lo elimina da lst2
-            (pop lst2 pos)
-            ; altrimenti ferma il ciclo e restituisce nil
-            (setq stop true)))
-      (not stop)))
+(sublists-sum-to '(1 1 2 2 3) 4)
+;-> ((1 1 2) (1 1 2) (2 2) (1 3) (1 3))
 
 (define (sublist? lst1 lst2 all)
 "Check if all elements of a list (lst1) are in another list (lst2)"
@@ -9046,7 +9031,7 @@ e) Gestione di grandi numeri
       (setq y (g (g y c n) c n))     ; lepre: due passi
       (setq d (gcd (abs (- x y)) n)) ; calcola il GCD
       (inc i))
-    ;; se non si è trovato nulla o se d = n → tentativo fallito
+    ;; se non si è trovato nulla o se d = n -> tentativo fallito
     (if (or (= d n) (= d 1)) nil d)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9063,7 +9048,7 @@ e) Gestione di grandi numeri
     ;; casi banali
     ((< n 2) '())          ; niente da fattorizzare
     ((= n 2) '(2))         ; 2 è primo
-    ((even? n)             ; se n è pari → fattorizza 2 e continua
+    ((even? n)             ; se n è pari -> fattorizza 2 e continua
       (cons 2 (pollard-rho (/ n 2))))
     (true
       (letn ((d nil) (tentativi 0))
@@ -9071,7 +9056,7 @@ e) Gestione di grandi numeri
         (while (and (or (nil? d) (= d n)) (< tentativi 50))
           (setq d (rho-step n))
           (inc tentativi))
-        ;; se dopo 50 tentativi non troviamo nulla → probabilmente primo
+        ;; se dopo 50 tentativi non troviamo nulla -> probabilmente primo
         (if (or (nil? d) (= d 1) (= d n))
             (list n)
             ;; fattorizza ricorsivamente i due fattori trovati

@@ -3294,6 +3294,7 @@ NOTE LIBERE 34
   Divisione solo con addizioni
   Fibonattoriale
   (a! * b!) / c! = 1
+  Ricerca delle componenti connesse in un grafo
 
 PROBLEMI SUI DADI
 =================
@@ -3341,7 +3342,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (377 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (380 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

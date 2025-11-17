@@ -7849,6 +7849,23 @@ Proviamo:
 (find-equal '(1 2) '(1 2))
 ;-> (1 2)
 
+; Funzione alternativa (più lenta):
+(define (find-equal lst1 lst2)
+  (letn ((a (sort lst1))
+         (b (sort lst2))
+        out)
+    (while (and a b)
+      (cond
+        ((= (a 0) (b 0))
+          (push (a 0) out -1)
+          (setq a (rest a))
+          (setq b (rest b)))
+        ((< (a 0) (b 0))
+          (setq a (rest a)))
+        (true
+          (setq b (rest b)))))
+    out))
+
 Per N liste:
 Nota: (find-equals a b c) = (find-equal (find-equal a b) c)
 
