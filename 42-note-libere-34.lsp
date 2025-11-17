@@ -1476,7 +1476,7 @@ Algoritmo:
           (coords '())
           (d '((-1 0) (1 0) (0 -1) (0 1))) )
     (define (dfs r c coords)
-      (when (and (>= r 0) (< r R) (>= c 0) (< c C) 
+      (when (and (>= r 0) (< r R) (>= c 0) (< c C)
                  (not (visited r c)) (= ((matrix r) c) 1))
         (setf (visited r c) true)
         (push (list r c) coords -1)
@@ -1544,6 +1544,86 @@ Test di velocità:
 ;-> 784.001
 
 La versione ricorsiva pura è più lenta e con matrici molto grandi può causare stack overflow.
+
+
+--------------------------------------------
+Quadrato di lato uguale a N ripetuto N volte
+--------------------------------------------
+
+Dato un numero intero N, scrivere una funzione che stampa un quadrato/rettangolo in cui i lati orizzontali contengono N copie di N e i lati verticali contengono N copie di N.
+
+Esempi:
+  N = 0, nessun output
+  N = 1, 1
+  N = 2: 22
+         22
+  N = 3: 333
+         3 3
+         333
+  N = 4: 4444
+         4  4
+         4  4
+         4444
+  N = 5: 55555
+         5   5
+         5   5
+         5   5
+         55555
+
+(define (quad N)
+  (letn ( (s (string N)) (h (dup s N))
+          (v (string N (dup " " (* (- N 2) (length N))) N)) )
+    (println h)
+    (dotimes (r (- N 2)) (println v))
+    (if (> N 1) (println h))'>))
+
+Proviamo:
+
+(quad 0)
+;->
+(quad 1)
+;-> 1
+(quad 2)
+;-> 22
+;-> 22
+(quad 5)
+;-> 55555
+;-> 5   5
+;-> 5   5
+;-> 5   5
+;-> 55555
+(quad 10)
+;-> 10101010101010101010
+;-> 10                10
+;-> 10                10
+;-> 10                10
+;-> 10                10
+;-> 10                10
+;-> 10                10
+;-> 10                10
+;-> 10                10
+;-> 10101010101010101010
+(quad 12)
+;-> 121212121212121212121212
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 12                    12
+;-> 121212121212121212121212
+(quad 36)
+
+Versione code-golf (139 caratteri, one-line):
+
+(define(f n)
+(let(h(dup(string n)n))(println h)
+(dotimes(r(- n 2))(println(string n(dup" "(*(- n 2)(length n)))n)))
+(if(> n 1)(println h))'>))
 
 ============================================================================
 

@@ -3296,6 +3296,7 @@ NOTE LIBERE 34
   (a! * b!) / c! = 1
   Ricerca delle componenti connesse in un grafo
   Isole nelle matrici binarie
+  Quadrato di lato uguale a N ripetuto N volte
 
 PROBLEMI SUI DADI
 =================
