@@ -712,6 +712,45 @@ Simuliamo un paio di partite con 1 milione di turni:
 ;-> Player2: 333271
 ;-> (333756 332973 333271)
 
+"Social cycling and conditional responses in the Rock-Paper-Scissors game"
+by Zhijian Wang1, Bin Xu and Hai-Jun Zhou
+https://arxiv.org/pdf/1404.5199v1
+
+Un gruppo di scienziati cinesi ha condotto un esperimento in cui hanno fatto giocare 360 studenti a Rock=Paper-Scissors tra loro per 300 turni a partita(più di 2 ore).
+Matematicamente nessuna scelta tra Rock, Paper e Scissors è la migliore (infatti R batte S, S batte P e P batte R), quindi tutto ciò che potete fare è sceglierli con la stessa probabilità: 1/3, 1/3, 1/3.
+Quindi fare ogni scelta con la stessa probabilità sarebbe la cosa migliore da fare giocando contro un computer che adotta la stessa strategia.
+Ma il fatto è che gli esseri umani sono irrazionali (non seguono la strategia 1/3,1/3,1/3) e gli scienziati hanno fatto due scoperte piuttosto importanti su come le persone cercano di battersi a vicenda:
+1) La prima è che le persone che vincono tendono a ripetere la loro strategia.
+Per esempio, se vincono con Rock tendono a scegliere Rock anche al prossimo turno.
+2) La seconda cosa che hanno scoperto è che i perdenti cambiano strategia.
+   Per esempio, se perdono con Rock, allora tendono a scegliereo Scissors o Paper al prossimo turno.
+Quindi con le seguenti azioni:
+1) I vincitori ripetono
+2) I perdenti cambiano
+possiamo giocare contro di loro con queste regole:
+a) Se perdi, al turno successivo gioca la cosa che non è uscita.
+b) Se vinci, al turno successivo gioca la cosa con cui il tuo avversario ha appena perso.
+c) Se pareggi, scegli il turno successivo a caso.
+
+Possiamo creare uno schema grafico per seguire queste tre regole:
+
+      R       
+     / \     ^
+    /   \    | direzione anti-oraria (sa P a R, da R a S, da S a P, ecc.)
+   /     \   |
+  S ----- P
+
+Se perdi o vinci il prossimo turno scegli quello che viene dopo in direzione anti-oraria.
+In definitiva:
+  Se perdi con R scegli S al prossimo turno.
+  Se vinci con R scegli S al prossimo turno.
+  Se perdi con S scegli P al prossimo turno.
+  Se vinci con S scegli P al prossimo turno.
+  Se perdi con P scegli R al prossimo turno.
+  Se vinci con P scegli R al prossimo turno.
+
+Naturalmente, potremmo costruire un'altra strategia per giocare contro chi adotta queste tre regole... e cosi via all'infinito.
+
 
 ----------------
 TODO application

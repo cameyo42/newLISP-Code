@@ -8622,7 +8622,7 @@ Algoritmo
 
 ; Funzione che trova i gruppi di sottoinsiemi non sovrapposti
 (define (trova-gruppi L K)
-  (letn ((ssa (subset-sum-all L K))
+  (letn ((ssa (sublists-sum-to L K))
          (ris '())
          (n 0)
          (gruppo '())

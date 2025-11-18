@@ -1625,5 +1625,78 @@ Versione code-golf (139 caratteri, one-line):
 (dotimes(r(- n 2))(println(string n(dup" "(*(- n 2)(length n)))n)))
 (if(> n 1)(println h))'>))
 
+
+---------------
+49 monete d'oro
+---------------
+
+Un padre ha 49 monete d'oro.
+La prima moneta pesa un grammo.
+La seconda moneta pesa 2 g e così via fino alla 49esima moneta che pesa 49 g.
+Vuole dare sette monete a ciascuno dei sette figli in modo che ogni figlio riceva monete dello stesso peso totale.
+Scrivere una funzione che trova un modo per distribuire correttamente le monete.
+
+Lista di monete: 1..N
+(setq N 49)
+(setq M (sequence 1 N))
+
+Numero di figli:
+(setq figli 7)
+
+Peso totale delle monete: N*(N+1)/2 = 49*50/2 = 1225 g
+(setq peso-totale (/ (* N (+ N 1)) 2))
+
+Peso monete per ogni figlio: Peso-totale/figli = 1125/7 = 175 g
+(setq peso (div peso-totale figli))
+
+Quindi dobbiamo trovare sette sequenze di numeri in cui ognuna somma a 175 con il vincolo che i numeri (1..49) devono essere usati tutti per una sola volta.
+
+La soluzione potrebbe essere calcolata con la funzione "trova-gruppi" che si trova in "Sottoinsiemi non sovrapposti che sommano ad un numero" su "Note libere 33".
+Purtroppo la funzione è molto lenta e non riesce a calcolare i gruppi per una lista di 49 elementi (da 1 a 49).
+
+Allora usiamo la funzione "qmDispari" che si trova in "Quadrati magici" su "Problemi vari".
+Questa funzione genera un quadrato magico di ordine dispari, quindi basta creare un quadrato magico di ordine 7 ed utilizzare i valori delle righe per distribuire le monete correttamente (infatti ogni riga somma a 175 e anche ogni colonna).
+
+(define (qmDispari n)
+  (define (f n x y) (% (add x (mul y 2) 1) n))
+  (local (val nm row out)
+    (setq out '())
+    (setq row '())
+    ;calcolo quadrato magico
+    (for (i 0 (sub n 1))
+      (for (j 0 (sub n 1))
+        (setq val (add (mul (f n (sub n j 1) i) n)
+                       (add (f n j i))
+                       1))
+        (push val row -1)
+      )
+      (push row out -1)
+      (setq row '())
+    )
+    ;calcolo numero magico
+    (setq nm (div (mul n (add 1 (mul n n))) 2))
+    (println nm)
+    out
+  )
+)
+
+(setq sol (qmDispari 7))
+;-> 175
+;-> ((2 45 39 33 27 21 8)
+;->  (18 12 6 49 36 30 24)
+;->  (34 28 15 9 3 46 40)
+;->  (43 37 31 25 1913 7)
+;->  (10 4 47 41 35 22 16)
+;->  (26 20 14 1 44 38 32)
+;->  (42 29 23 17 11 5 48))
+
+Verifica delle righe:
+(dolist (s sol) (print (apply + s) "-"))
+;-> 175-175-175-175-175-175-175
+
+Verifica delle colonne:
+(dolist (s (transpose sol)) (print (apply + s) "-"))
+;-> 175-175-175-175-175-175-175
+
 ============================================================================
 
