@@ -3298,6 +3298,8 @@ NOTE LIBERE 34
   Isole nelle matrici binarie
   Quadrato di lato uguale a N ripetuto N volte
   49 monete d'oro
+  Diagonalizzare una lista in una matrice
+  Numeri BCD
 
 PROBLEMI SUI DADI
 =================

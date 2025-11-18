@@ -2367,6 +2367,8 @@ Oppure:
 (lookup 5 digit-bcd)
 ;-> "0101"
 
+Vedi anche "Numeri BCD" su "Note libere 34".
+
 
 -------------
 Il gioco Zara

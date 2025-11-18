@@ -1698,5 +1698,198 @@ Verifica delle colonne:
 (dolist (s (transpose sol)) (print (apply + s) "-"))
 ;-> 175-175-175-175-175-175-175
 
+
+---------------------------------------
+Diagonalizzare una lista in una matrice
+---------------------------------------
+
+Dato una lista L con N elementi, scrivere una funzione che costruisce la matrice M di dimensioni NxN dove:
+
+  M(i,i) = V(i), per i = 1,..,N
+  M(i,j) = 0, per (i != j)
+
+In altre parole, gli elementi della lista costituiscono la diagonale principale della matrice.
+
+(define (diagonalize lst)
+  (letn ( (N (length lst)) (matrix (array N N '(0))) )
+    (dolist (el lst) (setf (matrix $idx $idx) el))
+    ;(map (fn(x) (setf (matrix $idx $idx) x)) lst)
+  matrix))
+
+(diagonalize '(0))
+;-> ((0))
+(diagonalize '(1))
+;-> ((1))
+(diagonalize '(1 2 3 4))
+;-> ((1 0 0 0) (0 2 0 0) (0 0 3 0) (0 0 0 4))
+
+Versione code-golf (86 caratteri):
+
+(define(f l)(letn((n(length l))(m(array n n'(0))))(map(fn(x)(setf(m $idx $idx)x))l)m))
+
+(f '(0))
+;-> ((0))
+(f '(1))
+;-> ((1))
+(f '(1 2 3 4))
+;-> ((1 0 0 0) (0 2 0 0) (0 0 3 0) (0 0 0 4))
+
+
+----------
+Numeri BCD
+----------
+
+I numeri interi BCD (Binary-Coded Decimal) rappresentano ogni cifra decimale usando 4 bit (nibble).
+È un sistema usato in contesti dove è importante mantenere la precisione decimale ed evitare conversioni binario<->decimale che potrebbero introdurre errori (per esempio nelle calcolatrici o nei registratori di cassa).
+
+Rappresentazione
+Ogni cifra 0–9 è codificata come un nibble (4 bit):
+
+  | Dec | BCD  |
+  | --- | ---- |
+  | 0   | 0000 |
+  | 1   | 0001 |
+  | 2   | 0010 |
+  | 3   | 0011 |
+  | 4   | 0100 |
+  | 5   | 0101 |
+  | 6   | 0110 |
+  | 7   | 0111 |
+  | 8   | 1000 |
+  | 9   | 1001 |
+
+I codici da 1010 a 1111 non rappresentano cifre valide in BCD.
+
+Per esempio:
+- 37 in BCD -> '0011 0111'
+- 509 in BCD -> '0101 0000 1001'
+
+Basta convertire ogni cifra decimale in binario a 4 bit, senza mai trasformare il numero intero in binario "classico".
+
+Pro
+- Conversione rapida a decimale.
+- Nessun errore di arrotondamento sulle operazioni "per cifre".
+- Velocizza le operazioni decimali nei primi microprocessori.
+- Facilita la visualizzazione (ogni nibble = una cifra).
+- Supporto hardware semplice.
+Contro
+- Richiede più memoria del binario puro.
+- Operazioni aritmetiche più lente (correzioni da fare).
+- Non rappresenta bene numeri molto grandi o calcoli complessi.
+
+Varianti
+- Packed BCD: ogni byte contiene due cifre (alto e basso nibble).
+- Unpacked BCD: una cifra per byte (comune nei vecchi mainframe).
+- Signed BCD: l'ultimo nibble (o byte) contiene il segno.
+
+Vediamo due funzioni che convertono Intero decimale <--> Intero BCD.
+
+; Funzione che prende un intero decimale e restituisce l'intero BCD (lista di nibble)
+(define (to-BCD n)
+  (define (bit d k) (& (>> d k) 1)) ; estrae il k-esimo bit da d
+  (let ( (s (string n)) (out '()) (d 0) (nib '()) )
+    (dolist (ch (explode s))
+      (setq d (- (char ch) 48))
+      (setq nib (list (bit d 3) (bit d 2) (bit d 1) (bit d 0)))
+      (push nib out -1))
+    out))
+
+(to-BCD 0)
+;-> ((0 0 0 0)
+(to-BCD 37)
+;-> ((0 0 1 1) (0 1 1 1))
+(to-BCD 509)
+;-> ((0 1 0 1) (0 0 0 0) (1 0 0 1))
+
+; Funzione che prende un intero BCD (lista di nibble) e restituisce l'intero decimale.
+(define (from-BCD bcd)
+  (if (= bcd '(0 0 0 0)) 0
+  ;else
+  (let ( (out 0) (d 0) )
+    (dolist (nib bcd)
+      (setq d (+ (* (nib 0) 8) (* (nib 1) 4) (* (nib 2) 2) (* (nib 3) 1)))
+      (println d)
+      (setq out (+ (* out 10) d)))
+    out)))
+
+(from-BCD '(0 0 0 0))
+;-> 0
+(from-BCD '((0 0 1 1) (0 1 1 1)))
+;-> 37
+(from-BCD '((0 1 0 1) (0 0 0 0) (1 0 0 1)))
+;-> 509
+
+Somma in BCD
+------------
+La somma non è una semplice somma binaria:
+se il nibble risultante è > 9 (1001) bisogna aggiungere 6 (0110) per correggere.
+
+Esempio: 8 + 7
+- binario: 1000 + 0111 = 1111 (15) -> invalido per BCD
+- aggiungi 0110: 1111 + 0110 = 1 0101 -> risultato: 0001 0101 (cioè 15)
+
+Scriviamo un addizionatore BCD che somma due numeri interi positivi in BCD:
+
+L'algoritmo segue queste idee:
+1) Si parte dalla cifra meno significativa (ultima della lista).
+2) Si sommano i due nibble e l'eventuale riporto.
+3) Se la somma è > 9, si aggiunge 6 per riportarla nel range BCD.
+4) Si produce il nibble corretto e il nuovo riporto.
+5) Alla fine, se resta un riporto, si aggiunge un nibble 0001.
+
+(define (BCD-add bcd1 bcd2)
+  (define (to-dec nib) (+ (* (nib 0) 8) (* (nib 1) 4) (* (nib 2) 2) (* (nib 3) 1)))
+  (define (to-nib d) (list (& (>> d 3) 1) (& (>> d 2) 1) (& (>> d 1) 1) (& d 1)))
+  (letn ((a (reverse bcd1)) (b (reverse bcd2)) (len (max (length a) (length b)))
+        (carry 0) (out '()) (d1 0) (d2 0) (s 0))
+    (for (i 0 (- len 1))
+      (setq d1 (if (< i (length a)) (to-dec (a i)) 0))
+      (setq d2 (if (< i (length b)) (to-dec (b i)) 0))
+      (setq s (+ d1 d2 carry))
+      (if (> s 9) (setq s (+ s 6) carry 1) (setq carry 0))
+      (push (to-nib (& s 15)) out))
+    (if (= carry 1) (push '(0 0 0 1) out))
+    out))
+
+(BCD-add (to-BCD 37) (to-BCD 85))
+;-> ((0 0 0 1) (0 0 1 0) (0 0 1 0))
+(from-BCD (BCD-add (to-BCD 37) (to-BCD 85)))
+;-> 122
+
+(BCD-add (to-BCD 509) (to-BCD 91))
+;-> ((0 1 1 0) (0 0 0 0) (0 0 0 0))
+(from-BCD (BCD-add (to-BCD 509) (to-BCD 91)))
+;-> 600
+
+(BCD-add (to-BCD 123456789) (to-BCD 123456789))
+;-> ((0 0 1 0) (0 1 0 0) (0 1 1 0) (1 0 0 1) (0 0 0 1)
+;->  (0 0 1 1) (0 1 0 1) (0 1 1 1) (1 0 0 0))
+(from-BCD (BCD-add (to-BCD 123456789) (to-BCD 123456789)))
+;-> 246913578
+(+ 123456789 123456789)
+;-> 246913578
+
+Scriviamo un addizionatore BCD con N addendi:
+
+(define-macro (BCD+)
+"Sum two of more BCD positive integers"
+  (apply BCD-add (map eval (args)) 2))
+
+(setq bcd1 (to-BCD 101))
+;-> ((0 0 0 1) (0 0 0 0) (0 0 0 1))
+(setq bcd2 (to-BCD 91))
+;-> ((1 0 0 1) (0 0 0 1))
+(setq bcd3 (to-BCD 9))
+;-> (1 0 0 1)
+
+(BCD+ bcd1 bcd2 bcd3)
+;-> ((0 0 1 0) (0 0 0 0) (0 0 0 1))
+(from-BCD (BCD+ bcd1 bcd2 bcd3))
+;-> 201
+(from-BCD (apply BCD+ (list bcd1 bcd2 bcd3)))
+;-> 201
+
+Vedi anche "Codifica BCD (Binary-Coded Decimal)" su "Note libere 26".
+
 ============================================================================
 

@@ -7472,6 +7472,100 @@ Risolvendo il problema di Fibonacci utilizzando la formula:
 Nel giorno 853 i due serpenti si trovano nella condizione di incontrarsi domani (x+1) dopo il primo movimento (nel giorno 852 sono ancora troppo distanti).
 Quindi i serpenti si incontrano dopo 854 giorni.
 
+Il problema delle castagne
+--------------------------
+Fibonacci porta alla corte 60 castagne da distribuire equamente a tutti i Cortigiani.
+Purtroppo quel giorno c'erano cinque assenti per cui i presenti ricevono una castagna in più a testa.
+Quanti erano i Cortigiani?
+
+A) Soluzione algebrica
+
+Poniamo:
+  x = numero di cortigiani
+  y = castagne per ogni cortigiano
+
+Possiamo impostare due equazioni:
+
+1)  60/(x - 5) = y
+2)  60/x = y-1 
+
+Prendiamo y dalla 1) e lo sositutiamo in 2):
+
+  60/x = 60/(x - 5) - 1
+
+Svolgiamo i passaggi e otteniamo la seguente equazione di secondo grado:
+
+  x^2 - 5*x - 300 = 0
+
+Soluzioni dell'equazione di secondo grado (a*x^2 + b*x + c = 0):
+
+  x1 = -b/(2*a) + (sqrt(b*b - 4*a*c))/(2*a) = 20
+  x2 = -b/(2*a) - (sqrt(b*b - 4*a*c))/(2*a) = -15
+
+La soluzione x2 = -15 non è possibile, quindi i Cortigiani erano 20.
+
+B) Soluzione logica
+
+1) Se ognuno riceve una castagna in più significa che non c'è resto e quindi il numero dei Cortigiani è divisibile per cinque sia con i presenti che con gli assenti.
+Numero cortigiani --> Multipli di 5 --> 5, 10, 20, 25, 30,...
+
+2) La differenza tra:
+a) il numero di castagne ricevute dai cortigiani presenti (assenti esclusi) e
+b) il numero di castagne che avrebbero ricevuto tutti (assenti inclusi)
+   deve essere uguale a 1.
+
+Adesso possiamo provare tutti i multipli di 5 e verificare la differenza 2).
+
+Esempio:
+  Cortigiani-totali = 10
+  Castagne-tutti = 60/10 = 6
+  Cortigiani-presenti = 10 - 5 = 5
+  Castagne-presenti = 60/5 = 12
+  Differenza = Castagne-presenti - Castagne-tutti =
+             = 12 - 6 = 6 che è diverso da 1.
+
+(define (logic)
+  (let ( (castagne 60)
+        (cortigiani '(5 10 15 20 25 30 35 40 45 50 55 60))
+        (tutti 0) (presenti 0) (diff 0) )
+    (dolist (cort cortigiani)
+      (setq tutti (div castagne cort))
+      (setq presenti (div castagne (- cort 5)))
+      (setq diff (sub presenti tutti))
+      (println "Prova: Cortigiani = " cort)
+      (println "       castagne (tutti): " tutti)
+      (println "       castagne (presenti): " presenti)
+      (println "       Differenza: " diff)
+      (if (= diff 1) (println "CORRETTO") (println "ERRATO")))))
+
+(logic)
+;-> Prova: Cortigiani = 5
+;->        castagne (tutti): 12
+;->        castagne (presenti): 1.#INF
+;->        Differenza: 1.#INF
+;-> ERRATO
+;-> Prova: Cortigiani = 10
+;->        castagne (tutti): 6
+;->        castagne (presenti): 12
+;->        Differenza: 6
+;-> ERRATO
+;-> Prova: Cortigiani = 15
+;->        castagne (tutti): 4
+;->        castagne (presenti): 6
+;->        Differenza: 2
+;-> ERRATO
+;-> Prova: Cortigiani = 20
+;->        castagne (tutti): 3
+;->        castagne (presenti): 4
+;->        Differenza: 1
+;-> CORRETTO
+;-> ...
+;-> Prova: Cortigiani = 60
+;->        castagne (tutti): 1
+;->        castagne (presenti): 1.090909090909091
+;->        Differenza: 0.09090909090909083
+;-> ERRATO
+
 
 ---------
 Countdown
