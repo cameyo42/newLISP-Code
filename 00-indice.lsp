@@ -3302,6 +3302,8 @@ NOTE LIBERE 34
   Numeri BCD
   Legge di Weber-Fechner
   Matrici binarie random e indicizzazione lineare
+  The first, the last, and everything between
+  Ordinare un set con differenza costante tra i numeri adiacenti
 
 PROBLEMI SUI DADI
 =================

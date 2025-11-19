@@ -2081,8 +2081,8 @@ Questo perché ogni riga contiene N elementi e quindi ogni blocco di lunghezza N
             ; Inserimento degli 1 (k)
             (dolist (p posizioni)
               ; indicizzazione lineare
-              (setq r (/ p cols))
-              (setq c (% p cols))
+              (setq r (/ p cols)) ; indice riga
+              (setq c (% p cols)) ; indice colonna
               (setf (matrix r c) 1))
             matrix))))
 
@@ -2098,6 +2098,157 @@ Proviamo:
 ;-> nil
 (random-binary-matrix 3 3 9)
 ;-> ((1 1 1) (1 1 1) (1 1 1))
+
+
+-------------------------------------------
+The first, the last, and everything between
+-------------------------------------------
+
+https://codegolf.stackexchange.com/questions/175485/the-first-the-last-and-everything-between
+
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Dati due numeri interi, restituire una lista con prima i due numeri interi e quindi l'intervallo tra di essi (escludendo entrambi).
+L'ordine dell'intervallo deve essere lo stesso dell'input.
+
+(define (flev a b)
+  (cond ((= a b) (list a b)) ; numeri uguali
+        ((= (abs (- a b)) 1) (list a b)) ; numeri con diffrenza assoluta = 1
+        (true
+          ; genera la sequenza con i due numeri estremi compresi
+          (setq seq (sequence a b))
+          ; sposta l'ultimo numero della sequenza in seconda posizione 
+          ; cioè dopo il primo numero --> indice 1
+          (push (pop seq -1) seq 1)
+          seq)))
+
+Proviamo:
+
+(flev 0 5)
+;-> (0 5 1 2 3 4)
+(flev -3 8)
+;-> (-3 8 -2 -1 0 1 2 3 4 5 6 7)
+(flev 4 4)
+;-> (4 4)
+(flev 4 5)
+;-> (4 5)
+(flev 8 2)
+;-> (8 2 7 6 5 4 3)
+(flev -2 -7)
+;-> (-2 -7 -3 -4 -5 -6)
+
+Versione code-golf (87 caratteri):
+
+(define(f a b)(if(<=(abs(- a b))1)(list a b)(let(s(sequence a b))(push(pop s -1)s 1))))
+
+(f 0 5)
+;-> (0 5 1 2 3 4)
+(f -3 8)
+;-> (-3 8 -2 -1 0 1 2 3 4 5 6 7)
+(f 4 4)
+;-> (4 4)
+(f 4 5)
+;-> (4 5)
+(f 8 2)
+;-> (8 2 7 6 5 4 3)
+(f -2 -7)
+;-> (-2 -7 -3 -4 -5 -6)
+
+
+--------------------------------------------------------------
+Ordinare un set con differenza costante tra i numeri adiacenti
+--------------------------------------------------------------
+
+Data una lista di interi tutti diversi (un set o insieme), scrivere una funzione che ordina la lista in modo tale che la differenza assoluta di ogni coppia di numeri adiacenti sia sempre uguale a k: abs(x(i+1) - x(i)) = k, per tutte le coppie adiacenti.
+Se questo non è possibile restituire nil.
+
+Affinché una lista di numeri diversi possa essere riordinata in modo che abs(x(i+1) - x(i)) = k per ogni coppia adiacente, i numeri devono formare una catena aritmetica con passo +-k:
+
+  ..., a-k, a, a+k, a+2k, ...
+
+Questo implica che:
+1. Tutti gli elementi devono appartenere allo stesso insieme di congruenza modulo k:
+   (x % k) deve essere sempre lo stesso per tutti gli elementi
+2. Se questo è vero, l'unica sequenza possibile è ordinare la lista in modo crescente oppure in modo decrescente.
+
+In definitiva, dopo aver ordinato la lista basta controllare se la sequenza costruita soddisfa la condizione, altrimenti restituire 'nil'.
+
+; Funzione che ordina una lista in modo che tra gli elementi adiacenti
+; ci sia sempre un differenza pari a k
+(define (sort-delta lst k)
+  (sort lst)
+  (for-all (fn(x) (= x k)) 
+            (map (fn(x y) (abs (- x y))) (chop lst) (rest lst))))
+
+(setq L1 '(1 3 5 7))
+(setq L2 '(1 2 3 4 5 6 7))
+(sort-delta L1 1)
+;-> nil
+(sort-delta L1 2)
+;-> true
+(sort-delta L2 1)
+;-> true
+(sort-delta L2 2)
+;-> nil
+
+Se la lista può contenere numeri uguali, allora il problema è più difficile.
+Un metodo brute-force è quello di calcolare tutte le permutazioni e verificare quale permutazione soddisfa la condizione.
+Comunque la lista da ordinare non deve superare i 10 elementi.
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (ordina-delta lst k)
+  (let ( (out '())
+         (permute (perm lst)) )
+       (dolist (p permute)
+         (if (for-all (fn(x) (= x k)) 
+                      (map (fn(x y) (abs (- x y))) (chop p) (rest p)))
+             (push p out)))
+       (unique out)))
+
+Proviamo:
+
+(setq L1 '(1 3 5 7))
+(ordina-delta L1 2)
+;-> ((7 5 3 1) (1 3 5 7))
+
+(setq L2 '(1 2 3 4 5 6 7))
+(ordina-delta L2 1)
+((7 6 5 4 3 2 1) (1 2 3 4 5 6 7))
+
+(setq L3 '(4 4 5 5 5))
+(ordina-delta L3 1)
+;-> ((5 4 5 4 5))
+
+(setq L4 '(1 7 5 2 6 4 4 3 3))
+(ordina-delta L4 1)
+;-> ((7 6 5 4 3 4 3 2 1) (1 2 3 4 3 4 5 6 7))
+
+(setq L5 '(1 2 2 3 3 3 4 4 4))
+(ordina-delta L5 1)
+;-> ((2 1 2 3 4 3 4 3 4) (4 3 2 1 2 3 4 3 4)
+;->  (4 3 4 3 2 1 2 3 4) (4 3 4 3 4 3 2 1 2))
 
 ============================================================================
 
