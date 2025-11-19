@@ -1891,5 +1891,213 @@ Scriviamo un addizionatore BCD con N addendi:
 
 Vedi anche "Codifica BCD (Binary-Coded Decimal)" su "Note libere 26".
 
+
+----------------------
+Legge di Weber-Fechner
+----------------------
+
+Ernst Heinrich Weber (1795-1878)
+Gustav Theodor Fechner (1801-1887)
+La legge di Weber-Fechner, è un principio fondamentale della psicofisica che descrive come la nostra percezione di una variazione in uno stimolo dipenda dall'intensità iniziale di quello stimolo.
+In sintesi, afferma che la soglia differenziale (la minima variazione percepibile) è una frazione costante del valore dello stimolo stesso, espressa dalla formula k = deltaR / R. 
+Questo significa che se lo stimolo è debole, anche una piccola variazione assoluta può essere percepita, mentre con stimoli più intensi, la variazione assoluta deve essere molto maggiore per essere notata.
+Quindi abbiamo una relazione proporzionale per cui l'aumento dello stimolo necessario per avvertire una differenza è proporzionale all'intensità dello stimolo iniziale.
+
+Esempio:
+Se tieni in mano un peso da 1kg e aggiungi 100g, noterai sicuramente il cambiamento.
+Se invece tieni in mano un peso da 10kg e aggiungi sempre 100g, è probabile che la differenza non venga percepita.
+La minima variazione percepibile viene chiamata "just-noticeable difference" o JND.
+
+Formula:
+La legge può essere espressa come k = deltaR / R,
+dove:
+  k è la costante di Weber (una costante che varia a seconda del senso, ad esempio vista, udito, tatto).
+  deltaR è la variazione dello stimolo necessaria affinché la differenza sia percepita (la soglia differenziale).
+  R è l'intensità dello stimolo iniziale.
+
+Applicazioni e implicazioni:
+Percezione sensoriale: Spiega perché i nostri sensi non percepiscono le variazioni in modo lineare, ma logaritmico, come formulato nella successiva legge di Weber-Fechner: S = k*log(I).
+
+Psicologia: È un pilastro della psicologia sperimentale e della psicofisica, permettendo di studiare e quantificare la relazione tra stimoli fisici e sensazioni soggettive.
+
+Economia: È stata estesa al concetto di utilità marginale decrescente in economia: l'incremento di utilità derivante da un bene diminuisce all'aumentare della sua quantità già posseduta.
+
+Vediamo un esempio visivo.
+
+Scriviamo una funzione che genera una matrice binaria MxN con K valori a 1.
+
+; Funzione che genera una matrice binaria random con K valori a 1
+(define (random-binary-matrix M N K)
+  (letn ( (matrix (array-list (array M N '(0))))
+          (tot (* M N))
+          (posizioni (randomize (sequence 0 (- tot 1))))
+          (p 0) (r 0) (c 0) )
+    (if (> K tot) nil ; celle < numero di 1 da inserire --> impossibile
+    ;else
+      (for (i 0 (- K 1))
+        (setq p (posizioni i))
+        (setq r (/ p N))
+        (setq c (% p N))
+        (setf (matrix r c) 1))
+      matrix)))
+
+(define (print-grid grid ch0 ch1 coord)
+"Print a matrix with only digits (0..9)"
+  (local (row col)
+    (setq row (length grid))
+    (setq col (length (first grid)))
+    ; indici di colonna della griglia
+    (if coord
+        (println "  " (join (map (fn(x) (format "%2d" x)) (sequence 0 (- col 1))))))
+    (for (i 0 (- row 1))
+      ; indice di riga della griglia
+      (if coord (print (format "%2d" i)))
+      ; stampa della griglia
+      (for (j 0 (- col 1))
+        (if (and (!= ch0 "") (!= ch1 ""))
+            (begin
+              (cond ((= (grid i j) 0) (print ch0))
+                    ((= (grid i j) 1) (print ch1))
+                    (true
+                      (print (format "%2d" (grid i j))))))
+            ;else
+            (print (format "%2d" (grid i j)))))
+      (println))))
+
+Poi generiamo 4 matrici nel modo seguente:
+0) Definiamo M e N (uguali per tutte le matrici) (es. 18x18)
+1) la prima matrice contiene K celle con valore 1 (es. K = 8)
+Questa matrice contiene 8 celle con valore 1.
+2) la seconda matrice contiene (+ K delta) celle con valore 1 (es. delta = 10)
+Questa matrice contiene 18 celle con valore 1.
+3) la terza matrice contiene K celle con valore 1 (es. K = 100)
+Questa matrice contiene 100 celle con valore 1.
+4) la quarta matrice contiene (+ K delta) celle con valore 1 (es. delta = 10)
+Questa matrice contiene 110 celle con valore 1.
+
+(setq m1 (random-binary-matrix 18 18 8))
+(setq m2 (random-binary-matrix 18 18 18))
+(setq m3 (random-binary-matrix 18 18 100))
+(setq m4 (random-binary-matrix 18 18 110))
+
+Adesso stampiamo e confrontiamo le matrici 1 e 2:
+
+(print-grid m1 "  " " *" true)
+(print-grid m2 "  " " *" true)
+
+   0 1 2 3 4 5 6 7 8 91011121314151617      0 1 2 3 4 5 6 7 8 91011121314151617
+ 0                                        0             *
+ 1                                        1   *
+ 2                                        2
+ 3                                        3         *
+ 4           *                   *        4                 *     *
+ 5                             *          5
+ 6                                        6       *
+ 7                       *                7           *                       *
+ 8                                        8
+ 9                         *              9       *                     *
+10                                       10   *
+11     *                                 11           *
+12                                       12
+13                                       13
+14                                       14 *
+15           *                           15 *
+16                                       16     *             *         *
+17     *                                 17 *
+
+Si riesce chiaramente a percepire che gli asterischi "*" della matrice 2 sono in numero maggiore.
+
+Adesso stampiamo confrontiamo le matrici 3 e 4:
+
+(print-grid m3 "  " " *" true)
+(print-grid m4 "  " " *" true)
+
+   0 1 2 3 4 5 6 7 8 91011121314151617      0 1 2 3 4 5 6 7 8 91011121314151617
+ 0 * * *   *     *           *            0     *         * *   *   *
+ 1               * * *   *   *     *      1           *     *   *   *   * *
+ 2   *   *           *     * *     * *    2       *     * *   * * *       * *
+ 3           * *     * * * * *       *    3 *         * *   *   * * * *     *
+ 4       * *                         *    4   *           *         *   *
+ 5 * *             *     *                5 *     *   *       *       *
+ 6   * * *   * *     *                    6 *       *     *   *   * * *
+ 7       *     *     *           * * *    7 *   *             * *   *   * * *
+ 8 *             *           *            8 *   *   *         * * *
+ 9     * * *         *                    9 *     *   *                   *
+10     *             *               *   10 *   *       *       *     *     * *
+11       *   * *         *     * * *     11       *   *     *   *   * *
+12     *       * *         * * *         12 *         *         *
+13           * *               *     *   13 * *                     * * *   *
+14             * *     * *     * *   *   14 *           * * *         *   *   *
+15       *     * * *         * * *   *   15                   * *           * *
+16     *     *           * * *           16   *   * *   *     * * * * * *
+17       *     *       *   * * *   *     17 *                 * *   *         *
+
+Questa volta è più difficile stabilire quale matrice ha più asterischi "*".
+
+
+-----------------------------------------------
+Matrici binarie random e indicizzazione lineare
+-----------------------------------------------
+
+Scriviamo una funzione che può generare due tipi di matrici binarie random:
+1) una matrice binaria random
+2) una matrice binaria random con k celle a 1
+
+Per inserire gli 1 in modo casuale nella matrice utilizziamo l'indicizzazione lineare degli elementi di una lista di posizioni casuali:
+1) generiamo una sequenza casuale con numeri che vanno da 0 a (rows*cols - 1)
+(es. (8 2 6 7 3 9 0 1 5 4))
+2) prendiamo i primi k valori della sequenza
+(es k = 4 --> (8 2 6 7))
+3) per ogni valore x della sequenza calcoliamo il relativo indice nella matrice con le seguenti formule:
+   Indice-riga    = x / cols
+   Indice-colonna = x % cols
+4) Inseriamo 1 nella cella (Indice-riga Indice-colonna)
+
+L'indicizzazione lineare -> (riga, colonna) funziona così:
+Data una matrice è M x N, con M = numero di righe e N = numero di colonne,
+Allora, data una posizione lineare 'p' (0-based):
+  Indice di riga    = p / N
+  Indice di colonna = p % N
+Questo perché ogni riga contiene N elementi e quindi ogni blocco di lunghezza N corrisponde a una riga.
+
+; Funzione che genera una matrice binaria casuale (rows x cols) (opzionale: con k celle a 1)
+; Parametri:
+; <rows> numero di righe (intero)
+; <cols> numero di colonne (intero)
+; <k> numero di celle a 1 (intero)
+; Output: matrice binaria (list of lists)
+(define (random-binary-matrix rows cols k)
+  (let ( (matrix '())
+         (posizioni '())
+         (tot (* rows cols))
+         (p 0) (r 0) (c 0) )
+    (cond ((nil? k) ; matrice random binaria
+            (array-list (array rows cols (rand 2 tot))))
+          ((> k tot) nil) ; (celle a 1) > celle --> impossibile
+          (true ; matrice random binaria con k celle a 1
+            (setq matrix (array-list (array rows cols '(0))))
+            ; posizioni lineari random degli 1
+            (setq posizioni (slice (randomize (sequence 0 (- tot 1))) 0 k))
+            ; Inserimento degli 1 (k)
+            (dolist (p posizioni)
+              ; indicizzazione lineare
+              (setq r (/ p cols))
+              (setq c (% p cols))
+              (setf (matrix r c) 1))
+            matrix))))
+
+Proviamo:
+
+(random-binary-matrix 4 4)     
+;-> ((0 1 1 1) (1 0 0 0) (1 1 0 0) (1 0 0 0))
+(random-binary-matrix 5 5 10)  
+;-> ((0 0 0 0 1) (0 0 1 0 1) (0 0 0 0 1) (0 0 1 1 1) (0 0 1 1 1))
+(random-binary-matrix 3 3 0)
+;-> ((0 0 0) (0 0 0) (0 0 0))
+(random-binary-matrix 3 3 10)
+;-> nil
+(random-binary-matrix 3 3 9)
+;-> ((1 1 1) (1 1 1) (1 1 1))
+
 ============================================================================
 

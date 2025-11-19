@@ -3300,6 +3300,8 @@ NOTE LIBERE 34
   49 monete d'oro
   Diagonalizzare una lista in una matrice
   Numeri BCD
+  Legge di Weber-Fechner
+  Matrici binarie random e indicizzazione lineare
 
 PROBLEMI SUI DADI
 =================
