@@ -2250,5 +2250,147 @@ Proviamo:
 ;-> ((2 1 2 3 4 3 4 3 4) (4 3 2 1 2 3 4 3 4)
 ;->  (4 3 4 3 2 1 2 3 4) (4 3 4 3 4 3 2 1 2))
 
+
+---------------------------------------------------------------
+Numeri divisibili/non-divisibili dal numero di fattori distinti
+---------------------------------------------------------------
+
+Sequenza OEIS A075592:
+Numbers n such that number of distinct prime divisors of n is a divisor of n.
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 22, 23,
+  24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 36, 37, 38, 40, 41, 42, 43, 44,
+  46, 47, 48, 49, 50, 52, 53, 54, 56, 58, 59, 60, 61, 62, 64, 66, 67, 68,
+  71, 72, 73, 74, 76, 78, 79, 80, 81, 82, 83, 84, 86, 88, 89, 90, ...
+
+(define (a075592 limite)
+  (let (out '())
+    (for (num 2 limite)
+      (if (zero? (% num (length (unique (factor num)))))
+        (push num out -1)))
+    out))
+
+(a075592 90)
+;-> (2 3 4 5 6 7 8 9 10 11 12 13 14 16 17 18 19 20 22 23
+;->  24 25 26 27 28 29 30 31 32 34 36 37 38 40 41 42 43 44
+;->  46 47 48 49 50 52 53 54 56 58 59 60 61 62 64 66 67 68
+;->  71 72 73 74 76 78 79 80 81 82 83 84 86 88 89 90)
+
+Sequenza OEIS A185307:
+Numbers not divisible by the number of their distinct prime factors.
+  1, 15, 21, 33, 35, 39, 45, 51, 55, 57, 63, 65, 69, 70, 75, 77, 85, 87,
+  91, 93, 95, 99, 110, 111, 115, 117, 119, 123, 129, 130, 133, 135, 140,
+  141, 143, 145, 147, 153, 154, 155, 159, 161, 170, 171, 175, 177, 182,
+  183, 185, 187, 189, 190, 201, 203, 205, 207, 209, ...
+
+(define (a185307 limite)
+  (let (out '(1))
+    (for (num 2 limite)
+      (if-not (zero? (% num (length (unique (factor num)))))
+        (push num out -1)))
+    out))
+
+(a185307 209)
+;-> (1 15 21 33 35 39 45 51 55 57 63 65 69 70 75 77 85 87
+;->  91 93 95 99 110 111 115 117 119 123 129 130 133 135 140
+;->  141 143 145 147 153 154 155 159 161 170 171 175 177 182
+;->  183 185 187 189 190 201 203 205 207 209)
+
+Sequenza OEIS A074946:
+Positive integers n for which the sum of the prime-factorization exponents of n (bigomega(n) = A001222(n)) divides n.
+  2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 16, 17, 18, 19, 22, 23, 24, 26, 27,
+  29, 30, 31, 34, 36, 37, 38, 40, 41, 42, 43, 45, 46, 47, 53, 56, 58, 59,
+  60, 61, 62, 63, 66, 67, 71, 73, 74, 75, 78, 79, 80, 82, 83, 84, 86, 88,
+  89, 94, 96, 97, 99, 100, 101, 102, 103, 104, 105, 106, ...
+
+(define (a074946 limite)
+  (let (out '())
+    (for (num 2 limite)
+      (setq fattori (factor num))
+      (setq somma (apply + (flat (count (unique fattori) fattori))))
+      (if (zero? (% num somma))
+        (push num out -1)))
+    out))
+
+(a074946 106)
+;-> (2 3 4 5 6 7 10 11 12 13 14 16 17 18 19 22 23 24 26 27
+;->  29 30 31 34 36 37 38 40 41 42 43 45 46 47 53 56 58 59
+;->  60 61 62 63 66 67 71 73 74 75 78 79 80 82 83 84 86 88
+;->  89 94 96 97 99 100 101 102 103 104 105 106)
+
+
+------------------------------------------------
+Massimo numero di elementi per sequenze sum-free
+------------------------------------------------
+
+Data una sequenza di interi da 1 a N, calcolare la lista sum-free con il numero massimo di elementi.
+Una lista è sum-free se nessuna coppia di numeri (non necessariamente distinti) somma ad un numero contenuto nella lista.
+
+Soluzione brute-force
+---------------------
+
+Algoritmo
+1) Creazione del powerset della lista (lista di tutte le sottoliste)
+2) Ciclo per ogni elemento del powerset
+   2.1 verifica sum-free
+   2.2 eventuale aggiornamento della soluzione (lista più grande)
+
+(define (powerset-i lst)
+"Generate all sublists of a list (binary mask)"
+  (if (= lst '()) lst
+  ;else
+      (let ((out '(())) (n (length lst)) (group '()))
+        (for (mask 1 (- (<< 1 n) 1))
+          (setq group '())
+          (for (i 0 (- n 1))
+            (if (!= (& mask (<< 1 i))) (push (lst i) group -1)))
+          (push group out -1))
+        out)))
+
+(define (sum-free? lst)
+"Check if a list is sum-free (no pair of numbers (not necessarily distinct) sums to a number in the list)"
+  (let (out nil)
+    (dolist (el1 lst out)
+      (dolist (el2 lst out)
+        (if (find (+ el1 el2) lst) (setq out true))))
+    (not out)))
+
+(define (list-max N)
+  (setq max-len 0)
+  (setq seq (sequence 1 N))
+  (setq ps (powerset-i seq))
+  (dolist (el ps)
+    (if (sum-free? el)
+      (when (> (length el) max-len)
+        (setq max-len (length el))
+        (setq out el))))
+  out)
+
+Proviamo:
+
+(list-max 5)
+;-> (1 3 5)
+
+(list-max 10)
+;-> (1 3 5 7 9)
+
+(time (println (list-max 20)))
+;-> (1 3 5 7 9 11 13 15 17 19)
+;-> 3828.755
+
+Soluzione ragionata
+-------------------
+Sappiamo che un numero dispari più un numero dispari dà sempre come risultato un numero pari.
+Consideriamo il sottoinsieme di tutti i numeri dispari D = (1 3 5 ...).
+L'addizione di un qualsiasi numero pari comporterebbe una violazione delle regole (lista non sum-free), quindi il numero massimo di elementi della lista è dato da quanti numeri dispari esistono nella sequenza (1..N).
+
+(define (list-max2 N) (sequence 1 N 2))
+
+(list-max2 5)
+;-> (1 3 5)
+(list-max2 10)
+;-> (1 3 5 7 9)
+(list-max2 20)
+;-> (1 3 5 7 9 11 13 15 17 19)
+
 ============================================================================
 

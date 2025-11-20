@@ -3304,6 +3304,8 @@ NOTE LIBERE 34
   Matrici binarie random e indicizzazione lineare
   The first, the last, and everything between
   Ordinare un set con differenza costante tra i numeri adiacenti
+  Numeri divisibili/non-divisibili dal numero di fattori distinti
+  Massimo numero di elementi per sequenze sum-free
 
 PROBLEMI SUI DADI
 =================
@@ -3351,7 +3353,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (380 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (382 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
