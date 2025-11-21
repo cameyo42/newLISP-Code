@@ -3306,6 +3306,7 @@ NOTE LIBERE 34
   Ordinare un set con differenza costante tra i numeri adiacenti
   Numeri divisibili/non-divisibili dal numero di fattori distinti
   Massimo numero di elementi per sequenze sum-free
+  Sequenza di parole che genera palindromi
 
 PROBLEMI SUI DADI
 =================

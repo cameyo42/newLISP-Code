@@ -2392,5 +2392,60 @@ L'addizione di un qualsiasi numero pari comporterebbe una violazione delle regol
 (list-max2 20)
 ;-> (1 3 5 7 9 11 13 15 17 19)
 
+
+----------------------------------------
+Sequenza di parole che genera palindromi
+----------------------------------------
+
+Una parola (stringa) è palindroma se si legge allo stesso modo sia in avanti che al contrario.
+Definiamo una sequenza di parole nel modo seguente:
+
+  w(0) = "0"
+  w(1) = "1"
+  w(n) = w(n-2) + w(n-1),
+  dove il segno '+' rappresenta l'unione delle due stringhe
+
+Per n >= 1 la parola formata dall'unione di w(1), w(2), ... w(n) è palindroma.
+
+Scriviamo la funzione che genera la sequenza di parole:
+
+(letn ((out (array 10 '(0))) ((out 0) -1)))
+
+(define (parole limite)
+  (let ((out (array (+ limite 1) '(0))))
+    (setf (out 0) "0")
+    (setf (out 1) "1")
+    (for (i 2 limite) (setf (out i) (append (out (- i 2)) (out (- i 1)))))
+    out))
+
+(setq seq (parole 10))
+;-> ("0" "1" "01" "101" "01101" "10101101" "0110110101101"
+;->  "101011010110110101101" "0110110101101101011010110110101101"
+;->  "1010110101101101011010110110101101101011010110110101101" 
+;->  "01101101011011010110101101101011011010110101101101011010
+;->   110110101101101011010110110101101")
+
+Nota:
+; (setq seq (parole 50))
+;-> ERR: not enough memory
+
+Adesso scriviamo la funzione che genera palindromi dalla sequenza:
+
+(define (pali n)
+  (let (out "")
+    (for (i 1 n)
+      (extend out (seq i)))))
+
+(map pali (sequence 1 6))
+;-> ("1" "101" "101101" "10110101101" "1011010110110101101"
+;->  "10110101101101011010110110101101")
+
+Verifichiamo:
+
+(define (palindrome? str) (= str (reverse (copy str))))
+
+(map palindrome? (map pali (sequence 1 6)))
+;-> (true true true true true true)
+
 ============================================================================
 
