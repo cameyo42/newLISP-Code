@@ -3307,6 +3307,7 @@ NOTE LIBERE 34
   Numeri divisibili/non-divisibili dal numero di fattori distinti
   Massimo numero di elementi per sequenze sum-free
   Sequenza di parole che genera palindromi
+  Prodotti di cifre divisibili per 10
 
 PROBLEMI SUI DADI
 =================

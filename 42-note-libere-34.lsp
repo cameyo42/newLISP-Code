@@ -1899,7 +1899,7 @@ Legge di Weber-Fechner
 Ernst Heinrich Weber (1795-1878)
 Gustav Theodor Fechner (1801-1887)
 La legge di Weber-Fechner, è un principio fondamentale della psicofisica che descrive come la nostra percezione di una variazione in uno stimolo dipenda dall'intensità iniziale di quello stimolo.
-In sintesi, afferma che la soglia differenziale (la minima variazione percepibile) è una frazione costante del valore dello stimolo stesso, espressa dalla formula k = deltaR / R. 
+In sintesi, afferma che la soglia differenziale (la minima variazione percepibile) è una frazione costante del valore dello stimolo stesso, espressa dalla formula k = deltaR / R.
 Questo significa che se lo stimolo è debole, anche una piccola variazione assoluta può essere percepita, mentre con stimoli più intensi, la variazione assoluta deve essere molto maggiore per essere notata.
 Quindi abbiamo una relazione proporzionale per cui l'aumento dello stimolo necessario per avvertire una differenza è proporzionale all'intensità dello stimolo iniziale.
 
@@ -2088,9 +2088,9 @@ Questo perché ogni riga contiene N elementi e quindi ogni blocco di lunghezza N
 
 Proviamo:
 
-(random-binary-matrix 4 4)     
+(random-binary-matrix 4 4)
 ;-> ((0 1 1 1) (1 0 0 0) (1 1 0 0) (1 0 0 0))
-(random-binary-matrix 5 5 10)  
+(random-binary-matrix 5 5 10)
 ;-> ((0 0 0 0 1) (0 0 1 0 1) (0 0 0 0 1) (0 0 1 1 1) (0 0 1 1 1))
 (random-binary-matrix 3 3 0)
 ;-> ((0 0 0) (0 0 0) (0 0 0))
@@ -2118,7 +2118,7 @@ L'ordine dell'intervallo deve essere lo stesso dell'input.
         (true
           ; genera la sequenza con i due numeri estremi compresi
           (setq seq (sequence a b))
-          ; sposta l'ultimo numero della sequenza in seconda posizione 
+          ; sposta l'ultimo numero della sequenza in seconda posizione
           ; cioè dopo il primo numero --> indice 1
           (push (pop seq -1) seq 1)
           seq)))
@@ -2178,7 +2178,7 @@ In definitiva, dopo aver ordinato la lista basta controllare se la sequenza cost
 ; ci sia sempre un differenza pari a k
 (define (sort-delta lst k)
   (sort lst)
-  (for-all (fn(x) (= x k)) 
+  (for-all (fn(x) (= x k))
             (map (fn(x y) (abs (- x y))) (chop lst) (rest lst))))
 
 (setq L1 '(1 3 5 7))
@@ -2222,7 +2222,7 @@ Comunque la lista da ordinare non deve superare i 10 elementi.
   (let ( (out '())
          (permute (perm lst)) )
        (dolist (p permute)
-         (if (for-all (fn(x) (= x k)) 
+         (if (for-all (fn(x) (= x k))
                       (map (fn(x y) (abs (- x y))) (chop p) (rest p)))
              (push p out)))
        (unique out)))
@@ -2421,7 +2421,7 @@ Scriviamo la funzione che genera la sequenza di parole:
 (setq seq (parole 10))
 ;-> ("0" "1" "01" "101" "01101" "10101101" "0110110101101"
 ;->  "101011010110110101101" "0110110101101101011010110110101101"
-;->  "1010110101101101011010110110101101101011010110110101101" 
+;->  "1010110101101101011010110110101101101011010110110101101"
 ;->  "01101101011011010110101101101011011010110101101101011010
 ;->   110110101101101011010110110101101")
 
@@ -2446,6 +2446,147 @@ Verifichiamo:
 
 (map palindrome? (map pali (sequence 1 6)))
 ;-> (true true true true true true)
+
+
+-----------------------------------
+Prodotti di cifre divisibili per 10
+-----------------------------------
+
+Dato un generatore di numeri casuali da 1 a 9 (con la stessa probabilità), determinare la probabilità che dopo aver generato n numeri (con n > 1) il loro prodotto sia divisibile per 10.
+
+1) Soluzione con simulazione
+----------------------------
+
+(define (simula prove n)
+  (let (conta 0)
+    (for (p 1 prove)
+      (if (zero? (% (apply * (map (fn(x) (+ x 1)) (rand 9 n))) 10))
+          (++ conta)))
+    (div conta prove)))
+
+(simula 1e6 2)
+;-> 0.098401
+
+(map (curry simula 1e6) (sequence 2 10))
+;-> (0.09850299999999999 0.2138 0.318995 0.409833 0.48421
+;->  0.548634 0.602352 0.648996 0.689505)
+
+2) Soluzione matematica
+-----------------------
+
+Principio di complementarità
+----------------------------
+Quando vogliamo calcolare la probabilità di un evento A, a volte è molto più facile calcolare la probabilità dell'evento opposto not(A) (cioè l'evento che A non accada).
+Il principio di complementarità dice:
+
+  P(A) = 1 - P(not(A))
+
+In questo caso:
+- A = "il prodotto è divisibile per 10"
+- not(A) = "il prodotto non è divisibile per 10"
+
+Quando il prodotto non è divisibile per 10?
+Quando manca almeno uno dei due fattori necessari: il 2 o il 5.
+Quindi:
+
+  P(A) = 1 - P("manca almeno un fattore tra 2 e 5")
+
+Principio di inclusione–esclusione
+----------------------------------
+L'evento: "manca almeno un fattore tra 2 e 5"
+è l'unione di due eventi:
+
+  E2 = "manca il 2"
+  E5 = "manca il 5"
+
+Quindi vogliamo calcolare:
+
+  P(E2 unito E5)
+
+Il principio di inclusione–esclusione dice:
+
+  P(E2 unito E5) = P(E2) + P(E5) - P(E2 intersezione E5)
+
+Il motivo è semplice:
+- Se sommiamo P(E2)) e P(E5), l'evento in cui mancano entrambi (cioè (E2 unito E5)) viene contato due volte.
+- Quindi bisogna sottrarlo una volta.
+
+Quindi nel nostro problema:
+
+1) Probabilità che non compaia nessun 5:
+
+  P(E5) = (8/9)^n, (i numeri possibili sono 1,2,3,4,6,7,8,9)
+
+2) Probabilità che non compaia nessun 2:
+
+  P(E2) = (5/9)^n, (i numeri possibili sono 1,3,5,7,9)
+
+3) Probabilità che non compaiano né 2 né 5:
+
+  P(E2 intersezione E5) = (4/9)^2, (i numeri possibili sono 1,3,7,9)
+
+4) Probabilità che manca il 2 o manca il 5 --> P(E2 unito E5)
+
+  P(E2 unito E5) = (8/9)^n + (5/9)^n - (4/9)^n
+
+Infine, per complementarità, la probabilità che il prodotto sia divisibile per 10 vale:
+
+  P("prodotto sia divisibile per 10") = 1 - P(E2 unito E5) =
+  = 1 - (8/9)^n - (5/9)^n + (4/9)^n
+
+Spiegazione breve
+Affinché il prodotto sia divisibile per 10, deve contenere un fattore 2 e un fattore 5.
+La probabilità che non ci sia 5 (1 2 3 4 6 7 8 9) vale (8/9)^n.
+La probabilità che non ci sia 2 (1 3 5 7 9) vale (5/9)^n.
+La probabilità che non ci sia né 2 né 5 (1 3 7 9) vale (4/9)^n.
+L'unica possibilità rimasta è ottenere un 2 e un 5, rendendo il prodotto divisibile per 10.
+Per complementarità e principio di inclusione-esclusione, questa la probabilità vale:
+
+  P("prodotto sia divisibile per 10") = 1 - (8/9)^n - (5/9)^n + (4/9)^n
+
+(define (prob n)
+  (sub 1 (pow (div 8 9) n) (pow (div 5 9) n) (sub (pow (div 4 9) n))))
+
+(map prob (sequence 2 10))
+;-> (0.09876543209876543 0.2139917695473251 0.319463496418229
+;->  0.40949042320784450 0.4850359682448288 0.5486291046419076
+;->  0.60270365308428490 0.6491958663549156 0.6895538271051249)
+
+Vediamo una funzione che restituisce la probabilità come frazione (num e den):
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (prob-rat n)
+  (local (a b c den num)
+    (setq a (** 8 n))
+    (setq b (** 5 n))
+    (setq c (** 4 n))
+    (setq den (** 9 n))
+    (setq num (- den a b (- c)))
+    (list num den)))
+
+(map prob-rat (sequence 2 10))
+;-> ((8L 81L) (156L 729L) (2096L 6561L) (24180L 59049L) (257768L 531441L)
+;->  (2624076L 4782969L) (25944416L 43046721L) (251511780L 387420489L)
+;->  (2404325528L 3486784401L))
+
+(map (fn(x) (div (x 0) (x 1))) (map prob-rat (sequence 2 10)))
+;-> (0.09876543209876543 0.2139917695473251 0.3194634964182289
+;->  0.40949042320784440 0.4850359682448287 0.5486291046419076
+;->  0.60270365308428490 0.6491958663549154 0.6895538271051248)
+
+Vediamo le differenze tra i due risultati (simulazione e formula)
+
+(map sub (map (curry simula 1e6) (sequence 2 10))
+         (map prob (sequence 2 10)))
+;-> (0.0004445679012345799 -0.0003717695473251237 0.0002705035817709978
+;->  -0.0002204232078444335 -0.0006499682448288247 0.000309895358092338
+;->  -0.0003386530842848234 0.0006691336450844743 0.0007901728948750408)
 
 ============================================================================
 
