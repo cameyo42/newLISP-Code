@@ -101,7 +101,7 @@ newLISP is a registered trademark of Lutz Mueller.
     Funzioni con codice auto-modificante
 
 10. ELABORAZIONE DEL TESTO
--------------------
+--------------------------
     Espressioni regolari
     Scansione del testo
     Aggiunta di stringhe

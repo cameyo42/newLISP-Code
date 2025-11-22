@@ -2627,5 +2627,176 @@ Metodo 2 (bit manipulation)
 (map complement2 (sequence 0 10))
 ;-> (1 0 1 0 3 2 1 0 7 6 5)
 
+Test di correttezza:
+
+(setq t (rand 1e3 1e3))
+(= (map complement1 t) (map complement1 t))
+;-> true
+
+Test di velocità:
+
+(time (map complement1 t) 100)
+;-> 187.447
+(time (map complement2 t) 100)
+;-> 31.234
+
+
+------------
+Matrioske 3D
+------------
+
+Abbiamo una collezione di oggetti tridimensionali, ciascuno descritto da tre valori positivi:
+
+  (x y z)
+
+che rappresentano altezza, larghezza e profondità.
+Un oggetto può essere inserito in un altro se e solo se tutte e tre le dimensioni sono minori dell'oggetto "contenitore".
+L'obiettivo è trovare la catena più lunga di oggetti inseriti uno dentro l'altro, cioè costruire una matrioska 3D massima.
+
+Analisi
+-------
+1. Rotazioni degli oggetti:
+Un oggetto può essere ruotato, quindi possiamo ordinare le sue dimensioni internamente in modo crescente.
+In questo modo (3 2 7) diventa (2 3 7) e tutte le possibili rotazioni sono considerate.
+
+2. Comparazione tra oggetti:
+Per sapere se un oggetto `A` può entrare in `B`, dobbiamo confrontare tutte e tre le dimensioni:
+  A.x < B.x AND A.y < B.y AND A.z < B.z
+Non è sufficiente guardare solo una dimensione (come nella versione 2D), perché potrebbero verificarsi conflitti tra le dimensioni.
+
+3. Ordinamento iniziale:
+Ordinare gli oggetti può essere utile per rendere più efficiente la ricerca della catena, ma nell'approccio generale 3D non basta ridurre il problema a una singola dimensione come nel caso delle buste 2D.
+È comunque utile ordinare le dimensioni interne degli oggetti e, se si vuole, fare un ordinamento lessicografico iniziale per garantire coerenza.
+
+Algoritmo
+---------
+1. Normalizzazione degli oggetti
+- Per ogni oggetto, ordiniamo le tre dimensioni internamente in ordine crescente.
+- Questo permette di considerare tutte le rotazioni possibili senza doverle enumerare esplicitamente.
+2. Dynamic programming per 3D
+- Per risolvere il problema, si utilizza una tecnica simile alla Longest Increasing Subsequence (LIS), ma estesa a 3 dimensioni.
+- Per ogni oggetto i nella lista ordinata, si considera la catena più lunga terminante in i:
+  1. Si confrontano tutti gli oggetti j precedenti (j < i).
+  2. Si verifica se tutte e tre le dimensioni di j sono minori di quelle di i.
+  3. Se sì, la catena che termina in j può essere estesa aggiungendo i.
+  4. Si mantiene la catena più lunga possibile.
+- Questo garantisce che ogni oggetto nella catena può essere inserito nel successivo.
+3. Ricostruzione della catena
+- Durante la procedura, si mantiene un array dei **predecessori** per ogni oggetto.
+- Alla fine, risalendo dagli oggetti con lunghezza massima della catena, si può ricostruire l'intera sequenza di oggetti.
+
+Note:
+a) Non si può ridurre a una LIS su una sola dimensione**.
+- Questo funziona in 2D perché basta ordinare larghezza e altezza in modo particolare.
+- In 3D, una LIS su una dimensione potrebbe selezionare oggetti incompatibili in altre dimensioni.
+b) La normalizzazione è fondamentale.
+- Garantisce che ogni oggetto sia rappresentato nella forma ottimale e tutte le rotazioni siano considerate.
+c) Complessità temporale O(n^2)
+- Con n oggetti, si confrontano tutti i precedenti per ogni oggetto, quindi la complessità è quadratica in numero di oggetti (gestibile per centinaia o poche migliaia di oggetti).
+
+Esempio:
+  Oggetti iniziali: (3 2 7) (4 5 1) (6 9 2) (3 8 1)
+  Normalizziamo internamente: (2 3 7) (1 4 5) (2 6 9) (1 3 8)
+  Confrontiamo tutte le triple secondo le regole:
+  - (1 3 8) --> può essere primo della catena
+  - (1 4 5) --> non può entrare in (1 3 8)
+  - (2 3 7) --> non può entrare in (1 3 8)
+  - (2 6 9) --> può entrare dopo (1 3 8)
+  Catena massima: ((1 3 8) (2 6 9))
+  - Lunghezza = 2
+  - Tutti gli oggetti rispettano il vincolo "tutte le dimensioni minori"
+
+; Confronto lessicografico su triple normalizzate (può essere utile per ordinare inizialmente)
+; Ordinamento lessicografico:
+; prima per dimensione 1 (crescente)
+; poi dimensione 2 (crescente)
+; poi dimensione 3 (decrescente)
+(define (cmp x y)
+  (if (= (first x) (first y))
+      (if (= (x 1) (y 1))
+          (>= (last x) (last y))
+          (<= (x 1) (y 1)))
+      (<= (first x) (first y))))
+
+; LIS 3D: calcola lunghezza massima e catena di oggetti incastrabili in 3 dimensioni
+(define (lis3D objs)
+  (local (len vet prev out last-idx)
+    ; calcola il numero di oggetti
+    (setq len (length objs))
+    ; vet[i] = lunghezza massima della catena terminante in i
+    (setq vet (array len '(1)))
+    ; prev[i] = indice del predecessore nella catena per ricostruzione
+    (setq prev (array len '(-1)))
+    ; out = lunghezza massima globale trovata finora
+    (setq out 1)
+    ; last-idx = indice dell'ultimo oggetto nella catena massima
+    (setq last-idx 0)
+    ; ciclo su ogni oggetto come potenziale termine di catena
+    (for (i 0 (- len 1))
+      ; ciclo sui precedenti per estendere la catena
+      (for (j 0 (- i 1))
+        (let ((a (objs j)) (b (objs i)))
+          ; verifica che tutte le dimensioni di a siano minori di b
+          (if (and (< (a 0) (b 0)) (< (a 1) (b 1)) (< (a 2) (b 2)))
+              ; se la catena terminante in j estesa con i è più lunga di quella attuale in i
+              (if (> (+ (vet j) 1) (vet i))
+                  (begin
+                    ; aggiorna lunghezza della catena terminante in i
+                    (setf (vet i) (+ (vet j) 1))
+                    ; registra il predecessore per ricostruire la catena
+                    (setf (prev i) j))))))
+      ; aggiorna la lunghezza massima globale se necessario
+      (if (> (vet i) out)
+          (begin
+            (setq out (vet i))
+            (setq last-idx i))))
+    ; ricostruzione della catena completa partendo dall'ultimo elemento
+    (setq chain '())
+    (while (>= last-idx 0)
+      (push (objs last-idx) chain)
+      (setq last-idx (prev last-idx)))
+    ; restituisce una lista con lunghezza massima, lista delle terze dimensioni e catena completa
+    (list out (map last chain) chain)))
+
+; Funzione MATRIOSKA 3D
+(define (matrioska3D objs)
+  (local (norm sorted third result)
+    ; 1) normalizzazione interna delle triple (gestione rotazioni)
+    (setq norm (map sort objs))
+    ; 2) ordinamento globale (facoltativo, ma mantiene ordine coerente)
+    (setq sorted (sort norm cmp))
+    ; 3) applica LIS 3D
+    (setq result (lis3D sorted))
+    result))
+
+Proviamo:
+
+(matrioska3D '((3 2 7) (4 5 1) (6 9 2) (3 8 1)))
+;-> (2 (8 9) ((1 3 8) (2 6 9)))
+(matrioska3D '((2 3 7) (1 4 5) (2 6 9) (1 3 8)))
+;-> (2 (8 9) ((1 3 8) (2 6 9)))
+(matrioska3D '((4 5 6) (1 2 3) (6 7 8) (9 10 11) (9 10 11)))
+;-> (4 (3 6 8 11) ((1 2 3) (4 5 6) (6 7 8) (9 10 11)))
+(matrioska3D '((4 5 7) (4 5 6) (1 2 3) (6 7 8) (9 10 11) (9 10 11)))
+;-> (4 (3 7 8 11) ((1 2 3) (4 5 7) (6 7 8) (9 10 11)))
+
+Ecco la versione corretta di 'verifica':
+(- n 1) al posto di n nel 'for'
+; Funziona che verifica l'output della funzione 'matrioska3D':
+(define (verifica risultato)
+  (letn ((objs (last risultato)) (ok true) (i 0) (n (- (length objs) 1)))
+    (for (i 0 (- n 1))
+      (let ((a (objs i)) (b (objs (+ i 1))))
+        (if (or (>= (a 0) (b 0))
+                (>= (a 1) (b 1))
+                (>= (a 2) (b 2)))
+            (setq ok false))))
+    ok))
+
+(verifica (matrioska3D '((4 5 7) (4 5 6) (1 2 3) (6 7 8) (9 10 11) (9 10 11))))
+;-> true
+
+Vedi anche "Buste Matrioska" su "Note libere 4".
+
 ============================================================================
 

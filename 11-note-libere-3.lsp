@@ -2784,11 +2784,11 @@ K = 50      50-imo carattere è "3"
 K = 190    190-imo carattere è "1"
 
 Possiamo risolvere questo problema spezzando la stringa in base ai seguenti criteri:
- I primi 9 decimali hanno lunghezza 1, poi 90 numeri sono di lunghezza 2, poi 900 numeri sono di lunghezza 3 e così via, quindi possiamo saltare questi numeri in base al dato K e poi ricavare il carattere cercato.
+I primi 9 decimali hanno lunghezza 1, poi 90 numeri sono di lunghezza 2, poi 900 numeri sono di lunghezza 3 e così via, quindi possiamo saltare questi numeri in base al dato K e poi ricavare il carattere cercato.
 
 La K-esima cifra sarà compresa tra 10^k e 10^(k + 1) per qualche k intero.
-Se la risposta non è compresa tra 10^m e 10^(m + 1) per il valore di m che stiamo
-attualmente verificando, aumentiamo m di 1 e sottraiamo la lunghezza dei numeri da 10^m a 10^(m + 1). Una volta trovata la potenza di 10 dove si trova il numero, tutti i numeri che dobbiamo controllare hanno "ordine" cifre, e possiamo usare la divisione intera per determinare il numero e poi estrarre il carattere con il modulo.
+Se la risposta non è compresa tra 10^m e 10^(m + 1) per il valore di m che stiamo attualmente verificando, aumentiamo m di 1 e sottraiamo la lunghezza dei numeri da 10^m a 10^(m + 1).
+Una volta trovata la potenza di 10 dove si trova il numero, tutti i numeri che dobbiamo controllare hanno "ordine" cifre, e possiamo usare la divisione intera per determinare il numero e poi estrarre il carattere con il modulo.
 
 Funzione che calcola la potenza intera di un numero intero:
 

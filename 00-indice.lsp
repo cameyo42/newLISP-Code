@@ -3309,6 +3309,7 @@ NOTE LIBERE 34
   Sequenza di parole che genera palindromi
   Prodotti di cifre divisibili per 10
   Complemento di un numero intero
+  Matrioske 3D
 
 PROBLEMI SUI DADI
 =================
@@ -3356,7 +3357,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (382 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (384 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
