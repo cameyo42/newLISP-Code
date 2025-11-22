@@ -2798,5 +2798,201 @@ Ecco la versione corretta di 'verifica':
 
 Vedi anche "Buste Matrioska" su "Note libere 4".
 
+
+----------------------
+Risolutore di rapporti
+----------------------
+
+Abbiamo una lista di coppie di stringhe:
+
+(setq coppie '(("a" "b") ("b" "c") ("x" "y") ("x" "a"))
+
+e una lista di valori:
+
+(setq values '(1.5 2.5 5.0 3.0))
+
+Queste due liste rappresentano i rapporti:
+
+  a/b = 1.5
+  b/c = 2.5
+  x/y = 5.0
+  x/a = 3.0
+
+Scrivere una funzione che date due stringhe calcola il loro rapporto.
+
+Esempi:
+(solve a c) --> 3.75
+  Spiegazione:
+  a/b * b/c = a/c = 1.5*2.5 = 3.75
+
+(solve b y) --> 1.11111111
+  Spiegazione:
+  a/b = 1.5 --> b = a/1.5
+  x/a = 3.0 --> x = 3.0*a
+  x/y = 5.0 --> y = x/5.0 --> y = a*3.0/5.0
+  Quindi:
+  b/y = (a/1.5)*(5.0/a*3.0) = 5 / 4.5 = 1.1111111
+
+Algoritmo
+---------
+Costruire un grafo orientato in cui ogni coppia genera due archi:
+  da A a B con peso A/B = v
+  da B a A con peso B/A = 1/v
+Poi fare una ricerca in profondità (DFS) accumulando il prodotto dei pesi fino ad arrivare al nodo di destinazione.
+
+(define (ratio-solver coppie valori a b)
+  ; L'algoritmo costruisce un grafo pesato orientato in memoria.
+  ; Ogni coppia (X Y) con valore V rappresenta l'equazione X/Y = V.
+  ; Da essa si derivano due archi:
+  ;   X -> Y con peso V
+  ;   Y -> X con peso 1/V
+  ; Questo permette di navigare il sistema anche "al contrario".
+  ; Una volta costruito il grafo, si cerca un percorso da 'a' a 'b'.
+  ; Il percorso rappresenta una catena di rapporti concatenati.
+  ; Il valore finale è il prodotto dei pesi lungo il percorso.
+  ; Se non esiste nessun percorso, i due nodi appartengono a componenti
+  ; disconnesse del grafo delle equazioni, quindi si restituisce nil.
+  ; Se le variabili 'a' o 'b' non esistono, restituisce nil.
+  (if (and (find a (flat coppie)) (find b (flat coppie))) ; controllo 'a' 'b'
+    (letn ((G '())  ; lista associativa del grafo
+          ; funzione locale: aggiunge due archi (diretto e reciproco)
+          (add-edge (lambda (x y v)
+                      (letn ((lx (lookup x G)) (ly (lookup y G)))
+                        (if (not lx) (push (list x '()) G -1))
+                        (if (not ly) (push (list y '()) G -1))
+                        (push (list y v) (lookup x G) -1)
+                        (push (list x (div 1 v)) (lookup y G) -1))))
+          )
+      ; --- COSTRUZIONE DEL GRAFO ---
+      ; Per ogni coppia usa il valore corrispondente con $idx
+      (dolist (p coppie)
+        (add-edge (p 0) (p 1) (valori $idx)))
+      ; --- RISOLUZIONE DEL RAPPORTO ---
+      ; Si usa DFS iterativa con uno stack.
+      ; Lo stack contiene coppie (nodo corrente, prodotto accumulato).
+      (letn ((stack (list (list a 1.0)))
+            (visited '())
+            result)
+        ; Cerca finché ci sono nodi da esplorare
+        (until (null? stack)
+          (letn ((curr (pop stack))
+                (node (curr 0))
+                (prod (curr 1)))
+            ; Se ho trovato il nodo target -> fine
+            (if (= node b)
+                (begin (setq result prod) (setq stack '()))
+                ; Altrimenti esploro i vicini non ancora visitati
+                (begin
+                  (push node visited)
+                  (dolist (nx (lookup node G))
+                    (let (next (nx 0))
+                      (if (not (ref next visited))
+                          (push (list next (mul prod (nx 1))) stack -1))))))))
+        ; Se non trovato -> nilL (grafi disconnessi)
+        result))))
+
+Proviamo:
+
+(setq coppie '(("a" "b") ("b" "c") ("x" "y") ("x" "a") ("d" "f")))
+(setq valori '(1.5 2.5 5.0 3.0 2.0))
+
+(ratio-solver coppie valori "a" "c")
+;-> 3.75
+(ratio-solver coppie valori "b" "y")
+;-> 1.111111111
+(ratio-solver coppie valori "c" "y")
+;-> 0.4444444444444444
+(ratio-solver coppie valori "f" "d")
+;-> 0.5
+(ratio-solver coppie valori "f" "a")
+;-> nil ; non esiste un percorso
+(ratio-solver coppie valori "z" "a")
+;-> nil ; non esiste una varibile ("z")
+
+Possiamo usare anche i simboli al posto delle stringhe:
+
+(setq coppie '((a b) (b c) (x y) (x a) (d f)))
+
+(ratio-solver coppie valori 'a 'c)
+;-> 3.75
+(ratio-solver coppie valori 'c 'y)
+;-> 0.4444444444444444
+(ratio-solver coppie valori 'f 'a)
+;-> nil ; non esiste un percorso
+(ratio-solver coppie valori 'f 'z)
+;-> nil ; non esiste una varibile (z)
+
+Vediamo una funzione con ricorsione pura (senza stack):
+
+(define (ratio-solver-R coppie valori a b)
+  ; L'algoritmo interpreta ogni equazione X/Y = V come un arco orientato
+  ; nel grafo: X -> Y con peso V, e il reciproco Y -> X con peso 1/V.
+  ; Per trovare il rapporto richiesto si cerca ricorsivamente un percorso
+  ; che porta da 'a' a 'b'. Ogni passo ricorsivo moltiplica il peso
+  ; dell'arco percorso per il valore accumulato finora.
+  ; La ricerca procede in profondità: ogni ramo rappresenta una possibile
+  ; concatenazione di rapporti. Se si raggiunge il nodo finale, il valore
+  ; accumulato rappresenta il rapporto desiderato.
+  ; Se non esiste alcun percorso, significa che le due variabili
+  ; appartengono a componenti disconnesse del sistema delle equazioni
+  ; -> la funzione restituisce nil.
+  ; Se le variabili 'a' o 'b' non esistono, restituisce nil.
+  (if (and (find a (flat coppie)) (find b (flat coppie))) ; controllo 'a' 'b'
+    (letn ((G '())
+          (visited '())
+          (finito nil)
+          (risultato nil)
+          (add-edge
+            (lambda (x y v)
+              (letn ((lx (lookup x G)) (ly (lookup y G)))
+                (if (not lx) (push (list x '()) G -1))
+                (if (not ly) (push (list y '()) G -1))
+                (push (list y v)           (lookup x G) -1)
+                (push (list x (div 1 v))   (lookup y G) -1))))
+          (dfs
+            (lambda (node target prod)
+              ; Se già trovato → non proseguire oltre
+              (if finito nil
+                  (if (= node target)
+                      ; trovato risultato → salva e blocca ulteriori ricorsioni
+                      (begin
+                        (setq risultato prod)
+                        (setq finito true))
+                      ; altrimenti continua la ricerca
+                      (begin
+                        (push node visited)
+                        (dolist (nx (lookup node G))
+                          (if finito (setq nx nx)    ; evita altri rami
+                              (letn ((next (nx 0))
+                                      (peso (nx 1)))
+                                (if (not (ref next visited))
+                                    (dfs next target (mul prod peso))))))))))))
+      ; Costruzione del grafo
+      (dolist (p coppie)
+        (add-edge (p 0) (p 1) (valori $idx)))
+      ; Avvia la DFS
+      (dfs a b 1.0)
+      ; Se mai trovato → risultato, altrimenti NIL
+      risultato)))
+
+Proviamo:
+
+(setq coppie '(("a" "b") ("b" "c") ("x" "y") ("x" "a") ("d" "f")))
+(setq valori '(1.5 2.5 5.0 3.0 2.0))
+
+(ratio-solver-R coppie valori "a" "c")
+;-> 3.75
+(ratio-solver-R coppie valori "b" "y")
+;-> 1.111111111
+
+(setq coppie '((a b) (b c) (x y) (x a) (d f)))
+
+(ratio-solver-R coppie valori 'a 'c)
+;-> 3.75
+(ratio-solver-R coppie valori 'f 'a)
+;-> nil
+(ratio-solver-R coppie valori 'f 'z)
+;-> nil
+
 ============================================================================
 

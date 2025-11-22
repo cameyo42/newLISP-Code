@@ -3310,6 +3310,7 @@ NOTE LIBERE 34
   Prodotti di cifre divisibili per 10
   Complemento di un numero intero
   Matrioske 3D
+  Risolutore di rapporti
 
 PROBLEMI SUI DADI
 =================
