@@ -3308,6 +3308,7 @@ NOTE LIBERE 34
   Massimo numero di elementi per sequenze sum-free
   Sequenza di parole che genera palindromi
   Prodotti di cifre divisibili per 10
+  Complemento di un numero intero
 
 PROBLEMI SUI DADI
 =================

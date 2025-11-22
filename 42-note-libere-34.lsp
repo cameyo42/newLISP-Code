@@ -2588,5 +2588,44 @@ Vediamo le differenze tra i due risultati (simulazione e formula)
 ;->  -0.0002204232078444335 -0.0006499682448288247 0.000309895358092338
 ;->  -0.0003386530842848234 0.0006691336450844743 0.0007901728948750408)
 
+
+-------------------------------
+Complemento di un numero intero
+-------------------------------
+
+Il complemento C di un numero intero N è il numero decimale che ha tutti i bit invertiti nella rappresentazione binaria di N.
+
+Esempio:
+  N = 5
+  binario(5) = 101
+  flip-bit(101) = 010
+  C = decimale(010) = 2
+
+Metodo 1 (stringa)
+------------------
+
+(define (complement1 num)
+  (let ( (out "") (bin-str (bits num)) )
+    (dostring (b bin-str)
+      (if (= b 48) ; "0"
+          (push "1" out -1)
+          (push "0" out -1)))
+    (int out 0 2)))
+
+(map complement1 (sequence 0 10))
+;-> (1 0 1 0 3 2 1 0 7 6 5)
+
+Metodo 2 (bit manipulation)
+---------------------------
+
+(define (complement2 num)
+  (letn ( (len (length (bits num))) ; numero di bit significativi
+          ; mask = (2^len - 1)
+          (mask (- (<< 1 len) 1)) ) ; crea una maschera di 1 (lunghezza = len)
+    (^ num mask)))                  ; inverte solo i bit signific
+
+(map complement2 (sequence 0 10))
+;-> (1 0 1 0 3 2 1 0 7 6 5)
+
 ============================================================================
 

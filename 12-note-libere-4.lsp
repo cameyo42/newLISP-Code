@@ -29,7 +29,8 @@ Differenza tra il valore x e il numero di eulero "e":
 Ricerca del numero diverso
 --------------------------
 
-Una lista contiene tutti numeri positivi uguali tranne uno. Determinare l'indice del numero diverso.
+Una lista contiene tutti numeri positivi uguali tranne uno.
+Determinare l'indice del numero diverso.
 
 Le spiegazioni della seguente implementazione si trovano nei commenti.
 
@@ -127,7 +128,8 @@ Facciamo alcune prove:
 Ricerca del numero singolo
 --------------------------
 
-In una lista di numeri interi positivi, un numero compare una sola volta, mentre gli altri numeri compaiono un numero pari di volte (2*k con k=1,2,3,...). Scrivere una funzione per trovare il numero singolo.
+In una lista di numeri interi positivi, un numero compare una sola volta, mentre gli altri numeri compaiono un numero pari di volte (2*k con k=1,2,3,...).
+Scrivere una funzione per trovare il numero singolo.
 
 Possiamo usare la funzione "xor" che ha la seguente proprietà: (x xor x) = 0, lo "xor" con lo stesso numero produce 0. Infatti risulta:
 
@@ -181,8 +183,10 @@ Punti in un semicerchio
 
 Scegliendo n punti a caso su una circonferenza, qual'è la probabilità che tutti i punti si trovino in un semicerchio?
 
-Supponiamo che il punto "i" abbia angolo 0 (l'angolo è arbitrario in questo problema) - essenzialmente questo è l'evento in cui il punto "i" è il "primo" o "punto iniziale" nel semicerchio. Quindi vogliamo che tutti i punti siano nello stesso semicerchio, cioè che i punti rimanenti finiscano tutti nel semicerchio superiore.
-Questo è come il lancio di moneta per ogni punto rimanente, quindi la probabilità che i restanti (n − 1) punti siano nel semicerchio in senso orario di un dato punto è pari a 1/2^(n−1). Ci sono n punti e l'evento che qualsiasi punto i sia il "punto iniziale" è disgiunto dall'evento che qualsiasi altro punto j sia il "punto iniziale" (ed esattamente uno di essi deve accadere affinché i punti si trovino a semicerchio), quindi la probabilità finale vale n/2^(n−1) (cioè possiamo semplicemente sommare la probabilità degli n eventi).
+Supponiamo che il punto "i" abbia angolo 0 (l'angolo è arbitrario in questo problema) - essenzialmente questo è l'evento in cui il punto "i" è il "primo" o "punto iniziale" nel semicerchio.
+Quindi vogliamo che tutti i punti siano nello stesso semicerchio, cioè che i punti rimanenti finiscano tutti nel semicerchio superiore.
+Questo è come il lancio di moneta per ogni punto rimanente, quindi la probabilità che i restanti (n − 1) punti siano nel semicerchio in senso orario di un dato punto è pari a 1/2^(n−1).
+Ci sono n punti e l'evento che qualsiasi punto i sia il "punto iniziale" è disgiunto dall'evento che qualsiasi altro punto j sia il "punto iniziale" (ed esattamente uno di essi deve accadere affinché i punti si trovino a semicerchio), quindi la probabilità finale vale n/2^(n−1) (cioè possiamo semplicemente sommare la probabilità degli n eventi).
 
   P = n/2^(n−1)
 
@@ -376,7 +380,8 @@ Parole di Lyndon
 
 Dato un intero n e una lista di caratteri S, generare tutte le parole di Lyndon di lunghezza n con i caratteri contenuti in S.
 
-Una parola di Lyndon è una stringa che è strettamente inferiore a tutte le sue rotazioni in ordine lessicografico. Ad esempio, la stringa "012" è una parola di Lyndon poiché è inferiore alle rotazioni "120" e "201", ma "102" non è una parola di Lyndon in quanto è maggiore della sua rotazione "021".
+Una parola di Lyndon è una stringa che è strettamente inferiore a tutte le sue rotazioni in ordine lessicografico.
+Ad esempio, la stringa "012" è una parola di Lyndon poiché è inferiore alle rotazioni "120" e "201", ma "102" non è una parola di Lyndon in quanto è maggiore della sua rotazione "021".
 Nota: "000" non è considerata una parola di Lyndon in quanto è uguale alla stringa ruotata.
 
 Vediamo un paio di esempi:
@@ -384,14 +389,16 @@ Vediamo un paio di esempi:
 Input: n = 2, S = ("0" "1" "2")
 Output: "01" "02" "12"
 
-Le altre possibili stringhe di lunghezza 2 sono "00", "11", "20", "21" e "22". Tutti queste sono maggiori o uguali a una delle loro rotazioni.
+Le altre possibili stringhe di lunghezza 2 sono "00", "11", "20", "21" e "22".
+Tutti queste sono maggiori o uguali a una delle loro rotazioni.
 
 Input: n = 1, S = ("0" "1" "2")
 Output: "0" "1" "2"
 
 Esiste un algoritmo efficiente per generare parole di Lyndon (proposto da Jean-Pierre Duval) che può essere utilizzato per generare tutte le parole di Lyndon di lunghezza n con tempo proporzionale al numero di tali parole (vedi "Average cost of Duval's algorithm for generating Lyndon words" di Berstel e Pocchiola)
 
-L'algoritmo genera le parole di Lyndon in ordine lessicografico. Se w è una parola di Lyndon, la parola successiva si ottiene con i seguenti passaggi:
+L'algoritmo genera le parole di Lyndon in ordine lessicografico.
+Se w è una parola di Lyndon, la parola successiva si ottiene con i seguenti passaggi:
 
 1) Ripetere w per formare una stringa v di lunghezza n, tale che v[i] = w[i mod |w|].
 2) Affinchè l'ultimo carattere di v è l'ultimo nell'ordinamento di S, rimuoverlo.
@@ -444,7 +451,9 @@ Vediamo una possibile implementazione:
 Fattorizzazione di Lyndon
 -------------------------
 
-Una stringa è chiamata parola di Lyndon (o semplice), se è strettamente più piccola di uno qualsiasi dei suoi suffissi non banali. Esempi di stringhe semplici sono: a, b, ab, aab, abb, ababb, abcd. Si può dimostrare che una stringa è semplice, se e solo se è strettamente più piccola di tutte le sue rotazioni cicliche non banali.
+Una stringa è chiamata parola di Lyndon (o semplice), se è strettamente più piccola di uno qualsiasi dei suoi suffissi non banali.
+Esempi di stringhe semplici sono: a, b, ab, aab, abb, ababb, abcd.
+Si può dimostrare che una stringa è semplice, se e solo se è strettamente più piccola di tutte le sue rotazioni cicliche non banali.
 
 Quindi, data stringa s la fattorizzazione di Lyndon della stringa s è una fattorizzazione s = w1w2… wk, dove tutte le stringhe wi sono semplici e sono in ordine non crescente w1≥w2≥ ... ≥w
 
@@ -3071,33 +3080,52 @@ Proviamo:
 Yahtzee
 -------
 
-Yahtzee è un gioco di strategia che si svolge con 5 dadi. Si gioca da soli cercando di fare il punteggio migliore o contro uno o più avversari.
+Yahtzee è un gioco di strategia che si svolge con 5 dadi.
+Si gioca da soli cercando di fare il punteggio migliore o contro uno o più avversari.
 
-Sono previste diverse combinazioni che ogni giocatore deve realizzare lanciando i dadi. Ottenuta la combinazione il giocatore guadagna il punteggio previsto per la combinazione. Una combinazione non può essere ripetuta quindi il gioco termina dopo 13 turni di lancio dei dadi, anche quando non sono state realizzate tutte le combinazioni.
+Sono previste diverse combinazioni che ogni giocatore deve realizzare lanciando i dadi.
+Ottenuta la combinazione il giocatore guadagna il punteggio previsto per la combinazione.
+Una combinazione non può essere ripetuta quindi il gioco termina dopo 13 turni di lancio dei dadi, anche quando non sono state realizzate tutte le combinazioni.
 
-Ad ogni turno il giocatore può lanciare i dadi tre volte. Al primo lancio il giocatore lancia tutti i dadi, mentre nei successivi due lanci il giocatore può scegliere di trattenere uno o più dadi favorevoli ad ottenere la combinazione cercata. Il giocatore può anche scegliere di non trattenere alcun dado o di non utilizzare successivi lanci, nel caso ad esempio si sia già realizzata una combinazione utile. Al termine dei tre lanci il giocatore deve segnare obbligatoriamente un punteggio in una delle caselle del segnapunti non ancora utilizzata. Se alla fine del turno di gioco non viene realizzata una delle possibili combinazioni ancora "libera" sul tabellone, il giocatore deve segnare "0" (zero) in una delle caselle ancora a sua disposizione.
+Ad ogni turno il giocatore può lanciare i dadi tre volte.
+Al primo lancio il giocatore lancia tutti i dadi, mentre nei successivi due lanci il giocatore può scegliere di trattenere uno o più dadi favorevoli ad ottenere la combinazione cercata.
+Il giocatore può anche scegliere di non trattenere alcun dado o di non utilizzare successivi lanci, nel caso ad esempio si sia già realizzata una combinazione utile.
+Al termine dei tre lanci il giocatore deve segnare obbligatoriamente un punteggio in una delle caselle del segnapunti non ancora utilizzata.
+Se alla fine del turno di gioco non viene realizzata una delle possibili combinazioni ancora "libera" sul tabellone, il giocatore deve segnare "0" (zero) in una delle caselle ancora a sua disposizione.
 
 Vince il giocatore che ha totalizzato il maggior numero di punti.
 
 Le combinazioni valide sono le seguenti:
 
   Dadi uguali con 1 (punteggio dato dalla somma dei dadi con 1):
-  si ottiene quando almeno un dado è 1. Il punteggio è la somma dei dadi che riportano 1. Ad esempio: 1-3-4-6-1 vale 2.
+  si ottiene quando almeno un dado è 1.
+  Il punteggio è la somma dei dadi che riportano 1.
+  Ad esempio: 1-3-4-6-1 vale 2.
 
   Dadi uguali con 2 (punteggio dato dalla somma dei dadi con 2):
-  si ottiene quando almeno un dado è 2. Il punteggio è la somma dei dadi che riportano 2. Ad esempio: 2-1-2-2-5 vale 6.
+  si ottiene quando almeno un dado è 2.
+  Il punteggio è la somma dei dadi che riportano 2.
+  Ad esempio: 2-1-2-2-5 vale 6.
 
   Dadi uguali con 3 (punteggio dato dalla somma dei dadi con 3):
-  si ottiene quando almeno un dado è 3. Il punteggio è la somma dei dadi che riportano 3. Ad esempio: 3-1-3-4-3 vale 9.
+  si ottiene quando almeno un dado è 3.
+  Il punteggio è la somma dei dadi che riportano 3.
+  Ad esempio: 3-1-3-4-3 vale 9.
 
   Dadi uguali con 4 (punteggio dato dalla somma dei dadi con 4):
-  si ottiene quando almeno un dado è 4. Il punteggio è la somma dei dadi che riportano 4. Ad esempio: 4-1-2-2-1 vale 4.
+  si ottiene quando almeno un dado è 4.
+  Il punteggio è la somma dei dadi che riportano 4.
+  Ad esempio: 4-1-2-2-1 vale 4.
 
   Dadi uguali con 5 (punteggio dato dalla somma dei dadi con 5):
-  si ottiene quando almeno un dado è 5. Il punteggio è la somma dei dadi che riportano 5. Ad esempio: 5-1-5-5-2 vale 15.
+  si ottiene quando almeno un dado è 5.
+  Il punteggio è la somma dei dadi che riportano 5.
+  Ad esempio: 5-1-5-5-2 vale 15.
 
   Dadi uguali con 6 (punteggio dato dalla somma dei dadi con 6):
-  si ottiene quando almeno un dado è 6. Il punteggio è la somma dei dadi che riportano 6. Ad esempio: 6-3-2-6-1 vale 12,
+  si ottiene quando almeno un dado è 6.
+  Il punteggio è la somma dei dadi che riportano 6.
+  Ad esempio: 6-3-2-6-1 vale 12,
 
   Bonus (35 punti):
   si ottiene quando la somma dei punteggi per le 6 combinazioni precedenti supera o raggiunge 63.
@@ -3109,10 +3137,12 @@ Le combinazioni valide sono le seguenti:
   quando 5 dadi sono ordinati in modo crescente (1-2-3-4-5 o 2-3-4-5-6)
 
   Tris (punteggio dato dalla somma di tutti i dadi):
-  quando 3 dei cinque dadi sono uguali. Ad esempio 3-3-3-5-2 vale 16.
+  quando 3 dei cinque dadi sono uguali. 
+  Ad esempio 3-3-3-5-2 vale 16.
 
   Poker (punteggio dato dalla somma di tutti i dadi):
-  quando 4 dei 5 dadi sono uguali. Ad esempio 5-5-5-5-1 vale 21.
+  quando 4 dei 5 dadi sono uguali.
+  Ad esempio 5-5-5-5-1 vale 21.
 
   Full (25 punti):
   quando ci sono 3 dadi di un tipo e due di un altro. Ad esempio 4-4-4-1-1.
@@ -3121,7 +3151,9 @@ Le combinazioni valide sono le seguenti:
   quando si ottengono 5 dadi uguali. Ad esempio 1-1-1-1-1 o 4-4-4-4-4. Se Yahtzee viene ripetuto può essere inserito solo in un'altra combinazione libera con il relativo punteggio.
 
   Chance (punteggio dato dalla somma dei 5 dadi):
-  qualsiasi combinazione ottenuta. Questa è una possibilità da sfruttare quando non si riesce a realizzare nessuna delle combinazioni precedenti o la combinazione realizzata è già stata utilizzata precedentemente. Anche questa combinazione può essere utilizzata una sola volta.
+  qualsiasi combinazione ottenuta.
+  Questa è una possibilità da sfruttare quando non si riesce a realizzare nessuna delle combinazioni precedenti o la combinazione realizzata è già stata utilizzata precedentemente.
+  Anche questa combinazione può essere utilizzata una sola volta.
 
 Nota: alcune combinazioni offrono al giocatore la possibilità di scegliere in quale categoria classificarle. Ad esempio, un Full potrebbe essere segnato nelle categorie Full, Tris o Chance.
 
@@ -3310,7 +3342,10 @@ Scriviamo una funzione che calcola i valori di tutte le combinazioni per un dete
 Gioco del 15
 ------------
 
-Il gioco del quindici è un puzzle creato nel 1874 da Noyes Palmer Chapman e reso noto nel 1880 da Samuel Loyd. Il gioco consiste di una tabellina di forma quadrata, solitamente di plastica, divisa in quattro righe e quattro colonne (quindi 16 posizioni), su cui sono posizionate 15 tessere quadrate, numerate progressivamente a partire da 1 fino a 15. Le tessere possono scorrere in orizzontale o verticale, ma il loro spostamento è limitato dall'esistenza di un singolo spazio vuoto. Lo scopo del gioco è riordinare le tessere dopo averle "mescolate" in modo casuale (la posizione da raggiungere è quella con il numero 1 in alto a sinistra e gli altri numeri a seguire da sinistra a destra e dall'alto in basso, fino al 15 seguito dalla casella vuota).
+Il gioco del quindici è un puzzle creato nel 1874 da Noyes Palmer Chapman e reso noto nel 1880 da Samuel Loyd.
+Il gioco consiste di una tabellina di forma quadrata, solitamente di plastica, divisa in quattro righe e quattro colonne (quindi 16 posizioni), su cui sono posizionate 15 tessere quadrate, numerate progressivamente a partire da 1 fino a 15.
+Le tessere possono scorrere in orizzontale o verticale, ma il loro spostamento è limitato dall'esistenza di un singolo spazio vuoto.
+Lo scopo del gioco è riordinare le tessere dopo averle "mescolate" in modo casuale (la posizione da raggiungere è quella con il numero 1 in alto a sinistra e gli altri numeri a seguire da sinistra a destra e dall'alto in basso, fino al 15 seguito dalla casella vuota).
 
 Posizione finale (soluzione) del gioco del 15
 
@@ -3697,7 +3732,8 @@ Puzzle 15
 Numeri rari
 -----------
 
-I numeri rari sono quei numeri che quando aggiunti o sottratti al suo rovescio danno un quadrato perfetto. In altre parole, i numeri rari sono numeri interi positivi n dove:
+I numeri rari sono quei numeri che quando aggiunti o sottratti al suo rovescio danno un quadrato perfetto.
+In altre parole, i numeri rari sono numeri interi positivi n dove:
 
   - n è espresso in base dieci
   - r è il contrario di n (cifre decimali)
@@ -3776,7 +3812,9 @@ Dato un numero ABCD...MNPQ con qualunque numero di cifre:
 Se A = 4 allora Q = 0 e B - P = cifra pari positiva o negativa, cioè -8, -6, -4, -2, 0, 2, 4, 6, 8.
 Se A = 6 allora Q = 0 o 5 e B - P = cifra dispari positiva o negativa cioè -9, -7, -5, -3, -1, 1, 3, 5, 7, 9.
 Se A = 8 allora Q = 2, 3, 7 o 8: se Q = 2 allora B + P = 9, se Q = 3 allora B - P = 7 per B>P e B - P = -3 per B<P e B non può mai essere uguale a P, se Q = 7 allora B + P = 11 per B>1 e B + P = 1 per B<1, se Q = 8 allora B = P.
-È chiaro dalla (1) e (2) sopra che se la prima e l'ultima cifra sono uguali, possono essere 2 o 8 e anche la seconda cifra B e P dovranno essere uguali. Anche la differenza tra la prima e l'ultima cifra, ad esempio A-Q di qualsiasi numero raro, può essere solo 0, 1, 4, 5 o 6. Il valore di Q non può mai essere 1, 4, 6, 9.
+È chiaro dalla (1) e (2) sopra che se la prima e l'ultima cifra sono uguali, possono essere 2 o 8 e anche la seconda cifra B e P dovranno essere uguali.
+Anche la differenza tra la prima e l'ultima cifra, ad esempio A-Q di qualsiasi numero raro, può essere solo 0, 1, 4, 5 o 6.
+Il valore di Q non può mai essere 1, 4, 6, 9.
 
 3) la radice digitale può avere solo i valori 2, 5, 8 o 9.
 
@@ -3883,19 +3921,27 @@ Quindi questo approccio non è applicabile per calcolare i numeri rari con più 
 Patience Sort
 -------------
 
-L'ordinamento della pazienza (patience sort) è un algoritmo di ordinamento che prende il nome da una variante semplificata del gioco di carte della pazienza. Una variante dell'algoritmo calcola in modo efficiente la lunghezza e i valori della più lunga sottosequenza crescente in una data lista.
+L'ordinamento della pazienza (patience sort) è un algoritmo di ordinamento che prende il nome da una variante semplificata del gioco di carte della pazienza.
+Una variante dell'algoritmo calcola in modo efficiente la lunghezza e i valori della più lunga sottosequenza crescente in una data lista.
 
-Il gioco inizia con un mazzo di carte mescolato. Le carte vengono distribuite una alla volta in una sequenza di pile sul tavolo, secondo le seguenti regole:
+Il gioco inizia con un mazzo di carte mescolato.
+Le carte vengono distribuite una alla volta in una sequenza di pile sul tavolo, secondo le seguenti regole:
 
-Inizialmente, non ci sono pile. La prima carta estratta forma una nuova pila composta dalla singola carta.
+Inizialmente, non ci sono pile.
+La prima carta estratta forma una nuova pila composta dalla singola carta.
 Ogni carta successiva viene posizionata sulla pila esistente più a sinistra la cui prima carta ha un valore maggiore o uguale al valore della nuova carta, o alla destra di tutte le pile esistenti, formando così una nuova pila.
 Quando non ci sono più carte da distribuire, il gioco finisce.
 
 Questo gioco di carte viene trasformato in un algoritmo di ordinamento a due fasi nel modo seguente:
-Data una lista di n elementi da un dominio totalmente ordinato, considerare questa lista come una raccolta di carte e simulare il gioco di smistamento della pazienza. Quando il gioco è finito, recuperare la sequenza ordinata raccogliendo ripetutamente la carta minima visibile. In altre parole, eseguire una fusione k-way delle pile, ciascuna delle quali è ordinata internamente.
+Data una lista di n elementi da un dominio totalmente ordinato, considerare questa lista come una raccolta di carte e simulare il gioco di smistamento della pazienza.
+Quando il gioco è finito, recuperare la sequenza ordinata raccogliendo ripetutamente la carta minima visibile.
+In altre parole, eseguire una fusione k-way delle pile, ciascuna delle quali è ordinata internamente.
 
 Algoritmo per trovare la sottosequenza crescente più lunga
-Innanzitutto, eseguire l'algoritmo di ordinamento come descritto sopra. Il numero di pile è la lunghezza della sottosequenza più lunga. Ogni volta che una carta viene posizionata in cima a una pila, mettere un puntatore (indietro) sulla carta in cima alla pila precedente (che, per ipotesi, ha un valore inferiore a quello della nuova carta). Alla fine, seguire tutti i puntatori creati dalla prima carta nell'ultima pila per recuperare una sottosequenza decrescente della lunghezza più lunga. Il suo inverso è la sottosequenza crescente più lunga.
+Innanzitutto, eseguire l'algoritmo di ordinamento come descritto sopra.
+Il numero di pile è la lunghezza della sottosequenza più lunga.
+Ogni volta che una carta viene posizionata in cima a una pila, mettere un puntatore (indietro) sulla carta in cima alla pila precedente (che, per ipotesi, ha un valore inferiore a quello della nuova carta).
+Alla fine, seguire tutti i puntatori creati dalla prima carta nell'ultima pila per recuperare una sottosequenza decrescente della lunghezza più lunga. Il suo inverso è la sottosequenza crescente più lunga.
 
 Vediamo un'implementazione dell'ordinamento della pazienza:
 
@@ -3972,7 +4018,8 @@ lista degli elementi:
 ;->  (3) 3 (4 4) 4 4 (((7))) ((7)) (7) 7)
 ----------------------------
 
-Supponiamo di avere una lista annidata e di voler conoscere la struttura della lista. Possiamo scrivere una funzione che elenca tutte le sotto-liste e i relativi elementi:
+Supponiamo di avere una lista annidata e di voler conoscere la struttura della lista.
+Possiamo scrivere una funzione che elenca tutte le sotto-liste e i relativi elementi:
 
 (define (elements-aux lst)
   (if (null? lst)
@@ -4018,7 +4065,8 @@ Supponiamo di avere una lista annidata e di voler conoscere la struttura della l
 ;->  (7)
 ;->  7)
 
-Però quello che ci interessa non sono i valori, ma tutti gli indici della lista. Allora ho chiesto un aiuto al forum di newLISP (vedi il thread in fondo a questo articolo) e ho ottenuto la seguente funzione che genera la lista di tutti gli indici degli elementi di una lista data:
+Però quello che ci interessa non sono i valori, ma tutti gli indici della lista.
+Allora ho chiesto un aiuto al forum di newLISP (vedi il thread in fondo a questo articolo) e ho ottenuto la seguente funzione che genera la lista di tutti gli indici degli elementi di una lista data:
 
 (define (index-list lst)
   (local (mylist mv)
@@ -4175,7 +4223,9 @@ Something like below? (not very elegant, I know)
 Re: List of indexes
 Post by rickyboy » Wed May 12, 2021 8:12 pm
 
-Here's a version that uses recursive calls in a classic way (think, SICP) where even the loop is handled by recursive call. (Nota bene: This is not a good newLISP implementation because newLISP doesn't turn tail calls into loops. fdb's implementation is the better one for newLISP.)
+Here's a version that uses recursive calls in a classic way (think, SICP) where even the loop is handled by recursive call.
+(Nota bene: This is not a good newLISP implementation because newLISP doesn't turn tail calls into loops.
+fdb's implementation is the better one for newLISP.)
 
 (define (get-indices L (child 0) (parents '()) (result '()))
   (if (empty? L)
@@ -4187,7 +4237,8 @@ Here's a version that uses recursive calls in a classic way (think, SICP) where 
       (get-indices (1 L) (+ 1 child) parents
                    (snoc result (snoc parents child)))))
 
-You will need this utility function, snoc, which acts like cons but does the reverse (it says it in the name lol :) : it takes the element argument and puts it at the end of the list. (Note also that the arguments are reversed as compared with cons.)
+You will need this utility function, snoc, which acts like cons but does the reverse (it says it in the name lol :) : it takes the element argument and puts it at the end of the list.
+(Note also that the arguments are reversed as compared with cons)
 
 (define (snoc xs x) (push x xs -1))
 
@@ -4222,7 +4273,12 @@ Very nice solutions
 Buche sulle strada
 ------------------
 
-Una macchina può riparare con una sezione tutte le buche lungo una strada fino a 3 unità di lunghezza. Un'unità di strada sarà rappresentata da un punto in una stringa. Ad esempio, "..." è una sezione di 3 unità di strada di lunghezza. Le buche sono contrassegnate con una "X" sulla strada e contano come 1 unità di lunghezza. Scrivere una funzione che, data una strada di lunghezza N, restituisce il minor numero possibile di sezioni che la macchina deve effettuare per riparare tutta la strada. Ecco alcuni esempi:
+Una macchina può riparare con una sezione tutte le buche lungo una strada fino a 3 unità di lunghezza.
+Un'unità di strada sarà rappresentata da un punto in una stringa.
+Ad esempio, "..." è una sezione di 3 unità di strada di lunghezza.
+Le buche sono contrassegnate con una "X" sulla strada e contano come 1 unità di lunghezza.
+Scrivere una funzione che, data una strada di lunghezza N, restituisce il minor numero possibile di sezioni che la macchina deve effettuare per riparare tutta la strada.
+Ecco alcuni esempi:
 
   strada       sezioni minime necessarie
   .X.          1
@@ -4469,13 +4525,15 @@ Adesso scriviamo una funzione che converte i millisecondi in un periodo (può se
 Partizione di una lista in due parti con somme uguali
 -----------------------------------------------------
 
-Determinare se è possibile partizionare una lista in due sotto-liste in modo che la somma di ogni sotto-lista sia la stessa. Per esempio, la lista di numeri A = (7 5 6 11 3 4) può essere divisa in due sotto-liste con la stessa somma (18) in due modi diversi:
+Determinare se è possibile partizionare una lista in due sotto-liste in modo che la somma di ogni sotto-lista sia la stessa.
+Per esempio, la lista di numeri A = (7 5 6 11 3 4) può essere divisa in due sotto-liste con la stessa somma (18) in due modi diversi:
 
 a) (5 6 7) e (11 3 4)
 
 b) (3 4 5 6) e (11 7)
 
-Supponendo che la somma di tutti gli elementi della lista sia S, ciò implica che le due sotto-liste devono avere una somma uguale a S/2. Quidi se la somma di tutti gli elementi della lista è dispari, allora non è possibile suddividere la lista in due parti con somma uguale.
+Supponendo che la somma di tutti gli elementi della lista sia S, ciò implica che le due sotto-liste devono avere una somma uguale a S/2.
+Quidi se la somma di tutti gli elementi della lista è dispari, allora non è possibile suddividere la lista in due parti con somma uguale.
 
 Se la somma degli elementi è pari, allora possiamo utilizzare due metodi per provare a suddividere la lista: brute-force e programmazione dinamica.
 
@@ -4586,13 +4644,16 @@ Vedi anche "Il problema P vs NP" su "Note libere 26".
 Numeri di Zumkeller
 -------------------
 
-I numeri Zumkeller sono l'insieme di numeri i cui divisori possono essere partizionati in due insiemi disgiunti che si sommano allo stesso valore. Ogni somma deve contenere valori di divisori che non sono nell'altra somma e tutti i divisori devono essere nell'una o nell'altra. Non ci sono restrizioni sul modo in cui i divisori devono essere partizionati, solo che le somme delle due partizione devono essere sono uguali.
+I numeri Zumkeller sono l'insieme di numeri i cui divisori possono essere partizionati in due insiemi disgiunti che si sommano allo stesso valore.
+Ogni somma deve contenere valori di divisori che non sono nell'altra somma e tutti i divisori devono essere nell'una o nell'altra.
+Non ci sono restrizioni sul modo in cui i divisori devono essere partizionati, solo che le somme delle due partizione devono essere sono uguali.
 Per esempio:
 6 è un numero Zumkeller: i divisori (1 2 3 6) possono essere partizionati in due gruppi (1 2 3) e (6) che sommano entrambi a 6.
 10 non è un numero Zumkeller: i divisori (1 2 5 10) non possono essere suddivisi in due gruppi in alcun modo che sommino entrambi allo stesso valore.
 12 è un numero Zumkeller: i divisori (1 2 3 4 6 12) possono essere partizionati in due gruppi (1 3 4 6) e (2 12) che sommano entrambi a 14.
 
-I numeri pari di Zumkeller sono comuni mentre i numeri dispari di Zumkeller lo sono molto meno. Per valori inferiori a  un milione (10^6), c'è almeno un numero Zumkeller ogni 12 numeri interi consecutivi e la stragrande maggioranza di essi è pari.
+I numeri pari di Zumkeller sono comuni mentre i numeri dispari di Zumkeller lo sono molto meno.
+Per valori inferiori a  un milione (10^6), c'è almeno un numero Zumkeller ogni 12 numeri interi consecutivi e la stragrande maggioranza di essi è pari.
 
 Sequenza OEIS A083207:
   6, 12, 20, 24, 28, 30, 40, 42, 48, 54, 56, 60, 66, 70, 78, 80, 84,
@@ -6956,10 +7017,13 @@ L'indice j è specifico per il bruco. Ogni volta che un bruco raggiunge una fogl
 Buste matrioska
 ---------------
 
-Dato un numero di buste con larghezze e altezze date come una coppia di numeri interi (w, h). Una busta può entrare in un'altra se e solo se sia la larghezza che l'altezza di una busta sono maggiori della larghezza e dell'altezza dell'altra busta.
+Dato un numero di buste con larghezze e altezze date come una coppia di numeri interi (w, h).
+Una busta può entrare in un'altra se e solo se sia la larghezza che l'altezza di una busta sono maggiori della larghezza e dell'altezza dell'altra busta.
 Qual è il numero massimo di buste che inserire una dentro l'altra come una bambola russa (matrioska)?
 
-Possiamo ordinare le buste per altezza in ordine crescente e larghezza in ordine decrescente. Quindi per i valori della larghezza trovare la sottosequenza crescente più lunga. Questo problema viene quindi convertito nel problema di trovare la sottosequenza crescente più lunga.
+Possiamo ordinare le buste per altezza in ordine crescente e larghezza in ordine decrescente.
+Quindi per i valori della larghezza trovare la sottosequenza crescente più lunga.
+Questo problema viene quindi convertito nel problema di trovare la sottosequenza crescente più lunga.
 
 Ordinamento standard:
 
@@ -6972,8 +7036,8 @@ Ordinamento con una funzione di comparazione (ascendente in x e discendente in y
 
 (define (cmp x y)
   (if (= (first x) (first y))
-      (> (last x) (last y))
-      (< (first x) (first y))))
+      (>= (last x) (last y))
+      (<= (first x) (first y))))
 
 (setq m '((3 8) (4 6) (2 11) (2 10) (2 12) (20 3) (10 1)))
 
@@ -6984,17 +7048,40 @@ Funzione che calcola la lunghezza della sottosequenza crescente più lunga:
 
 (define (lis lst)
   (local (len vet out)
+    ; L'algoritmo calcola la lunghezza della sottosequenza crescente più lunga (LIS)
+    ; usando un approccio dinamico O(n^2).
+    ;
+    ; Idea generale:
+    ; Per ogni posizione i della lista, vogliamo sapere qual è la massima lunghezza
+    ; di una sottosequenza crescente che termina esattamente in i.
+    ; Questa informazione viene memorizzata in vet[i].
+    ;
+    ; Strategia:
+    ; 1) Ogni elemento può costituire da solo una sottosequenza crescente → inizialmente vet[i] = 1.
+    ; 2) Per ogni elemento lst[i], si controllano tutti gli elementi precedenti lst[j] con j < i.
+    ;    Se lst[j] < lst[i], allora possiamo “allungare” la sottosequenza che termina in j
+    ;    aggiungendo lst[i]. La lunghezza ottenuta sarebbe vet[j] + 1.
+    ; 3) Si prende il massimo tra i valori possibili e lo si assegna a vet[i].
+    ; 4) Durante il processo si mantiene anche la variabile out che tiene traccia
+    ;    della lunghezza massima trovata in qualsiasi posizione.
+    ;
+    ; Al termine, out rappresenta la lunghezza della LIS complessiva.
     (setq out 1)
     (setq len (length lst))
     (setq vet (array len '(1)))
     (for (i 0 (- len 1))
       (setq j 0)
+      ; Per ogni indice j < i, verifichiamo se lst[j] può precedere lst[i] in una LIS.
       (while (< j i)
+        ; Se lst[j] < lst[i], allora possiamo costruire una sottosequenza crescente
+        ; che termina in i estendendo quella che termina in j.
         (if (> (lst i) (lst j))
+            ; Aggiorna vet[i] scegliendo la miglior estensione possibile
             (setf (vet i) (max (vet i) (+ (vet j) 1)))
         )
         (++ j)
       )
+      ; Aggiorna la lunghezza massima globale.
       (setq out (max (vet i) out))
     )
     out))
@@ -7009,6 +7096,8 @@ Funzione che calcola la soluzione:
 
 (matrioska '((6 4) (6 7) (1 8) (2 3) (5 2) (5 4)))
 ;-> 3
+
+Vedi anche "Matrioske 3D" su "Note libere 34".
 
 
 -----------
@@ -8930,7 +9019,8 @@ Possiamo scrivere una versione bottom-up utilizzando la tecnica di memoizzazione
 Internet-point
 --------------
 
-Un internet-point possiede N computer. I clienti sono rappresentati da una stringa di caratteri. Ogni carattere è ripetuto due volte: la prima occorrenza rappresenta l'ingresso nel locale, la seconda occorrenza rappresenta l'uscita dal locale.
+Un internet-point possiede N computer. I clienti sono rappresentati da una stringa di caratteri.
+Ogni carattere è ripetuto due volte: la prima occorrenza rappresenta l'ingresso nel locale, la seconda occorrenza rappresenta l'uscita dal locale.
 Le regole di utilizzo di un computer sono le seguenti:
 1) quando arriva un cliente, se è libero un computer, allora lo occupa, altrimenti si mette in attesa.
 2) quando si libera un computer, se esistono clienti in attesa, allora il primo della lista occupa un computer.

@@ -6896,7 +6896,6 @@ Vediamo la velocità delle funzioni:
 (time (multiple3 lst) 1000)
 ;-> 463.329
 
-
 Se invece vogliamo eliminare tutti gli elementi multipli possiamo usare la seguente funzione:
 
 (define (delete-multiple lst)
