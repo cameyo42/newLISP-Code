@@ -3312,6 +3312,7 @@ NOTE LIBERE 34
   Matrioske 3D
   Risolutore di rapporti
   Distanza di Hamming
+  Hamming Ball
 
 PROBLEMI SUI DADI
 =================

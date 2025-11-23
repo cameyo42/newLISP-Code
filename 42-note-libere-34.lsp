@@ -3105,5 +3105,313 @@ Questo accade perché ogni differenza tra x e z deve apparire in almeno una dell
 
 La distanza di Hamming soddisfa tutte queste proprietà, quindi definisce uno spazio metrico (o sistema metrico) sull'insieme di tutte le stringhe di una certa lunghezza.
 
+
+------------
+Hamming Ball
+------------
+
+Per ogni stringa x di lunghezza n e raggio r, è possibile definire una "open ball" (intorno) B centrata in x come l'insieme di tutte le stringhe di lunghezza n che hanno una distanza di Hamming inferiore a r da x:
+
+  B(x,r) = {y : DH(x,y) < r}
+
+Problema
+Dati una stringa binaria 'x' di lunghezza 'N' e un raggio 'r' vogliamo generare tutte le stringhe binarie a distanza di Hamming inferiore a 'r' da 'x'.
+La distanza di Hamming tra due stringhe binarie è il numero di bit in cui differiscono.
+
+Algoritmo generale
+1. Distanza zero (k = 0): includiamo la stringa originale 'x'.
+2. Distanze da 1 a r-1 (k = 1..r-1): generiamo (in modo iterativo) tutte le combinazioni di 'k' bit da invertire.
+3. Per ogni combinazione di posizioni dei bit da flippare:
+   - Copiamo la stringa originale in 'tmp'
+   - Invertiamo i bit nelle posizioni indicate dalla combinazione
+   - Convertiamo 'tmp' in stringa e aggiungiamo al risultato 'res'
+4. Ripetiamo finché non abbiamo generato tutte le combinazioni per tutti i valori di 'k'.
+
+Algoritmo specifico
+1. Preparazione iniziale
+   - 'chars = explode(x)': converte la stringa in lista di caratteri ('"101"' -> '("1" "0" "1")')
+   - 'res = ()': lista vuota per memorizzare tutte le stringhe della Hamming ball
+   - 'comb = ()': combinazione corrente di posizioni da flippare
+   - 'n = length(chars)': lunghezza della stringa
+   - 'done': flag booleano per terminare il ciclo di generazione combinazioni
+2. Ciclo esterno su 'k' (numero di bit da cambiare)
+   (setq comb (sequence 0 (- k 1)))
+   - 'k = 0': stringa originale -> aggiunta direttamente a 'res'
+   - 'k >= 1': inizializza la prima combinazione (0 1 ... k-1)
+3. Ciclo interno per generare tutte le combinazioni lessicografiche
+   3.1. Costruzione della stringa corrente:
+        - 'tmp = ()'
+        - Per ogni indice 'j' da 0 a n-1:
+          - Se 'j' è in 'comb' -> flip bit -> 'tmp.push(flip(chars[j]))'
+          - Altrimenti -> mantieni bit originale -> 'tmp.push(chars[j])'
+        - Converti 'tmp' in stringa con 'join' e aggiungi a 'res'
+   3.2. Aggiornamento combinazione (generazione della combinazione successiva in ordine lessicografico):
+        - Parti dall'ultima posizione i = k-1
+        - Trova la posizione 'i' più a destra che può essere incrementata senza uscire dal range [0..n-1]
+        - Se non esiste (i < 0) -> tutte le combinazioni generate -> 'done = true'
+        - Altrimenti:
+          - Incrementa comb[i]++
+          - Aggiorna tutte le posizioni successive j = i+1 .. k-1 così che comb[j] = comb[j-1] + 1
+        - Questo garantisce che le combinazioni siano ordinate e non ripetute
+4. Uscita
+Alla fine:
+- 'res' contiene tutte le stringhe binarie a distanza di Hamming < r da 'x'
+- La dimensione di 'res' è: |B(x,r)| = Sum[k=0,r-1]binom(N k)
+
+Quanti elementi ha una Hamming ball con x di lunghezza N e raggio r?
+Per ogni (k = 0, 1, ..., r-1) bit da cambiare, il numero di combinazioni possibili è il coefficiente binomiale:
+
+  binom(N k)
+
+- k=0 -> la stringa originale
+- k=1 -> tutte le stringhe con 1 bit invertito
+- ... fino a (k = r-1)
+Quindi il numero totale di elementi nella Hamming ball è:
+
+  |B(x,r)| = Sum[k=0,r-1]binom(N k)
+
+; Funzione ausiliaria: inverte un singolo bit
+(define (flip ch)
+  (if (= ch "0") "1" "0"))
+
+(define (hamming-ball x r)
+  ; Calcola tutte le stringhe binarie di lunghezza n
+  ; a distanza di Hamming < r dalla stringa x
+  (letn ((chars (explode x))       ; converte la stringa in lista di caratteri
+         (n (length chars))        ; lunghezza della stringa
+         (res '())                 ; lista dei risultati (stringhe nella ball)
+         (comb '())                ; lista degli indici dei bit da flippar
+         (tmp '())                 ; lista temporanea per costruire ogni stringa modificata
+         (i 0) (j 0) (k 0)         ; contatori per i loop
+         (done nil))               ; variabile booleana per terminare il ciclo delle combinazioni
+    (for (k 0 (- r 1))             ; per ogni numero di bit da cambiare (0 .. r-1)
+      (if (= k 0)
+          ; caso k=0: nessun bit da flippare, aggiungo la stringa originale
+          (push (join chars "") res -1)
+          ;else
+          (begin
+            ; inizializza la prima combinazione di k bit [0..k-1]
+            (setq comb '())
+            (setq comb (sequence 0 (- k 1)))
+            (setf done nil)           ; resettare done per il nuovo k
+            (while (not done)         ; ciclo fino a generare tutte le combinazioni
+              (setq tmp '())          ; reset della stringa temporanea
+              (for (j 0 (- n 1))      ; ciclo su tutti i bit della stringa originale
+                (if (ref j comb)      ; se j è nella combinazione corrente
+                    (push (flip (chars j)) tmp -1) ; inverto il bit
+                    (push (chars j) tmp -1)))      ; altrimenti lascio il bit originale
+              (push (join tmp "") res -1)          ; aggiungo la stringa modificata ai risultati
+              (setf i (- k 1))                     ; parto dall'ultima posizione della combinazione
+              (while (and (>= i 0) (>= (comb i) (- n (- k i)))) (-- i))
+                ; decremento i finché non trovo un elemento della combinazione che può essere incrementato
+              (if (< i 0)
+                  (setf done true) ; tutte le combinazioni generate, termino il while
+                  ;else
+                  (begin
+                    (setf (comb i) (+ (comb i) 1))
+                    ; incremento il valore trovato
+                    (if (< (+ i 1) (length comb))
+                        ; aggiorno tutti gli elementi successivi della combinazione
+                        (for (j (+ i 1) (- k 1))
+                          (setf (comb j) (+ (comb (- j 1)) 1)))))))))) ; garantisce ordine crescente
+    res)) ; restituisce la lista completa di stringhe nella Hamming ball
+
+Proviamo:
+
+(hamming-ball "10" 2)
+;-> ("10" "00" "11")
+(hamming-ball "101" 2)
+;-> ("101" "001" "111" "100")
+(hamming-ball "10" 3)
+;-> ("10" "00" "11" "01")
+(hamming-ball "101" 3)
+;-> ("101" "001" "111" "100" "011" "000" "110")
+(hamming-ball "1111" 4)
+;-> ("1111" "0111" "1011" "1101" "1110" "0011" "0101" "0110"
+;->  "1001" "1010" "1100" "0001" "0010" "0100" "1000")
+(length (hamming-ball "1111" 4))
+;-> 15
+(length (hamming-ball "10101010" 3))
+;-> 37
+
+; Funzione che calcola la distanza di Hamming tra due stringhe
+(define (hamming-dist str1 str2)
+  (if (= (length str1) (length str2))
+      (length (clean true? (map = (explode str1) (explode str2))))))
+
+(map (curry hamming-dist "10101010") (hamming-ball "10101010" 3))
+;-> (0 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2)
+
+Adesso vediamo una funzione che calcola il numero di elementi di una Hamming Ball.
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+; Funzione che calcola il numero di elementi di una Hamming Ball con raggio r di una parola binaria x lunga n
+(define (ball-length n r)
+  (let (sum 0)
+    (for (k 0 (- r 1)) (++ sum (binom n k))) sum))
+
+(ball-length 4 4)
+;-> 15
+(ball-length 8 3)
+;-> 37
+
+; Funzione hamming-ball (senza commenti)
+(define (hamming-ball x r)
+  (letn ((chars (explode x))
+         (n (length chars))
+         (res '())
+         (comb '())
+         (tmp '())
+         (i 0) (j 0) (k 0)
+         (done nil))
+    (for (k 0 (- r 1))
+      (if (= k 0)
+          (push (join chars "") res -1)
+          ;else
+          (begin
+            (setq comb '())
+            (setq comb (sequence 0 (- k 1)))
+            (setf done nil)
+            (while (not done)
+              (setq tmp '())
+              (for (j 0 (- n 1))
+                (if (ref j comb)
+                    (push (flip (chars j)) tmp -1)
+                    (push (chars j) tmp -1)))
+              (push (join tmp "") res -1)
+              (setf i (- k 1))
+              (while (and (>= i 0) (>= (comb i) (- n (- k i)))) (-- i))
+              (if (< i 0)
+                  (setf done true)
+                  ;else
+                  (begin
+                    (setf (comb i) (+ (comb i) 1))
+                      (if (< (+ i 1) (length comb))
+                          (for (j (+ i 1) (- k 1))
+                          (setf (comb j) (+ (comb (- j 1)) 1))))))))))
+    res))
+
+Esempio dettagliato
+-------------------
+Vediamo uno schema visivo che mostra come l'algoritmo genera tutte le combinazioni di bit da flippare per costruire la Hamming Ball.
+Dati:
+  x = "101"
+  N = 3
+  r = 3
+Quindi generiamo distanze k = 0, 1, 2
+(la distanza 3 è esclusa perché il raggio è < r)
+
+Contiamo tutte le stringhe con 0, 1 o 2 bit diversi da '"101"'.
+
+k = 0 -> Nessun flip
+Combinazione: '()'
+  Stringa: 101
+
+k = 1 -> Flip di 1 bit
+Tutte le combinazioni di lunghezza 1 prese da (0 1 2)
+Combinazioni generate dal codice (lessicografiche):
+  (0)
+  (1)
+  (2)
+Costruzione stringhe:
+  +------+------------------+-----------+
+  | Comb | Flippa posizioni | Risultato |
+  +------+------------------+-----------+
+  | (0)  | 1->0             | 001       |
+  | (1)  | 0->1             | 111       |
+  | (2)  | 1->0             | 100       |
+  +------+------------------+-----------+
+
+k = 2 -> Flip di 2 bit
+Tutte le combinazioni di 2 elementi da (0 1 2)
+Generazione lessicografica:
+  L'algoritmo parte da:
+  (0 1)
+  e genera:
+  (0 1)
+  (0 2)
+  (1 2)
+  (con l'algoritmo iterativo "incrementa la posizione destra disponibile")
+Costruzione stringhe:
+  +-------+------------+-----------+
+  | Comb  | Flip       | Risultato |
+  +-------+------------+-----------+
+  | (0 1) | 1->0, 0->1 | 011       |
+  | (0 2) | 1->0, 1->0 | 000       |
+  | (1 2) | 0->1, 1->0 | 110       |
+  +-------+----------+-------------+
+
+Risultato finale: ("101" "001" "111" "100" "011" "000" "110")
+
+Schema generale della generazione delle combinazioni
+----------------------------------------------------
+Per ogni 'k':
+1. Inizializzazione
+comb = (0 1 2 ... k-1)
+2. Per ogni combinazione:
+- Usa 'comb' per determinare quali bit flippar
+- Poi genera la successiva combinazione con la regola:
+    Parti da i = k-1 (da destra)
+    Trova la prima posizione che può essere incrementata
+    Incrementala
+    Aggiorna tutte le posizioni successive:
+      comb[j] = comb[j-1] + 1
+3. Se nessuna posizione si può incrementare -> done = true
+
+Vediamo anche la rappresentazione grafica bit-per-bit.
+Dati:
+  x = "101"
+  r = 3   -> k = 0, 1, 2
+
+Stringa di partenza
+  pos: 0 1 2
+  x =  1 0 1
+
+k = 0  -> nessun flip
+  101
+
+k = 1  -> flip di 1 bit
+  Combinazioni: '(0) (1) (2)'
+  - Flip in posizione 0 -> '(0)'
+    x:    1 0 1
+    flip: ^      
+    out:  0 0 1    = "001"
+  - Flip in posizione 1 -> '(1)'
+    x:    1 0 1
+    flip:   ^    
+    out:  1 1 1    = "111"
+  - Flip in posizione 2 -> '(2)'
+    x:    1 0 1
+    flip:     ^  
+    out:  1 0 0    = "100"
+
+k = 2  -> flip di 2 bit
+  Combinazioni: '(0 1) (0 2) (1 2)'
+  - Flip in posizioni 0 e 1 -> '(0 1)'
+    x:    1 0 1
+    flip: ^ ^    
+    out:  0 1 1    = "011"
+  - Flip in posizioni 0 e 2 -> '(0 2)'
+    x:    1 0 1
+    flip: ^   ^  
+    out:  0 0 0    = "000"
+  - Flip in posizioni 1 e 2 -> '(1 2)'
+    x:    1 0 1
+    flip:   ^ ^  
+    out:  1 1 0    = "110"
+
+Risultato finale: ("101" "001" "111" "100" "011" "000" "110")
+
 ============================================================================
 
