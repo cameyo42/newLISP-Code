@@ -3311,6 +3311,7 @@ NOTE LIBERE 34
   Complemento di un numero intero
   Matrioske 3D
   Risolutore di rapporti
+  Distanza di Hamming
 
 PROBLEMI SUI DADI
 =================

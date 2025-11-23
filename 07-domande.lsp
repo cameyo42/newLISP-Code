@@ -3139,7 +3139,8 @@ Vediamo la velocità di esecuzione delle due funzioni:
 Distanza di Hamming tra DNA (Google)
 ------------------------------------
 
-Date due sequenze di DNA (stringhe), determinare la distanza di Hamming. In pratica, occorre calcolare il numero di caratteri diversi tra due stringhe della stessa lunghezza.
+Date due sequenze di DNA (stringhe), determinare la distanza di Hamming.
+In pratica, occorre calcolare il numero di caratteri diversi tra due stringhe della stessa lunghezza.
 
 La struttura canonica del DNA ha quattro basi: Adenina (Adenine) (A), Citosina (Cytosine) (C), Guanina (Guanine) (G), e Timina (Thymine) (T).
 

@@ -2994,5 +2994,116 @@ Proviamo:
 (ratio-solver-R coppie valori 'f 'z)
 ;-> nil
 
+
+-------------------
+Distanza di Hamming
+-------------------
+
+La distanza di Hamming tra due stringhe di lunghezza uguale è il numero di posizioni nelle quali i simboli corrispondenti sono diversi.
+Quindi la distanza di Hamming misura il numero di sostituzioni necessarie per convertire una stringa nell'altra.
+Rappresenta anche il numero minimo di errori che possono aver portato alla trasformazione di una stringa nell'altra.
+
+; Funzione che calcola la distanza di Hamming tra due stringhe
+(define (hamming-dist str1 str2)
+  (if (= (length str1) (length str2))
+      (length (clean true? (map = (explode str1) (explode str2))))))
+
+Proviamo:
+
+(hamming-dist "1234" "1235")
+;-> 1
+(hamming-dist "1234" "1234")
+;-> 0
+(hamming-dist "1235" "4321")
+;-> 4
+(hamming-dist "1235" "43210")
+;-> nil
+
+Per le stringhe che rappresentano numeri binari (stringhe binarie) è possibile calcolare la distanza di Hamming anche con un altro metodo.
+
+(define (pop-count1 num)
+"Calculate the number of 1 in binary value of an integer number"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter))
+    counter))
+
+; Funzione che calcola la distanza di Hamming tra due stringhe binarie
+; (devono entrambe iniziare con 1)
+(define (hamming-bit b1 b2)
+  (pop-count1 (^ (int (string b1) 0 2) (int (string b2) 0 2))))
+
+Proviamo:
+
+(hamming-bit "1010" "1111")
+;-> 2
+(hamming-bit 1010 1111)
+;-> 2
+(hamming-bit 1000 1111)
+;-> 3
+
+(hamming-bit "011" "111")
+;-> 3 ; errore
+(hamming-dist "011" "111")
+;-> 1 ; corretto
+
+Un altro metodo per numeri interi:
+
+Versione C (wikipedia)
+int hamming_distance(unsigned x, unsigned y)
+{
+    int dist = 0;
+    // The ^ operators sets to 1 only the bits that are different
+    for (unsigned val = x ^ y; val > 0; ++dist)
+    {
+        // We then count the bit set to 1 using the Peter Wegner way
+        val = val & (val - 1); // Set to zero val's lowest-order 1
+    }
+    // Return the number of differing bits
+    return dist;
+}
+
+Versione newlisp:
+
+(define (hamming-num x y)
+  (letn ((dist 0)
+         (val (^ x y)))
+    (while (> val 0)
+      (++ dist)
+      (setq val (& val (- val 1))))
+    dist))
+
+(bits 34)
+;-> "100010"
+(bits 45)
+;-> "101101"
+(hamming-num 34 45)
+;-> 4
+
+La distanza di Hamming può generare uno spazio metrico perché una funzione di distanza in una metrica deve soddisfare i seguenti assiomi per tutte le stringhe x, y e z di uguale lunghezza.
+
+1) Non negatività
+
+   a) DH(x,y) >= 0
+   b) DH(x,y) = 0 se e solo se x = y
+
+La distanza di Hamming conta il numero di posizioni diverse tra due stringhe, quindi è sempre un numero non negativo. Inoltre, se e e y solo identiche, allora DH(x,y) = 0.
+
+2) Simmetria
+
+   DH(x,y) = DH(y,x)
+
+La distanza di Hamming tra x e y è uguale alla distanza tra y e x perché conta solo le differenze di posizione, indipendentemente dall'ordine.
+
+3) Disuguaglianza triangolare
+
+   DH(x,z) = DH(x,y) + DH(y,z)
+
+Se consideriamo tre stringhe x, y, e z, la distanza diretta DH(x,z) non può superare la somma delle distanze DH(x,y) + DH(y,z). 
+Questo accade perché ogni differenza tra x e z deve apparire in almeno una delle distanze parziali tra x e y o tra y e z.
+
+La distanza di Hamming soddisfa tutte queste proprietà, quindi definisce uno spazio metrico (o sistema metrico) sull'insieme di tutte le stringhe di una certa lunghezza.
+
 ============================================================================
 
