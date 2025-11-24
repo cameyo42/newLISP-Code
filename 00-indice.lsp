@@ -3314,6 +3314,7 @@ NOTE LIBERE 34
   Distanza di Hamming
   Hamming Ball
   Panchine e lampioni
+  Allungamento di una stringa
 
 PROBLEMI SUI DADI
 =================

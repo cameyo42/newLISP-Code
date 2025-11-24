@@ -3424,8 +3424,8 @@ Lungo un viale rettilineo ci sono panchine P e lampioni L:
   *---*---*---*---*---*---*---*---*---*-
   0   1   2   3   4   5   6   7   8   9
 
-Ogni lampione fa luce fino ad una distanza r (raggio).
-Determinare il valore di minimo di r affinchè tutte le panchine siano illuminate almeno da un lampione.
+Ogni lampione fa luce fino ad una distanza r (raggio) a destra e a sinistra).
+Determinare il valore minimo di r affinchè tutte le panchine siano illuminate almeno da un lampione.
 
 Versione 1
 ----------
@@ -3791,6 +3791,184 @@ Verifica di correttezza di tutte le funzioni:
     (println p { } l)))
 ;-> nil
 
+
+---------------------------
+Allungamento di una stringa
+---------------------------
+
+Data una stringa di lunghezza N (es. "abc"), stamparla nel modo seguente:
+
+  riga 1         --> stringa (0 spazi tra i caratteri)
+  riga 2         --> stringa con 1 spazio tra i caratteri
+  riga 3         --> stringa con 2 spazi tra i caratteri
+  ...
+  riga N         --> stringa con (N-1) spazi tra i caratteri
+  riga (N+1)     --> stringa con (N-2) spazi tra i caratteri
+  riga (N+2)     --> stringa con (N-3) spazi tra i caratteri
+  ...
+  riga (N*2 - 1) --> stringa (0 spazi tra i caratteri)
+
+Esempio:
+stringa = abcd
+output =
+  abcd
+  a b c d
+  a  b  c  d
+  a   b   c   d
+  a  b  c  d
+  a b c d
+  abcd
+
+Esempio:
+stringa = 12345
+output =
+  12345
+  1 2 3 4 5
+  1  2  3  4  5
+  1   2   3   4   5
+  1    2    3    4    5
+  1   2   3   4   5
+  1  2  3  4  5
+  1 2 3 4 5
+  12345
+
+Esempio di funzionamento:
+
+(let (ch '("a" "b" "c"))
+  (for (i 0 2)
+    (println (join (flat (transpose (list ch (dup (dup " " i) 10 true)))))))
+  (for (i 1 0)
+    (println (join (flat (transpose (list ch (dup (dup " " i) 10 true))))))))
+;-> abc
+;-> a b c
+;-> a  b  c
+;-> a b c
+;-> abc
+
+(define (elongate str)
+  (local (chars k)
+    (setq chars (explode str)) ; lista di caratteri
+    (setq k (- (length str) 1)) ; spazio massimo tra due numeri
+    (for (i 0 k) ; stampa le prime (k+1) righe
+      (println (join (flat (transpose (list chars (dup (dup " " i) 10 true)))))))
+    (for (i (- k 1) 0) ; stampa le restanti k righe
+      (println (join (flat (transpose (list chars (dup (dup " " i) 10 true)))))))))
+
+(elongate "abcd")
+;-> abcd
+;-> a b c d
+;-> a  b  c  d
+;-> a   b   c   d
+;-> a  b  c  d
+;-> a b c d
+;-> abcd
+(elongate "12345")
+;-> 12345
+;-> 1 2 3 4 5
+;-> 1  2  3  4  5
+;-> 1   2   3   4   5
+;-> 1    2    3    4    5
+;-> 1   2   3   4   5
+;-> 1  2  3  4  5
+;-> 1 2 3 4 5
+;-> 12345
+
+Adesso convertiamo il doppio ciclo 'for' in un ciclo 'for' unico.
+
+Supponiamo di avere il seguente codice:
+
+(let (k 3)
+  (for (i 0 k)
+    (println (dup "*" i)))
+  (for (i (- k 1) 0)
+    (println (dup "*" i))))
+;-> *
+;-> **
+;-> ***
+;-> **
+;-> *
+
+Bisogna costruire una sequenza che faccia:
+
+  '0 1 2 ... k ... 2 1 0'
+
+Con un solo 'for' che va da 0 a (* 2 k).
+Per un indice globale 'i' che va da 0 a (* 2 k):
+- se i <= k  -> new-i = i
+- altrimenti -> new-i = (- (* 2 k) i)
+
+Questo genera esattamente la sequenza: '0 1 2 ... k ... 2 1 0'
+E il codice diventa:
+
+(let (k 3)
+  (for (i 0 (* 2 k))
+    (let (new-i (if (<= i k) i (- (* 2 k) i)))
+      (println (dup "*" new-i)))))
+;-> *
+;-> **
+;-> ***
+;-> **
+;-> *
+
+La funzione 'elongate' diventa:
+
+(define (elongate str)
+  (let ( (chars (explode str))    ; lista di caratteri
+         (k (- (length str) 1)) ) ; spazio massimo tra due numeri
+  (for (i 0 (* 2 k)) ; ciclo unico per tutte le righe
+    (let (new-i (if (<= i k) i (- (* 2 k) i)))
+      (println (join (flat (transpose
+                (list chars (dup (dup " " new-i) 10 true))))))))))
+
+(elongate "abcd")
+;-> abcd
+;-> a b c d
+;-> a  b  c  d
+;-> a   b   c   d
+;-> a  b  c  d
+;-> a b c d
+;-> abcd
+(elongate "12345")
+;-> 12345
+;-> 1 2 3 4 5
+;-> 1  2  3  4  5
+;-> 1   2   3   4   5
+;-> 1    2    3    4    5
+;-> 1   2   3   4   5
+;-> 1  2  3  4  5
+;-> 1 2 3 4 5
+;-> 12345
+
+Versione code-golf (161 caratteri, one-line):
+
+(define(f s)
+(let((c(explode s))(k(-(length s)1)))
+(for(i 0(* 2 k))(let(d(if(<= i k)i(-(* 2 k)i)))
+(println(join(flat(transpose(list c(dup(dup" "d)10 true))))))))))
+
+(f "12345")
+;-> 12345
+;-> 1 2 3 4 5
+;-> 1  2  3  4  5
+;-> 1   2   3   4   5
+;-> 1    2    3    4    5
+;-> 1   2   3   4   5
+;-> 1  2  3  4  5
+;-> 1 2 3 4 5
+;-> 12345
+
+(f ">>>>>>")
+;-> >>>>>>
+;-> > > > > > >
+;-> >  >  >  >  >  >
+;-> >   >   >   >   >   >
+;-> >    >    >    >    >    >
+;-> >     >     >     >     >     >
+;-> >    >    >    >    >    >
+;-> >   >   >   >   >   >
+;-> >  >  >  >  >  >
+;-> > > > > > >
+;-> >>>>>>
 
 ============================================================================
 
