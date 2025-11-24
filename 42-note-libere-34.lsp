@@ -2660,7 +2660,7 @@ Un oggetto può essere ruotato, quindi possiamo ordinare le sue dimensioni inter
 In questo modo (3 2 7) diventa (2 3 7) e tutte le possibili rotazioni sono considerate.
 
 2. Comparazione tra oggetti:
-Per sapere se un oggetto `A` può entrare in `B`, dobbiamo confrontare tutte e tre le dimensioni:
+Per sapere se un oggetto 'A' può entrare in 'B', dobbiamo confrontare tutte e tre le dimensioni:
   A.x < B.x AND A.y < B.y AND A.z < B.z
 Non è sufficiente guardare solo una dimensione (come nella versione 2D), perché potrebbero verificarsi conflitti tra le dimensioni.
 
@@ -2951,10 +2951,10 @@ Vediamo una funzione con ricorsione pura (senza stack):
                 (push (list x (div 1 v))   (lookup y G) -1))))
           (dfs
             (lambda (node target prod)
-              ; Se già trovato → non proseguire oltre
+              ; Se già trovato -> non proseguire oltre
               (if finito nil
                   (if (= node target)
-                      ; trovato risultato → salva e blocca ulteriori ricorsioni
+                      ; trovato risultato -> salva e blocca ulteriori ricorsioni
                       (begin
                         (setq risultato prod)
                         (setq finito true))
@@ -2972,7 +2972,7 @@ Vediamo una funzione con ricorsione pura (senza stack):
         (add-edge (p 0) (p 1) (valori $idx)))
       ; Avvia la DFS
       (dfs a b 1.0)
-      ; Se mai trovato → risultato, altrimenti NIL
+      ; Se mai trovato -> risultato, altrimenti NIL
       risultato)))
 
 Proviamo:
@@ -3100,7 +3100,7 @@ La distanza di Hamming tra x e y è uguale alla distanza tra y e x perché conta
 
    DH(x,z) = DH(x,y) + DH(y,z)
 
-Se consideriamo tre stringhe x, y, e z, la distanza diretta DH(x,z) non può superare la somma delle distanze DH(x,y) + DH(y,z). 
+Se consideriamo tre stringhe x, y, e z, la distanza diretta DH(x,z) non può superare la somma delle distanze DH(x,y) + DH(y,z).
 Questo accade perché ogni differenza tra x e z deve apparire in almeno una delle distanze parziali tra x e y o tra y e z.
 
 La distanza di Hamming soddisfa tutte queste proprietà, quindi definisce uno spazio metrico (o sistema metrico) sull'insieme di tutte le stringhe di una certa lunghezza.
@@ -3385,30 +3385,30 @@ k = 1  -> flip di 1 bit
   Combinazioni: '(0) (1) (2)'
   - Flip in posizione 0 -> '(0)'
     x:    1 0 1
-    flip: ^      
+    flip: ^
     out:  0 0 1    = "001"
   - Flip in posizione 1 -> '(1)'
     x:    1 0 1
-    flip:   ^    
+    flip:   ^
     out:  1 1 1    = "111"
   - Flip in posizione 2 -> '(2)'
     x:    1 0 1
-    flip:     ^  
+    flip:     ^
     out:  1 0 0    = "100"
 
 k = 2  -> flip di 2 bit
   Combinazioni: '(0 1) (0 2) (1 2)'
   - Flip in posizioni 0 e 1 -> '(0 1)'
     x:    1 0 1
-    flip: ^ ^    
+    flip: ^ ^
     out:  0 1 1    = "011"
   - Flip in posizioni 0 e 2 -> '(0 2)'
     x:    1 0 1
-    flip: ^   ^  
+    flip: ^   ^
     out:  0 0 0    = "000"
   - Flip in posizioni 1 e 2 -> '(1 2)'
     x:    1 0 1
-    flip:   ^ ^  
+    flip:   ^ ^
     out:  1 1 0    = "110"
 
 Risultato finale: ("101" "001" "111" "100" "011" "000" "110")
@@ -3418,12 +3418,14 @@ Risultato finale: ("101" "001" "111" "100" "011" "000" "110")
 Panchine e lampioni
 -------------------
 
-Lungo un viale rettilineo ci sono panchine P e lampioni L.
+Lungo un viale rettilineo ci sono panchine P e lampioni L:
 
       P   L       P       L   P   P   P
   *---*---*---*---*---*---*---*---*---*-
   0   1   2   3   4   5   6   7   8   9
 
+Ogni lampione fa luce fino ad una distanza r (raggio).
+Determinare il valore di minimo di r affinchè tutte le panchine siano illuminate almeno da un lampione.
 
 Versione 1
 ----------
@@ -3466,17 +3468,16 @@ Proviamo:
 (setq p1 (rand 1000 100))
 (setq l1 (rand 1000 10))
 (lumen1 p1 l1)
-;-> 120
+;-> 268
 
 La funzione è lenta per valori grandi di panchine e lampioni.
-
 
 (setq p2 (rand 50000 5000))
 (setq l2 (rand 50000 1000))
 
 (time (println (lumen1 p2 l2)))
-;-> 195
-;-> 4078.597
+;-> 246
+;-> 1359.962
 
 Versione 2
 ----------
@@ -3510,11 +3511,11 @@ Proviamo:
 ;-> 3
 
 (lumen2 p1 l1)
-;-> 120
+;-> 268
 
 (time (println (lumen2 p2 l2)))
-;-> 145
-;-> 6078.469
+;-> 246
+;-> 5096.708
 
 Questa modifica ha peggiorato il tempo di esecuzione.
 Probabilmente la funzione nativa 'exists' in 'check?' è più veloce.
@@ -3567,16 +3568,16 @@ Proviamo:
 (lumen3 panc lamp)
 ;-> 3
 (lumen3 p1 l1)
-;-> 120
+;-> 268
 (time (println (lumen3 p2 l2)))
-;-> 195
-;-> 1984.523
+;-> 246
+;-> 1691.435
 
-Questa verione è più veloce di 'lumen1' e 'lumen2'.
+Questa versione è più veloce di 'lumen2' (come 'lumen1').
+Il risultato dipende anche dalla disposizione delle panchine e dei lampioni, non solo dal loro numero.
 
 Versione 4
 ----------
-
 Possiamo scrivere una funzione ancora più veloce che non usa ricerca binaria: ci muoviamo in parallelo lungo le due liste, avanzando l'indice dei lampioni solo quando serve.
 
 Algoritmo
@@ -3602,6 +3603,7 @@ Ogni panchina incrementa 'i' di 1 -> O(P)
 Ogni lampione incrementa 'j' di 1 -> al massimo M volte -> O(L)
 Totale: O(P + L) --> complessità lineare
 
+; Funzione che calcola il raggio minimo per illuminare una disposizione di panchine e lampioni
 (define (lumen4 panchine lampioni)
   (local (i j n m p l dist-max)
     ; Le due liste vengono ordinate. Questo è fondamentale,
@@ -3656,21 +3658,12 @@ Proviamo:
 (lumen4 panc lamp)
 ;-> 3
 (lumen4 p1 l1)
-;-> 120
+;-> 268
 (time (println (lumen4 p2 l2)))
-;-> 195
-;-> 762.82
+;-> 246
+;-> 65.522
 
-Questa funzione è velocissima.
-
-Verifica di correttezza:
-
-(for (i 1 100)
-  (setq p (rand 1000 100))
-  (setq l (rand 1000 10))
-  (if-not (= (lumen1 p l) (lumen2 p l) (lumen3 p l (lumen4 p l)))
-    (println p { } l)))
-;-> nil
+Questa funzione è molto veloce.
 
 Complessità delle quattro versioni
 ----------------------------------
@@ -3703,6 +3696,101 @@ Complessità delle quattro versioni
    ogni panchina incrementa i di 1
    ogni lampione incrementa j di 1
    => O(P + L)
+
+Versione 5
+----------
+Possiamo ottimizzare 'lumen4' in diversi modi:
+
+1) Eliminazione delle 'abs' nel ciclo interno
+'lumen4' chiama 'abs' due volte ad ogni confronto interno.
+'lumen5' trasforma il confronto usando algebra -> **zero abs interne**.
+Questo riduce enormemente il costo di ogni iterazione.
+
+2) Nessun 'let' interno
+'lumen4' usa 'let' per calcolare la distanza -> ogni 'let' crea un frame.
+'lumen5' non crea **nessun frame** dentro i cicli -> zero overhead.
+
+3) Uso di 'dolist' anziché '(while ...)' + accesso '(panchine i)'
+'dolist':
+- non fa lookup '(panchine idx)' -> evita un'operazione costosa
+- non richiede incrementi manuali
+- è implementato in modo molto efficiente a livello C
+Questo da solo rende 'lumen5' molto più rapida.
+
+4) Solo una chiamata a 'abs' per panchina
+In lumen4 le 'abs' possono essere tre per panchina (due interne + una esterna).
+In lumen5 solo la chiamata finale è necessaria.
+
+5) Meno accessi a liste
+'lumen4' fa diverse chiamate:
+  (panchine i)
+  (lampioni j)
+  (lampioni (+ j 1))
+'lumen5' riduce gli accessi e li fa in modo più lineare.
+
+Nota: l'algoritmo è lo stesso di 'lumen4', quindi la complessità è sempre lineare.
+
+; Funzione che calcola il raggio minimo per illuminare una disposizione di panchine e lampioni
+(define (lumen5 panchine lampioni)
+  (local (i n m out)
+    ; Ordiniamo panchine e lampioni come in lumen4.
+    ; L'algoritmo resta O(P + L), ma l'implementazione diventa più snella.
+    (sort panchine)
+    (sort lampioni)
+    ; Numero di panchine e lampioni
+    ; (setq n (length panchine)) ; Non serve
+    (setq m (length lampioni))
+    ; i = indice del lampione scelto come "candidato corrente".
+    (setq i 0)
+    ; out = distanza massima trovata.
+    (setq out 0)
+    ; Uso di dolist:
+    ; - evita di accedere continuamente a (panchine k)
+    ; - elimina un contatore manuale
+    ; - rimuove chiamate '(list index)' ripetute
+    ; Questo riduce il numero di operazioni nel ciclo principale,
+    ; rendendolo più veloce della variante lumin4.
+    (dolist (p panchine)
+      ; Ciclo per avanzare nei lampioni:
+      ; Si sfrutta una proprietà matematica:
+      ;   abs(p - L[i+1]) < abs(p - L[i])
+      ; è equivalente a:
+      ;   (p - L[i]) > (L[i+1] - p)
+      ; cioè **non serve abs**, basta confrontare due differenze semplici.
+      ; Questo elimina *tutte* le chiamate a abs() nel ciclo interno.
+      ; In lumen4 invece le abs vengono chiamate continuamente.
+      (while (and (< (+ i 1) m)
+                  (> (- p (lampioni i))
+                     (- (lampioni (+ i 1)) p)))
+        (++ i))
+      ; Aggiorna la distanza massima (1 sola abs a ciclo esterno).
+      ; Eliminato il let interno usato in lumen4 che creava un frame
+      ; a ogni iterazione: qui l'allocazione è zero.
+      (setq out (max out (abs (- (lampioni i) p))))
+    )
+    out))
+
+Proviamo:
+
+(lumen5 panc lamp)
+;-> 3
+(lumen5 p1 l1)
+;-> 268
+(time (println (lumen5 p2 l2)))
+;-> 246
+;-> 15.587
+
+Questa funzione è la più veloce in assoluto.
+
+Verifica di correttezza di tutte le funzioni:
+
+(for (i 1 100)
+  (setq p (rand 1000 100))
+  (setq l (rand 1000 10))
+  (if-not (= (lumen1 p l) (lumen2 p l) (lumen3 p l (lumen4 p l) (lumen5 p l)))
+    (println p { } l)))
+;-> nil
+
 
 ============================================================================
 
