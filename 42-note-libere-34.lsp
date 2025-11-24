@@ -3413,5 +3413,296 @@ k = 2  -> flip di 2 bit
 
 Risultato finale: ("101" "001" "111" "100" "011" "000" "110")
 
+
+-------------------
+Panchine e lampioni
+-------------------
+
+Lungo un viale rettilineo ci sono panchine P e lampioni L.
+
+      P   L       P       L   P   P   P
+  *---*---*---*---*---*---*---*---*---*-
+  0   1   2   3   4   5   6   7   8   9
+
+
+Versione 1
+----------
+Ricerca brute-force con un ciclo per il raggio che va dalla posizione minima alla posizione massima con passo 1 e verifica se il raggio corrente soddisfa le condizioni.
+
+; Funzione che verifica se una panchina è illuminata da una lista di lampioni com raggio r (lumen)
+(define (check? p lmp r)
+  (exists (fn(x) (<= (abs (- p x)) r)) lmp))
+
+(setq panc '(1 4 7 8 9))
+(setq lamp '(2 6))
+
+(check? 1 lamp 2)
+;-> 2
+(check? 8 lamp 2)
+;-> 6
+(check? 9 lamp 2)
+;-> nil
+
+; Funzione che calcola il raggio minimo per illuminare una disposizione di panchine e lampioni
+(define (lumen1 panchine lampioni)
+  (local (min-lumen max-lumen sol stop)
+    (setq sol nil)
+    (sort panchine)
+    (sort lampioni)
+    (setq max-lumen (max (panchine -1) (lampioni -1)))
+    (setq min-lumen (min (panchine 0) (lampioni 0)))
+    ;(println min-lumen { } max-lumen)
+    (setq stop nil)
+    (for (raggio min-lumen max-lumen 1 stop)
+      (when (for-all (fn(x) (check? x lampioni raggio)) panchine)
+        (setq sol raggio) (setq stop true)))
+    sol))
+
+Proviamo:
+
+(lumen1 panc lamp)
+;-> 3
+
+(setq p1 (rand 1000 100))
+(setq l1 (rand 1000 10))
+(lumen1 p1 l1)
+;-> 120
+
+La funzione è lenta per valori grandi di panchine e lampioni.
+
+
+(setq p2 (rand 50000 5000))
+(setq l2 (rand 50000 1000))
+
+(time (println (lumen1 p2 l2)))
+;-> 195
+;-> 4078.597
+
+Versione 2
+----------
+Modifichiamo la funzione inserendo una ricerca binaria al posto del ciclo 'for' (che aumenta r solamente di 1 per ogni passo).
+
+; Funzione che calcola il raggio minimo per illuminare una disposizione di panchine e lampioni
+(define (lumen2 panchine lampioni)
+  (local (low high mid sol)
+    (sort panchine)
+    (sort lampioni)
+    ; raggio massimo possibile = distanza max tra estremi
+    (setq high (max (abs (- (panchine -1) (lampioni 0)))
+                    (abs (- (lampioni -1) (panchine 0)))))
+    (setq low 0)
+    (setq sol nil)
+    (while (<= low high)
+      (setq mid (/ (+ low high) 2))
+      (if (for-all (fn(x) (check? x lampioni mid)) panchine)
+          (begin
+            (setq sol mid)       ; mid funziona: prova a ridurre
+            (setq high (- mid 1)))
+          (begin
+            (setq low (+ mid 1)) ; mid non funziona: aumenta
+          ))
+    )
+    sol))
+
+Proviamo:
+
+(lumen2 panc lamp)
+;-> 3
+
+(lumen2 p1 l1)
+;-> 120
+
+(time (println (lumen2 p2 l2)))
+;-> 145
+;-> 6078.469
+
+Questa modifica ha peggiorato il tempo di esecuzione.
+Probabilmente la funzione nativa 'exists' in 'check?' è più veloce.
+
+Versione 3
+----------
+Ottimizziamo anche la funzione 'check?' (usando una ricerca binaria anche tra i lampioni per trovare il più vicino a una panchina).
+
+; Ricerca binaria del lampione più vicino alla panchina p.
+(define (closest-lamp p lamp)
+  (letn ((low 0) (high (- (length lamp) 1)) (best nil))
+    (while (<= low high)
+      (let ((mid (div (+ low high) 2)))
+        (if (< (lamp mid) p)
+            (setq low (+ mid 1))
+            (setq high (- mid 1)))
+        ; memorizza il candidato più vicino visto finora
+        (if (nil? best)
+            (setq best (lamp mid))
+            (when (< (abs (- p (lamp mid))) (abs (- p best)))
+              (setq best (lamp mid)))))
+    )
+    best))
+
+; Funzione che verifica se una panchina è illuminata da una lista di lampioni com raggio r (lumen)
+(define (check p lamp r)
+  (let ((near (closest-lamp p lamp)))
+    (<= (abs (- p near)) r)))
+
+; Funzione che calcola il raggio minimo per illuminare una disposizione di panchine e lampioni
+(define (lumen3 panchine lampioni)
+  (local (low high mid sol)
+    (sort panchine)
+    (sort lampioni)
+    (setq high (max (abs (- (panchine -1) (lampioni 0)))
+                    (abs (- (lampioni -1) (panchine 0)))))
+    (setq low 0)
+    (setq sol nil)
+    (while (<= low high)
+      (setq mid (/ (+ low high) 2))
+      (if (for-all (fn(x) (check x lampioni mid)) panchine)
+          (begin
+            (setq sol mid)
+            (setq high (- mid 1)))
+          (setq low (+ mid 1))))
+    sol))
+
+Proviamo:
+
+(lumen3 panc lamp)
+;-> 3
+(lumen3 p1 l1)
+;-> 120
+(time (println (lumen3 p2 l2)))
+;-> 195
+;-> 1984.523
+
+Questa verione è più veloce di 'lumen1' e 'lumen2'.
+
+Versione 4
+----------
+
+Possiamo scrivere una funzione ancora più veloce che non usa ricerca binaria: ci muoviamo in parallelo lungo le due liste, avanzando l'indice dei lampioni solo quando serve.
+
+Algoritmo
+---------
+1. Ordina panchine e lampioni.
+2. Usa due indici:
+   - 'i' per scorrere le panchine
+   - 'j' per scorrere i lampioni
+3. Per ogni panchina:
+   - prova il lampione attuale lampioni[j]
+   - se il successivo lampioni[j+1] è più vicino, incrementa j
+   - ripeti finché conviene
+4. Il lampione selezionato è sempre il più vicino, perché:
+   - p cresce monotonicamente
+   - j avanza solo in avanti
+5. Aggiorna continuamente la distanza massima (raggio minimo).
+6. Alla fine questa distanza è il raggio minimo richiesto.
+(Si tratta dello stesso principio del merge-sort)
+
+Complessità
+-----------
+Ogni panchina incrementa 'i' di 1 -> O(P)
+Ogni lampione incrementa 'j' di 1 -> al massimo M volte -> O(L)
+Totale: O(P + L) --> complessità lineare
+
+(define (lumen4 panchine lampioni)
+  (local (i j n m p l dist-max)
+    ; Le due liste vengono ordinate. Questo è fondamentale,
+    ; perché l'algoritmo sfrutta l'ordine crescente di panchine e lampioni
+    ; per scorrere entrambe le liste una sola volta.
+    (sort panchine)
+    (sort lampioni)
+    ; n = numero panchine, m = numero lampioni
+    (setq n (length panchine))
+    (setq m (length lampioni))
+    ; i scorre le panchine, j scorre i lampioni
+    ; entrambi partono dall'inizio delle rispettive liste
+    (setq i 0)
+    (setq j 0)
+    ; dist-max terrà la distanza massima minima trovata
+    ; cioè il raggio minimo necessario per coprire tutte le panchine
+    (setq dist-max 0)
+    ; Ciclo principale: si processa ogni panchina
+    (while (< i n)
+      ; p = posizione della panchina corrente
+      (setq p (panchine i))
+      ; Per ogni panchina, ci si sposta tra i lampioni
+      ; SEMPRE e SOLO in avanti.
+      ; L'idea chiave:
+      ; - p cresce nel tempo (perché scorriamo panchine ordinate)
+      ; - anche j può solo crescere, mai tornare indietro
+      ; Si muove l'indice j finché il lampione successivo è PIÙ vicino
+      ; alla panchina corrente rispetto al lampione attuale.
+      ; Questa condizione è ciò che permette la linearità:
+      ; j viene incrementato al massimo m volte in tutta la funzione.
+      (while (and (< (+ j 1) m)
+                  (<= (abs (- p (lampioni (+ j 1))))
+                      (abs (- p (lampioni j)))))
+        (++ j))
+      ; A questo punto, lampioni[j] è il lampione più vicino alla panchina p.
+      (setq l (lampioni j))
+      ; Calcoliamo la distanza attuale.
+      (let ((d (abs (- p l))))
+        ; Se questa distanza è più grande della distanza massima trovata finora,
+        ; aggiorniamo dist-max. La distanza massima tra tutte le panchine
+        ; e il loro lampione più vicino è il raggio minimo necessario.
+        (when (> d dist-max)
+          (setq dist-max d)))
+      ; Passiamo alla prossima panchina
+      (++ i)
+    )
+    ; dist-max è il raggio minimo che illumina tutte le panchine
+    dist-max))
+
+Proviamo:
+
+(lumen4 panc lamp)
+;-> 3
+(lumen4 p1 l1)
+;-> 120
+(time (println (lumen4 p2 l2)))
+;-> 195
+;-> 762.82
+
+Questa funzione è velocissima.
+
+Verifica di correttezza:
+
+(for (i 1 100)
+  (setq p (rand 1000 100))
+  (setq l (rand 1000 10))
+  (if-not (= (lumen1 p l) (lumen2 p l) (lumen3 p l (lumen4 p l)))
+    (println p { } l)))
+;-> nil
+
+Complessità delle quattro versioni
+----------------------------------
+  P = numero di panchine
+  L = numero di lampioni
+  R = intervallo dei raggi testati (max-r - min-r)
+
+1) lumen1  (versione iniziale, raggio lineare)
+   -------------------------------------------
+   check(p) = O(L)
+   test su tutti i raggi = R iterazioni
+   test su tutte le panchine = P
+   => O(P * L * R)
+
+2) lumen2  (ricerca binaria sul raggio)
+   ------------------------------------
+   check(p) = O(L)
+   ricerca binaria sul raggio = log R tentativi
+   => O(P * L * log R)
+
+3) lumen3  (ricerca binaria su raggio e su lampione piu' vicino)
+   -------------------------------------------------------------
+   check(p) = O(log L)
+   ricerca binaria sul raggio = log R
+   => O(P * log L * log R)
+
+4) lumen4  (algoritmo lineare)
+   --------------------------------------
+   scansione con due indici (stile merge)
+   ogni panchina incrementa i di 1
+   ogni lampione incrementa j di 1
+   => O(P + L)
+
 ============================================================================
 

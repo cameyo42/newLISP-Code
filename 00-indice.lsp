@@ -3313,6 +3313,7 @@ NOTE LIBERE 34
   Risolutore di rapporti
   Distanza di Hamming
   Hamming Ball
+  Panchine e lampioni
 
 PROBLEMI SUI DADI
 =================
