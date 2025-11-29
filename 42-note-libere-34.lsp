@@ -2682,7 +2682,7 @@ Algoritmo
   4. Si mantiene la catena più lunga possibile.
 - Questo garantisce che ogni oggetto nella catena può essere inserito nel successivo.
 3. Ricostruzione della catena
-- Durante la procedura, si mantiene un array dei **predecessori** per ogni oggetto.
+- Durante la procedura, si mantiene un array dei predecessori per ogni oggetto.
 - Alla fine, risalendo dagli oggetti con lunghezza massima della catena, si può ricostruire l'intera sequenza di oggetti.
 
 Note:
@@ -3703,12 +3703,12 @@ Possiamo ottimizzare 'lumen4' in diversi modi:
 
 1) Eliminazione delle 'abs' nel ciclo interno
 'lumen4' chiama 'abs' due volte ad ogni confronto interno.
-'lumen5' trasforma il confronto usando algebra -> **zero abs interne**.
+'lumen5' trasforma il confronto usando algebra -> zero abs interne.
 Questo riduce enormemente il costo di ogni iterazione.
 
 2) Nessun 'let' interno
 'lumen4' usa 'let' per calcolare la distanza -> ogni 'let' crea un frame.
-'lumen5' non crea **nessun frame** dentro i cicli -> zero overhead.
+'lumen5' non crea nessun frame dentro i cicli -> zero overhead.
 
 3) Uso di 'dolist' anziché '(while ...)' + accesso '(panchine i)'
 'dolist':
@@ -3756,8 +3756,8 @@ Nota: l'algoritmo è lo stesso di 'lumen4', quindi la complessità è sempre lin
       ;   abs(p - L[i+1]) < abs(p - L[i])
       ; è equivalente a:
       ;   (p - L[i]) > (L[i+1] - p)
-      ; cioè **non serve abs**, basta confrontare due differenze semplici.
-      ; Questo elimina *tutte* le chiamate a abs() nel ciclo interno.
+      ; cioè non serve abs, basta confrontare due differenze semplici.
+      ; Questo elimina tutte le chiamate a abs() nel ciclo interno.
       ; In lumen4 invece le abs vengono chiamate continuamente.
       (while (and (< (+ i 1) m)
                   (> (- p (lampioni i))
@@ -3969,6 +3969,140 @@ Versione code-golf (161 caratteri, one-line):
 ;-> >  >  >  >  >  >
 ;-> > > > > > >
 ;-> >>>>>>
+
+
+------------------
+Pagine di un libro
+------------------
+
+Le pagine di un libro sono numerate da 1 a n.
+Quando sono stati sommati i numeri di pagina del libro, uno dei numeri di pagina è stato aggiunto per errore due volte, ottenendo una somma errata di 5100.
+Qual è il numero della pagina aggiunta due volte?
+
+La somma dei primi N numeri vale:
+
+; Funzione che calcola la somma dei primi n numeri
+(define (somma n) (/ (* n (+ n 1)) 2))
+
+Ponendo x la pagina contata due volte, risulta:
+
+  n*(n+1)/2 + x = somma = 5100
+
+Possiamo stabilire un limite superiore e inferiore per il numero di pagine contenute nel libro, dove il limite superiore massimizza la somma delle pagine e il limite inferiore massimizza la pagina extra (e quindi minimizza la somma totale delle pagine).
+In altre parole, ponendo x = 1 troviamo il limite minimo, mentre ponendo x = n troviamo il limite massimo:
+
+Limite superiore di n: n*(n+1)/2 + 1 = somma = 5100
+  n^2 + n - 10198 = 0
+  n^2 + n - 2*(s - 1) = 0
+
+Limite inferiore di n: n*(n+1)/2 + n = s = 5100
+  n^2 + 3*n - 10200 = 0
+  n^2 + 3*n - 2*s = 0
+
+Dopo aver calcolato i limiti (inferiore e superiore) di n possiamo calcolare i valori della x e poi verificare quale risultato sia corretto.
+
+Nota: le equazioni n^2 + n - 2*(s - 1) = 0 e n^2 + 3*n - 2*s = 0 hanno sempre radici reali, perchè (b^2 - 4ac) è sempre positivo.
+
+(define (quadratic a b c)
+"Find the solutions of A*x^2 + B*x + C = 0"
+  (letn ((delta (sub (mul b b) (mul 4 a c)))
+         (den (mul 2 a))
+         x1 x2 i1 i2)
+    (cond
+      ((= a 0)  ; equazione lineare
+        (if (!= b 0)
+            (setq x1 (sub 0 (div c b))  x2 x1  i1 0.0  i2 0.0)))
+      ((> delta 0) ; due radici reali
+        (letn ((sd (sqrt delta)))
+          (setq x1 (div (add (sub 0 b) sd) den))
+          (setq x2 (div (sub (sub 0 b) sd) den))
+          (setq i1 0.0 i2 0.0)))
+      ((< delta 0) ; radici complesse
+        (letn ((sd (sqrt (sub 0 delta))))
+          (setq x1 (div (sub 0 b) den))
+          (setq x2 x1)
+          (setq i1 (div sd den) i2 (sub 0 (div sd den)))))
+      (true ; delta = 0: radici coincidenti
+        (setq x1 (sub 0 (div b den)))
+        (setq x2 x1 i1 0.0 i2 0.0))
+    )
+    (list (list x1 i1) (list x2 i2))))
+
+; Funzione che calcola x per un dato n:
+(define (solve-x s n) (- s (/ (* n (+ n 1)) 2)))
+
+; Funzione che calcola la pagina che è stata calcolata due volte
+(define (book s)
+  (setq upper (quadratic 1 1 (* -2 (- s 1))))
+  (println "upper: " upper)
+  (cond
+    ((> (upper 0 0) 0) (setq massimo (floor (upper 0 0))))
+    ((> (upper 1 0) 0) (setq massimo (floor (upper 1 0))))
+    (true (println "Errore: nessuna soluzione positiva " upper)))
+  (setq lower (quadratic 1 3 (* -2 s)))
+  (println "lower: " lower)
+  (cond
+    ((> (lower 0 0) 0) (setq minimo (ceil (lower 0 0))))
+    ((> (lower 1 0) 0) (setq minimo (ceil (lower 1 0))))
+    (true (println "Errore: nessuna soluzione positiva " lower)))
+  (println "minimo: " minimo)
+  (println "massimo: " massimo)
+  (setq stop nil)
+  (for (num minimo massimo 1 stop)
+    (setq x (solve-x s num))
+    (setq pagine num)
+    (println "num: " num)
+    (setq x (solve-x s num))
+    (println "x: " x)
+    (print "(somma " num "):" (somma num))
+    (when (and (!= x 0) (= (- s x) (somma num)))
+      (setq pagine num)
+      (setq stop true)))
+  (if-not stop
+      (println "Errore: nessuna soluzione")
+      ;else
+      (begin
+        (println "Somma delle pagine da 1 a " pagine " : " (somma pagine))
+        (println "Somma delle pagine (" s ") - pagina doppia (" x ") : " (- s x))
+        (println "Pagina doppia (contata due volte): " x))))
+
+Proviamo:
+
+(book 5100)
+;-> upper: ((100.4863852209792 0) (-101.4863852209792 0))
+;-> lower: ((99.50618792925511 0) (-102.5061879292551 0))
+;-> minimo: 100
+;-> massimo: 100
+;-> num: 100
+;-> x: 50
+;-> (somma 100):5050Somma delle pagine da 1 a 100 : 5050
+;-> Somma delle pagine (5100) - pagina doppia (50) : 5050
+;-> Pagina doppia (contata due volte): 50
+;-> 50
+
+(book 1031)
+;-> upper: ((44.88997686714546 0) (-45.88997686714546 0))
+;-> lower: ((43.93401809217406 0) (-46.93401809217406 0))
+;-> minimo: 44
+;-> massimo: 44
+;-> num: 44
+;-> x: 41
+;-> (somma 44):990Somma delle pagine da 1 a 44 : 990
+;-> Somma delle pagine (1031) - pagina doppia (41) : 990
+;-> Pagina doppia (contata due volte): 41
+;-> 41
+
+(book 500001500000)
+;-> upper: ((1000000.999998 0) (-1000001.999998 0))
+;-> lower: ((1000000 0) (-1000003 0))
+;-> minimo: 1000000
+;-> massimo: 1000000
+;-> num: 1000000
+;-> x: 1000000
+;-> (somma 1000000):500000500000Somma delle pagine da 1 a 1000000 : 500000500000
+;-> Somma delle pagine (500001500000) - pagina doppia (1000000) : 500000500000
+;-> Pagina doppia (contata due volte): 1000000
+;-> 1000000
 
 ============================================================================
 

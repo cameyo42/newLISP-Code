@@ -3315,6 +3315,7 @@ NOTE LIBERE 34
   Hamming Ball
   Panchine e lampioni
   Allungamento di una stringa
+  Pagine di un libro
 
 PROBLEMI SUI DADI
 =================
