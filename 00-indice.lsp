@@ -3316,6 +3316,8 @@ NOTE LIBERE 34
   Panchine e lampioni
   Allungamento di una stringa
   Pagine di un libro
+  Massime occorrenze dei numeri nelle tavole pitagoriche
+  Lista di tutti i colori RGB (esadecimale)
 
 PROBLEMI SUI DADI
 =================

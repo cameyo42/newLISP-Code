@@ -8041,5 +8041,13 @@ Funzione di conversione HEX --> RGB:
 (hex-rgb "FFD700")
 ;-> (255 215 0)
 
+Conversione RGB --> HEX con "format":
+
+(format "%02X%02X%02X" 125 15 33)
+;-> "7D0F21"
+(setq rgb '(16 24 255))
+(format "%02X%02X%02X" rgb)
+;-> "1018FF"
+
 =============================================================================
 

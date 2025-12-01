@@ -4104,5 +4104,71 @@ Proviamo:
 ;-> Pagina doppia (contata due volte): 1000000
 ;-> 1000000
 
+
+------------------------------------------------------
+Massime occorrenze dei numeri nelle tavole pitagoriche
+------------------------------------------------------
+
+Dato un numero intero positivo N:
+1) calcolare la tavola pitagorica di ordine N, cioè la tabella di moltiplicazione 1-N.
+2) calcolare quale numero ha il massimo delle occorrenze (se esistono più numeri con le stesse occorrenze, allora prendere il numero con valore massimo).
+
+Esempio:
+M(n) è la tabella in cui m(x,y) = x*y per x = 1 a n e y = 1 a n.
+In M(10), i numeri più frequenti sono 6, 8, 10, 12, 18, 20, 24, 30, 40, ciascuno dei quali ricorre 4 volte.
+Il più grande di questi numeri è 40, quindi a(10) = 40.
+
+Sequenza OEIS A057143:
+Largest of the most frequently occurring numbers in 1-to-n multiplication table.
+  1, 2, 6, 4, 4, 12, 12, 24, 24, 40, 40, 24, 24, 24, 60, 60, 60, 36, 36,
+  60, 60, 60, 60, 120, 120, 120, 120, 168, 168, 120, 120, 120, 120, 120,
+  120, 180, 180, 180, 180, 120, 120, 120, 120, 120, 360, 360, 360, 360,
+  360, 360, 360, 360, 360, 360, 360, 360, 360, 360, ...
+
+(define (major N)
+  (let ( (pita '()) (unici '()) )
+    (for (i 1 N)
+      (for (j 1 N)
+        (push (* i j) pita -1)))
+    (setq unici (unique pita))
+    (last (first (sort (map list (count unici pita) unici) >)))))
+
+(map major (sequence 1 70))
+;-> (1 2 6 4 4 12 12 24 24 40 40 24 24 24 60 60 60 36 36
+;->  60 60 60 60 120 120 120 120 168 168 120 120 120 120 120
+;->  120 180 180 180 180 120 120 120 120 120 360 360 360 360
+;->  360 360 360 360 360 360 360 360 360 360 360 360 360 360
+;->  360 360 360 360 360 360 360 840)
+
+
+-----------------------------------------
+Lista di tutti i colori RGB (esadecimale)
+-----------------------------------------
+
+Scrivere una funzione che genera tutti i colori RGB in formato esadecimale.
+Il numero di colori RGB è 16777216: 16 milioni 777 mila 216.
+
+Esempi:
+  rgb = (125 15 33)
+  esadecimale = "7D0F21"
+  
+  rgb = (16 24 255)
+  esadecimale = "1018FF"
+
+(define (all-rgb)
+  (let (rgb '())
+    (for (r 0 255)
+      (for (g 0 255)
+        (for (b 0 255)
+          (push (format "%02X%02X%02X" r g b) rgb))))))
+
+(time (println (length (setq res (all-rgb)))))
+;-> 16777216
+;-> 16700.35
+
+(slice res 100000 10)
+;-> ("FE795F" "FE795E" "FE795D" "FE795C" "FE795B" "FE795A" "FE7959"
+;->  "FE7958" "FE7957" "FE7956")
+
 ============================================================================
 
