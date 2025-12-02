@@ -4170,5 +4170,201 @@ Esempi:
 ;-> ("FE795F" "FE795E" "FE795D" "FE795C" "FE795B" "FE795A" "FE7959"
 ;->  "FE7958" "FE7957" "FE7956")
 
+
+-------------------------------------------------------------
+Sequenza dei numeri k tali che 2^k non supera l'n-esimo primo
+-------------------------------------------------------------
+
+Sequenza OEIS A098388
+a(n) = floor(log_2(prime(n))).
+  1, 1, 2, 2, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 9, 9, 9, 9, 9, 9, 9, 9, ...
+
+a(n) is the greatest k such that 2^k does not exceed prime(n)
+
+(define (primes num-primes)
+"Generate a given number of prime numbers (starting from 2)"
+  (let ( (k 3) (tot 1) (out '(2)) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k 2))
+    out))
+
+(define (seq limite)
+  (map (fn(x) (floor (log x 2))) (primes limite)))
+
+(seq 105)
+;-> (1 1 2 2 3 3 4 4 4 4 4 5 5 5 5 5 5 5 6 6 6 6 6 6
+;->  6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+;->  7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+;->  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+;->  8 9 9 9 9 9 9 9 9)
+
+
+--------------------------------------------------------------------
+Numero di 0 nella rappresentazione binaria dell'n-esimo numero primo
+--------------------------------------------------------------------
+
+Sequenza OEIS A035103:
+Number of 0's in binary representation of n-th prime.
+  1, 0, 1, 0, 1, 1, 3, 2, 1, 1, 0, 3, 3, 2, 1, 2, 1, 1, 4, 3, 4, 2, 3, 3, 4,
+  3, 2, 2, 2, 3, 0, 5, 5, 4, 4, 3, 3, 4, 3, 3, 3, 3, 1, 5, 4, 3, 3, 1, 3, 3,
+  3, 1, 3, 1, 7, 5, 5, 4, 5, 5, 4, 5, 4, 3, 4, 3, 4, 5, 3, 3, 5, 3, 2, 3, 2,
+  1, 5, 4, 5, 4, 4, 4, 2, 4, 2, 2, 5, 4, 3, 2, 3, 1, 2, 2, 2, 1, 1, 7, 6, 5,
+  6, 5, 5, 5, 4, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (bit1-count num)
+"Count the bit 1 of an integer"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter))
+    counter))
+
+(define (bit0-count num)
+"Count the bit 0 of an integer"
+  (- (length (bits num)) (bit1-count num)))
+
+(define (seq limite)
+  (let (out '())
+    (for (num 2 limite)
+      (if (prime? num) (push (bit0-count num) out -1)))
+    out))
+
+(seq 500)
+;-> (1 0 1 0 1 1 3 2 1 1 0 3 3 2 1 2 1 1 4 3 4 2 3 3 4
+;->  3 2 2 2 3 0 5 5 4 4 3 3 4 3 3 3 3 1 5 4 3 3 1 3 3
+;->  3 1 3 1 7 5 5 4 5 5 4 5 4 3 4 3 4 5 3 3 5 3 2 3 2
+;->  1 5 4 5 4 4 4 2 4 2 2 5 4 3 2 3 1 2 2 2)
+
+
+----------------------
+Quanti pesci nel lago?
+----------------------
+
+Un biologo va in un lago e cattura e marca k pesci il giorno 1.
+Il giorno 2 cattura k pesci e ne trova x già marcati il giorno precedente (quindi ne marca k-x).
+Il giorno 3 cattura k pesci e ne trova y già marcati i gioni precedenti (quindi ne marca k-y).
+Stimare quanti pesci ci sono nel lago.
+
+Descrizione del problema
+- Giorno 1: catturiamo e marchiamo k pesci.
+- Giorno 2: catturiamo k pesci e ne troviamo x gia' marcati.
+  Quindi marchiamo (k - x) pesci nuovi.
+- Giorno 3: catturiamo k pesci e ne troviamo y marcati nei giorni precedenti.
+  Quindi marchiamo (k - y) pesci nuovi.
+- Obiettivo: stimare il numero totale N di pesci nel lago.
+
+Assunzioni del modello classico: popolazione chiusa, mescolamento casuale, marcatura innocua, stessa probabilita' di cattura per tutti.
+
+1. Metodo elementare
+--------------------
+A) Stima da giorni 1 e 2 (metodo Lincoln–Petersen)
+
+Stima semplice:
+
+  N12 = (k * k) / x
+
+Stima corretta per piccoli campioni (formula di Chapman):
+
+  N12c = ((k + 1) * (k + 1)) / (x + 1) - 1
+
+B) Stima da giorni 2 e 3
+
+Dopo il giorno 2, il numero totale di pesci marcati è:
+
+  M2 = k + (k - x) = 2*k - x
+
+Usando i dati del giorno 3:
+
+Stima semplice:
+
+  N23 = (M2 * k) / y
+      = (k * (2*k - x)) / y
+
+Stima di Chapman:
+
+  N23c = ((M2 + 1) * (k + 1)) / (y + 1) - 1
+
+Nota: Se le ipotesi del modello sono valide, N12 e N23 dovrebbero essere simili.
+Se sono molto diversi, le assunzioni potrebbero essere violate.
+
+2. Metodo rigoroso: massimo della verosimiglianza (MLE)
+-------------------------------------------------------
+Il modello usa la distribuzione ipergeometrica.
+
+Giorno 2 (recapture x):
+
+Probabilita':
+
+  P2 = C(k, x) * C(N - k, k - x) / C(N, k)
+
+Giorno 3 (recapture y):
+
+Dopo giorno 2 i marcati totali sono:
+
+  M2 = 2*k - x
+
+Probabilita':
+
+  P3 = C(M2, y) * C(N - M2, k - y) / C(N, k)
+
+Verosimiglianza totale (in funzione di N):
+
+  L(N) = P2 * P3
+
+La stima MLE è il valore di N (intero) che massimizza L(N).
+
+La ricerca si fa provando N = 2*k, 2*k+1, ..., fino a un massimo (es. 10*k
+o finchè L(N) scende molto).
+
+Vediamo una funzione che esegue la ricerca MLE con log-verosimiglianza:
+
+(define (log-choose n k)
+  (let ((k (min k (sub n k))))
+    (if (< k 0) -1e99
+      (let ((s 0) (i 1))
+        (for (i 1 k)
+          (setf s (add s (log (div (add n (sub k i) 1) i)))))
+        s))))
+
+(define (log-hyperprob N M sample success)
+  (add
+    (log-choose M success)
+    (log-choose (sub N M) (sub sample success))
+    (sub (log-choose N sample))))
+
+(define (estimate-N-mle k x y Nmax)
+  (let ((M2 (sub (add k k) x))
+        (bestN 0)
+        (bestLogL -1e99))
+    (for (N (max (add k k) (add M2 k)) Nmax)
+      (letn ((l1 (log-hyperprob N k k x))
+            (l2 (log-hyperprob N M2 k y))
+            (logL (add l1 l2)))
+        (when (> logL bestLogL)
+          (setf bestLogL logL)
+          (setf bestN N))))
+    (list bestN bestLogL)))
+
+(estimate-N-mle 100 20 35 2000)
+;-> (509 -4.619505243265053)
+
+3. Considerazioni pratiche
+--------------------------
+- Confrontare le due stime semplici N12 e N23: devono essere simili.
+- Se vogliamo una singola stima robusta usiamo il metodo MLE.
+- Per un intervallo di confidenza, possiamo esaminare i valori di N vicino al massimo e vedere dove la log-verosimiglianza scende di una quantità standard (profilo della verosimiglianza).
+
 ============================================================================
 

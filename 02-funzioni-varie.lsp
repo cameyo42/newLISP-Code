@@ -3248,7 +3248,7 @@ Altra funzione per generare un poligono con i punti ordinati in modo antiorario:
 
 (define (poligono punti)
   ;; Calcola il centroide
-  (setq centroide 
+  (setq centroide
         (list (div (apply add (map (fn (p) (p 0)) punti)) (length punti))
               (div (apply add (map (fn (p) (p 1)) punti)) (length punti))))
   ; (println centroide)
@@ -6983,6 +6983,19 @@ Radice n-esima di un numero
 ;-> 2.350038405769921
 (pow 30.5 (div 4))
 ;-> 2.350038405769921
+
+Versione con errore massimo (eps):
+
+(define (nth-root n num eps)
+  (let ( (x1 num) (x2 (div num n)) )
+    (setq eps (or eps 1e-9))
+    (until (<= (abs (sub x1 x2)) eps)
+      (setq x1 x2)
+      (setq x2 (div (add (mul x1 (- n 1)) (div num (pow x1 (- n 1)))) n)))
+    x2))
+
+(nth-root 25 100)
+;-> 1.202264434617413
 
 
 ------------------------------

@@ -3318,6 +3318,9 @@ NOTE LIBERE 34
   Pagine di un libro
   Massime occorrenze dei numeri nelle tavole pitagoriche
   Lista di tutti i colori RGB (esadecimale)
+  Sequenza dei numeri k tali che 2^k non supera l'n-esimo primo
+  Numero di 0 nella rappresentazione binaria dell'n-esimo numero primo
+  Quanti pesci nel lago?
 
 PROBLEMI SUI DADI
 =================
