@@ -3321,6 +3321,7 @@ NOTE LIBERE 34
   Sequenza dei numeri k tali che 2^k non supera l'n-esimo primo
   Numero di 0 nella rappresentazione binaria dell'n-esimo numero primo
   Quanti pesci nel lago?
+  Numeri non-square, non-cube, squarefree e cubefree
 
 PROBLEMI SUI DADI
 =================

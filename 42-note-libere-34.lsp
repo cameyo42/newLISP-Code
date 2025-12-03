@@ -4366,5 +4366,114 @@ Vediamo una funzione che esegue la ricerca MLE con log-verosimiglianza:
 - Se vogliamo una singola stima robusta usiamo il metodo MLE.
 - Per un intervallo di confidenza, possiamo esaminare i valori di N vicino al massimo e vedere dove la log-verosimiglianza scende di una quantità standard (profilo della verosimiglianza).
 
+
+--------------------------------------------------
+Numeri non-square, non-cube, squarefree e cubefree
+--------------------------------------------------
+
+Non-Square: numeri che non sono il quadrato di un numero intero positivo
+Non-Cube: numeri che non sono il cubo di un numero intero positivo
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (isq (int (sqrt num)))
+    (= num (* isq isq))))
+
+(define (cube? num)
+"Check if an integer is a perfect cube"
+  (let ((cr (int (pow num (div 3)))))
+    (cond ((= (* cr cr cr) num) true)
+          ((= (* (+ cr 1) (+ cr 1) (+ cr 1)) num) true)
+          ((= (* (- cr 1) (- cr 1) (- cr 1)) num) true)
+          (true nil))))
+
+Sequenza OEIS A000037:
+Numbers that are not squares (or, the nonsquares).
+  2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24,
+  26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44,
+  45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+  65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83,
+  84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, ...
+
+Formule:
+  a(n) = n + floor(1/2 + sqrt(n)).
+  a(n) = n + floor(sqrt( n + floor(sqrt n))).
+
+(clean square? (sequence 1 99))
+;-> (2 3 5 6 7 8 10 11 12 13 14 15 17 18 19 20 21 22 23 24
+;->  26 27 28 29 30 31 32 33 34 35 37 38 39 40 41 42 43 44
+;->  45 46 47 48 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+;->  65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 82 83
+;->  84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99)
+
+Sequenza OEIS A007412:
+The noncubes: a(n) = n + floor((n + floor(n^(1/3)))^(1/3)).
+  2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+  23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+  42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+  60, 61, 62, 63, 65, 66, 67, 68, 69, 70, 71, ...
+
+(clean cube? (sequence 1 71))
+;-> (2 3 4 5 6 7 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+;->  23 24 25 26 28 29 30 31 32 33 34 35 36 37 38 39 40 41
+;->  42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59
+;->  60 61 62 63 65 66 67 68 69 70 71)
+
+Sequenza OEIS A094784:
+Numbers that are neither squares nor cubes.
+  2, 3, 5, 6, 7, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24,
+  26, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+  46, 47, 48, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 65,
+  66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, ...
+
+(clean (fn(x) (or (square? x) (cube? x))) (sequence 1 82))
+;-> (2 3 5 6 7 10 11 12 13 14 15 17 18 19 20 21 22 23 24
+;->  26 28 29 30 31 32 33 34 35 37 38 39 40 41 42 43 44 45
+;->  46 47 48 50 51 52 53 54 55 56 57 58 59 60 61 62 63 65
+;->  66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 82)
+
+SquareFree: numeri che non sono divisibili per un quadrato maggiore di 1.
+CubeFree: numeri che non sono divisibili per un cubo maggiore di 1.
+
+(define (squarefree? num)
+  (if (= num 1) true
+      (letn ( (fattori (factor num))
+              (unici (unique fattori)) )
+        ; non esiste un fattore quadrato?
+        (not (find 1 (count unici fattori) <)))))
+
+(define (cubefree? num)
+  (if (= num 1) true
+      (letn ( (fattori (factor num))
+              (unici (unique fattori)) )
+        ; non esiste un fattore cubico?
+        (not (find 2 (count unici fattori) <)))))
+
+Sequenza OEIS A005117:
+Squarefree numbers: numbers that are not divisible by a square greater than 1.
+  1, 2, 3, 5, 6, 7, 10, 11, 13, 14, 15, 17, 19, 21, 22, 23, 26, 29, 30, 31,
+  33, 34, 35, 37, 38, 39, 41, 42, 43, 46, 47, 51, 53, 55, 57, 58, 59, 61,
+  62, 65, 66, 67, 69, 70, 71, 73, 74, 77, 78, 79, 82, 83, 85, 86, 87, 89,
+  91, 93, 94, 95, 97, 101, 102, 103, 105, 106, 107, 109, 110, 111, 113, ...
+
+(filter squarefree? (sequence 1 113))
+;-> (1 2 3 5 6 7 10 11 13 14 15 17 19 21 22 23 26 29 30 31
+;->  33 34 35 37 38 39 41 42 43 46 47 51 53 55 57 58 59 61
+;->  62 65 66 67 69 70 71 73 74 77 78 79 82 83 85 86 87 89
+;->  91 93 94 95 97 101 102 103 105 106 107 109 110 111 113)
+
+Sequenza OEIS A004709:
+Cubefree numbers: numbers that are not divisible by any cube > 1.
+  1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23,
+  25, 26, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46,
+  47, 49, 50, 51, 52, 53, 55, 57, 58, 59, 60, 61, 62, 63, 65, 66, 67, 68, 69,
+  70, 71, 73, 74, 75, 76, 77, 78, 79, 82, 83, 84, 85, ...
+  
+(filter cubefree? (sequence 1 85))
+;-> (1 2 3 4 5 6 7 9 10 11 12 13 14 15 17 18 19 20 21 22 23
+;->  25 26 28 29 30 31 33 34 35 36 37 38 39 41 42 43 44 45 46
+;->  47 49 50 51 52 53 55 57 58 59 60 61 62 63 65 66 67 68 69
+;->  70 71 73 74 75 76 77 78 79 82 83 84 85)
+
 ============================================================================
 
