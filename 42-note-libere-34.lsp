@@ -4475,5 +4475,136 @@ Cubefree numbers: numbers that are not divisible by any cube > 1.
 ;->  47 49 50 51 52 53 55 57 58 59 60 61 62 63 65 66 67 68 69
 ;->  70 71 73 74 75 76 77 78 79 82 83 84 85)
 
+
+-----------------------------------------
+Somma massima di elementi non consecutivi
+-----------------------------------------
+
+Abbiamo una lista di numeri interi positivi.
+Partendo dal primo numero e attraversando la lista possiamo prendere qualunque numero con il solo vincolo di non poter prendere due numeri adiacenti.
+Scrivere una funzione che produce la somma massima con i numeri presi.
+
+Possiamo usare un approccio ricorsivo (con memoizzazione).
+Una funzione dfs(i) che calcola la somma massima che può essere presa a partire dall'indice i.
+A ogni indice, abbiamo due possibilità:
+Prendere il numero corrente e saltare quello successivo: lista[i] + dfs(i + 2)
+Saltare il numero corrente e considerare quello successivo: dfs(i + 1)
+Questo metodo funziona perchè quando ci troviamo nella posizione i, il massimo che possiamo ottenere dipende solo dalle scelte disponibili dalla posizione i in poi, non importa come siamo arrivati alla posizione i.
+Questa è la proprietà della sottostruttura ottimale che rende applicabile la programmazione dinamica.
+
+Algoritmo:
+- dfs(i) restituisce la somma massima ottenibile dagli indici i..end
+- Se l'indice va oltre la lista, restituisce 0
+- Se il valore e gia in memo, viene riusato
+- Altrimenti calcola:
+  - prendi = lst[i] + dfs(i+2)
+  - salta = dfs(i+1)
+- Salva il massimo in memo
+- Parte da dfs(0)
+
+(define (max-somma-lista lst)
+  (letn ((n (length lst)) (memo '()))
+    (define (dfs i)
+      (if (>= i n) '(0 ())
+        (let (m (lookup i memo))
+          (if m m
+            (letn ((res1 (dfs (+ i 1))) (sum1 (res1 0)) (list1 (res1 1))
+                   (res2 (dfs (+ i 2))) (sum2 (res2 0)) (list2 (res2 1))
+                   (sum2 (+ (lst i) sum2)) (list2 (cons (lst i) list2))
+                   (best (if (> sum2 sum1) (list sum2 list2) (list sum1 list1))))
+              (setf (lookup i memo) best)
+              best)))))
+    (dfs 0)))
+
+Proviamo:
+
+(max-somma-lista '(1 2 3 1))
+;-> (4 (1 3))
+(max-somma-lista '(3 2 7 10))
+;-> (13 (3 10))
+(max-somma-lista '(1 3 11 2 1 10))
+;-> (22 (1 11 10))
+
+Vediamo una versione iterativa (bottom-up).
+
+Algoritmo:
+- dp[i] contiene la somma massima ottenibile dalla posizione i
+- scelte[i] contiene la lista degli elementi corrispondenti
+- Costruzione bottom-up:
+  - Base: dp[n] = 0 e lista vuota
+  - Base: dp[n-1] = lst[n-1]
+  - Per ogni i da n-2 a 0:
+    - confronta "prendi" e "salta"
+    - salva in dp[i] il migliore
+    - salva in scelte[i] la lista corrispondente
+
+(define (max-somma-lista-iter lst)
+  (letn ((n (length lst)) (dp '()) (scelte '()) (i 0))
+    (for (k 0 n) (push 0 dp -1) (push '() scelte -1))
+    (setf (dp n) 0) (setf (scelte n) '())
+    (setf (dp (sub n 1)) (lst (sub n 1))) (setf (scelte (sub n 1)) (list (lst (sub n 1))))
+    (for (i (sub n 2) 0 -1)
+      (letn ((prendi (add (lst i) (dp (add i 2))))
+             (salta (dp (add i 1))))
+        (if (> prendi salta)
+          (begin (setf (dp i) prendi) (setf (scelte i) (cons (lst i) (scelte (add i 2)))))
+          (begin (setf (dp i) salta) (setf (scelte i) (scelte (add i 1)))))))
+    (list (dp 0) (scelte 0))))
+
+Proviamo:
+
+(max-somma-lista-iter '(1 2 3 1))
+;-> (4 (1 3))
+(max-somma-lista-iter '(3 2 7 10))
+;-> (13 (3 10))
+(max-somma-lista-iter '(1 3 11 2 1 10))
+;-> (22 (1 11 10))
+
+
+------------
+Il numero 37
+------------
+
+Dato un numero intero positivo N < 10 risulta:
+
+  NNN/(N+N+N) = 37, dove NNN è la concatenazione di N
+
+(define (il37 num)
+  (let ( (numer (int (dup (string num) 3) 0 10))
+         (denom (+ num num num)) )
+    (div numer denom)))
+
+(map il37 (sequence 1 9))
+;-> (37 37 37 37 37 37 37 37 37)
+
+In generale risulta che la soluzione sarà sempre 33...36...67 dove al posto dei primi puntini ci saranno tanti 3 e al posto dei secondi puntini ci saranno tanti 6.
+Per un numero a 1 cifra sarà 37.
+Per un numero a 2 cifre 3367.
+Per un numero a 3 cifre 333667.
+Per un numero a 4 cifre 33336667.
+Quindi tra il primo 3 e il 7 ci saranno tanti 3 e tanti 6 pari al numero delle cifre meno 1.
+
+(define (generale num)
+  (let ( (len (length num))
+         (numer (int (dup (string num) 3) 0 10))
+         (denom (+ num num num))
+         (res1 0) (res2 0) )
+    (setq res1 (div numer denom))
+    (setq res2 (int (string (dup (string 3) len) 
+                            (dup (string 6) (- len 1))
+                            7) 0 10))
+    (list res1 res2)))
+
+Proviamo:
+
+(map generale (sequence 1 20))
+;-> ((37 37) (37 37) (37 37) (37 37) (37 37) (37 37) (37 37) (37 37) (37 37)
+;->  (3367 3367) (3367 3367) (3367 3367) (3367 3367) (3367 3367) (3367 3367)
+;->  (3367 3367) (3367 3367) (3367 3367) (3367 3367) (3367 3367))
+
+(map generale '(1 22 333 4444 55555))
+;-> ((37 37) (3367 3367) (333667 333667) (33336667 33336667)
+;->  (3333366667 3333366667))
+
 ============================================================================
 

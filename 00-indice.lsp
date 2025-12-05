@@ -3322,6 +3322,8 @@ NOTE LIBERE 34
   Numero di 0 nella rappresentazione binaria dell'n-esimo numero primo
   Quanti pesci nel lago?
   Numeri non-square, non-cube, squarefree e cubefree
+  Somma massima di elementi non consecutivi
+  Il numero 37
 
 PROBLEMI SUI DADI
 =================
