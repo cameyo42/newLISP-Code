@@ -3324,6 +3324,7 @@ NOTE LIBERE 34
   Numeri non-square, non-cube, squarefree e cubefree
   Somma massima di elementi non consecutivi
   Il numero 37
+  Eliminazione di una sequenza
 
 PROBLEMI SUI DADI
 =================

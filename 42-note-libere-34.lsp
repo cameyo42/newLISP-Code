@@ -4582,7 +4582,8 @@ Per un numero a 1 cifra sarà 37.
 Per un numero a 2 cifre 3367.
 Per un numero a 3 cifre 333667.
 Per un numero a 4 cifre 33336667.
-Quindi tra il primo 3 e il 7 ci saranno tanti 3 e tanti 6 pari al numero delle cifre meno 1.
+Per un numero a k cifre: 3(k volte)6(k-1 volte)7
+Quindi tra il primo 3 e il 7 ci saranno tanti 3 quanti il numero delle cifre e tanti 6 pari al numero delle cifre meno 1.
 
 (define (generale num)
   (let ( (len (length num))
@@ -4605,6 +4606,208 @@ Proviamo:
 (map generale '(1 22 333 4444 55555))
 ;-> ((37 37) (3367 3367) (333667 333667) (33336667 33336667)
 ;->  (3333366667 3333366667))
+
+
+----------------------------
+Eliminazione di una sequenza
+----------------------------
+
+Data una sequenza di interi da 0 a N applicare il seguente processo:
+1) Mischiare gli elementi delle lista
+2) Eliminare gli elementi il cui valore è uguale alla loro posizione
+3) Se esiste almeno un elemento con valore >= alla lunghezza della lista,
+   allora stop (restituire il numero di elementi della lista),
+   altrimenti andare al passo 1).
+
+Esempio:
+  N = 3
+  sequenza = (0 1 2 3)
+  mischia --> (0 2 1 3)
+  Togliere lo 0 e il 3 --> (1 2)
+  mischia --> (2 1)
+  Togliere l'1 --> (2)
+  Il 2 è maggiore della lunghezza della lista (1) --> Stop
+  Valore restituito = 1
+
+Qual'è la probabilità che al termine del processo la lista sia vuota?
+(cioè siano stati eliminati tutti gli elementi della lista)
+
+Scriviamo una funzione per simulare il processo.
+Per verificare la condizione di stop usiamo la seguente espressione:
+  (exists (fn(x) (< x (length lst))) lst)
+
+(define (processo num)
+  (local (tmp)
+    (setq lst (sequence 0 num))
+    (while (and lst (exists (fn(x) (< x (length lst))) lst))
+      ; Mischia la lista
+      ; il parametro 'true' permette a 'randomize' di restituire
+      ; una lista uguale a quella passata come parametro,
+      ; altrimenti con alcune liste (es. (0 2)) si avrebbe un loop infinito
+      (setq lst (randomize lst true))
+      ;(print lst) (read-line)
+      ; Elimina gli lementi che hanno valore uaguale alla loro posizione
+      (setq tmp '())
+      (dolist (el lst)
+        (if-not (= el $idx) (push el tmp)))
+      (setq lst tmp)
+      ;(print lst) (read-line)
+    )
+    (length lst)))
+
+Proviamo:  
+
+N = 1 --> seq = (0 1)
+(collect (processo 1) 20)
+;-> (0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+
+N = 2 --> seq = (0 1 2)
+(collect (processo 2) 20)
+;-> (1 0 0 0 0 0 1 0 1 1 1 0 1 0 1 1 0 1 0 0)
+
+N = 3 --> seq = (0 1 2 3)
+(collect (processo 3 ) 20)
+;-> (1 1 1 2 2 0 2 0 1 1 1 1 1 1 0 0 2 2 1 1)
+
+N = 3 --> seq = (0 1 2 3 4)
+(collect (processo 4 ) 20)
+;-> (1 2 2 1 2 1 1 1 2 1 2 1 2 2 2 2 0 1 2 1)
+
+Con l'aumentare di N la probabilità che il processo produca una lista vuota diminuisce velocemente.
+
+(count '(0) (collect (processo 9) 1e3))
+;-> (0) ; nessuna lista vuota
+(count '(0) (collect (processo 9) 1e6))
+;-> (24)
+
+(time (println (count '(0) (collect (processo 20) 1e6))))
+;-> (0)
+;-> 56536.502
+
+(time (println (count (sequence 0 20) (collect (processo 20) 1e6))))
+;-> (0 0 0 15 1334 25093 161210 383889 331549 91551 5359 0 0 0 0 0 0 0 0 0 0)
+;-> 56599.113
+
+Vediamo il processo da un punto di vista matematico.
+
+Stato iniziale:
+
+  L(N+1) = (0, 1, 2, 3, ..., N)
+
+Ad ogni iterazione:
+
+1. si prende una permutazione casuale uniforme della lista corrente L(k)
+2. si eliminano tutti gli elementi tali che:
+
+  valore = posizione
+
+3. il processo continua solo se:
+
+  per ogni x in L(k) vale x < k
+
+altrimenti si ferma e restituisce k.
+
+L'obiettivo è calcolare la probabilità che il processo termini con:
+
+  k = 0 (lista vuota)
+
+Dopo il primo shuffle, la lista e` una permutazione uniforme di: (0 1 ... N).
+
+Dopo la rimozione dei punti fissi, rimane un insieme di cardinalità:
+
+  K = (N+1) - F
+
+dove F e` il numero di punti fissi della permutazione.
+
+F ha distribuzione asintoticamente simile a:
+
+  Poisson(lambda=1) --> P(X = k) = exp(-1) / k!.
+  
+Una variabile casuale X ha distribuzione di Poisson con parametro lambda se:
+
+  P(X = k) = exp(-lambda) * lambda^k / k!
+
+per k = 0, 1, 2, ...
+
+Nel nostro caso lambda = 1, quindi:
+
+  P(X = k) = exp(-1) / k!
+
+La lista residua è un sottoinsieme casuale di (0 1 ... N) condizionato a non contenere i punti fissi.
+
+Da questo punto in poi, la struttura iniziale è dimenticata.
+
+Ad ogni iterazione successiva:
+
+- la lista corrente viene randomizzata in modo uniforme
+- in media viene eliminato circa 1 elemento
+- la lunghezza cambia lentamente: k -> k - 1
+
+Ma la condizione di stop richiede:
+
+  max(L(k)) < k
+
+Se anche un solo elemento >= k è presente, il processo termina.
+
+Condizionando sulla lunghezza k, la lista e` approssimativamente un sottoinsieme casuale di (0 1 ... N) di cardinalità k.
+
+La probabilità che tutti gli elementi siano < k vale:
+
+ P(max(L(k)) < k) = C(k, k) / C(N+1, k) = 1 / C(N+1, k)
+
+dove C è il coeffiente binomiale.
+
+Questa probabilità diventa rapidamente minuscola quando k < N+1.
+
+Per arrivare a k = 0 bisogna superare il test di stop per tutti i valori:
+
+  k = N+1, N, N-1, ..., 1
+
+Una stima superiore e`:
+
+  P(lista vuota) <= Prod[k=1,N+1]( 1 / C(N+1, k) )
+
+cioe`:
+
+  P(lista vuota) <= 1 / Prod[k=1,N+1] C(N+1, k) )
+
+Usando la stima:
+
+  C(N+1, k) >= ((N+1) / k)^k
+
+si ottiene:
+
+  log P(lista vuota) <= - Sum[k=1,N]( k * log(N / k) )
+
+che cresce come:
+
+  N^2 / 2
+
+Quindi:
+
+  P(lista vuota) ~= exp(-c*N^2),  c > 0
+
+Partendo dalla sequenza completa:
+
+  (0 1 2 3 ... N)
+
+la probabilità che il processo elimini tutti gli elementi prima di fermarsi soddisfa:
+
+   lim P(lista vuota) = 0
+  N->Inf 
+
+con decadimento super-esponenziale.
+
+In breve, con N sufficientemente grande il processo quasi sempre si arresta molto prima che la lista possa diventare vuota.
+
+I dati ottenuti dalle simulazioni mostrano che:
+
+- per N = 9 la probabilità è circa 2.4e-5
+- per N = 20 non si osservano liste vuote nemmeno con 1e6 simulazioni
+
+Questo è coerente con una legge del tipo:
+
+  P(N) ~= exp(-c*N^2)
 
 ============================================================================
 
