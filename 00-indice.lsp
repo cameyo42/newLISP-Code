@@ -3325,6 +3325,8 @@ NOTE LIBERE 34
   Somma massima di elementi non consecutivi
   Il numero 37
   Eliminazione di una sequenza
+  Conversione ore, minuti, secondi
+  Lavori in parallelo
 
 PROBLEMI SUI DADI
 =================

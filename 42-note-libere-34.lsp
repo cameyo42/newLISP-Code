@@ -4809,5 +4809,187 @@ Questo è coerente con una legge del tipo:
 
   P(N) ~= exp(-c*N^2)
 
+
+-------------------
+Lavori in parallelo
+-------------------
+
+Partiamo da un problema di Erone di Alessandria (I secolo d.c.).
+
+Una vasca si può riempire tramite tre rubinetti.
+Il rubinetto A impiega 4 ore per riempirle, il rubinetto B ne impiega 6 e il rubinetto C ne impiega 8.
+In quanto tempo si riempirebbe la vasca se i tre rubinetti venissero aperti contemporaneamente?
+
+
+Calcoliamo il minimo comune multiplo delle ore impiegate dai 3 rubinetti:
+
+  mcm(4 6 8) = 24
+
+Calcoliamo quante vasche riempie ogni rubinetto in 24 ore:
+
+  A = 24/4 = 6 vasche
+  B = 24/6 = 4 vasche
+  C = 24/8 = 3 vasche
+
+Quindi in 24 ore i tre rubinetti riempiono 6 + 4 + 3 = 13 vasche.
+
+Allora per riempire una vasca i tre rubinetti impiegano 24/13 ore (1 ora 50 minuti 26 secondi).
+
+(div 24 13)
+;-> 1.846153846153846
+
+Possiamo ragionare anche in termini di spazio, tempo, velocità:
+
+  4 ore a vasca -> v1 = 1/4 vasche/ora
+  6 ore a vasca -> v2 = 1/6 vasche/ora
+  8 ore a vasca -> v3 = 1/8 vasche/ora
+
+La velocità di riempimento media è uguale alla quantità di acqua aperta diviso il tempo impiegato.
+Indicando con x il numero di vasche (spazio) possiamo scrivere:
+
+  x = v * t --> t = x/v
+
+In questa formula abbiamo:
+
+  v = v1 + v2 + v3 (somma delle tre velocità)
+  x = 1 (perchè dobbiamo riempire una vasca)
+
+Quindi il tempo impiegato per riempire una vasca vale:
+
+  t = 1/(v1 + v2 + v3) = 1/(1/4 + 1/6 + 1/8) = 1/(13/24) = 24/13 ore
+
+Scriviamo una funzione che risolve questo tipo di problemi:
+
+(define (parallel workers)
+  (div (apply add (map div workers))))
+
+Proviamo:
+
+(parallel '(4 6 8))
+;-> 1.846153846153846
+
+(parallel '(1 1 10))
+;-> 0.4761904761904762
+(parallel '(2 2 8))
+;-> 0.8888888888888888
+(parallel '(4 4 4))
+;-> 1.333333333333333
+
+
+--------------------------------
+Conversione ore, minuti, secondi
+--------------------------------
+
+Vediamo alcune funzioni per convertire i tempi da ore, minuti, secondi in ore, minuti, secondi decimali e viceversa.
+
+(define (hh-hhmmss hh)
+"Convert hours (decimal) to hours, minutes, seconds"
+  (local (hh-int mm mm-int ss)
+    (setq hh-int (int hh))
+    (setq mm (mul (sub hh hh-int) 60))
+    (setq mm-int (int mm))
+    (setq ss (int (add (mul (sub mm mm-int) 60) 0.5)))
+    (when (= ss 60)
+      (setq ss 0)
+      (++ mm-int))
+    (when (= mm-int 60)
+      (setq mm-int 0)
+      (++ hh-int))
+    (list hh-int mm-int ss)))
+
+(hh-hhmmss 1.846153846153846)
+;-> (1 50 46)
+(hh-hhmmss 1.621)
+;-> (1 37 16)
+(hh-hhmmss 1.9997222)
+;-> (1 59 59)
+(hh-hhmmss 1.9998621)
+;-> (2 0 0)
+(hh-hhmmss 2.5)
+;-> (2 30 0)
+
+(define (mm-hhmmss mm)
+"Convert minutes (decimal) to hours, minutes, seconds"
+  (local (hh mm-int ss)
+    (setq hh 0)
+    (setq mm-int (int mm))
+    (setq ss (int (add (mul (sub mm mm-int) 60) 0.5)))
+    (when (= ss 60)
+      (setq ss 0)
+      (++ mm-int))
+    (while (> mm-int 59)
+      (-- mm-int 60)
+      (++ hh))
+    (list hh mm-int ss)))
+
+(mm-hhmmss 60)
+;-> (1 0 0)
+(mm-hhmmss 121.6)
+;-> (2 1 36)
+(mm-hhmmss 59.999)
+;-> (1 0 0)
+
+(define (ss-hhmmss ss)
+"Convert seconds (decimal) to hours, minutes, seconds"
+  (local (hh mm ss-int)
+    (setq hh 0)
+    (setq mm 0)
+    (setq ss-int (int (add ss 0.5)))
+    (while (> ss-int 59)
+      (-- ss-int 60)
+      (++ mm))
+    (while (> mm 59)
+      (-- mm 60)
+      (++ hh))
+    (list hh mm ss-int)))
+
+(ss-hhmmss 3599)
+;-> (0 59 59)
+(ss-hhmmss 7321.6)
+;-> (2 2 2)
+(ss-hhmmss 3599)
+;-> 0 59 59
+(ss-hhmmss 7321.6)
+;-> (2 2 2)
+
+Funzioni inverse:
+
+(define (hhmmss-hh hh mm ss)
+"Convert hours, minutes, seconds (not normalized) to decimal hours"
+  (div (add (mul hh 3600)
+            (mul mm 60)
+            ss)
+       3600))
+
+(hhmmss-hh 1 120 0)
+;-> 3
+(hhmmss-hh 0 59 120)
+;-> 1
+(hhmmss-hh 1 112 12)
+;-> 2.87
+
+(define (hhmmss-mm hh mm ss)
+"Convert hours, minutes, seconds (not normalized) to decimal minutes"
+  (div (add (mul hh 3600)
+            (mul mm 60)
+            ss)
+       60))
+
+(hhmmss-mm 1 120 0)
+;-> 180
+(hhmmss-mm 0 1 30)
+;-> 1.5
+
+(define (hhmmss-ss hh mm ss)
+"Convert hours, minutes, seconds (not normalized) to decimal seconds"
+  (add (mul hh 3600)
+       (mul mm 60)
+       ss))
+
+(hhmmss-ss 0 59 120)
+;-> 3660
+(hhmmss-ss 1 0 -60)
+;-> 3540
+
 ============================================================================
 
