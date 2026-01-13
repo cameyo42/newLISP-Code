@@ -4991,5 +4991,42 @@ Funzioni inverse:
 (hhmmss-ss 1 0 -60)
 ;-> 3540
 
+
+----------------------
+Vincere con meno punti
+----------------------
+
+In alcuni giochi (es. tennis, ping-pong) è possibile vincere facendo meno punti dell'avversario.
+Esempio:
+Una partita di Tennis in cui vince chi si aggiudica per primo 3 set.
+Punteggio per vincere un set: 6
+Risultato tra due giocatori A e B:
+
+  A | 6 5 5 6 5
+ ---------------
+  B | 1 7 7 1 7
+
+Vince il giocatore B per 3 a 2, ma A ha fatto 6+5+6+6+6 = 27 punti, mentre B, pur vincendo il match, ha fatto soltanto 23 punti.
+
+Dato il numero di giochi da aggiudicarsi per vincere un match e il punteggio da raggiungere per vincere un gioco, determinare la differenza massima tra i giochi vinti dal perdente e quelli vinti dal vincitore.
+
+(define (max-diff giochi punti)
+  (local (A-win A-lose B-win B-lose)
+    (setq A-win (* giochi punti))
+    (setq A-lose 0)
+    (setq B-win (* (- giochi 1) punti))
+    (setq B-lose (* giochi (- punti 1)))
+    (println A-win { } (+ B-win B-lose))
+    (- (+ B-win B-lose) A-win)))
+
+Proviamo:
+
+(max-diff 3 6)
+;-> 18 27
+;-> 9
+(max-diff 4 11)
+;-> 44 73
+;-> 29
+
 ============================================================================
 
