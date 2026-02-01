@@ -5004,9 +5004,9 @@ Risultato tra due giocatori A e B:
 
   A | 6 5 5 6 5
  ---------------
-  B | 1 7 7 1 7
+  B | 1 6 6 1 6
 
-Vince il giocatore B per 3 a 2, ma A ha fatto 6+5+6+6+6 = 27 punti, mentre B, pur vincendo il match, ha fatto soltanto 23 punti.
+Vince il giocatore B per 3 a 2, ma A ha fatto 6+5+5+6+5 = 27 punti, mentre B, pur vincendo il match, ha fatto soltanto 1+6+6+1+6 = 20 punti.
 
 Dato il numero di giochi da aggiudicarsi per vincere un match e il punteggio da raggiungere per vincere un gioco, determinare la differenza massima tra i giochi vinti dal perdente e quelli vinti dal vincitore.
 
@@ -5027,6 +5027,254 @@ Proviamo:
 (max-diff 4 11)
 ;-> 44 73
 ;-> 29
+
+In alcuni casi per vincere un gioco occorre raggiungere il punteggio stabilito con più di un punto di vantaggio sull'avversario (es. 2 punti di vantaggio: 6-5 non vince, ma 7-5 vince).
+
+(define (max-diff giochi punti gap)
+  (local (A-win A-lose B-win B-lose)
+    (setq A-win (* giochi punti))
+    (setq A-lose 0)
+    (setq B-win (* (- giochi 1) punti))
+    (setq B-lose (* giochi (- punti gap)))
+    (println A-win { } (+ B-win B-lose))
+    (- (+ B-win B-lose) A-win)))
+
+(max-diff 3 6 2)
+;-> 18 24
+;-> 9
+
+(max-diff 4 11 2)
+;-> 44 69
+;-> 25
+
+(max-diff 3 6 1)
+;-> 18 27
+;-> 9
+
+(max-diff 4 11 1)
+;-> 44 73
+;-> 29
+
+
+-------------
+Funzione XAND
+-------------
+
+Tavola di verità
+
+ +---+---+-----+      +------+------+------+
+ | A | B | Out |      |  A   |  B   | Out  |
+ +---+---+-----+      +------+------+------+
+ | 0 | 0 |  1  |      | nil  | nil  | true |
+ | 0 | 1 |  0  |      | nil  | true | nil  |
+ | 1 | 0 |  0  |      | true | nil  | nil  |
+ | 1 | 1 |  1  |      | true | true | true |
+ +---+---+-----+      +------+------+------+
+
+(define (xand a b)
+  (cond ((and (nil? a) (nil? b)) true)
+        ((and (nil? a) (true? b)) nil)
+        ((and (true? a) (nil? b)) nil)
+        ((and (true? a) (true? b)) true)))
+
+(setq A '(nil nil true true))
+(setq B '(nil true nil true))
+(map xand A B)
+;-> (true nil nil true)
+
+Nota: generalizzando per qualunque tipo di parametri 'a' e 'b' possiamo scrivere:
+  se (a == b), allora output = true
+               altrimenti output = nil
+
+(define (xand a b) (= a b))
+(map xand A B)
+;-> (true nil nil true)
+
+
+----------------------------------------
+Stampa dell'N-esima riga di una funzione
+----------------------------------------
+
+Scrivere una funzione che prende un intero N e una funzione F e stampa la riga N-esima (1-based) della funzione F.
+
+(define (print-line-N N func)
+  (let (linee (parse (source 'func) "\r\n"))
+    ; toglie gli ultimi due \r\n
+    (pop linee -1) (pop linee -1)
+    ; stampa la linea N-esima del sorgente di F
+    ; (come rappresentato internamente da newlisp)
+    ; N deve essere un numero di linea valido
+    (if (and (> N 0) (<= N (length linee)))
+        (println (linee (- N 1)))
+        nil)))
+
+Proviamo:
+
+(define (somma a b)
+  (if (> a b)
+    (+ a b b)
+    ;else
+    (+ a a b)))
+
+(print-line-N 2 somma)
+;->   (if (> a b)
+
+(print-line-N 2 print-line-N)
+;->   (let (linee (parse (source 'func) "\r\n"))
+
+
+--------------------
+Hacker logo (Glider)
+--------------------
+
+  +---+---+---+
+  |   | * |   |
+  +---+---+---+
+  |   |   | * |
+  +---+---+---+
+  | * | * | * |
+  +---+---+---+
+
+Il Glider è un simbolo utilizzato per rappresentare la cultura hacker.
+Fu proposto nel 2003 da Eric S. Raymond, figura di spicco del movimento open source, per dare agli hacker un'identità condivisa, distinta dai "cracker" (hacker criminali).
+
+Origine e significato
+---------------------
+Il Gioco della Vita di Conway:
+il simbolo è un pattern tratto da LIFE, una simulazione di automa cellulare creata dal matematico John Conway nel 1970.
+
+La "Spaceship" (Navicella Spaziale) più semplice:
+il Glider è il pattern più piccolo e riconoscibile che si muove lungo la griglia.
+
+Simbolismo:
+rappresenta un comportamento complesso ed emergente che nasce da regole semplici, una metafora di come gli hacker utilizzano le tecnologie di base per creare sistemi sofisticati.
+
+Storia: fu descritto per la prima volta su Scientific American nel 1970, più o meno nello stesso periodo in cui nacquero Unix e Internet.
+
+(define (glider side blank ch)
+  (if (< side 5) (setq side 5))
+  (if (even? side) (++ side)) ; lenght of cell must be odd
+  (setq pos1 (/ side 2))
+  (setq pos2 (+ pos1 (- side 1)))
+  (setq pos3 (+ pos2 (- side 1)))
+  ;(println pos1 { } pos2 { } pos3)
+  (setq bordo (string (dup (string "+" (dup "-" (- side 2))) 3) "+"))
+  (setq blank-line (string (dup (string "|" (dup " " (- side 2))) 3) "|"))
+  ; linea 1
+  (setq linea1 (string (dup (string "|" (dup " " (- side 2))) 3) "|"))
+  (setf (linea1 pos2) ch)
+  (println bordo)
+  (if (> blank 0) (for (i 1 blank) (println blank-line)))
+  (println linea1)
+  (if (> blank 0) (for (i 1 blank) (println blank-line)))
+  ; linea 2
+  (setq linea2 (string (dup (string "|" (dup " " (- side 2))) 3) "|"))
+  (setf (linea2 pos3) ch)
+  (println bordo)
+  (if (> blank 0) (for (i 1 blank) (println blank-line)))
+  (println linea2)
+  (if (> blank 0) (for (i 1 blank) (println blank-line)))
+  ; linea 3
+  (setq linea3 (string (dup (string "|" (dup " " (- side 2))) 3) "|"))
+  (setf (linea3 pos1) ch)  
+  (setf (linea3 pos2) ch)  
+  (setf (linea3 pos3) ch)  
+  (println bordo)
+  (if (> blank 0) (for (i 1 blank) (println blank-line)))
+  (println linea3)
+  (if (> blank 0) (for (i 1 blank) (println blank-line)))
+  (println bordo)
+'> )
+
+Proviamo:
+
+(glider 5 0 "*")
+;-> +---+---+---+
+;-> |   | * |   |
+;-> +---+---+---+
+;-> |   |   | * |
+;-> +---+---+---+
+;-> | * | * | * |
+;-> +---+---+---+
+
+(glider 5 1 "*")
+;-> +---+---+---+
+;-> |   |   |   |
+;-> |   | * |   |
+;-> |   |   |   |
+;-> +---+---+---+
+;-> |   |   |   |
+;-> |   |   | * |
+;-> |   |   |   |
+;-> +---+---+---+
+;-> |   |   |   |
+;-> | * | * | * |
+;-> |   |   |   |
+;-> +---+---+---+
+
+(glider 9 0 "*")
+;-> +-------+-------+-------+
+;-> |       |   *   |       |
+;-> +-------+-------+-------+
+;-> |       |       |   *   |
+;-> +-------+-------+-------+
+;-> |   *   |   *   |   *   |
+;-> +-------+-------+-------+
+
+(glider 9 1 "*")
+;-> +-------+-------+-------+
+;-> |       |       |       |
+;-> |       |   *   |       |
+;-> |       |       |       |
+;-> +-------+-------+-------+
+;-> |       |       |       |
+;-> |       |       |   *   |
+;-> |       |       |       |
+;-> +-------+-------+-------+
+;-> |       |       |       |
+;-> |   *   |   *   |   *   |
+;-> |       |       |       |
+;-> +-------+-------+-------+
+
+(glider 12 1 "*")
+;-> +-----------+-----------+-----------+
+;-> |           |           |           |
+;-> |           |     *     |           |
+;-> |           |           |           |
+;-> +-----------+-----------+-----------+
+;-> |           |           |           |
+;-> |           |           |     *     |
+;-> |           |           |           |
+;-> +-----------+-----------+-----------+
+;-> |           |           |           |
+;-> |     *     |     *     |     *     |
+;-> |           |           |           |
+;-> +-----------+-----------+-----------+
+
+(glider 12 2 "O")
+;-> +-----------+-----------+-----------+
+;-> |           |           |           |
+;-> |           |           |           |
+;-> |           |     O     |           |
+;-> |           |           |           |
+;-> |           |           |           |
+;-> +-----------+-----------+-----------+
+;-> |           |           |           |
+;-> |           |           |           |
+;-> |           |           |     O     |
+;-> |           |           |           |
+;-> |           |           |           |
+;-> +-----------+-----------+-----------+
+;-> |           |           |           |
+;-> |           |           |           |
+;-> |     O     |     O     |     O     |
+;-> |           |           |           |
+;-> |           |           |           |
+;-> +-----------+-----------+-----------+
+
+Nota: i caratteri UTF-8 che sono rappresentati con più di 1 byte non vengono stampati correttamente.
+
+Vedi anche "Game of Life" su "Rosetta Code".
 
 ============================================================================
 

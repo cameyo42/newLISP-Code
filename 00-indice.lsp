@@ -3328,6 +3328,9 @@ NOTE LIBERE 34
   Lavori in parallelo
   Conversione ore, minuti, secondi
   Vincere con meno punti
+  Funzione XAND
+  Stampa dell'N-esima riga di una funzione
+  Hacker logo (Glider)
 
 PROBLEMI SUI DADI
 =================
