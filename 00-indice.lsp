@@ -3331,6 +3331,7 @@ NOTE LIBERE 34
   Funzione XAND
   Stampa dell'N-esima riga di una funzione
   Hacker logo (Glider)
+  Liste con la stessa struttura
 
 PROBLEMI SUI DADI
 =================

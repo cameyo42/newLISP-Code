@@ -5276,5 +5276,103 @@ Nota: i caratteri UTF-8 che sono rappresentati con più di 1 byte non vengono st
 
 Vedi anche "Game of Life" su "Rosetta Code".
 
+
+-----------------------------
+Liste con la stessa struttura
+-----------------------------
+
+Date due liste (anche annidate) determinare se hanno la stessa struttura.
+Due liste hanno la stessa struttura se le relative liste di indici degli elementi sono uguali.
+
+La seguente funzione genera la lista degli indici di tutti gli elementi della lista data:
+
+(define (index-list lst)
+"Create a list of indexes for all the elements of a list"
+  (ref-all nil lst (fn(x) true)))
+
+(setq lst '(1 2 (3 4)))
+
+Lista degli indici:
+(setq indici (index-list lst))
+;-> ((0) (1) (2) (2 0) (2 1))
+
+Indicizzazione di tutti gli elementi della lista iniziale:
+(dolist (idx indici) (print (lst idx) { }))
+;-> 1 2 (3 4) 3 4
+
+Un caso particolare si verifica quando una lista di indici ha la stessa struttura della parte iniziale dell'altra lista di indici, cioè quando la lista più corta ha la stessa struttura della parte iniziale della lista più lunga.
+
+Esempi:
+  a = (1 (1 (2 3)) (3) (3 4))
+  b = (9 (0 (4 2)) (1) (6 7))
+  c = (2 (0 (3 4)))
+  d = (9 (0 (4 2 3)) (4) (0 9))
+  e = (1 2 3 4)
+  f = (5 6 7 8 9 10 11)
+
+  a e b hanno la stessa struttura
+  c ha la stessa struttura di a (solo per gli elementi di c)
+  a e d non hanno la stessa struttura
+  e ha la stessa struttura di f (solo per gli elementi di e)
+
+(setq a '(1 (1 (2 3)) (3) (3 4)))
+(setq b '(9 (0 (4 2)) (1) (6 7)))
+(setq c '(9 (0 (4 2))))
+(setq d '(9 (0 (4 2 3)) (4) (0 9)))
+(setq e '(1 2 3 4))
+(setq f '(5 6 7 8 9 10 11))
+
+(index-list a)
+;-> ((0) (1) (1 0) (1 1) (1 1 0) (1 1 1) (2) (2 0) (3) (3 0) (3 1))
+(index-list b)
+;-> ((0) (1) (1 0) (1 1) (1 1 0) (1 1 1) (2) (2 0) (3) (3 0) (3 1))
+(index-list d)
+;-> ((0) (1) (1 0) (1 1) (1 1 0) (1 1 1) (1 1 2) (2) (2 0) (3) (3 0) (3 1))
+(index-list e)
+;-> ((0) (1) (2) (3))
+(index-list f)
+;-> ((0) (1) (2) (3) (4) (5) (6))
+
+Funzione che verifica se due liste hanno la stessa struttura:
+(define (same-structure? lst1 lst2)
+  (local (s1 s2 len-s1 len-s2 struttura indici all)
+    ; calcola la lista degli indici di tutti gli elementi della lista lst1
+    (setq s1 (ref-all nil lst1 (fn(x) true)))
+    ; calcola la lista degli indici di tutti gli elementi della lista lst2
+    (setq s2 (ref-all nil lst2 (fn(x) true)))
+    (setq len-s1 (length s1))
+    (setq len-s2 (length s2))
+    (cond ((= len-s1 len-s2) ; liste di indici con stessa lunghezza
+            (when (= s1 s2) 
+              (setq struttura true)
+              (setq indici s1)
+              (setq all true)))
+          ((> len-s1 len-s2) ; lunghezza della prima lista di indici maggiore
+            (when (= (slice s1 0 len-s2) s2)
+              (setq struttura true)
+              (setq indici (slice s1 0 len-s2))))
+          ((< len-s1 len-s2) ; lunghezza della seconda lista di indici maggiore
+            (when (= (slice s2 0 len-s1) s1)
+              (setq struttura true)
+              (setq indici (slice s2 0 len-s1))))
+    )
+    ; struttura: true --> liste con la stessa struttura
+    ; indici: true --> lista degli indici uguali
+    ; all: true --> la lista degli indici uguali comprende tutti gli elementi
+    (list struttura indici all)))
+
+Proviamo:
+
+(same-structure? a b)
+;-> (true ((0) (1) (1 0) (1 1) (1 1 0) (1 1 1) (2) (2 0) (3) (3 0) (3 1)) true)
+(same-structure? a c)
+;-> (true ((0) (1) (1 0) (1 1) (1 1 0) (1 1 1)) nil)
+(same-structure? a d)
+;-> (nil nil nil)
+(same-structure? a e)
+;-> (nil nil nil)
+(same-structure? e f)
+;-> (true ((0) (1) (2) (3)) nil)
+
 ============================================================================
 
