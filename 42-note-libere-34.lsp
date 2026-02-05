@@ -5374,5 +5374,46 @@ Proviamo:
 (same-structure? e f)
 ;-> (true ((0) (1) (2) (3)) nil)
 
+
+---------------------------------------
+Massima variazione tra numeri adiacenti
+---------------------------------------
+
+Data una lista L di numeri interi, scrivere una funzione che determina la variazione massima (in valore assoluto) tra tutte le coppie di numeri adiacenti.
+Esempio:
+  L = (1 3 2 6 5)
+  Variazioni tra coppie adiacenti di numeri adiacenti:
+  (1 3) --> 2
+  (3 2) --> 1
+  (2 6) --> 4
+  (6 5) --> 1
+  Variazione massima: (2 6) --> 4
+
+(define (delta lst)
+  (local (diff max-diff indice)
+    ; lista delle differenze assolute di ogni coppia di numeri adiacenti
+    (setq diff (map (fn(x y) (abs (- x y))) (rest lst) (chop lst)))
+    ;(println diff)
+    ; calcolo della variazione (differenza) massima
+    (setq max-diff (apply max diff))
+    ; indice della variazione
+    (setq indice (find max-diff diff))
+    ; restituisce (variazione-massima (primo-numero secondo-numero))
+    (list max-diff (list (lst indice) (lst (+ indice 1))))))
+
+Proviamo:
+
+(setq L '(1 3 2 6 5))
+(delta L)
+;-> (4 (2 6))
+
+(setq L '(7 9 4 1 6 5))
+(delta L)
+;-> (5 (9 4))
+
+(setq L '(1 2 3 4 5 7))
+(delta L)
+;-> (2 (5 7))
+
 ============================================================================
 
