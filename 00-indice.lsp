@@ -3332,7 +3332,8 @@ NOTE LIBERE 34
   Stampa dell'N-esima riga di una funzione
   Hacker logo (Glider)
   Liste con la stessa struttura
-  Massima variazione tra numeri adiacenti
+  Massima differenza tra coppie di elementi adiacenti
+  John D. Cook's exponential sums
 
 PROBLEMI SUI DADI
 =================

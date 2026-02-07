@@ -5375,9 +5375,9 @@ Proviamo:
 ;-> (true ((0) (1) (2) (3)) nil)
 
 
----------------------------------------
-Massima variazione tra numeri adiacenti
----------------------------------------
+---------------------------------------------------
+Massima differenza tra coppie di elementi adiacenti
+---------------------------------------------------
 
 Data una lista L di numeri interi, scrivere una funzione che determina la variazione massima (in valore assoluto) tra tutte le coppie di numeri adiacenti.
 Esempio:
@@ -5414,6 +5414,63 @@ Proviamo:
 (setq L '(1 2 3 4 5 7))
 (delta L)
 ;-> (2 (5 7))
+
+
+-------------------------------
+John D. Cook's exponential sums
+-------------------------------
+
+https://www.johndcook.com/
+https://www.johndcook.com/expsum/
+https://www.johndcook.com/expsum/details.html
+
+La pagina web di John D. Cook include una sezione che disegna la "somma esponenziale del giorno".
+Questa è definita come segue:
+
+  Sum[n=0,N]exp(2πi(n/m + n^2/d + n^3/y))
+  dove i è l'unità immaginaria e N è calcolato come 2*mcm(m,d,y)+1, dove mcm indica il minimo comune multiplo.
+
+Equazione di eulero per il calcolo dell'esponenziale complesso:
+
+  e^(a+ib) = e^a * (cos(b) + i sin(b))
+
+(define (lcm_ a b) (/ (* a b) (gcd a b)))
+(define-macro (lcm)
+"Calculate the lcm of two or more number"
+  (apply lcm_ (map eval (args)) 2))
+
+(define (cook dd mm yy)
+  (letn ((out '())
+         (pi 3.1415926535897931)
+         ; calcola 2*mcm(m,d,y) per avere 2*lcm+1 campioni con (for (n 0 N).
+         (N (* 2 (lcm dd mm yy))))
+    (for (n 0 N)
+      (setq f (add (div n mm) (div (mul n n) dd) (div (mul n n n) yy)))
+      ; Riduzione a modulo 1 ((sub f (floor f)) prima di moltiplicare per 2π:
+      ; poichè per n grandi l’argomento può diventare enorme
+      ; e cos/sin perdono precisione.
+      (setq power (mul 2 pi (sub f (floor f))))
+      (setq re (cos power))
+      (setq im (sin power))
+      (push (list re im) out))
+    out))
+
+(cook 1 2 3)
+;-> ((1 0)
+;->  (0.4999999999995876 0.8660254037846767)
+;->  (-0.4999999999998968 0.8660254037844982)
+;->  (-1 1.224606353822377e-016)
+;->  (-0.500000000000052 -0.8660254037844086)
+;->  (0.499999999999897 -0.8660254037844981)
+;->  (1 0)
+;->  (0.5000000000000516 0.8660254037844088)
+;->  (-0.499999999999974 0.8660254037844536)
+;->  (-1 1.224606353822377e-016)
+;->  (-0.5000000000000034 -0.8660254037844366)
+;->  (0.4999999999999993 -0.866025403784439)
+;->  (1 0))
+
+Nota: la lista di punti può essere esportata e plottata con un foglio elettronico.
 
 ============================================================================
 
