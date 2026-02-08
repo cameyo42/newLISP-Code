@@ -5472,5 +5472,104 @@ Equazione di eulero per il calcolo dell'esponenziale complesso:
 
 Nota: la lista di punti può essere esportata e plottata con un foglio elettronico.
 
+
+------------------
+Il Colpo di Venere
+------------------
+
+"Siccome mi sembrava che per puro caso alcuni fatti fossero avvenuti così com’erano stati predetti dagl’indovini, tu hai parlato a lungo del caso, e hai detto, per esempio, che si può ottenere il 'colpo di Venere' lanciando a caso quattro dadi [...]".
+Cicerone, "De Divinatione",II,21,48
+
+Nel dialogo col fratello Quinto, Cicerone parla del Colpo di Venere che consiste nel lanciare quattro dadi tetraedrici ottenendo quattro risultati diversi.
+
+Un dado tetraedrico è una piramide con base triangolare e quindi ha quattro facce.
+
+Supponendo che le facce di ciascun dato siano equiprobabili, determinare:
+A) la probabilità di ottenere il Colpo di Venere nel lancio di quattro dati,
+B) la probabilità di ottenere quattro numeri tutti uguali.
+
+Punto A
+-------
+
+Simulazione:
+
+(define (simula-A iter)
+  (let ( (ok 0) (lancio nil) )
+    (for (i 1 iter)
+      (setq lancio (rand 4 4))
+      ; controlla se tutti i numeri del lancio sono diversi
+      (if (= (sort lancio) '(0 1 2 3)) (++ ok)))
+    (div ok iter)))
+
+(simula-A 1e4)
+;-> 0.094
+(simula-A 1e7)
+;-> 0.0937672
+
+Calcolo delle probabilità:
+
+Per ottenere quattro numeri diversi (colpo di Venere) deve risultare:
+Per il primo dado qualunque numero va bene, cioè abbiamo 4 possibilità su 4 di scegliere un numero corretto (4/4 = 1).
+Per il secondo dado abbiamo 3 possibilità su 4 di scegliere un numero corretto (3/4).
+Per il terzo dado abbiamo 2 possibilità su 4 di scegliere un numero corretto (2/4 = 1/2).
+Per il quarto e ultimo dado abbiamo 1 possibilità su 4 di scegliere il numero corretto (1/4).
+Quindi la probabilità di ottenere il Colpo di Venere vale:
+
+  P(venere) = 1 * 3/4 * 1/2 * 1/4 = 3/32 = 0.09375 (circa il 9.4%)
+ 
+(mul 1 (div 3 4) (div 1 2) (div 1 4))
+;-> 0.09375
+
+Nota:
+Il settimo degli otto quesiti di matematica della maturità 2025 per i licei scientifici parte proprio dalla citazione di Cicerone e chiede di determinare la probabilità del Colpo di Venere.
+
+Punto B
+-------
+
+Simulazione:
+
+(define (simula-B iter)
+  (let ( (ok 0) (lancio nil) )
+    (for (i 1 iter)
+      (setq lancio (rand 4 4))
+      ; controlla se tutti i numeri sono uguali
+      (if (apply = lancio) (++ ok)))
+    (div ok iter)))
+
+(simula-B 1e4)
+;-> 0.017
+
+(simula-B 1e7)
+;-> 0.0155937
+
+Calcolo delle probabilità:
+
+Per ottenere quattro numeri uguali deve risultare:
+Per il primo dado qualunque numero va bene, cioè abbiamo 4 possibilità su 4 di scegliere un numero corretto (4/4 = 1).
+Per il secondo dado abbiamo 1 possibilità su 4 di scegliere il numero corretto (1/4).
+Per il terzo dado abbiamo 1 possibilità su 4 di scegliere il numero corretto (1/4).
+Per il quarto dado abbiamo 1 possibilità su 4 di scegliere il numero corretto (1/4).
+Quindi la probabilità di ottenere quattro numeri uguali vale:
+
+  P(tutti uguali) = 1 * 1/4 * 1/4 * 1/4 = 1/64 = 0.015625 (circa 1.6%)
+
+(mul 1 (div 1 4) (div 1 4) (div 1 4))
+;-> 0.015625
+
+Nota:
+In alcuni casi, probabilmente non in questo che è banale, è utile utilizzare la "funzione generatrice".
+E' un metodo assai utile quando si hanno dadi con numero facce diverse e probabilità differenziate da faccia a faccia (in questi casi i conti diventano complicati).
+Scrivo la funzione che caratterizza un dado a 4 facce equiprobabili sostituendo idealmente i numeri 1:4 con le lettere a, b, c, d, assegnando ad ogni lettera la singola probabilità di uscita (nel nostro caso equiprobabile è sempre 1/4):
+
+  f(a,b,c,d) = 1/4a+1/4b+1/4c+1/4d
+
+Siccome i dadi lanciati sono 4 (oppure è un dado lanciato 4 volte), elevo il polinomio alla 4ᵃ potenza.
+Il coefficiente del termine: "abcd" ci dà la probabilità delle 4 facce diverse.
+Il coefficiente di: "a^4, b^4, c^4, d^4" ci restituisce la probabilità di 4a, 4b, 4c, 4d.
+Se si sviluppa (1/4a+1/4b+1/4c+1/4d)^4 si ha:
+3/32abcd (3/32 probabilità di 4 facce diverse)
+a^4/256, b^4/256, c^4/256, d^4/256.
+Per esempio, nello sviluppo si ha 3/64ab²d: significa che la configurazione del tipo: 1-2-2-4 ha probabilità 3/64.
+
 ============================================================================
 

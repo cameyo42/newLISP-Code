@@ -3334,6 +3334,7 @@ NOTE LIBERE 34
   Liste con la stessa struttura
   Massima differenza tra coppie di elementi adiacenti
   John D. Cook's exponential sums
+  Il Colpo di Venere
 
 PROBLEMI SUI DADI
 =================
