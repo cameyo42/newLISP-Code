@@ -10,7 +10,8 @@
 Turochamp
 ---------
 
-Turochamp è un programma di scacchi sviluppato da Alan Turing e David Champernowne nel 1948. Si tratta del primo programma per computer per giocare a scacchi, ma non è mai stato completato da Turing e Champernowne, poiché il suo algoritmo era troppo complesso per essere eseguito dai computer del tempo.
+Turochamp è un programma di scacchi sviluppato da Alan Turing e David Champernowne nel 1948.
+Si tratta del primo programma per computer per giocare a scacchi, ma non è mai stato completato da Turing e Champernowne, poiché il suo algoritmo era troppo complesso per essere eseguito dai computer del tempo.
 Turing ha giocato una partita contro l'informatico Alick Glennie utilizzando il programma su carta nell'estate del 1952, eseguendolo manualmente passo dopo passo.
 Questa è la partita:
 
@@ -75,7 +76,9 @@ Dato un numero N e un'unità di tempo X, trovare il numero di contenitori che ve
         |  4  |     |  5  |     |  6  |
         +-----+     +-----+     +-----+
 
-Nella disposizione piramidale N indica il numero di livelli dei contenitori in modo tale che il livello 1 abbia 1 contenitore, il livello 2 abbia 2 contenitori e così via fino al livello N. Il liquido è sempre versato nel contenitore più in alto al primo livello. Quando il contenitore di un livello trabocca da entrambi i lati, i contenitori dei livelli inferiori vengono riempiti. La quantità di liquido versato in ogni secondo è uguale al volume del contenitore.
+Nella disposizione piramidale N indica il numero di livelli dei contenitori in modo tale che il livello 1 abbia 1 contenitore, il livello 2 abbia 2 contenitori e così via fino al livello N. Il liquido è sempre versato nel contenitore più in alto al primo livello.
+Quando il contenitore di un livello trabocca da entrambi i lati, i contenitori dei livelli inferiori vengono riempiti.
+La quantità di liquido versato in ogni secondo è uguale al volume del contenitore.
 
 Per esempio:
 N = 3, X = 5
@@ -92,9 +95,12 @@ Quindi, quando si verifica un riempimento, il liquido scorre verso i contenitori
 Poiché il liquido verrà versato per X secondi, la quantità totale di liquido versato sarà X unità.
 Quindi il valore massimo che può essere versato in un contenitore può essere X unità e il valore minimo che può essere versato per riempirlo completamente è 1 unità.
 
-Iniziare il ciclo esterno da 1 a N per n contenitori a ogni livello. All'interno di questo ciclo, avviare un altro ciclo da 1 a i, per ogni contenitore di ogni riga. Dichiarare un contatore, conta = 0, per contare i contenitori che vengono riempiti.
+Iniziare il ciclo esterno da 1 a N per n contenitori a ogni livello.
+All'interno di questo ciclo, avviare un altro ciclo da 1 a i, per ogni contenitore di ogni riga.
+Dichiarare un contatore, conta = 0, per contare i contenitori che vengono riempiti.
 Se il valore di cont[i][j] è maggiore o uguale a 1 (significa che è riempito), il conteggio viene incrementato di 1, quindi in cont[i+1][j] e cont[i+1][j+1] il liquido viene versato e il loro valore viene aumentato rispettivamente del valore di (cont[i][j]-1)/2, perché il liquido è diviso a metà in entrambi.
-In questo modo continuare il ciclo, incrementando il conteggio per ogni contenitore riempito. Quando il ciclo finisce, il conteggio sarà la risposta richiesta.
+In questo modo continuare il ciclo, incrementando il conteggio per ogni contenitore riempito.
+Quando il ciclo finisce, il conteggio sarà la risposta richiesta.
 
 (define (container n x)
   (setq secchio (array 1000 1000 '(0)))
@@ -154,7 +160,8 @@ Il cavallo degli scacchi si muove a L.
   |        |        |        |        |
   +--------+--------+--------+--------+
 
-Suggerimento: la forma irregolare della scacchiera e i movimenti a forma di L dei cavalli sono irrilevanti. Ciò che conta sono le relazioni tra le caselle.
+Suggerimento: la forma irregolare della scacchiera e i movimenti a forma di L dei cavalli sono irrilevanti.
+Ciò che conta sono le relazioni tra le caselle.
 
            +--------+
            |        |
@@ -547,7 +554,9 @@ Speranza matematica
 -------------------
 La speranza (o aspettativa) matematica di una variabile casuale X è il numero che esprime il valore medio del fenomeno che questa variabile rappresenta.
 
-L'speranza matematica, chiamata anche valore atteso, è uguale alla somma delle probabilità di un evento casuale, moltiplicata per il valore dell'evento casuale. In altre parole, è il valore medio di un set di dati. Questo, tenendo conto che il termine aspettativa matematica è coniato dalla teoria della probabilità.
+L'speranza matematica, chiamata anche valore atteso, è uguale alla somma delle probabilità di un evento casuale, moltiplicata per il valore dell'evento casuale.
+In altre parole, è il valore medio di un set di dati.
+Questo, tenendo conto che il termine aspettativa matematica è coniato dalla teoria della probabilità.
 
 In matematica, il valore medio degli eventi che si è verificati è chiamato media matematica.
 Nelle distribuzioni discrete, se ogni evento ha la stessa probabilità, allora la media aritmetica è la stessa della speranza matematica.
@@ -736,8 +745,11 @@ Come funziona questo metodo?
 In altre parole, come fa la la macro a diventare "eseguibile" a causa della sua ridefinizione?
 
 ralph.ronnquist:
-"Well, being or not being a macro is, I believe, some flag attached to the symbol, which is set by the "(macro ..)" term. That term also wraps the given "body" into an "expand" term, as is typically useful for these kinds of macros. But not in this case, where you want the xlate-ion to be invoked at read time.
-The "(constant ...)" term simply attaches a new definition to the symbol without messing with the flag, and thus redefines it. The manual has some discussion about this point."
+"Well, being or not being a macro is, I believe, some flag attached to the symbol, which is set by the "(macro ..)" term.
+That term also wraps the given "body" into an "expand" term, as is typically useful for these kinds of macros.
+But not in this case, where you want the xlate-ion to be invoked at read time.
+The "(constant ...)" term simply attaches a new definition to the symbol without messing with the flag, and thus redefines it.
+The manual has some discussion about this point."
 
 Altro esempio:
 ;(module "infix.lsp")
@@ -889,14 +901,17 @@ Numeri colorati
 Un numero colorato (colorful) è un numero intero non negativo in base 10 in cui il prodotto di ogni sottogruppo di cifre consecutive è unico.
 
 Per esempio,
-24753 è un numero colorato. 2, 4, 7, 5, 3, (2×4)=8, (4×7)=28, (7×5)=35, (5×3)=15, (2×4×7)=56, (4×7×5)=140, (7×5×3)=105, (2×4×7×5)=280, (4×7×5×3)=420, (2×4×7×5×3)=840
+24753 è un numero colorato.
+2, 4, 7, 5, 3, (2×4)=8, (4×7)=28, (7×5)=35, (5×3)=15, (2×4×7)=56, (4×7×5)=140, (7×5×3)=105, (2×4×7×5)=280, (4×7×5×3)=420, (2×4×7×5×3)=840
 Ogni prodotto è unico.
 
-2346 non è un numero colorato. 2, 3, 4, 6, (2×3)=6, (3×4)=12, (4×6)=24, (2×3×4)=48, (3×4×6)=72, (2×3×4×6)=144
+2346 non è un numero colorato.
+2, 3, 4, 6, (2×3)=6, (3×4)=12, (4×6)=24, (2×3×4)=48, (3×4×6)=72, (2×3×4×6)=144
 Il prodotto 6 viene ripetuto.
 
 I numeri a una cifra sono considerati colorati.
-Un numero colorato maggiore di 9 non può contenere una cifra ripetuta, la cifra 0 o la cifra 1. Di conseguenza, esiste un limite superiore fisso per i numeri colorati: nessun numero colorato può avere più di 8 cifre.
+Un numero colorato maggiore di 9 non può contenere una cifra ripetuta, la cifra 0 o la cifra 1.
+Di conseguenza, esiste un limite superiore fisso per i numeri colorati: nessun numero colorato può avere più di 8 cifre.
 
 (define (int-list num)
 "Convert an integer to a list of digits"
@@ -985,7 +1000,8 @@ Numeri colorati totali: 57256
 Numeri brillanti
 ----------------
 
-I numeri brillanti (brilliant) sono un sottoinsieme dei numeri semiprimi. Nello specifico, sono numeri che sono il prodotto esattamente di due numeri primi che hanno entrambi lo stesso numero di cifre quando espressi in base 10.
+I numeri brillanti (brilliant) sono un sottoinsieme dei numeri semiprimi.
+Nello specifico, sono numeri che sono il prodotto esattamente di due numeri primi che hanno entrambi lo stesso numero di cifre quando espressi in base 10.
 I numeri brillanti sono utili in crittografia e durante il test di algoritmi di fattorizzazione primi.
 
 Esempi:
@@ -1085,11 +1101,15 @@ StrappaCamicia o StracciaCamicia o Scamicia è un gioco di carte diffuso in Ital
 
 Una volta mischiate le carte e smezzate dal giocatore alla propria sinistra vengono suddivise in mazzetti uguali, tanti quanti sono i giocatori.
 
-Quando un giocatore gioca una delle tre carte vincenti il giocatore successivo è obbligato a giocare il numero di carte indicate (1 per l'asso, 2 per il due e 3 per il tre). Se durante queste giocata esce una delle carte vincenti l'obbligo si interrompe e tocca al giocatore successivo giocare il numero di carte indicate. Se il giocatore obbligato a giocare le carte non pone una carta vincente il mazzetto di carte presente sul tavolo viene preso dall'altro giocatore (che ha giocato un 1 o un 2 o un 3). Questo riporrà le carte sotto le proprie e inizierà un nuovo turno.
+Quando un giocatore gioca una delle tre carte vincenti il giocatore successivo è obbligato a giocare il numero di carte indicate (1 per l'asso, 2 per il due e 3 per il tre).
+Se durante queste giocata esce una delle carte vincenti l'obbligo si interrompe e tocca al giocatore successivo giocare il numero di carte indicate.
+Se il giocatore obbligato a giocare le carte non pone una carta vincente il mazzetto di carte presente sul tavolo viene preso dall'altro giocatore (che ha giocato un 1 o un 2 o un 3).
+Questo riporrà le carte sotto le proprie e inizierà un nuovo turno.
 
 Il vincitore è quello che avrà l'intero mazzo (cioè quando tutti gli avversari non avranno più carte).
 
-Esiste una configurazione del mazzo che porta ad una partita infinita, ovvero nella quale i giocatori non arriveranno mai a zero carte, in quanto dopo una certa sequenza di mosse ritorneranno allo stato iniziale. È stata trovata nel 2017, ed è la seguente (con 0 si indica una carta diversa da 1, 2 e 3):
+Esiste una configurazione del mazzo che porta ad una partita infinita, ovvero nella quale i giocatori non arriveranno mai a zero carte, in quanto dopo una certa sequenza di mosse ritorneranno allo stato iniziale.
+È stata trovata nel 2017, ed è la seguente (con 0 si indica una carta diversa da 1, 2 e 3):
 
 Giocatore 1: 0 0 3 0 2 0 2 0 3 0 3 1 0 0 0 0 0 3 1 0
 Giocatore 2: 0 0 1 0 0 2 0 0 0 0 2 0 0 0 0 0 0 0 1 0
@@ -1512,7 +1532,8 @@ Vedi anche "Circonferenze di raggio R passanti per 2 punti" su "Note libere 27".
 Determinante di una matrice (Gauss)
 -----------------------------------
 
-Per calcolare il determinante di una matrice, prima trasformiamo la matrice data in una matrice triangolare superiore usando le operazioni sulle righe. Al termine il prodotto degli elementi diagonali della matrice diagonale è il determinante.
+Per calcolare il determinante di una matrice, prima trasformiamo la matrice data in una matrice triangolare superiore usando le operazioni sulle righe.
+Al termine il prodotto degli elementi diagonali della matrice diagonale è il determinante.
 
 (define (deter matrix)
   (setq n (length matrix))
@@ -1662,7 +1683,8 @@ Possono decidere una strategia prima di entrare nella stanza.
 I prigionieri entrano nella stanza uno alla volta, possono aprire un cassetto, controllare il numero della carta nel cassetto, quindi chiudere il cassetto.
 Un prigioniero non può aprire più di 50 cassetti.
 Un prigioniero che trova il proprio numero viene separato dagli altri.
-Se tutti i 100 prigionieri trovano il proprio numero, saranno tutti graziati. In caso contrario, saranno tutti giustiziati.
+Se tutti i 100 prigionieri trovano il proprio numero, saranno tutti graziati.
+In caso contrario, saranno tutti giustiziati.
 
 Simulare diverse migliaia di prove del gioco in cui i prigionieri aprono casualmente i cassetti.
 Simulare diverse migliaia di prove del gioco in cui i prigionieri usano la seguente strategia ottimale:
@@ -1784,7 +1806,9 @@ Lo scopo è sconfiggere l'avversario scegliendo un segno in grado di battere que
 Se i due giocatori scelgono lo stesso simbolo, il gioco è pari e si gioca di nuovo.
 
 La strategia tra giocatori umani comporta l'uso della psicologia per predire o influenzare le scelte dell'avversario.
-Secondo la teoria dei giochi la strategia ottimale è quella di selezionare i simboli casualmente. In questo caso "ottimale" significa solo "incapace di essere sconfitto più di quanto ci si attenda dal caso", mentre non implica che questa strategia casuale sia la migliore contro un avversario non ottimale. Infatti, se l'avversario è un essere umano, è molto probabile che giochi in modo sub-ottimale e che una strategia modificata possa sfruttare tale comportamento (debolezza).
+Secondo la teoria dei giochi la strategia ottimale è quella di selezionare i simboli casualmente.
+In questo caso "ottimale" significa solo "incapace di essere sconfitto più di quanto ci si attenda dal caso", mentre non implica che questa strategia casuale sia la migliore contro un avversario non ottimale.
+Infatti, se l'avversario è un essere umano, è molto probabile che giochi in modo sub-ottimale e che una strategia modificata possa sfruttare tale comportamento (debolezza).
 
 Scrivere una funzione per simulare un determinato numero di partite a morra cinese con strategia casuale.
 
@@ -1908,7 +1932,8 @@ Regole
 Dopo che le carte sono state mischiate vengono distribuite 3 carte a ciascun giocatore e poi vengono messe 4 scoperte sul tavolo.
 Ogni giocatore nel rispettivo turno può prendere solo una carta dello stesso valore dal tavolo obbligatoriamente (ad es. se in mano ha un 7, allora dal tavolo può prendere solo un altro 7).
 Ogni volta che viene effettuata una presa, il giocatore deve tenere scoperta l'ultima carta del proprio mazzo.
-Se l'avversario ne ha una dello stesso valore in mano può "rubare" il suo mazzo (che va tenuto sempre girato). Se la carta in tavola è la stessa del mazzo dell'avversario si prende quella che si preferisce.
+Se l'avversario ne ha una dello stesso valore in mano può "rubare" il suo mazzo (che va tenuto sempre girato).
+Se la carta in tavola è la stessa del mazzo dell'avversario si prende quella che si preferisce.
 Una volta concluso il turno, le carte del mazzo saranno distribuite (3 + 3) ai due giocatori per iniziare un nuovo turno.
 Dopo l'ultima mano, le carte rimaste sulla tavola vengono prese dal giocatore che ha fatto l'ultima presa.
 Il vincitore è quello che ha il maggior numero di carte (ogni carta vale 1).
@@ -2772,7 +2797,8 @@ Nota: per generare numeri con distribuzione gaussiana (normale) è possibile uti
 sintassi: (normal float-mean float-stdev int-n)
 sintassi: (normal float-mean float-stdev)
 
-Nella prima forma, "normal" restituisce un elenco di lunghezza "int-n" di numeri in virgola mobile casuali e distribuiti in modo continuo con una media di "float-mean" e una deviazione standard di "float-stdev". Il generatore casuale utilizzato internamente può essere seminato utilizzando la funzione "seed".
+Nella prima forma, "normal" restituisce un elenco di lunghezza "int-n" di numeri in virgola mobile casuali e distribuiti in modo continuo con una media di "float-mean" e una deviazione standard di "float-stdev".
+Il generatore casuale utilizzato internamente può essere seminato utilizzando la funzione "seed".
 
 (normal 10 3 10)
 ;-> (7 6.563476562 11.93945312 6.153320312 9.98828125
@@ -2792,7 +2818,9 @@ Vedi anche le funzioni "random" e "rand" per numeri distribuiti uniformemente, "
 Cerchio minimo di inclusione (Minimum Enclosing Circle)
 -------------------------------------------------------
 
-Data una lista contenente N punti con coordinate 2D. Trovare il centro e il raggio del cerchio minimo di inclusione (MEC). Un cerchio minimo di inclusione è un cerchio in cui tutti i punti giacciono all'interno del cerchio o sulla sua circonferenza.
+Data una lista contenente N punti con coordinate 2D.
+Trovare il centro e il raggio del cerchio minimo di inclusione (MEC).
+Un cerchio minimo di inclusione è un cerchio in cui tutti i punti giacciono all'interno del cerchio o sulla sua circonferenza.
 
 Esempi:
 Input: punti = ((0, 0) (0, 1) (1, 0))
@@ -2803,18 +2831,23 @@ Output: centro = (1.0, 1.0), reggio = 5
 
 Per risolvere il problema dobbiamo fare alcune osservazioni:
 
-1) Il MEC interseca almeno un punto. Questo perché se il MEC non si interseca in nessun punto, il cerchio potrebbe essere ulteriormente ridotto fino a quando non si interseca uno dei punti.
+1) Il MEC interseca almeno un punto.
+Questo perché se il MEC non si interseca in nessun punto, il cerchio potrebbe essere ulteriormente ridotto fino a quando non si interseca uno dei punti.
 
 2) Dato un cerchio che racchiude tutti i punti e si interseca in un unico punto, il cerchio può essere ulteriormente rimpicciolito spostando il centro verso quel punto mantenendo il punto sul bordo del cerchio finché il cerchio non si interseca uno o più punti aggiuntivi.
 
-3) Se il cerchio si interseca in due punti (A e B) e la distanza AB è uguale al diametro del cerchio, il cerchio non può più essere rimpicciolito. Altrimenti, il centro del cerchio può essere spostato verso il punto medio di AB finché il cerchio non interseca un terzo punto (in corrispondenza del quale il cerchio non può più essere ridotto).
+3) Se il cerchio si interseca in due punti (A e B) e la distanza AB è uguale al diametro del cerchio, il cerchio non può più essere rimpicciolito.
+Altrimenti, il centro del cerchio può essere spostato verso il punto medio di AB finché il cerchio non interseca un terzo punto (in corrispondenza del quale il cerchio non può più essere ridotto).
 
 Dalle osservazioni di cui sopra, si può concludere che il MEC:
 
-a) Interseca 2 punti A e B, dove AB = diametro del cerchio. In questo caso, il centro del cerchio sarebbe il punto medio di A e B e il raggio sarebbe la metà della distanza AB.
+a) Interseca 2 punti A e B, dove AB = diametro del cerchio.
+In questo caso, il centro del cerchio sarebbe il punto medio di A e B e il raggio sarebbe la metà della distanza AB.
 b) Interseca 3 o più punti.
 
-Pertanto, la soluzione a questo problema è banale per N <= 3. Per gli altri casi utilizziamo tutte le coppie e le triple dei punti per ottenere il cerchio definito da quei punti. Dopo aver ottenuto il cerchio, verifichiamo se gli altri punti sono racchiusi dal cerchio e restituiamo il cerchio valido più piccolo trovato.
+Pertanto, la soluzione a questo problema è banale per N <= 3.
+Per gli altri casi utilizziamo tutte le coppie e le triple dei punti per ottenere il cerchio definito da quei punti.
+Dopo aver ottenuto il cerchio, verifichiamo se gli altri punti sono racchiusi dal cerchio e restituiamo il cerchio valido più piccolo trovato.
 
 I punti e i cerchi sono definiti dalle seguenti strutture:
   - point -> (x y)
@@ -2942,7 +2975,9 @@ Facciamo alcune prove:
 Complessità temporale: O(N^4)
 
 Un'altro metodo di soluzione del problema utilizza l'algoritmo convex-hull.
-Calcoliamo il convex-hull dei punti dati e poi utilizziamo la funzione "find-mec" per trovare il MEC con i punti che formano il convex-hull. Se il numero di vertici del convex-hull è considerevolmente inferiore a N, la complessità sarebbe O(H^4 + N*Log(N)) dove H rappresenta il numero di vertici del convex-hull e il fattore NLog(N) è la complessità temporale dell'algoritmo di convex-hull (Graham Scan). Infine, se il numero di vertici, H, del convex-hull è molto piccolo, allora può essere considerato come un fattore costante e quindi la complessità temporale diventa O(NLog(N)).
+Calcoliamo il convex-hull dei punti dati e poi utilizziamo la funzione "find-mec" per trovare il MEC con i punti che formano il convex-hull.
+Se il numero di vertici del convex-hull è considerevolmente inferiore a N, la complessità sarebbe O(H^4 + N*Log(N)) dove H rappresenta il numero di vertici del convex-hull e il fattore NLog(N) è la complessità temporale dell'algoritmo di convex-hull (Graham Scan).
+Infine, se il numero di vertici, H, del convex-hull è molto piccolo, allora può essere considerato come un fattore costante e quindi la complessità temporale diventa O(NLog(N)).
 
 Vedi anche "Circonferenza con copertura massima di una lista di punti interi" su "Note libere 15"
 Vedi anche "Cerchio di massima inclusione di punti" su "Note libere 27"
@@ -3045,12 +3080,13 @@ Complessità temporale: O(r1*c1*r2*c2)
 
 
 -------------
-Numeri di Lha
+Numeri di Lah
 -------------
 
-In matematica , i numeri di Lah , scoperti da Ivo Lah nel 1954, [1] [2] sono coefficienti che esprimono fattoriali crescenti in termini di fattoriali decrescenti . Sono anche i coefficienti delle derivate th di . [3]n{\displaystyle e^{1/x}}
+In matematica i numeri di Lah, scoperti da Ivo Lah nel 1954, sono coefficienti che esprimono fattoriali crescenti in termini di fattoriali decrescenti e compaiono naturalmente anche nelle derivate di e^(1/x).
 
-I numeri Lah senza segno hanno un significato interessante in combinatoria : contano il numero di modi in cui un insieme di n elementi può essere partizionato in k sottoinsiemi ordinati linearmente non vuoti . [4] I numeri di Lah sono correlati ai numeri di Stirling . [5]
+I numeri Lah senza segno hanno un significato interessante in combinatoria: contano il numero di modi in cui un insieme di n elementi può essere partizionato in k sottoinsiemi ordinati linearmente non vuoti.
+I numeri di Lah sono correlati ai numeri di Stirling.
 
 Numeri Lah senza segno (sequenza OEIS A105278):
 
@@ -3159,7 +3195,9 @@ Vediamo la velocità di questa funzione:
 Settore circolare
 -----------------
 
-Un settore circolare è la porzione di un cerchio racchiusa tra due raggi e un arco, dove l'area più piccola è il "settore minore" e la più grande è il "settore maggiore". Chiamiamo "theta" l'angolo minore racchiuso tra i due raggi. Chiamiamo L la lunghezza della parte circolare del settore.
+Un settore circolare è la porzione di un cerchio racchiusa tra due raggi e un arco, dove l'area più piccola è il "settore minore" e la più grande è il "settore maggiore".
+Chiamiamo "theta" l'angolo minore racchiuso tra i due raggi.
+Chiamiamo L la lunghezza della parte circolare del settore.
 
   Area-Settore = π*r^2 * (theta/360)
 
@@ -3196,7 +3234,8 @@ Un settore circolare è la porzione di un cerchio racchiusa tra due raggi e un a
 Corda del cerchio
 -----------------
 
-In un cerchio, se viene disegnata una corda, quella corda divide l'intero cerchio in due parti chiamate segmenti del cerchio. L'area più piccola è conosciuta come il "segmento minore" e l'area più grande è chiamata il "segmento maggiore".
+In un cerchio, se viene disegnata una corda, quella corda divide l'intero cerchio in due parti chiamate segmenti del cerchio.
+L'area più piccola è conosciuta come il "segmento minore" e l'area più grande è chiamata il "segmento maggiore".
 Dato il raggio del cerchio e l'angolo che forma il segmento minore, trovare l'area del "segmento minore".
 
 Vedi immagine "corda.png" nella cartella "data".
@@ -3245,7 +3284,11 @@ Scriviamo la funzione:
 Esperimento dell'imbuto (Funnel Experiment)
 -------------------------------------------
 
-Il Dr. Deming ha affermato: "Se qualcuno regola un processo stabile a causa di un risultato indesiderato, o per un risultato molto buono, l'output che ne conseguirà sarà peggiore che se avesse lasciato il processo da solo (indisturbato)". Questo è spesso chiamato manomissione del processo. È qualcosa che viene fatto spesso dal personale in prima linea e molto spesso dal management. Ciò aumenta la variazione e i fallimenti in un processo. Fare del proprio meglio non è più sufficiente: devi sapere cosa fare.
+Il Dr. Deming ha affermato: "Se qualcuno regola un processo stabile a causa di un risultato indesiderato, o per un risultato molto buono, l'output che ne conseguirà sarà peggiore che se avesse lasciato il processo da solo (indisturbato)".
+Questo è spesso chiamato manomissione del processo.
+È qualcosa che viene fatto spesso dal personale in prima linea e molto spesso dal management.
+Ciò aumenta la variazione e i fallimenti in un processo.
+Fare del proprio meglio non è più sufficiente: devi sapere cosa fare.
 
 Un esempio di controllo eccessivo è l'esperimento a imbuto descritto dal Dr. Deming.
 L'obiettivo dell'esperimento dell'imbuto è far cadere una biglia attraverso un imbuto e colpire un bersaglio.
@@ -3263,7 +3306,8 @@ Per ogni lancio, la biglia si fermerà a una distanza "z" dal bersaglio.
 La regola 2 è spostare l'imbuto di una distanza -z dalla sua ultima posizione.
 
 Regola 3:
-Spostare l'imbuto di una distanza -z dal bersaglio per ogni biglia che finisce a una distanza z dal bersaglio. Nota che la regola 2 sposta l'imbuto in base all'ultima posizione dell'imbuto stesso.
+Spostare l'imbuto di una distanza -z dal bersaglio per ogni biglia che finisce a una distanza z dal bersaglio.
+Nota che la regola 2 sposta l'imbuto in base all'ultima posizione dell'imbuto stesso.
 La regola 3 sposta l'imbuto a una certa distanza dal bersaglio.
 
 Regola 4:
@@ -3522,7 +3566,9 @@ Regola 1:
 ;->                        ·
 ;->                        ·                 ■
 
-La regola 1 è lasciare l'imbuto fisso sopra il bersaglio. Il modello risultante è mostrato nella figura sopra. Il bersaglio (obiettivo) è dove le linee continue si incrociano (0, 0).
+La regola 1 è lasciare l'imbuto fisso sopra il bersaglio.
+Il modello risultante è mostrato nella figura sopra.
+Il bersaglio (obiettivo) è dove le linee continue si incrociano (0, 0).
 Come si può vedere nella figura, la variazione è un cerchio approssimativo ed è stabile.
 Sicuramente possiamo fare di meglio! Questo cerchio è troppo grande.
 Perché non regoliamo semplicemente l'imbuto dopo ogni lancio in modo che il prossimo lancio sia più vicino al bersaglio?
@@ -3608,9 +3654,14 @@ Regola 3:
 ;->                      ·           ■ ■■   ■■
 ;->                      ·             ■     ■
 
-La regola 3 è spostare l'imbuto di una distanza -z dal bersaglio dopo ogni lancio della biglia che finisce a una distanza z dal bersaglio. Notare che la regola 2 sposta l'imbuto in base all'ultima posizione dell'imbuto. La regola 3 sposta l'imbuto a una distanza dal bersaglio.
+La regola 3 è spostare l'imbuto di una distanza -z dal bersaglio dopo ogni lancio della biglia che finisce a una distanza z dal bersaglio.
+Notare che la regola 2 sposta l'imbuto in base all'ultima posizione dell'imbuto.
+La regola 3 sposta l'imbuto a una distanza dal bersaglio.
 I risultati sono mostrati nella figura sopra.
-In questo caso il lancio delle biglie oscilla avanti e indietro. Il motivo sembra simile a una farfalla. Questo non è un processo stabile. L'ampiezza delle oscillazioni continuerà ad aumentare.
+In questo caso il lancio delle biglie oscilla avanti e indietro.
+Il motivo sembra simile a una farfalla.
+Questo non è un processo stabile.
+L'ampiezza delle oscillazioni continuerà ad aumentare.
 
 Regola 4:
 
@@ -3648,9 +3699,11 @@ Regola 4:
 ;->   ■ ·            ■          ■
 ;->  ■··∙············■··■······················
 
-La regola 4 consiste semplicemente nel posizionare l'imbuto sul punto in cui si è fermata l'ultima biglia. Il modello per questa variazione è mostrato nella figura sopra.
+La regola 4 consiste semplicemente nel posizionare l'imbuto sul punto in cui si è fermata l'ultima biglia.
+Il modello per questa variazione è mostrato nella figura sopra.
 In base a questa regola, la biglia continua a spostarsi in una direzione.
-Non tornerà. Questo non è un processo stabile.
+Non tornerà.
+Questo non è un processo stabile.
 
 Esempi di regole
 ----------------
@@ -3848,7 +3901,8 @@ Nota: si usa la formula [D2] quando vogliamo effettuare delle previsioni sui pro
 
 Perchè si divide per (N - 1)?
 
-Si tratta del metodo "Correzione di Bessel" che corregge il bias nella stima della varianza della popolazione e, parzialmente, il bias nella stima della deviazione standard della popolazione. Tuttavia, la correzione spesso aumenta l'errore quadratico medio in queste stime.
+Si tratta del metodo "Correzione di Bessel" che corregge il bias nella stima della varianza della popolazione e, parzialmente, il bias nella stima della deviazione standard della popolazione.
+Tuttavia, la correzione spesso aumenta l'errore quadratico medio in queste stime.
 
 newLISP mette a disposizione la funzione "stats" per calcolare la varianza e la deviazione standard di una lista di numeri.
 
@@ -4078,7 +4132,10 @@ Definizione del principio della piccionaia di Dijkstra
 ------------------------------------------------------
 Dato un qualunque insieme non-vuoto di numeri reali, il valore massimo tra essi è almeno pari alla media dei valori.
 
-Consideriamo di nuovo il problema di infilare i piccioni nelle buche e consideriamo la media. Se abbiamo più di n piccioni e n buche, il valore medio di (piccioni/buche) è maggiore di uno. Ciò significa che anche il valore massimo dovrebbe essere maggiore di uno. In altre parole, ci deve essere un valore con più di un piccione per buca.
+Consideriamo di nuovo il problema di infilare i piccioni nelle buche e consideriamo la media.
+Se abbiamo più di n piccioni e n buche, il valore medio di (piccioni/buche) è maggiore di uno.
+Ciò significa che anche il valore massimo dovrebbe essere maggiore di uno.
+In altre parole, ci deve essere un valore con più di un piccione per buca.
 
 Formulazione astratta del principio
 -----------------------------------
@@ -4100,7 +4157,8 @@ Questo principio permette di risolvere problemi di varia natura, se si è in gra
 Problema 1
 ----------
 Da "Giochi di aritmetica e problemi interessanti" di Giuseppe Peano.
-Si stima che la superficie del capo umano portante capelli è di 775 cm2 e che ogni cm2 contiene al massimo 165 capelli. Dimostrare che in una città di 150.000 abitanti vi sono due persone che hanno lo stesso numero di capelli.
+Si stima che la superficie del capo umano portante capelli è di 775 cm2 e che ogni cm2 contiene al massimo 165 capelli.
+Dimostrare che in una città di 150.000 abitanti vi sono due persone che hanno lo stesso numero di capelli.
 Soluzione: poiché il massimo numero di capelli che può avere una persona vale:
 
   775 * 165 = 125875 < 150.00
@@ -4110,7 +4168,8 @@ Per esempio, per una città come Roma, che ha circa 2.788.000 abitanti (ISTAT 20
 
 Problema 2
 ----------
-Una borsa contiene 10 biglie rosse, 10 biglie bianche e 10 biglie blu. Qual è il minimo n. di biglie devi scegliere a caso dal sacchetto per assicurarti di ottenere 4 biglie dello stesso colore?
+Una borsa contiene 10 biglie rosse, 10 biglie bianche e 10 biglie blu.
+Qual è il minimo n. di biglie devi scegliere a caso dal sacchetto per assicurarti di ottenere 4 biglie dello stesso colore?
 Soluzione: applichiamo il principio della piccionaia.
 N. di colori (buche) n = 3
 N. di biglie (piccioni) K+1 = 4
@@ -4128,7 +4187,8 @@ Se q1 + q2 + ... + qn – n + 1 oggetti vengono inseriti in n caselle, quindi o 
 
 Problema 3
 ----------
-In una scuola, una squadra può essere formato con 10 alunni del primo anno o 8 del secondo anno o 6 del terzo anno o 4 dell'ultimo anno. Scegliendo gli alunni a caso, qual è il numero minimo di studenti che dobbiamo scegliere per garantire che si formi una squadra?
+In una scuola, una squadra può essere formato con 10 alunni del primo anno o 8 del secondo anno o 6 del terzo anno o 4 dell'ultimo anno.
+Scegliendo gli alunni a caso, qual è il numero minimo di studenti che dobbiamo scegliere per garantire che si formi una squadra?
 Soluzione: possiamo applicare direttamente dalla formula sopra dove,
 
   q1 = 10, q2 = 8, q3 = 6, q4 = 4 e n=4
@@ -4139,7 +4199,8 @@ Pertanto il numero minimo di studenti richiesto per garantire la formazione del 
 
 Problema 4
 ----------
-Una scatola contiene 6 palline rosse, 8 verdi, 10 blu, 12 gialle e 15 bianche. Scegliendo a caso, qual è il numero minimo di palline che dobbiamo scegliere dalla scatola per essere certi di ottenere 9 palline dello stesso colore?
+Una scatola contiene 6 palline rosse, 8 verdi, 10 blu, 12 gialle e 15 bianche.
+Scegliendo a caso, qual è il numero minimo di palline che dobbiamo scegliere dalla scatola per essere certi di ottenere 9 palline dello stesso colore?
 Soluzione: in questo caso non possiamo applicare direttamente la formula.
 Infatti vediamo cosa accade se la applichiamo direttamente:
 
@@ -4164,7 +4225,8 @@ Problema 5
 Dato un qualunque insieme A di n+1 numeri naturali compresi tra 1 e 2n.
 Esiste sempre in A una coppia di numeri in cui un numero divide l'altro?
 Soluzione:
-Ogni numero a si può dividere successivamente per 2, zero o più volte fino ad arrivare ad un numero dispari, ovvero a=(2^k)*m con m dispari. Si avrà k >= 0 e m <= a.
+Ogni numero a si può dividere successivamente per 2, zero o più volte fino ad arrivare ad un numero dispari, ovvero a=(2^k)*m con m dispari.
+Si avrà k >= 0 e m <= a.
 Poichè a appartiene ad A si ha m <= 2n.
 Ma ci sono solo n numeri dispari tra 1 e 2n, mentre in A ci sono n+1 numeri, quindi un valore di m si ripete almeno due volte (principio della piccionaia):
 
@@ -4176,26 +4238,37 @@ Problema 6
 ----------
 Non è possibile inventare un algoritmo di compressione dati senza perdita di informazioni ("lossless") che funzioni sempre, cioè che a partire da un qualunque file in ingresso ne produca in uscita sempre uno più corto.
 Soluzione:
-Consideriamo i file di lunghezza k bit. Il loro numero è per definizione 2^k: ma i file di lunghezza tra 1 e k−1 sono solo 2^k−1, e pertanto dobbiamo avere due file che vengono "compressi" nello stesso file.
+Consideriamo i file di lunghezza k bit.
+Il loro numero è per definizione 2^k: ma i file di lunghezza tra 1 e k−1 sono solo 2^k−1, e pertanto dobbiamo avere due file che vengono "compressi" nello stesso file.
 Come facciamo allora a decomprimere il file compresso e scegliere il risultato corretto?
 
 From wikipedia:
-Lossless data compression algorithms (that do not attach compression id labels to their output data sets) cannot guarantee compression for all input data sets. In other words, for any lossless data compression algorithm, there will be an input data set that does not get smaller when processed by the algorithm, and for any lossless data compression algorithm that makes at least one file smaller, there will be at least one file that it makes larger. This is easily proven with elementary mathematics using a counting argument called the pigeonhole principle:
+Lossless data compression algorithms (that do not attach compression id labels to their output data sets) cannot guarantee compression for all input data sets.
+In other words, for any lossless data compression algorithm, there will be an input data set that does not get smaller when processed by the algorithm, and for any lossless data compression algorithm that makes at least one file smaller, there will be at least one file that it makes larger.
+This is easily proven with elementary mathematics using a counting argument called the pigeonhole principle:
 
 - Assume that each file is represented as a string of bits of some arbitrary length.
 - Suppose that there is a compression algorithm that transforms every file into an output file that is no longer than the original file, and that at least one file will be compressed into an output file that is shorter than the original file.
-- Let M be the least number such that there is a file F with length M bits that compresses to something shorter. Let N be the length (in bits) of the compressed version of F.
-- Because N<M, every file of length N keeps its size during compression. There are 2^N such files possible. Together with F, this makes 2^N + 1 files that all compress into one of the 2^N files of length N.
-- But 2^N is smaller than 2^N + 1, so by the pigeonhole principle there must be some file of length N that is simultaneously the output of the compression function on two different inputs. That file cannot be decompressed reliably (which of the two originals should that yield?), which contradicts the assumption that the algorithm was lossless.
+- Let M be the least number such that there is a file F with length M bits that compresses to something shorter.
+Let N be the length (in bits) of the compressed version of F.
+- Because N<M, every file of length N keeps its size during compression.
+There are 2^N such files possible.
+Together with F, this makes 2^N + 1 files that all compress into one of the 2^N files of length N.
+- But 2^N is smaller than 2^N + 1, so by the pigeonhole principle there must be some file of length N that is simultaneously the output of the compression function on two different inputs.
+That file cannot be decompressed reliably (which of the two originals should that yield?), which contradicts the assumption that the algorithm was lossless.
 - We must therefore conclude that our original hypothesis (that the compression function makes no file longer) is necessarily untrue.
 
 Problema 7
 ----------
 Dimostrare che ad una festa ci sono due persone che hanno lo stesso numero di amici (l'amicizia è reciproca, cioè se A è amico di B, allora anche B è amico di A).
 Soluzione:
-detto n il numero di persone ad una festa, allora ogni partecipante può avere da 0 a (n - 1) amici. Se tutte le persone avessero un numero diverso di amici, allora ce ne sarebbe una con 0 amici e un'altra con (n - 1) amici, il che è impossibile in quanto la persona con(n - 1) amici sarebbe amica di tutti (compreso di colui che ha 0 amici).
+detto n il numero di persone ad una festa, allora ogni partecipante può avere da 0 a (n - 1) amici.
+Se tutte le persone avessero un numero diverso di amici, allora ce ne sarebbe una con 0 amici e un'altra con (n - 1) amici, il che è impossibile in quanto la persona con(n - 1) amici sarebbe amica di tutti (compreso di colui che ha 0 amici).
 Un altro modo di ragionare
-Ognuno degli n partecipanti può essere amico di un numero di persone variabile tra 0 e n-1. Iniziamo a supporre che ciascuno abbia almeno un amico, e associamogli il numero di amici che ha: ci sono allora n persone a cui sono associati i numeri da 1 a n−1, e per il principio dei cassetti due di loro devono avere lo stesso numero. Cosa succede se esiste uno senza amici (imbucato)? In questo caso nessuno degli altri può avere n−1 amici, visto che non conosce l'imbucato. Quindi alle n persone si associano i numeri da 0 a n−2, che vale di nuovo n−1.
+Ognuno degli n partecipanti può essere amico di un numero di persone variabile tra 0 e n-1.
+Iniziamo a supporre che ciascuno abbia almeno un amico, e associamogli il numero di amici che ha: ci sono allora n persone a cui sono associati i numeri da 1 a n−1, e per il principio dei cassetti due di loro devono avere lo stesso numero.
+Cosa succede se esiste uno senza amici (imbucato)? In questo caso nessuno degli altri può avere n−1 amici, visto che non conosce l'imbucato.
+Quindi alle n persone si associano i numeri da 0 a n−2, che vale di nuovo n−1.
 
 Nota: nel 2014 è stato dimostrato che in meccanica quantistica il principio dei cassetti può essere violato.
 
@@ -8522,7 +8595,8 @@ Da binario a gray:
 
 Da gray a binario:
 1) Il bit più significativo (MSB) del codice binario è sempre uguale all'MSB del codice gray.
-2) Gli altri bit del codice binario di uscita possono essere ottenuti controllando il bit del codice gray in quell'indice. Se il bit del codice gray corrente è 0, copiare il bit del codice binario precedente, altrimenti copiare l'inversione del bit del codice binario precedente.
+2) Gli altri bit del codice binario di uscita possono essere ottenuti controllando il bit del codice gray in quell'indice.
+Se il bit del codice gray corrente è 0, copiare il bit del codice binario precedente, altrimenti copiare l'inversione del bit del codice binario precedente.
 
 ; funzione di xor tra due caratteri
 (define (xor-char a b)

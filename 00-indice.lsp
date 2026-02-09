@@ -1313,7 +1313,7 @@ NOTE LIBERE 10
   Trasformazione Box-Muller
   Cerchio minimo di inclusione (Minimum Enclosing Circle)
   Prodotto di Kronecker
-  Numeri di Lha
+  Numeri di Lah
   Settore circolare
   Corda del cerchio
   Esperimento dell'imbuto (Funnel Experiment)
@@ -3335,6 +3335,7 @@ NOTE LIBERE 34
   Massima differenza tra coppie di elementi adiacenti
   John D. Cook's exponential sums
   Il Colpo di Venere
+  Sempre lo stesso numero
 
 PROBLEMI SUI DADI
 =================

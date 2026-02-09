@@ -3448,7 +3448,8 @@ Tempo necessario di andata e ritorno senza corrente:
 ;-> 7.5 ; minuti
 
 Nota: la barca impiega più tempo ad andare e tornare quando c'è la corrente.
-Questo accade perchè t2 > t1, cioè la barca viaggia per più tempo controcorrente di quanto non faccia a favore di corrente. In altre parole, il tratto controcorrente dura di più e quindi il tempo per cui siamo sfavoriti è maggiore del tempo per cui siamo favoriti.
+Questo accade perchè t2 > t1, cioè la barca viaggia per più tempo controcorrente di quanto non faccia a favore di corrente.
+In altre parole, il tratto controcorrente dura di più e quindi il tempo per cui siamo sfavoriti è maggiore del tempo per cui siamo favoriti.
 
 
 ---------------------

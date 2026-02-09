@@ -5447,7 +5447,7 @@ Equazione di eulero per il calcolo dell'esponenziale complesso:
     (for (n 0 N)
       (setq f (add (div n mm) (div (mul n n) dd) (div (mul n n n) yy)))
       ; Riduzione a modulo 1 ((sub f (floor f)) prima di moltiplicare per 2π:
-      ; poichè per n grandi l’argomento può diventare enorme
+      ; poichè per n grandi l'argomento può diventare enorme
       ; e cos/sin perdono precisione.
       (setq power (mul 2 pi (sub f (floor f))))
       (setq re (cos power))
@@ -5477,7 +5477,7 @@ Nota: la lista di punti può essere esportata e plottata con un foglio elettroni
 Il Colpo di Venere
 ------------------
 
-"Siccome mi sembrava che per puro caso alcuni fatti fossero avvenuti così com’erano stati predetti dagl’indovini, tu hai parlato a lungo del caso, e hai detto, per esempio, che si può ottenere il 'colpo di Venere' lanciando a caso quattro dadi [...]".
+"Siccome mi sembrava che per puro caso alcuni fatti fossero avvenuti così com'erano stati predetti dagl'indovini, tu hai parlato a lungo del caso, e hai detto, per esempio, che si può ottenere il 'colpo di Venere' lanciando a caso quattro dadi [...]".
 Cicerone, "De Divinatione",II,21,48
 
 Nel dialogo col fratello Quinto, Cicerone parla del Colpo di Venere che consiste nel lanciare quattro dadi tetraedrici ottenendo quattro risultati diversi.
@@ -5563,13 +5563,140 @@ Scrivo la funzione che caratterizza un dado a 4 facce equiprobabili sostituendo 
 
   f(a,b,c,d) = 1/4a+1/4b+1/4c+1/4d
 
-Siccome i dadi lanciati sono 4 (oppure è un dado lanciato 4 volte), elevo il polinomio alla 4ᵃ potenza.
+Siccome i dadi lanciati sono 4 (oppure è un dado lanciato 4 volte), elevo il polinomio alla quarta potenza.
 Il coefficiente del termine: "abcd" ci dà la probabilità delle 4 facce diverse.
 Il coefficiente di: "a^4, b^4, c^4, d^4" ci restituisce la probabilità di 4a, 4b, 4c, 4d.
 Se si sviluppa (1/4a+1/4b+1/4c+1/4d)^4 si ha:
 3/32abcd (3/32 probabilità di 4 facce diverse)
 a^4/256, b^4/256, c^4/256, d^4/256.
 Per esempio, nello sviluppo si ha 3/64ab²d: significa che la configurazione del tipo: 1-2-2-4 ha probabilità 3/64.
+
+
+-----------------------
+Sempre lo stesso numero
+-----------------------
+
+Scegliere un numero di 3 cifre tale che:
+- il valore assoluto della differenza della prima e ultima cifra non deve essere inferiore a 2
+- invertire le cifre
+- sottrarre i 2 numeri (il più grande meno il più piccolo)
+- somma il numero ottenuto dalla sottrazione precedente con lo stesso numero con le cifre invertite
+- somma i 2 numeri ottenuti
+Il numero che si ottiene vale sempre 1089.
+
+(define (trasforma n)
+  (setq s (string n))
+  (cond ((!= (length n) 3) nil)
+        ((< (abs (- (int (s 0) 0 10) (int (s 2) 0 10))) 2) nil)
+        (true
+          (setq s1 (reverse (copy s)))
+          (setq n1 (abs (- (int s 0 10) (int s1 0 10))))
+          (setq n2 (int (reverse (string n1)) 0 10))
+          ;(println s { } s1 { } n1 { } n2)
+          (+ n1 n2))))
+
+Proviamo:
+
+(trasforma 267)
+;-> 1089
+(trasforma 162)
+;-> nil
+(trasforma 16)
+;-> nil
+(trasforma 341)
+;-> 1089
+
+Verifichiamo che 1089 sia l'unico risultato:
+(sort (unique (map trasforma (sequence 100 999))))
+;-> (nil 1089)
+
+Spiegazione matematica:
+
+Indichiamo il numero di tre cifre come:
+  abc = 100a + 10b + c
+con a != 0 e |a − c| >= 2.
+Invertendo le cifre otteniamo
+  cba = 100c + 10b + a
+
+1) Sottrazione
+Senza perdita di generalità supponiamo a > c (altrimenti scambiamo i due numeri).
+Calcoliamo:
+  abc − cba
+  = (100a + 10b + c) − (100c + 10b + a)
+  = 100a − 100c + c − a
+  = 99a − 99c
+  = 99(a − c)
+Quindi la differenza è sempre un multiplo di 99.
+Pongo d = a − c con d >= 2.
+Allora:
+99d
+
+2) Struttura di 99d
+Per d = 2,...,9 si ottiene sempre un numero del tipo:
+  198, 297, 396, 495, 594, 693, 792, 891
+Osservazione chiave: le cifre esterne sommano sempre 9 e la cifra centrale è 9.
+Infatti:
+  99d = 100d − d = (d−1) 9 (10−d)
+esempio:
+  d = 4 -> 396 -> 3 + 6 = 9
+
+3) Somma col numero invertito
+Sia il risultato:
+  xyz
+con x + z = 9 e y = 9.
+
+Il numero invertito è:
+  zyx
+Sommiamo:
+  xyz + zyx
+  = (100x + 90 + z) + (100z + 90 + x)
+  = 101x + 101z + 180
+  = 101(x+z) + 180
+  = 101·9 + 180
+  = 909 + 180
+  = 1089
+
+4) Conclusione
+Tutto dipende dal fatto che:
+- la sottrazione produce sempre 99(a−c)
+- quel numero ha forma (x, 9, 9−x)
+- la somma con l'inverso diventa costante
+Perciò il risultato finale è sempre 1089 indipendentemente dal numero iniziale (purché |a−c| >= 2).
+
+Adesso togliamo due vincoli:
+- il valore assoluto della differenza tra la prima e l'ultima cifra può avere un valore qualsiasi
+- il numero può avere qualunque numero di cifre
+
+(define (trasforma2 n)
+  (setq s (string n))
+  (setq s1 (reverse (copy s)))
+  (setq n1 (abs (- (int s 0 10) (int s1 0 10))))
+  (setq n2 (int (reverse (string n1)) 0 10))
+  ;(println s { } s1 { } n1 { } n2)
+  (+ n1 n2))
+
+Proviamo:
+
+(sort (unique (map trasforma2 (sequence 1 9))))
+;-> (0)
+(sort (unique (map trasforma2 (sequence 10 99))))
+;-> (0 18 99)
+(sort (unique (map trasforma2 (sequence 100 999))))
+;-> (0 198 1089)
+(sort (unique (map trasforma2 (sequence 1000 9999))))
+;-> (0 99 261 342 423 504 585 666 747 828 1170 1251 1332
+;->  1413 1494 1575 1656 1737 1818 1998 9999 10890 10989)
+(sort (unique (map trasforma2 (sequence 1 10000))))
+;-> (0 18 99 198 261 342 423 504 585 666 747 828 1089 1170 1251 1332
+;->  1413 1494 1575 1656 1737 1818 1998 9999 10890 10989 19998)
+
+Il caso in cui n ha esattamente 3 cifre da 100 a 999) genera i seguenti risultati:
+a) 0, quando la differenza assoluta tra la prima e la terza cifra di n vale 0 (cioè le due cifre sono uguali)
+b) 198, quando la differenza assoluta tra la prima e la terza cifra di n vale 1
+c) 1089, quando la differenza assoluta tra la prima e la terza cifra è maggiore o uguale a 2
+
+(sort (unique (map trasforma2 (sequence 100 999))))
+;-> (0 198 1089)
 
 ============================================================================
 
