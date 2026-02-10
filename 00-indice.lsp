@@ -3336,6 +3336,7 @@ NOTE LIBERE 34
   John D. Cook's exponential sums
   Il Colpo di Venere
   Sempre lo stesso numero
+  Piramide di bicchieri
 
 PROBLEMI SUI DADI
 =================

@@ -5698,5 +5698,149 @@ c) 1089, quando la differenza assoluta tra la prima e la terza cifra è maggiore
 (sort (unique (map trasforma2 (sequence 100 999))))
 ;-> (0 198 1089)
 
+
+---------------------
+Piramide di bicchieri
+---------------------
+
+Supponiamo di avere alcuni bicchieri impilati in una piramide di N righe:
+la prima fila contiene 1 bicchiere, la seconda fila 2 bicchieri e così via fino alla N-esima fila.
+Ogni bicchiere è in grado di contenere 1 litro.
+
+Poi, cominciamo a versare acqua nel primo bicchiere in cima.
+Quando il bicchiere più in alto è pieno, il liquido in eccesso versato cadrà in parti uguali nel bicchiere immediatamente a sinistra e a destra di esso nella riga sottostante.
+Quando questi bicchieri si riempiono, l'acqua in eccesso cadrà in parti uguali a sinistra e a destra di quei bicchieri nella riga sottostante, e così via.
+I bicchieri nell'ultima fila inferiore vedono l'acqua in eccesso cadere sul pavimento.
+
+Esempio:
+dopo aver versato un  litro di acqua, il bicchiere più in alto è pieno.
+Dopo aver versato due litri di acqua, i due bicchieri della seconda fila sono pieni a metà.
+Dopo aver versato tre litri di acqua, questi due bicchieri si riempiono completamente: ora ci sono 3 bicchieri pieni in totale.
+Dopo aver versato quattro litri di aqua, la terza fila ha il bicchiere centrale mezzo pieno e i due bicchieri esterni pieni per un quarto.
+
+Scrivere una funzione che prende il numero di file di bicchieri e la quantità d'acqua versata e restituisce la situazione (quantità di acqua) di tutti i bicchieri nella piramide
+
+Disposizione dei bicchieri a piramide:
+
+riga 0         U
+riga 1        U U
+riga 2       U U U
+riga 3     U U U U U
+riga 4    U U U U U U
+riga 5  U U U U U U U U
+...
+
+Flusso dell'acqua:
+                      ..
+                      ..
+                   ........
+                   .|....|.
+riga 0             .|....|.
+                   .|....|.
+                   .+----+.
+              ........  ........
+              .|....|.  .|....|.
+riga 1        .|....|.  .|....|.
+              .|....|.  .|....|.
+              .+----+.  .+----+.
+              .      .  .      .
+           |  . |   |.  .|   | .  |
+riga 2     |  . |   |....|   | .  |
+           |....|   |....|   |....|
+           +----+   +----+   +----+
+...
+
+Funzione che stampa la piramide dei bicchieri:
+
+(define (show-piramide lst)
+  (dolist (row lst)
+    (dolist (el row)
+      (if (!= el 0) (print el { })))
+    (println)))
+
+Funzione che calcola l'acqua nei bicchieri:
+
+(define (piramide N qt)
+  ; N:  numero di righe della piramide
+  ; qt: litri di acqua versati nei bicchieri della piramide
+  (local (pira eccesso acqua pavimento)
+    ; Creazione di una matrice che rappresenta la piramide di bicchieri
+    ; pira[i][j] contiene la quantità di acqua
+    ; del j-esimo bicchiere della i-esima riga
+    ; l'ultima fila della matrice rappresenta l'acqua che cade nel pavimento
+    (setq pira (array (+ N 1) (+ N 1) '(0)))
+    ; Versiamo tutta l'acqua nel bicchiere in cima
+    (setf (pira 0 0) qt)
+    ; Processiamo ogni riga dall'alto verso il basso...
+    (for (riga 0 (- N 1))
+      ; processiamo ogni bicchiere nella riga corrente
+      ; (la riga i ha i+1 bicchieri)
+      (for (bicchiere 0 riga)
+        ; Se il bicchiere attuale contiene più di 1 litro
+        (when (> (pira riga bicchiere) 1)
+          ; Calcola la quantità di acqua che trabocca nei bicchieri sottostanti
+          (setq eccesso (div (sub (pira riga bicchiere) 1) 2))
+            ; Il bicchiere attuale può contenere al massimo 1 litro
+          (setf (pira riga bicchiere) 1)
+          ; Divide equamente l'acqua in eccesso nei due bicchieri sottostanti
+          ; bicchiere sotto a sinistra
+          (inc (pira (+ riga 1) bicchiere) eccesso)
+          ; bicchiere sotto a destra
+          (inc (pira (+ riga 1) (+ bicchiere 1)) eccesso))))
+    ; Calcola l'acqua totale che si trova nei bicchieri
+    (setq acqua (apply add (flat (slice (array-list pira) 0 N))))
+    ; Calcola l'acqua caduta nel pavimento
+    (setq pavimento (apply add (flat (last (array-list pira) 0 N))))
+    ; Deve risultare che l'acqua versata (qt) è uguale alla somma 
+    ; dell'acqua nei bicchieri e dell'acqua nel pavimento
+    (if (!= qt (add pavimento acqua)) (print "ERRORE: "))
+    (println acqua { } pavimento)
+    ; stampa la matrice che rappresenta la piramide dei bicchieri
+    (show-piramide (slice (array-list pira) 0 N)) '>))
+
+Proviamo:
+
+(piramide 2 2)
+;-> 2 0
+;-> 1
+;-> 0.5 0.5
+
+(piramide 2 3)
+;-> 3 0
+;-> 1
+;-> 1 1
+
+(piramide 3 5)
+;-> 5 0
+;-> 1
+;-> 1 1
+;-> 0.5 1 0.5
+
+(piramide 3 10)
+;-> 6 4
+;-> 1
+;-> 1 1
+;-> 1 1 1
+
+(piramide 4 10)
+;-> 8.75 1.25
+;-> 1
+;-> 1 1
+;-> 1 1 1
+;-> 0.375 1 1 0.375
+
+(piramide 10 100)
+;-> 45.921875 54.078125
+;-> 1
+;-> 1 1
+;-> 1 1 1
+;-> 1 1 1 1
+;-> 1 1 1 1 1
+;-> 1 1 1 1 1 1
+;-> 0.578125 1 1 1 1 1 0.578125
+;-> 1 1 1 1 1 1
+;-> 0.8828125 1 1 1 1 1 0.8828125
+;-> 1 1 1 1 1 1
+
 ============================================================================
 
