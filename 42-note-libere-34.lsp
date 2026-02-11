@@ -4151,7 +4151,7 @@ Il numero di colori RGB è 16777216: 16 milioni 777 mila 216.
 Esempi:
   rgb = (125 15 33)
   esadecimale = "7D0F21"
-  
+
   rgb = (16 24 255)
   esadecimale = "1018FF"
 
@@ -4468,7 +4468,7 @@ Cubefree numbers: numbers that are not divisible by any cube > 1.
   25, 26, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46,
   47, 49, 50, 51, 52, 53, 55, 57, 58, 59, 60, 61, 62, 63, 65, 66, 67, 68, 69,
   70, 71, 73, 74, 75, 76, 77, 78, 79, 82, 83, 84, 85, ...
-  
+
 (filter cubefree? (sequence 1 85))
 ;-> (1 2 3 4 5 6 7 9 10 11 12 13 14 15 17 18 19 20 21 22 23
 ;->  25 26 28 29 30 31 33 34 35 36 37 38 39 41 42 43 44 45 46
@@ -4591,7 +4591,7 @@ Quindi tra il primo 3 e il 7 ci saranno tanti 3 quanti il numero delle cifre e t
          (denom (+ num num num))
          (res1 0) (res2 0) )
     (setq res1 (div numer denom))
-    (setq res2 (int (string (dup (string 3) len) 
+    (setq res2 (int (string (dup (string 3) len)
                             (dup (string 6) (- len 1))
                             7) 0 10))
     (list res1 res2)))
@@ -4655,7 +4655,7 @@ Per verificare la condizione di stop usiamo la seguente espressione:
     )
     (length lst)))
 
-Proviamo:  
+Proviamo:
 
 N = 1 --> seq = (0 1)
 (collect (processo 1) 20)
@@ -4722,7 +4722,7 @@ dove F e` il numero di punti fissi della permutazione.
 F ha distribuzione asintoticamente simile a:
 
   Poisson(lambda=1) --> P(X = k) = exp(-1) / k!.
-  
+
 Una variabile casuale X ha distribuzione di Poisson con parametro lambda se:
 
   P(X = k) = exp(-lambda) * lambda^k / k!
@@ -4794,7 +4794,7 @@ Partendo dalla sequenza completa:
 la probabilità che il processo elimini tutti gli elementi prima di fermarsi soddisfa:
 
    lim P(lista vuota) = 0
-  N->Inf 
+  N->Inf
 
 con decadimento super-esponenziale.
 
@@ -5176,9 +5176,9 @@ Storia: fu descritto per la prima volta su Scientific American nel 1970, più o 
   (if (> blank 0) (for (i 1 blank) (println blank-line)))
   ; linea 3
   (setq linea3 (string (dup (string "|" (dup " " (- side 2))) 3) "|"))
-  (setf (linea3 pos1) ch)  
-  (setf (linea3 pos2) ch)  
-  (setf (linea3 pos3) ch)  
+  (setf (linea3 pos1) ch)
+  (setf (linea3 pos2) ch)
+  (setf (linea3 pos3) ch)
   (println bordo)
   (if (> blank 0) (for (i 1 blank) (println blank-line)))
   (println linea3)
@@ -5343,7 +5343,7 @@ Funzione che verifica se due liste hanno la stessa struttura:
     (setq len-s1 (length s1))
     (setq len-s2 (length s2))
     (cond ((= len-s1 len-s2) ; liste di indici con stessa lunghezza
-            (when (= s1 s2) 
+            (when (= s1 s2)
               (setq struttura true)
               (setq indici s1)
               (setq all true)))
@@ -5516,7 +5516,7 @@ Per il quarto e ultimo dado abbiamo 1 possibilità su 4 di scegliere il numero c
 Quindi la probabilità di ottenere il Colpo di Venere vale:
 
   P(venere) = 1 * 3/4 * 1/2 * 1/4 = 3/32 = 0.09375 (circa il 9.4%)
- 
+
 (mul 1 (div 3 4) (div 1 2) (div 1 4))
 ;-> 0.09375
 
@@ -5791,7 +5791,7 @@ Funzione che calcola l'acqua nei bicchieri:
     (setq acqua (apply add (flat (slice (array-list pira) 0 N))))
     ; Calcola l'acqua caduta nel pavimento
     (setq pavimento (apply add (flat (last (array-list pira) 0 N))))
-    ; Deve risultare che l'acqua versata (qt) è uguale alla somma 
+    ; Deve risultare che l'acqua versata (qt) è uguale alla somma
     ; dell'acqua nei bicchieri e dell'acqua nel pavimento
     (if (!= qt (add pavimento acqua)) (print "ERRORE: "))
     (println acqua { } pavimento)
@@ -5841,6 +5841,277 @@ Proviamo:
 ;-> 1 1 1 1 1 1
 ;-> 0.8828125 1 1 1 1 1 0.8828125
 ;-> 1 1 1 1 1 1
+
+
+--------------
+Velocità media
+--------------
+
+Problema 1
+----------
+Una moto percorre un percorso da A a B a 70 km/h.
+Poi ritorna da B ad A alla velocità di 80 km/h.
+Calcolare la velocità media complessiva.
+
+Problema 2
+----------
+Una moto percorre un percorso da A a B a 70 km/h.
+Poi compie metà percorso di ritorno a 60 km/h e l'altra metà a 80 km/h.
+Calcolare la velocità media complessiva.
+
+Soluzione 1
+-----------
+Sia s la distanza tra A e B.
+
+v1 = s/t1  --> t1 = s/v1  (1)
+v2 = s/t2  --> t2 = s/v2  (2)
+
+Velocità media totale:
+
+  V = (s + s) / (t1 + t2)
+
+Sostituiamo t1 e t2 con le formule (1) e (2):
+
+            2s                 2s                (v1*v2)
+  V = ---------------  = --------------- = 2 * -----------
+       (s/v1 + s/v2)      (v1*s + v2*s)         (v1 + v2)
+                          -------------
+                              v1*v2
+
+Quindi risulta che la velocità media vale:
+
+            2s
+  V = ---------------
+       (s/v1 + s/v2)
+
+(define (vel-media v1 v2) (div (mul 2 v1 v2) (add v1 v2)))
+(vel-media 70 80)
+;-> 74.66666666666667
+
+Soluzione 2
+-----------
+Sia s la distanza tra A e B.
+
+Andata:
+velocita v1
+tempo
+  t1 = s / v1
+
+Ritorno:
+meta distanza a v2
+  t2 = (s/2) / v2 = s/(2*v2)
+
+altra meta a v3
+  t3 = (s/2) / v3 = s/(2*v3)
+
+Tempo totale:
+  t = t1 + t2 + t3
+  = s/v1 + s/(2*v2) + s/(2*v3)
+
+Distanza totale: 2s
+
+Velocita media:
+  vm = distanza totale / tempo totale
+  vm = 2s / (s/v1 + s/(2*v2) + s/(2*v3))
+
+Semplificando s:
+  vm = 2 / (1/v1 + 1/(2*v2) + 1/(2*v3))
+
+oppure moltiplicando numeratore e denominatore per 2:
+  vm = 4 / (2/v1 + 1/v2 + 1/v3)
+Questa e la formula generale.
+
+Con:
+  v1 = 70
+  v2 = 60
+  v3 = 80
+
+  vm = 4 / (2/70 + 1/60 + 1/80) = 6720/97 ~ 69.28 km/h
+
+Nota:
+Nel caso di velocità su più tratte (n) della stessa lunghezza per calcolare la velocità media si utilizza la formula per la media armonica:
+
+                      n
+  V = ---------------------------------
+       1/v1 + 1/v2 + /1v3 + ... + 1/vn
+
+(define (velocita-media lst)
+  (let (sum-rec 0)
+    (dolist (x lst)
+      (setq sum-rec (add sum-rec (div x))))
+    (div (length lst) sum-rec)))
+
+(velocita-media '(70 80))
+;-> 74.6666666666666
+
+(velocita-media '(70 60 80))
+;-> 69.04109589041096
+
+
+-------------------
+Spinta di Archimede
+-------------------
+
+Una zattera di legno quadrata con lato L (4m) e altezza H (0.5 m) galleggia sull'acqua.
+Il peso specifico del legno vale PS (0.8 g/cm^3 = 800 kg/m^3)
+Qual'è l'altezza della zattera immersa nell'acqua?
+
+Mettiamo sopra la zattera un carico di peso N (400 kg).
+Qual'è l'altezza della zattera immersa nell'acqua?
+
+Quale peso possiamo caricare per fare in modo che tutta la zattera sia sommersa?
+
+Principio di Archimede
+Immergendo un corpo nell'acqua, questo riceve una spinta verso l'alto con una forza uguale al peso dell'acqua che è stata spostata.
+
+  Peso del corpo = Peso dell'acqua spostata
+
+Calcoliamo la massa (m) partendo dalla formula della densità (d):
+
+  d = m/V , dove V è il volume del corpo
+  m = d * V
+
+  Peso del corpo = Volume della zattera * densità della zattera =
+  = L * L * H * PS = 4 * 4 * 0.5 * 800 = 6400 kg
+
+  Peso dell'acqua spostata = Volume immerso * densità dell'acqua =
+  = Volume immerso * 1 = Volume immerso
+
+Quindi risulta:
+
+  L * L * H * PS = 4 * 4 * 0.5 * 800 = 6400 = Volume immerso
+
+Quanto volume occupa 6400 kg di acqua?
+
+La densità dell'acqua (d1) vale 1000 kg/m^3.
+
+  Volume immerso = m/d1 = 6400/1000 = 6.4 m^3
+
+Adesso possiamo calcolare l'altezza della parte immersa della zattera:
+
+  Volume immerso = Area di base * altezza
+
+  altezza = Volume immerso / Area di base = 6.4 / 16 = 0.4 m = 40 cm
+
+Nel caso in cui aggiungiamo il carico di 400 kg otteniamo:
+
+  altezza = Volume immerso / Area di base = 6.8 / 16 = 0.425 m = 42.5 cm
+
+Per far si che la zattera sia completamente sommersa:
+
+  Volume immerso = L * L * H = 8 m^3
+  Acqua spostata = Volume immerso * densità acqua = 8 * 1000 = 8000 m^3
+
+Quindi dobbiamo caricare (8000 - 6400) = 1600 kg sulla zattera per fare in modo che venga completamente sommersa dall'acqua.
+
+In modo più formale:
+
+Una zattera di legno quadrata con lato L e altezza H galleggia sull'acqua.
+Il peso specifico del legno vale PS1.
+Il peso specifico dell'acqua vale PS2.
+Qual'è l'altezza della zattera immersa nell'acqua? Quale peso dobbiamo caricare per fare in modo che tutta la zattera sia sommersa (cioè la parte sommersa della zattera vale H)?
+
+Consideriamo il principio di Archimede: un corpo che galleggia sposta un volume di acqua il cui peso e uguale al peso totale del corpo.
+
+Dati:
+  L = lato della base quadrata
+  H = altezza della zattera
+  PS1 = peso specifico del legno
+  PS2 = peso specifico dell acqua
+
+Volume totale zattera:
+  V = L^2 * H
+
+1) Altezza immersa senza carico
+
+Sia h l altezza immersa.
+
+Volume immerso:
+  Vimm = L^2 * h
+
+  Spinta di Archimede = PS2 * Vimm = PS2 * L^2 * h
+  Peso zattera = PS1 * V = PS1 * L^2 * H
+
+  Equilibrio:
+  PS2 * L^2 * h = PS1 * L^2 * H
+
+  Semplificando L^2:
+
+  PS2 * h = PS1 * H
+
+  h = (PS1 / PS2) * H
+
+2) Peso da aggiungere per sommergerla tutta
+
+Se è tutta immersa:
+  Volume immerso massimo = L^2 * H
+
+Spinta massima:
+  Fmax = PS2 * L^2 * H
+
+Peso zattera:
+  Plegno = PS1 * L^2 * H
+
+Peso aggiuntivo necessario:
+  Pextra = Fmax - Plegno
+
+  Pextra = (PS2 - PS1) * L^2 * H
+
+Quindi le formule finali sono le seguenti:
+
+Altezza immersa:
+  h = (PS1/PS2) * H
+
+Peso da caricare per immersione completa:
+  Pextra = (PS2 - PS1) * L^2 * H
+
+Adesso scriviamo una funzione che prende L, H, PS1, PS2 e P il peso del carico, e calcola l'altezza della parte immersa.
+
+Basta applicare ancora il principio di Archimede includendo anche il carico.
+
+Peso totale:
+Ptot = PS1 * L^2 * H + P
+
+Spinta:
+PS2 * L^2 * h
+
+Equilibrio:
+PS2 * L^2 * h = Ptot
+
+Quindi:
+h = (PS1 * L^2 * H + P) / (PS2 * L^2)
+
+Se h > H la zattera e completamente sommersa, quindi affonda.
+
+(define (altezza-immersa L H PS1 PS2 P)
+  (letn (base volume peso-legno peso-tot h)
+    (setq base (mul L L))
+    (setq volume (mul base H))
+    (setq peso-legno (mul PS1 volume))
+    (setq peso-tot (add peso-legno P))
+    (setq h (div peso-tot (mul PS2 base)))
+    (cond ((= h H) (println "sommersa") h)
+          ((> h H) (println "affondata") h)
+          (true h))))
+
+Proviamo:
+
+(altezza-immersa 4 0.5 800 1000 0)
+;-> 0.4
+
+(altezza-immersa 4 0.5 800 1000 400)
+;-> 0.425
+
+(altezza-immersa 4 0.5 800 1000 1600)
+;-> sommersa
+;-> 0.5
+
+(altezza-immersa 4 0.5 800 1000 2000)
+;-> affondata
+;-> 0.525
+
+Nota: per correttezza, quando h > H dovremmo considerare anche la forma e la densità del carico (per tenere conto del volume della parte di carico in acqua).
+
 
 ============================================================================
 

@@ -3337,6 +3337,8 @@ NOTE LIBERE 34
   Il Colpo di Venere
   Sempre lo stesso numero
   Piramide di bicchieri
+  Velocità media
+  Spinta di Archimede
 
 PROBLEMI SUI DADI
 =================
