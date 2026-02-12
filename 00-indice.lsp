@@ -3339,6 +3339,7 @@ NOTE LIBERE 34
   Piramide di bicchieri
   Velocità media
   Spinta di Archimede
+  Quadrati unitari in caduta libera
 
 PROBLEMI SUI DADI
 =================

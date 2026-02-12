@@ -6110,8 +6110,142 @@ Proviamo:
 ;-> affondata
 ;-> 0.525
 
-Nota: per correttezza, quando h > H dovremmo considerare anche la forma e la densità del carico (per tenere conto del volume della parte di carico in acqua).
+Nota: per correttezza, quando h > H dovremmo considerare anche la forma e la densità del carico (per tenere conto del volume della parte del carico sommersa dall'acqua).
 
+
+---------------------------------
+Quadrati unitari in caduta libera
+---------------------------------
+
+Ci sono diversi quadrati unitari (di lato 1) che vengono rilasciati dall'alto verso sull'asse X di un piano 2D.
+I quadrati sono rappresentati con una lista Q di valori interi che rappresentano le coordinate dell'asse X.
+Ogni quadrato viene rilasciato uno alla volta allineato alla sua coordinata X e da un'altezza superiore a qualsiasi quadrato già atterrato.
+Quindi cade verso il basso (direzione Y negativa) finché non atterra sul lato superiore di un altro quadrato o sull'asse X.
+Una volta atterrato, ogni quadrato si blocca in posizione e non può essere spostato.
+Dopo aver rilasciato tutti i quadrati stampare la situazione finale come istogramma.
+
+Esempio:
+  lista quadrati (coordinate x) = (1 4 3 3 5 3 5 3 2 1)
+    Alla coordinata 0 non ci sono quadrati
+    Alla coordinata 1 ci sono 2 quadrat1
+    Alla coordinata 2 c'è 1 quadrato
+    Alla coordinata 3 ci sono 4 quadrat1
+    Alla coordinata 4 c'è 1 quadrato
+  Istogramma:
+    . . . * . .
+    . . . * . .
+    . * . * . *
+    . * * * * *
+
+Data una lista con numeri interi, stampare il suo istogramma.
+Esempio:
+  lista = (0 2 1 4 1 2)
+  istogramma =
+    . . . * . .
+    . . . * . .
+    . * . * . *
+    . * * * * *
+    -----------
+
+Per costruire l'istogramma contiamo prima le frequenze e poi stampiamo riga per riga dall'alto verso il basso:
+- trova il valore massimo 'max-val'
+- per ogni livello da 'max-val' a 1
+- stampa "*" se il valore >= livello, altrimenti "."
+- infine stampa la linea di base
+
+Funzione che genera un semplice istogramma per una lista di interi:
+
+(define (istogramma lst ch1 ch2)
+  (let ( (max-val (apply max lst)) (len (length lst)) )
+    (setq ch1 (or ch1 "*"))
+    (setq ch2 (or ch2 "."))
+    (for (livello max-val 1 -1)
+      (for (i 0 (- len 1))
+        (if (>= (lst i) livello)
+            (print ch1 " ")
+            (print ch2 " ")))
+      (println))
+    (println (dup "-" (- (* 2 len) 1))) '>))
+
+Proviamo:
+
+(istogramma '(0 1 0 3 4 2 5))
+;-> . . . . . . *
+;-> . . . . * . *
+;-> . . . * * . *
+;-> . . . * * * *
+;-> . * . * * * *
+;-> -------------
+
+(istogramma '(0 1 0 3 4 2 5) "■" " ")
+;->             ■
+;->         ■   ■
+;->       ■ ■   ■
+;->       ■ ■ ■ ■
+;->   ■   ■ ■ ■ ■
+;-> -------------
+
+(istogramma '(0 1 0 3 4 2 5) "█")
+;-> . . . . . . █
+;-> . . . . █ . █
+;-> . . . █ █ . █
+;-> . . . █ █ █ █
+;-> . █ . █ █ █ █
+;-> -------------
+
+Funzione che genera la situazione finale della caduta di quadrati unitari:
+
+(define (fall Q ch1 ch2)
+  ; massimo valore della coordinata x
+  (setq x-max (apply max Q))
+  ; vettore che rappresernta l'asse X
+  (setq asse-x (array (+ x-max 1) '(0)))
+  ; ciclo per ogni quadrato...
+  (dolist (quad Q)
+    ; aggiunge un quadrato alla relativa coordinata dell'asse X
+    ; (aggiorna l'altezza della coordinata x)
+    (++ (asse-x quad)))
+  ; stampa la situazione finale
+  (println "Asse X: " asse-x)
+  (istogramma asse-x ch1 ch2))
+
+Proviamo:
+
+(fall '(1 4 3 3 5 3 5 3 2 1))
+;-> Asse X: (0 2 1 4 1 2)
+;-> . . . * . .
+;-> . . . * . .
+;-> . * . * . *
+;-> . * * * * *
+;-> -----------
+
+(fall (rand 20 100) "█")
+;-> Asse X: (3 5 5 6 4 5 3 5 3 7 6 5 3 8 7 4 8 3 5 5)
+;-> . . . . . . . . . . . . . █ . . █ . . .
+;-> . . . . . . . . . █ . . . █ █ . █ . . .
+;-> . . . █ . . . . . █ █ . . █ █ . █ . . .
+;-> . █ █ █ . █ . █ . █ █ █ . █ █ . █ . █ █
+;-> . █ █ █ █ █ . █ . █ █ █ . █ █ █ █ . █ █
+;-> █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
+;-> ---------------------------------------
+
+(fall (rand 10 100) "█")
+;-> Asse X: (11 5 10 10 11 8 12 12 10 11)
+;-> . . . . . . █ █ . .
+;-> █ . . . █ . █ █ . █
+;-> █ . █ █ █ . █ █ █ █
+;-> █ . █ █ █ . █ █ █ █
+;-> █ . █ █ █ █ █ █ █ █
+;-> █ . █ █ █ █ █ █ █ █
+;-> █ . █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █
+;-> █ █ █ █ █ █ █ █ █ █
+;-> -------------------
 
 ============================================================================
 
