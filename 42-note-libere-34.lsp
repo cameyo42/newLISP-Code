@@ -6247,5 +6247,197 @@ Proviamo:
 ;-> █ █ █ █ █ █ █ █ █ █
 ;-> -------------------
 
+
+----------------------
+Parsing di quaternioni
+----------------------
+
+https://codegolf.stackexchange.com/questions/76545/parse-a-quaternion
+
+Un quaternione è fondamentalmente un numero composto da 4 parti (con una componente reale e tre componenti immaginarie.
+Le componenti immaginarie sono rappresentate dai suffissi i, j, k.
+Ad esempio, 1-2i+3j-4k è un quaternione con 1 come componente reale e -2, 3 e -4 come componenti immaginarie.
+
+Data una stringa di un quaternione (es. "1+2i-3j-4k") trasfornarla in una lista di coefficienti (es. (1 2 -3 -4)). 
+
+Tuttavia, la stringa dei quaternioni può essere formattata in molti modi diversi:
+1) Potrebbe essere normale: 1+2i-3j-4k
+2) Potrebbe avere termini mancanti: 1-3k, 2i-4k (se mancano termini, restituire 0 per quei termini)
+3) Potrebbe avere coefficienti mancanti: i+j-k (in questo caso, ciò equivale a 1i+1j-1k. In altre parole, una i, j o k senza un numero davanti si presume abbia un 1 davanti per impostazione predefinita)
+4) Potrebbe non essere nell'ordine corretto: 2i-1+3k-4j
+5) I coefficienti possono essere semplicemente numeri interi o decimali: 7-2,4i+3,75j-4,0k
+6) Potrebbero esseci degli spazi nella stringa: 1 +2i -3j -4 k
+Ci sono alcune cose da notare durante l'analisi:
+
+La stringa di input è sempre ben formata ed ha le seguenti caratteristiche:
+a) Ci sarà sempre un + o un - tra i termini
+b) contiene almeno 1 termine e senza lettere ripetute (nessuna j-j)
+c) i numeri contenuti possono essere interi o float
+
+Algoritmo
+---------
+1) Eliminazione degli spazi dalla stringa
+2) Inserisce gli eventuali +1 o -1 alle parti immaginarie
+3) Per ogni componente immaginaria "im":
+   3.1) Cerca la posizione di "im"
+        3.1.1) se non trovata --> "im" = 0
+        3.1.2) se trovata
+             3.1.2.1) cerca il numero associato alla "im" (get-num s idx)
+                      (partendo dalla posizione corrente a sinistra
+                       fino a "+" o "-")
+             3.1.2.2) "im" = numero
+             3.1.2.3) elimina la stringa numero e "im" dalla stringa
+4) La stringa data adesso contiene solo la parte reale (oppure "").
+
+Funzione che prende una stringa e un indice e ritorna la stringa dall'indice precedente a quello dato fino ad un "+" o un "-" a sinistra:
+
+(define (get-num s idx)
+  (local (num i found)
+    (setq num "")
+    (setq i (- idx 1))
+    (setq found nil)
+    (until found
+      (if (or (= (s i) "+") (= (s i) "-")) (setq found true))
+      (push (s i) num)
+      (-- i))
+    num))
+
+Funzione che effetua il parsing di un quaternione in forma di stringa:
+
+(define (quat s)
+  ; lista risultato
+  (setq res '(0 0 0 0))
+  ; elimina gli spazi
+  (replace " " s "")
+  ; aggiunge un (eventuale) "+" all'inizio
+  (if (and (!= (s 0) "-") (!= (s 0) "+")) (push "+" s))
+  ; inserisce gli eventuali valori a 1 delle parti immaginarie
+  (replace "+i" s "+1i") (replace "-i" s "-1i")
+  (replace "+j" s "+1j") (replace "-j" s "-1j")
+  (replace "+k" s "+1k") (replace "-k" s "-1k")
+  ; ciclo per ogni parte immaginaria...
+  (dolist (im '("i" "j" "k"))
+    ; cerca l'indice della parte immaginaria corrente nella stringa
+    (setq idx (find im s))
+    ;(println im)
+    (cond
+      ; parte immaginaria non trovata --> 0
+      ((nil? idx) (setf (res (+ $idx 1)) 0))
+      ; parte immaginaria trovata
+      (true
+        ; trova il numero associato (a sinistra) alla parte immaginaria
+        (setq num (get-num s idx))
+        ;(println num)
+        ; aggiorna la lista dei risultati con il valore
+        ; della parte immaginaria
+        (setf (res (+ $idx 1)) (eval-string num))
+        ; elimina il valore e la relativa parte immaginaria dalla stringa
+        (replace (string num im) s "")
+        ;(println s)
+        )))
+  ; adesso la stringa data contiene solo la parte reale
+  ; aggiorna la parte reale della lista soluzione
+  (if (!= s "")
+    (setf (res 0) (eval-string s)))
+  res)
+
+Proviamo:
+
+(quat "1+2i+3j+4k")
+;-> (1 2 3 4)
+(quat "-1+3i-3j+7k")
+;-> (-1 3 -3 7)
+(quat "-1-4i-9j-2k")
+;-> (-1 -4 -9 -2)
+(quat "17-16i-15j-14k")
+;-> (17 -16 -15 -14)
+(quat "7+2i")
+;-> (7 2 0 0)
+(quat "2i-6k")
+;-> (0 2 0 -6)
+(quat "1-5j+2k")
+;-> (1 0 -5 2)
+(quat "3+4i-9k")
+;-> (3 4 0 -9)
+(quat "42i+j-k")
+;-> (0 42 1 -1)
+(quat "6-2i+j-3k")
+;-> (6 -2 1 -3)
+(quat "1+i+j+k")
+;-> (1 1 1 1)
+(quat "-1-i-j-k")
+;-> (-1 -1 -1 -1)
+(quat "16k-20j+2i-7")
+;-> (-7 2 -20 16)
+(quat "i+4k-3j+2")
+;-> (2 1 -3 4)
+(quat "5k-2i+9+3j")
+;-> (9 -2 3 5)
+(quat "5k-2j+3")
+;-> (3 0 -2 5)
+(quat "1.75-1.75i-1.75j-1.75k")
+;-> (1.75 -1.75 -1.75 -1.75)
+(quat "2.0j-3k+0.47i-13")
+;-> (-13 0.47 2.0 -3)
+(quat "5.6-3i")
+;-> (5.6 -3 0 0)
+(quat "k-7.6i")
+;-> (0 -7.6 0 1)
+(quat "0")
+;-> (0 0 0 0)
+(quat "0j+0k")
+;-> (0 0 0 0)
+(quat "-0j")
+;-> (0 0 0 0)
+(quat "1-0k")
+;-> (1 0 0 0)
+(quat " 1 - 1 k ")
+;-> (1 0 0 -1)
+
+
+---------------------------------------------
+Modo idiomatico di fare replacement con regex
+---------------------------------------------
+
+Partiamo dalla stringa:
+(setq s "-i+k-2j")
+
+Modifichiamo la stringa:
+(replace "+i" s "+1i") (replace "-i" s "-1i")
+(replace "+j" s "+1j") (replace "-j" s "-1j")
+(replace "+k" s "+1k") (replace "-k" s "-1k")
+;-> "-1i+1k-2j"
+
+Abbiamo inserito 1 davanti alle lettere "i", "j" e "k" che non avevano un numero.
+
+Come facciamo a farlo con un replace unico (utilizzando una regex)?
+
+Quando usiamo i "gruppi di cattura", la funzione 'replace' mette i match nelle variabili di sistema:
+
+- '$0' = match completo
+- '$1 $2 ...' = gruppi catturati
+
+(setq s "-i+k-2j")
+(replace "([+-])([ijk])" s (string $1 "1" $2) 0)
+;-> "-1i+1k-2j"
+
+Come funziona:
+Regex:
+  ([+-])   -> segno
+  ([ijk])  -> lettera
+
+Replacement:
+  $1 "1" $2
+
+Quindi:
+  -i  -> -1i
+  +k  -> +1k
+
+'-2j' non matcha, quindi resta invariato.
+
+Regola:
+1) Se usiamo "regex con gruppi", usiamo $1 $2 ...
+2) Se usiamo una "funzione", riceviamo la lista '("match" start end)'.
+
 ============================================================================
 

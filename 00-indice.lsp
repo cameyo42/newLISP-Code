@@ -3340,6 +3340,8 @@ NOTE LIBERE 34
   Velocità media
   Spinta di Archimede
   Quadrati unitari in caduta libera
+  Parsing di quaternioni
+  Modo idiomatico di fare replacement con regex
 
 PROBLEMI SUI DADI
 =================
