@@ -3342,6 +3342,7 @@ NOTE LIBERE 34
   Quadrati unitari in caduta libera
   Parsing di quaternioni
   Modo idiomatico di fare replacement con regex
+  Il gioco dei tubi di cifre
 
 PROBLEMI SUI DADI
 =================

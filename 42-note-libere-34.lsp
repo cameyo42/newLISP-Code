@@ -6394,6 +6394,20 @@ Proviamo:
 (quat " 1 - 1 k ")
 ;-> (1 0 0 -1)
 
+Versione code-golf (142 caratteri, one-line):
+(define(g s x)(local(n i f)(setq n "")(setq i(- x 1))(setq f nil)
+(until f(if(or(=(s i) "+")(=(s i) "-"))(setq f true))
+(push(s i) n)(-- i)) n))
+
+Versione code-golf (335 caratteri, one-line):
+(define(q s)(setq o '(0 0 0 0))(replace" "s"")
+(if(and(!=(s 0)"-")(!=(s 0)"+"))(push"+"s))
+(replace"([+-])([ijk])"s(string $1"1"$2)0)
+(dolist(x '("i""j""k"))(setq idx(find x s))
+(cond((nil? idx)(setf(o(+ $idx 1)) 0))
+(true(setq n(g s idx))(setf(o(+ $idx 1))(eval-string n))
+(replace(string n x)s""))))(if(!= s"")(setf(o 0)(eval-string s)))o)
+
 
 ---------------------------------------------
 Modo idiomatico di fare replacement con regex
@@ -6438,6 +6452,170 @@ Quindi:
 Regola:
 1) Se usiamo "regex con gruppi", usiamo $1 $2 ...
 2) Se usiamo una "funzione", riceviamo la lista '("match" start end)'.
+
+
+--------------------------
+Il gioco dei tubi di cifre
+--------------------------
+
+Abbiamo N tubi (0 <= N <= 9) con N cifre casuali (0..(N-1)) in ogni tubo.
+Le NxN cifre sono composte da N volte ogni cifra (N zeri, N uno, ecc.).
+Inoltre abbiamo anche un tubo vuoto.
+L'obiettivo è ordinare le cifre in modo che ogni tubo contenga N cifre di un solo tipo.
+È possibile spostare solo la cifra più in alto da un tubo all'altro.
+Non è possibile scambiare direttamente le cifre più in alto tra 2 tubi, ma solo una cifra alla volta.
+Ogni tubo ha una capacità massima di N cifre.
+
+Esempio con N=3 tubi (+ uno vuoto):
+
+Mosse: 0            Mosse: 1            Mosse: 2            Mosse: 3
+|0|0|0| |           | |0|0| |           | | |0| |           | | | |0|
+|2|2|1| |           |2|2|1| |           |2|2|1|0|           |2|2|1|0|
+|2|1|1| |           |2|1|1|0|           |2|1|1|0|           |2|1|1|0|
+---------           ---------           ---------           ---------
+ A B C D             A B C D             A B C D             A B C D
+from --> to: A D    from --> to: B D    from --> to: C D    from --> to: B A
+
+Mosse: 4            Mosse: 5
+|2| | |0|           |2| |1|0|
+|2| |1|0|           |2| |1|0|
+|2|1|1|0|           |2| |1|0|
+---------           ---------
+ A B C D             A B C D
+from --> to: B C    Stop: ogni tubo contiene 3 cifre di un solo tipo.
+
+Nota: questo gioco è molto simile al "Water Sort Puzzle".
+
+Scriviamo una serie di funzioni che permettono di giocare interattivamente a questo puzzle.
+
+; Funzione che crea i tubi con le cifre da ordinare
+(define (create-tubes N)
+  (let (tubes '())
+    (for (c 0 (- N 1))
+      (push (dup c N) tubes))
+    (setq tubes (randomize (flat tubes)))
+    (setq tubes (explode tubes N))
+    (for (t 0 (- N 1))
+      (push " " (tubes t) -1))
+    tubes))
+
+; Funzione che stampa i tubi
+(define (print-tubes matrix)
+  (local (letters rows cols)
+    (setq letters " A B C D E F G H I J")
+    (setq rows (length matrix))
+    (setq cols (length (matrix 0)))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        (print "|" (matrix r c)))
+      (println "|"))
+      (println (dup "-" (+ (* cols 2) 1)))
+      (println (slice letters 0 (* cols 2))) '>))
+
+; Funzione che verifica se in ogni tubo ci sono cifre tutte uguali
+; (oppure tutti " ")
+(define (solved? tubi)
+  (let (sorted true)
+  (dolist (riga (transpose tubi))
+    (if-not (apply = riga) (setq sorted nil)))
+  sorted))
+
+; Funzione che gestisce una partita del gioco
+(define (new-game N)
+  (local (tubi mosse game-over input-ok input len from to
+          cond1 cond2 stop r1 c1 r2 c2)
+  (setq tubi (create-tubes N))
+  (setq mosse 0)
+  (setq game-over nil)
+  (until game-over
+    (println "\nMosse: " mosse)
+    (print-tubes tubi)
+    (setq input-ok nil)
+    (until input-ok
+      (print "from --> to: ")
+      (setq input (parse (upper-case (read-line))))
+      (setq len (length input))
+      (cond ((zero? len) nil)
+            ((!= len 2) nil)
+            (true
+              (setq from (- (char (input 0)) 65))
+              (setq to (- (char (input 1)) 65))
+              (if (and (>= from 0) (<= from N)
+                       (>= to 0) (<= to N))
+                  (setq input-ok true))))
+    );input-ok
+    ; cerca la prima cifra della colonna 'from'
+    ; se esiste, allora cond1 --> true
+    (setq cond1 nil)
+    (setq r1 nil)
+    (setq stop nil)
+    (for (riga 0 (- N 1) 1 stop)
+      (when (!= (tubi riga from) " ")
+          (setq r1 riga) (setq stop true)))
+    (setq c1 from)
+    (if-not stop
+          ; cifra non trovata (colonna vuota)
+          (println "Il tubo " (char (+ from 65)) " 'from' è vuoto.")
+          ; cifra trovata
+          (setq cond1 true))
+    ; cerca il primo posto vuoto della colonna 'to'
+    ; se esiste, allora cond2 --> true
+    (setq cond2 nil)
+    (setq r2 nil)
+    (setq stop nil)
+    (for (riga (- N 1) 0 -1 stop)
+      (when (= (tubi riga to) " ")
+          (setq r2 riga) (setq stop true)))
+    (setq c2 to)
+    (if-not stop
+          ; posto vuoto non trovato (colonna piena)
+          (println "Il tubo " (char (+ to 65)) " 'to' è pieno.")
+          ; posto vuoto trovato
+          (setq cond2 true))
+    ;(println cond1 { } cond2)
+    ; Se entrambe le condizioni sono soddisfatte,
+    ; (cioè se 'from' è 'piena' e 'to' è vuota)
+    ; allora scambia la prima cifra della colonna 'from'
+    ; con il primo posto vuoto " " della colonna 'to'
+    (when (and cond1 cond2)
+      (swap (tubi r1 c1) (tubi r2 c2))
+      (++ mosse)
+      (if (solved? tubi) (setq game-over true)))
+  );game-over
+  (println "\n*** BRAVO!!! ***")
+  (println "Mosse: " mosse)
+  (print-tubes tubi) '>))
+
+Proviamo:
+(new-game 4)
+
+;-> Mosse: 0
+;-> |0|2|0|3| |
+;-> |0|3|3|1| |
+;-> |2|1|2|1| |
+;-> |3|2|1|0| |
+;-> -----------
+;->  A B C D E
+;-> from --> to: D E
+;-> 
+;-> Mosse: 1
+;-> |0|2|0| | |
+;-> |0|3|3|1| |
+;-> |2|1|2|1| |
+;-> |3|2|1|0|3|
+;-> -----------
+;->  A B C D E
+;-> from --> to: D E
+;-> ...
+;-> ...
+;-> *** BRAVO!!! ***
+;-> Mosse: 19
+;-> | |2|1|0|3|
+;-> | |2|1|0|3|
+;-> | |2|1|0|3|
+;-> | |2|1|0|3|
+;-> -----------
+;->  A B C D E
 
 ============================================================================
 
