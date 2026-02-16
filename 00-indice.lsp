@@ -3343,6 +3343,7 @@ NOTE LIBERE 34
   Parsing di quaternioni
   Modo idiomatico di fare replacement con regex
   Il gioco dei tubi di cifre
+  Il dado a 6 facce
 
 PROBLEMI SUI DADI
 =================

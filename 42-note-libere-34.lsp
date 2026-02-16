@@ -6617,5 +6617,74 @@ Proviamo:
 ;-> -----------
 ;->  A B C D E
 
+
+-----------------
+Il dado a 6 facce
+-----------------
+
+Un dado da gioco di tipo occidentale è costruito in base a due regole.
+
+Prima regola
+La somma dei numeri su ogni coppia di facce opposte del dado è sempre 7.
+Così il numero 1 è opposto al 6, il 2 al 5 e il 3 al 4.
+
+Seconda regola
+Se si guarda un dado in modo da vedere le tre facce corrispondenti ai numeri 1, 2, 3, si nota che i tre numeri si succedono in senso antiorario. Stessa cosa vale per le terne (3, 4, 5), (1, 3, 5) e (2, 4, 6).
+
+La figura seguente mostra lo sviluppo sul piano di un dado.
+
+                      +---------+
+                      |       O |
+                      |         |
+                      | O       |
+  +---------+---------+---------+---------+
+  | O       | O     O | O     O |         |
+  |    O    | O     O |         |    O    |
+  |       O | O     O | O     O |         |
+  +---------+---------+---------+---------+
+                      | O     O |
+                      |    O    |
+                      | O     O |
+                      +---------+
+
+Scriviamo una funzione che simula il lancio di un dado (graficamente).
+
+(define (dado)
+  (let (d (+ (rand 6) 1))
+    (setq linea "+---------+")
+    (setq punti '(() ((1 1)) ((0 2) (2 0)) ((0 0) (1 1) (2 2))
+                  ((0 0) (0 2) (2 0) (2 2)) ((0 0) (0 2) (1 1) (2 0) (2 2))
+                  ((0 0) (0 2) (1 0) (1 2) (2 0) (2 2))))
+    (setq num (punti d))
+    ;(println d { } num)
+    (println linea)
+    (for (r 0 2)
+      (print "|")
+      (for (c 0 2)
+        (if (find (list r c) num)
+          (print " " "O" " ")
+          ;else
+          (print " " " " " ")))
+      (println "|"))
+    (println linea) d))
+
+Proviamo:
+
+(dado)
+;-> +---------+
+;-> | O     O |
+;-> |         |
+;-> | O     O |
+;-> +---------+
+;-> 4
+
+(dado)
+;-> +---------+
+;-> | O     O |
+;-> | O     O |
+;-> | O     O |
+;-> +---------+
+;-> 6
+
 ============================================================================
 
