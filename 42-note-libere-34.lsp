@@ -6686,5 +6686,122 @@ Proviamo:
 ;-> +---------+
 ;-> 6
 
+
+-------------
+Dado truccato
+-------------
+
+Un dado regolare (non truccato) è un dado in cui le 6 facce hanno tutte la stessa probabilità (1/6).
+Un dado truccato è un dado in cui le 6 facce non sono tutte equiprobabili.
+
+Scriviamo una funzione che simula un dado truccato.
+La funzione prende due parametri:
+1) una lista con i numeri da truccare
+2) una lista che contiene le percentuali relative ai numeri da truccare
+
+; Funzione che simula un dado truccato
+; Parametri:
+; 1) una lista con i numeri da truccare (es. (2 3))
+; 2) lista con le percentuali dei numeri da truccare (es. 0.4 0.2)
+(define (unfair nums probs)
+  (local (somma-trucco trucco non-trucco prob-facce lst somma rnd stop out)
+    ; somma delle probabilità delle facce truccate
+    (setq somma-trucco (apply add probs))
+    (cond
+      ((> somma-trucco 1)
+        (println "Errore: Somma probabilità truccate > 1: " somma-trucco)
+        nil)
+      (true
+        ; A) Calcola la lista delle probabilità di ogni numero (faccia)
+        ; numero di facce truccate
+        (setq trucco (length nums))
+        ; numero di facce non-truccate
+        (setq non-trucco (- 6 trucco))
+        ; probabilità delle facce non truccate
+        (setq prob-facce (div (sub 1 somma-trucco) non-trucco))
+        ; creazione della lista di probabilità dei numeri (facce)
+        (setq lst (array 7 (list prob-facce)))
+        ; il numero 0 non esiste nel dado, quindi ha probabilità 0
+        (setf (lst 0) 0)
+        ; aggiornamento della lista di probabilità
+        ; con i valori dei dadi truccati
+        (dolist (el nums)
+          (setf (lst el) (probs $idx)))
+        ;(println lst)
+        (setq somma (apply add lst))
+        ; controllo per verificare la correttezza
+        ; della lista di probabilità creata
+        (if (> (abs (sub 1 somma)) 1e-6)
+            (println "Errore: Somma probabilità diversa da 1: " somma))
+        ; B) Genera il numero (faccia) di output
+        ; generiamo un numero random diverso da 1 e da 0
+        ; (per evitare errori di arrotondamento)
+        (while (and (setq rnd (random)) (or (= rnd 0) (= rnd 1))))
+        (setq stop nil)
+        (dolist (p lst stop)
+          ; sottraiamo la probabilità corrente al numero random...
+          (setq rnd (sub rnd p))
+          ; se il risultato è minore di zero,
+          ; allora restituiamo l'indice della probabilità corrente
+          (if (< rnd 0) (set 'out $idx 'stop true)))
+        out))))
+
+Proviamo:
+
+(unfair '(2) '(0.5))
+;-> 4
+
+(unfair '(2 3) '(0.4 0.2))
+;-> 2
+
+(unfair '(2 3) '(0.6 0.6))
+;-> Errore: Somma probabilità truccate > 1: 1.2
+;-> nil
+
+(setq vet (array 7 '(0)))
+;-> (0 0 0 0 0 0 0)
+(unfair '(2 3) '(0.4 0.2))
+;-> 5
+(for (i 0 999999) (++ (vet (unfair '(2 3) '(0.4 0.2)))))
+vet
+;-> (0 99752 400175 200211 100247 99679 99936)
+(apply + vet)
+;-> 1000000
+
+Dado regolare:
+(setq pf (div 1 6))
+(setq pd (list pf pf pf pf pf pf))
+(unfair '(1 2 3 4 5 6) pd)
+;-> 1
+(setq vet (array 7 '(0)))
+;-> (0 0 0 0 0 0 0)
+(for (i 0 999999) (++ (vet (unfair '(1 2 3 4 5 6) pd))))
+vet
+;-> (0 166027 166590 166952 166501 166546 167384)
+(apply + vet)
+;-> 1000000
+
+Dado sempre 6:
+(setq vet (array 7 '(0)))
+;-> (0 0 0 0 0 0 0)
+(unfair '(6) '(1))
+;-> 6
+(for (i 0 999999) (++ (vet (unfair '(6) '(1)))))
+vet
+;-> (0 0 0 0 0 0 1000000)
+(apply + vet)
+;-> 1000000
+
+Dado solo 3 o 4:
+(setq vet (array 7 '(0)))
+;-> (0 0 0 0 0 0 0)
+(unfair '(3 4) '(0.5 0.5))
+;-> 4
+(for (i 0 999999) (++ (vet (unfair '(3 4) '(0.5 0.5)))))
+vet
+;-> (0 0 0 499924 500076 0 0)
+(apply + vet)
+;-> 1000000
+
 ============================================================================
 

@@ -1625,9 +1625,9 @@ Adesso vediamo un metodo migliore che viene spiegato nei commenti della funzione
 
 (define (rand-pick lst)
   (local (rnd stop out)
-    ; generiamo un numero random diverso da 1
+    ; generiamo un numero random diverso da 1 e da 0
     ; (per evitare errori di arrotondamento)
-    (while (= (setq rnd (random)) 1))
+    (while (and (setq rnd (random)) (or (= rnd 0) (= rnd 1))))    
     ;(if (= rnd 1) (println rnd))
     (setq stop nil)
     (dolist (p lst stop)

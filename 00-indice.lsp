@@ -3344,6 +3344,7 @@ NOTE LIBERE 34
   Modo idiomatico di fare replacement con regex
   Il gioco dei tubi di cifre
   Il dado a 6 facce
+  Dado truccato
 
 PROBLEMI SUI DADI
 =================
