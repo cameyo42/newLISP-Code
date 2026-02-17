@@ -6803,5 +6803,78 @@ vet
 (apply + vet)
 ;-> 1000000
 
+
+---------------
+Corsa campestre
+---------------
+
+Ad una corsa campestre partecipano N persone ognuna con un numero diverso.
+Al termine della corsa viene compilato in una lista l'ordine di arrivo dei partecipanti.
+Data un'altra lista contenente alcuni numeri dei partecipanti, determinare l'ordine di arrivo di questi.
+La lista dei numeri contiene solo alcuni numeri che appartengono alla lista di arrivo.
+
+Esempio:
+  partecipanti: (1 3 5 6 8)
+  lista di arrivo: (3 5 1 6 8)
+  lista di numeri: (1 8 5)
+  numeri in ordine di arrivo: (5 1 8)
+
+(define (order arrivo numeri)
+  (let (indici '())
+    ; cerca gli indici dei numeri nella lista arrivo...
+    (dolist (el numeri) (push (find el arrivo) indici))
+    ; seleziona gli elementi della lista arrivo utilizzando gli indici ordinati
+    (select arrivo (sort indici))))
+
+Proviamo:
+
+(setq arrivo '(3 5 1 6 8))
+(setq numeri '(1 8 5))
+(order arrivo numeri)
+;-> (5 1 8)
+
+(order '(3 1 2 5 4) '(1 3 4))
+;-> (3 1 4)
+
+(order '(1 4 5 3 2) '(2 5))
+;-> (5 2)
+
+(order '(1 2 3 4 5 6) '(6 5 4 3 2 1))
+;-> (1 2 3 4 5 6)
+
+Versione code-golf (65 caratteri):
+(define(o a n i)(dolist(x n)(push(find x a)i))(select a(sort i)))
+
+(setq a '(3 5 1 6 8))
+(setq n '(1 8 5))
+(o a n)
+;-> (5 1 8)
+
+(o '(3 1 2 5 4) '(1 3 4))
+;-> (3 1 4)
+
+(o '(1 4 5 3 2) '(2 5))
+;-> (5 2)
+
+(o '(1 2 3 4 5 6) '(6 5 4 3 2 1))
+;-> (1 2 3 4 5 6)
+
+Versione code-golf (60 caratteri):
+(define(o a n)(select a(sort(map find n(dup a(length n))))))
+
+(setq a '(3 5 1 6 8))
+(setq n '(1 8 5))
+(o a n)
+;-> (5 1 8)
+
+(o '(3 1 2 5 4) '(1 3 4))
+;-> (3 1 4)
+
+(o '(1 4 5 3 2) '(2 5))
+;-> (5 2)
+
+(o '(1 2 3 4 5 6) '(6 5 4 3 2 1))
+;-> (1 2 3 4 5 6)
+
 ============================================================================
 

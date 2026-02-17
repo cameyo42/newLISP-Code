@@ -3345,6 +3345,7 @@ NOTE LIBERE 34
   Il gioco dei tubi di cifre
   Il dado a 6 facce
   Dado truccato
+  Corsa campestre
 
 PROBLEMI SUI DADI
 =================
@@ -3392,7 +3393,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (384 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (385 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
