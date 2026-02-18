@@ -3348,10 +3348,11 @@ NOTE LIBERE 34
   Corsa campestre
   Processo di contaminazione
   Trasformare una funzione non-distruttiva in distruttiva
+  Matrici riflesse
 
 PROBLEMI SUI DADI
 =================
-  Problemi 1,...,80
+  Problemi 1,..,80
 
 APPENDICI
 =========

@@ -7175,5 +7175,346 @@ Proviamo la macro all'interno di una funzione:
 Nota: la macro è lenta rispetto all'assegnazione diretta.
 Inoltre le macro vengono generalmente usate per restituire codice e non per restituire un valore.
 
+
+----------------
+Matrici riflesse
+----------------
+
+Problema 1
+----------
+Date due matrici A e B, determinare se sono una il riflesso dell'altra.
+
+Problema 2
+----------
+Data una matrice A, determinare tutte le matrici riflesse.
+
+Soluzione 1
+-----------
+Per verificare se due matrici sono l'una il riflesso dell'altra, dobbiamo prima definire l'asse di simmetria.
+
+Ecco i 4 casi possibili:
+
+1) Riflessione orizzontale (Left <-> Right)
+-------------------------------------------
+Specchio rispetto ad un asse verticale.
+Effetto: inverti le colonne, le righe restano uguali.
+Condizione: A[i][j] == B[i][N-1-j]
+Dimensioni richieste A e B entrambe M × N.
+Esempio:
+Matrice A: [1, 2, 3] --> Matrice B: [3, 2, 1]
+
+(define (riflessione-orizzontale? A B)
+  (letn (r (length A)
+         c (length (A 0))
+         ok true)
+    (if (or (!= r (length B)) (!= c (length (B 0))))
+        nil
+        (begin
+          (for (i 0 (- r 1))
+            (for (j 0 (- c 1))
+              (if (!= (A i j) (B i (- c 1 j)))
+                  (setq ok nil))))
+          ok))))
+
+2) Riflessione verticale (Top <-> Bottom)
+-----------------------------------------
+Specchio rispetto ad un asse orizzontale.
+Effetto: inverti le righe, le colonne restano uguali.
+Condizione: A[i][j] == B[M-1-i][j]
+Dimensioni richieste A e B entrambe M × N.
+
+(define (riflessione-verticale? A B)
+  (letn (r (length A)
+         c (length (A 0))
+         ok true)
+    (if (or (!= r (length B)) (!= c (length (B 0))))
+        nil
+        (begin
+          (for (i 0 (- r 1))
+            (for (j 0 (- c 1))
+              (if (!= (A i j) (B (- r 1 i) j))
+                  (setq ok nil))))
+          ok))))
+
+3) Riflessione diagonale (trasposizione)
+----------------------------------------
+Specchio rispetto alla diagonale principale (alto-sinistra -> basso-destra).
+Effetto: scambio righe <-> colonne.
+Condizione: A[i][j] == B[j][i]
+Dimensioni richieste (devono essere invertite):
+A = M × N
+B = N × M
+Questa NON è un semplice flip: è uno scambio di indici.
+Qui non stiamo 'ribaltando', stiamo 'ruotando la griglia degli indici'.
+Esempio 2×3:
+1 2 3      1 4
+4 5 6  ->  2 5
+           3 6
+
+(define (riflessione-diagonale? A B)
+  (letn (r (length A)
+         c (length (A 0))
+         ok true)
+    (if (or (!= c (length B)) (!= r (length (B 0))))
+        nil
+        (begin
+          (for (i 0 (- r 1))
+            (for (j 0 (- c 1))
+              (if (!= (A i j) (B j i))
+                  (setq ok nil))))
+          ok))))
+
+4) Riflessione diagonale secondaria (alto-destra -> basso-sinistra)
+-------------------------------------------------------------------
+Specchio rispetto alla diagonale secondaria (alto-destra -> basso-sinistra).
+Condizione (matrice quadrata N x N): A[i][j] == B[N-1-j][N-1-i]
+Dimensioni richieste (solo matrici quadrate): N x N
+Questa riflessione equivale a:
+trasposizione + flip verticale (oppure orizzontale + trasposizione).
+Esempio:
+1 2      4 2
+3 4  ->  3 1
+Questo è davvero uno 'specchio'.
+
+(define (riflessione-diagonale-secondaria? A B)
+  (letn (n (length A)
+         ok true)
+    (if (or (!= n (length B)) (!= n (length (A 0))) (!= n (length (B 0))))
+        nil
+        (begin
+          (for (i 0 (- n 1))
+            (for (j 0 (- n 1))
+              (if (!= (A i j) (B (- n 1 j) (- n 1 i)))
+                  (setq ok nil))))
+          ok))))
+
+Nota:
+questa trasformazione ha senso solo per matrici quadrate, quindi il controllo dimensioni è necessario.
+
+Intuitivamente:
+- orizzontale -> flip righe
+- verticale -> flip colonne
+- diagonale principale -> scambio indici (trasposizione)
+- diagonale secondaria -> scambio + doppio flip
+
+Riepilogo degli indici
+----------------------
+orizzontale:   (i, j) -> (i, N-1-j)
+verticale:     (i, j) -> (M-1-i, j)
+trasposizione: (i, j) -> (j, i)
+secondaria:    (i, j) -> (N-1-j, N-1-i)
+
+L'idea migliore è non costruire la matrice riflessa, ma confrontare direttamente gli indici 'specchiati' è più veloce e consuma meno memoria.
+
+Algoritmo (pseudo-codice):
+Verificare che A e B abbiano le stesse dimensioni (Righe x Colonne).
+Scegliere l'asse di riflessione.
+Cicla su ogni elemento i, j:
+  Se A[i][j] != B[posizione_specchiata], allora NON sono riflesse.
+  Se il ciclo termina senza errori, le matrici sono speculari.
+
+; Funzione generale per determinare se due matrici A e B sono una il riflesso dell'altra
+(define (tipo-riflessione A B)
+  ; numero righe e colonne di A
+  (letn (rA (length A)
+         cA (length (A 0))
+         ; numero righe e colonne di B
+         rB (length B)
+         cB (length (B 0))
+         ok true
+         rifles '())
+    ; riflessione ORIZZONTALE (Left<->Right)
+    ; stesse dimensioni
+    ; A[i][j] == B[i][cA-1-j]
+    (if (and (= rA rB) (= cA cB))
+        (begin
+          (setq ok true)
+          (for (i 0 (- rA 1))
+            (for (j 0 (- cA 1))
+              (if (!= (A i j) (B i (- cA 1 j)))
+                  (setq ok nil))))
+          (if ok (push "orizzontale" rifles))))
+    ; riflessione VERTICALE (Top<->Bottom)
+    ; stesse dimensioni
+    ; A[i][j] == B[rA-1-i][j]
+    (if (and (= rA rB) (= cA cB))
+        (begin
+          (setq ok true)
+          (for (i 0 (- rA 1))
+            (for (j 0 (- cA 1))
+              (if (!= (A i j) (B (- rA 1 i) j))
+                  (setq ok nil))))
+          (if ok (push "verticale" rifles))))
+    ; riflessione DIAGONALE PRINCIPALE (trasposizione)
+    ; dimensioni invertite
+    ; A[i][j] == B[j][i]
+    (if (and (= rA cB) (= cA rB))
+        (begin
+          (setq ok true)
+          (for (i 0 (- rA 1))
+            (for (j 0 (- cA 1))
+              (if (!= (A i j) (B j i))
+                  (setq ok nil))))
+          (if ok (push "diagonale-principale" rifles))))
+    ; riflessione DIAGONALE SECONDARIA
+    ; solo quadrate
+    ; A[i][j] == B[n-1-j][n-1-i]
+    (if (and (= rA cA) (= rB cB) (= rA rB))
+        (begin
+          (setq ok true)
+          (for (i 0 (- rA 1))
+            (for (j 0 (- cA 1))
+              (if (!= (A i j) (B (- rA 1 j) (- rA 1 i)))
+                  (setq ok nil))))
+          (if ok (push "diagonale-secondaria" rifles))))
+    ; risultato finale
+    (if rifles
+      (list true rifles)
+      (list nil nil))))
+
+Proviamo:
+
+(setq A '((1 2 3)))
+(setq B '((3 2 1)))
+(tipo-riflessione A B)
+;-> (true "orizzontale")
+
+(setq A '((1 2)
+          (3 4)))
+(setq B '((4 2)
+          (3 1)))
+(tipo-riflessione A B)
+;-> (true ("diagonale-secondaria"))
+
+(setq A '((1 2 3)))
+(setq B '((3 2 1)))
+(tipo-riflessione A B)
+;-> (true ("orizzontale"))
+
+Nota: due matrici possono avere piu di un tipo di riflessione contemporaneamente.
+Succede quando la matrice ha simmetrie interne.
+In quel caso più trasformazioni producono la stessa matrice.
+Non è un fatto raro: dipende solo dai valori.
+
+Caso 1 — matrice costante
+Tutti gli elementi uguali.
+Qualunque trasformazione dà la stessa matrice:
+- orizzontale
+- verticale
+- diagonale principale
+- diagonale secondaria
+(setq a1 '((1 1)
+           (1 1)))
+(tipo-riflessione a1 a1)
+;-> (true ("diagonale-secondaria" "diagonale-principale"
+;->        "verticale" "orizzontale"))
+
+Caso 2 — doppia simmetria (orizzontale + verticale)
+Simmetrica rispetto:
+- asse verticale
+- asse orizzontale
+Ma non rispetto alle diagonali.
+(setq a2 '((1 2 1)
+           (3 4 3)
+           (1 2 1)))
+(tipo-riflessione a2 a2)
+;-> (true ("verticale" "orizzontale"))
+
+Caso 3 — simmetria diagonale
+In questo caso risulta: A[i][j] = A[j][i]
+Quindi simmetrica solo rispetto:
+- diagonale principale
+(setq a3 '((1 2 3)
+           (2 4 5)
+           (3 5 6)))
+(tipo-riflessione a3 a3)
+;-> (true ("diagonale-principale"))
+
+Caso 4 — rettangolari
+Se la matrice NON è quadrata:
+- orizzontale e verticale -> possibili
+- diagonale principale -> cambia dimensioni
+- diagonale secondaria -> impossibile
+Quindi al massimo una tra (orizzontale, verticale) + eventualmente la trasposizione.
+
+Regola generale:
+Più riflessioni sono vere solo se:
+  A = riflesso(A)
+cioè la matrice è 'invariante' rispetto a quell'asse.
+
+Soluzione 2
+-----------
+Costruiamo ora una funzione che, data una sola matrice A, genera tutte le matrici ottenute dalle riflessioni possibili.
+Restituisce una lista associativa del tipo:
+
+  ((orizzontale <matrice>)
+   (verticale <matrice>)
+   (diagonale-principale <matrice>)
+   (diagonale-secondaria <matrice>))   ; solo se quadrata
+
+(define (riflessioni A)
+  ; numero righe e colonne
+  (letn (r (length A)
+         c (length (A 0))
+         out '())
+    ; RIFLESSO ORIZZONTALE (Left<->Right)
+    ; invertiamo le colonne
+    ; B[i][j] = A[i][c-1-j]
+    (let (B '())
+      (for (i 0 (- r 1))
+        (let (row '())
+          (for (j 0 (- c 1))
+            (push (A i (- c 1 j)) row -1))
+          (push row B -1)))
+      (push (list "orizzontale" B) out -1))
+    ; RIFLESSO VERTICALE (Top<->Bottom)
+    ; invertiamo le righe
+    ; B[i] = A[r-1-i]
+    (let (B '())
+      (for (i (- r 1) 0 -1)
+        (push (A i) B -1))
+      (push (list "verticale" B) out -1))
+    ; RIFLESSO DIAGONALE PRINCIPALE (trasposizione)
+    ; B[j][i] = A[i][j]
+    (let (B '())
+      (for (j 0 (- c 1))
+        (let (row '())
+          (for (i 0 (- r 1))
+            (push (A i j) row -1))
+          (push row B -1)))
+      (push (list "diagonale-principale" B) out -1))
+    ; RIFLESSO DIAGONALE SECONDARIA
+    ; solo matrici quadrate
+    ; B[i][j] = A[n-1-j][n-1-i]
+    (if (= r c)
+        (let (B '())
+          (for (i 0 (- r 1))
+            (let (row '())
+              (for (j 0 (- c 1))
+                (push (A (- r 1 j) (- r 1 i)) row -1))
+              (push row B -1)))
+          (push (list "diagonale-secondaria" B) out -1)))
+    ; lista finale delle trasformazioni
+    out))
+
+Proviamo:
+
+(setq A '((1 2)
+          (3 4)))
+(riflessioni A)
+;-> (("orizzontale" ((2 1) (4 3)))
+;->  ("verticale" ((3 4) (1 2)))
+;->  ("diagonale-principale"  ((1 3) (2 4)))
+;->  ("diagonale-secondaria" ((4 2) (3 1))))
+
+(setq B '((1 2 3)
+          (3 4 5)))
+(riflessioni B)
+(("orizzontale" ((3 2 1) (5 4 3)))
+ ("verticale" ((3 4 5) (1 2 3)))
+ ("diagonale-principale" ((1 3) (2 4) (3 5))))
+
+Nota: la funzione restituisce anche le trasformazioni uguali alla matrice data.
+
 ============================================================================
 
