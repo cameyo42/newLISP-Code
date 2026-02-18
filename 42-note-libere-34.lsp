@@ -4711,13 +4711,13 @@ L'obiettivo è calcolare la probabilità che il processo termini con:
 
   k = 0 (lista vuota)
 
-Dopo il primo shuffle, la lista e` una permutazione uniforme di: (0 1 ... N).
+Dopo il primo shuffle, la lista è una permutazione uniforme di: (0 1 ... N).
 
 Dopo la rimozione dei punti fissi, rimane un insieme di cardinalità:
 
   K = (N+1) - F
 
-dove F e` il numero di punti fissi della permutazione.
+dove F è il numero di punti fissi della permutazione.
 
 F ha distribuzione asintoticamente simile a:
 
@@ -4749,7 +4749,7 @@ Ma la condizione di stop richiede:
 
 Se anche un solo elemento >= k è presente, il processo termina.
 
-Condizionando sulla lunghezza k, la lista e` approssimativamente un sottoinsieme casuale di (0 1 ... N) di cardinalità k.
+Condizionando sulla lunghezza k, la lista è approssimativamente un sottoinsieme casuale di (0 1 ... N) di cardinalità k.
 
 La probabilità che tutti gli elementi siano < k vale:
 
@@ -4763,11 +4763,11 @@ Per arrivare a k = 0 bisogna superare il test di stop per tutti i valori:
 
   k = N+1, N, N-1, ..., 1
 
-Una stima superiore e`:
+Una stima superiore è:
 
   P(lista vuota) <= Prod[k=1,N+1]( 1 / C(N+1, k) )
 
-cioe`:
+cioè:
 
   P(lista vuota) <= 1 / Prod[k=1,N+1] C(N+1, k) )
 
@@ -6875,6 +6875,305 @@ Versione code-golf (60 caratteri):
 
 (o '(1 2 3 4 5 6) '(6 5 4 3 2 1))
 ;-> (1 2 3 4 5 6)
+
+
+--------------------------
+Processo di contaminazione
+--------------------------
+
+In una griglia MxN sono posizionate cellule con uno di tre valori possibili:
+
+  0: vuoto
+  1: cellula sana
+  2: cellula malata
+
+Il processo di contaminazione funziona come segue:
+ogni minuto, qualsiasi cellula sana adiacente (in alto, in basso, a sinistra o a destra) a una cellula malata viene contaminata e divanta malata..
+Ad esempio, dopo il primo minuto, tutte le cellule sane direttamente accanto alle cellule inizialmente malate diventeranno malate.
+Dopo il secondo minuto, le cellule appena malate dal minuto 1 faranno ammalare le cellule sane adiacenti, e così via.
+
+Trovare il numero minimo di minuti necessari affinché tutte le cellule sane risultino ammalate.
+Trovare anche il numero di cellule sane rimaste al termine del processo (cioè tutte le cellule sane isolate che non possono essere contaminate da nessuna cellula malata.
+
+Utilizziamo un algoritmo BFS (Breadth-First-Search) per simulare questo processo di diffusione minuto per minuto.
+Iniziamo trovando tutte le cellule inizialmente malate e contando tutte le cellule sane.
+Quindi elaboriamo il processo di contaminazione in cicli, dove ogni ciclo rappresenta un minuto.
+In ogni ciclo, tutte le cellule attualmente malate fanno ammalare le cellule sane adiacenti simultaneamente.
+Il processo continua finché tutte le cellule sane non sono malate o non è più possibile raggiungere cellule sane.
+
+; Funzione che stampa la griglia di cellule
+(define (print-grid grid titolo)
+  (println "\n" titolo)
+  (dolist (r grid)
+    (dolist (v r)
+      (print v " "))
+    (println)))
+
+; Funzione che simula il processo di contaminazione
+(define (contaminazione grid)
+  ; Simula il processo di contaminazione e ritorna (minuti sane-rimaste)
+  (letn (
+         ; numero di righe della griglia
+         rows (length grid)
+         ; numero di colonne (griglia rettangolare)
+         cols (length (grid 0))
+         ; contatore delle cellule sane (valore 1)
+         numero-sane 0
+         ; coda BFS con le posizioni delle cellule malate
+         queue '()
+         ; minuti trascorsi durante la simulazione
+         minuti-totale 0
+         ; spostamenti 4-direzionali: su destra giù sinistra
+         directions '((-1 0) (0 1) (1 0) (0 -1))
+         ; flag per terminare anticipatamente quando non restano sane
+         finito nil
+         ; valore finale dei minuti
+         risultato 0)
+    ; scansione completa della griglia
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        (cond
+          ; se la cella è già malata la inserisco nella coda iniziale
+          ((= (grid r c) 2)
+            (push (list r c) queue -1))
+          ; se la cella è sana incremento il contatore
+          ((= (grid r c) 1)
+            (inc numero-sane)))))
+    ; stampa la griglia iniziale
+    (print-grid grid "stato iniziale:")
+    ; stampa numero di sane iniziali
+    (println "sane iniziali = " numero-sane)
+    ; stampa numero di malate iniziali
+    (println "malate iniziali = " (length queue))
+    ; ciclo BFS: ogni iterazione rappresenta 1 minuto
+    (while (and (> (length queue) 0) (> numero-sane 0) (not finito))
+      ; incremento il tempo
+      (++ minuti-totale)
+      ; debug minuto corrente
+      (println "\nminuto = " minuti-totale)
+      ; numero di celle malate da processare in questo minuto (livello BFS)
+      (let (current-level-size (length queue))
+        ; elaboro solo gli elementi presenti all'inizio del minuto
+        (for (i 1 current-level-size)
+          ; estraggo la prossima posizione dalla coda
+          (letn (pos (pop queue 0)
+                 ; riga corrente
+                 curr-row (pos 0)
+                 ; colonna corrente
+                 curr-col (pos 1))
+            ; controllo le quattro direzioni adiacenti
+            (dolist (d directions)
+              ; calcolo coordinate della cella vicina
+              (letn (next-row (+ curr-row (d 0))
+                     next-col (+ curr-col (d 1)))
+                ; verifico limiti e che sia sana
+                (when (and (>= next-row 0) (< next-row rows)
+                           (>= next-col 0) (< next-col cols)
+                           (= (grid next-row next-col) 1))
+                  ; la cella sana diventa malata
+                  (setf (grid next-row next-col) 2)
+                  ; la aggiungo alla coda per il minuto successivo
+                  (push (list next-row next-col) queue -1)
+                  ; decremento il numero di sane rimaste
+                  (-- numero-sane)
+                  ; debug infezione
+                  (println "  malata: (" next-row { } next-col ")"
+                           " sane rimaste = " numero-sane)
+                  ; se non restano sane termino anticipatamente
+                  (when (= numero-sane 0)
+                    (set 'finito true))))))))
+      ; stampa la griglia dopo questo minuto
+      (print-grid grid (string "stato dopo minuto " minuti-totale)))
+    ; salvo i minuti totali trascorsi
+    (set 'risultato minuti-totale)
+    ; stampa stato finale della griglia
+    (print-grid grid "stato finale:")
+    ; stampa minuti totali
+    (println "\nminuti = " risultato)
+    ; stampa quante sane sono rimaste isolate
+    (println "sane rimaste = " numero-sane)
+    ; ritorna (minuti sane-rimaste)
+    (list risultato numero-sane)))
+
+Proviamo:
+
+(set 'g '((2 1 1)
+          (1 1 0)
+          (0 1 1)))
+(contaminazione g)
+;-> stato iniziale:
+;-> 2 1 1
+;-> 1 1 0
+;-> 0 1 1
+;-> sane iniziali = 6
+;-> malate iniziali = 1
+;-> 
+;-> minuto = 1
+;->   malata: (0 1) sane rimaste = 5
+;->   malata: (1 0) sane rimaste = 4
+;-> 
+;-> stato dopo minuto 1
+;-> 2 2 1
+;-> 2 1 0
+;-> 0 1 1
+;-> 
+;-> minuto = 2
+;->   malata: (0 2) sane rimaste = 3
+;->   malata: (1 1) sane rimaste = 2
+;-> 
+;-> stato dopo minuto 2
+;-> 2 2 2
+;-> 2 2 0
+;-> 0 1 1
+;-> 
+;-> minuto = 3
+;->   malata: (2 1) sane rimaste = 1
+;-> 
+;-> stato dopo minuto 3
+;-> 2 2 2
+;-> 2 2 0
+;-> 0 2 1
+;-> 
+;-> minuto = 4
+;->   malata: (2 2) sane rimaste = 0
+;-> 
+;-> stato dopo minuto 4
+;-> 2 2 2
+;-> 2 2 0
+;-> 0 2 2
+;-> 
+;-> stato finale:
+;-> 2 2 2
+;-> 2 2 0
+;-> 0 2 2
+;-> 
+;-> minuti = 4
+;-> sane rimaste = 0
+;-> (4 0)
+
+(setq g '((2 1 1)
+          (0 1 1)
+          (1 0 1)))
+(contaminazione g)
+;-> ...
+;-> (5 1)
+
+(setq g '((0 2)))
+(contaminazione g)
+;-> ...
+;-> (0 0)
+
+(setq g '((0 2) (1 0)))
+(contaminazione g)
+;-> ...
+;-> (1 1)
+
+
+-------------------------------------------------------
+Trasformare una funzione non-distruttiva in distruttiva
+-------------------------------------------------------
+
+Una funzione viene detta "distruttiva" quando modifica il proprio argomento (pass-by-reference).
+Una funzione viene detta "non-distruttiva" quando modifica una copia del proprio argomento (pass-by-value).
+
+Esempio funzione distruttiva: sort
+----------------------------------
+(setq a '(2 5 3 1 7))
+(sort a)
+;-> (1 2 3 5 7)
+Il parametro 'a' è stato modificato da 'sort':
+a
+;-> (1 2 3 5 7)
+
+Per fare in modo che la lista 'a' non venga modificata occorre usare la funzione 'copy':
+
+(setq a '(2 5 3 1 7))
+(sort (copy a))
+;-> (1 2 3 5 7)
+In questo caso il parametro 'a' non viene modificato:
+a
+;-> (2 5 3 1 7)
+
+Esempio funzione non-distruttiva: randomize
+-------------------------------------------
+(setq a '(2 5 3 1 7))
+(randomize a true)
+;-> (7 2 3 1 5)
+Il parametro 'a' non è stato modificato da 'randomize':
+a
+;-> (2 5 3 1 7)
+
+Per fare in modo che la lista 'a' venga modificata occorre scrivere una macro.
+Vediamo prima perchè una funzione non è sufficiente:
+
+La seguente funzione si limita a passare gli argomenti di 'randomize1' alla funzione 'randomize', quibdi la lista 'a' non viene modificata:
+
+(define (randomize1)
+  (apply randomize (args)))
+
+(setq a '(2 5 3 1 7))
+(randomize1 a true)
+;-> (3 2 5 7 1)
+a
+;-> (2 5 3 1 7)
+
+Proviamo con una macro:
+
+(define-macro (randomize2) (eval (cons 'randomize (args))))
+(randomize2 '(2 5 3 1 7) true)
+;-> (5 2 3 7 1)
+
+(setq a '(2 5 3 1 7))
+(randomize2 a true)
+;-> (3 5 2 1 7)
+a
+;-> (2 5 3 1 7)
+
+Anche questa macro non modifica la lista 'a'.
+
+Normalmente per modificare la lista 'a' scriviamo:
+
+(setq a (randomize a true))
+;-> (7 1 3 2 5)
+a
+;-> (7 1 3 2 5)
+
+Quindi possiamo scrivere una macro che prima crea l'espressione '(setq...)' e poi la valuta/esegue:
+
+(define-macro (randomize@)
+ ; unione degli argomenti in formato stringa
+ (setq arg (join (map string (args)) " "))
+ (println "arg: " arg)
+ ; creazione dell'espressione (setq...)
+ (setq expr (string "(setq " (args 0) " (randomize " arg "))"))
+ (println "expr: " expr)
+ (eval-string expr))
+
+(setq a '(2 5 3 1 7))
+(randomize@ a true)
+;-> arg: a true
+;-> expr: (setq a (randomize a true))
+;-> (1 7 5 3 2)
+a
+;-> (1 7 5 3 2)
+In questo caso la lista 'a' è stata modificata.
+
+Proviamo la macro all'interno di una funzione:
+
+(define (test)
+  (let (lst (rand 10 6))
+    (println "Originale: " lst)
+    (randomize@ lst)
+    (println "Ordinata: " lst) '>))
+
+(test)
+;-> Originale: (1 4 2 8 2 7)
+;-> arg: lst
+;-> expr: (setq lst (randomize lst))
+;-> Ordinata: (7 1 4 2 8 2)
+
+Nota: la macro è lenta rispetto all'assegnazione diretta.
+Inoltre le macro vengono generalmente usate per restituire codice e non per restituire un valore.
 
 ============================================================================
 

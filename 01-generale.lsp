@@ -331,7 +331,8 @@ I simboli "a" e "c" assumono i valori 1 e 2 se non si forniscono valori nella ch
 
 Una funzione viene detta "distruttiva" quando modifica il proprio argomento.
 
-La maggior parte delle funzione primitive in newLISP sono non-distruttive (non hanno effetti collaterali) e lasciano intatti gli oggetti esistenti, sebbene possano crearne di nuovi. Esistono tuttavia alcune funzioni distruttive che modificano il contenuto di una variabile, una lista, un vettore o una stringa:
+La maggior parte delle funzione primitive in newLISP sono non-distruttive (non hanno effetti collaterali) e lasciano intatti gli oggetti esistenti, sebbene possano crearne di nuovi.
+Esistono tuttavia alcune funzioni distruttive che modificano il contenuto di una variabile, una lista, un vettore o una stringa:
 
 Funzione        Descrizione
 --------        -----------

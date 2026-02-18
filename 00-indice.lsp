@@ -3346,6 +3346,8 @@ NOTE LIBERE 34
   Il dado a 6 facce
   Dado truccato
   Corsa campestre
+  Processo di contaminazione
+  Trasformare una funzione non-distruttiva in distruttiva
 
 PROBLEMI SUI DADI
 =================
