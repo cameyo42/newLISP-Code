@@ -7746,5 +7746,62 @@ Proviamo:
 Vedi anche "Rotazione di 90 gradi (in senso orario) di una matrice quadrata" su "Note libere 18".
 Vedi anche "Rotazione di una matrice" in "Note libere 19".
 
+
+----------------------
+Il giudice della città
+----------------------
+
+Una città è popolata da N persone etichettate da 1 a N.
+Il 'giudice della città' ha due caratteristiche uniche:
+1) Il giudice non si fida di nessun'altra persona in città
+2) Tutti gli altri (N-1) si fidano del giudice
+
+Abbiamo una lista F con elementi del tipo: (A B) che significa:
+'A' si fida di 'B' (dove 'A' e 'B' sono numeri interi compresi tra 1 e N)
+Le relazioni di fiducia sono direzionali:
+se la persona A si fida della persona B, non significa che B si fidi di A.
+
+Trovare, se esiste, il giudice della città.
+
+Esempio:
+Se N = 3 e F = ((1 3) (2 3)), la persona 3 è il giudice perché:
+La persona 3 non si fida di nessuno (nessuna voce con 3 come primo elemento)
+Tutti gli altri (persone 1 e 2) si fidano della persona 3.
+
+Le relazioni di fiducia possono essere rappresentate come a un grafo orientato in cui ogni persona è un nodo e ogni relazione di fiducia è un arco orientato dalla persona che si fida alla persona che riceve fiducia.
+In questo modo il giudice della città è un nodo con le seguenti proprietà:
+  In-degree: N-1 archi in entrata (tutti gli altri si fidano di lui)
+  Out-degree: 0 archi in uscita (il giudice non si fida di nessuno)
+Invece di costruire un grafo vero e proprio, possiamo semplificare il tutto calcolando In-degree e Out-degree per ogni persona.
+
+(define (giudice F)
+  (local (N out-degree in-degree judge out)
+    ; calcolo del numero di persone
+    (setq N (apply max (flat F)))
+    ; vettore archi in uscita
+    (setq out-degree (array (+ N 1) '(0)))
+    ; vettore archi in ingresso
+    (setq in-degree (array (+ N 1) '(0)))
+    ; calcola i valori di out-degree e in-degree per ogni persona
+    (dolist (el F)
+      (++ (out-degree (el 0)))
+      (++ (in-degree (el 1))))
+    ; cerca il giudice
+    (setq judge nil)
+    (for (i 1 N 1 judge)
+      ;(println i { } (out-degree i) { } (in-degree i))
+      (when (and (= (out-degree i) 0) (= (in-degree i) (- N 1)))
+        (setq out i) (setq judge true)))
+    out))
+
+Proviamo:
+
+(giudice '((1 2)))
+;-> 2
+(giudice '((1 3) (2 3) (3 1)))
+;-> nil
+(giudice '((1 3) (2 3)))
+;-> 3
+
 ============================================================================
 

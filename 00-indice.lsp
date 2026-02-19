@@ -3350,6 +3350,7 @@ NOTE LIBERE 34
   Trasformare una funzione non-distruttiva in distruttiva
   Matrici riflesse
   Rotazioni di matrici
+  Il giudice della città
 
 PROBLEMI SUI DADI
 =================
