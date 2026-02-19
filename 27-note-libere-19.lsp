@@ -393,13 +393,13 @@ Funzione che ruota di un posto un anello di una matrice:
   (local (i value temp)
     (setq value (matrix row col))
     (setq temp 0)
-    (setq i (- col 1))
     ; case A
     ; 2----------3
     ; |          |
     ; |          |
     ; 1----------0
     ; Bottom right to left
+    (setq i (- col 1))
     (while (>= i idx)
       (setq temp (matrix row i))
       (setf (matrix row i) value)
@@ -456,12 +456,6 @@ Funzione che ruota di un posto un anello di una matrice:
 ;->  (7 5 3)
 ;->  (8 9 6)
 
-(setq q '(( 1  2  3  4  5)
-          ( 6  7  8  9 10)
-          (11 12 13 14 15)
-          (16 17 18 19 20)
-          (21 22 23 24 25)))
-
 (rotate-ring q 4 4 0)
 ;-> (( 6  1  2  3  4)
 ;->  (11  7  8  9  5)
@@ -486,26 +480,40 @@ Funzione che ruota di un posto una matrice:
     )
     matrix))
 
+Proviamo:
+
+(setq r '((1 2 3)
+          (8 9 4)
+          (7 6 5)))
+(rotate-one r)
+;-> ((8 1 2)
+;->  (7 9 3)
+;->  (6 5 4))
+
+(setq q '(( 1  2  3  4)
+          ( 5  6  7  8)
+          ( 9 10 11 12)
+          (13 14 15 16)))
+(rotate-one q)
+;-> (( 5  1  2  3)
+;->  ( 9 10  6  4)
+;->  (13 11  7  8)
+;->  (14 15 16 12))
+
+(setq q '(( 1  2  3  4  5)
+          ( 6  7  8  9 10)
+          (11 12 13 14 15)
+          (16 17 18 19 20)
+          (21 22 23 24 25)))
 (rotate-one q)
 ;-> (( 6  1  2  3  4)
 ;->  (11 12  7  8  5)
 ;->  (16 17 13  9 10)
 ;->  (21 18 19 14 15)
-;->  (22 23 24 25 20))
+;->  (22 23 24 25 20)
 
-(rotate-one m)
-;-> (4 1 2)
-;-> (7 5 3)
-;-> (8 9 6)
-
-(setq r '((1 2 3)
-          (8 9 4)
-          (7 6 5)))
-
-(rotate-one r)
-;-> ((8 1 2)
-;->  (7 9 3)
-;->  (6 5 4))
+Vedi anche "Rotazioni di matrici" in "Note libere 34".
+Vedi anche "Rotazione di 90 gradi (in senso orario) di una matrice quadrata" su "Note libere 18".
 
 
 --------

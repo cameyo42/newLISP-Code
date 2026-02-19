@@ -9230,6 +9230,9 @@ Per ruotare una matrice di 180 gradi applicare due volte "rot90":
 ;->  (10  9  8  7  6)
 ;->  ( 5  4  3  2  1))
 
+Vedi anche "Rotazioni di matrici" in "Note libere 34".
+Vedi anche "Rotazione di una matrice" in "Note libere 19".
+
 
 ---------------------------------------------
 Attraversamento di matrici lungo le diagonali

@@ -3349,6 +3349,7 @@ NOTE LIBERE 34
   Processo di contaminazione
   Trasformare una funzione non-distruttiva in distruttiva
   Matrici riflesse
+  Rotazioni di matrici
 
 PROBLEMI SUI DADI
 =================

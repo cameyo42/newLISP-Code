@@ -7516,5 +7516,235 @@ Proviamo:
 
 Nota: la funzione restituisce anche le trasformazioni uguali alla matrice data.
 
+
+--------------------
+Rotazioni di matrici
+--------------------
+
+1️) Rotazioni geometriche (90/180/270 gradi)
+-------------------------------------------
+
+; Funzione che ruota una matrice in senso orario o antiorario di 90 o 180 o 270 gradi
+(define (rotate-matrix A gradi direzione)
+  ; numero righe e colonne di A
+  (letn (r (length A)
+         c (length (A 0))
+         B '())
+    ; 90° ORARIO
+    (if (and (= gradi 90) (= direzione 'orario))
+        (begin
+          ; dimensioni invertite
+          (for (i 0 (- c 1))
+            (let (row '())
+              (for (j 0 (- r 1))
+                (push (A (- r 1 j) i) row -1))
+              (push row B -1)))))
+    ; 90° ANTIORARIO
+    (if (and (= gradi 90) (= direzione 'antiorario))
+        (begin
+          (for (i 0 (- c 1))
+            (let (row '())
+              (for (j 0 (- r 1))
+                (push (A j (- c 1 i)) row -1))
+              (push row B -1)))))
+    ; 180° (stesso per entrambe le direzioni)
+    (if (= gradi 180)
+        (begin
+          (for (i (- r 1) 0 -1)
+            (let (row '())
+              (for (j (- c 1) 0 -1)
+                (push (A i j) row -1))
+              (push row B -1)))))
+    ; 270° ORARIO
+    (if (and (= gradi 270) (= direzione 'orario))
+        (begin
+          (for (i 0 (- c 1))
+            (let (row '())
+              (for (j 0 (- r 1))
+                (push (A j (- c 1 i)) row -1))
+              (push row B -1)))))
+    ; 270° ANTIORARIO
+    (if (and (= gradi 270) (= direzione 'antiorario))
+        (begin
+          (for (i 0 (- c 1))
+            (let (row '())
+              (for (j 0 (- r 1))
+                (push (A (- r 1 j) i) row -1))
+              (push row B -1)))))
+    B))
+
+Proviamo:
+
+(setq m '((1 2 3 4)
+          (5 6 7 8)
+          (9 10 11 12)
+          (13 14 15 16)))
+
+(rotate-matrix m 90 'orario)
+;-> ((13 9 5 1)
+;->  (14 10 6 2)
+;->  (15 11 7 3)
+;->  (16 12 8 4))
+
+(rotate-matrix m 90 'antiorario)
+;-> ((4 8 12 16)
+;->  (3 7 11 15)
+;->  (2 6 10 14)
+;->  (1 5 9 13))
+
+(setq m1 (rotate-matrix m 90 'orario))
+(setq m2 (rotate-matrix m1 90 'antiorario))
+(= m m2)
+;-> true
+
+(setq m1 (rotate-matrix m 180 'orario))
+(setq m2 (rotate-matrix m1 180 'antiorario))
+(= m m2)
+;-> true
+
+(setq m1 (rotate-matrix m 270 'orario))
+(setq m2 (rotate-matrix m1 270 'antiorario))
+(= m m2)
+;-> true
+
+2) Rotazioni di 1..N posizioni ("layered rotation")
+---------------------------------------------------
+
+Layered rotation
+Spostamento degli elementi lungo i bordi concentrici (anelli/layer) della matrice di X posizioni.
+Sia matrici quadrate che rettangolari >= 2X2.
+Direzioni oraria e antioraria.
+Numero di posizioni X da ruotare.
+Ogni anello (layer) ruota indipendentemente dagli altri.
+L'elemento centrale di matrici con dimensioni dispari rimane fermo.
+
+; Funzione che ruota una matrice in senso orario di una posizione
+; layered rotation
+(define (rotate-ring-orario matrix row col idx)
+  (local (i value temp)
+    (setq value (matrix row col idx))
+    ;; caso A: bottom right -> left
+    (setq i (- col 1))
+    (while (>= i idx)
+      (setq temp (matrix row i))
+      (setf (matrix row i) value)
+      (setq value temp)
+      (-- i))
+    ;; caso B: bottom left -> top
+    (setq i (- row 1))
+    (while (>= i idx)
+      (setq temp (matrix i idx))
+      (setf (matrix i idx) value)
+      (setq value temp)
+      (-- i))
+    ;; caso C: top left -> right
+    (setq i (+ idx 1))
+    (while (<= i col)
+      (setq temp (matrix idx i))
+      (setf (matrix idx i) value)
+      (setq value temp)
+      (++ i))
+    ;; caso D: top right -> bottom
+    (setq i (+ idx 1))
+    (while (<= i row)
+      (setq temp (matrix i col))
+      (setf (matrix i col) value)
+      (setq value temp)
+      (++ i))
+    matrix))
+
+; Funzione che ruota una matrice in senso orario di una posizione
+; layered rotation
+(define (rotate-ring-antiorario matrix row col idx)
+  (local (i value temp)
+    ;; valore iniziale: angolo in alto a sinistra dell'anello
+    (setq value (matrix idx idx))
+    ;; caso A: colonna sinistra dall'alto verso il basso
+    (setq i (+ idx 1))
+    (while (<= i row)
+      (setq temp (matrix i idx))
+      (setf (matrix i idx) value)
+      (setq value temp)
+      (++ i))
+    ;; caso B: riga inferiore da sinistra verso destra
+    (setq i (+ idx 1))
+    (while (<= i col)
+      (setq temp (matrix row i))
+      (setf (matrix row i) value)
+      (setq value temp)
+      (++ i))
+    ;; caso C: colonna destra dal basso verso l'alto
+    (setq i (- row 1))
+    (while (>= i idx)
+      (setq temp (matrix i col))
+      (setf (matrix i col) value)
+      (setq value temp)
+      (-- i))
+    ;; caso D: riga superiore da destra verso sinistra
+    (setq i (- col 1))
+    (while (>= i idx)
+      (setq temp (matrix idx i))
+      (setf (matrix idx i) value)
+      (setq value temp)
+      (-- i))
+    matrix))
+
+; Funzione che ruota una matrice in senso orario o antiorario di una posizione
+; layered rotation
+(define (rotate-matrix-one matrix direzione)
+  (local (row col size ring)
+    (setq row (length matrix))
+    (setq col (length (matrix 0)))
+    (setq size (min row col))
+    (setq ring 0)
+    (while (< ring (/ size 2))
+      (-- row)
+      (-- col)
+      (if (= direzione 'orario)
+          (setq matrix (rotate-ring-orario matrix row col ring))
+          (setq matrix (rotate-ring-antiorario matrix row col ring)))
+      (++ ring))
+    matrix))
+
+Proviamo:
+
+(setq m '((1 2 3 4)
+          (5 6 7 8)
+          (9 10 11 12)
+          (13 14 15 16)))
+(rotate-matrix-one  m 'orario)
+;-> ((5 1 2 3)
+;->  (9 10 6 4)
+;->  (13 11 7 8)
+;->  (14 15 16 12))
+(rotate-matrix-one  m 'antiorario)
+;-> ((2 3 4 8) 
+;->  (1 7 11 12) 
+;->  (5 6 10 16) 
+;->  (9 13 14 15))
+
+(setq q '((1 2 3) 
+          (4 5 6)))
+(rotate-matrix-one  q 'orario)
+;-> ((4 1 2)
+;->  (5 6 3))
+(rotate-matrix-one  q 'antiorario)
+;-> ((2 3 6)
+;->  (1 4 5))
+
+(setq t '(( 1  2  3  4  5)
+          ( 6  7  8  9 10)
+          (11 12 13 14 15)
+          (16 17 18 19 20)))
+(setq t1 (rotate-matrix-one t 'orario))
+(setq t2 (rotate-matrix-one t1 'orario))
+(setq t3 (rotate-matrix-one t2 'antiorario))
+(setq t4 (rotate-matrix-one t3 'antiorario))
+(= t t4)
+;-> true
+
+Vedi anche "Rotazione di 90 gradi (in senso orario) di una matrice quadrata" su "Note libere 18".
+Vedi anche "Rotazione di una matrice" in "Note libere 19".
+
 ============================================================================
 
