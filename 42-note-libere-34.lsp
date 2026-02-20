@@ -7922,5 +7922,116 @@ Proviamo:
 ;-> (12211 1194)
 ;-> 131367.445
 
+
+-----------------
+Sequenza multipla
+-----------------
+
+Definizione:
+
+a(0) = 0 oppure a(0) = 1
+
+a(n) = n * a(n-1) if n pari
+       n + a(n-1) if n dispari
+
+oppure
+
+a(n) = n * a(n-1) if n dispari
+       n + a(n-1) if n pari
+
+Scriviamo una funzione che calcola tutte le sequenze della definizione.
+
+(define (seq N a0 f)
+  (let (out (list a0))
+    (for (i 1 N)
+      (if (f i)
+        (push (* i (out (- i 1))) out))
+        (push (+ i (out (- i 1))) out))
+    (unique (sort out))))
+
+Proviamo:
+
+(seq 20 0 odd?)
+;-> (0 1 2 4 5 7 8 13 14 16 17 18 19 22 23 25 26 33 34 44 65 75 119 152)
+(seq 20 1 odd?)
+;-> (1 2 3 5 6 8 9 10 11 14 15 17 18 21 23 24 26 27 40 41 55 78 136 150 171)
+(seq 20 0 even?)
+;-> (0 1 3 4 5 9 10 12 13 14 15 16 17 19 20 24 27 28 30 40 48 56 80 180)
+(seq 20 1 even?)
+;-> (1 2 4 5 6 7 8 10 11 12 13 14 18 19 21 22 28 29 31 32 50 84 96 112 200 216)
+
+
+--------------------------------
+Self Numbers (Numeri Colombiani)
+--------------------------------
+
+Sequenza OEIS A003052:
+Self numbers or Colombian numbers (numbers that are not of the form m + sum of digits of m for any m).
+  1, 3, 5, 7, 9, 20, 31, 42, 53, 64, 75, 86, 97, 108, 110, 121, 132, 143,
+  154, 165, 176, 187, 198, 209, 211, 222, 233, 244, 255, 266, 277, 288,
+  299, 310, 312, 323, 334, 345, 356, 367, 378, 389, 400, 411, 413, 424,
+  435, 446, 457, 468, 479, 490, 501, 512, 514, 525, ...
+
+The following recurrence relation generates infinite base 10 self numbers:
+C(k)=8.10^(k-1)+C(k-1)+8; C(1)=9
+The term "self numbers" was coined by Kaprekar (1959).
+The term "Colombian number" was coined by Recamán (1973) of Bogota, Colombia.
+The asymptotic density of sequence is approximately 0.0977778 (Guaraldo, 1978).
+
+La relazione: C(k)=8·10^(k-1)+C(k-1)+8 ; C(1)=9
+non genera tutti i self numbers, ma solo una sottosequenza infinita garantita (serve come costruzione teorica).
+
+Un numero 'n' è 'self' se non esiste alcun 'm' tale che
+  m + somma_cifre(m) = n
+
+Algoritmo
+1) per ogni 'm' calcolare il generatore:
+   g(m) = m + sumdigits(m)
+2) segnare tutti i valori generati
+3) i numeri non generati sono i numeri self
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10))
+    )
+    out))
+
+; Funzione che genera i self numbers fino a N
+(define (self-numbers N)
+  ; gen = array di segnature (true se il numero è generato)
+  ; out = lista risultato dei self numbers
+  (letn (gen (array (+ N 1) '(nil)) out '())
+    ; per ogni m da 1 a N calcola il generatore g(m)=m+somma_cifre(m)
+    (for (m 1 N)
+      ; calcolo del valore generato
+      (let (g (+ m (digit-sum m)))
+        ; se il generato è entro il limite, viene segnato come "non self"
+        (if (<= g N) (setf (gen g) true))))
+    ; scansiona tutti i numeri 1..N
+    (for (i 1 N)
+      ; se non è mai stato segnato, è un self number
+      (if (nil? (gen i)) (push i out -1)))
+    out))
+
+(self-numbers 525)
+;-> (1 3 5 7 9 20 31 42 53 64 75 86 97 108 110 121 132 143
+;->  154 165 176 187 198 209 211 222 233 244 255 266 277 288
+;->  299 310 312 323 334 345 356 367 378 389 400 411 413 424
+;->  435 446 457 468 479 490 501 512 514 525)
+
+Densità asintotica:
+
+(define (density N) (div (length (self-numbers N)) N))
+
+(map density '(1e2 1e3 1e4 1e5 1e6))
+;-> (0.13 0.102 0.0983 0.09784 0.097786)
+
+(time (println (density 1e7)))
+;-> 0.0977787
+;-> 12311.072
+
 ============================================================================
 

@@ -3352,6 +3352,8 @@ NOTE LIBERE 34
   Rotazioni di matrici
   Il giudice della città
   Sequenza di Brougnard
+  Sequenza multipla
+  Self Numbers (Numeri Colombiani)
 
 PROBLEMI SUI DADI
 =================
