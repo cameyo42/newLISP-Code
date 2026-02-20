@@ -3351,6 +3351,7 @@ NOTE LIBERE 34
   Matrici riflesse
   Rotazioni di matrici
   Il giudice della città
+  Sequenza di Brougnard
 
 PROBLEMI SUI DADI
 =================

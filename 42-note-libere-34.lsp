@@ -7803,5 +7803,124 @@ Proviamo:
 (giudice '((1 3) (2 3)))
 ;-> 3
 
+
+---------------------
+Sequenza di Brougnard
+---------------------
+
+Brougnard sequence
+------------------
+The gb[n] sequence definition is the following :
+1) gb[0] = starter =  any prime > 2
+2) computation of gb[n+1]
+let p : = gb[n]
+if p  = 2 (mod 3)
+         then p  := (p-1)/2  ;
+         else p  := p * 2 ;
+gb[n+1] := next prime > p  ;
+
+Examples:
+gb[0]=23  -> (23 13 29 27 11 7)
+(length 6)
+gb[0]=281 -> (281 149 79 163 331 673 1361 683 347 179 97 197 101 53 29 17 11 7)
+(length 18)
+
+Note: The sequence 7 17 11 7 .. is periodic.
+A gb-sequence is convergent if gb[n] = 7 for some n. The sequence stops at n.
+A sequence which is not convergent is divergent.
+
+; Funzione che verifica se un dato numero è primo
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+; Funzione che calcola il primo successivo ad un dato numero
+(define (next-prime num) (until (prime? (++ num))) num)
+
+(next-prime 11)
+;-> 13
+
+; Funzione che genera una sequenza di Brougnard
+; Parametri: starter = numero primo > 2
+;            limit = lunghezza massima della sequenza
+; Output: lista di numeri (sequenza di Brougnard a partire da starter)
+(define (gb-seq starter limit)
+  (letn ((out (list starter)) (p starter) (stop nil) (k 0))
+    (until stop
+      (if (= (% p 3) 2)
+          (setq p (/ (- p 1) 2))
+          (setq p (* p 2)))
+      (setq p (next-prime p))
+      (push p out -1)
+      (++ k)
+      (if (= p 7) (setq stop true))
+      (when (> k limit) (setq stop true) (println starter ": Limit error!!!")))
+    ;(println (length out))
+    out))
+
+Proviamo:
+
+Nota: il numero primo 2 produce una sequenza infinita di 2
+(gb-seq 2 10)
+;-> 2: Limit error!!!
+;-> (2 2 2 2 2 2 2 2 2 2 2 2)
+
+(gb-seq 23 1000)
+;-> (23 13 29 17 11 7)
+(gb-seq 281 1000)
+;-> (281 149 79 163 331 673 1361 683 347 179 97 197 101 53 29 17 11 7)
+
+Vediamo quale numero primo ha la sequenza di Brougnard più lunga.
+Abbiamo bisogno di una funzione che genera N numeri primi.
+
+(define (primes num-primes)
+"Generate a given number of prime numbers (starting from 2)"
+  (let ( (k 3) (tot 1) (out '(2)) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k 2))
+    out))
+
+(time (primes 1e5))
+;-> 605.382
+
+; Funzione che calcola la sequenza più lunga di N numeri primi (1..N)
+; Parametri: N = numero di primi da calcolare
+;            limit = lunghezza massima della sequenza
+; Output: coppia di elementi (primo lunghezza-sequenza)
+(define (find-gb N limit)
+  (let ((max-len 0) (max-prime 3) (lst '()) (primi (primes N)))
+    (pop primi)
+    (dolist (primo primi)
+      (setq lst (gb-seq primo limit))
+      ;(println primo { } (length lst))
+      (when (> (setq len (length lst)) max-len)
+        (setq max-len len)
+        (setq max-primo primo)))
+    (list max-primo max-len)))
+
+Proviamo:
+
+(find-gb 12 5000)
+;-> (31 21)
+(find-gb 100 5000)
+;-> 359 61
+
+(time (println (find-gb 1000 5000)))
+;-> (6481 451)
+;-> 1780.268
+(apply max (gb-seq 6481 5000))
+;-> 111800125737497
+
+(time (println (find-gb 1400 5000)))
+;-> (9241 469)
+;-> 2330.738
+(time (println (find-gb 1500 5000)))
+;-> (12211 1194)
+;-> 131367.445
+
 ============================================================================
 
