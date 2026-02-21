@@ -3356,6 +3356,7 @@ NOTE LIBERE 34
   Self Numbers (Numeri Colombiani)
   Somma dei quadrati/cubi delle cifre
   Somma dei fattori primi di (primo + reverse(primo))
+  Doppio fattoriale unico
 
 PROBLEMI SUI DADI
 =================

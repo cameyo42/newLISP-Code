@@ -4496,7 +4496,7 @@ La sequenza dei doppi fattoriali per i numeri pari n = 0, 2, 4, 6, 8, ... inizia
 
 1, 2, 8, 48, 384, 3840, 46080, 645120, ... (sequenza A000165 nell'OEIS)
 
-La sequenza dei doppi fattoriali per dispari n = 1, 3, 5, 7, 9, ... inizia come:
+La sequenza dei doppi fattoriali per i numeri dispari n = 1, 3, 5, 7, 9, ... inizia come:
 
 1, 3, 15, 105, 945, 10395, 135135, ... (sequenza A001147 nell'OEIS)
 
@@ -4517,9 +4517,23 @@ Numeri pari:
 (map double-fact (sequence 0 14 2))
 ;-> (1 2 8 48 384 3840 46080 645120)
 
+Sequenza OEIS A000165:
+Double factorial of even numbers: (2n)!! = 2^n*n!.
+  1, 2, 8, 48, 384, 3840, 46080, 645120, 10321920, 185794560, 3715891200,
+  81749606400, 1961990553600, 51011754393600, 1428329123020800,
+  42849873690624000, 1371195958099968000, 46620662575398912000,
+  1678343852714360832000, 63777066403145711616000, ...
+
 Numeri dispari:
 (map double-fact (sequence 1 13 2))
 ;-> (1 3 15 105 945 10395 135135)
+
+Sequenza OEIS A001147:
+Double factorial of odd numbers: a(n) = (2*n-1)!! = 1*3*5*...*(2*n-1).
+  1, 1, 3, 15, 105, 945, 10395, 135135, 2027025, 34459425, 654729075,
+  13749310575, 316234143225, 7905853580625, 213458046676875, 6190283353629375,
+  191898783962510625, 6332659870762850625, 221643095476699771875,
+  8200794532637891559375, 319830986772877770815625, ...
 
 
 --------------
