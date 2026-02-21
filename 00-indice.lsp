@@ -3354,6 +3354,8 @@ NOTE LIBERE 34
   Sequenza di Brougnard
   Sequenza multipla
   Self Numbers (Numeri Colombiani)
+  Somma dei quadrati/cubi delle cifre
+  Somma dei fattori primi di (primo + reverse(primo))
 
 PROBLEMI SUI DADI
 =================

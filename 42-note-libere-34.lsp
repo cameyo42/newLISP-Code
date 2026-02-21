@@ -8033,5 +8033,117 @@ Densità asintotica:
 ;-> 0.0977787
 ;-> 12311.072
 
+
+-----------------------------------
+Somma dei quadrati/cubi delle cifre
+-----------------------------------
+
+Definizione delle sequenze:
+
+  a(0) = 2
+  dato a(n) = xyz...w, dove x,y,z,...,z sono le cifre del numero
+       a(n+1) = x^2 + y^2 + z^2 + ... + w^2 (quadrati)
+       a(n+1) = x^3 + y^3 + z^3 + ... + w^3 (cubi)
+
+Sequenza OEIS A000216:
+Take sum of squares of digits of previous term, starting with 2.
+  2, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16,
+  37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89,
+  145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37, 58, 89, 145, 42, 20,
+  4, 16, 37, 58, 89, 145, 42, 20, 4, 16, 37, ...
+
+Sequenza OEIS A098870:
+Sum of the cubes of the digits of the previous term, starting with 2.
+  2, 8, 512, 134, 92, 737, 713, 371, 371, 371, 371, 371, 371, 371,...
+
+; Funzione che calcola la somma dei quadrati delle cifre di un numero
+(define (digit-square-sum num)
+  (let ((sum 0) (d 0))
+    (while (!= num 0)
+      (setq d (% num 10))
+      (++ sum (* d d))
+      (setq num (/ num 10)))
+    sum))
+
+; Funzione che calcola la somma dei cubi delle cifre di un numero
+(define (digit-cube-sum num)
+  (let ((sum 0) (d 0))
+    (while (!= num 0)
+      (setq d (% num 10))
+      (++ sum (* d d d))
+      (setq num (/ num 10)))
+    sum))
+
+(define (seq N type period)
+  (let ( (out '(2)) (k 1) (stop nil) )
+    (until (or stop (>= k N))
+      (if (= type 'square)
+          (setq next (digit-square-sum (out (- k 1))))
+          ;else
+          (setq next (digit-cube-sum (out (- k 1)))))
+      (if (and period (find next out)) (setq stop true))
+      (push next out -1)
+      (++ k))
+    out))
+
+Proviamo:
+
+(seq 50 'square)
+;-> (2 4 16 37 58 89 145 42 20 4 16 37 58 89 145 42 20 4 16
+;->  37 58 89 145 42 20 4 16 37 58 89 145 42 20 4 16 37 58 89
+;->  145 42 20 4 16 37 58 89 145 42 20 4)
+
+Cerchiamo il periodo:
+(seq 1000 'square true)
+;-> (2 4 16 37 58 89 145 42 20 4)
+
+(seq 15 'cube)
+;-> (2 8 512 134 92 737 713 371 371 371 371 371 371 371 371)
+371 è un punto fisso
+
+(seq 15 'cube true)
+;-> (2 8 512 134 92 737 713 371 371)
+
+
+---------------------------------------------------
+Somma dei fattori primi di (primo + reverse(primo))
+---------------------------------------------------
+
+Determinare i numeri primi p in cui risulta:
+
+  Somma[fattori-primi(p + reverse(p))] == p
+
+Nota: reverse(p) == emirp (il contrario di "prime")
+
+(define (reverse-digits num)
+"Reverse the digits of an integer"
+  (int (reverse (string num)) 0 10))
+
+(define (primes num-primes)
+"Generate a given number of prime numbers (starting from 2)"
+  (let ( (k 3) (tot 1) (out '(2)) )
+    (until (= tot num-primes)
+      (when (= 1 (length (factor k)))
+        (push k out -1)
+        (++ tot))
+      (++ k 2))
+    out))
+
+(define (find-p N)
+  (let ( (primi (primes N)) (out '()) )
+    (dolist (p primi)
+      (if (= (apply + (factor (+ p (reverse-digits p)))) p)
+        (push p out -1)))
+    out))
+
+Proviamo:
+
+(find-p 1000)
+;-> (17 107)
+
+(time (println (find-p 1e6)))
+;-> (17 107)
+;-> 20595.429
+
 ============================================================================
 
