@@ -8193,5 +8193,105 @@ Formula: a(n) = n!/a(n-1). - Vaclav Kotesovec, Sep 17 2012
 
 Nota: la funzione 'vk' è impraticabile per N > 1e4.
 
+
+--------------
+Primi di Carol
+--------------
+
+Sequenza OEIS A091516:
+Primes of the form 4^k - 2^(k+1) - 1.
+  7, 47, 223, 3967, 16127, 1046527, 16769023, 1073676287, 68718952447,
+  274876858367, 4398042316799, 1125899839733759, 18014398241046527,
+  1298074214633706835075030044377087, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+; Funzione che calcola i primi di Carol fino a un dato limite:
+(define (carol limit)
+  (let ( (out '()) (num 0) )
+    (for (k 1 limit)
+      (setq num (- (** 4 k) (** 2 (+ k 1)) 1))
+      (if (prime? num) (push (list k num) out -1)))
+    out))
+
+(carol 30)
+;-> ((2 7L) (3 47L) (4 223L) (6 3967L) (7 16127L) (10 1046527L)
+;->  (12 16769023L) (15 1073676287L) (18 68718952447L) (19 274876858367L)
+;->  (21 4398042316799L) (25 1125899839733759L) (27 18014398241046527L))
+
+
+------------------------------------------------------
+Numeri uguali alla somma dei divisori propri non primi
+------------------------------------------------------
+
+Sequenza OEIS A331805:
+Integers k such that k is equal to the sum of the nonprime proper divisors of k.
+  42, 1316, 131080256
+The number 37778715690312487141376 is also in the sequence.
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+; Funzione che calcola la sequenza fino a un dato limite:
+(define (seq limit)
+  (let ( (out '()) )
+    (for (k 1 limit)
+      ; calcola i divisori
+      (setq divisori (divisors k))
+      ; rimuove l'ultimo divisore (k)
+      (pop divisori -1)
+      ; elimina i divisori primi
+      (setq non-primi (clean prime? divisori))
+      ; verifica la condizione
+      (if (= k (apply + non-primi)) (push k out -1)))
+    out))
+
+Proviamo:
+
+(seq 1e4)
+;-> (42 1316)
+
+(time (println (seq 1e6)))
+;-> (42 1316)
+;-> 16494.922
+
 ============================================================================
 

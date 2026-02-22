@@ -3357,6 +3357,8 @@ NOTE LIBERE 34
   Somma dei quadrati/cubi delle cifre
   Somma dei fattori primi di (primo + reverse(primo))
   Doppio fattoriale unico
+  Primi di Carol
+  Numeri uguali alla somma dei divisori propri non primi
 
 PROBLEMI SUI DADI
 =================
@@ -3404,7 +3406,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (385 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (388 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
