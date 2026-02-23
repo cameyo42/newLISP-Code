@@ -3359,6 +3359,7 @@ NOTE LIBERE 34
   Doppio fattoriale unico
   Primi di Carol
   Numeri uguali alla somma dei divisori propri non primi
+  Pentagramma Magico
 
 PROBLEMI SUI DADI
 =================

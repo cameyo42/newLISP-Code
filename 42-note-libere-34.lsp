@@ -4,7 +4,7 @@
 
 ================
 
-    "Aiuto..." Anonimi
+  "Aiuto..." Anonimi
 
 ------------------------------------------------------
 Somme e differenze alternate del powerset di una lista
@@ -8292,6 +8292,366 @@ Proviamo:
 (time (println (seq 1e6)))
 ;-> (42 1316)
 ;-> 16494.922
+
+
+------------------
+Pentagramma Magico
+------------------
+
+Un "pentagramma" è una stella a 5 angoli con 5 punti di intersezione.
+(Vedi figura "pentagram.png" nella cartella "data".)
+Un "pentagramma magico" è qualsiasi pentagramma in cui la somma dei 4 punti di ciascuna delle 5 linee dia la stessa quantità.
+Un "pentagramma magico primo" richiede che tutti i numeri utilizzati nel "pentagramma magico" siano numeri primi diversi.
+
+Il pentagramma ha 10 posizioni totali:
+- 5 vertici esterni
+- 5 punti di intersezione interni
+Ogni linea del pentagramma contiene 4 punti e le linee sono 5.
+
+Il problema è assegnare 10 numeri distinti tali che 5 somme di 4 elementi siano tutte uguali.
+
+Numeriamo le posizioni (in modo arbitrario):
+
+         0
+    1  2   3  4
+      5     6
+         7
+     8       9
+
+Dalle linee del disegno otteniamo 5 vincoli del tipo:
+
+  L1 = (1 2 3 4)
+  L2 = (0 2 5 8)
+  L3 = (0 3 6 9)
+  L4 = (1 5 7 9)
+  L5 = (4 6 7 8)))
+
+Condizione magica: somma(L1) = somma(L2) = somma(L3) = somma(L4) = somma(L5)
+
+Algoritmo
+---------
+Dato un insieme di 10 numeri distinti:
+1) generiamo una permutazione
+2) assegniamo i valori ai 10 nodi
+3) calcoliamo la somma della prima linea (target)
+4) controlliamo le altre 4
+5) se tutte uguali --> soluzione
+
+Per ridurre la ricerca:
+- fissiamo la somma della prima linea
+- interrompiamo appena una somma non coincide
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(time (setq permutation (perm (sequence 0 9))))
+;-> 2934.306
+(length permutation)
+;-> 3628800
+(length (perm (sequence 0 8)))
+;-> 362880
+(length (perm (sequence 0 7)))
+;-> 40320
+
+; Funzione che prende una lista di numeri e verifica se possono creare un pentagramma magico
+(define (pentagram nums)
+  (let ((lines '((1 2 3 4)
+                  (0 2 5 8)
+                  (0 3 6 9)
+                  (1 5 7 9)
+                  (4 6 7 8)))
+        (permu '())
+        (trovato nil)
+        (stop nil)
+        (sol nil))
+    (dolist (permu (perm nums) trovato)
+      (setq target (apply + (select permu (lines 0))))
+      ;(print permu { } (select permu (lines 0)) { } target)
+      ;(read-line)
+      (setq stop nil)
+      (for (i 1 4 1 stop)
+        (if (!= target (apply + (select permu (lines i))))
+            (setq stop true)))
+      (when (not stop)
+        (setq sol permu)
+        (setq trovato true)))
+    sol))
+
+Proviamo:
+(setq pp '(5 7 11 13 17 19 23 31 41 43))
+(time (println (setq s (pentagram pp))))
+;-> (19 23 13 17 31 11 5 7 41 43)
+;-> 2779.679
+
+Check della soluzione:
+
+(define (check-sol lst)
+  (let ((lines '((1 2 3 4)
+                 (0 2 5 8)
+                 (0 3 6 9)
+                 (1 5 7 9)
+                 (4 6 7 8)))
+        (somme '()))
+        (for (l 0 4) (push (apply + (select lst (lines l))) somme))
+        (if (apply = somme)
+            (list true (somme 0))
+            (list nil somme))))
+
+(check-sol s)
+;-> (true 84)
+
+(time (println (pentagram '(1 2 3 4 5 6 7 8 9 10))))
+;-> nil
+;-> 4867.153
+
+Possiamo ottimizzare la funzione 'pentagram' facendo la seguente considerazione:
+Ogni numero compare esattamente in 2 linee.
+Quindi:
+  somma(5 linee) = 2 * somma(tutti i numeri)
+Se la somma magica è M:
+  5M = 2S
+  M = 2S/5
+M deve essere un numero
+Perciò la condizione necessaria è 2S/5 deve essere un numero intero:
+  (= 0 (% (* 2 (apply + nums)) 5))
+Se non vale, è impossibile.
+
+; Funzione che prende una lista di numeri e verifica se possono creare un pentagramma magico
+(define (pentagram nums)
+  ; definisce le 5 linee del pentagramma come quartine di indici
+  ; variabili di lavoro: permutazione corrente, flag trovato, flag stop, soluzione
+  (let ((lines '((1 2 3 4)
+                  (0 2 5 8)
+                  (0 3 6 9)
+                  (1 5 7 9)
+                  (4 6 7 8)))
+        (permu '())
+        (trovato nil)
+        (stop nil)
+        (sol nil))
+    ; condizione necessaria: ogni numero compare in 2 linee → 5*M = 2*S → (2*S) divisibile per 5
+    (when (= 0 (% (* 2 (apply + nums)) 5))
+      ; prova tutte le permutazioni dei numeri finché non trova una soluzione
+      (dolist (permu (perm nums) trovato)
+        ; calcola la somma target usando la prima linea
+        (setq target (apply + (select permu (lines 0))))
+        ; reset del flag di uscita anticipata
+        (setq stop nil)
+        ; controlla le altre 4 linee e interrompe appena una somma differisce
+        (for (i 1 4 1 stop)
+          (if (!= target (apply + (select permu (lines i))))
+              (setq stop true)))
+        ; se tutte le somme coincidono salva la soluzione e termina la ricerca
+        (when (not stop)
+          (setq sol permu)
+          (setq trovato true))))
+    ; restituisce la permutazione trovata oppure nil se non esiste
+    sol))
+
+Proviamo:
+
+(time (println (setq s (pentagram pp))))
+;-> (19 23 13 17 31 11 5 7 41 43)
+;-> 2704.285
+
+(setq aa '(1 2 3 4 5 6 7 8 9 10))
+(time (println (pentagram aa)))
+;-> nil
+;-> 5605.169
+
+L'ottimizzazione viene applicata solo quando i numeri della lista data NON possono formare un pentagramma magico:
+(setq bb '(2 3 5 7 9 11 13 17 19))
+(time (println (pentagram bb)))
+;-> nil
+;-> 0
+
+Possiamo ottimizzare ulteriormente la funzione sfruttando la simmetria del pentagramma.
+
+La figura è una classica 'magic star (5,4)', cioè una stella a 5 punte con simmetrie del gruppo diedrale D5:
+- 5 rotazioni
+- 5 riflessioni
+Quindi, ci sono 10 configurazioni equivalenti.
+Questo significa che ogni soluzione viene generata 10 volte dal brute-force.
+
+1) Eliminare le rotazioni (x5)
+Basta fissare un nodo qualsiasi (es. nodo 0)
+perché:
+- tutte le rotazioni spostano 0 altrove
+- fissandolo, rimane una sola rotazione valida
+In questo modo dobbiamo calcolare le permutazioni di 9 elementi (9!) (invece di 10!).
+
+(define (pentagram1 nums)
+  ; definisce le 5 linee del pentagramma come quartine di indici
+  ; variabili di lavoro: permutazione corrente, flag trovato, flag stop, soluzione
+  (let ((lines '((1 2 3 4)
+                  (0 2 5 8)
+                  (0 3 6 9)
+                  (1 5 7 9)
+                  (4 6 7 8)))
+        (permu '())
+        (trovato nil)
+        (stop nil)
+        (sol nil))
+    ; condizione necessaria: ogni numero compare in 2 linee → 5*M = 2*S → (2*S) divisibile per 5
+    (when (= 0 (% (* 2 (apply + nums)) 5))
+      ; fissa il valore del nodo 0 per eliminare le simmetrie di rotazione (riduce 10! → 9!)
+      (setq primo (nums 0))
+      ; lista dei restanti 9 elementi da permutare
+      (setq resto (rest nums))
+      ; prova tutte le permutazioni dei restanti numeri finché non trova una soluzione
+      (dolist (p (perm resto) trovato)
+        ; ricostruisce la permutazione completa inserendo il valore fisso in testa
+        (setq permu (cons primo p))
+        ; calcola la somma target usando la prima linea
+        (setq target (apply + (select permu (lines 0))))
+        ; reset del flag di uscita anticipata
+        (setq stop nil)
+        ; controlla le altre 4 linee e interrompe appena una somma differisce
+        (for (i 1 4 1 stop)
+          (if (!= target (apply + (select permu (lines i))))
+              (setq stop true)))
+        ; se tutte le somme coincidono salva la soluzione e termina la ricerca
+        (when (not stop)
+          (setq sol permu)
+          (setq trovato true))))
+    ; restituisce la permutazione trovata oppure nil se non esiste
+    sol))
+
+Proviamo:
+
+(setq pp '(5 7 11 13 17 19 23 31 41 43))
+(time (println (setq s (pentagram1 pp))))
+;-> (5 23 31 17 13 7 19 11 41 43)
+;-> 296.832
+
+2) Eliminare anche le riflessioni (x2)
+Ora restano ancora le simmetrie speculari.
+Se fissiamo solo il nodo 0, una soluzione e la sua immagine specchiata vengono entrmbe provate.
+Per rompere anche questo occorre fissare un secondo nodo NON simmetrico rispetto a 0 (es. nodo 1).
+In questo modo dobbiamo calcolare le permutazioni di 8 elementi (8!) (invece di 10!).
+
+Guardando lo schema della figura "pentagram.png":
+- 0 è il vertice superiore
+- 1 è il vertice esterno sinistro
+- non sono né opposti né simmetrici tra loro rispetto a uno specchio della figura
+Quindi:
+Fissando 0 eliminiamo le 5 rotazioni
+Fissando anche 1 eliminiamo anche le 2 riflessioni
+
+Perché 0 e 1 funzionano geometricamente?
+Le simmetrie del pentagramma:
+A) Rotazioni
+0 può andare in (0,1,4,8,9) --> fissarlo blocca tutto
+B) Riflessioni
+Con 0 fisso, lo specchio scambia:
+  1 <-> 4
+  2 <-> 3
+  5 <-> 6
+  8 <-> 9
+  7 resta fisso
+Quindi:
+- se 1 è fissato, la riflessione lo manderebbe in 4
+- ma 1 != 4, quindi la riflessione impossibile
+Simmetria distrutta.
+
+Regola generale
+Per rompere tutte le simmetrie:
+- fissare un nodo qualsiasi
+- fissare uno che non sia il suo speculare
+Nella figura:
+OK: (0,1) (0,2) (0,3)
+NO: (0,7)  ; centrale speculare
+NO: coppie opposte tipo (1,4)
+
+Importante: Fissiamo posizioni, non valori
+1) scegliamo due posizioni canoniche (0 e 1)
+2) per ogni coppia ordinata (a,b) con a<b
+3) permutiamo solo gli altri 8
+
+(define (pentagram2 nums)
+  ; definisce le 5 linee del pentagramma come quartine di indici
+  ; variabili di lavoro: permutazione corrente, flag trovato, flag stop, soluzione
+  (let ((lines '((1 2 3 4)
+                 (0 2 5 8)
+                 (0 3 6 9)
+                 (1 5 7 9)
+                 (4 6 7 8)))
+        (permu '())
+        (trovato nil)
+        (stop nil)
+        (sol nil))
+    ; condizione necessaria: ogni numero compare in 2 linee → 5*M = 2*S → (2*S) divisibile per 5
+    (when (= 0 (% (* 2 (apply + nums)) 5))
+      ; sceglie tutte le coppie ordinate per i nodi 0 e 1 (rompe riflessione con a<b)
+      (for (i 0 (- (length nums) 2) 1 trovato)
+        (for (j (+ i 1) (- (length nums) 1) 1 trovato)
+          (setq primo (nums i))
+          (setq secondo (nums j))
+          ; rimuove i due valori scelti
+          (setq resto (difference nums (list primo secondo)))
+          ; permuta solo gli altri 8 (8! invece di 10!)
+          (dolist (p (perm resto) trovato)
+            (setq permu (append (list primo secondo) p))
+            ; calcola la somma target usando la prima linea
+            (setq target (apply + (select permu (lines 0))))
+            (setq stop nil)
+            ; controlla le altre 4 linee e interrompe appena una somma differisce
+            (for (k 1 4 1 stop)
+              (if (!= target (apply + (select permu (lines k))))
+                  (setq stop true)))
+            ; se tutte le somme coincidono salva la soluzione e termina la ricerca
+            (when (not stop)
+              (setq sol permu)
+              (setq trovato true))))))
+    ; restituisce la permutazione trovata oppure nil se non esiste
+    sol))
+
+Proviamo:
+
+(setq pp '(5 7 11 13 17 19 23 31 41 43))
+(time (println (pentagram2 pp)))
+;-> (5 11 41 19 13 7 17 23 31 43)
+;-> 79.027
+(check-sol (pentagram2 pp))
+;-> (true 84)
+
+La soluzione che ottiamo ora:
+  (5 11 41 19 13 7 17 23 31 43)
+è semplicemente una rotazione/riflessione della precedente:
+  (19 23 13 17 31 11 5 7 41 43)
+quindi tutto coerente: siamo nella stessa classe di soluzione.
+
+(setq nn '(14009 13921 13933 13963 13999 13967 13913 13997 13907 13931))
+(time (println (setq sol (pentagram1 nn))))
+;-> (14009 13921 13933 13963 13999 13967 13913 13997 13907 13931)
+;-> 312.401
+(check-sol sol)
+;-> (true 55816)
+
+(time (println (setq sol (pentagram2 nn))))
+;-> (14009 13921 13933 13963 13999 13967 13913 13997 13907 13931)
+;-> 43.644
+(check-sol sol)
+;-> (true 55816)
 
 ============================================================================
 

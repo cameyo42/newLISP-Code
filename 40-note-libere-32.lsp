@@ -4,8 +4,8 @@
 
 ================
 
-    "Cuius rei demonstrationem mirabilem sane detexi
-     hanc marginis exiguitas non caperet." Pierre de Fermat
+  "Cuius rei demonstrationem mirabilem sane detexi
+   hanc marginis exiguitas non caperet." Pierre de Fermat
 
 -----------------------------------
 Somma dei numeri che non dividono N

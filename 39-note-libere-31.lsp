@@ -4,8 +4,8 @@
 
 ================
 
-    "L'ora del coglione passa per tutti"
-    "No escaping from dumbass moment"
+  "L'ora del coglione passa per tutti"
+  "No escaping from dumbass moment"
 
 ----------------------------------------
 Inversioni crescenti dei numeri naturali
