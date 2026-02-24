@@ -3361,6 +3361,12 @@ NOTE LIBERE 34
   Numeri uguali alla somma dei divisori propri non primi
   Pentagramma Magico
 
+NOTE LIBERE 35
+==============
+  Massima differenza tra elementi successivi ordinati
+  e^(PI*sqrt(163))
+  Sequenze di interi concatenati
+
 PROBLEMI SUI DADI
 =================
   Problemi 1,..,80

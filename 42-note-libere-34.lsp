@@ -3424,7 +3424,7 @@ Lungo un viale rettilineo ci sono panchine P e lampioni L:
   *---*---*---*---*---*---*---*---*---*-
   0   1   2   3   4   5   6   7   8   9
 
-Ogni lampione fa luce fino ad una distanza r (raggio) a destra e a sinistra).
+Ogni lampione fa luce fino ad una distanza r (raggio) a destra e a sinistra.
 Determinare il valore minimo di r affinchè tutte le panchine siano illuminate almeno da un lampione.
 
 Versione 1
