@@ -10366,6 +10366,22 @@ La soluzione è immediata.
 PERSISTENZA DI UN NUMERO
 ------------------------
 
+Sequenza OEIS A031286:
+Additive persistence: number of summations of digits needed to obtain a single digit (the additive digital root).
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1,
+  1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2,
+  2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2,
+  2, 2, 2, ...
+
+Sequenza OEIS A031346:
+Multiplicative persistence: number of iterations of "multiply digits" needed to reach a number < 10.
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 1, 1, 1, 2, 2, 2, 2, 3,
+  2, 3, 1, 1, 2, 2, 2, 3, 2, 3, 2, 3, 1, 1, 2, 2, 2, 2, 3, 2, 3, 3, 1, 1,
+  2, 2, 3, 3, 2, 4, 3, 3, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 2, 3, 3, 3,
+  3, 3, 3, 2,...
+
 La persistenza di un numero descrive il numero di operazioni che si devono applicare ad un intero per raggiungere un punto fisso, ad esempio fino a quando successive operazioni non cambieranno più il numero.
 Generalmente, questo termine viene riferito alla persistenza additiva o moltiplicativa di un intero, che indica quante volte bisogna sostituire un numero con la somma o con la moltiplicazione delle sue cifre fino a quando si raggiunge un numero con una sola cifra. La cifra finale che si ottiene viene chiamata Multiplicative Digital Root o Additive Digital Root del numero intero iniziale.
 

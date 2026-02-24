@@ -312,5 +312,210 @@ oppure:
 ;->  97531246810L 1197531246810L 119753124681012L 13119753124681012L
 ;->  1311975312468101214L 151311975312468101214L)
 
+
+------------------------------------------------------
+Numero di zeri nei numeri da 1 a 111...1 (n + 1 cifre)
+------------------------------------------------------
+
+Sequenza OEIS A014925:
+Number of zeros in numbers 1 to 111...1 (n+1 digits).
+  1, 21, 321, 4321, 54321, 654321, 7654321, 87654321, 987654321,
+  10987654321, 120987654321, 1320987654321, 14320987654321,
+  154320987654321, 1654320987654321, 17654320987654321,
+  187654320987654321, 1987654320987654321, 20987654320987654321,
+  220987654320987654321
+
+Esempio:
+  a(1) --> zeri tra 1 e 11   --> 1
+  a(2) --> zeri tra 1 e 111  --> 21
+  a(3) --> zeri tra 1 e 1111 --> 4321
+
+Formula:
+  a(1) = 1
+  a(n) = n*10^(n-1) + a(n-1), per n > 1
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (seq num)
+  (let (out '(1L))
+  (for (n 2 num)
+  ;(print n { } (* n (** 10 (- n 1)))) (read-line)
+    (push (+ (out -1) (* n (** 10 (- n 1)))) out -1))
+  out))
+
+(seq 15)
+;-> (1L 21L 321L 4321L 54321L 654321L 7654321L 87654321L 987654321L
+;->  10987654321L 120987654321L 1320987654321L 14320987654321L
+;->  154320987654321L 1654320987654321L)
+
+
+--------------------------------
+Palprimo1*Palprimo2 = Palindromo
+--------------------------------
+
+Trovare, fino ad un dato N, i numeri palindromi che sono il prodotto di due primi palindromi (anche non distinti).
+
+Esempi:
+ 3*3= 9
+ 5*11 = 55
+ 7*11 = 77
+ 11*3 = 33
+ 101*3 = 303
+ 131*3 = 393
+ 151*11 = 1661
+
+Sequenza OEIS A046328:
+Palindromes with exactly 2 prime factors (counted with multiplicity).
+  4, 6, 9, 22, 33, 55, 77, 111, 121, 141, 161, 202, 262, 303, 323, 393,
+  454, 505, 515, 535, 545, 565, 626, 707, 717, 737, 767, 818, 838, 878,
+  898, 939, 949, 959, 979, 989, 1111, 1441, 1661, 1991, 3113, 3223, 3443,
+  3883, 7117, 7447, 7997, 9119, 9229, 9449, 10001, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (palindromo? num) (= (string num) (reverse (string num))))
+
+(define (palprimi N)
+  (letn ( (out '()) 
+          (lst (primes-to N))
+          (len (length lst)) )
+    (for (i 0 (- len 1))
+      (for (j i (- len 1))
+        (setq a (lst i))
+        (setq b (lst j))
+        (if (palindromo? (* a b))
+          (push (list (* a b) a b) out -1))))
+    ; generiamo molti palindromi > N,
+    ; ma quelli ordinati e corretti sono solo quelli fino a N
+    (filter (fn(x) (<= x N)) (sort (map first out)))))
+
+Proviamo:
+
+(palprimi 1000)
+;-> (4 6 9 22 33 55 77 111 121 141 161 202 262 303 323 393 454 505 515 535 545 565 626
+;->  707 717 737 767 818 838 878 898 939 949 959 979 989)
+
+(time (println (palprimi 10001)))
+;-> (4 6 9 22 33 55 77 111 121 141 161 202 262 303 323 393
+;->  454 505 515 535 545 565 626 707 717 737 767 818 838 878
+;->  898 939 949 959 979 989 1111 1441 1661 1991 3113 3223 3443
+;->  3883 7117 7447 7997 9119 9229 9449 10001)
+;-> 1741.462
+
+
+----------------------------
+Persistenza dei numeri primi
+----------------------------
+
+Definiamo la "persistenza additiva" di un numero come i passaggi prima che il numero collassi a una singola cifra (addizione di cifre).
+Definiamo la "persistenza moltiplicativa" di un numero come i passaggi prima che il numero collassi a una singola cifra (moltiplicazione di cifre).
+
+Esempi:
+La persistenza additiva di 679 vale 3.
+679 -> 6+7+9=21 -> (2+1) = 3
+679 -> 21 -> 3 (2 passaggi)
+
+La persistenza moltiplicativa di 679 vale 6.
+679 -> (6*7*9)=378 -> (3*7*8)=168 -> (1*6*8)=48 -> (4*2)=32 -> (3*2)=6.
+679 -> 378 -> 168 -> 48 -> 32 -> 6 (5 passaggi).
+
+Vedi "Persistenza di un numero" su "Rosetta code".
+
+Sequenza OEIS A107450:
+Additive persistence of the prime numbers.
+  0, 0, 0, 0, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 2,
+  2, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 1, 1,
+  2, 2, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2,
+  2, 2, 3, 2, 2, 3, 1, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1,
+  2, 1, 2, 2, ...
+
+Sequenza OEIS A129985:
+Multiplicative persistence of the prime numbers.
+  0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 3, 2, 3, 1, 2, 1, 2, 3, 2, 3,
+  3, 1, 1, 1, 1, 1, 2, 1, 2, 3, 3, 1, 3, 2, 2, 2, 3, 1, 1, 3, 3, 2, 1, 2,
+  3, 3, 2, 3, 1, 2, 2, 3, 2, 2, 4, 2, 3, 3, 1, 1, 1, 2, 1, 3, 3, 2, 3, 3,
+  3, 3, 4, 3, 3, 4, 1, 1, 3, 1, 2, 3, 2, 3, 3, 2, 2, 3, 4, 3, 3, 3, 3, 1,
+  1, 2, 2, 2, ...
+
+(define (pers-add n)
+"Calculate the additive persistence of an integer"
+  (let (out 0)
+    (while (> n 9)
+      (setq n (digit-sum n))
+      (++ out)
+    )
+    out))
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10)))
+    out))
+
+(pers-add 679)
+;-> 2
+(define (pers-mul n)
+"Calculate the multiplicative persistence of an integer"
+  (let (out 0)
+    (while (> n 9)
+      (setq n (digit-prod n))
+      (++ out))
+    out))
+
+(define (digit-prod num)
+"Calculate the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10))
+        )
+    out)))
+
+(pers-mul 679)
+;-> 5
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (seq-add N)
+  (map pers-add (primes-to N)))
+
+(seq-add 100)
+;-> (0 0 0 0 1 1 1 2 1 2 1 2 1 1 2 1 2 1 2 1 2 2 2 2 2)
+
+(define (seq-mul N)
+  (map pers-mul (primes-to N)))
+
+(seq-mul 100)
+;-> (0 0 0 0 1 1 1 1 1 2 1 2 1 2 3 2 3 1 2 1 2 3 2 3 3)
+
 ============================================================================
 

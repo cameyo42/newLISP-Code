@@ -3366,6 +3366,9 @@ NOTE LIBERE 35
   Massima differenza tra elementi successivi ordinati
   e^(PI*sqrt(163))
   Sequenze di interi concatenati
+  Numero di zeri nei numeri da 1 a 111...1 (n + 1 cifre)
+  Palprimo1*Palprimo2 = Palindromo
+  Persistenza dei numeri primi
 
 PROBLEMI SUI DADI
 =================
