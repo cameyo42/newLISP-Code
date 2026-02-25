@@ -636,7 +636,6 @@ Hai spostato il blocco.
 
 Step 3 — ricostruisci gli 1 persi
 
-
   (r ^ x)
 mostra i bit cambiati.
 Poi:
@@ -773,7 +772,7 @@ Proviamo:
 ;-> (3 5 6 9 10 12 17 18 20 24)
 ;-> 24
 
-Comuqnue questa funzione è molto lenta per grandi valori di n e/o k:
+Comunque questa funzione è molto lenta per grandi valori di n e/o k:
 
 (time (println (trova 250 2)))
 ;-> (...)
@@ -852,6 +851,155 @@ Proviamo:
 ;-> (3 5 6 9)
 (trova-list 10 2)
 ;-> (3 5 6 9 10 12 17 18 20 24)
+
+
+---------------------------
+La funzione "doz" o "monus"
+---------------------------
+
+La funzione "doz" (Difference Or Zero) è definita nel modo seguente:
+
+           | (x - y), se x >= y
+  doz(x) = |
+           | 0, se x < y
+
+I matematici la chiamano "monus".
+È chiamata anche "sottrazione di prima elementare" perchè il risultato è 0 se si cerca di togliere troppo.
+
+In C:
+
+  doz(x,y) = (x - y) & -(x >= y)
+
+Funzionamento:
+- (x >= y) -> 1 oppure 0
+- negazione -> -1 (= tutti 1 in complemento a due) oppure 0
+- AND -> tiene il risultato oppure lo azzera
+
+In newLISP:
+In questo caso non possiamo applicare il bit-trick direttamente perchè in newLISP tutti i valori sono 'true' tranne 'nil', quindi anche '0' vale true.
+
+(define (doz x y)
+  (& (- x y) (- (if (> x y) 1 0))))
+
+(doz 10 7)
+;-> 3
+(doz 7 10)
+;-> 0
+(doz 7 7)
+;-> 0
+
+oppure
+
+(define (doz x y)
+  (if (> x y) (- x y) 0))
+
+(doz 10 7)
+;-> 3
+(doz 7 10)
+;-> 0
+(doz 7 7)
+;-> 0
+
+oppure
+
+(define (doz x y)
+  (max 0 (- x y)))
+
+oppure
+
+(define (doz x y)
+  (- x (min x y)))
+
+Con la funzione "doz" è possibile implementare le funzioni max e min:
+
+  max(x,y) = y + doz(x,y)
+  min(x,y) = x - doz(x,y)
+
+
+-------------------------------
+Alternanza tra due o tre valori
+-------------------------------
+
+Abbiamo una variabile 'x' che può avere solo due valori possibili 'a' e 'b'.
+Scrivere una funzione che assegna ad 'x' alternativamente 'a' e 'b' (flip value).
+In altri termini:
+  func(a) --> b
+  func(b) --> a
+
+Primo metodo:
+
+In C:
+
+if (x == a) x = b;
+else x = a;
+
+oppure
+
+x = x == a ? b : a;
+
+In newLISP:
+
+(define (flip1 x)
+  (if (= x a)
+      (setq x b)
+      ;else
+      (setq x a)))
+
+(setq a 1)
+(setq b 0)
+(setq x a)
+;-> 1
+(setq x (flip1 x))
+;-> 0
+(setq x (flip1 x))
+;-> 1
+(setq x (flip1 x))
+;-> 0
+
+Secondo metodo:
+
+(define (flip2 x) (+ a b (- x)))
+(setq a 3)
+(setq b 5)
+(setq x a)
+;-> 3
+(setq x (flip2 x))
+;-> 5
+(setq x (flip2 x))
+;-> 3
+(setq x (flip2 x))
+;-> 5
+
+Adesso abbiamo tre costanti arbitrarie ma distinte 'a', 'b' e 'c' e cerchiamo una funzione 'func' che soddisfi:
+
+  func(a) = b
+  func(b) = c
+  func(c) = a
+
+In C:
+
+if (x == a) x = b;
+else if (x == b) x = c;
+else x = a;
+
+In newLISP:
+
+(define (flip3)
+  (if (= x a) b
+      (= x b) c
+      a))
+
+(setq a 1 b 2 c 3)
+(setq x a)
+;-> 1
+(setq x (flip3 x))
+;-> 2
+(setq x (flip3 x))
+;-> 3
+(setq x (flip3 x))
+;-> 1
+(setq x (flip3 x))
+;-> 2
 
 ============================================================================
 

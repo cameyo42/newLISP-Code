@@ -2,7 +2,7 @@
 ============================================================================
  Note su newLISP
  Problem Solving e Matematica ricreativa con newLISP
- © copyright 2019-2025 Massimo Corinaldesi aka cameyo
+ © copyright 2019-2026 Massimo Corinaldesi aka cameyo
  MIT-0 License
 ============================================================================
 
@@ -3371,10 +3371,12 @@ NOTE LIBERE 35
   Persistenza dei numeri primi
   Gosper's Hack
   N-esimo numero con lo stesso numero di bit
+  La funzione "doz" o "monus"
+  Alternanza tra due o tre valori
 
 PROBLEMI SUI DADI
 =================
-  Problemi 1,..,80
+  Problemi 1,...,80
 
 APPENDICI
 =========
@@ -3433,7 +3435,7 @@ LICENSE
 
 "MIT No Attribution" (MIT-0)
 
-Copyright (c) 2019-2025 Massimo Corinaldesi aka cameyo
+Copyright (c) 2019-2026 Massimo Corinaldesi aka cameyo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
