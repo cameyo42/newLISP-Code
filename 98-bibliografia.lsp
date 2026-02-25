@@ -68,6 +68,8 @@
   "Algorithms", Sedgewick-Wayne, 4ed, 2011
 
   "Teoria e Progetto di Algoritmi Fondamentali", Ausiello-Marchetti-Spaccamela-Protasi, 1985
+  
+  "Hacker’s Delight", 2ed, Henry S. Warren, Jr., 2013
 
   "Primality Testing in Polynomial Time", Martin Dietzfelbinger, 2004
 

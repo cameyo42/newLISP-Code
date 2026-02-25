@@ -3369,6 +3369,8 @@ NOTE LIBERE 35
   Numero di zeri nei numeri da 1 a 111...1 (n + 1 cifre)
   Palprimo1*Palprimo2 = Palindromo
   Persistenza dei numeri primi
+  Gosper's Hack
+  N-esimo numero con lo stesso numero di bit
 
 PROBLEMI SUI DADI
 =================

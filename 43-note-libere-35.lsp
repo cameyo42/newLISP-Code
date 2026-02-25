@@ -517,5 +517,341 @@ Multiplicative persistence of the prime numbers.
 (seq-mul 100)
 ;-> (0 0 0 0 1 1 1 1 1 2 1 2 1 2 3 2 3 1 2 1 2 3 2 3 3)
 
+
+-------------
+Gosper's Hack
+-------------
+
+Il trucco noto come Gosper's hack (o snoob: next higher number with same number of bits) permette, dato un numero x, di trovare il primo numero maggiore di x che ha lo stesso numero di bit a 1.
+Il nome viene da Bill Gosper, storico membro del gruppo AI del MIT negli anni '70 (ambiente 'hacker culture', insieme a Knuth, Sussman, ecc.).
+Comparve in un laboratorio e poi fu diffuso in 'Hacker's Delight' e negli archivi Usenet.
+
+L'obiettivo matematico è molto semplice:
+dato un intero x con k bit a 1:
+
+  k = popcount(x)
+
+trovare il minimo y > x tale che
+
+  popcount(y) = k
+
+cioè il successivo sottoinsieme k-combinazione rappresentato in binario.
+
+Infatti:
+
+  numero binario <-> sottoinsieme
+  bit 1 <-> elemento scelto
+
+Esempio con k = 3:
+
+00111 = (0 1 2)
+01011 = (0 1 3)
+01101 = (0 2 3)
+01110 = (1 2 3)
+10011 ...
+
+Esempi: 
+
+k = 2
+  "11"   = 3
+  "101"  = 5
+  "110"  = 6
+  "1001" = 9
+  ...
+
+k = 3
+  "111"    = 7
+  "1011"   = 11
+  "1101"   = 13
+  "1110"   = 14
+  "10011"  = 19
+  "10101"  = 21
+  "10110"  = 22
+  "11001"  = 25
+  "11010"  = 26
+  "11100"  = 28
+  "100011" = 35
+  ...
+
+Quindi il problema è puramente combinatorio: stiamo enumerando le combinazioni in ordine lessicografico.
+
+Matematicamente
+---------------
+
+Scriviamo x in forma generale:
+
+... A 0 1 1 1 0 0 0
+          ^^^ ^^^
+        blocco1 zeri finali
+
+Sia:
+- c = numero di zeri finali
+- r = numero di 1 subito a sinistra
+
+Pattern:
+
+... 0 1^r 0^c
+
+
+Il prossimo numero con lo stesso numero di 1 si ottiene:
+1. spostando a sinistra il primo "01" -> "10"
+2. mettendo tutti gli 1 rimasti il più a destra possibile
+cioè:
+
+... 1 0 0^(?) 1^(r-1)
+
+Questo garantisce:
+- stesso numero di 1
+- incremento minimo ⇒ successivo in ordine
+
+Traduzione bitwise
+------------------
+
+Step 1 — isola il bit meno significativo
+
+  c = x & (-x)
+Proprietà aritmetica in complemento a due:
+  -x = ~x + 1
+Quindi 'x & (-x)' estrae la potenza di due più bassa (rightmost 1).
+
+Esempio:
+  x      = 1011000
+  -x     = 0101000 (in two's complement)
+  AND    = 0001000
+Serve per sapere di quanto "salire".
+
+Step 2 — aggiungi c
+
+  r = x + c
+Questo:
+- trasforma il primo "01" in "10"
+- azzera tutti i bit a destra
+
+Esempio:
+  1011000
+  +001000
+  -------
+  1100000
+Hai spostato il blocco.
+
+Step 3 — ricostruisci gli 1 persi
+
+
+  (r ^ x)
+mostra i bit cambiati.
+Poi:
+  ((r ^ x) >> 2) / c
+conta quanti 1 devono tornare a destra e li compatta.
+Infine:
+  | r
+li reinserisce.
+
+Risultato finale:
+  (((r ^ x) >> 2) / c) | r
+
+Formula completa
+----------------
+  c = x & -x
+  r = x + c
+  next = (((r ^ x) >> 2) / c) | r
+
+Costo:
+- tempo costante O(1)
+- solo operazioni bitwise e aritmetiche
+
+Interpretazione combinatoria
+----------------------------
+
+In realtà stiamo facendo:
+- enumerazione delle combinazioni
+- in ordine co-lessicografico
+- senza generare tutte le 2^n stringhe
+
+Quindi:
+brute force -> O(valore numerico)
+Gosper -> O(numero di combinazioni)
+
+
+Versione C:
+
+unsigned snoob(unsigned x) {
+  unsigned smallest, ripple, ones;
+                               // x = xxx0 1111 0000
+  smallest = x & -x;           // 0000 0001 0000
+  ripple = x + smallest;       // xxx1 0000 0000
+  ones = x ^ ripple;           // 0001 1111 0000
+  ones = (ones >> 2)/smallest; // 0000 0000 0111
+  return ripple | ones;        // xxx1 0000 0111
+}
+
+Versione newLISP:
+
+(define (snoob x)
+  (letn (c (& x (- x))
+         r (+ x c))
+    (| r (/ (>> (^ r x) 2) c))))
+
+Proviamo:
+
+(snoob 3)
+;-> 5
+(snoob 7)
+;-> 11
+
+Negli anni '70:
+- niente memoria
+- niente CPU veloci
+Generare combinazioni senza allocazioni era cruciale.
+Questo trucco permetteva di scorrere tutte le k-subset usando 'solo registri', senza liste o ricorsione.
+Per questo è diventato un classico "hacker trick".
+
+
+------------------------------------------
+N-esimo numero con lo stesso numero di bit
+------------------------------------------
+
+Dati due numeri interi positivi n e k, scrivere una funzione che restituisce un numero intero che rappresenta l'n-esimo numero intero positivo più piccolo che ha esattamente k unità (1) nella sua rappresentazione binaria.
+
+Esempi:
+
+n = 3, k = 2 --> soluzione = 6
+  "11"   = 3
+  "101"  = 5
+  "110"  = 6 --> soluione
+  "1001" = 9
+  ...
+
+n = 5, k = 3 --> soluzione = 19
+  "111"    = 7
+  "1011"   = 11
+  "1101"   = 13
+  "1110"   = 14
+  "10011"  = 19 --> soluzione
+  "10101"  = 21
+  "10110"  = 22
+  "11001"  = 25
+  "11010"  = 26
+  "11100"  = 28
+  "100011" = 35
+  ...
+
+Algoritmo 1: Brute-force
+------------------------
+
+Ciclo da 1 all'n-esimo numero che ha k bit a 1 nella sua rappresentazione binaria
+
+(define (pop-count1 num)
+"Calculate the number of 1 in binary value of an integer number"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter))
+    counter))
+
+(define (trova n k)
+  (let ( (out '())
+         (conta 0)
+         (num 1) )
+    (while (< conta n)
+      (when (= (pop-count1 num) k)
+        (push num out -1)
+        (++ conta))
+      (++ num))
+    (println out)
+    ;(println (length out))
+    (last out)))
+
+Proviamo:
+
+(trova 3 1)
+;-> (1 2 4)
+;-> 4
+(trova 4 2)
+;-> (3 5 6 9)
+;-> 9
+(trova 10 2)
+;-> (3 5 6 9 10 12 17 18 20 24)
+;-> 24
+
+Comuqnue questa funzione è molto lenta per grandi valori di n e/o k:
+
+(time (println (trova 250 2)))
+;-> (...)
+;-> 4456448
+;-> 6047.534
+
+Algoritmo 2: Gosper's Hack
+--------------------------
+
+Il collo di bottiglia è evidente: stiamo testando tutti i numeri e calcolando ogni volta la 'pop-count'.
+Quindi la complessità è circa O(valore-risultato).
+Un idea migliore è quella di generare direttamente i numeri con k bit a 1.
+Partiamo dal numero più piccolo che ha esattamente 'k' bit a 1:
+
+  111...1   (k volte 1)
+
+cioè,
+
+  (2^k - 1)
+
+Poi possiamo generare il successivo numero con lo stesso numero di bit a 1 usando il trucco bitwise noto come 'Gosper's hack'.
+
+Gosper Hack
+-----------
+  c = x & -x
+  r = x + c
+  x = (((r ^ x) >> 2) / c) | r
+
+Questo produce il prossimo intero (x) con lo stesso popcount in tempo costante.
+
+Quindi la complessità diventa O(n) (invece di scandire milioni di numeri).
+
+(define (next-comb x)
+  (letn (c (& x (- x))
+         r (+ x c))
+    (| r (/ (>> (^ r x) 2) c))))
+
+(define (trova-fast n k)
+  (letn (x (- (<< 1 k) 1)
+         i 1)
+    (while (< i n)
+      (setq x (next-comb x))
+      (++ i))
+    x))
+
+Proviamo:
+
+(trova-fast 3 1)
+;-> 4
+(trova-fast 4 2)
+;-> 9
+(trova-fast 10 2)
+;-> 24
+
+(time (println (trova-fast 250 2)))
+
+ora è praticamente istantaneo.
+
+Se vogliamo la lista completa:
+
+(define (trova-list n k)
+  (letn ( (x (- (<< 1 k) 1))
+          (out (list x))
+          (i 1) )
+    (while (< i n)
+      (setq x (next-comb x))
+      (push x out -1)
+      (++ i))
+    out))
+
+Proviamo:
+
+(trova-list 3 1)
+;-> (1 2 4)
+(trova-list 4 2)
+;-> (3 5 6 9)
+(trova-list 10 2)
+;-> (3 5 6 9 10 12 17 18 20 24)
+
 ============================================================================
 
