@@ -1001,5 +1001,329 @@ In newLISP:
 (setq x (flip3 x))
 ;-> 2
 
+
+-------------------------------------------------
+Prime potenze di 2 minore e maggiore di un intero
+-------------------------------------------------
+
+Dato un numero intero positivo 'x' determinare la prima potenza di 2 minore di 'x' e la prima potenza di 2 maggiore di 'x'.
+Se 'x' è una potenza di 2 restituire 'x'.
+
+Esempi:
+  x = 5
+  Prima potenza di 2 minore = 4
+  Prima potenza di 2 maggiore = 8
+
+  x = 31
+  Prima potenza di 2 minore = 16
+  Prima potenza di 2 maggiore = 31
+
+  x = 64  --> 64 (è una potenza di 2)
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+Prima potenza di 2 minore o uguale a x
+--------------------------------------
+
+In C:
+unsigned flp(unsigned x) {
+  x = x | (x >> 1);
+  x = x | (x >> 2);
+  x = x | (x >> 4);
+  x = x | (x >> 8);
+  x = x | (x >> 16);
+  x = x | (x >> 32);
+  return x - (x >> 1);
+}
+
+(define (flp x)
+  (setq x (| x (>> x 1)))
+  (setq x (| x (>> x 2)))
+  (setq x (| x (>> x 4)))
+  (setq x (| x (>> x 8)))
+  (setq x (| x (>> x 16)))
+  (setq x (| x (>> x 32)))
+  (- x (>> x 1)))
+
+(flp 16385)
+;-> 16384
+(flp 16384)
+;-> 16384
+(flp 16383)
+;-> 8192
+
+Valore massimo:
+(- (** 2 63) 1)
+;-> 9223372036854775807
+MAX-INT = 9223372036854775807
+(flp 9223372036854775807)
+;-> 4611686018427387904
+(** 2 62)
+;-> 4611686018427387904L
+
+Prima potenza di 2 maggiore o uguale a x
+----------------------------------------
+In C:
+unsigned clp(unsigned x) {
+  x = x − 1;
+  x = x | (x >> 1);
+  x = x | (x >> 2);
+  x = x | (x >> 4);
+  x = x | (x >> 8);
+  x = x | (x >> 16);
+  x = x | (x >> 32);
+  return x + 1;
+}
+
+(define (clp x)
+  (setq x (- x 1))
+  (setq x (| x (>> x 1)))
+  (setq x (| x (>> x 2)))
+  (setq x (| x (>> x 4)))
+  (setq x (| x (>> x 8)))
+  (setq x (| x (>> x 16)))
+  (setq x (| x (>> x 32)))
+  (+ x 1))
+
+(clp 16385)
+;-> 32768
+(clp 16384)
+;-> 16384
+(clp 16383)
+;-> 16384
+
+Valore massimo:
+(** 2 61)
+;-> 2305843009213693952
+(clp (+ 2305843009213693952 1))
+;-> 4611686018427387904
+(clp 2305843009213693952)
+;-> 2305843009213693952
+
+
+-------------
+Cocktail sort
+-------------
+
+Il Cocktail Sort o (Shaker Sort) è una variante di Bubble Sort.
+L'algoritmo Bubble Sort attraversa sempre gli elementi da sinistra e sposta l'elemento più grande nella posizione corretta nella prima iterazione, il secondo più grande nella seconda iterazione e così via.
+Cocktail Sort attraversa una data lista in entrambe le direzioni alternativamente.
+Cocktail Sort non esegue iterazioni non necessarie, rendendolo efficiente per array di grandi dimensioni.
+
+Algoritmo:
+Ogni iterazione dell'algoritmo è suddivisa in 2 fasi:
+La prima fase esegue un ciclo nella lista da sinistra a destra, proprio come Bubble Sort.
+Durante il ciclo, gli elementi adiacenti vengono confrontati e, se il valore a sinistra è maggiore del valore a destra, i valori vengono scambiati.
+Alla fine della prima iterazione, il numero più grande si troverà alla fine della lista.
+La seconda fase esegue un ciclo nella lista in direzione opposta, partendo dall'elemento immediatamente precedente a quello ordinato più di recente e tornando all'inizio della lista.
+Anche in questo caso, gli elementi adiacenti vengono confrontati e, se necessario, scambiati.
+
+1) Iniziare dall'inizio ddella lista e confrontare ogni coppia adiacente di elementi. Se sono nell'ordine sbagliato, scambiarli.
+2) Continuare a iterare nella lista in questo modo fino a raggiungere la fine della lista.
+3) Quindi, spostarsi nella direzione opposta dalla fine della lista all'inizio, confrontando ogni coppia adiacente di elementi e scambiandoli se necessario.
+4) Continuare a iterare nella lista in questo modo fino a raggiungere l'inizio della lista.
+5) Ripetere i passaggi da 1 a 4 fino a quando la lista non è completamente ordinata.
+
+; Funzione che ordina una lista di numeri in modo ascendente (cocktail sort)
+(define (cocktail lst)
+  (local len arr start end swapped continue)
+    (setq len (length lst))
+    ; usiamo un vettore che è molto più veloce di una lista
+    ; quando indicizziamo gli elementi
+    (setq arr (array len lst))
+    (setq start 0)
+    (setq end (- len 1))
+    (setq swapped true)
+    (setq continue true)
+    (while (and swapped continue)
+          ; reimposta a 'nil' il flag 'swapped' all'ingresso del ciclo, 
+          ; perché potrebbe essere 'true' da un'iterazione precedente.
+          (setq swapped false)
+          ; ciclo da sinistra a destra come il bubble sort
+          (for (i start (- end 1))
+            (when (> (arr i) (arr (+ i 1)))
+                (swap (arr i) (arr (+ i 1)))
+                (setq swapped true)))
+          (cond
+              ; se non viene spostato nulla, la lista è ordinata
+              ; e fermiamo il ciclo ponendo 'continue' a nil
+              ((nil? swapped) (setq continue nil))
+              (true
+                ; altrimenti, reimposta il flag 'swapped' in modo che
+                ; possa essere utilizzato nella fase successiva
+                (setq swapped nil)
+                ; sposta indietro di uno il punto finale
+                ; perchè l'elemento alla fine è nella sua posizione corretta              
+                (-- end)
+                ; ciclo da destra a sinistra,
+                ; eseguendo lo stesso confronto della fase precedente
+                (for (i (- end 1) start -1)
+                  (when (> (arr i) (arr (+ i 1)))
+                      (swap (arr i) (arr (+ i 1)))
+                      (setq swapped true)))
+                ; aumentare il punto di partenza,
+                ; perchè l'ultima fase ha spostato il successivo
+                ; numero più piccolo nella sua posizione corretta.                    
+                (++ start))))
+    ; restituisce la lista ordinata (conversione dal vettore 'arr')
+    (array-list arr))
+
+Proviamo:
+
+(cocktail '(2 4 1 3 5 4 21 7 8 9))
+;-> (1 2 3 4 4 5 7 8 9 21)
+
+(setq a (rand 10 100))
+(cocktail a)
+;-> (0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 3 3 3 3 3 3
+;->  4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6
+;->  7 7 7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 8 8 8 9 9 9 9 9 9 9 9 9 9 9 9 9 9)
+
+Test di velocità:
+
+(setq lst (rand 1000 10000))
+(time (cocktail lst))
+;-> 5111.574
+(time (sort lst))
+;-> 0
+
+Test di correttezza:
+
+(for (i 1 100)
+  (setq lst (rand 100 1000))
+  (if (!= (cocktail lst) (sort lst))
+      (println "Errore: " lst)))
+;-> nil
+
+
+----------------------------
+Verificare le ottimizzazioni
+----------------------------
+
+Alle volte, quello che sembra una modifica che ottimizza una funzione, in realtà ne peggiora le prestazioni.
+Prendiamo il prodotto di due numeri complessi.
+
+  c1 = (a + bi)
+  c2 = (c + di)
+
+Il loro prodotto vale:
+
+  m = c1 * c2 = (a + bi )(c + di) = (ac – bd) + (ad + bc)i
+
+Per eseguire il calcolo del prodotto dobbiamo eseguire 4 moltiplicazioni e 3 somme/sottrazioni:
+Moltiplicazioni: a*c, a*d, b*c, e b*d.
+
+Con passaggi algebrici possiamo ridurre il calcolo a 3 moltiplicazioni e 6 somme/sottrazioni:
+
+  p = ac
+  q = bd
+  r = (a + b)(c + d)
+  m = (p - q) + (r - p - q)i
+
+Moltiplicazioni: a*c, b*d, e (a + b)*(c + d)
+
+Quindi risulta:
+
+(ac – bd) + (ad + bc)i = (p - q) + (r - p - q)i
+
+In teoria la moltiplicazione che abbiamo evitato dovrebbe essere più importante delle 3 somme/sottrazioni che abbiamo introdotto.
+Cioè, dovrebbe essere più veloce fare 3 somme/sottrazioni che una sola moltiplicazione.
+Vediamo se questo è vero:
+
+; Funzione con 4* e 3+-
+(define (m1 a b c d)
+  (list (sub (mul a c) (mul b d)))
+        (add (mul a d) (mul b c)))
+
+; Funzione con 3* e 6+-
+(define (m2 a b c d)
+  (list (sub (mul a c) (mul b d)))
+        (sub (mul (add a b) (add c d)) (mul a c) (mul b d)))
+
+(m1 11 77 21 42)
+;-> 2079
+(m2 11 77 21 42)
+;-> 2079
+
+Test di correttezza:
+
+(for (i 1 1000)
+  (setq t (rand 1000 4))
+  (if (!= (apply m1 t) (apply m2 t))
+      (println t)))
+;-> nil
+
+Test di velocità:
+
+Numeri interi (int):
+(time (m1 35 6 940 197) 1e6)
+;-> 230.181
+(time (m2 35 6 940 197) 1e6)
+;-> 280.207
+
+Numeri a virgola mobile (float):
+(time (m1 284.188360240485 920.92654194769 769.2190313425 839.167455061) 1e6)
+;-> 234.254
+(time (m2 284.188360240485 920.92654194769 769.2190313425 839.167455061) 1e6)
+;-> 288.763
+
+Quindi la nostra 'ottimizzazione' ha peggiorato la velocità della funzione.
+
+
+--------------------------
+Numeri naturali senza zeri
+--------------------------
+
+Dato un numero intero positivo N, generiamo la sequenza dei numeri da 1 a N eliminando tutte le cifre che valgono 0.
+Quanti numeri 'diversi' abbiamo generato?
+Scrivere una funzione che conta i numeri univoci (tutti diversi tra loro).
+
+Sequenza OEIS A052386:
+Number of integers from 1 to 10^n-1 that lack 0 as a digit.
+  0, 9, 90, 819, 7380, 66429, 597870, 5380839, 48427560, 435848049,
+  3922632450, 35303692059, 317733228540, 2859599056869, 25736391511830,
+  231627523606479, 2084647712458320, 18761829412124889,
+  168856464709124010, 1519708182382116099, 13677373641439044900, ...
+
+Primo metodo: brute force
+-------------------------
+
+(define (diversi1 N)
+  (if (= N 1) 1
+  ;else
+  (let ( (out '()) (seq (sequence 1 N)) )
+    (dolist (el seq)
+      (push (int (replace "0" (string el) "") 0 10) out -1))
+    (length (unique out)))))
+
+(diversi1 200)
+;-> 171
+
+Per creare la sequenza:
+
+(map diversi1 '(1 10 1e2 1e3 1e4 1e5 1e6))
+;-> (1 9 90 819 7380 66429 597870)
+
+Secondo metodo: formula
+-----------------------
+
+  a(n) = 9*a(n-1) + 9
+
+(define (diversi2 num)
+  (let (out '(0L))
+  (for (i 1 (- num 1))
+    (push (+ 9L (* 9L (out -1))) out -1))))
+
+(diversi2 21)
+;-> (0L 9L 90L 819L 7380L 66429L 597870L 5380839L 48427560L 435848049L
+;->  3922632450L 35303692059L 317733228540L 2859599056869L 25736391511830L
+;->  231627523606479L 2084647712458320L 18761829412124889L
+;->  168856464709124010L 1519708182382116099L 13677373641439044900L)
+
 ============================================================================
 

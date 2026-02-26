@@ -3373,6 +3373,10 @@ NOTE LIBERE 35
   N-esimo numero con lo stesso numero di bit
   La funzione "doz" o "monus"
   Alternanza tra due o tre valori
+  Prime potenze di 2 minore e maggiore di un intero
+  Cocktail sort
+  Verificare le ottimizzazioni
+  Numeri naturali senza zeri
 
 PROBLEMI SUI DADI
 =================
