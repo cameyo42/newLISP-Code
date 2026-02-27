@@ -173,6 +173,10 @@
 
   Videos about numbers and mathematics. Videos by Brady Haran since 2011.
   https://www.youtube.com/@numberphile
+  
+  The Prime Puzzles and Problem Connection by Carlos Rivera
+  Our main purpose is to create an anthology of the most interesting problems & puzzles explicitly related to primes.
+  https://www.primepuzzles.net/
 
 =============================================================================
 

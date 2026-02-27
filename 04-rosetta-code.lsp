@@ -4977,7 +4977,7 @@ oppure:
           (begin (setq out mid) (setq trovato true))
           (if (< (* mid mid) n)
             (begin (setq start (+ mid 1)) (setq out mid))
-            (begin (setq end (- mid 1))  (setq out mid)))
+            (begin (setq end (- mid 1))))
       )
     )
     out

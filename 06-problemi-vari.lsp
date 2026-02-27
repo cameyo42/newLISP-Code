@@ -1716,6 +1716,9 @@ Radice quadrata intera di un numero intero (2^64 bit)
 (isqrt 4)
 ;-> 2
 
+(isqrt 6)
+;-> 2
+
 (isqrt 18)
 ;-> 4
 

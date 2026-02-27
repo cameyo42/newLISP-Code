@@ -1325,5 +1325,126 @@ Secondo metodo: formula
 ;->  231627523606479L 2084647712458320L 18761829412124889L
 ;->  168856464709124010L 1519708182382116099L 13677373641439044900L)
 
+
+-----------------------------------
+Radice quadrata intera di un intero
+-----------------------------------
+
+La seguente funzione calcola la radice quadrata intera (floor(sqrt(x))) usando la ricerca binaria.
+
+(define (isqrt x)
+  ; a = limite inferiore della ricerca
+  ; b = limite superiore stimato come 2^(bits(x)/2)
+  (letn (a 1
+         b (<< 1 (>> (length (bits x)) 1)))
+    ; ciclo finché l'intervallo di ricerca è valido
+    (do-while (>= b a)
+      ; punto medio dell'intervallo (a + b) / 2
+      (setq m (>> (+ a b) 1))
+      ; se m^2 supera x, la radice è più piccola -> sposta b a sinistra
+      (if (> (* m m) x)
+          (setq b (- m 1))
+          ; altrimenti la radice è >= m -> sposta a a destra
+          (setq a (+ m 1))))
+    ; quando il ciclo termina, a ha superato la soluzione di 1
+    ; quindi la radice intera è a-1
+    (- a 1)))
+
+Proviamo:
+
+(isqrt 15)
+;-> 3
+(isqrt 18)
+;-> 4
+
+(isqrt 4294836225)
+;-> 65535
+(* 65535 65535)
+;-> 4294836225
+
+(* 65536 65536)
+;-> 4294967296
+(isqrt 4294967296)
+;-> nil
+(isqrt 4294967295)
+;-> 65535
+
+Quindi il valore massimo gestibile dalla funzione vale 4294967295.
+
+Algoritmo
+---------
+1) Stima iniziale del limite superiore
+   (bits x) produce la rappresentazione binaria di 'x'.
+   (length (bits x)) è il numero di bit ~ log2(x)+1.
+   Se 'x' ha k bit, allora sqrt(x) ha circa k/2 bit.
+   Quindi:
+   2^(k/2) è un ottimo limite superiore.
+   Questo è ciò che fa:
+   (>> (length (bits x)) 1)   ; k/2
+   (<< 1 ...)                 ; 2^(k/2)
+   Risultato: 'b' è appena sopra sqrt(x).
+   Funziona per 32/64/128 bit senza costanti (ma la primitiva >> funziona solo per i numeri int64).
+
+2) Ricerca binaria
+   Manteniamo l'intervallo [a, b].
+   Ogni iterazione:
+   - calcola il medio 'm'
+   - confronta 'm*m' con 'x'
+   Se (m*m > x) -> radice più piccola -> riduci 'b'
+   Altrimenti -> radice più grande -> aumenta 'a'
+   Complessità: O(log x)
+3. Terminazione
+   Quando (a > b), l’ultimo valore valido è (a-1), che è:
+   il massimo 'm' tale che (m*m <= x).
+
+In pratica è una 'binary search' su [1, 2^(bits/2)].
+
+
+-------------------------------------------------
+Ordinamento di interi in base al binario riflesso
+-------------------------------------------------
+
+La riflessione binaria di un numero intero positivo è definita come il numero ottenuto invertendo l'ordine delle sue cifre binarie (ignorando gli zeri iniziali) e interpretando il numero binario risultante come decimale.
+Data una lista di interi positivi, ordinare la lista in ordine crescente in base alla riflessione binaria di ciascun elemento.
+Se due numeri diversi hanno la stessa riflessione binaria, il numero originale più piccolo dovrebbe apparire per primo.
+
+Esempio: lista = (3 6 5 8)
+(setq base '(3 6 5 8))
+(setq lst base)
+; numeri in binario
+(setq lst (map bits lst))
+("11" "110" "101" "1000")
+; numeri in binario riflessi
+(setq lst (map reverse lst))
+; numeri decimali dei binari riflessi
+(setq lst (map (fn(x) (int x 0 2)) lst))
+;-> (3 3 5 1)
+; associazione tra coppie:
+; (numero-della-lista-data numero-decimale-del-binario-riflesso)
+(setq coppie (map list lst base))
+;-> ((3 3) (3 6) (5 5) (1 8))
+; ordinamento crescente delle coppie
+(sort coppie)
+;-> ((1 8) (3 3) (3 6) (5 5))
+; estrazione della lista ordinara (primo elemento di ogni coppia)
+(map last coppie)
+;-> (8 3 6 5)
+
+; Funzione che ordina una la lista in ordine crescente in base alla riflessione binaria di ciascun elemento
+(define (ordina lst)
+  (map last 
+      (sort (map list (map (fn(x) (int (reverse (bits x)) 0 2)) lst) lst))))
+
+Proviamo:
+
+(ordina '(3 6 5 8))
+;-> (8 3 6 5)
+
+(ordina (sequence 1 10))
+;-> (1 2 4 8 3 6 5 10 7 9)
+
+Vedi anche "Ordinare una lista con un'altra lista" su "Note libere 5".
+Vedi anche "Ordinare una lista con un'altra lista (variante)" su "Note libere 19".
+
 ============================================================================
 

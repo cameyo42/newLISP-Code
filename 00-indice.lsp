@@ -3377,6 +3377,8 @@ NOTE LIBERE 35
   Cocktail sort
   Verificare le ottimizzazioni
   Numeri naturali senza zeri
+  Radice quadrata intera di un intero
+  Ordinamento di interi in base al binario riflesso
 
 PROBLEMI SUI DADI
 =================

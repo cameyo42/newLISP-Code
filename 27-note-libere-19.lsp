@@ -3611,6 +3611,7 @@ Ordinare una lista con un'altra lista (variante)
 ------------------------------------------------
 
 Vedi anche "Ordinare una lista con un'altra lista" su "Note libere 5".
+Vedi anche "Ordinamento di interi in base al binario riflesso" su "Note libere 35".
 
 Data una lista di nomi di colori univoci, ordinarli nell'ordine in cui appaiono per primi nella lista seguente:
 
