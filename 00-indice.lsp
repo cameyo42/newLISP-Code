@@ -3379,6 +3379,8 @@ NOTE LIBERE 35
   Numeri naturali senza zeri
   Radice quadrata intera di un intero
   Ordinamento di interi in base al binario riflesso
+  Puzzle 1256: Another sequence of primes
+  Trimming list
 
 PROBLEMI SUI DADI
 =================

@@ -1446,5 +1446,233 @@ Proviamo:
 Vedi anche "Ordinare una lista con un'altra lista" su "Note libere 5".
 Vedi anche "Ordinare una lista con un'altra lista (variante)" su "Note libere 19".
 
+
+---------------------------------------
+Puzzle 1256: Another sequence of primes
+---------------------------------------
+
+https://www.primepuzzles.net/puzzles/puzz_1256.htm
+
+Consider the following process: take a prime k>9, sum the digits, repeat the sum deleting the first addendum and adding the previous sum and so on.
+Sequence lists the minimum prime k that produces a run of exactly n consecutive primes.
+
+The first 12 terms:
+  0   [13]
+  1   [23, 5]
+  2   [101, 2, 3]
+  3   [11, 2, 3, 5]
+  4   [317, 11, 19, 37, 67]
+  5   [331, 7, 11, 19, 37, 67]
+  6   [599, 23, 41, 73, 137, 251, 461]
+  7   [35311, 13, 23, 41, 79, 157, 313, 613]
+  8   [3393311, 23, 43, 83, 157, 311, 619, 1237, 2473]
+  9   [3533377, 31, 59, 113, 223, 443, 883, 1759, 3511, 6991]
+  10  [1933537, 31, 61, 113, 223, 443, 881, 1759, 3511, 6991, 13921]
+  11  [331733953, 37, 71, 139, 277, 547, 1091, 2179, 4349, 8693, 17383, 34729]
+
+Example: 
+  Seq(5) = 331 because:
+  1) 3 + 3 + 1 = 7, prime;
+  2) 3 + 1  + 7 = 11, prime;
+  3) 1 + 7 + 11 = 19, prime;
+  4) 7 + 11 + 19 = 37, prime;
+  5) 11 + 19 + 37 = 67, prime, and 19 + 37 + 67 = 123 composite.
+
+Sequenza OEIS A391445:
+Take a prime p>9, sum the digits, repeat the sum deleting the first addendum and adding the previous sum and so on.
+Sequence lists the minimum prime p that produces a run of exactly n consecutive primes.
+  13, 23, 101, 11, 317, 331, 599, 35311, 3393311, 3533377, 1933537,
+  331733953, 59393313971, 7117113335317, 171355597959913, 799353955313539,
+  395377199771711897, 33793799795555374999, 33793799795555379859, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+; Funzione che simula il processo per un numero primo
+(define (count-primes num)
+    (let ( (digits (int-list num))
+           (stop nil)
+           (conta 0) )
+      (until stop
+        ; somma le cifre
+        (setq somma (apply + digits))
+        ; Se la somma è un numero primo...
+        (if (prime? somma)
+          (begin
+            ; aumenta il conteggio
+            (++ conta)
+            ; toglie il primo addendo (nella lista delle cifre)
+            (pop digits)
+            ;(println digits)
+            ; aggiunge la somma come ultimo addendo
+            (push somma digits -1))
+          ;else
+          ; altrimenti ferma il ciclo
+          (setq stop true)))
+      conta))
+
+(count-primes 317)
+;-> 4
+
+; Funzione che elimina i nil alla fine di una lista/vettore
+(define (trim-trailing-nil lst)
+  (letn (ultimo -1)
+    (for (i 0 (- (length lst) 1))
+      (if (lst i) (set 'ultimo i)))
+    (if (= ultimo -1) '() (slice lst 0 (+ ultimo 1)))))
+
+; Funzione che genera la sequenza (dato un valore massimo per i numeri primi):
+(define (seq N)
+  (local (out primi contatore conta)
+    (setq out '())
+    (setq primi (primes-to N))
+    (println "...")
+    (setq primi (slice primi 4))
+    (setq contatore (array (+ (length primi) 1) '(nil)))
+    ;(println primi)
+    (dolist (p primi)
+      (setq conta (count-primes p))
+      ; aggiorna (contatore conta) se (contatore conta) vale 'nil'
+      ; (così ogni cella del vettore può essere aggiornata solo una volta)
+      (if-not (contatore conta) (setf (contatore conta) p)))
+    ; rimuove i valori 'nil' alla fine del contatore
+    (trim-trailing-nil contatore)))
+
+Proviamo:
+
+(time (println (seq 1e4)))
+;-> (13 23 101 11 317 331 599)
+;-> 15.586
+(time (println (seq 1e6)))
+;-> (13 23 101 11 317 331 599 35311)
+;-> 275.717
+(time (println (seq 1e7)))
+;-> (13 23 101 11 317 331 599 35311 3393311 3533377 1933537)
+;-> 2849.178
+(time (println (seq 1e8)))
+;-> (13 23 101 11 317 331 599 35311 3393311 3533377 1933537)
+;-> 29308.478
+
+Non provare '(time (println (seq 1e9))).
+La funzione 'primes-to' può calcolare i primi fino 1e8, poi crasha il sistema (32 Gb RAM).
+
+
+-------------
+Trimming list
+-------------
+
+Data una lista del tipo:
+  (nil nil 1 4 2 nil 4 nil nil 6 7 nil nil nil nil)
+
+Come togliere tutti i 'nil' all'inizio della lista (trim-leading)?
+Risultato: (1 4 2 nil 4 nil nil 6 7 nil nil nil nil)
+
+Come togliere tutti i 'nil' in fondo alla lista (trim-trailing)?
+Risultato: (nil nil 1 4 2 nil 4 nil nil 6 7)
+
+Algoritmo (trime-leading)
+  Scorrere la lista da sinistra
+  Al primo valore uguale ad un dato valore salvare l'indice e fermare il ciclo
+  Usare slice per restituire la lista partendo dall'indice trovato
+  Se non trova nulla -> lista vuota
+
+Logica:
+- leading -> dolist diretto + slice
+- trailing -> reverse + dolist + reverse
+(il reverse costa, ma spesso resta molto veloce in pratica)
+
+(define (trim-trailing value lst)
+  ; indice del primo elemento valido trovato (nella lista invertita)
+  ; stop serve per terminare dolist appena trovato
+  ; rev è la lista invertita per poter tagliare i valori finali
+  (let ((primo -1) (stop nil) (rev (reverse lst)))
+    ; scorre la lista invertita
+    ; $idx è l'indice corrente fornito da dolist
+    ; appena trova un elemento diverso da value salva l'indice e ferma il ciclo
+    (dolist (el rev stop)
+      (if-not (= el value) (set 'primo $idx 'stop true)))
+    ; se non è stato trovato nulla restituisce lista vuota
+    ; altrimenti taglia e reinverte per ripristinare l'ordine originale
+    (if (= primo -1) '() (reverse (slice rev primo)))))
+
+(define (trim-leading value lst)
+  ; indice del primo elemento valido
+  ; stop per uscita anticipata
+  (let ((primo -1) (stop nil))
+    ; scorre la lista da sinistra
+    ; al primo elemento diverso da value memorizza la posizione e termina
+    (dolist (el lst stop)
+      (if-not (= el value) (set 'primo $idx 'stop true)))
+    ; se tutti gli elementi sono value restituisce lista vuota
+    ; altrimenti fa slice dalla prima posizione valida
+    (if (= primo -1) '() (slice lst primo))))
+
+Proviamo:
+
+(setq a '(nil nil 1 4 2 nil 4 nil nil 6 7 nil nil nil nil))
+(setq b '(0 0 1 4 2 0 4 0 0 6 7 0 0 0 0))
+
+(trim-leading nil a)
+;-> (1 4 2 nil 4 nil nil 6 7 nil nil nil nil)
+(trim-trailing nil a)
+;-> (nil nil 1 4 2 nil 4 nil nil 6 7)
+
+(trim-leading 0 b)
+;-> (1 4 2 0 4 0 0 6 7 0 0 0 0)
+(trim-trailing 0 b)
+;-> (0 0 1 4 2 0 4 0 0 6 7)
+
+Possiamo rendere le funzioni molto più veloci utilizzando 'find' per trovare direttamente il primo elemento diverso:
+
+(find 0 '(0 0 1 3 2 0 2) !=)
+;-> 2
+
+(define (trim-leading value lst)
+  ; 'find' trova l'indice del primo elemento diverso da value
+  ; 'slice' restituisce la lista a partire da quell'indice
+  (slice lst (find value lst !=)))
+
+(define (trim-trailing value lst)
+  ; inverte la lista per trasformare i trailing in leading
+  (let (rev (reverse lst))
+    ; 'find' trova il primo elemento diverso da value nella lista invertita
+    ; 'slice' rimuove i value iniziali
+    ; reverse finale ripristina l'ordine originale
+    (reverse (slice rev (find value rev !=)))))
+
+Proviamo: 
+
+(trim-leading nil a)
+;-> (1 4 2 nil 4 nil nil 6 7 nil nil nil nil)
+(trim-trailing nil a)
+;-> (nil nil 1 4 2 nil 4 nil nil 6 7)
+
+(trim-leading 0 b)
+;-> (1 4 2 0 4 0 0 6 7 0 0 0 0)
+(trim-trailing 0 b)
+;-> (0 0 1 4 2 0 4 0 0 6 7)
+
 ============================================================================
 
