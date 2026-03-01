@@ -3381,6 +3381,8 @@ NOTE LIBERE 35
   Ordinamento di interi in base al binario riflesso
   Puzzle 1256: Another sequence of primes
   Trimming list
+  Numeri composti uguali alla somma dei fattori primi
+  Costante di Cahen
 
 PROBLEMI SUI DADI
 =================

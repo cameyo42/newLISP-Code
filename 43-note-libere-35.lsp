@@ -1674,5 +1674,246 @@ Proviamo:
 (trim-trailing 0 b)
 ;-> (0 0 1 4 2 0 4 0 0 6 7)
 
+
+---------------------------------------------------
+Numeri composti uguali alla somma dei fattori primi
+---------------------------------------------------
+
+Il numero 39 è un numero composto uguale alla somma dei suoi fattori primi:
+
+  39 = 3 * 13 = 3 + 5 + 7 + 11 + 13
+
+Sequenza OEIS A055233:
+Composite numbers equal to the sum of the primes from their smallest prime factor to their largest prime factor.
+  10, 39, 155, 371, 2935561623745, 454539357304421
+
+Esempio: 10 = 2*5 = 2 + 3 + 5;
+
+(define (primes-range n1 n2)
+"Generate all prime numbers in the interval [n1..n2]"
+  (if (> n1 n2) (swap n1 n2))
+  (cond ((= n2 1) '())
+        ((= n2 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ n2 1))))
+            ; initialize lst
+            (if (> n1 2) (setq lst '()))
+            (for (x 3 n2 2)
+              (when (not (arr x))
+                ; push current primes (x) only if > n1
+                (if (>= x n1) (push x lst -1))
+                (for (y (* x x) n2 (* 2 x) (> y n2))
+                  (setf (arr y) true)))) lst))))
+
+(primes-range 3 11)
+;-> (3 5 7 11)
+
+(primes-range 3 5)
+;-> (3 5)
+
+(define (curio num)
+  (let (fat (factor num)) ; lista dei fattori del numero
+    ; quando il numero non è primo...
+    (when (> (length fat) 1)
+      ; somma dei fattori: (apply + (primes-range (fat 0) (fat -1)))
+      ; se num == somma dei fattori --> true (altrimenti nil)
+      (if (= num (apply + (primes-range (fat 0) (fat -1)))) true nil))))
+
+Proviamo:
+
+(curio 39)
+;-> true
+
+(time (println (filter curio (sequence 1 1e4))))
+;-> (10 39 155 371)
+;-> 420.187
+
+(time (println (filter curio (sequence 1 1e5))))
+;-> (10 39 155 371)
+;-> 34514.342
+
+Vediamo un altro metodo: calcoliamo i numeri primi tutti in una volta.
+
+Il limite superiore per il calcolo dei numeri primi fino a N vale (N/2 + 1).
+Infatti serve:
+  max(fattore primo) <= N/2
+perché:
+  se (p > N/2) --> (2p > N) --> impossibile
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (seq N)
+  (letn ( (out '())
+          ; limite superiore per il calcolo dei numeri primi fino a N
+          (primi (primes-to (+ (/ N 2)) 1))
+          (len (length primi))
+          (revprimi (reverse (copy primi)))
+          (fat nil) (i1 nil) (i2 nil) )
+    (for (num 2 N)
+      ; lista dei fattori del numero
+      (setq fat (factor num))
+      ; quando il numero non è primo...
+      (when (> (length fat) 1)
+        ; ricerca dell'indice del primo fattore nella lista dei primi
+        (setq i1 (find (fat 0) primi))
+        ; ricerca dell'indice dell'ultimo fattore nella lista dei primi inversa
+        (setq i2 (find (fat -1) revprimi))
+        ; indice dell'ultimo fattore nella lista dei primi
+        (setq i2 (- len i2 1))
+        ; somma dei fattori: (apply + (slice primi i1 (- i2 i1 (- 1))))
+        ; se num == somma dei fattori,
+        ; allora inserisce num nella lista di output
+        (if (= num (apply + (slice primi i1 (- i2 i1 (- 1)))))
+            (push num out -1))))
+    out))
+
+Proviamo:
+
+(time (println (seq 1e4)))
+;-> (10 39 155 371)
+;-> 69.224
+
+(time (println (seq 1e5)))
+;-> (10 39 155 371)
+;-> 4824.975
+
+Questa funzione è 7 volte più veloce, ma non possiamo calcolare i termini successivi della sequenza in un tempo ragionevole:
+  2935561623745, 454539357304421
+Però possiamo verificarli:
+
+(time (println (curio 2935561623745)))
+;-> true
+;-> 1582.673
+
+(time (println (curio 454539357304421)))
+;-> true
+;-> 24493.207
+
+
+-----------------
+Costante di Cahen
+-----------------
+
+La costante di Cahen è un numero trascendente che vale:
+
+  C = 0.64341054628833802618225430775756...
+
+Un numero trascendente è un numero reale o complesso che non è soluzione di alcuna equazione polinomiale a coefficienti interi (o razionali).
+
+La costante viene definita come la somma di una serie infinita di frazioni unitarie, con segni alterni (partendo da +):
+
+  C = 1 - 1/2 + 1/6 - 1/42 + 1/1806 - 1/3263442 + ...
+
+Come si calcolano i denominatori?
+I denominatori si determinano tramite i valori della sequenza di Sylvester.
+
+Sequenza di Sylvester
+Ogni termine è il prodotto di tutti i termini precedenti +1.
+Definizione:
+  s(0) = 2
+  s(1) = s(0) + 1 = 3
+  s(2) = s(0)*s(1) + 1 = 7
+  s(3) = s(0)*s(1)*s(2) + 1 = 43
+  ...
+  s(n+1) = s(n)^2 - s(n) + 1
+
+(define (sylvester N)
+  (let (out '(2L))
+    (setq cur 2L)
+    (for (i 1 (- N 1))
+      (setq cur (+ (* cur cur) (- cur) 1L))
+      (push cur out -1))))
+
+(sylvester 9)
+;-> (2L 3L 7L 43L 1807L 3263443L 10650056950807L
+;->  113423713055421844361000443L
+;->  12864938683278671740537145998360961546653259485195807L)
+
+La formula per i denominatori vale:
+
+  denominatore(k) = sylvester(k) - 1
+
+(setq denominatori (map -- (sylvester 9)))
+;-> (1L 2L 6L 42L 1806L 3263442L 10650056950806L
+;->  113423713055421844361000442L
+;->  12864938683278671740537145998360961546653259485195806L)
+
+Sommando a coppie i valori della costante otteniamo un risutato interessante:
+
+  C = (1 - 1/2) + (1/6 - 1/42) + (1/1806 - 1/3263442) + ...
+
+Sommiamo le coppie:
+
+  1 - 1/2 = 1/2
+  1/6 - 1/42 = 1/7
+  1/1806 - 1/3263442 = 1/1807
+
+Quindi possiamo scrivere:
+
+  C = 1/2 + 1/7 + 1/1807 + ...
+
+In questo caso i denominatori dei termini sono i valori con indice pari della sequenza di Sylvester:
+
+  s(0) = 2, s(2) = 7, s(4) = 1807, ...
+
+Sequenza OEIS A129871:
+A variant of Sylvester's sequence: a(0)=1 and for n>0, a(n) = (a(0)*a(1)*...*a(n-1)) + 1.
+  1, 2, 3, 7, 43, 1807, 3263443, 10650056950807,
+  113423713055421844361000443,
+  12864938683278671740537145998360961546653259485195807, ...
+
+Scriviamo una funzione che calcola la costante di Cahen:
+
+(div 10650056950807)
+;-> 9.389621150563197e-014
+(div 113423713055421844361000443L)
+;-> 8.816498535111202e-027
+(div 12864938683278671740537145998360961546653259485195807L)
+;-> 7.773064641961799e-053
+
+(setq C 0.64341054628833802618225430775756)
+;-> 0.6434105462883381
+
+; Funzione che calcola la costante di Cahen
+; Restituisce una coppia di valori:
+; (C-calcolata  (C-vera - C-calcolata))
+(define (cahen N)
+  (let ( (C 0.6434105462883381) (sylv '()) (calc 0) )
+    (if (odd? N) (++ N)) ; solo valori pari per N
+    ; lista di elementi con indice pari della sequenza di sylvester
+    (setq sylv (select (sylvester N) (sequence 0 (- N 1) 2)))
+    (setq calc (apply add (map div sylv)))
+    (list calc (sub C calc))))
+
+Proviamo:
+
+(cahen 3)
+;-> (0.6428571428571428 0.000553403431195254) 
+2 cifre corrette: 0.64...
+
+(cahen 5)
+;-> (0.643410546288244 9.403589018575076e-014)
+12 cifre corrette: 0.643410546288...
+
+(cahen 7)
+;-> (0.6434105462883379 1.110223024625157e-016)
+14 cifre corrette: 0.64341054628833...
+
+(cahen 8)
+;-> (0.6434105462883379 1.110223024625157e-016)
+;-> (0.6434105462883379 1.110223024625157e-016)
+14 cifre corrette: 0.64341054628833...
+Abbiamo raggiunto il limite di precisione della funzione.
+
 ============================================================================
 
