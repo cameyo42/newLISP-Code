@@ -1274,6 +1274,21 @@ Numeri a virgola mobile (float):
 
 Quindi la nostra 'ottimizzazione' ha peggiorato la velocità della funzione.
 
+Vediamo un altro confronto:
+
+(setq a 11.7312)
+(setq b -122198565.39987233612)
+(setq c 565827.2760238)
+(define (plus) (add a b c))
+(define (mult) (mul a b))
+(define (mult1) (mul a b c))
+(time (plus) 1e7)
+;-> 464.078
+(time (mult) 1e7)
+;-> 426.364
+(time (mult1) 1e7)
+;-> 471.49
+
 
 --------------------------
 Numeri naturali senza zeri
@@ -1914,6 +1929,233 @@ Proviamo:
 ;-> (0.6434105462883379 1.110223024625157e-016)
 14 cifre corrette: 0.64341054628833...
 Abbiamo raggiunto il limite di precisione della funzione.
+
+
+------------------------------
+Trasformazione di numeri primi
+------------------------------
+
+Trovare i numeri primi P che rimangono primi quando si applica contemporaneamente la seguente serie di trasformazioni:
+
+a) tutte le cifre "1" si trasformano in cifre "3"
+b) tutte le cifre "3" si trasformano in cifre "7"
+c) tutte le cifre "7" si trasformano in cifre "9"
+d) tutte le cifre "9" si trasformano in cifre "1"
+e) le altre cifre (0, 2, 4, 5, 6 e 8) rimangono invariate (cifre "inattive")
+
+Dato un numero primo P, determinare tutti i numeri che si mantengono primi applicando continuamente le regole di trasformazione.
+
+Esempi:
+  numero primo = 19
+  prima trasformazione: 31
+  seconda trasformazione: 73
+  terza trasformazione: 97
+  quarta trasformazione: 19 (ciclo)
+  lista di numeri: (19 31 73 97)
+
+  numero primo = 131
+  prima trasformazione: 373
+  seconda trasformazione: 797
+  terza trasformazione: 919
+  quarta trasformazione: 131 (ciclo)
+  lista di numeri: (131 373 797 919)
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+; Funzione che calcola le liste di primi per ogni numero primo da 1 a N
+(define (carousel N)
+  (local (primi out cur-seq new-num stop cifre new-cifre cifra new-num)
+    ; lista delle soluzioni
+    (setq out '())
+    ; lista di primi
+    (setq primi (primes-to N))
+    ; ciclo per ogni primo...
+    (dolist (p primi)
+      ; lista di primi per il numero primo corrente
+      (setq cur-seq (list p))
+      ; nuovo numero
+      (setq new-num p)
+      ; flag per terminare il ciclo delle trasformazioni
+      (setq stop nil)
+      ; ciclo delle trasformazioni...
+      (until stop
+        ; converte il numero corrente in cifre
+        (setq cifre (int-list new-num))
+        ; Trasformazione del numero
+        (setq new-cifre '())
+        (dolist (c cifre)
+          (if (= c 1) (setq cifra 3)
+              (= c 3) (setq cifra 7)
+              (= c 7) (setq cifra 9)
+              (= c 9) (setq cifra 1)
+              (setq cifra c))
+          (push cifra new-cifre -1)
+        )
+        ; nuovo numero (numero corrente trasformato)
+        (setq new-num (list-int new-cifre))
+        ;(println "new-num: " new-num)
+        ; controlla se il nuovo numero è primo e se è stato già calcolato
+        (if (and (prime? new-num) (not (find new-num cur-seq)))
+            (push new-num cur-seq -1)
+            ; else
+            (setq stop true))
+      )
+      ; inserisce il risultato del numero primo corrente
+      ; nella lista delle soluzioni
+      (push cur-seq out -1))
+      out))
+
+Proviamo:
+
+(carousel 50)
+;-> ((2) (3 7) (5) (7) (11) (13 37 79) (17) (19 31 73 97) (23) (29)
+;->  (31 73 97 19) (37 79) (41 43 47) (43 47) (47))
+
+Vediamo quanto vale la massima lunghezza delle liste di primi:
+
+(apply max (map length (carousel 10000000)))
+;-> 4
+
+Vediamo la frequenza delle lunghezze delle liste di primi:
+
+(count '(1 2 3 4) (map length (carousel 100000)))
+;-> (7422 1349 485 336)
+
+
+-----------------------------------------
+Numeri con cifre in successione (+1 o -1)
+-----------------------------------------
+
+Esistono due tipi di numeri con cifre in successione:
+
+1) Successione ascendente: cifra(i) + 1 = cifra(i+1)
+
+Ordine delle cifre ascendenti:
+  0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 0 -> 1 ...
+
+Sequenza OEIS A059043:
+Numbers in which each digit is the (immediate) successor of the previous one (if it exists) and 0 is considered the successor of 9.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 23, 34, 45, 56, 67, 78, 89, 90, 123,
+  234, 345, 456, 567, 678, 789, 890, 901, 1234, 2345, 3456, 4567, 5678,
+  6789, 7890, 8901, 9012, 12345, 23456, 34567, 45678, 56789, 67890,
+  78901, 89012, 90123, 123456, 234567, 345678, 456789, ...
+
+2) Successione discendente: cifra(i) - 1 = cifra(i+1)
+
+Ordine delle cifre discendenti:
+  0 -> 9 -> 8 -> 7 -> 6 -> 5 -> 4 -> 3 -> 2 -> 1 -> 0 -> 9 ...
+
+Sequenza OEIS A158699:
+Start with 0, then add one to each single digit.
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 21, 32, 43, 54, 65, 76, 87, 98, 109,
+  210, 321, 432, 543, 654, 765, 876, 987, 1098, 2109, 3210, 4321, 5432,
+  6543, 7654, 8765, 9876, 10987, 21098, 32109, 43210, 54321, 65432, 76543,
+  87654, 98765, 109876, 210987, 321098, 432109, 543210, ...
+
+; Funzione che verifica se un numero ha tutte le cifre in successione ascendente (+1)
+(define (digit-up? num)
+  (if (< num 10) num
+  ;else
+  (let ( (len (length num))
+         (cifre (int-list num))
+         (stop nil) )
+    (for (k 0 (- len 2) 1 stop)
+      ; controllo coppie di cifre consecutive
+      (cond ((= (cifre k) 9)
+              (if-not (= (cifre (+ k 1)) 0) (setq stop true)))
+            (true  
+              (if-not (= (cifre k) (- (cifre (+ k 1)) 1)) (setq stop true)))))
+    (not stop))))
+
+; Funzione che verifica se un numero ha tutte le cifre in successione discendente (-1)
+(define (digit-down? num)
+  (if (< num 10) num
+  ;else
+  (let ( (len (length num))
+         (cifre (int-list num))
+         (stop nil) )
+    (for (k 0 (- len 2) 1 stop)
+      ; controllo coppie di cifre consecutive
+      (cond ((= (cifre k) 0)
+              (if-not (= (cifre (+ k 1)) 9) (setq stop true)))
+            (true  
+              (if-not (= (cifre k) (+ (cifre (+ k 1)) 1)) (setq stop true)))))
+    (not stop))))
+
+Proviamo:
+
+(filter digit-up? (sequence 0 456789))
+;-> (0 1 2 3 4 5 6 7 8 9 12 23 34 45 56 67 78 89 90 123
+;->  234 345 456 567 678 789 890 901 1234 2345 3456 4567 5678
+;->  6789 7890 8901 9012 12345 23456 34567 45678 56789 67890
+;->  78901 89012 90123 123456 234567 345678 456789)
+
+(filter digit-down? (sequence 0 543210))
+;-> (0 1 2 3 4 5 6 7 8 9 10 21 32 43 54 65 76 87 98 109
+;->  210 321 432 543 654 765 876 987 1098 2109 3210 4321 5432
+;->  6543 7654 8765 9876 10987 21098 32109 43210 54321 65432 76543
+;->  87654 98765 109876 210987 321098 432109 543210)
+
+Vediamo quali sono i numeri primi.
+
+Sequenza OEIS A006055:
+Primes with consecutive (ascending) digits.
+  2, 3, 5, 7, 23, 67, 89, 4567, 78901, 678901, 23456789, 45678901,
+  9012345678901, 789012345678901, 56789012345678901234567890123,
+  90123456789012345678901234567, 678901234567890123456789012345678901, ...
+
+Sequenza OEIS A120804:
+Primes with consecutive digits descending.
+  2, 3, 5, 7, 43, 109, 10987, 76543, 10987654321098765432109876543210987, 4321098765432109876543210987654321098765432109876543210987654321, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(filter prime? (filter digit-up? (sequence 0 456789)))
+;-> (2 3 5 7 23 67 89 4567 78901)
+
+(filter prime? (filter digit-down? (sequence 0 543210)))
+(2 3 5 7 43 109 10987 76543)
+
+(digit-up? 4321098765432109876543210987654321098765432109876543210987654321)
+;-> nil
+(digit-down? 4321098765432109876543210987654321098765432109876543210987654321)
+;-> true
+
+(digit-up? 10987654321098765432109876543210987)
+;-> nil
+(digit-down? 10987654321098765432109876543210987)
+;-> true
 
 ============================================================================
 

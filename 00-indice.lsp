@@ -3383,6 +3383,8 @@ NOTE LIBERE 35
   Trimming list
   Numeri composti uguali alla somma dei fattori primi
   Costante di Cahen
+  Trasformazione di numeri primi
+  Numeri con cifre in successione (+1 o -1)
 
 PROBLEMI SUI DADI
 =================
@@ -3430,7 +3432,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (388 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (394 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
