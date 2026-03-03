@@ -2580,5 +2580,190 @@ Limiti della funzione 'divisors':
 ;-> (6 10311)
 ;-> 1468.705
 
+
+--------------------------------------------------
+Somme delle coppie di cifre speculari di un numero
+--------------------------------------------------
+
+Determinare i numeri che si ottengono sommando le coppie di cifre speculari di un numero intero N.
+Abbiamo due modi di calcolare le coppie:
+
+1) Solo coppie uniche
+Esempio:
+  N = 38421
+  Coppie di cifre speculari:
+  (3)842(1) --> 3 + 1 = 4
+  3(8)4(2)1 --> 8 + 2 = 10
+  38(4)21   --> 4 + 4 = 8
+  Output: (4 10 8)
+
+2) Tutte le coppie speculari
+  N = 38421
+  Coppie di cifre speculari:
+  3  8  4  2  1
+  +  +  +  +  +
+  1  2  4  8  3
+  =============
+  4 10  8 10  4
+  Output: (4 10 8 10 4)
+
+In formule:
+
+  Lista S = (a(0) + a(k-1), a(1) + a(k-2), ...)
+  con s(i) = a(i) + a(k-1-i),
+  dove k è la lunghezza del numero
+  per i = 0,...,(k - 1)/2, metà intervallo -> solo coppie uniche (e centro)
+  per i = 0,...,(k - 1), intervallo completo -> tutte le posizioni speculari        
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+; Funzione che calcola le somme delle coppie di cifre speculari di un numero
+(define (sum-digit-pairs num)
+  (let ( (out '()) (k (length num)) (d (int-list num)) )
+    (for (i 0 (/ (- k 1) 2))
+      (push (+ (d i) (d (- k 1 i))) out -1))
+    out))
+
+(sum-digit-pairs 38421)
+;-> (4 10 8)
+
+(sum-digit-pairs 12345)
+(sum-digit-pairs 1234)
+(sum-digit-pairs 2)
+(sum-digit-pairs 67382)
+(sum-digit-pairs 6738345623463452)
+(sum-digit-pairs 111111111143333333333)
+
+(define (sum-digit-pairs-all num)
+  (letn ( (out '()) (d (int-list num)) (k (length d)) )
+    (for (i 0 (- k 1))
+      (push (+ (d i) (d (- k 1 i))) out -1))
+    out))
+
+(sum-digit-pairs-all 38421)
+;-> (4 10 8 10 4)
+
+Quindi:
+- (k-1)/2: metà intervallo -> solo coppie uniche (più l'eventuale centro)
+- (k-1): intervallo completo -> tutte le posizioni speculari
+
+
+------------------------------------
+Coppie di numeri primi complementari
+------------------------------------
+
+Due numeri (A, B) si dicono "coppia di numeri primi complementari" (Digit Complementary Prime Pair - DCPP) se:
+
+a) A e B sono primi
+b) la somma delle cifre nelle posizioni corrispondenti è "10" o "0"
+c) A è l'inverso di B (e viceversa)
+
+Esempio: condizioni a) e b)
+  A = 4721
+  B = 6389
+
+Esempio: condizioni a), b) e c)
+  A = 3467
+  B = 7643
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-range n1 n2)
+"Generate all prime numbers in the interval [n1..n2]"
+  (if (> n1 n2) (swap n1 n2))
+  (cond ((= n2 1) '())
+        ((= n2 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ n2 1))))
+            ; initialize lst
+            (if (> n1 2) (setq lst '()))
+            (for (x 3 n2 2)
+              (when (not (arr x))
+                ; push current primes (x) only if > n1
+                (if (>= x n1) (push x lst -1))
+                (for (y (* x x) n2 (* 2 x) (> y n2))
+                  (setf (arr y) true)))) lst))))
+
+Per rispettare le condizioni i numeri A e B devono avere lo stesso numero di cifre.
+Quindi scriviamo una funzione per calcolare le DCCP che prende come parametro il numero di cifre (k).
+
+; Funzione che trova le coppie dcpp con numeri di k cifre che rispettano le condizioni a), b) e c)
+(define (dcpp k)
+  (local (out start end primi inv digits1 digits2)
+    (setq out '())
+    (setq start (pow 10 (- k 1)))
+    (setq end (- (pow 10 k) 1))
+    (println (time (setq primi (primes-range start end))))
+    (setq primi '(19))
+    (dolist (p primi)
+      (setq inv (int (reverse (string p)) 0 10))
+      (setq digits1 (int-list p))
+      (setq digits2 (int-list inv))
+      (if (and (for-all (fn(x) (or (= x 0) (= x 10))) (map + digits1 digits2))
+              (prime? inv))
+          (push (list p inv) out -1)))
+    out))
+
+Proviamo:
+
+(dcpp 2))
+;-> 0
+;-> ((37 73) (73 37))
+
+(dcpp 3)
+;-> 0
+;-> ()
+
+(dcpp 4)
+;-> 0
+;-> ((1009 9001) (1559 9551) (3467 7643) (3917 7193) (7193 3917)
+;->  (7643 3467) (9001 1009) (9551 1559))
+
+(dcpp 5)
+;-> 15.586
+;-> ((10009 90001) (90001 10009))
+
+(dcpp 6)
+;-> 140.753
+;-> ((107309 903701) (130079 970031) (306407 704603) (309107 701903)
+;->  (701903 309107) (704603 306407) (903701 107309) (970031 130079))
+
+(time (println (dcpp 7)))
+;-> 1624.95
+;-> ((1050509 9050501) (1235789 9875321) (1285289 9825821) (1375379 9735731)
+;->  (1395179 9715931) (1445669 9665441) (1735739 9375371) (1915919 9195191)
+;->  (1985219 9125891) (3395177 7715933) (3825827 7285283) (7285283 3825827)
+;->  (7715933 3395177) (9050501 1050509) (9125891 1985219) (9195191 1915919)
+;->  (9375371 1735739) (9665441 1445669) (9715931 1395179) (9735731 1375379)
+;->  (9825821 1285289) (9875321 1235789))
+;-> 3796.961
+
+(time (println (dcpp 8)))
+;-> 18423.549
+;-> ((10064009 90046001) (10200809 90800201) (10600409 90400601)
+;->  (11246899 99864211) (11328799 99782311) (11346799 99764311)
+;->  (12364789 98746321) (12991189 98119921) (13282879 97828231)
+;->  ...
+;->  (97828231 13282879) (98119921 12991189) (98746321 12364789)
+;->  (99764311 11346799) (99782311 11328799) (99864211 11246899))
+;-> 38617.42
+
 ============================================================================
 

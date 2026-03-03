@@ -3389,6 +3389,8 @@ NOTE LIBERE 35
   Corda e arco di una circonferenza
   Numeri di Jeff
   Numeri ppn (picture-perfect numbers)
+  Somme delle coppie di cifre speculari di un numero
+  Coppie di numeri primi complementari
 
 PROBLEMI SUI DADI
 =================
