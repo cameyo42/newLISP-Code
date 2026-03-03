@@ -3385,6 +3385,10 @@ NOTE LIBERE 35
   Costante di Cahen
   Trasformazione di numeri primi
   Numeri con cifre in successione (+1 o -1)
+  Primo + somma delle cifre
+  Corda e arco di una circonferenza
+  Numeri di Jeff
+  Numeri ppn (picture-perfect numbers)
 
 PROBLEMI SUI DADI
 =================

@@ -2080,6 +2080,14 @@ Start with 0, then add one to each single digit.
   6543, 7654, 8765, 9876, 10987, 21098, 32109, 43210, 54321, 65432, 76543,
   87654, 98765, 109876, 210987, 321098, 432109, 543210, ...
 
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
 ; Funzione che verifica se un numero ha tutte le cifre in successione ascendente (+1)
 (define (digit-up? num)
   (if (< num 10) num
@@ -2156,6 +2164,421 @@ Primes with consecutive digits descending.
 ;-> nil
 (digit-down? 10987654321098765432109876543210987)
 ;-> true
+
+
+-------------------------
+Primo + somma delle cifre
+-------------------------
+
+Iniziamo con un numero primo P, quindi aggiungiamo a P la somma delle cifre di P (SOD).
+Prima sequenza:
+Se il nuovo numero è primo, ripetiamo la procedura fino a ottenere un numero composto.
+Seconda sequenza:
+Se il nuovo numero è composto, ripetiamo la procedura fino a ottenere un numero primo.
+
+Esempi:
+Sequenza 1
+  N = 277
+  Output = (277 293 307 317 328)
+
+Sequenza 2
+  N = 2
+  Output = (2 4 8 16 23)
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10)))
+    out))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+; Funzione che calcola il valore della sequenza 1 per un dato numero primo
+(define (seq1 primo)
+  (let ( (out (list primo))
+         (stop nil)
+         (new-num primo) )
+    (until stop
+      ; calcolo del nuovo numero
+      (setq new-num (+ new-num (digit-sum new-num)))
+      ; se abbiamo già incontrato il nuovo numero,
+      ; allora fermiamo il ciclo
+      (if (find new-num out) (setq stop true))
+      (push new-num out -1)
+      ; se nuovo numero non è primo,
+      ; allora fermiamo il ciclo
+      (if-not (prime? new-num) (setq stop true)))
+    out))
+
+(seq1 277)
+;-> (277 293 307 317 328)
+
+; Funzione che calcola il valore della sequenza 2 per un dato numero primo
+(define (seq2 primo)
+  (let ( (out (list primo))
+         (stop nil)
+         (new-num primo) )
+    (until stop
+      ; calcolo del nuovo numero
+      (setq new-num (+ new-num (digit-sum new-num)))
+      ; se abbiamo già incontrato il nuovo numero,
+      ; allora fermiamo il ciclo
+      (if (find new-num out) (setq stop true))
+      (push new-num out -1)
+      ; se nuovo numero è primo,
+      ; allora fermiamo il ciclo
+      (if (prime? new-num) (setq stop true)))
+    out))
+
+(seq2 2)
+;-> (2 4 8 16 23)
+
+Per il numero primo 3, la sequenza 2 sembra non terminare mai perchè ogni numero generato è divisibile per 3.
+
+(setq new-num 3)
+(setq out (list new-num))
+(setq stop nil)
+(for (i 1 20)
+  (setq new-num (+ new-num (digit-sum new-num)))
+      (if (find new-num out) (setq stop true))
+      (push new-num out -1)
+      (if (prime? new-num) (setq stop true)))
+out
+
+;-> (3 6 12 15 21 24 30 33 39 51 57 69 84 96 111 114 120 123 129 141 147)
+I numeri della lista di output sono tutti divisibili per 3:
+
+(filter (fn(x) (!= (% x 3) 0)) out)
+;-> ()
+
+Vediamo quanto vale il numero primo che genera la lista più lunga:
+
+(define (seq1-max N)
+  (local (primo max-list max-len cur-list cur-len)
+    (setq primo (primes-to N))
+    (setq max-list '())
+    (setq max-len 0)
+    (dolist (p primo)
+      (setq cur-list (seq1 p))
+      (setq cur-len (length cur-list))
+      ;(print cur-list) (read-line)
+      (when (> cur-len max-len)
+        (setq max-list cur-list)
+        (setq max-len cur-len)))
+    (list max-len max-list)))
+
+(time (println (seq1-max 1e7)))
+;-> (7 (516493 516521 516541 516563 516589 516623 516646))
+;-> 4078.722
+Il numero 516493 genera la lista con lunghezza massima (7).
+
+(define (seq2-max N)
+  (local (primo max-list max-len cur-list cur-len)
+    (setq primo (primes-to N))
+    (println "...")
+    ; rimuove il numero primo 3
+    (pop primo 1)
+    (setq max-list '())
+    (setq max-len 0)
+    (dolist (p primo)
+      (setq cur-list (seq2 p))
+      (setq cur-len (length cur-list))
+      ;(print cur-list) (read-line)
+      (when (> cur-len max-len)
+        (setq max-list cur-list)
+        (setq max-len cur-len)))
+    (list max-len max-list)))
+
+(time (println (seq2-max 1e7)))
+;-> (111 (8047399 8047439 8047474 8047508 8047540 8047568 8047606 8047637
+;->       8047672 8047706 8047738 8047775 8047813 8047844 8047879 8047922
+;->       8047954 8047991 8048029 8048060 8048086 8048120 8048143 8048171
+;->       ...
+;->       8050546 8050574 8050603 8050625 8050651 8050676 8050708 8050736
+;->       8050765 8050796 8050831))
+;-> 21970.61
+Il numero 8047399 genera la lista con lunghezza massima (111).
+
+
+---------------------------------
+Corda e arco di una circonferenza
+---------------------------------
+
+Abbiamo un cerchio di centro C=(x0,y0) e raggio R.
+Dati due punti A e B sul perimetro della circonferenza quali sono le formule per calcolare:
+1) la lunghezza dell'arco delimitato dai punti A e B?
+2) la superficie dell'area delimitata dall'arco AB e dalla corda AB
+3) la superficie dell'area delimitata dall'arco AB e dai segmenti AC e BC
+4) la distanza del centro C dalla corda AB
+
+Vedi figura "corda-arco.png" nella cartella "data".
+
+Dati:
+ C = (x0, y0) centro
+ R = raggio
+ A = (x1, y1)
+ B = (x2, y2)
+
+Angolo al centro theta (in radianti)
+------------------------------------
+Metodo del prodotto scalare:
+  u = (x1 - x0, y1 - y0)
+  v = (x2 - x0, y2 - y0)
+  dot = (x1-x0)*(x2-x0) + (y1-y0)*(y2-y0)
+  cos(theta) = dot / (R^2)
+  theta = arccos(dot / (R^2))
+  (con 0 <= theta <= pi per l'arco minore)
+
+Se vogliamo l'angolo dell'arco maggiore:
+  theta_mag = 2*pi - theta
+
+Lunghezza dell'arco AB
+----------------------
+  Arco minore:
+  L = R * theta
+  Arco maggiore:
+  L = R * (2*pi - theta)
+
+Area delimitata da arco AB e corda AB (segmento circolare)
+----------------------------------------------------------
+Formula standard (theta in radianti):
+  Area = (R^2 / 2) * (theta - sin(theta))
+equivalentemente:
+  Area = (R^2 * theta)/2 - (R^2 * sin(theta))/2
+
+Formule utili
+-------------
+Lunghezza corda:
+  d = sqrt((x2-x1)^2 + (y2-y1)^2)
+
+Angolo dal lato della corda:
+  theta = 2 * arcsin(d / (2*R))
+
+che possiamo usare direttamente nelle formule sopra.
+
+Distanza tra il centro C e la corda AB
+--------------------------------------
+Formula geometrica
+Nel triangolo isoscele ACB:
+  d = 2 R sin(theta/2)
+La distanza del centro dalla corda (chiamiamola h) è l'altezza:
+  h = R cos(theta/2)
+Quindi:
+  h = R cos(theta/2)
+
+Solo in funzione della corda d:
+Dal triangolo rettangolo:
+  (R)^2 = h^2 + (d/2)^2
+quindi:
+  h = sqrt(R^2 - (d/2)^2)
+
+Direttamente dalle coordinate (formula punto-retta):
+Equazione della retta AB.
+Distanza punto-retta:
+h = abs((x2-x1)*(y1-y0) - (y2-y1)*(x1-x0)) / sqrt((x2-x1)^2 + (y2-y1)^2)
+
+Riassunto pratico
+-----------------
+Se conosci R e theta:
+  h = R cos(theta/2)
+Se conosci R e d:
+  h = sqrt(R^2 - d^2/4)
+Se conosciamo solo coordinate: usiamo la formula punto-retta sopra.
+
+Area del settore circolare
+--------------------------
+Il settore circolare è delimitato da:
+- arco AB
+- raggio AC
+- raggio BC
+cioè il settore di angolo centrale theta.
+
+Formula principale (theta in radianti):
+  Area_settore = (R^2 * theta) / 2
+
+Se theta è in gradi:
+  Area_settore = (theta / 360) * pi * R^2
+
+Se conosciamo solo la lunghezza dell'arco L:
+Poiché
+  L = R * theta
+allora
+  theta = L / R
+e quindi
+  Area_settore = (R * L) / 2
+
+Se abbiamo solo le coordinate dei punti
+vettori
+  u = (x1-x0, y1-y0)
+  v = (x2-x0, y2-y0)
+angolo
+  theta = arccos( (u·v) / (R^2) )
+area
+  Area_settore = (R^2 * theta) / 2
+
+Nota geometrica:
+  Settore = segmento + triangolo
+cioè
+  Area_settore = (R^2/2)(theta - sin(theta)) + (R^2/2) sin(theta)
+che torna a
+  Area_settore = (R^2 * theta)/2
+
+
+--------------
+Numeri di Jeff
+--------------
+
+https://www.primepuzzles.net/puzzles/puzz_210.htm
+
+Un numero è di Jeff (Jeff Heleen) se le cifre nei suoi fattori primi (k > 1) sono le stesse del numero stesso.
+
+Definiamo la seguente sequenza:
+sia H(k) il numero composto più piccolo tale che le cifre nei suoi fattori primi (k > 1) siano le stesse del numero stesso, senza aggiunte.
+
+Ad esempio, il numero più piccolo per k=2 che abbia questa proprietà è 1255 = 5*251.
+I valori di H(k) per k = 2,...,9 sono:
+  
+  k  H(n)                  Fattorizzazione
+  2  1255                  5*251
+  3  163797                3*71*769
+  4  11937639              3*7*61*9319
+  5  1037715385            5*7*7*83*51031
+  6  117295838975          5*5*7*89*821*9173
+  7  11099654778737        7*7*7*7*89*541*96013
+  8  1091778783077899      7*7*7*7*7*809*8191*9803
+  9  1023976197718878397   7*7*7*7*61*89*971*983*82301  
+
+(define (same-digits? num1 num2)
+"Check if two numbers have the same digits"
+  (= (sort (explode (string num1))) (sort (explode (string num2)))))
+
+; Funzione che verifica se un dato numero è di Jeff
+(define (jeff? num)
+  (let (fattori (factor num))
+    (if (> (length fattori) 1)
+        (same-digits? num (join (map string (factor num))))
+        nil)))
+
+(jeff? 11)
+;-> nil
+
+(jeff? 1255)
+;-> true
+
+(jeff? 11937639)
+;-> true
+
+(time (println (filter jeff? (sequence 1 1e6))))
+;-> (1255 12955 17482 25105 100255 101299 105295 107329 117067 124483 127417 129595 132565
+;->  145273 146137 149782 163797 174082 174298 174793 174982 250105 256315 263155 295105
+;->  297463 307183 325615 371893 536539 687919)
+;-> 4625.416
+
+; Funzione che determina il numero H(k) (dato k e il limite massimo M)
+(define (jeff k N)
+  (setq sol nil)
+  (setq stop nil)
+  (for (num 2 N 1 stop)
+    (setq fattori (factor num))
+    (when (and (= (length fattori) k)
+               (same-digits? num (join (map string fattori))))
+      (setq sol (list num fattori))
+      (setq stop true)))
+  sol) 
+
+(time (println (jeff 2 1e8)))
+;-> (1255 (5 251))
+;-> 0
+(time (println (jeff 3 1e8)))
+;-> (163797 (3 71 769))
+;-> 312.417
+(time (println (jeff 4 1e8)))
+;-> (11937639 (3 7 61 9319))
+;-> 36518.974
+
+
+------------------------------------
+Numeri ppn (picture-perfect numbers)
+------------------------------------
+
+I numeri ppn sono i numeri interi positivi n in cui l'inversione di n è uguale alla somma delle inversioni dei divisori propri di n:
+
+  reverse(n) = Sum[i=1..k]reverse(divisor(i))
+  dove k sono il numero di divisori propri di n
+
+Sequenza OEIS A069942:
+Reversal of n equals the sum of the reversals of the proper divisors of n.
+  6, 10311, 21661371, 1460501511, 7980062073, 79862699373, 798006269373
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+; Funzione che verifica se un numero è ppn
+(define (ppn? num)
+  (let (divisori (divisors num))
+    (pop divisori -1)
+    (= (int (reverse (string num)) 0 10)
+       (apply + (map (fn(x) (int (reverse (string x)) 0 10)) divisori)))))
+
+Proviamo:
+
+(ppn? 8)
+;-> nil
+(ppn? 10311)
+;-> true
+(ppn? 7980062073)
+;-> true
+
+Limiti della funzione 'divisors':
+
+(time (map divisors (sequence 1 1e6)))
+;-> 10298.166
+(time (map divisors (sequence 1 1e7)))
+;-> 130476.072
+
+(time (println (filter ppn? (sequence 1 1e5))))
+;-> (6 10311)
+;-> 1468.705
 
 ============================================================================
 
