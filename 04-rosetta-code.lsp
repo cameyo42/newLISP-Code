@@ -5237,6 +5237,9 @@ In questo esempio viene utilizzato il prodotto di primi (* 2 3 5 7 11 13). Per n
 
 Il miglioramento di velocità per la gestione di grandi numeri è significativo (+ 25%).
 
+Per una funzione molto più veloce:
+Vedi anche "Primi gemelli" su "Note libere 35".
+
 
 ----------------
 NUMERI SEMIPRIMI

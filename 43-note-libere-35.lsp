@@ -2765,5 +2765,238 @@ Proviamo:
 ;->  (99764311 11346799) (99782311 11328799) (99864211 11246899))
 ;-> 38617.42
 
+
+-----------
+Palinpoints
+-----------
+
+https://jlpe.tripod.com/ppn/ppnpaper.htm
+
+Nel paragrafo "7. Palinpoints of arithmetical functions" dell'articolo "Picture-Perfect Numbers and Other Digit-Reversal Diversions" Joseph L. Pe definisce un'interessante equazione funzionale:
+
+  f(r(x)) = r(f(x))
+  dove: x è un numero intero
+        f(x) è una data funzione aritmetica di x, ed è essa stessa un intero
+        r(x) indica l'inverso numerico dell'intero x
+
+I "Palinpoints" sono tutti i valori di x che risolvono l'equazione per una data funzione specifica f(x).
+
+Esempio:
+Sia f(x)=isqrt(x), dove isqrt(x) è la radice quadrata intera di x.
+Quindi l'equazione diventa:
+
+  isqrt(r(x)) = r(isqrt(x))
+
+Il numero 154 è un 'palinpoint':
+  x = 154
+  r(x) = 451
+  isqrt(r(154)) = isqrt(451) = 21
+  r(isqrt(154) = r(12) = 21
+
+Palinpoints:
+  1 2 3 4 5 6 7 8 9 11 22 33 44 55 66 67 76 77 88 89 98 99 100
+  121 131 141 144 154 164 169 179 189 400 441 451 461 484 494
+  505 515 525 900 961 971 981 ...
+
+Scriviamo una funzione che calcola i 'palinpoints'.
+
+(define (pe func x)
+  (let (rx (int (reverse (string x)) 0 10))
+    (= (func rx) (int (reverse (string (func x))) 0 10))))
+
+1) Prendiamo la funzione f(x) = isqrt(x):
+
+(define (isqrt x) (int (sqrt x)))
+
+(filter (fn(x) (pe isqrt x)) (sequence 1 981))
+;-> (1 2 3 4 5 6 7 8 9 11 22 33 44 55 66 67 76 77 88 89 98 99 100
+;->  121 131 141 144 154 164 169 179 189 400 441 451 461 484 494
+;->  505 515 525 900 961 971 981)
+
+2) Prendiamo la funzione f(x) = x^2:
+
+(define (square x) (* x x))
+
+Esempio:
+  x = 31
+  r(x) = 13
+  square(r(31)) = square(13) = 169
+  r(square 31) = r(961) = 169
+
+(filter (fn(x) (pe square x)) (sequence 1 981))
+;-> (1 2 3 10 11 12 13 20 21 22 30 31 100 101 102 103 110 111 112 113
+;->  120 121 122 130 200 201 202 210 211 212 220 221 300 301 310 311)
+
+Sequenza OEIS A061909:
+Skinny numbers: numbers n such that there are no carries when n is squared by "long multiplication".
+  0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 30, 31, 100, 101, 102, 103, 110,
+  111, 112, 113, 120, 121, 122, 130, 200, 201, 202, 210, 211, 212, 220, 221,
+  300, 301, 310, 311, 1000, 1001, 1002, 1003, 1010, 1011, 1012, 1013, 1020,
+  1021, 1022, 1030, 1031, 1100, 1101, 1102, ...
+
+3) Prendiamo con la funzione f(x) = prime(x):
+
+Esempio:
+  x = 12
+  r(x) = 21
+  primo(r(12)) = primo(21) = 73
+  r(primo 12) = r(37) = 73
+
+(define (primo x) ((primes-to 1000) (- x 1)))
+(filter (fn(x) (pe primo x)) (sequence 1 100))
+;-> (1 2 3 4 5 12 21)
+
+Sequenza OEIS A069469:
+Numbers k such that prime(reversal(k)) = reversal(prime(k)). Ignore leading 0's.
+  1, 2, 3, 4, 5, 12, 21, 8114118, 535252535, ...
+
+
+-------------
+Primi gemelli
+-------------
+
+Due numeri sono primi gemelli se n e (n + 2) sono entrambi primi.
+Le coppie di primi gemelli sono infinite, ma la loro frequenza diminuisce con l'aumentare di n.
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+; Funzione che calcola i primi gemelli nell'intervallo [n1,n2]
+(define (prime-pairs n1 n2)
+"Generate pairs of twin primes in the interval [n1..n2]"
+  (let ((out (list)) (x nil) (FX (* 2 3 5 7 11 13)) (M 0))
+    (for (y (if (odd? n1) n1 (++ n1)) n2 2)
+      (if (if (< y FX) (1 (factor y))
+             (or (= (setf M (% y FX))) (if (factor M) (<= ($it 0) 13)) (1 (factor y))))
+        (setf y nil)
+        x (push (list x y) out -1))
+      (setf x y))
+    out))
+
+(prime-pairs 2 100)
+;-> ((3 5) (5 7) (11 13) (17 19) (29 31) (41 43) (59 61) (71 73))
+
+; Funzione che calcola i primi gemelli fino ad un dato intero N
+(define (gemelli N)
+  (local (out primi len)
+    (setq out '())
+    (println (time (setq primi (primes-to N))))
+    ; numero di primi
+    (setq len (length primi))
+    ; lista delle differenze tra coppie di primi adiacenti
+    (setq diff (map - (rest primi) (chop primi)))
+    ; trasforma la lista in vettore (indicizzazione più veloce)
+    (setq primi (array len primi))
+    ; ciclo sulla lista delle differenze
+    (dolist (d diff)
+      ; se la differenza corrente vale 2,
+      ; allora recupera dal vettore i relativi gemelli
+      ; e li inserisce nella soluzione
+      (if (= d 2) (push (list (primi $idx) (primi (+ $idx 1))) out -1)))
+    out))
+
+Proviamo:
+
+(gemelli 100)
+;-> ((3 5) (5 7) (11 13) (17 19) (29 31) (41 43) (59 61) (71 73))
+(time (gemelli2 1e7))
+
+Test di correttezza:
+
+(= (prime-pairs 2 1e6) (gemelli 1e6))
+;-> true
+
+Test di velocità:
+
+(time (prime-pairs 2 1e6))
+;-> 442.998
+(time (gemelli 1e6))
+;-> 156.206
+
+(time (prime-pairs 2 1e7))
+;-> 7813.043
+(time (gemelli 1e7))
+;-> 1765.791
+
+Vedi anche "Coppie di primi gemelli" su "Rosetta code".
+
+
+----------------
+Terzine di primi
+----------------
+
+Una terzina (terna) di primi è una lista di tre numeri primi della forma (p, p + 2, p + 6) o (p, p + 4, p + 6).
+Le prime terzine di primi sono (sequenza A098420 dell'OEIS):
+
+  (5, 7, 11), (7, 11, 13), (11, 13, 17), (13, 17, 19), (17, 19, 23),
+  (37, 41, 43), (41, 43, 47), (67, 71, 73), (97, 101, 103), (101, 103, 107),
+  (103, 107, 109), (107, 109, 113), (191, 193, 197), (193, 197, 199),
+  (223, 227, 229), (227, 229, 233), (277, 281, 283), (307, 311, 313),
+  (311, 313, 317), (347, 349, 353), (457, 461, 463), (461, 463, 467),
+  (613, 617, 619), (641, 643, 647), (821, 823, 827), (823, 827, 829),
+  (853, 857, 859), (857, 859, 863), (877, 881, 883), (881, 883, 887), ...
+
+Sequenza OEIS A098420:
+Members of prime triples (p,q,r) with p < q < r = p + 6.
+  5, 7, 11, 13, 17, 19, 23, 37, 41, 43, 47, 67, 71, 73, 97, 101, 103, 107,
+  109, 113, 191, 193, 197, 199, 223, 227, 229, 233, 277, 281, 283, 307,
+  311, 313, 317, 347, 349, 353, 457, 461, 463, 467, 613, 617, 619, 641,
+  643, 647, 821, 823, 827, 829, 853, 857, 859, 863, ...
+
+Scrivere una funzione che calcola le terzine di primi fino ad un dato intero N.
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (terne-primi N)
+  (local (out primi len pp)
+    (setq out '())
+    (println (time (setq primi (primes-to N))))
+    (setq len (length primi))
+    (setq pp (array len primi))
+    (for (k 0 (- len 1))
+      (setq p (pp k))
+      ; (println p { } (+ p 2) { } (+ p 6))
+      ; (print p { } (+ p 4) { } (+ p 6)) (read-line)
+      (if (and (find (+ p 2) primi) (find (+ p 6) primi))
+          (push (list p (+ p 2) (+ p 6)) out -1))
+      (if (and (find (+ p 4) primi) (find (+ p 6) primi))
+          (push (list p (+ p 4) (+ p 6)) out -1)))
+    out))
+
+(terne-primi 1e3)
+;-> ((5 7 11) (7 11 13) (11 13 17) (13 17 19) (17 19 23) (37 41 43)
+;->  (41 43 47) (67 71 73) (97 101 103) (101 103 107) (103 107 109)
+;->  (107 109 113) (191 193 197) (193 197 199) (223 227 229) (227 229 233)
+;->  (277 281 283) (307 311 313) (311 313 317) (347 349 353) (457 461 463)
+;->  (461 463 467) (613 617 619) (641 643 647) (821 823 827) (823 827 829)
+;->  (853 857 859) (857 859 863) (877 881 883) (881 883 887))
+
+Calcoliamo i numeri della sequenza:
+
+(sort (unique (flat (terne-primi 1e3))))
+;-> (5 7 11 13 17 19 23 37 41 43 47 67 71 73 97 101 103 107
+;->  109 113 191 193 197 199 223 227 229 233 277 281 283 307
+;->  311 313 317 347 349 353 457 461 463 467 613 617 619 641
+;->  643 647 821 823 827 829 853 857 859 863 877 881 883 887)
+
 ============================================================================
 
