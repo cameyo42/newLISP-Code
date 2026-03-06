@@ -2998,5 +2998,141 @@ Calcoliamo i numeri della sequenza:
 ;->  311 313 317 347 349 353 457 461 463 467 613 617 619 641
 ;->  643 647 821 823 827 829 853 857 859 863 877 881 883 887)
 
+Le seguenti sequenze riportano solo il primo numero delle terzine:
+
+(p, p+2, p+6)         
+Sequenza OEIS A022004:  5, 11, 17, 41, 101, 107, ...
+
+(p, p+2, p+8)
+Sequenza OEIS A046134:  3, 5, 11, 29, 59, 71, 101, ...
+
+(p, p+2, p+12)
+Sequenza OEIS A046135:  5, 11, 17, 29, 41, 59, 71, ...
+
+(p, p+4, p+6)
+Sequenza OEIS A022005:  7, 13, 37, 67, 97, 103, ...
+
+(p, p+4, p+10)
+Sequenza OEIS A046136:  3, 7, 13, 19, 37, 43, 79, ...
+
+(p, p+4, p+12)
+Sequenza OEIS A046137:  7, 19, 67, 97, 127, 229, ...
+
+(p, p+6, p+8)
+Sequenza OEIS A046138:  5, 11, 23, 53, 101, 131, ...
+
+(p, p+6, p+10)
+Sequenza OEIS A046139:  7, 13, 31, 37, 61, 73, 97, ...
+
+(p, p+6, p+12)
+Sequenza OEIS A023241:  5, 7, 11, 17, 31, 41, 47, ...
+
+(p, p+8, p+12)
+Sequenza OEIS A046141:  5, 11, 29, 59, 71, 89, 101, ...
+
+(define (seq-terne a b N)
+  (local (out primi len pp)
+    (setq out '())
+    (println (time (setq primi (primes-to N))))
+    (setq len (length primi))
+    (setq pp (array len primi))
+    (for (k 0 (- len 1))
+      (setq p (pp k))
+      ; (println p { } (+ p a) { } (+ p b))
+      (if (and (find (+ p a) primi) (find (+ p b) primi))
+          ;(push (list p (+ p a) (+ p b)) out -1)))
+          (push p out -1)))
+    (sort (unique (flat out)))))
+
+Proviamo:
+
+(seq-terne 2 6 250)
+;-> (5 11 17 41 101 107 191 227)
+(seq-terne 2 8 250)
+;-> (3 5 11 29 59 71 101 149 191)
+(seq-terne 2 12 250)
+;-> (5 11 17 29 41 59 71 101 137 179 227)
+(seq-terne 4 6 250)
+;-> (7 13 37 67 97 103 193 223)
+(seq-terne 4 10 250)
+;-> (3 7 13 19 37 43 79 97 103 127 163 223 229)
+(seq-terne 4 12 250)
+;-> (7 19 67 97 127 229)
+(seq-terne 6 8 250)
+;-> (5 11 23 53 101 131 173 191 233)
+(seq-terne 6 10 250)
+;-> (7 13 31 37 61 73 97 103 157 223)
+(seq-terne 6 12 250)
+;-> (5 7 11 17 31 41 47 61 67 97 101 151 167 227)
+(seq-terne 8 12 250)
+;-> (5 11 29 59 71 89 101)
+
+
+-----------------------------
+Sequenza "Ulisse" James Joice
+-----------------------------
+
+Sequenza OEIS A002488:
+a(n) = n^(n^n)
+  -1, 0, 1, 16, 7625597484987, ...
+
+Sequenza OEIS A054382:
+James Joyce's "Ulysses" sequence: number of digits in n^(n^n).
+1, 1, 2, 13, 155, 2185, 36306, 695975, 15151336, 369693100, 10000000001, 297121486765, 9622088391635, 337385711567665, 12735782555419983, 515003176870815368, 22212093154093428530, 1017876887958723919835, 49390464231494436119285
+
+(define (pow-i num power)
+"Calculate the integer power of an integer"
+  (local (pot out)
+    (if (zero? power)
+        (setq out 1L)
+        (begin
+          (setq pot (pow-i num (/ power 2)))
+          (if (odd? power)
+              (setq out (* num pot pot))
+              (setq out (* pot pot)))
+        )
+    )
+    out))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (nnn1 num)
+  (let (power (pow-i num num))
+    (pow-i num power)))
+
+(define (nnn2 num)
+  (let (power (** num num))
+    (** num power)))
+
+(length (nnn1 5L))
+;-> 2185
+(length (nnn2 5))
+;-> 2185
+
+(time (println (length (nnn1 6L))))
+;-> 36306
+;-> 9.525
+(time (println (length (nnn2 6L))))
+;-> 36306
+;-> 210.131
+
+La funzione 'pow-i' è molto più veloce della funzione '**' soprattutto per numeri molto grandi
+
+(time (println (length (nnn1 7L))))
+;-> 695975
+;-> 3505.075
+
+(map nnn1 '(0L 1L 2L 3L))
+;-> (0L 1L 16L 7625597484987L)
+
+(time (println (map (fn(x) (length (nnn1 x))) '(0L 1L 2L 3L 4L 5L 6L 7L))))
+;-> (1 1 2 13 155 2185 36306 695975)
+;-> 3519.984
+
 ============================================================================
 

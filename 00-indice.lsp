@@ -3394,6 +3394,7 @@ NOTE LIBERE 35
   Palinpoints
   Primi gemelli
   Terzine di primi
+  Sequenza "Ulisse" James Joice
 
 PROBLEMI SUI DADI
 =================
