@@ -1088,7 +1088,7 @@ Vediamo se le funzioni producono gli stessi risultati.
 
 Vediamo la velocità di tutte queste funzioni.
 
-(silent (setq test (rand 1e20 1e5)))
+(silent (setq test (clean zero? (rand 1e20 1e5))))
 
 (time (map last-digit test) 100)
 ;-> 997.245

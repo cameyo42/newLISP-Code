@@ -3134,5 +3134,65 @@ La funzione 'pow-i' è molto più veloce della funzione '**' soprattutto per num
 ;-> (1 1 2 13 155 2185 36306 695975)
 ;-> 3519.984
 
+
+------------------
+Gelfand's question
+------------------
+
+Consideriamo la cifra decimale più a sinistra (ovvero la più significativa) dei numeri 2^n, 3^n, ..., 9^n.
+Quali sono le sequenze di cifre che compaiono nella tabella per n = 1,2,...
+
+   n  OEIS     2^n 3^n 4^n 5^n 6^n 7^n 8^n 9^n
+   1  A000027   2   3   4   5   6   7   8   9
+   2  A002993   4   9   1   2   3   4   6   8
+   3  A002994   8   2   6   1   2   3   5   7
+   4  A097408   1   8   2   6   1   2   4   6
+   5  A097409   3   2   1   3   7   1   3   5
+   6  A097410   6   7   4   1   4   1   2   5
+   7  A097411   1   2   1   7   2   8   2   4
+   8  A097412   2   6   6   3   1   5   1   4
+   9  A097413   5   1   2   1   1   4   1   3
+  10  A097414   1   5   1   9   6   2   1   3
+
+Sequenza OEIS A000027: The positive integers. Also called the natural numbers, the whole numbers or the counting numbers, but these terms are ambiguous.
+Sequenza OEIS A002993: Initial digits of squares.
+Sequenza OEIS A002994: Initial digit of cubes.
+Sequenza OEIS A097408: Initial decimal digit of n^4.
+Sequenza OEIS A097409: Initial decimal digit of n^5.
+Sequenza OEIS A097410: Initial decimal digit of n^6.
+Sequenza OEIS A097411: Initial decimal digit of n^7.
+Sequenza OEIS A097412: Initial decimal digit of n^8.
+Sequenza OEIS A097413: Initial decimal digit of n^9.
+Sequenza OEIS A097414: Initial decimal digit of n^10.
+
+(define (first-digit num)
+  (if (zero? num) 0
+    ;else
+    ;(/ num (pow 10 (- (length num) 1)))) ; slower
+    ; (- (length num) 1) = (int (log num 10))
+    (/ num (pow 10 (int (log num 10))))))
+
+(first-digit 214)
+;-> 2
+(first-digit 9223372036854775807)
+;-> 9
+(first-digit 92233720368547758070000)
+;-> 9L
+
+(define (seq n max-base)
+  (map first-digit (map (fn(x) (pow x n)) (sequence 2 max-base))))
+
+(map (fn(n) (seq n 9)) (sequence 1 10))
+;-> ((2 3 4 5 6 7 8 9)
+;->  (4 9 1 2 3 4 6 8)
+;->  (8 2 6 1 2 3 5 7)
+;->  (1 8 2 6 1 2 4 6)
+;->  (3 2 1 3 7 1 3 5)
+;->  (6 7 4 1 4 1 2 5)
+;->  (1 2 1 7 2 8 2 4)
+;->  (2 6 6 3 1 5 1 4)
+;->  (5 1 2 1 1 4 1 3)
+;->  (1 5 1 9 6 2 1 3))
+
 ============================================================================
 

@@ -3395,6 +3395,7 @@ NOTE LIBERE 35
   Primi gemelli
   Terzine di primi
   Sequenza "Ulisse" James Joice
+  Gelfand's question
 
 PROBLEMI SUI DADI
 =================
@@ -3442,7 +3443,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (394 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (399 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================
