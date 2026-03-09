@@ -3396,6 +3396,7 @@ NOTE LIBERE 35
   Terzine di primi
   Sequenza "Ulisse" James Joice
   Gelfand's question
+  Complessità di un intero (Mahler-Popken)
 
 PROBLEMI SUI DADI
 =================

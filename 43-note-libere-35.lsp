@@ -3194,5 +3194,236 @@ Sequenza OEIS A097414: Initial decimal digit of n^10.
 ;->  (5 1 2 1 1 4 1 3)
 ;->  (1 5 1 9 6 2 1 3))
 
+
+----------------------------------------
+Complessità di un intero (Mahler-Popken)
+----------------------------------------
+
+La complessità di un intero n è il minimo numero di 1 necessari per rappresentarlo utilizzando solo addizioni, moltiplicazioni e parentesi. Questo non consente la giustapposizione di 1 per formare interi più grandi, quindi, ad esempio, 2 = 1+1 ha complessità 2, ma 11 no (incollare insieme due 1 non è un'operazione consentita).
+
+Sequenza OEIS A005245:
+The (Mahler-Popken) complexity of n: minimal number of 1's required to build n using + and *.
+  1, 2, 3, 4, 5, 5, 6, 6, 6, 7, 8, 7, 8, 8, 8, 8, 9, 8, 9, 9, 9, 10, 11,
+  9, 10, 10, 9, 10, 11, 10, 11, 10, 11, 11, 11, 10, 11, 11, 11, 11, 12,
+  11, 12, 12, 11, 12, 13, 11, 12, 12, 12, 12, 13, 11, 12, 12, 12, 13, 14,
+  12, 13, 13, 12, 12, 13, 13, 14, 13, 14, 13, 14, 12, 13, 13, 13, 13, 14,
+  13, 14, ...
+
+   n.........minimal expression...........a(n) = number of 1's
+   1..................1...................1
+   2.................1+1..................2
+   3................1+1+1.................3
+   4.............(1+1)*(1+1)..............4
+   5............(1+1)*(1+1)+1.............5
+   6............(1+1)*(1+1+1).............5
+   7...........(1+1)*(1+1+1)+1............6
+   8..........(1+1)*(1+1)*(1+1)...........6
+   9...........(1+1+1)*(1+1+1)............6
+  10..........(1+1+1)*(1+1+1)+1...........7
+  11.........(1+1+1)*(1+1+1)+1+1..........8
+  12.........(1+1)*(1+1)*(1+1+1)..........7
+  13........(1+1)*(1+1)*(1+1+1)+1.........8
+  14.......[(1+1)*(1+1+1)+1]*(1+1)........8
+  15.......[(1+1)*(1+1)+1]*(1+1+1)........8
+  16.......(1+1)*(1+1)*(1+1)*(1+1)........8
+  17......(1+1)*(1+1)*(1+1)*(1+1)+1.......9
+  18........(1+1)*(1+1+1)*(1+1+1).........8
+  19.......(1+1)*(1+1+1)*(1+1+1)+1........9
+  20......[(1+1+1)*(1+1+1)+1]*(1+1).......9
+  21......[(1+1)*(1+1+1)+1]*(1+1+1).......9
+  22.....[(1+1)*(1+1+1)+1]*(1+1+1)+1.....10
+  23....[(1+1)*(1+1+1)+1]*(1+1+1)+1+1....11
+  24......(1+1)*(1+1)*(1+1)*(1+1+1).......9
+  25.....(1+1)*(1+1)*(1+1)*(1+1+1)+1.....10
+  26....[(1+1)*(1+1)*(1+1+1)+1]*(1+1)....10
+  27.......(1+1+1)*(1+1+1)*(1+1+1)........9
+  28......(1+1+1)*(1+1+1)*(1+1+1)+1......10
+  29.....(1+1+1)*(1+1+1)*(1+1+1)+1+1.....11
+  30.....[(1+1+1)*(1+1+1)+1]*(1+1+1).....10
+  31....[(1+1+1)*(1+1+1)+1]*(1+1+1)+1....11
+  32....(1+1)*(1+1)*(1+1)*(1+1)*(1+1)....10
+  33...(1+1)*(1+1)*(1+1)*(1+1)*(1+1)+1...11
+  34..[(1+1)*(1+1)*(1+1)*(1+1)+1]*(1+1)..11  
+...
+
+Usiamo la programmazione dinamica bottom-up.
+Relazione della programmazione dinamica bottom-up:
+
+  C(n) = min [C(n-1) + 1, min(C(a) + C(b))]
+    (a*b=n, a,b>=2) 
+
+cioè:
+
+  Addizione --> n = (n-1) + 1
+  Moltiplicazione --> n = a * b
+
+Poiché tutti i valori usati sono minori di n, possiamo riempire la tabella in ordine crescente.
+
+Quindi per ogni 'n', la complessità è il minimo tra:
+1. Addizione: c(n) = c(n-1) + 1, si aggiunge un 1
+2. Moltiplicazione: c(n) = c(a) + c(b) per ogni fattorizzazione a * b = n con a, b >= 2
+Possiamo esplorare solo 'a' fino a 'sqrt(n) perchè se a * b = n e (a <= b), vale (a <= sqrt(n)), evitando duplicati (complessità O(N*sqrt(N)).
+
+; Complessità di un intero (Mahler-Popken)
+; complexity(n) = minimo numero di 1 necessari per costruire n
+;                 usando solo + e * (e parentesi)
+; Algoritmo: programmazione dinamica bottom-up.
+; Per ogni n, la complessità è il minimo tra:
+; 1) complexity(n-1) + 1          (addizione di 1)
+; 2) complexity(a) + complexity(b) per ogni a*b = n, con a,b >= 2
+
+; Funzione che costruisce la tabella delle complessità da 1 a limit.
+(define (complexity-table limit)
+  (let ((c (array (+ limit 1) (list 999999))))
+    (setf (c 1) 1)
+    (for (n 2 limit)
+      ; Caso 1: n = (n-1) + 1
+      (setf (c n) (+ (c (- n 1)) 1))
+      ; Caso 2: n = a * b  per ogni fattorizzazione non banale
+      (for (a 2 (int (sqrt n)))
+        (when (= (% n a) 0)
+          (let ((b (/ n a)))
+            (let ((costo (+ (c a) (c b))))
+              (when (< costo (c n))
+                (setf (c n) costo)))))))
+    c))
+
+(complexity-table 10)
+;-> (999999 1 2 3 4 5 5 6 6 6 7)
+
+; Funzione che restituisce la complessità intera (costo) di un numero positivo intero
+(define (complexity num)
+  ((complexity-table num) num))
+
+(complexity 10)
+;-> 7
+
+Se vogliamo restituire anche l'espressione di 1 della complessità di un numeri dobbiamo fare alcune modifiche:
+
+1) 'complexity-tables: ora mantiene due vettori paralleli:
+'cost' per il numero di 1, e 'expr' per l'espressione testuale corrispondente.
+
+2) 'parenthesize': aggiunge parentesi attorno a un'espressione solo se contiene +, così la precedenza della * viene rispettata correttamente (es. (1+1)*... ma 1+1+1 non ne ha bisogno come fattore).
+
+3) 'complexity-expr': restituisce una lista (costo espressione) invece del solo numero.
+
+; Complessità di un intero (Mahler-Popken)
+; complexity(n) = minimo numero di 1 necessari per costruire n
+;                 usando solo + e * (e parentesi)
+; Algoritmo: programmazione dinamica bottom-up.
+; Per ogni n, la complessità è il minimo tra:
+; 1) complexity(n-1) + 1          (addizione di 1)
+; 2) complexity(a) + complexity(b) per ogni a*b = n, con a,b >= 2
+
+; Aggiunge parentesi attorno a expr se contiene '+' (priorità della *)
+(define (parenthesize expr)
+  (if (find "+" expr)
+    (append "(" expr ")")
+    expr))
+
+(parenthesize "1+1")
+;-> "(1+1)"
+(parenthesize "1*1")
+;-> "1*1"
+
+; Costruisce le tabelle 'cost' ed 'expr' da 1 fino a limit.
+; Restituisce una lista (costo expr) da due vettori.
+(define (complexity-tables limit)
+  (let ((cost (array (+ limit 1) (list 999999)))
+        (expr (array (+ limit 1) (list ""))))
+    ; caso base
+    (setf (cost 1) 1)
+    (setf (expr 1) "1")
+    (for (n 2 limit)
+      ; --- caso 1: addizione n = (n-1) + 1 ---
+      (setf (cost n) (+ (cost (- n 1)) 1))
+      (setf (expr n) (append (expr (- n 1)) "+1"))
+      ; --- caso 2: moltiplicazione n = a * b ---
+      (for (a 2 (int (sqrt n)))
+        (when (= (% n a) 0)
+          (letn ((b (/ n a))
+                 (c (+ (cost a) (cost b))))
+            (when (< c (cost n))
+              (setf (cost n) c)
+              (setf (expr n)
+                (append (parenthesize (expr a))
+                        "*"
+                        (parenthesize (expr b))))))))
+    )
+    (list cost expr)))
+
+(complexity-tables 10)
+;-> ((999999 1 2 3 4 5 5 6 6 6 7)
+;->  ("" "1" "1+1" "1+1+1" "1+1+1+1" "1+1+1+1+1" "(1+1)*(1+1+1)"
+;->   "(1+1)*(1+1+1)+1" "(1+1)*(1+1+1+1)" "(1+1+1)*(1+1+1)"
+;->   "(1+1+1)*(1+1+1)+1"))
+
+; Funzione che restituisce la complessità intera (costo espressione) di un numero positivo intero
+(define (complexity-expr num)
+  (letn ((tables (complexity-tables num))
+         (cost (tables 0))
+         (expr (tables 1)))
+    (list (cost num) (expr num))))
+
+(complexity-expr 22)
+;-> (10 "(1+1+1)*((1+1)*(1+1+1)+1)+1")
+
+(complexity-expr 101)
+;-> (15 "(1+1)*((1+1)*((1+1)*((1+1)*((1+1)*(1+1+1)))+1))+1")
+
+Nota:
+la parte additiva:
+  (setf (cost n) (+ (cost (- n 1)) 1))
+  (setf (expr n) (append (expr (- n 1)) "+1"))
+è corretta ma non sempre minima.
+Infatti la formula teorica completa è:
+
+  C(n) = min (C(k)+C(n-k))
+       (1<=k<n)
+
+ma nella pratica si usa solo (n-1) perché quasi sempre è il migliore caso additivo.
+
+; Funzione che stampa tutti risultati fino a un dato intero N
+(define (print-table N)
+  (let (table (complexity-tables N))
+    (for (k 1 N)
+      (println k { } (table 0 k) { } (table 1 k))) '>))
+
+(print-table 34)
+;-> 1 1 1
+;-> 2 2 1+1
+;-> 3 3 1+1+1
+;-> 4 4 1+1+1+1
+;-> 5 5 1+1+1+1+1
+;-> 6 5 (1+1)*(1+1+1)
+;-> 7 6 (1+1)*(1+1+1)+1
+;-> 8 6 (1+1)*(1+1+1+1)
+;-> 9 6 (1+1+1)*(1+1+1)
+;-> 10 7 (1+1+1)*(1+1+1)+1
+;-> 11 8 (1+1+1)*(1+1+1)+1+1
+;-> 12 7 (1+1)*((1+1)*(1+1+1))
+;-> 13 8 (1+1)*((1+1)*(1+1+1))+1
+;-> 14 8 (1+1)*((1+1)*(1+1+1)+1)
+;-> 15 8 (1+1+1)*(1+1+1+1+1)
+;-> 16 8 (1+1)*((1+1)*(1+1+1+1))
+;-> 17 9 (1+1)*((1+1)*(1+1+1+1))+1
+;-> 18 8 (1+1)*((1+1+1)*(1+1+1))
+;-> 19 9 (1+1)*((1+1+1)*(1+1+1))+1
+;-> 20 9 (1+1)*((1+1+1)*(1+1+1)+1)
+;-> 21 9 (1+1+1)*((1+1)*(1+1+1)+1)
+;-> 22 10 (1+1+1)*((1+1)*(1+1+1)+1)+1
+;-> 23 11 (1+1+1)*((1+1)*(1+1+1)+1)+1+1
+;-> 24 9 (1+1)*((1+1)*((1+1)*(1+1+1)))
+;-> 25 10 (1+1)*((1+1)*((1+1)*(1+1+1)))+1
+;-> 26 10 (1+1)*((1+1)*((1+1)*(1+1+1))+1)
+;-> 27 9 (1+1+1)*((1+1+1)*(1+1+1))
+;-> 28 10 (1+1+1)*((1+1+1)*(1+1+1))+1
+;-> 29 11 (1+1+1)*((1+1+1)*(1+1+1))+1+1
+;-> 30 10 (1+1)*((1+1+1)*(1+1+1+1+1))
+;-> 31 11 (1+1)*((1+1+1)*(1+1+1+1+1))+1
+;-> 32 10 (1+1)*((1+1)*((1+1)*(1+1+1+1)))
+;-> 33 11 (1+1)*((1+1)*((1+1)*(1+1+1+1)))+1
+;-> 34 11 (1+1)*((1+1)*((1+1)*(1+1+1+1))+1)
+
 ============================================================================
 
