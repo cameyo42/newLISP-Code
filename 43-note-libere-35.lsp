@@ -239,7 +239,7 @@ Per ogni n:
     (for (k 1 N)
       (push (string k) lst -1)
       (sort lst (fn (a b) (<= (string a b) (string b a))))
-      (set 's "")
+      (setq s "")
       (dolist (x lst)
         (extend s x))
       (push (bigint s) out -1))
@@ -265,7 +265,7 @@ String together the first n numbers in an order which maximizes the result.
     (for (k 1 num)
       (push (string k) lst -1)
       (sort lst (fn (a b) (>= (string a b) (string b a))))
-      (set 's "")
+      (setq s "")
       (dolist (x lst)
         (extend s x))
       (push (bigint s) out -1))
@@ -1555,7 +1555,7 @@ Sequence lists the minimum prime p that produces a run of exactly n consecutive 
 (define (trim-trailing-nil lst)
   (letn (ultimo -1)
     (for (i 0 (- (length lst) 1))
-      (if (lst i) (set 'ultimo i)))
+      (if (lst i) (setq ultimo i)))
     (if (= ultimo -1) '() (slice lst 0 (+ ultimo 1)))))
 
 ; Funzione che genera la sequenza (dato un valore massimo per i numeri primi):
@@ -3424,6 +3424,297 @@ ma nella pratica si usa solo (n-1) perché quasi sempre è il migliore caso addi
 ;-> 32 10 (1+1)*((1+1)*((1+1)*(1+1+1+1)))
 ;-> 33 11 (1+1)*((1+1)*((1+1)*(1+1+1+1)))+1
 ;-> 34 11 (1+1)*((1+1)*((1+1)*(1+1+1+1))+1)
+
+
+------------------
+Numeri di Friedman
+------------------
+
+Un numero di Friedman è un numero che può essere rappresentato con un'espressione che utilizza solo le cifre del numero.
+Inoltre, l'espressione può includere +, -, ×, ÷, esponenti e parentesi, ma nient'altro.
+Ad esempio, 25 è un numero di Friedman perché può essere rappresentato come 5^2.
+Scrivi un programma in newLISP che verifica se un intero positivo N è un numero di Friedman e restituisce la relativa espressione.
+
+Sequenza OEIS A036057:
+Friedman numbers: can be written in a nontrivial way using their digits and the operations + - * / ^ and concatenation of digits (but not of results).
+  25, 121, 125, 126, 127, 128, 153, 216, 289, 343, 347, 625, 688, 736,
+  1022, 1024, 1206, 1255, 1260, 1285, 1296, 1395, 1435, 1503, 1530, 1792,
+  1827, 2048, 2187, 2349, 2500, 2501, 2502, 2503, 2504, 2505, 2506, 2507,
+  2508, 2509, 2592, 2737, 2916, 3125, 3159, ...
+
+Un numero di Friedman 'simpatico' è un numero di Friedman in cui le cifre si presentano nell'espressione nello stesso ordine in cui si trovano nel numero originale.
+Quindi, 343 è un numero di Friedman simpatico, perché può essere rappresentato da un'espressione con le cifre 3, 4 e 3 nello stesso ordine:
+
+  343 = (3 + 4)^3
+
+I primi sette numeri di Friedman simpatici sono 127, 343, 736, 1285, 2187, 2502, 2592.
+
+Algoritmo (forza bruta intelligente)
+------------------------------------
+1. digits: estrae le cifre del numero (es. `343` → `(3 4 3)`)
+2. permutations: genera tutte le permutazioni delle cifre
+3. multi-digit-splits: per ogni permutazione, genera tutte le possibili tokenizzazioni: le cifre possono essere raggruppate in numeri multi-cifra (es. (3 4 3) -> (3 43), (34 3), ecc.), escludendo zeri iniziali.
+4. build-expressions: data una sequenza di token, costruisce ricorsivamente tutte le espressioni binarie possibili (come gli alberi di parsing di una grammatica)
+5. combine: applica tutti gli operatori (+, -, *, /, ^) con controlli di sicurezza (divisione intera, potenze non negative, limite per evitare overflow)
+
+;---------------------------------------------------------
+; Genera tutte le permutazioni degli elementi di una lista
+;---------------------------------------------------------
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+;----------------------------------------------------------
+; Estrae le cifre di un numero intero e le restituisce
+; come lista di interi.
+; Esempio: 343 -> (3 4 3)
+;----------------------------------------------------------
+(define (digits n)
+  ; converte il numero in stringa, esplode in caratteri
+  ; e riconverte ogni carattere in intero
+  (map (fn (c) (int (string c))) (explode (string n))))
+
+;----------------------------------------------------------
+; Divisione sicura.
+; Restituisce nil se:
+;   - divisione per zero
+;   - divisione non intera
+;----------------------------------------------------------
+(define (safe-div a b)
+  ; controlla validità divisione
+  (if (or (= b 0) (!= (mod a b) 0))
+      nil
+      (/ a b)))
+
+;----------------------------------------------------------
+; Potenza intera sicura.
+; Limita gli esponenti per evitare overflow.
+;----------------------------------------------------------
+(define (safe-pow base expn)
+  ; controlla casi non validi
+  (cond
+    ((< expn 0) nil)
+    ((and (= base 0) (= expn 0)) nil)
+    ((> expn 20) nil)
+    ; calcolo della potenza
+    (true
+     (let ((result 1))
+       (dotimes (i expn)
+         (setq result (* result base)))
+       result))))
+
+;----------------------------------------------------------
+; Combina due espressioni applicando tutti gli operatori.
+; Ogni espressione è nella forma:
+;   (valore stringa-espressione)
+;----------------------------------------------------------
+(define (combine expr1 expr2)
+  ; estrae valore e stringa della prima espressione
+  (letn ((v1 (first expr1))
+         (s1 (last expr1))
+         ; estrae valore e stringa della seconda espressione
+         (v2 (first expr2))
+         (s2 (last expr2))
+         ; lista risultati
+         (results '()))
+    ; operazione di addizione
+    (push (list (+ v1 v2) (string "(" s1 "+" s2 ")")) results)
+    ; operazione di sottrazione
+    (push (list (- v1 v2) (string "(" s1 "-" s2 ")")) results)
+    ; operazione di moltiplicazione
+    (push (list (* v1 v2) (string "(" s1 "*" s2 ")")) results)
+    ; divisione sicura
+    (let ((d (safe-div v1 v2)))
+      (if d
+          (push (list d (string "(" s1 "/" s2 ")")) results)))
+    ; potenza sicura
+    (let ((p (safe-pow v1 v2)))
+      (if p
+          (push (list p (string "(" s1 "^" s2 ")")) results)))
+    results))
+
+;----------------------------------------------------------
+; Costruisce ricorsivamente tutte le espressioni possibili
+; da una lista di numeri.
+;----------------------------------------------------------
+(define (build-expressions token-list)
+  ; se c'è un solo numero l'espressione è il numero stesso
+  (if (= (length token-list) 1)
+      (list (list (first token-list) (string (first token-list))))
+      ; altrimenti divide la lista in due parti
+      (let ((results '()))
+        (for (i 0 (- (length token-list) 2))
+          ; divide lista in parte sinistra e destra
+          (letn ((left  (slice token-list 0 (+ i 1)))
+                 (right (slice token-list (+ i 1)))
+                 ; genera tutte le espressioni per entrambe
+                 (left-exprs  (build-expressions left))
+                 (right-exprs (build-expressions right)))
+            ; combina ogni espressione sinistra con ogni destra
+            (dolist (le left-exprs)
+              (dolist (re right-exprs)
+                (dolist (c (combine le re))
+                  (push c results))))))
+        results)))
+
+;----------------------------------------------------------
+; Genera tutte le possibili suddivisioni delle cifre
+; in numeri a più cifre.
+; Esempio:
+; (3 4 3) -> (3 4 3) (3 43) (34 3) (343)
+;----------------------------------------------------------
+(define (multi-digit-splits digit-list)
+  ; caso base
+  (if (null? digit-list)
+      '(())
+      ; lista risultati
+      (let ((results '()))
+        ; prova tutte le lunghezze del prefisso
+        (for (len 1 (length digit-list))
+          (letn ((pfx  (slice digit-list 0 len))
+                 (rdl  (slice digit-list len))
+                 ; costruzione numero dal prefisso
+                 (num-str (apply string pfx))
+                 (num     (int num-str 0 10)))
+            ; evita numeri con zero iniziale
+            (when (or (= len 1) (!= (first pfx) 0))
+              ; continua con il resto della lista
+              (dolist (sbsplit (multi-digit-splits rdl))
+                (push (cons num sbsplit) results)))))
+        results)))
+
+;----------------------------------------------------------
+; Rimuove eventuali parentesi esterne inutili
+;----------------------------------------------------------
+(define (clean-expr s)
+  (if (and (> (length s) 2)
+           (= (first s) "(")
+           (= (last s) ")"))
+      (slice s 1 (- (length s) 2))
+      s))
+
+;----------------------------------------------------------
+; Verifica se un numero è un numero di Friedman.
+; Restituisce l'espressione se trovata.
+;----------------------------------------------------------
+(define (is-friedman? n)
+  ; estrae le cifre del numero
+  (letn ((digs  (digits n))
+         ; genera tutte le permutazioni delle cifre (senza duplicati)
+         ;(perms (perm-unique digs)))
+         ;(perms (unique (permutations digs)))
+         (perms (unique (perm digs)))
+         (found nil))
+    ; ricerca con uscita anticipata
+    (catch
+      ; prova ogni permutazione
+      (dolist (p perms)
+        ; prova ogni possibile suddivisione delle cifre
+        (dolist (split (multi-digit-splits p))
+          ; evita il caso banale con un solo numero
+          (when (> (length split) 1)
+            ; genera tutte le espressioni
+            (dolist (expr (build-expressions split))
+              ; verifica se il valore coincide con n
+              (when (= (first expr) n)
+                (setq found (last expr))
+                (throw (clean-expr found))))))))
+    found))
+
+Proviamo:
+
+(is-friedman? 25)
+;-> "(5^2)"
+
+(is-friedman? 41665)
+;-> "(641*65)"
+
+(time (println (filter is-friedman? (sequence 1 2000))))
+;-> (25 121 125 126 127 128 153 216 289 343 347 625 688 736
+;->  1022 1024 1206 1255 1260 1285 1296 1395 1435 1503 1530 1792 1827)
+;-> 20093.839
+
+(time (println (filter is-friedman? (sequence 1 3159))))
+;-> (25 121 125 126 127 128 153 216 289 343 347 625 688 736
+;->  1022 1024 1206 1255 1260 1285 1296 1395 1435 1503 1530 1792
+;->  1827 2048 2187 2349 2500 2501 2502 2503 2504 2505 2506 2507
+;->  2508 2509 2592 2737 2916 3125 3159)
+;-> 42023.818
+
+Il programma funziona, ma è molto lento perché genera tutte le espressioni possibili.
+Le tre parti più critiche sono:
+1) permutazioni delle cifre
+Se il numero ha cifre ripetute (es. 343, 1285, ecc.) l'algoritmo genera molte permutazioni identiche.
+Si potrebbero generare solo le permutazioni univoche.
+2) costruzione degli alberi di espressione
+La funzione 'build-expressions' viene chiamata molte volte con gli stessi token.
+Si potrebbe utilizzare una hash-table o una lista associativa per implementare una memoization dei risultati.
+3) valori intermedi enormi
+Molte espressioni producono numeri enormi che non potranno mai tornare al valore target.
+Si potrebbero scartare subito utilizzando un valore massimo.
+
+
+--------
+x% di y%
+--------
+
+Quanto vale il 12% del 42% di un numero R?
+
+Il 12% vale 12/100,
+il 42% vale 42/100,
+quindi il 12% del 42% vale:
+  (12/100)*(42/100) = (12*42) / (100*100) = 504/10000 = 0.0504
+Cioè il (0.0504 * 100) = 5.04% del numero R.
+
+; Funzione che calcola la percentuale di un valore
+(define (perc p val) (div (mul p val) 100))
+
+Scriviamo una funzione generale che prende una lista con le percentuali ed un eventuale numero R:
+
+  (perc1 perc2 perc3 ... percN R)
+
+; Funzione che calcola le percentuali totali di un eventuale valore
+(define (perc-mult lst)
+  (let ( (R (pop lst -1))
+         (perc-tot (apply mul (map (fn(x) (div x 100)) lst))) )
+    (if R 
+        (list (mul 100 perc-tot) (mul R perc-tot))
+        ;else
+        (list (mul 100 perc-tot) R))))
+
+Proviamo:
+
+(perc-mult '(12 42 nil))
+(perc-mult '(12 42 100))
+(perc-mult '(12 42 120))
+
+Quanto vale il 200% del 50% del 100% di 120?
+(perc-mult '(200 50 100 120))
+
+Quanto vale il 100% del 100% del 100% di 100?
+(perc-mult '(50 50 50 100))
+
+Quanto vale il 60% di 200?
+(perc-mult '(60 200))
+;-> (60 120)
 
 ============================================================================
 

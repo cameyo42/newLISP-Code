@@ -3397,6 +3397,8 @@ NOTE LIBERE 35
   Sequenza "Ulisse" James Joice
   Gelfand's question
   Complessità di un intero (Mahler-Popken)
+  Numeri di Friedman
+  x% di y%
 
 PROBLEMI SUI DADI
 =================
