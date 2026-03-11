@@ -3425,6 +3425,13 @@ ma nella pratica si usa solo (n-1) perché quasi sempre è il migliore caso addi
 ;-> 33 11 (1+1)*((1+1)*((1+1)*(1+1+1+1)))+1
 ;-> 34 11 (1+1)*((1+1)*((1+1)*(1+1+1+1))+1)
 
+Sequenza OEIS A005520:
+Smallest number of complexity n: smallest number requiring n 1's to build using + and *.
+  1, 2, 3, 4, 5, 7, 10, 11, 17, 22, 23, 41, 47, 59, 89, 107, 167, 179,
+  263, 347, 467, 683, 719, 1223, 1438, 1439, 2879, 3767, 4283, 6299,
+  10079, 11807, 15287, 21599, 33599, 45197, 56039, 81647, 98999, 163259,
+  203999, 241883, 371447, 540539, 590399, 907199, ...
+
 
 ------------------
 Numeri di Friedman
@@ -3715,6 +3722,213 @@ Quanto vale il 100% del 100% del 100% di 100?
 Quanto vale il 60% di 200?
 (perc-mult '(60 200))
 ;-> (60 120)
+
+
+---------------------------------------------
+Numeri con somma delle cifre primo e divisore
+---------------------------------------------
+
+Determinare la sequenza dei numeri in cui la somma delle cifre è primo ed è divisore del numero.
+
+Esempio:
+  numero = 12
+  somma-cifre = 3  -->  numero primo e divisore di 12
+
+Sequenza OEIS A062713:
+Numbers k such that the sum of the digits of k is a prime factor of k.
+  2, 3, 5, 7, 12, 20, 21, 30, 50, 70, 102, 110, 111, 120, 133, 140, 200,
+  201, 209, 210, 230, 247, 300, 308, 320, 322, 364, 407, 410, 476, 481,
+  500, 506, 511, 605, 629, 700, 704, 715, 782, 803, 832, 874, 902, 935,
+  1002, 1010, 1011, 1015, 1020, 1040, 1066, 1088, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (seq limit)
+  (let (out '())
+    (for (k 1 limit)
+      (setq somma (apply + (map (fn (c) (int (string c))) (explode (string k)))))
+      (if (and (zero? (% k somma)) (prime? somma))
+          (push k out -1)))
+    out))
+
+(seq 1088)
+;-> (2 3 5 7 12 20 21 30 50 70 102 110 111 120 133 140 200
+;->  201 209 210 230 247 300 308 320 322 364 407 410 476 481
+;->  500 506 511 605 629 700 704 715 782 803 832 874 902 935
+;->  1002 1010 1011 1015 1020 1040 1066 1088)
+
+
+-----------------------
+Numeri printer's errors
+-----------------------
+
+Il numero 2592 è un numero 'printer's errors'.
+Perché se una stampante provasse a comporre 2^59^2 e dimenticasse accidentalmente di elevare gli esponenti, non si verificherebbe alcun errore (2^59^2 --> 2^5*9^2 = 2592).
+
+Numeri in cui inserendo in qualche modo le operazioni * e ^ tra le cifre è possibile ottenere un'espressione che valuta al numero stesso.
+
+Sequenza OEIS A096298:
+Numbers, not ending with 0, that are "printer's errors".
+  2592, 34425, 312325, 492205, 3472875, 10744475, 13745725, 13942125,
+  14569245, 14706125, 16746975, 19748225, 60466176, 189637632, 373156875,
+  381358125, 514155276, 684204032, 1268929233, 1297080225, 1368408064,
+  1527672265, ...
+
+Esempi:
+  2^5 9^2 = 2592
+  3^4*425 = 34425
+  31^2*325 = 312325
+  49^2*205 = 492205
+  1*7^3*7*72375 = 173772375
+
+Sequenza OEIS A156322:
+Integers n such that if you insert between each of their digits either "*" (times), "^" (exponentiation), or "nothing" (so that two or more digits are merged to form an integer), then you can recover n in a nontrivial way (however, two "^" mustn't be adjacent - you must avoid decompositions containing a^b^c).
+  2592, 34425, 35721, 312325, 344250, 357210, 492205, 1492992, 1729665,
+  1769472, 3123250, 3365793, 3442500, 3472875, 3572100, 3639168, 4922050,
+  6718464, 6967296, 7587328, 10744475, 10756480, 13745725, 13942125,
+  14569245, 16746975, 17266392, 17296650, 17577728, 17694720, ...
+
+Quindi dobbiamo verificare se un numero può essere espresso come prodotto di termini dove ogni termine è o una sequenza di cifre consecutive o una base elevata a un esponente (entrambi formati da cifre consecutive del numero).
+
+Algoritmo
+---------
+1) 'partitions': genera tutte le 2^(n-1) partizioni delle cifre in segmenti contigui
+2) 'build-tokens': per ogni partizione esplora ricorsivamente due opzioni:
+      Opzione A: chiudere il token corrente
+      Opzione B: estendere il token corrente con ^
+3) 'check-partition': filtra i risultati cercando un prodotto uguale a 'n' con almeno un '^' usato
+4) Il punto di ingresso prova tutte le partizioni fermandosi alla prima soluzione trovata
+
+; Verifica se un numero è un "printer's error number":
+; le sue cifre possono essere partizionate in segmenti contigui
+; dove ogni segmento è un intero oppure base^exp (con base ed exp
+; formati da segmenti adiacenti), e il prodotto di tutti i termini
+; vale n. Deve esserci almeno un ^.
+; Restituisce nil oppure la stringa dell'espressione trovata.
+
+(define (printer-error? n)
+  (letn ((s      (string n))
+         (digits (map int (explode s)))
+         (len    (length digits)))
+    ; --- Converte una lista di cifre in intero ---
+    (define (digits-to-int ds)
+      (let ((result 0))
+        (dolist (d ds)
+          (setq result (+ (* result 10) d)))
+        result))
+    ; --- Genera tutte le partizioni di lst in segmenti contigui non vuoti ---
+    ; Es: (1 2 3) -> ((1)(2)(3)) ((1)(2 3)) ((1 2)(3)) ((1 2 3))
+    (define (partitions lst)
+      (if (null? lst)
+          '(())
+          (let ((result '()))
+            (for (i 1 (length lst))
+              (letn ((head (slice lst 0 i))
+                     (tail (slice lst i)))
+                (dolist (resto (partitions tail))
+                  (push (cons head resto) result -1))))
+            result)))
+    ; --- Costruisce ricorsivamente tutti i modi di assegnare ^ tra segmenti ---
+    ; parts      = lista di segmenti (es. ((2)(5)(9)(2)))
+    ; idx        = indice del segmento corrente in esame
+    ; current    = segmento o coppia (base exp) in costruzione
+    ; has-exp    = true se current è già una coppia base^exp
+    ; acc-vals   = valori numerici dei token chiusi finora
+    ; acc-exprs  = stringhe dei token chiusi finora
+    ; results    = lista accumulata di (vals exprs) completi
+    ; Ogni token può essere:
+    ;   - un intero  -> valore = digits-to-int, expr = "123"
+    ;   - base^exp   -> valore = pow(base,exp),  expr = "2^5"
+    (define (build-tokens parts idx current has-exp acc-vals acc-exprs results)
+      (letn ((k        (length parts))
+             (tok-val  (if has-exp
+                           (pow (digits-to-int (first current))
+                                (digits-to-int (last  current)))
+                           (digits-to-int current)))
+             (tok-expr (if has-exp
+                           (string (digits-to-int (first current))
+                                   "^"
+                                   (digits-to-int (last  current)))
+                           (string (digits-to-int current)))))
+        (if (= idx k)
+            ; Tutti i segmenti consumati: chiudi l'ultimo token e salva
+            (when (and (> tok-val 0) (= tok-val (int tok-val)))
+              (push (list (append acc-vals  (list (int tok-val)))
+                          (append acc-exprs (list tok-expr)))
+                    results -1))
+            (begin
+              ; Opzione A: chiudi il token corrente e inizia un nuovo token
+              ;            col segmento idx
+              (when (and (> tok-val 0) (= tok-val (int tok-val)))
+                (setq results
+                      (build-tokens parts
+                                    (+ idx 1)
+                                    (nth idx parts)
+                                    nil
+                                    (append acc-vals  (list (int tok-val)))
+                                    (append acc-exprs (list tok-expr))
+                                    results)))
+              ; Opzione B: estendi il token corrente usando ^ con il segmento idx
+              ;            (solo se non c'è già un esponente)
+              (when (not has-exp)
+                (setq results
+                      (build-tokens parts
+                                    (+ idx 1)
+                                    (list current (nth idx parts))
+                                    true
+                                    acc-vals
+                                    acc-exprs
+                                    results)))))
+        results))
+    ; --- Controlla una singola partizione ---
+    ; Una soluzione valida richiede:
+    ;   - almeno un ^ (length vals < length parts)
+    ;   - prodotto dei valori = n
+    ; Restituisce la stringa dell'espressione o nil
+    (define (check-partition parts)
+      (letn ((token-lists (build-tokens parts 1 (nth 0 parts) nil '() '() '()))
+             (found nil))
+        (dolist (entry token-lists found)
+          (letn ((vals  (first entry))
+                 (exprs (last  entry)))
+            (when (and (< (length vals) (length parts))
+                       (= n (apply * vals)))
+              (setq found (join exprs " * ")))))
+        found))
+    ; --- Punto di ingresso: prova tutte le partizioni ---
+    (letn ((all-parts (partitions digits))
+           (found nil))
+      (dolist (p all-parts found)
+        (letn ((res (check-partition p)))
+          (when res (setq found res)))))))
+
+Proviamo:
+
+(printer-error? 2592)
+;-> "2^5 * 9^2"
+
+(printer-error? 35721)
+;-> "3^5 * 7 * 21" 
+3^5 * 7 * 21 = 35721
+
+(* (pow 3 5) 7 21)
+(map printer-error? '(2592 34425 312325 492205 3472875 10744475 13745725 60466176))
+;-> ("2^5 * 9^2" "3^4 * 425" "31^2 * 325" "49^2 * 205" "3^4 * 7^2 * 875"
+;->  "1^0 * 7^4 * 4475" "1^3 * 7^4 * 5725" "6^4 * 6^6 * 1^76")
+
+(map printer-error? '(1234 9999 2593 34426))
+;-> (nil nil nil nil)
+
+(filter printer-error? (sequence 1 1e4))
+;-> (2592)
+
+La funzione è molto lenta:
+(time (println (filter printer-error? (sequence 1 1e5))))
+;-> (2592 34425 35721)
+;-> 42946.466
 
 ============================================================================
 

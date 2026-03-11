@@ -3399,6 +3399,8 @@ NOTE LIBERE 35
   Complessità di un intero (Mahler-Popken)
   Numeri di Friedman
   x% di y%
+  Numeri con somma delle cifre primo e divisore
+  Numeri printer's errors
 
 PROBLEMI SUI DADI
 =================
