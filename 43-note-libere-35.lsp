@@ -3930,5 +3930,245 @@ La funzione è molto lenta:
 ;-> (2592 34425 35721)
 ;-> 42946.466
 
+
+--------------------------
+Stringhe "Number-Sum-Char"
+--------------------------
+
+Una stringa "Number-Sum-Char" di un numero intero N ha le seguenti proprietà:
+1) è costituita da numeri in lettere la cui somma vale N.
+2) la somma dei caratteri dei numeri in lettere vale N.
+
+Esempi:
+
+  N = 11
+  Stringa NSC = "uno più tre più sette"
+  1) 1 + 3 + 7 = 11
+  2) (uno)3 + (tre)3 + (sette)5 = 11, cioè length("unotresette") = 11
+
+  N = 21
+  Stringa NSC = "quattro più quattro più tredici" 
+  1) 4 + 4 + 13 = 21
+  2) length("quattroquattrotredici") = 21
+
+; ---------------------------------------------------------
+; Lista dei numeri e loro rappresentazione in lettere
+; (0 "zero") ... (100 "cento") espandibile
+; Ogni numero ha associata la sua stringa in italiano
+; ---------------------------------------------------------
+(setq names
+'((0 "zero") (1 "uno") (2 "due") (3 "tre") (4 "quattro") (5 "cinque")
+  (6 "sei") (7 "sette") (8 "otto") (9 "nove") (10 "dieci") (11 "undici")
+  (12 "dodici") (13 "tredici") (14 "quattordici") (15 "quindici")
+  (16 "sedici") (17 "diciassette") (18 "diciotto") (19 "diciannove")
+  (20 "venti") (21 "ventuno") (22 "ventidue") (23 "ventitre")
+  (24 "ventiquattro") (25 "venticinque") (26 "ventisei") (27 "ventisette")
+  (28 "ventotto") (29 "ventinove") (30 "trenta") (31 "trentuno")
+  (32 "trentadue") (33 "trentatre") (34 "trentaquattro") (35 "trentacinque")
+  (36 "trentasei") (37 "trentasette") (38 "trentotto") (39 "trentanove")
+  (40 "quaranta") (41 "quarantuno") (42 "quarantadue") (43 "quarantatre")
+  (44 "quarantaquattro") (45 "quarantacinque") (46 "quarantasei")
+  (47 "quarantasette") (48 "quarantotto") (49 "quarantanove")
+  (50 "cinquanta") (51 "cinquantuno") (52 "cinquantadue") (53 "cinquantatre")
+  (54 "cinquantaquattro") (55 "cinquantacinque") (56 "cinquantasei")
+  (57 "cinquantasette") (58 "cinquantotto") (59 "cinquantanove")
+  (60 "sessanta") (61 "sessantuno") (62 "sessantadue") (63 "sessantatre")
+  (64 "sessantaquattro") (65 "sessantacinque") (66 "sessantasei")
+  (67 "sessantasette") (68 "sessantotto") (69 "sessantanove") (70 "settanta")
+  (71 "settantuno") (72 "settantadue") (73 "settantatre")
+  (74 "settantaquattro") (75 "settantacinque") (76 "settantasei")
+  (77 "settantasette") (78 "settantotto") (79 "settantanove") (80 "ottanta")
+  (81 "ottantuno") (82 "ottantadue") (83 "ottantatre") (84 "ottantaquattro")
+  (85 "ottantacinque") (86 "ottantasei") (87 "ottantasette") (88 "ottantotto")
+  (89 "ottantanove") (90 "novanta") (91 "novantuno") (92 "novantadue")
+  (93 "novantatre") (94 "novantaquattro") (95 "novantacinque")
+  (96 "novantasei") (97 "novantasette") (98 "novantotto") (99 "novantanove")
+  (100 "cento")))
+
+; ---------------------------------------------------------
+; Precalcolo della lista dei numeri con lunghezze e delta
+; Ogni elemento di 'nums' contiene:
+;   (n len delta)
+;   - n     = valore numerico
+;   - len   = lunghezza del numero in lettere (minuscole)
+;   - delta = n - len
+; Ordiniamo poi per delta crescente per ottimizzare il backtracking
+; ---------------------------------------------------------
+(setq nums '())
+(dolist (p names)
+  (letn ((n (p 0)) (l (length (lower-case (p 1)))))
+    (if (> n 0)
+      (push (list n l (- n l)) nums -1))))
+(setq nums (sort nums (fn (a b) (< (a 2) (b 2)))))
+
+; ---------------------------------------------------------
+; Funzione: expr-string
+; Dato un elenco di numeri, costruisce la stringa finale in lettere
+; concatenando i nomi dei numeri con " più "
+; ---------------------------------------------------------
+(define (expr-string lst)
+  (join (map (fn (x) (lower-case (lookup x names))) lst) " più "))
+
+; ---------------------------------------------------------
+; Funzione: expr-len
+; Calcola la lunghezza della stringa finale di una lista di numeri
+; Conta solo i caratteri dei numeri (esclude spazi e 'più')
+; ---------------------------------------------------------
+(define (expr-len lst)
+  (let ((total 0))
+    (dolist (x lst)
+      (setq total (+ total (length (lower-case (lookup x names))))))
+    total))
+
+; ---------------------------------------------------------
+; Funzione: find-NSC
+; Ricerca combinazioni di numeri tali che:
+;   - la somma dei numeri = target
+;   - la lunghezza della stringa (dei soli numeri) = target
+; Algoritmo:
+;   - Ricorsione con backtracking (ottimizzato)
+;   - 'lst' = numeri scelti finora
+;   - 'sum' = somma corrente dei numeri
+;   - 'len' = lunghezza corrente della stringa
+;   - 'start' = indice corrente in 'nums' per evitare duplicati
+; ---------------------------------------------------------
+(define (find-NSC target)
+  ; Lista risultato di tutte le combinazioni valide
+  (let ((out '()))
+    ; Funzione interna ricorsiva per il backtracking
+    ; lst   = lista dei numeri scelti finora
+    ; sum   = somma dei numeri scelti
+    ; len   = somma delle lettere dei numeri scelti
+    ; start = indice corrente in nums per evitare duplicati
+    (define (searcha lst sum len start)
+      ; Ciclo su tutti i numeri a partire da start
+      (for (i start (- (length nums) 1))
+        (letn ((n (nums i 0))   ; valore numerico corrente
+               (ln (nums i 1))) ; lunghezza in lettere del numero
+          ; Nuove variabili aggiornate per questo ramo della ricorsione
+          (let ((new-lst (append lst (list n)))  ; aggiunge il numero corrente alla lista
+                (new-sum (+ sum n))              ; aggiorna la somma dei numeri
+                (new-len (+ len ln)))            ; aggiorna la somma delle lettere
+            ; Potatura: se la somma dei numeri supera il target, non esplorare questo ramo
+            (when (<= new-sum target)
+              ; Potatura: se la somma delle lettere supera il target, non esplorare
+              (when (<= new-len target)
+                ; Se entrambe le condizioni sono esattamente uguali al target
+                (if (and (= new-sum target) (= new-len target))
+                    ; Combinazione valida → aggiungi la stringa finale in out
+                    (push (expr-string new-lst) out -1)
+                    ; Altrimenti continua la ricorsione dal numero corrente
+                    (searcha new-lst new-sum new-len i))))))))
+    ; Avvio della ricerca con lista vuota, somma e lunghezza iniziali 0, indice 0
+    (searcha '() 0 0 0)
+    ; Restituisce la lista di combinazioni valide
+    out))
+
+Spiegazione:
+1. Backtracking ricorsivo: esplora tutte le combinazioni possibili dei numeri memorizzati in 'nums'.
+2. Pruning/potatura:
+   - Se (sum > target) -> stop
+   - Se (len > target) -> stop
+3. Controllo combinazione valida:
+   - sum = target
+   - len = target (solo lettere dei numeri)
+4. Start index: permette di riusare numeri, evitando duplicati e combinazioni già viste in ordine diverso.
+5. (append lst (list n)): crea una nuova lista per il ramo ricorsivo, evitando di modificare 'lst' originale.
+6. (push ... out -1): aggiunge la combinazione finale all’output in coda alla lista.
+
+; ---------------------------------------------------------
+; Funzione: find-NSC (senza commenti)
+; Ricerca combinazioni di numeri tali che:
+;   - la somma dei numeri = target
+;   - la lunghezza della stringa = target
+; ---------------------------------------------------------
+(define (find-NSC target)
+  (let ((out '()))
+    (define (searcha lst sum len start)
+      (for (i start (- (length nums) 1))
+        (letn ((n (nums i 0)) (ln (nums i 1)))
+          (let ((new-lst (append lst (list n)))
+                (new-sum (+ sum n))
+                (new-len (+ len ln)))
+            (when (<= new-sum target)
+              (when (<= new-len target)
+                (if (and (= new-sum target) (= new-len target))
+                    (push (expr-string new-lst) out -1)
+                    (searcha new-lst new-sum new-len i))))))))
+    (searcha '() 0 0 0)
+    out))
+
+Proviamo:
+
+(find-NSC 3)
+;-> "tre"
+(find-NSC 8)
+;-> ("uno più sette")
+(find-NSC 10)
+;-> ("quattro più sei" "uno più uno più otto")
+(find-NSC 11)
+;-> ("uno più tre più sette" "due più due più sette")
+(find-NSC 21)
+;-> ("quattro più quattro più tredici"
+;->  "quattro più uno più uno più quindici"
+;->  "quattro più uno più tre più tre più dieci"
+;->  "quattro più uno più tre più sette più sei"
+;->  "quattro più cinque più due più dieci"
+;->  "quattro più due più due più tre più dieci"
+;->  "quattro più due più due più sette più sei"
+;->  "quattro più tre più quattordici"
+;->  "uno più uno più uno più uno più uno più sedici"
+;->  ...
+;->  "cinque più due più due più tre più tre più sei"
+;->  "due più due più due più due più due più undici"
+;->  "due più due più due più tre più tre più tre più sei"
+;->  "tre più tre più tre più tre più tre più tre più tre")
+
+Test di velocità:
+
+(time (println (length (find-NSC 35))))
+;-> 515
+;-> 1328.552
+(time (println (length (find-NSC 40))))
+;-> 1165
+;-> 3780.109
+(time (println (length (find-NSC 45))))
+;-> 2627
+;-> 10241.541
+
+Test di correttezza:
+; ---------------------------------------------------------
+; Funzione: check-solution
+; Verifica la correttezza delle soluzioni generate da 'find-NSC'
+; ---------------------------------------------------------
+; Lista di elementi: (numero-lettere numero)
+(setq numbers (map (fn(x) (list (x 1) (x 0))) names))
+(define (check-solution num lst)
+  (let ( (str "") (somma 0) )
+    ; Primo controllo: lunghezza caratteri dei numeri = num
+    (dolist (el lst)
+      (setq str (replace " più " el ""))
+      (when (!= num (length str)) ; Errore
+          (print num { } str { } (length str))))
+    ; Secondo controllo: somma dei numeri in lettere = num
+    (dolist (el lst)
+      (setq numeri (parse (replace "più" el "")))
+      (setq somma 0)
+      (dolist (el numeri) (++ somma (lookup el numbers)))
+      (when (!= num somma) ; Errore
+          (print num { } str { } somma)))))
+
+Proviamo:
+
+(check-solution 11 (find-NSC 11))
+;-> nil
+
+(check-solution 35
+  '("cinque più cinque più cinque più due più due più tre più sette più sei"))
+;-> nil
+
+(check-solution 35 (find-NSC 35))
+;-> nil
+
 ============================================================================
 

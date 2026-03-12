@@ -3401,6 +3401,7 @@ NOTE LIBERE 35
   x% di y%
   Numeri con somma delle cifre primo e divisore
   Numeri printer's errors
+  Stringhe "Number-Sum-Char"
 
 PROBLEMI SUI DADI
 =================

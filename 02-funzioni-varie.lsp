@@ -2739,28 +2739,28 @@ Questo problema è più difficile da risolvere per la lingua italiana che per qu
 
 Come prima cosa definiamo alcune liste:
 
-  ; la cifra 1
-  (setq un "Un")
-  ; le dieci cifre - codeA
-  (setq cifre '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
-    "Otto" "Nove"))
-  ; i primi venti numeri - code
-  (setq venti '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
-    "Otto" "Nove" "Dieci" "Undici" "Dodici" "Tredici" "Quattordici"
-    "Quindici" "Sedici" "Diciassette" "Diciotto" "Diciannove"))
-  ; le decine - codeB
-  (setq decine '("" "" "Venti" "Trenta" "Quaranta" "Cinquanta"
-    "Sessanta" "Settanta" "Ottanta" "Novanta"))
-  ; le decine senza vocali - codeB1
-  (setq dcn    '("" "" "Vent" "Trent" "Quarant" "Cinquant"
-    "Sessant" "Settant" "Ottant" "Novant"))
-  ; il numero 100
-  (setq cento "Cento")
-  ; multipli con la cifra 1 - codeC
-  (setq multiplo '("" "Mille" "Milione" "Miliardo" "Bilione" "Biliardo"
-    "Trilione" "Triliardo" "Quadrilione" "Quadriliardo"))
-  ; multipli con la cifra diversa da 1 - codeC1
-  (setq multipli '("" "Mila" "Milioni" "Miliardi" "Bilioni" "Biliardi"
+; la cifra 1
+(setq un "Un")
+; le dieci cifre - codeA
+(setq cifre '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+  "Otto" "Nove"))
+; i primi venti numeri - code
+(setq venti '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+  "Otto" "Nove" "Dieci" "Undici" "Dodici" "Tredici" "Quattordici"
+  "Quindici" "Sedici" "Diciassette" "Diciotto" "Diciannove"))
+; le decine - codeB
+(setq decine '("" "" "Venti" "Trenta" "Quaranta" "Cinquanta"
+  "Sessanta" "Settanta" "Ottanta" "Novanta"))
+; le decine senza vocali - codeB1
+(setq dcn    '("" "" "Vent" "Trent" "Quarant" "Cinquant"
+  "Sessant" "Settant" "Ottant" "Novant"))
+; il numero 100
+(setq cento "Cento")
+; multipli con la cifra 1 - codeC
+(setq multiplo '("" "Mille" "Milione" "Miliardo" "Bilione" "Biliardo"
+  "Trilione" "Triliardo" "Quadrilione" "Quadriliardo"))
+; multipli con la cifra diversa da 1 - codeC1
+(setq multipli '("" "Mila" "Milioni" "Miliardi" "Bilioni" "Biliardi"
     "Trilioni" "Triliardi" "Quadrilioni" "Quadriliardi"))
 
 Poichè la lettura di un numero procede per gruppi di tre (partendo da sinistra) scriviamo una funzione che converte in lettere un numero con 3 cifre. I numeri con una o due cifre devono essere riempiti con degli zeri: 000,001,002,...,999.
