@@ -3402,6 +3402,7 @@ NOTE LIBERE 35
   Numeri con somma delle cifre primo e divisore
   Numeri printer's errors
   Stringhe "Number-Sum-Char"
+  Numeri primi e crivello di Eratostene
 
 PROBLEMI SUI DADI
 =================

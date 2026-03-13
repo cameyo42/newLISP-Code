@@ -4170,5 +4170,154 @@ Proviamo:
 (check-solution 35 (find-NSC 35))
 ;-> nil
 
+
+-------------------------------------
+Numeri primi e crivello di Eratostene
+-------------------------------------
+
+Crivello di Eratostene:
+1. Si crea un array booleano di dimensione N+1, inizialmente tutto 'true'
+2. Si marcano '0' e '1' come non-primi
+3. Per ogni numero 'i' a partire da 2, se 'i' è ancora marcato come primo, si eliminano tutti i suoi multipli a partire da 'i*i'
+4. Il ciclo esterno si ferma a 'sqrt(N)' (ottimizzazione chiave: oltre quella soglia i composti sono già stati eliminati)
+5. Si raccolgono tutti gli indici ancora marcati 'true'
+
+Versione 1
+-----------
+Ottimizzazioni applicate:
+- Il ciclo esterno arriva solo fino a 'sqrt(N)' invece di 'N'
+- I multipli partono da 'i*i' invece che da '2i' (quelli inferiori sono già stati eliminati da fattori precedenti)
+- Uso di un array invece di una lista per accesso O(1)
+- La raccolta finale scorre al contrario e usa 'push' per evitare 'append' ripetute
+La complessità è O(N*log(log N)), che è quasi lineare e praticamente ottimale per questo problema.
+
+(define (primi1 N)
+  (if (< N 2)
+    '()
+    (let (sieve (array (+ N 1) (list true)))
+      (setf (sieve 0) nil)
+      (setf (sieve 1) nil)
+      (let (i 2)
+        (while (<= (* i i) N)
+          (when (sieve i)
+            (let (j (* i i))
+              (while (<= j N)
+                (setf (sieve j) nil)
+                (inc j i))))
+          (inc i)))
+      (let (result '())
+        (for (k N 2 -1)
+          (when (sieve k)
+            (push k result)))
+        result))))
+
+Proviamo:
+
+(primi1 50)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47)
+
+(time (println (length (primi1 1e6))))
+;-> 78498
+;-> 325.058
+
+(time (println (length (primi1 1e7))))
+;-> 664579
+;-> 3712.06
+
+Versione 2
+----------
+Ottimizzaioni applicate:
+- Salto dei pari: (for (x 3 num 2)
+Il ciclo esterno parte da 3 e avanza di 2, saltando tutti i numeri pari. La metà dei candidati viene ignorata a priori.
+- Salto dei multipli pari: (for (y (* x x) num (* 2 x)
+Il ciclo interno avanza di '2x' invece di 'x', saltando i multipli pari di ogni primo (già esclusi dal ciclo esterno). Dimezza le scritture sull'array.
+- Array senza inizializzazione: (array (+ num 1))
+Nessun 'true' come valore iniziale: l'array parte con 'nil' ovunque, e 'nil' significa "primo" (logica invertita). Si scrive 'true' solo sui composti, evitando di inizializzare N+1 celle.
+
+(define (primi2 num)
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (nil? (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+Proviamo:
+
+(primi2 50)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47)
+
+(time (println (length (primi2 1e6))))
+;-> 78498
+;-> 140.176
+
+(time (println (length (primi2 1e7))))
+;-> 664579
+;-> 1629.982
+
+(time (println (length (primi2 1e8))))
+;-> 5761455
+;-> 18657.478
+
+;;; Non provare !!!
+;;; (time (println (length (primi2 1e9))))
+La funzione 'primi2' può calcolare i primi fino 1e8, poi crasha il sistema (32 Gb RAM).
+
+Versione 3
+----------
+Otimizzazioni applicate:
+L'idea è comprimere il crivello memorizzando solo i numeri dispari.
+Mapping semplice:
+  indice i --> numero = 2*i + 3
+quindi l'array rappresenta:
+  3,5,7,9,11,13,...
+La dimensione diventa circa N/2 invece di N, e tutti i multipli pari spariscono automaticamente.
+Quando troviamo un primo 'p', il primo multiplo da eliminare è 'p*p'.
+L'indice corrispondente è: ((p*p) - 3) / 2 e gli incrementi sono 'p'.
+
+(define (primi3 N)
+  (cond ((< N 2) '())
+        ((< N 3) '(2))
+        (true
+          (letn ((m (/ (- N 3) 2))
+                 (arr (array (+ m 1)))
+                 (lim (/ (- (int (sqrt N)) 3) 2))
+                 (lst '(2)))
+            (for (i 0 lim)
+              (when (nil? (arr i))
+                (letn ((p (+ (* 2 i) 3))
+                       (j (/ (- (* p p) 3) 2)))
+                  (for (k j m p (> k m))
+                    (setf (arr k) true)))))
+            (for (i 0 m)
+              (when (nil? (arr i))
+                (push (+ (* 2 i) 3) lst -1)))
+            lst))))
+
+Proviamo:
+
+(primi3 50)
+;-> (2 3 5 7 11 13 17 19 23 29 31 37 41 43 47)
+
+(time (println (length (primi3 1e6))))
+;-> 78498
+;-> 114.421
+
+(time (println (length (primi3 1e7))))
+;-> 664579
+;-> 1379.886
+
+(time (println (length (primi3 1e8))))
+;-> 5761455
+;-> 15500.004
+
+Con questa versione possiamo calcolare i numeri primi fino a 1e9 (32 GB RAM):
+(time (println (length (primi3 1e9))))
+;-> 50847534
+;-> 178960.989
+
 ============================================================================
 
