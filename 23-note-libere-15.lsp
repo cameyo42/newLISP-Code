@@ -4952,7 +4952,9 @@ Funzione "sequence" e "series"
 *********************
 sintassi: (sequence num-start num-end [num-step])
 
-Genera una sequenza di numeri da "num-start" a "num-end" con una dimensione passo facoltativa di "num-step". Quando "num-step" viene omesso, si assume il valore 1 (uno). I numeri generati sono di tipo intero (quando non è specificata alcuna dimensione del passo opzionale) o virgola mobile (quando è presente la dimensione del passo opzionale).
+Genera una sequenza di numeri da "num-start" a "num-end" con una dimensione passo facoltativa di "num-step".
+Quando "num-step" viene omesso, si assume il valore 1 (uno).
+I numeri generati sono di tipo intero (quando non è specificata alcuna dimensione del passo opzionale) o virgola mobile (quando è presente la dimensione del passo opzionale).
 
 (sequence 10 5)
 ;-> (10 9 8 7 6 5)

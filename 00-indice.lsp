@@ -3403,6 +3403,9 @@ NOTE LIBERE 35
   Numeri printer's errors
   Stringhe "Number-Sum-Char"
   Numeri primi e crivello di Eratostene
+  La funzione "sequence" per caratteri
+  Estrazione di elementi da una lista con un generatore
+  Prese elettriche
 
 PROBLEMI SUI DADI
 =================

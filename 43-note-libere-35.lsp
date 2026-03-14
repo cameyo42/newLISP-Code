@@ -57,7 +57,7 @@ Questo metodo garantisce che il gap massimo venga trovato in modo efficiente sen
   (setq max-val (apply max lst))
   ; Calcola la dimensione del bucket usando il principio pigeonhole
   ; La distanza minima possibile del gap massimo vale:
-  ; (max-val - min-val) / (len - 1)  
+  ; (max-val - min-val) / (len - 1)
   (setq bucket-dim (max 1 (/ (- max-val min-val) (- len 1))))
   (setq bucket-len (+ 1 (/ (- max-val min-val) bucket-dim)))
   ; Initializza i buckets: ogni bucket ha i valori (min max)
@@ -68,12 +68,12 @@ Questo metodo garantisce che il gap massimo venga trovato in modo efficiente sen
     (setq bucket-idx (/ (- num min-val) bucket-dim))
     (setf ((buckets bucket-idx) 0) (min ((buckets bucket-idx) 0) num))
     (setf ((buckets bucket-idx) 1) (max ((buckets bucket-idx) 1) num)))
-  ; Trova la differenza massima confrontando i bucket adiacenti non vuoti    
+  ; Trova la differenza massima confrontando i bucket adiacenti non vuoti
   (setq prev-max MAX-INT)
   (setq max-diff 0)
   (dolist (bucket buckets)
     ; Processiamo solo i bucket non vuoti: (bucket 0) <= (bucket 1).
-    ; I bucket vuoti sono quelli in cui risulta: 
+    ; I bucket vuoti sono quelli in cui risulta:
     ; (min-val > max-val) dopo l'inizializzazione.
     (when (<= (bucket 0) (bucket 1))
         ; Calcola la differenza il minimo del bucket corrente e
@@ -216,7 +216,7 @@ Vediamo una sequenza in cui la concatenazione dei numeri deve essere fatta nell'
 Sequenza OEIS A060555:
 String together the first n numbers in an order which minimizes the result.
   1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789,
-  10123456789, 1011123456789, 101111223456789, 10111121323456789, 
+  10123456789, 1011123456789, 101111223456789, 10111121323456789,
   1011112131423456789, 101111213141523456789, 10111121314151623456789,
   1011112131415161723456789, 101111213141516171823456789,
   10111121314151617181923456789, ...
@@ -248,7 +248,7 @@ Per ogni n:
 (seq4 20)
 ;-> (1L 12L 123L 1234L 12345L 123456L 1234567L 12345678L 123456789L
 ;->  10123456789L 1011123456789L 101111223456789L 10111121323456789L
-;->  1011112131423456789L 101111213141523456789L 10111121314151623456789L 
+;->  1011112131423456789L 101111213141523456789L 10111121314151623456789L
 ;->  1011112131415161723456789L 101111213141516171823456789L
 ;->  10111121314151617181923456789L 1011112131415161718192023456789L)
 
@@ -290,7 +290,7 @@ oppure:
   a(1) = 1
   a(2) = 21 (unione a sinistra)
   a(3) = 213 (unione a destra)
-  a(4) = 4213 (unione a sinistra)  
+  a(4) = 4213 (unione a sinistra)
   ...
 
 (define (seq6 num test)
@@ -391,7 +391,7 @@ Palindromes with exactly 2 prime factors (counted with multiplicity).
 (define (palindromo? num) (= (string num) (reverse (string num))))
 
 (define (palprimi N)
-  (letn ( (out '()) 
+  (letn ( (out '())
           (lst (primes-to N))
           (len (length lst)) )
     (for (i 0 (- len 1))
@@ -550,7 +550,7 @@ Esempio con k = 3:
 01110 = (1 2 3)
 10011 ...
 
-Esempi: 
+Esempi:
 
 k = 2
   "11"   = 3
@@ -1141,7 +1141,7 @@ Anche in questo caso, gli elementi adiacenti vengono confrontati e, se necessari
     (setq swapped true)
     (setq continue true)
     (while (and swapped continue)
-          ; reimposta a 'nil' il flag 'swapped' all'ingresso del ciclo, 
+          ; reimposta a 'nil' il flag 'swapped' all'ingresso del ciclo,
           ; perché potrebbe essere 'true' da un'iterazione precedente.
           (setq swapped false)
           ; ciclo da sinistra a destra come il bubble sort
@@ -1158,7 +1158,7 @@ Anche in questo caso, gli elementi adiacenti vengono confrontati e, se necessari
                 ; possa essere utilizzato nella fase successiva
                 (setq swapped nil)
                 ; sposta indietro di uno il punto finale
-                ; perchè l'elemento alla fine è nella sua posizione corretta              
+                ; perchè l'elemento alla fine è nella sua posizione corretta
                 (-- end)
                 ; ciclo da destra a sinistra,
                 ; eseguendo lo stesso confronto della fase precedente
@@ -1168,7 +1168,7 @@ Anche in questo caso, gli elementi adiacenti vengono confrontati e, se necessari
                       (setq swapped true)))
                 ; aumentare il punto di partenza,
                 ; perchè l'ultima fase ha spostato il successivo
-                ; numero più piccolo nella sua posizione corretta.                    
+                ; numero più piccolo nella sua posizione corretta.
                 (++ start))))
     ; restituisce la lista ordinata (conversione dal vettore 'arr')
     (array-list arr))
@@ -1447,7 +1447,7 @@ Esempio: lista = (3 6 5 8)
 
 ; Funzione che ordina una la lista in ordine crescente in base alla riflessione binaria di ciascun elemento
 (define (ordina lst)
-  (map last 
+  (map last
       (sort (map list (map (fn(x) (int (reverse (bits x)) 0 2)) lst) lst))))
 
 Proviamo:
@@ -1485,7 +1485,7 @@ The first 12 terms:
   10  [1933537, 31, 61, 113, 223, 443, 881, 1759, 3511, 6991, 13921]
   11  [331733953, 37, 71, 139, 277, 547, 1091, 2179, 4349, 8693, 17383, 34729]
 
-Example: 
+Example:
   Seq(5) = 331 because:
   1) 3 + 3 + 1 = 7, prime;
   2) 3 + 1  + 7 = 11, prime;
@@ -1677,7 +1677,7 @@ Possiamo rendere le funzioni molto più veloci utilizzando 'find' per trovare di
     ; reverse finale ripristina l'ordine originale
     (reverse (slice rev (find value rev !=)))))
 
-Proviamo: 
+Proviamo:
 
 (trim-leading nil a)
 ;-> (1 4 2 nil 4 nil nil 6 7 nil nil nil nil)
@@ -1913,7 +1913,7 @@ Scriviamo una funzione che calcola la costante di Cahen:
 Proviamo:
 
 (cahen 3)
-;-> (0.6428571428571428 0.000553403431195254) 
+;-> (0.6428571428571428 0.000553403431195254)
 2 cifre corrette: 0.64...
 
 (cahen 5)
@@ -2099,7 +2099,7 @@ Start with 0, then add one to each single digit.
       ; controllo coppie di cifre consecutive
       (cond ((= (cifre k) 9)
               (if-not (= (cifre (+ k 1)) 0) (setq stop true)))
-            (true  
+            (true
               (if-not (= (cifre k) (- (cifre (+ k 1)) 1)) (setq stop true)))))
     (not stop))))
 
@@ -2114,7 +2114,7 @@ Start with 0, then add one to each single digit.
       ; controllo coppie di cifre consecutive
       (cond ((= (cifre k) 0)
               (if-not (= (cifre (+ k 1)) 9) (setq stop true)))
-            (true  
+            (true
               (if-not (= (cifre k) (+ (cifre (+ k 1)) 1)) (setq stop true)))))
     (not stop))))
 
@@ -2454,7 +2454,7 @@ sia H(k) il numero composto più piccolo tale che le cifre nei suoi fattori prim
 
 Ad esempio, il numero più piccolo per k=2 che abbia questa proprietà è 1255 = 5*251.
 I valori di H(k) per k = 2,...,9 sono:
-  
+
   k  H(n)                  Fattorizzazione
   2  1255                  5*251
   3  163797                3*71*769
@@ -2463,7 +2463,7 @@ I valori di H(k) per k = 2,...,9 sono:
   6  117295838975          5*5*7*89*821*9173
   7  11099654778737        7*7*7*7*89*541*96013
   8  1091778783077899      7*7*7*7*7*809*8191*9803
-  9  1023976197718878397   7*7*7*7*61*89*971*983*82301  
+  9  1023976197718878397   7*7*7*7*61*89*971*983*82301
 
 (define (same-digits? num1 num2)
 "Check if two numbers have the same digits"
@@ -2501,7 +2501,7 @@ I valori di H(k) per k = 2,...,9 sono:
                (same-digits? num (join (map string fattori))))
       (setq sol (list num fattori))
       (setq stop true)))
-  sol) 
+  sol)
 
 (time (println (jeff 2 1e8)))
 ;-> (1255 (5 251))
@@ -2613,7 +2613,7 @@ In formule:
   con s(i) = a(i) + a(k-1-i),
   dove k è la lunghezza del numero
   per i = 0,...,(k - 1)/2, metà intervallo -> solo coppie uniche (e centro)
-  per i = 0,...,(k - 1), intervallo completo -> tutte le posizioni speculari        
+  per i = 0,...,(k - 1), intervallo completo -> tutte le posizioni speculari
 
 (define (int-list num)
 "Convert an integer to a list of digits"
@@ -3000,7 +3000,7 @@ Calcoliamo i numeri della sequenza:
 
 Le seguenti sequenze riportano solo il primo numero delle terzine:
 
-(p, p+2, p+6)         
+(p, p+2, p+6)
 Sequenza OEIS A022004:  5, 11, 17, 41, 101, 107, ...
 
 (p, p+2, p+8)
@@ -3243,14 +3243,14 @@ The (Mahler-Popken) complexity of n: minimal number of 1's required to build n u
   31....[(1+1+1)*(1+1+1)+1]*(1+1+1)+1....11
   32....(1+1)*(1+1)*(1+1)*(1+1)*(1+1)....10
   33...(1+1)*(1+1)*(1+1)*(1+1)*(1+1)+1...11
-  34..[(1+1)*(1+1)*(1+1)*(1+1)+1]*(1+1)..11  
+  34..[(1+1)*(1+1)*(1+1)*(1+1)+1]*(1+1)..11
 ...
 
 Usiamo la programmazione dinamica bottom-up.
 Relazione della programmazione dinamica bottom-up:
 
   C(n) = min [C(n-1) + 1, min(C(a) + C(b))]
-    (a*b=n, a,b>=2) 
+    (a*b=n, a,b>=2)
 
 cioè:
 
@@ -3702,7 +3702,7 @@ Scriviamo una funzione generale che prende una lista con le percentuali ed un ev
 (define (perc-mult lst)
   (let ( (R (pop lst -1))
          (perc-tot (apply mul (map (fn(x) (div x 100)) lst))) )
-    (if R 
+    (if R
         (list (mul 100 perc-tot) (mul R perc-tot))
         ;else
         (list (mul 100 perc-tot) R))))
@@ -3911,7 +3911,7 @@ Proviamo:
 ;-> "2^5 * 9^2"
 
 (printer-error? 35721)
-;-> "3^5 * 7 * 21" 
+;-> "3^5 * 7 * 21"
 3^5 * 7 * 21 = 35721
 
 (* (pow 3 5) 7 21)
@@ -3947,7 +3947,7 @@ Esempi:
   2) (uno)3 + (tre)3 + (sette)5 = 11, cioè length("unotresette") = 11
 
   N = 21
-  Stringa NSC = "quattro più quattro più tredici" 
+  Stringa NSC = "quattro più quattro più tredici"
   1) 4 + 4 + 13 = 21
   2) length("quattroquattrotredici") = 21
 
@@ -4318,6 +4318,177 @@ Con questa versione possiamo calcolare i numeri primi fino a 1e9 (32 GB RAM):
 (time (println (length (primi3 1e9))))
 ;-> 50847534
 ;-> 178960.989
+
+
+------------------------------------
+La funzione "sequence" per caratteri
+------------------------------------
+
+La funzione "sequence" genera solo sequenze di interi o float.
+
+*********************
+>>>funzione SEQUENCE
+*********************
+sintassi: (sequence num-start num-end [num-step])
+
+Genera una sequenza di numeri da "num-start" a "num-end" con una dimensione passo facoltativa di "num-step".
+Quando "num-step" viene omesso, si assume il valore 1 (uno).
+I numeri generati sono di tipo intero (quando non è specificata alcuna dimensione del passo opzionale) o virgola mobile (quando è presente la dimensione del passo opzionale).
+
+Scriviamo una funzione che genera sequnze di caratteri.
+
+; Funzione che genera sequenze di caratteri
+(define (sequence-char start end step)
+  (let ( (a (char start)) (b (char end)) (k (or step 1)) )
+    (map char (sequence a b k))))
+
+Proviamo:
+
+(sequence-char "A" "C")
+;-> ("A" "B" "C")
+(sequence-char "a" "z" 2)
+;-> ("a" "c" "e" "g" "i" "k" "m" "o" "q" "s" "u" "w" "y")
+(sequence-char "a" "z" -2)
+;-> ("a" "c" "e" "g" "i" "k" "m" "o" "q" "s" "u" "w" "y")
+(sequence-char "a" "Z")
+;-> ("a" "`" "_" "^" "]" "\\" "[" "Z")
+(join (sequence-char "a" "h"))
+;-> "abcdefgh"
+
+
+-----------------------------------------------------
+Estrazione di elementi da una lista con un generatore
+-----------------------------------------------------
+
+Data una funzione e una lista, scrivere un programma che restituisce il primo elemento della lista per cui la funzione restituisce un valore vero, così come la lista senza quell'elemento.
+Questo è utile in situazioni in cui si desidera consumare iterativamente gli elementi da una lista.
+
+Utilizziamo un generatore al'interno di un contesto.
+
+; Funzione che inizializza il generatore
+(define (extract:init lst func)
+  (setq extract:lst lst)
+  (setq extract:func func))
+
+; Funzione che restituisce:
+; a) il primo elemento della lista per cui la funzione data restituisce vero,
+; b) la lista senza quell'elemento
+(define (extract:extract)
+  (let ((stop nil) (val nil))
+    (dolist (el extract:lst stop)
+      (when (extract:func el) ; (func el) == true
+        ; toglie dalla lista corrente solo l'elemento trovato
+        ;(setq val (pop extract:lst $idx))
+        ; toglie dalla lista corrente gli elementi dal primo
+        ; fino all'elemento trovato compreso
+        (setq val el)
+        (setq extract:lst (slice extract:lst (+ $idx 1)))
+        ; esce dal ciclo
+        (setq stop true)))
+    (if val (list val extract:lst) nil)))
+
+; Funzione da passare al generatore
+(define (f x) (odd? x))
+
+Inizializziamo il generatore con una lista e la funzione (f x):
+(extract:init '(1 2 3 4 5 11 7 2 21 2) f)
+
+Estraiamo gli elementi:
+
+(extract:extract)
+;-> (1 (2 3 4 5 11 7 2 21 2))
+(extract:extract)
+;-> (3 (4 5 11 7 2 21 2))
+(extract:extract)
+;-> (5 (11 7 2 21 2))
+(extract:extract)
+;-> (11 (7 2 21 2))
+(extract:extract)
+;-> (7 (2 21 2))
+(extract:extract)
+;-> (21 (2))
+(extract:extract)
+;-> nil
+
+Possiamo anche definire un 'alias' per la funzione (extract:extract):
+(define _ext extract:extract)
+
+(extract:init '(1 5 2 3) f)
+(_ext)
+;-> (1 (5 2 3))
+(_ext)
+;-> (5 (2 3))
+(_ext)
+;-> (3 ())
+(_ext)
+;-> nil
+
+Vediamo quanti simboli esistono nel contesto 'extract':
+
+(define (simboli contesto) (dotree (el contesto) (println el)) '>)
+(simboli extract)
+;-> extract:extract
+;-> extract:func
+;-> extract:init
+;-> extract:lst
+
+
+----------------
+Prese elettriche
+----------------
+
+Un appartamento ha N prese elettriche a muro.
+Inoltre abbiano M prese multiple che possono avere da 2 a K uscite.
+Quanti apparecchi elettrici possiamo usare utilizzando tutte le prese?
+
+Esempio:
+ N = 1, una presa a muro
+ M = 2 --> (2 3), 2 prese multiple con 2 e 3 ingressi
+ Attacchiamo la presa multipla (2) a muro --> (+ 2)
+ Attacchiamo la presa multipla (3) alla presa multipla (2) --> (- 1 + 3).
+ Prese totali = 2 - 1 + 3 = 4
+
+La formula è:
+
+  Prese-Totali = N - M + Sum[i=1,M]S(i)
+
+dove N = numero di prese a muro
+     M = numero di prese multiple
+     S = lista con i valori di ogni presa multipla (M valori)
+     S(i) = numero di uscite della i-esima presa multipla
+
+Spiegazione
+-----------
+All'inizio abbiamo N prese.
+Una presa multipla occupa una presa ma ne crea S(i) nuove.
+Quindi il guadagno netto della i-esima presa multipla vale:
+
+  guadagno(i) = S(i) - 1
+
+Dopo aver collegato tutte le M prese multiple:
+
+  Totale = N + somma(S(i) - 1) per i = 1..M
+
+cioè:
+
+  Totale = N - M + Sum[i=1,M]S(i)
+
+Una presa multipla puo essere collegata solo se esiste una presa libera.
+Dopo aver collegato k prese multiple, perche il processo sia sempre possibile deve esserci sempre almeno una presa libera per collegare la successiva.
+Inoltre, poichè risulta (S(i) >= 2), ogni presa multipla aumenta sempre il numero totale di prese.
+Quindi se N >= 1 possiamo sempre collegare tutte le prese multiple e l'ordine non ha importanza.
+
+; Funzione che calcola il numero totale di prese elettriche disponibili
+(define (prese N S)
+  (+ N (- (apply + S) (length S))))
+
+Proviamo:
+
+(prese 1 '(2 3))
+;-> 4
+
+(prese 4 '(3 3 3 3 2 2))
+;-> 14
 
 ============================================================================
 
