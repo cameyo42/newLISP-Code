@@ -4490,5 +4490,351 @@ Proviamo:
 (prese 4 '(3 3 3 3 2 2))
 ;-> 14
 
+
+---------------------------------
+Incontro tra robot in una griglia
+---------------------------------
+
+Due robot vengono posizionati su una griglia MxN.
+I robot si muovono simultaneamente a caso in una cella adiacente (se possibile).
+Ogni robot può spostarsi in una delle 8 celle adiacenti (N,E,S,O,NE,SE,SO,NO).
+I robot non possono oltrepassare i bordi della griglia (cioè se lo spostamento casuale non è possibile, allora il robot rimane fermo).
+Quando i robot si trovano nella stessa cella, allora il processo finisce.
+
+; Funzione che stampa la griglia
+(define (print-grid grid ch0 ch1 coord)
+"Print a matrix with only digits (0..9)"
+  (local (row col)
+    (setq row (length grid))
+    (setq col (length (first grid)))
+    ; indici di colonna della griglia
+    (if coord
+        (println "  " (join (map (fn(x) (format "%2d" x)) (sequence 0 (- col 1))))))
+    (for (i 0 (- row 1))
+      ; indice di riga della griglia
+      (if coord (print (format "%2d" i)))
+      ; stampa della griglia
+      (for (j 0 (- col 1))
+        (if (and (!= ch0 "") (!= ch1 ""))
+            (begin
+              (cond ((= (grid i j) 0) (print ch0))
+                    ((= (grid i j) 1) (print ch1))
+                    (true
+                      (print (format "%2d" (grid i j))))))
+            ;else
+            (print (format "%2d" (grid i j)))))
+      (println))))
+
+; Funzione che simula il processo di movimento dei due robot
+(define (robot-meet M N p1 p2)
+  (letn ((grid (array M N '(0)))
+         (moves '((-1 -1) (-1 0) (-1 1) (0 -1) (0 1) (1 -1) (1 0) (1 1)))
+         (x1 (p1 0)) (y1 (p1 1))
+         (x2 (p2 0)) (y2 (p2 1))
+         (steps 0) (finito nil))
+    (setf (grid x1 y1) 1)
+    (setf (grid x2 y2) 1)
+    (print-grid grid ". " "1 ")
+    (read-line)
+    (until finito
+      (++ steps)
+      ; muove robot 1
+      (letn ((m1 (moves (rand 8)))
+             (nx1 (+ x1 (m1 0)))
+             (ny1 (+ y1 (m1 1))))
+        (if (and (>= nx1 0) (< nx1 M) (>= ny1 0) (< ny1 N))
+            (begin
+              (setf (grid x1 y1) 0)
+              (setf (grid nx1 ny1) 1)
+              (setq x1 nx1) (setq y1 ny1))))
+      ; muove robot 2
+      (letn ((m2 (moves (rand 8)))
+             (nx2 (+ x2 (m2 0)))
+             (ny2 (+ y2 (m2 1))))
+        (if (and (>= nx2 0) (< nx2 M) (>= ny2 0) (< ny2 N))
+            (begin
+              (setf (grid x2 y2) 0)
+              (setf (grid nx2 ny2) 1)
+              (setq x2 nx2) (setq y2 ny2))))
+      ; stampa griglia corrente
+      (print-grid grid ". " "1 ")
+      (read-line)
+      ; controllo collisione
+      (if (and (= x1 x2) (= y1 y2))
+          (setq finito true)))
+    (list finito steps (list x1 y1) (list x2 y2))))
+
+Proviamo:
+
+(robot-meet 5 5 '(0 0) '(4 4) 1000)
+;-> 1 . . . .
+;-> . . . . .
+;-> . . . . .
+;-> . . . . .
+;-> . . . . 1
+;-> 
+;-> . 1 . . .
+;-> . . . . .
+;-> . . . . .
+;-> . . . . .
+;-> . . . 1 .
+;-> 
+;-> ...
+;-> 
+;-> . 1 . . .
+;-> . . . . .
+;-> . . . . .
+;-> . . . . .
+;-> . . . . .
+;-> 
+;-> (true 13 (0 1) (0 1))
+
+; Funzione che calcola il numero di passi di un processo
+(define (robot-meet-fast M N x1 y1 x2 y2)
+  (let ((dx (array 8 '(-1 -1 -1 0 0 1 1 1)))
+        (dy (array 8 '(-1 0 1 -1 1 -1 0 1)))
+        (steps 0)
+        (finito nil)
+        r nx ny)
+    (until finito
+      (++ steps)
+      ; muove robot 1
+      (setq r (rand 8))
+      (setq nx (+ x1 (dx r)))
+      (setq ny (+ y1 (dy r)))
+      (if (and (>= nx 0) (< nx M) (>= ny 0) (< ny N))
+          (begin (setq x1 nx) (setq y1 ny)))
+      ; muove robot 2
+      (setq r (rand 8))
+      (setq nx (+ x2 (dx r)))
+      (setq ny (+ y2 (dy r)))
+      (if (and (>= nx 0) (< nx M) (>= ny 0) (< ny N))
+          (begin (setq x2 nx) (setq y2 ny)))
+      ; controllo collisione
+      (if (and (= x1 x2) (= y1 y2))
+          (setq finito true)))
+    steps))
+
+Proviamo:
+
+(collect (robot-meet-fast 5 5 0 0 4 4) 10)
+;-> (38 166 33 24 32 69 65 43 94 37)
+
+; Funzione ausiliaria per calcolare la media dei passi di 'iter' processi
+(define (robot-stat-aux M N x1 y1 x2 y2 dx dy)
+  (local (steps finito r nx ny)
+    (setq steps 0)
+    (until finito
+      (++ steps)
+      (setq r (rand 8))
+      (setq nx (+ x1 (dx r)))
+      (setq ny (+ y1 (dy r)))
+      (when (and (>= nx 0) (< nx M) (>= ny 0) (< ny N))
+        (setq x1 nx y1 ny))
+      (setq r (rand 8))
+      (setq nx (+ x2 (dx r)))
+      (setq ny (+ y2 (dy r)))
+      (when (and (>= nx 0) (< nx M) (>= ny 0) (< ny N))
+        (setq x2 nx y2 ny))
+      (if (and (= x1 x2) (= y1 y2))
+          (setq finito true)))
+    steps))
+
+; Funzione che calcola la media dei passi di 'iter' processi
+; ogni processo inizia con i robot posizionati in modo casuale
+(define (robot-stat M N iter)
+  (let ( (dx (array 8 '(-1 -1 -1 0 0 1 1 1)))
+         (dy (array 8 '(-1 0 1 -1 1 -1 0 1)))
+         (somma 0) x1 y1 x2 y2 )
+    (for (i 1 iter)
+      (setq x1 (rand M))
+      (setq y1 (rand N))
+      (setq x2 (rand M))
+      (setq y2 (rand N))
+      (++ somma (robot-stat-aux M N x1 y1 x2 y2 dx dy)))
+    (div somma iter)))
+
+Proviamo:
+
+(time (println (robot-stat 5 5 1e5)))
+;-> 35.16844
+;-> 2378.43
+(time (println (robot-stat 5 5 1e6)))
+;-> 35.140599
+;-> 23635.555
+
+Griglie di dimensioni diverse con lo stesso numero di celle:
+(time (println (robot-stat 6 10 1e5)))
+;-> 93.09115
+;-> 6164.18
+(time (println (robot-stat 5 12 1e5)))
+;-> 99.52536000000001
+;-> 6565.682
+(time (println (robot-stat 4 15 1e5)))
+;-> 115.23469
+;-> 7567.635
+(time (println (robot-stat 2 30 1e5)))
+;-> 300.6541
+;-> 19137.07
+(time (println (robot-stat 1 60 1e5)))
+
+Il numero medio di passi diminuisce se la griglia diventa più 'quadrata'.
+
+Adesso vogliamo calcolare, per ogni coppia di posizioni iniziali, il numero medio di passi prima dell'incontro.
+Il risultato è una matrice MxN dove ogni cella rappresenta il tempo medio quando il robot 1 parte da quella cella e il robot 2 è fissato in una posizione.
+Questo produce una specie di 'heatmap' del tempo di incontro.
+
+; Funzione che calcola la mappa dei tempi medi
+(define (robot-heatmap M N x2 y2 iter)
+  (let ((matrix (array M N '(0)))
+        (dx (array 8 '(-1 -1 -1 0 0 1 1 1)))
+        (dy (array 8 '(-1 0 1 -1 1 -1 0 1)))
+        somma)
+    (for (x1 0 (- M 1))
+      (for (y1 0 (- N 1))
+        (setq somma 0)
+        (for (k 1 iter)
+          (++ somma (robot-stat-aux M N x1 y1 x2 y2 dx dy)))
+        (setf (matrix x1 y1) (div somma iter))))
+    matrix))
+
+Proviamo:
+
+Robot 2 fissato al centro della griglia:
+(setq H (robot-heatmap 5 5 2 2 2000))
+;-> ((35.595 33.8725 34.7175 34.081 34.9045)
+;->  (34.8365 35.1295 33.568 34.957 35.5575)
+;->  (35.298 35.273 32.4855 34.28 33.568)
+;->  (35.228 34.672 34.7195 35.5175 35.3215)
+;->  (37.784 34.285 35.413 34.8585 35.498))
+
+La struttura è radialmente simmetrica:
+- vicino al robot fisso -> incontro più veloce
+- lontano -> più lento
+Il massimo è agli angoli della griglia.
+Questo succede perché la distanza iniziale è maggiore e il moto è diffuso.
+Il centro non ha valore 0 perchè controlliamo la collisione 'dopo' i movimenti.
+
+Robot 2 è in un angolo:
+(robot-heatmap 5 5 0 0 2000)
+;-> ((15.6185 23.526 32.24 37.048 39.779)
+;->  (23.8105 27.6335 34.491 37.5375 39.201)
+;->  (32.203 32.8165 36.6305 40.0085 38.8305)
+;->  (36.4095 37.0525 37.0075 40.446 42.337)
+;->  (39.549 39.327 41.682 41.932 43.872))
+questa volta la mappa diventa asimmetrica, perché i bordi limitano il movimento.
+
+
+--------------------------------------------
+Applicazione multipla di una funzione (nest)
+--------------------------------------------
+
+La funzione Nest accetta tre parametri: f, start e times, dove f è una funzione, start è il suo argomento iniziale e times indica quante volte la funzione viene applicata.
+Dovrebbe restituire un'espressione con f applicata times volte partendo da start.
+Pertanto, funzionerà in questo modo:
+  (nest f x 3)
+restituisce:
+  f(f(f(x)))
+e
+  (nest f '(a b) 3)
+restituisce:
+  f(f(f('(a b))))
+
+Se il valore di 'start' è un numero, allora possiamo usare la funzione 'series':
+
+(define (nest func x0 iteration all)
+  (if all
+    (series x0 (fn(x) (func x)) (+ iteration 1))
+    (last (series x0 (fn(x) (func x)) (+ iteration 1)))))
+
+(nest sin 0.5 10)
+;-> 0.3660990370275885
+(nest sin 0.5 10 true)
+;-> (0.5 0.479425538604203 0.4612695550331807 0.4450853368470909
+;->  0.4305349046817725 0.417356952802932 0.4053456944600499
+;->  0.3943364654278321 0.3841956640114271 0.3748135580091452
+;->  0.3660990370275885)
+
+Quando il parametro 'all' vale 'true', allora vengono restituiti tutti i valori.
+
+Comunque il valore iniziale può essere anche una lista, quindi dobbiamo modificare la funzione.
+Inoltre ci sono alcune considerazioni da fare:
+1) l'applicazione della funzione 'f' deve continuare se raggiungiamo un valore specifico (es. nil o '() o 0)?
+2) l'applicazione della funzione 'f' deve continuare se incontriamo un ciclo (un valore già incontrato in precedenza)?
+3) In tali casi, quali valori vogliamo restituire?
+
+Per il caso 1) inseriamo come parametro una funzione 'fn-true' che restituisce 'true' quando dobbiamo fermarci (cioè quando il valore corrente ha un valore specifico).
+Per il caso 2) inseriamo un parametro 'cycle', quando vale 'true' controlliamo gli eventuali cicli (cioè controlliamo se un valore è stato calcolato precedentemente).
+Quando i casi 1) o 2) sono attivi e vengono verificati, allora restituiamo gli ultimi due valori calcolati.
+
+(define (nested func start times all cycle fn-true)
+    (if all ; restituisce tutti i risultati
+        (let ( (cur start) (out (list start)) (stop nil) (prev nil) )
+          (for (i 1 times 1 stop)
+            ; salva il valore precedente
+            (setq prev cur)
+            ; calcola il valore corrente
+            (setq cur (func cur))
+            ; controllo ciclo
+            (if (and cycle (ref cur out)) (setq stop true))
+            ; inserisce il valore corrente nella lista di output
+            (push cur out -1)
+            ; controllo valori di terminazione
+            (if (and fn-true (fn-true cur)) (setq stop true))
+            ; controllo punto fisso
+            (if (and cycle (= prev cur)) (setq stop true)))
+            out)
+        ;else 
+        (let ( (cur start) (stop nil) (prev nil) )
+          (for (i 1 times 1 stop)
+            ; salva il valore precedente
+            (setq prev cur)
+            ; inserisce il valore corrente nella lista di output
+            (setq cur (func cur))
+            ; controllo valori di terminazione
+            (if (and fn-true (fn-true cur)) (setq stop true))
+            ; controllo punto fisso
+            (if (and cycle (= prev cur)) (setq stop true)))
+            ; restituisce il risultato
+            (if stop (list prev cur) cur))))
+fn-true
+Proviamo:
+(nested sin 0.5 10)
+;-> 0.3660990370275885
+(nested sin 0.5 10 true)
+;-> (0.5 0.479425538604203 0.4612695550331807 0.4450853368470909
+;->  0.4305349046817725 0.417356952802932 0.4053456944600499
+;->  0.3943364654278321 0.3841956640114271 0.3748135580091452
+;->  0.3660990370275885)
+
+(define (f pair) (list (string (pair 0) (pair 1)) (string (pair 1) (pair 0))))
+(f '("a" "b"))
+;-> ("ab" "ba")
+(nested f '("a" "b") 3)
+(nested f '("a" "b") 3 true)
+;-> (("a" "b") ("ab" "ba") ("abba" "baab") ("abbabaab" "baababba"))
+
+(define (func-true x) (= x '("abba" "baab")))
+(nested f '("a" "b") 10 true nil func-true)
+;-> (("a" "b") ("ab" "ba") ("abba" "baab"))
+
+(define (g lst) (pop lst) lst)
+(define (func-true x) (= x '()))
+(nested g '(1 2 3) 2 true)
+;-> ((1 2 3) (2 3) (3))
+(nested g '(1 2 3) 3 true)
+;-> ((1 2 3) (2 3) (3) ())
+(nested g '(1 2 3) 4 true)
+;-> ((1 2 3) (2 3) (3) () ())
+(nested g '(1 2 3) 4 true nil func-true)
+;-> ((1 2 3) (2 3) (3) ())
+(nested g '(1 2 3) 4 nil nil func-true)
+;-> ((3) ())
+(nested g '(1 2 3) 4 nil true nil)
+;-> (nested g '(1 2 3) 4 nil true nil)
+;-> (() ())
+
+Vedi anche "La funzione "nest"" su "Note libere 23".
+
 ============================================================================
 

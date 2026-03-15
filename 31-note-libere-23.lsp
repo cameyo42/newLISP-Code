@@ -5537,6 +5537,8 @@ Proviamo:
 (sum4 '(1 1 1))
 ;-> (5 5 5)
 
+Vedi anche "Applicazione multipla di una funzione (nest)" su "Note libere 35".
+
 
 ----------------------------------------------
 Uscita anticipata da funzioni, cicli e blocchi

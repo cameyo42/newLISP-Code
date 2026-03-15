@@ -3406,6 +3406,8 @@ NOTE LIBERE 35
   La funzione "sequence" per caratteri
   Estrazione di elementi da una lista con un generatore
   Prese elettriche
+  Incontro tra robot in una griglia
+  Applicazione multipla di una funzione (nest)
 
 PROBLEMI SUI DADI
 =================
