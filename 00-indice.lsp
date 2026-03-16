@@ -3408,6 +3408,7 @@ NOTE LIBERE 35
   Prese elettriche
   Incontro tra robot in una griglia
   Applicazione multipla di una funzione (nest)
+  Visitare punti in una griglia
 
 PROBLEMI SUI DADI
 =================

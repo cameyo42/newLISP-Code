@@ -3458,7 +3458,7 @@ I primi sette numeri di Friedman simpatici sono 127, 343, 736, 1285, 2187, 2502,
 
 Algoritmo (forza bruta intelligente)
 ------------------------------------
-1. digits: estrae le cifre del numero (es. `343` → `(3 4 3)`)
+1. digits: estrae le cifre del numero (es. 343 -> (3 4 3))
 2. permutations: genera tutte le permutazioni delle cifre
 3. multi-digit-splits: per ogni permutazione, genera tutte le possibili tokenizzazioni: le cifre possono essere raggruppate in numeri multi-cifra (es. (3 4 3) -> (3 43), (34 3), ecc.), escludendo zeri iniziali.
 4. build-expressions: data una sequenza di token, costruisce ricorsivamente tutte le espressioni binarie possibili (come gli alberi di parsing di una grammatica)
@@ -4055,7 +4055,7 @@ Esempi:
               (when (<= new-len target)
                 ; Se entrambe le condizioni sono esattamente uguali al target
                 (if (and (= new-sum target) (= new-len target))
-                    ; Combinazione valida → aggiungi la stringa finale in out
+                    ; Combinazione valida -> aggiungi la stringa finale in out
                     (push (expr-string new-lst) out -1)
                     ; Altrimenti continua la ricorsione dal numero corrente
                     (searcha new-lst new-sum new-len i))))))))
@@ -4835,6 +4835,321 @@ Proviamo:
 ;-> (() ())
 
 Vedi anche "La funzione "nest"" su "Note libere 23".
+
+
+-----------------------------
+Visitare punti in una griglia
+-----------------------------
+
+In una griglia 2D infinita abbiamo N punti: (x1, y1) (x2, y2) ... (xN, yN).
+Questi punti devono essere visitati nell'ordine indicato, partendo da (x1, y1) e terminando nel punto (xN, yN).
+In una singola mossa, possiamo spostarci di una cella in alto, in basso, a sinistra o a destra.
+Determinare il percorso minimo che visita tutti i punti.
+
+L'idea è che tra due punti consecutivi possiamo sempre costruire un percorso usando solo mosse orizzontali e verticali.
+La distanza minima tra due punti (cioè il numero minimo di mosse):
+(x1,y1) e (x2,y2)) è la distanza Manhattan:
+  
+  d = |x2 - x1| + |y2 - y1|
+
+Poiché la griglia è infinita, un percorso esiste sempre.
+
+Costruzione del percorso
+Per andare da (x(i),y(i)) a (x(i+1),y(i+1)) (coppia di punti consecutivi):
+1. muoversi orizzontalmente fino a raggiungere x(i+1)
+2. muoversi verticalmente fino a raggiungere y(i+1)
+oppure viceversa (l’ordine è indifferente).
+
+Esempio: (2,3) -> (5,1)
+  (2,3), muove lungo X
+  (3,3), muove lungo X
+  (4,3), muove lungo X
+  (5,3), muove lungo X 
+  (5,2), muove lungo Y
+  (5,1), muove lungo Y
+
+(define (path points)
+  (let (out '())
+    (for (i 0 (- (length points) 2))
+      (letn ((p1 (points i))
+             (p2 (points (+ i 1)))
+             (x1 (p1 0)) (y1 (p1 1))
+             (x2 (p2 0)) (y2 (p2 1)))
+        ; inserisce il punto iniziale solo per il primo segmento
+        (if (= i 0) (push (list x1 y1) out -1))
+        ; muove lungo X
+        (while (!= x1 x2)
+          (if (< x1 x2) (inc x1) (-- x1))
+          (push (list x1 y1) out -1))
+        ; muove lungo Y
+        (while (!= y1 y2)
+          (if (< y1 y2) (inc y1) (-- y1))
+          (push (list x1 y1) out -1))))
+    out))
+
+Proviamo:
+
+(path '((0 0) (3 2) (1 4) (0 0)))
+;-> ((0 0) (1 0) (2 0) (3 0) (3 1) (3 2) (2 2) (1 2) (1 3) (1 4))
+
+Quanti sono i percorsi minimi tra due punti?
+--------------------------------------------
+Supponiamo di andare da (x1,y1) a (x2,y2).
+Definiamo:
+  dx = |x2 - x1|, dy = |y2 - y1|
+
+Il percorso minimo ha lunghezza: dx + dy e consiste di:
+- (dx) mosse orizzontali
+- (dy) mosse verticali
+Il problema diventa: in quanti modi possiamo ordinare queste mosse?
+La risposta è il coefficiente binomiale:
+
+  binom(dx+dy, dx)
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+Esempio:
+Da (0,0) a (3,2) --> dx = 3, dy = 2
+Numero di percorsi minimi:
+(binom 5 3)
+;-> 10L
+
+Perché dobbiamo scegliere 3 posizioni su 5 dove mettere le mosse orizzontali.
+Esempio di sequenze:
+  XXXYY
+  XXYXY
+  XXYYX
+  XYXXY
+  XYXYX
+  XYYXX
+  YXXXY
+  YXXYX
+  YXYXX
+  YYXXX
+
+Quanti sono i percorsi minimi tra N punti?
+------------------------------------------
+Se dobbiamo visitare più punti P1 -> P2 -> ... -> PN e i segmenti sono indipendenti, il numero totale di percorsi minimi è:
+
+  Prod[i=1,N-1]binom(dx(i)+dy(i), dx(i))
+
+dove:
+
+  dx(i) = |x(i+1) - x(i)|
+  dy(i) = |y(i+1) - y(i)|
+
+Quali sono tutti i percorsi minimi tra due punti?
+-------------------------------------------------
+Per generare tutti i percorsi minimi tra due punti basta osservare:
+- dobbiamo fare dx = |x2-x1| mosse orizzontali
+- dobbiamo fare dy = |y2-y1| mosse verticali
+- il percorso ha lunghezza (dx + dy)
+
+Quindi dobbiamo scegliere le posizioni delle mosse orizzontali (o verticali) nella sequenza di (dx + dy) mosse.
+Il numero totale dei percorsi è binom(dx+dy,dx), per generarli tutti:
+1. generare tutte le combinazioni delle posizioni delle mosse 'X'
+2. costruire la sequenza di mosse
+3. trasformarla nella sequenza di coordinate.
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+; Genera tutti i percorsi minimi tra due punti p1 e p2
+; usando solo mosse orizzontali e verticali
+(define (all-paths p1 p2)
+  (letn ((x1 (p1 0)) (y1 (p1 1)) ; coordinate punto iniziale
+         (x2 (p2 0)) (y2 (p2 1)) ; coordinate punto finale
+         (dx (abs (- x2 x1))) ; numero mosse orizzontali
+         (dy (abs (- y2 y1))) ; numero mosse verticali
+         (n (+ dx dy)) ; lunghezza totale del percorso minimo
+         ; tutte le combinazioni delle posizioni delle dx mosse orizzontali
+         (xs (comb dx (sequence 0 (- n 1))))
+         (out '())) ; lista dei percorsi risultanti
+    ; per ogni combinazione delle posizioni delle mosse orizzontali
+    (dolist (cx xs)
+      (letn ((x x1) (y y1) ; posizione corrente
+             (path (list (list x y)))) ; il percorso parte dal punto iniziale
+        ; costruiamo il percorso passo per passo
+        (for (i 0 (- n 1))
+          ; se la posizione i appartiene alla combinazione → mossa orizzontale
+          (if (ref i cx)
+              (if (< x1 x2) (++ x) (-- x))
+              ; altrimenti mossa verticale
+              (if (< y1 y2) (++ y) (-- y)))
+          ; aggiungiamo la nuova cella al percorso
+          (push (list x y) path -1))
+        ; salviamo il percorso completo
+        (push path out -1)))
+    ; restituisce tutti i percorsi
+    out))
+
+Proviamo:
+
+(all-paths '(0 0) '(2 1))
+;-> (((0 0) (1 0) (2 0) (2 1))
+;->  ((0 0) (1 0) (1 1) (2 1))
+;->  ((0 0) (0 1) (1 1) (2 1)))
+
+(length (all-paths '(0 0) '(3 2)))
+;-> 10
+
+Quali sono tutti i percorsi minimi tra N punti?
+-----------------------------------------------
+Abbiamo i punti P1 -> P2 -> P3 -> ... -> PN
+Ogni segmento è indipendente.
+
+Per il segmento P(i) -> P(i+1) definiamo:
+
+  dx(i) = |x(i+1) - x(i)|
+  dy(i) = |y(i+1) - y(i)|
+
+Il numero di percorsi minimi del segmento è
+
+  binom(dx(i) + dy(i),dx(i))
+
+Il numero totale di percorsi è quindi il prodotto:
+
+  Prod[i=1,N-1]binom(dx(i)+dy(i), dx(i))
+
+Per generare tutti i percorsi globali occorre:
+1. generare tutti i percorsi minimi di ogni segmento
+2. fare il prodotto cartesiano dei segmenti
+3. concatenare i percorsi eliminando il punto duplicato.
+
+Dividiamo il problema in due parti:
+
+A) Funzione "paths2"
+Genera tutti i percorsi minimi tra due punti
+1. tra due punti servono dx mosse orizzontali e dy verticali
+2. il percorso ha n = dx + dy mosse
+3. scegliamo le posizioni delle dx mosse orizzontali tra n posizioni
+4. ogni scelta genera un percorso.
+
+; Funzione che genera tutti i percorsi minimi tra due punti
+(define (paths2 p1 p2)
+  (letn (
+        ; coordinate dei punti
+        (x1 (p1 0)) (y1 (p1 1))
+        (x2 (p2 0)) (y2 (p2 1))
+        ; numero di mosse necessarie
+        (dx (abs (- x2 x1))) ; mosse orizzontali
+        (dy (abs (- y2 y1))) ; mosse verticali
+        ; lunghezza totale del percorso
+        (n (+ dx dy))
+        ; tutte le combinazioni delle posizioni delle mosse orizzontali
+        ; esempio: (0 2 4)
+        (cx (comb dx (sequence 0 (- n 1))))
+        ; lista dei percorsi risultanti
+        (out '())
+       )
+    ; per ogni combinazione
+    (dolist (c cx)
+      ; coordinate correnti
+      (letn (
+            (x x1)
+            (y y1)
+            ; il percorso parte dal punto iniziale
+            (path (list (list x y)))
+           )
+        ; costruiamo il percorso passo per passo
+        (for (i 0 (- n 1))
+          ; se la posizione i è nella combinazione
+          ; allora facciamo una mossa orizzontale
+          (if (ref i c)
+              (if (< x1 x2) (++ x) (-- x))
+              ; altrimenti mossa verticale
+              (if (< y1 y2) (++ y) (-- y))
+          )
+          ; aggiungiamo la nuova cella al percorso
+          (push (list x y) path -1)
+        )
+        ; salviamo il percorso costruito
+        (push path out -1)
+      )
+    )
+    ; ritorna tutti i percorsi
+    out))
+
+B) Funzione "all-paths"
+Genera tutti i percorsi che visitano N punti nell'ordine dato.
+1. generiamo tutti i percorsi per ogni segmento
+2. combiniamo i segmenti con un **prodotto cartesiano**
+3. uniamo i percorsi eliminando il punto duplicato.
+
+; Funzione che genera tutti i percorsi che visitano i punti nell'ordine dato
+(define (all-paths points)
+  ; lista dei percorsi per ogni segmento
+  (let ((paths '()))
+    ; per ogni coppia di punti consecutivi
+    (for (i 0 (- (length points) 2))
+      ; genera tutti i percorsi tra i due punti
+      (push (paths2 (points i) (points (+ i 1))) paths -1)
+    )
+    ; inizialmente i percorsi sono quelli del primo segmento
+    (let ((out (first paths)))
+      ; combiniamo progressivamente i segmenti successivi
+      (dolist (seg (rest paths))
+        ; nuovo insieme di percorsi
+        (setq out
+          (flat
+            ; per ogni percorso già costruito
+            (map
+              (fn (p)
+                ; lo concateno con ogni percorso del segmento successivo
+                (map
+                  (fn (q)
+                    ; eliminiamo il primo punto di q
+                    ; perché coincide con l'ultimo di p
+                    (append p (rest q))
+                  )
+                  seg
+                )
+              )
+              out
+            )
+            ; appiattiamo di un livello
+            1
+          )
+        )
+      )
+      ; tutti i percorsi completi
+      out
+    )
+  )
+)
+
+Proviamo:
+
+(all-paths '((0 0) (1 1) (2 0)))
+;-> (((0 0) (1 0) (1 1) (2 1) (2 0))
+;->  ((0 0) (1 0) (1 1) (1 0) (2 0))
+;->  ((0 0) (0 1) (1 1) (2 1) (2 0))
+;->  ((0 0) (0 1) (1 1) (1 0) (2 0)))
+
+Segmenti:
+  (0,0) -> (1,1)   2 percorsi
+  (1,1) -> (2,0)   2 percorsi
+
+Totale:
+  2 x 2 = 4 percorsi
+
+Nota: questo metodo esplode combinatoriamente, infatti se ogni segmento ha ~10 percorsi: 10 segmenti -> 10^10 percorsi.
 
 ============================================================================
 
