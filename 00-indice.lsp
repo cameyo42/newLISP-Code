@@ -3409,6 +3409,10 @@ NOTE LIBERE 35
   Incontro tra robot in una griglia
   Applicazione multipla di una funzione (nest)
   Visitare punti in una griglia
+  Taglio di corde lineari e circolari
+  X*Y = reverse(Y)
+  Probabilità di superare un esame
+  Duello tra pistoleri
 
 PROBLEMI SUI DADI
 =================

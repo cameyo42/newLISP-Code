@@ -3394,7 +3394,7 @@ Duello continuo
 ---------------
 
 Ci sono N persone disposte in modo equidistante lungo una circonferenza. Ad ogni turno ogni persona "spara" ad un'altra persona a caso (tranne che a se stesso). Tutti gli spari di ogni turno avvengono simultaneamente (es. se 1 spara a 3 e 3 spara a 1, allora muoiono entrambi). Non è possibile sparare ad una persona morta. Il duello continua fino a che non rimane soltanto una o nessuna persona viva.
-In media, quanto turni dura ogni duello?
+In media, quanti turni dura ogni duello?
 In media, rimane di più una persona o zero persone al termine del duello?
 Come cambiano i risultati se ogni persona può sparare anche a se stessa?
 
@@ -3512,6 +3512,8 @@ Facciamo alcune simulazioni:
 (time (println (duello 10000 1000)))
 ;-> (9.124 0.289 0.711 1000)
 ;-> 3199524.038 ; circa 53 minuti
+
+Vedi anche "Duello tra pistoleri" su "Note libere 35".
 
 
 ----------

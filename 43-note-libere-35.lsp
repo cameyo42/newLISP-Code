@@ -5151,5 +5151,538 @@ Totale:
 
 Nota: questo metodo esplode combinatoriamente, infatti se ogni segmento ha ~10 percorsi: 10 segmenti -> 10^10 percorsi.
 
+
+-----------------------------------
+Taglio di corde lineari e circolari
+-----------------------------------
+
+Abbiamo una corda di lunghezza unitaria.
+Se gli estremi della corda sono staccati (corda lineare) con N tagli otteniamo (N+1) segmenti di corda.
+Se gli estremi della corda sono uniti (corda circolare) con N tagli otteniamo N segmenti di corda.
+Con N tagli, quanto è lungo, in media, il pezzo più corto?
+Con N tagli, quanto è lungo, in media, il pezzo più lungo?
+
+Esempio corda lineare:
+  N = 2
+  t1 = 0.3
+  t2 = 0.8
+                   t1                            t2
+  |-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+  0    0.1   0.2   0.3   0.4   0.5   0.6   0.7   0.8   0.9   1.0
+
+  d1 = t1 - 0 = t1 = 0.3
+  d2 = t2 - t1 = t1 = 0.8 - 0.3 = 0.5
+  d3 = 1 - t3 = 1 - 0.8 = 0.2
+
+; Funzione che calcola la lunghezza dei segmenti di una corda lineare unitaria
+; sottoposta ai tagli contenuti in una lista (t1,t2,...,tN)
+(define (break-linear T)
+  (let (T (flat (list 0 (sort T) 1)))
+    (map sub (rest T) (chop T))))
+
+Proviamo:
+
+(break-linear '(0.3 0.8))
+;-> (0.3 0.5 0.2)
+(break-linear '(0.8 0.3))
+;-> (0.3 0.5 0.2)
+(break-linear '(0.5))
+;-> (0.5 0.5)
+
+Esempio corda circolare (immagina che 0 e 1 sono uniti):
+  N = 2
+  t1 = 0.3
+  t2 = 0.8
+                   t1                            t2
+  |-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+  0    0.1   0.2   0.3   0.4   0.5   0.6   0.7   0.8   0.9   1.0
+
+  d1 = t2 - t1 = 0.8 - 0.3 = 0.5
+  d3 = (1 - t2) + t1 = 0.2 + 0.3 = 0.5 (Perchè i punti 0 e 1 sono uniti)
+
+(define (break-circular T)
+  (let (T (flat (list (sort T) 1)))
+      (setf (T -1) (add 1 (T 0))) ; coordinata finale
+      (map sub (rest T) (chop T))))
+
+Proviamo:
+
+(break-circular '(0.3 0.8))
+;-> (0.5 0.5)
+(break-circular '(0.8 0.3))
+;-> (0.5 0.5)
+
+Con un taglio otteniamo un segmento lineare di lunghezza 1:
+(break-circular '(0.5))
+;-> (1)
+(break-circular '(0.2))
+;-> (1)
+
+; Funzione che calcola il valore minimo medio e il valore massimo medio
+; di N tagli di una corda lineare
+(define (medie-lineari N iter)
+  (let ( (emin 0) (emax 0) (dist 0) )
+    (for (i 1 iter)
+      (setq dist (break-linear (random 0 1 N)))
+      (inc emin (apply min dist))
+      (inc emax (apply max dist))
+    )
+    ;(println "valore minimo medio  = " (div emin iter))
+    ;(println "valore massimo medio = " (div emax iter))
+    (list (div emin iter) (div emax iter))))
+
+Proviamo:
+
+(medie-lineari 3 1e5)
+;-> (0.06248319009980664 0.5210660414441305)
+(medie-lineari 20 1e5)
+;-> (0.002268929105502424 0.1733977004303195)
+(medie-lineari 50 1e5)
+;-> (0.0003839600817895947 0.0886794573809124)
+
+Matematicamente (caso lineare):
+Il valore minimo medio vale: 1/(N+1)^2
+Il valore massimo medio vale: (1 + 1/2 + ... + 1/N + 1/(N+1)) / (N+1)
+
+; Funzione che calcola il valore minimo medio e il valore massimo medio
+; di N tagli di una corda circolare
+(define (medie-circolari N iter)
+  (let ( (emin 0) (emax 0) (dist 0) )
+    (for (i 1 iter)
+      (setq dist (break-circular (random 0 1 N)))
+      (inc emin (apply min dist))
+      (inc emax (apply max dist))
+    )
+    ;(println "valore minimo medio  = " (div emin iter))
+    ;(println "valore massimo medio = " (div emax iter))
+    (list (div emin iter) (div emax iter))))
+
+Proviamo:
+
+(medie-circolari 3 1e5)
+;-> (0.1114481221961225 0.610833123264258)
+(medie-circolari 20 1e5)
+;-> (0.002484960478530159 0.1797936817529937)
+(medie-circolari 50 1e5)
+;-> (0.0004025788140507105 0.08992011139257101)
+
+Matematicamente (caso circolare):
+Il valore minimo medio vale: 1/(N)^2
+Il valore massimo medio vale: (1 + 1/2 + ... + 1/N) / N
+
+Verifichiamo i valori calcolati con le simulazioni:
+
+(define (check N)
+  (list (div 1 (* N N)) (div (apply add (map div (sequence 1 N))) N)))
+
+Caso lineare:
+(check 4)
+;-> (0.0625 0.5208333333333333)
+(check 21)
+;-> (0.002267573696145125 0.1735885097506062)
+(check 51)
+;-> (0.0003844675124951942 0.08860418002875839)
+
+Caso circolare:
+(check 3)
+;-> (0.1111111111111111 0.6111111111111111)
+(check 20)
+;-> (0.0025 0.1798869828571841)
+(check 50)
+;-> (0.0004 0.08998410676658847)
+
+
+----------------
+X*Y = reverse(Y)
+----------------
+
+Determinare le coppie di numeri X e Y per cui risulta::
+
+  X*Y = reverse(Y)
+
+cioè, Y ={abc...z} --> X*{abc...z} = {z...cba}
+
+  X*Y = inizia con reverse(Y)
+  X*{abc...z} = {z...cba}...
+
+Proviamo con un metodo brute-force.
+Due cicli 'for' per X (da 2 a max-X) e Y (da 2 a max-Y).
+
+Comunque possiamo ottimizzare il ciclo per Y:
+
+Quando X*Y ha lo stesso numero di cifre di Y (X e Y interi)?
+Quando risulta X <= 9 floor((10^d - 1)/Y).
+Quindi per Y basta arrivare a:
+
+  Y <= max-X / Y
+
+perché X*Y non può superare il massimo numero con lo stesso numero di cifre.
+
+(define (findXY max-X max-Y)
+  (for (X 2 max-X)
+      (for (Y 2 (/ max-Y X))
+        (if (= (* X Y) (int (reverse (string Y)) 0 10))
+            (println X { } Y { } (* X Y) { } (reverse (string Y)))))))
+
+Proviamo:
+
+(time (findXY 9 1e6))
+;-> 4 2178 8712 8712
+;-> 4 21978 87912 87912
+;-> 4 219978 879912 879912
+;-> 9 1089 9801 9801
+;-> 9 10989 98901 98901
+;-> 9 109989 989901 989901
+;-> 1024.658
+
+(time (findXY 9 1e7))
+;-> 4 2178 8712 8712
+;-> 4 21978 87912 87912
+;-> 4 219978 879912 879912
+;-> 4 2199978 8799912 8799912
+;-> 9 1089 9801 9801
+;-> 9 10989 98901 98901
+;-> 9 109989 989901 989901
+;-> 9 1099989 9899901 9899901
+;-> 10635.099
+
+Dal punto di vista matematico vogliamo risolvere:
+  X * Y = reverse(Y)
+dove:
+ Y = a(d-1) a(d-2) ... a(1) a(0), con a(d-1) != 0.
+
+Il numero invertito è:
+  reverse(Y) = a(0) a(1) ... a(d-2) a(d-1)
+
+A) Ultima cifra della moltiplicazione
+-------------------------------------
+La prima colonna della moltiplicazione è:
+  X * a(0)
+
+La cifra finale deve diventare la prima cifra di reverse(Y):
+  X * a(0) = a(d-1) (mod 10)
+
+B) Prima cifra del risultato
+----------------------------
+La cifra piu' significativa di X*Y proviene da
+  X * a(d-1) + carry
+e deve essere:
+  a(0)
+Quindi:
+  X * a(d-1) + c = a(0) + 10k
+
+C) Vincolo modulo 9
+-------------------
+Poichè:
+  10 == 1 (mod 9)
+vale:
+  Y == reverse(Y) (mod 9)
+
+Quindi dalla relazione:
+  X*Y = reverse(Y)
+segue:
+  X*Y == Y (mod 9)
+  (X-1)Y == 0 (mod 9)
+
+cioè:
+  Y == 0 (mod 9) oppure X == 1 (mod 9)
+
+D) Proviamo i valori piccoli di X
+---------------------------------
+Le equazioni sulle cifre:
+  X * a(0) = a(d-1) (mod 10)
+  X * a(d-1) + c = a(0) (mod 10)
+eliminano quasi tutti i valori.
+
+Gli unici che funzionano sono:
+  X = 4
+  X = 9
+
+E) Famiglia per X = 4
+---------------------
+Le soluzioni hanno forma:
+  Y = 21 99...99 78
+
+Esempi:
+  2178
+  21978
+  219978
+  2199978
+  ...
+Verifica:
+  4 * 2178 = 8712
+  4 * 21978 = 87912
+
+F) Famiglia per X = 9
+---------------------
+Le soluzioni hanno forma:
+  Y = 10 99...99 89
+
+Esempi:
+  1089
+  10989
+  109989
+  1099989
+  ...
+Verifica
+  9 * 1089 = 9801
+  9 * 10989 = 98901
+
+E) Struttura delle soluzioni
+Le soluzioni si ottengono inserendo qualsiasi numero di '9' al centro.
+
+(define (solutions max9)
+  (for (k 0 max9)
+    (let ((mid (dup "9" k)))
+      (let ((y1 (string "21" mid "78"))
+            (y2 (string "10" mid "89")))
+        (println 4 " " y1 " " (* 4 (int y1)))
+        (println 9 " " y2 " " (* 9 (int y2)))))) '>)
+
+(solutions 1)
+;-> 4 2178 8712
+;-> 9 1089 9801
+;-> 4 21978 87912
+;-> 9 10989 98901
+
+(solutions 5)
+;-> 4 2178 8712
+;-> 9 1089 9801
+;-> 4 21978 87912
+;-> 9 10989 98901
+;-> 4 219978 879912
+;-> 9 109989 989901
+;-> 4 2199978 8799912
+;-> 9 1099989 9899901
+;-> 4 21999978 87999912
+;-> 9 10999989 98999901
+;-> 4 219999978 879999912
+;-> 9 109999989 989999901
+
+
+--------------------------------
+Probabilità di superare un esame
+--------------------------------
+
+Per ogni domanda di un esame, è possibile indovinare la risposta corretta con probabilità p(i).
+Una risposta corretta vale +1 punto, una risposta errata vale -1 punto e non rispondere vale 0 punti.
+Per superare l'esame occorre raggiungere o superare un punteggio P.
+Possiamo scegliere K domande a cui vogliamo rispondere.
+Che probabilità abbiamo di superare l'esame con K risposte?
+
+Quindi abbiamo:
+1) una lista con le N probabilità p(0),...p(N-1)
+2) il punteggio da raggiungere P
+3) il numero di domande a cui rispondere K (quelle con probabilità maggiore)
+
+Vogliamo la probabilità di ottenere esattamente un punteggio >= P
+
+Se ogni risposta corretta = +1, errata = -1, allora:
+  punteggio finale = 2*corrette - K
+  corrette = (punteggio + K)/2
+
+Quindi, per ottenere almeno P punti, serve almeno:
+  need = ceil((K + P)/2)
+
+Il problema si riduce a calcolare la probabilità di avere ≥ 'need' risposte corrette tra le K domande scelte.
+Possiamo usare DP 1D classico:
+  dp(c) = probabilità di avere esattamente c risposte corrette
+
+Vediamo come funziona questo DP 1D:
+- Abbiamo K domande selezionate, con probabilità di risposta corretta (p(0(, p(1), …, p(K-1)).
+- Vogliamo sapere la probabilità di avere esattamente 'c' risposte corrette su queste K domande.
+- Ogni risposta sbagliata vale 0 punti o -1, ma trasformando il problema in 'numero di risposte corrette' possiamo lavorare solo con numeri interi da 0 a K.
+1. dp(c) = probabilità di avere esattamente 'c' risposte corrette dopo aver considerato alcune domande.
+2. Inizialmente, nessuna domanda considerata:
+  dp(0) = 1
+  dp(c>0) = 0
+3. Poi aggiungiamo le domande una a una.
+Per ogni nuova domanda (i) con probabilità di successo p(i):
+  dp2(c) = p(i)*dp(c-1)       +      (1-p(i))*dp(c)
+           (risposta corretta)       (risposta errata)
+Se rispondi correttamente, il numero di risposte corrette aumenta di 1 -> moltiplichiamo la probabilità di avere 'c-1' corrette prima per p(i).
+Se sbagli, il numero di corrette rimane lo stesso -> moltiplichiamo la probabilità di avere 'c' corrette prima per (1-p(i)).
+Invece di calcolare tutte le combinazioni possibili esplicitamente, aggiorniamo una sola lista dp ad ogni domanda.
+Dopo aver considerato tutte le K domande, 'dp(c)' contiene la probabilità esatta di avere c corrette.
+
+Come ottenere la probabilità di almeno 'need' punti?
+1. Ogni risposta corretta = +1, ogni risposta sbagliata = -1
+2. Punteggio finale = 2*corrette - K
+3. Numero minimo di corrette per ottenere almeno P punti:
+  need = ceil((K + P)/2)
+4. Probabilità finale = somma di tutte le dp(c) con (c >= need)
+
+Controllo dei casi impossibili:
+1. (P > K() -> impossibile ottenere più punti di quante domande si rispondano.
+2. (K > length(probs)) -> impossibile rispondere a più domande di quelle disponibili.
+3. (P > length(probs)) -> impossibile ottenere più punti del numero totale di domande.
+In tutti questi casi restituiamo '0'.
+
+'sel' prende le K domande migliori
+'dp(c)' calcola le probabilità esatte di avere c risposte corrette
+'need = ceil((K+P)/2)' -> numero minimo di risposte corrette per ottenere almeno P punti
+'Somma dei dp(c) da need a K' -> probabilità finale
+
+(define (prob-punteggio probs K P)
+  (if (or (> P K) (> K (length probs)) (> P (length probs))) 0
+  ;else
+  (letn ((n (length probs))) ; numero totale di domande
+    ;; selezioniamo le K domande con probabilità più alte
+    (setq sel '())
+    (setq ps (sort probs >)) ; ordinamento decrescente
+    (for (i 0 (sub K 1))
+      (push (ps i) sel -1))
+    ;; DP 1D: dp(c) = probabilità di avere esattamente c risposte corrette
+    (setq dp (dup 0 (add K 1)))
+    (setf (dp 0) 1) ; inizializziamo 0 corrette
+    (for (i 0 (sub K 1))
+      (setq pi (sel i)) ; probabilità della i-esima domanda
+      (setq dp2 (dup 0 (add K 1))) ; buffer temporaneo per il DP
+      (for (c 0 K)
+        (if (> c 0)
+            (setf (dp2 c) (add (mul pi (dp (sub c 1))) ; risposta corretta
+                                (mul (sub 1 pi) (dp c)))) ; risposta errata
+            (setf (dp2 0) (mul (sub 1 pi) (dp 0))))) ; caso c=0
+      (setq dp dp2)) ; aggiorniamo dp con dp2
+    ;; calcoliamo il numero minimo di risposte corrette per ottenere almeno P punti
+    (setq need (ceil (div (add K P) 2)))
+    ;; somma delle probabilità di avere >= need risposte corrette
+    (setq prob 0)
+    (for (c need K)
+      (setq prob (add prob (dp c))))
+    prob)))
+
+Proviamo:
+
+(prob-punteggio '(0.9 0.8 0.6 0.55 0.4) 3 2)
+;->  0.432
+Domande scelte:(0.9 0.8 0.6) -> le 3 domande migliori
+DP passo passo:
+Risposta0: 0.9 -> dp dopo: (0.0999 0.9 0 0)
+Risposta1: 0.8 -> dp dopo: (0.02 0.26 0.72 0)
+Risposta2: 0.6 -> dp dopo: (0.008 0.116 0.444 0.432)
+Need=3 -> per ottenere almeno 2 punti con 3 domande, serve almeno 3 risposte corrette
+Probabilità finale=0.432
+La logica di need = ceil((K+P)/2) calcola esattamente il numero minimo di risposte corrette per ottenere almeno P punti:
+K=3, P=2 -> need = ceil((3+2)/2)=3
+K=3, P=1 -> need = ceil((3+1)/2)=2
+
+(prob-punteggio '(0.9 0.8 0.6 0.55 0.4) 3 1)
+;-> 0.876
+(prob-punteggio '(1.0 0.8 0.6 0.55 0.4) 1 1)
+;-> 1
+(prob-punteggio '(1.0 0.8 0.6 0.55 0.4) 2 1)
+;-> 0.8
+(prob-punteggio '(1.0 0.8 0.6 0.55 0.4) 1 2)
+;-> 0
+
+(prob-punteggio '(0.5 0.5 0.5 0.5) 1 1)
+;-> 0.5
+(prob-punteggio '(0.5 0.5 0.5 0.5) 2 1)
+;-> 0.25
+(prob-punteggio '(0.5 0.5 0.5 0.5) 3 1)
+;-> 0.5
+(prob-punteggio '(0.5 0.5 0.5 0.5) 4 1)
+;-> 0.3125
+
+
+--------------------
+Duello tra pistoleri
+--------------------
+
+Ci sono N pistoleri disposti in modo equidistante lungo una circonferenza.
+Ad ogni turno ogni pistolero "spara" ad un'altro pistolero a caso (tranne che a se stesso).
+Ogni pistolero ha una data probabilità di colpire il bersaglio (indipendente dalla distanza).
+1 colpisce sempre il bersaglio e 0 non lo colpisce mai.
+Quindi chi spara potrebbe non colpire il pistolero scelto a caso.
+Tutti gli spari di ogni turno avvengono simultaneamente (es. se 1 spara a 3 e 3 spara a 1, allora potrebbero essere colpiti entrambi).
+I pistoleri colpiti non partecipano al turno successivo (cioè non è possibile sparare ad un pistolero colpito).
+Il duello continua fino a che non rimane soltanto uno o nessun pistolero.
+
+; Funzione che simula un duello
+(define (duello P)
+  (local (len S shooted idx bersaglio)
+    ; numero di pistoleri iniziali
+    (setq len (length P))
+    ; lista degli indici dei pistoleri
+    (setq S (sequence 0 (- len 1)))
+    (while (> len 1)
+      ; lista dei colpiti
+      (setq shooted '())
+      ; ciclo per ogni pistolero...
+      (dolist (el P)
+        ; scelta del bersaglio da colpire
+        (setq idx $idx) ; because 'until' update $idx...
+        (until (!= idx (setq bersaglio (rand len))))
+        ; sparo...
+        (setq prob (random 0 1))
+        ; se il bersaglio è stato colpito,
+        ; allora lo aggiunge la lista dei colpiti
+        (if (>= el prob) (push bersaglio shooted -1)))
+      ; qualcuno potrebbe essere stato colpito più volte...
+      (setq shooted (unique (sort shooted >)))
+      ; elimina i colpiti dalla lista dei pistoleri
+      (map (fn(x) (pop P x)) shooted)
+      ;(println "P: " P)
+      ; elimina i colpiti dalla lista degli indici dei pistoleri
+      (map (fn(x) (pop S x)) shooted)
+      ;(println "S: " S)
+      ; calcola il numero dei pistoleri rimasti
+      (setq len (length P))
+    )
+    ; Restituisce:
+    ; una coppia (prob indice) oppure '() (cioè nessun vincitore)
+    (flat (list P S))))
+
+Proviamo:
+
+(setq pp '(1.0 0.2 0.3 0.5 0.9 0.9 0.7 1.0 0.4))
+(duello pp)
+
+; Funzione che simula un determinato numero di duelli
+; restituisce una coppia (a b)
+; a --> numero di duelli nulli
+; b --> lista con le vittorie di ogni pistolero
+(define (simula-duelli probs iter)
+  (let ( (out (array (length probs) '(0))) (nulli 0) )
+    (for (i 1 iter)
+      (setq res (duello probs))
+      (if (= res '())
+          (++ nulli) ; duello senza vincitore
+          ;else
+          (++ (out (res 1)))))
+    (list nulli out)))
+
+Proviamo:
+
+(setq pp '(1.0 0.2 0.3 0.5 0.9 0.9 0.7 1.0 0.4))
+(simula-duelli pp 1e5)
+;-> (31517 (10549 3897 4587 6215 9588 9725 7796 10575 5551))
+
+I più bravi hanno maggiori probabilità di vittoria.
+(setq pp '(0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1))
+(simula-duelli pp 1e5)
+;-> (23670 (1456 2595 3834 4843 5735 6722 7911 9268 10017 11384 12565))
+
+Nota: anche chi ha probabilità 0 può vincere.
+Infatti immaginiamo la situazione in cui rimangono 3 pistoleri:
+se due pistoleri si sparano a vicenda e vengono entrambi colpiti, allora chi rimane potrebbe essere quello con probabilità 0.
+
+Quando sono tutti bravi allo stesso modo, allora hanno tutti la stessa probabilità di vittoria.
+(setq pp '(0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5))
+(simula-duelli pp 1e5)
+;-> (24442 (6945 6892 6871 7016 6993 6870 6669 6872 6781 6848 6801))
+
+(setq pp '(0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2))
+(simula-duelli pp 1e5)
+;-> (9881 (8134 8137 8391 8112 8209 8115 8249 8028 8177 8279 8288))
+
+Quando tutte le probabilità valgono 1 non viene sprecato alcun colpo, quindi risulta il maggior numero di 'nulli' (cioè i duelli in cui tutti vengono colpiti e non c'è alcun vincitore)
+(setq pp '(1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0))
+(simula-duelli pp 1e5)
+;-> (44380 (5156 5116 5136 5160 4992 4995 5009 4995 4998 5052 5011))
+
+Vedi anche "Duello continuo" su "Note libere 6".
+
 ============================================================================
 
