@@ -5684,5 +5684,692 @@ Quando tutte le probabilità valgono 1 non viene sprecato alcun colpo, quindi ri
 
 Vedi anche "Duello continuo" su "Note libere 6".
 
+
+-----------------------
+Il cammello e le banane
+-----------------------
+
+Dobbiamo trasportare 3000 banane per 1000 km fino al mercato e abbiamo a disposizione un solo
+cammello.
+Però questo cammello ha dei limiti:
+1) può portare al massimo 1000 banane per volta,
+2) deve mangiare una banana per ogni chilometro percorso
+Qual è il numero massimo di banane che arriva al mercato?
+
+Disegniamo un grafico:
+A = punto di partenza
+B = punto di arrivo (mercato)
+
+  A                                                         B
+  |---------------------------------------------------------|
+                            1000 km
+
+Se partiamo con 1000 banane e arriviamo direttamente in B otteniamo:
+
+  1000 - 1*1000 = 0
+
+cioè il cammello ha mangiato tutte le 1000 banane per arrivare al mercato.
+
+Stabiliamo di partire con 1000 banane ed arrivare ad un punto intermedio: 1 km
+
+  A    1km                                                  B
+  |-----|...------------------------------------------------|
+                            1000 km
+
+Trasporto 1:
+ 1000 - 1 = 999
+Poi dobbiamo tornare indietro al punto A e consumiamo un'altra banana:
+ 1000 - 2 = 998
+Adesso siamo al punto A con 2000 banane.
+Nel punto a 1 km ci sono 998 banane.
+
+Trasporto 2
+-----------
+ Ripetiamo lo stesso viaggio e adesso al punto 1km abbiamo 998 + 998 banane.
+
+Trasporto 3
+-----------
+Ripetiamo lo stesso viaggio e adesso al punto 1km abbiamo 998 + 998 + 999 = 2995 banane.
+Questo perchè non dobbiamo tornare ad A (in quanto non ci sono più banane).
+
+Comunque ripetendo per 1000 volte (cioè per 1000 km) questo metodo otteniamo:
+
+  5 * 1000 = 5000 banane
+
+perchè per ogni tratta di 1km il cammello consuma 5 banane.
+Ma non abbiamo 5000 banane, quindi non possiamo usare questo metodo.
+
+Come ridurre questi trasporti e passare da tre a due trasporti?
+Quello che bisogna fare è consumare 1000 banane per arrivare al primo deposito, perché nel momento in cui le banane da 3000 diventano 2000, dovrò fare solo due viaggi perché sposto 1000 banane una volta e poi un'altra volta altre 1000 e quindi dovrò fare solo due trasporti.
+E quindi dove conviene fare il primo deposito?
+Quando avrò consumato 1000 banane.
+E per consumare 1000 banane devo arrivare a 200km, perchè per ogni kilometro consumo 5 banane (infatti 1000/5 = 200).
+
+Stabiliamo di partire con 1000 banane ed arrivare ad un punto intermedio: 200 km
+
+  A        200 km                                              B
+  |----------|-------------------------------------------------|
+                                  800 km
+
+Trasporto 1
+-----------
+1000 - 400 = 600 banane
+
+Trasporto 2
+-----------
+1000 - 400 = 600 banane
+
+Trasporto 3
+-----------
+1000 - 200 = 800 banane
+
+In questo modo a 200km abbiamo 2000 banane.
+
+Adesso dove piazzare il secondo punto di sosta?
+Ripetendo il ragionamento, da 200km devo fare 2 trasporti fino a quando a 200km rimangono 1000 banane.
+Con 1000 banane e 3 spostamenti devo fare 1000/3 = 333.333 km.
+Arrotondiamo al valore intero: 333.
+
+  A        200 km          200+333 km                          B
+  |----------|----------------|--------------------------------|
+                             533 km
+
+Trasporto 1
+-----------
+1000 - 666 = 334
+
+Trasporto 2
+-----------
+1000 - 333 = 667
+
+Adesso abbiamo 0 banane a 200km e 1001 banane al 533 km.
+Adesso possiamo arrivare direttamente al punto B consumando:
+
+1000 - 533 = 467 banane
+
+Quindi al mercato arrivano 1001 - 467 = 534 banane
+
+Generalizzazione del problema
+-----------------------------
+Questo è un classico problema di ottimizzazione a tratti: il costo (banane consumate per km) dipende da quante volte dobbiamo fare avanti-indietro.
+
+Parametri:
+  B = numero iniziale di banane
+  D = distanza totale (km)
+  C = capacita del cammello (banane per viaggio)
+Il cammello:
+- può portare al massimo C banane
+- consuma 1 banana per km
+
+1) Numero di viaggi
+Se abbiamo B banane, il numero di carichi necessari e:
+  n = ceil(B / C)
+
+2) Consumo per km
+Per avanzare di 1 km con n carichi:
+- n viaggi in avanti
+- n-1 viaggi di ritorno
+Totale percorsi: 2n - 1
+Quindi il consumo per km e:
+  consumo = 2n - 1
+
+3) Soluzione
+Bisogna ridurre il numero di viaggi il prima possibile.
+Strategia:
+- parti con n = ceil(B / C)
+- avanzi finche le banane scendono a (n-1)*C
+- poi passi a n-1 viaggi
+- e ripeti
+
+4) Distanza di transizione
+Per passare da n a n-1 viaggi:
+Banane da consumare:
+  B - (n-1)*C
+Dato che il consumo per km e (2n - 1), la distanza e:
+  d(n)= (B - (n-1)*C) / (2n - 1)
+
+5) Algoritmo
+Ripeti:
+1. n = ceil(B / C)
+2. Se n = 1:
+   risultato = B - D
+   STOP
+3. Calcola:
+   d(n) = (B - (n-1)*C) / (2n - 1)
+4. Se d(n) >= D:
+   risultato = B - (2n - 1)*D
+   STOP
+5. Altrimenti:
+   B = (n-1)*C
+   D = D - d(n)
+   ripeti
+
+6) Esempio: B=3000, C=1000, D=1000
+
+Fase 1: n = 3
+  d(3) = (3000 - 2000) / 5 = 1000 / 5 = 200
+Dopo 200 km:
+  B = 2000
+  D = 800
+
+Fase 2: n = 2
+  d(2) = (2000 - 1000) / 3 = 1000 / 3 = 333.33...
+Dopo 333.33 km:
+  B = 1000
+  D = 466.67
+
+Fase 3: n = 1
+Vai diretto:
+risultato = 1000 - 466.67 = 533.33...
+
+Risultato finale
+  533.33...
+Se si usano km interi: 534
+
+Nota:
+Il costo per km cambia a tratti:
+n = 3 -> consumo = 5
+n = 2 -> consumo = 3
+n = 1 -> consumo = 1
+La soluzione ottima consiste nel cambiare regime esattamente quando possibile.
+
+Definizione ricorsiva
+---------------------
+           = B - D,                   se B <= C
+f(B, D, C) = f((n-1)*C, D - d(n), C), se d(n) < D
+           = B - (2n - 1)*D,          se d(n) >= D
+dove:
+  n = ceil(B / C)
+  d(n) = (B - (n-1)*C) / (2n - 1)
+
+Se il cammello consuma 2 banane per km, allora basta modificare il modello introducendo un parametro:
+  k = consumo (banane per km)
+
+1) Modifica fondamentale
+Prima:
+  consumo per km = 2n - 1
+Ora ogni km costa k banane per ogni tratto, quindi:
+  consumo per km = k * (2n - 1)
+2) Distanza di transizione
+Prima:
+  d(n) = (B - (n-1)*C) / (2n - 1)
+Ora diventa:
+ d(n) = (B - (n-1)*C) / (k * (2n - 1))
+3) Caso finale (n = 1)
+Prima:
+  B - D
+Ora:
+  B - k * D
+
+Algoritmo (modello matematico a tratti)
+- Il problema e diviso in fasi
+- In ogni fase il numero di viaggi e n = ceil(B/C)
+- Il costo per km e k*(2n-1)
+- Si avanza finche si puo ridurre n di 1
+- Quando n diventa 1, si va direttamente al mercato
+
+(define (banane-finali B D C k)
+  ; B = banane iniziali
+  ; D = distanza totale
+  ; C = capacita cammello
+  ; k = consumo (banane per km per ogni tratta)
+  (letn ((finito nil) n dn)
+    (while (not finito)
+      ; numero di carichi necessari
+      (setq n (ceil (div B C)))
+      ; caso finale: un solo viaggio, si va diretto
+      (if (= n 1)
+          (begin
+            ; consumo lineare: k banane per km
+            (setq B (sub B (mul k D)))
+            (setq finito true))
+          (begin
+            ; distanza per ridurre i carichi da n a n-1
+            ; consumo per km = k*(2n-1)
+            (setq dn (div (sub B (mul (sub n 1) C))
+                          (mul k (sub (mul 2 n) 1))))
+            ; se non si completa la fase, si termina qui
+            (if (>= dn D)
+                (begin
+                  ; consumo totale sul tratto rimanente
+                  (setq B (sub B (mul k (sub (mul 2 n) 1) D)))
+                  (setq finito true))
+                (begin
+                  ; si completa la fase:
+                  ; si arriva a (n-1)*C banane
+                  (setq B (mul (sub n 1) C))
+                  ; si riduce la distanza residua
+                  (setq D (sub D dn)))))))
+    ; risultato finale (puo essere anche negativo)
+    B))
+
+(banane-finali 3000 1000 1000 1)
+;-> 533.3333333333333
+
+(banane-finali 3000 1000 1000 2)
+;-> -466.6666666666667 (non è possibile arrivare al mercato con le banane)
+
+Aumentare k ha un effetto drastico:
+- il primo tratto si accorcia molto
+- si consuma troppo velocemente
+- non si riesce a coprire tutta la distanza
+Per arrivare almeno con 0 banane serve che il consumo totale minimo sia <= B.
+Nel caso migliore (n = 1 sempre): k * D <= B
+Se non vale nemmeno questa, allora impossibile trasportare anche una sola banana.
+
+Vediamo una funzione che stampa i risultati intermedi.
+
+(define (banane-depositi B D C k)
+  ; B = banane iniziali
+  ; D = distanza totale
+  ; C = capacita
+  ; k = consumo per km
+  (letn ((finito nil) n dn fase 1 pos 0)
+    (println "Start: posizione = 0 banane = " B)
+    (while (not finito)
+      (setq n (ceil (div B C)))
+      (println "Fase " fase ": posizione = " pos " B = " B " D = " D " n = " n)
+      (if (= n 1)
+          (begin
+            (println "  Ultimo tratto fino al mercato")
+            (println "  Consumo totale = " (mul k D))
+            (setq pos (add pos D))
+            (setq B (sub B (mul k D)))
+            (println "  Arrivo al mercato: posizione = " pos " banane = " B)
+            (setq finito true))
+          (begin
+            ; distanza per creare nuovo deposito
+            (setq dn (div (sub B (mul (sub n 1) C))
+                          (mul k (sub (mul 2 n) 1))))
+            (println "  Consumo/km = " (mul k (sub (mul 2 n) 1)))
+            (println "  Distanza deposito = " dn)
+            (if (>= dn D)
+                (begin
+                  (println "  Non si riesce a creare un nuovo deposito")
+                  (setq pos (add pos D))
+                  (setq B (sub B (mul k (sub (mul 2 n) 1) D)))
+                  (println "  Arrivo finale: posizione = " pos " banane = " B)
+                  (setq finito true))
+                (begin
+                  ; creazione deposito
+                  (setq pos (add pos dn))
+                  (setq B (mul (sub n 1) C))
+                  (println "  Deposito creato a posizione = " pos)
+                  (println "  Banane nel deposito = " B)
+                  (setq D (sub D dn)))))
+      (setq fase (add fase 1))))
+    (println "Risultato finale: " B)
+    B))
+
+(banane-depositi 3000 1000 1000 1)
+;-> Start: posizione = 0 banane = 3000
+;-> Fase 1: posizione = 0 B = 3000 D = 1000 n = 3
+;->   Consumo/km = 5
+;->   Distanza deposito = 200
+;->   Deposito creato a posizione = 200
+;->   Banane nel deposito = 2000
+;-> Fase 2: posizione = 200 B = 2000 D = 800 n = 2
+;->   Consumo/km = 3
+;->   Distanza deposito = 333.3333333333333
+;->   Deposito creato a posizione = 533.3333333333333
+;->   Banane nel deposito = 1000
+;-> Fase 3: posizione = 533.3333333333333 B = 1000 D = 466.6666666666667 n = 1
+;->   Ultimo tratto fino al mercato
+;->   Consumo totale = 466.6666666666667
+;->   Arrivo al mercato: posizione = 1000 banane = 533.3333333333333
+;-> Risultato finale: 533.3333333333333
+;-> 533.3333333333333
+
+
+----------------------
+Primi strobogrammatici
+----------------------
+
+Un numero strobogrammatico è un numero che è uguale a se stesso se ruotato di 180 gradi (il centro di rotazione si trova a metà del numero).
+Ad esempio, i numeri "69", "88" e "818" sono tutti strobogrammatici.
+Scrivere una funzione per determinare se un numero è primo strobogrammatico.
+
+Sequenza OEIS A007597:
+Strobogrammatic primes.
+  11, 101, 181, 619, 16091, 18181, 19861, 61819, 116911, 119611,
+  160091, 169691, 191161, 196961, 686989, 688889, 1008001, 1068901,
+  1160911, 1180811, 1190611, 1191611, 1681891, 1690691, 1880881,
+  1881881, 1898681, 1908061, 1960961, 1990661, 6081809, 6100019,
+  6108019, ...
+
+Rappresentiamo la mappa dei numeri (1 -> 1), (8 -> 8), (0 -> 0), (6 -> 9) e (9 -> 6) con una lista associativa.
+Usiamo due puntatori (sinistra e destra) che si muovono, rispettivamente verso destra e verso sinistra.
+Fino a che non risulta sinistra = destra:
+  se il numero corrente di sinistra non compare nella lista di mappatura (link) oppure
+  se il carattere che mappa il numero corrente di sinistra è diverso
+  dal carattere corrente di destra, allora usciamo dal ciclo e restituiamo nil.
+Se terminiamo il ciclo, allora restituiamo true.
+
+(define (strobo? num)
+  (local (link s sx dx continua)
+    (setq continua true)
+    (setq link '(("1" "1") ("0" "0") ("8" "8") ("6" "9") ("9" "6")))
+    (setq s (string num))
+    (setq sx 0)
+    (setq dx (- (length s) 1))
+    (while (and continua (<= sx dx))
+      (if (or (not (lookup (s sx) link)) (!= (lookup (s sx) link) (s dx)))
+          (setq continua nil)
+      )
+      (++ sx)
+      (-- dx)
+    )
+    ; 'continua': true se il ciclo è terminato senza interruzioni (sx == dx)
+    ; 'continua': nil se il ciclo è stato interrotto
+    continua))
+
+Proviamo:
+
+(strobo? 69)
+;-> true
+(strobo? 169)
+;-> nil
+(strobo? 1691)
+;-> true
+
+(filter strobo? (sequence 0 10000)
+;-> (0 1 8 11 69 88 96 101 111 181 609 619 689 808 818 888
+;->  906 916 986 1001 1111 1691 1881 1961 6009 6119 6699 6889
+;->  6969 8008 8118 8698 8888 8968 9006 9116 9696 9886 9966)
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((< num 2) '())
+        ((< num 3) '(2))
+        (true
+          (letn ((m (/ (- num 3) 2))
+                 (arr (array (+ m 1)))
+                 (lim (/ (- (int (sqrt num)) 3) 2))
+                 (lst '(2)))
+            (for (i 0 lim)
+              (when (nil? (arr i))
+                (letn ((p (+ (* 2 i) 3))
+                       (j (/ (- (* p p) 3) 2)))
+                  (for (k j m p (> k m))
+                    (setf (arr k) true)))))
+            (for (i 0 m)
+              (when (nil? (arr i))
+                (push (+ (* 2 i) 3) lst -1)))
+            lst))))
+
+(time (println (filter strobo? (primes-to 1e7))))
+;-> (11 101 181 619 16091 18181 19861 61819 116911 119611
+;->  160091 169691 191161 196961 686989 688889 1008001 1068901
+;->  1160911 1180811 1190611 1191611 1681891 1690691 1880881
+;->  1881881 1898681 1908061 1960961 1990661 6081809 6100019
+;->  6108019 6110119 6608099 6610199 6800089 6801089 6860989)
+;-> 3135.722
+
+
+--------------------------------------------
+Somma delle cifre delle potenze di un numero
+--------------------------------------------
+
+Determinare la sequenza dei numeri N nei seguenti casi:
+a) somma-cifre(N) = somma-cifre(N^2)
+b) somma-cifre(N) = somma-cifre(N^2) = somma-cifre(N^3)
+c) somma-cifre(N) = somma-cifre(N^2) = somma-cifre(N^3) = somma-cifre(N^4)
+d) ...
+
+Sequenza OEIS A111434:
+Numbers k such that the sums of the digits of k, k^2 and k^3 coincide.
+  0, 1, 10, 100, 468, 585, 1000, 4680, 5850, 5851, 5868, 10000, 28845,
+  46800, 58500, 58510, 58680, 58968, 100000, 288450, 468000, 585000,
+  585100, 586800, 589680, 1000000, 2884500, 4680000, 5850000, 5851000,
+  5868000, 5896800, 10000000, ...
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10)))
+    out))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+; Funzione che calcola i numeri N fino ad un dato limite 
+; che soddisfano a:
+; somma-cifre(N) = somma-cifre(N^p(1)) = ... = somma-cifre(N^p(M))
+; dove p(i) sono M potenze da verificare (lista 'powers')
+(define (seq powers limite)
+  (setq out '())
+  (for (num 1 limite)
+    (setq values (map (fn(x) (digit-sum (** num x))) powers))
+    ;(println num { } values)
+    (if (apply = values) (push num out -1)))
+  out)
+
+Proviamo:
+
+N e N^2:
+(seq '(1 2) 1e2)
+;-> (1 9 10 18 19 45 46 55 90 99 100)
+
+N e N^3:
+(seq '(1 3) 1e3)
+;-> (1 8 10 80 100 171 378 468 487 577 585 586 684 800 1000)
+
+N, N^2 e N^3:
+(seq '(1 2 3) 1e3)
+;-> (1 10 100 468 585 1000)
+(seq '(1 2 3) 1e5)
+;-> (1 10 100 468 585 1000 4680 5850 5851 5868 10000 28845
+;->  46800 58500 58510 58680 58968 100000)
+
+N, N^2, N^3 e N^4:
+(time (println (seq '(1 2 3 4) 1e6)))
+;-> (1 10 100 1000 10000 100000 1000000)
+;-> 30424.844
+
+N^2 e N^3:
+(seq '(2 3) 1e2)
+;-> (1 3 6 10 24 28 30 37 60 64 81 87 93 100)
+
+N^2, N^3 e N^4:
+(seq '(2 3 4) 1e3)
+;-> (1 3 10 30 93 100 219 267 300 387 685 930 1000)
+
+N^2, N^3, N^4 e N^5:
+(seq '(2 3 4 5) 1e4)
+(1 3 10 30 100 300 1000 3000 10000)
+
+N^2, N^3, N^4, N^5 e N^6:
+(seq '(2 3 4 5 6) 1e4)
+;-> (1 10 100 1000 10000)
+
+N^3, N^4, N^5, N^6 e N^7:
+(seq '(3 4 5 6 7) 1e4)
+;-> (1 10 100 1000 10000)
+
+N^4, N^5, N^6 e N^7:
+(seq '(4 5 6 7) 1e4)
+;-> (1 10 100 414 1000 4140 10000)
+
+N^4, N^5, N^6, N^7 e N^8:
+(seq '(4 5 6 7 8) 1e4)
+;-> (1 10 100 1000 10000)
+
+N^5, N^6, N^7 e N^8:
+(seq '(5 6 7 8) 1e4)
+;-> (1 10 100 1000 10000)
+
+N^6, N^7 e N^8:
+(seq '(6 7 8) 1e3)
+;-> (1 3 10 30 39 91 100 147 300 390 483 910 1000)
+
+
+---------------------
+Conteggio di detenuti
+---------------------
+
+Ci sono N persone in N celle isolate tra loro (numerate da 1 a N).
+Ogni persona sa che ci sono in tutto N persone.
+Una cella vuota con dentro una lavagna.
+Ad ogni turno viene chiamata una persona a caso che entra nella cella vuota e:
+1) cancella il contenuto la lavagna
+2) scrive il proprio numero sulla lavagna
+Le persone non sanno chi viene chiamato ogni volta (tranne la persona chiamata).
+Le persone non possono comunicare tra loro in alcun modo.
+
+In media quante chiamate sono necessarie affinchè una qualunque delle persone possa dichiarare che sono state chiamate tutte le persone almeno una volta?
+
+Strategia A
+-----------
+
+1) Nominiamo un 'contatore' tra le persone (es. il numero 1)
+2) Ogni volta che il numero 1 viene chiamato memorizza il valore che trova nella lavagna (prima di cancellarlo e scrivere il proprio numero).
+Quando il numero 1 ha contato tutti i numeri, allora può dichiarare che sono state chiamate tutte le persone almeno una volta.
+
+Quindi sono necessarie diverse chiamate prima che il 'contatore' abbia visto tutti i numeri.
+
+(define (simula N)
+  (local (lst prev conta stop curr)
+    ; lista di persone (tutte con valore 0)
+    ; 0: persona non contata
+    ; 1: persona contata
+    (setq lst (dup 0 N))
+    ; il 'contatore' è la persona con indice 0
+    ; quindi ha già contato se stessa
+    (setf (lst 0) 1)
+    ; prima persona scelta
+    (setq prev (rand N))
+    ; conta il numero di persone scelte
+    (setq conta 1)
+    ; ciclo fino a che il 'contatore' non ha contato tutte le altre persone...
+    (setq stop nil)
+    (until stop
+      ; persone corrente scelta
+      (setq curr (rand N))
+      (++ conta)
+      ; se la persona corrente è il 'contatore'
+      ; e
+      ; la persona precedente non era il 'contatore'
+      ; e 
+      ; la persona precedente non è stata ancora conteggiata
+      ; allora marca la persona corrente come conteggiata (lista(prev)=1)
+      (if (and (= curr 0) (!= prev 0) (zero? (lst prev)) (setf (lst prev) 1)))
+      ;(print prev { } curr { } lst) (read-line)
+      ; controllo fine del conteggio:
+      ; se tutte le persone hanno valore 1, allora sono state tutte contate e
+      ; termina il ciclo
+      (if (for-all (fn(x) (= x 1)) lst)
+          (setq stop true))
+          ; altrimenti la persona corrente diventa la persona precedente
+          (setq prev curr)
+    )
+    ; restituisce il numero di persone scelte
+    conta))
+
+(div (apply add (collect (simula 4) 1e5)) 1e5)
+;-> 29.336873
+(mul 4 4 (log 4))
+;-> 22.18
+
+Strategia B
+-----------
+
+Tutti sono contatori, quindi usiamo una matrice (una riga per ogni 'contatore')
+
+(define (simula2 N)
+  (local (lst prev conta stop curr)
+    ; matrice di persone (tutte con valore 0)
+    ; ogni riga rappresenta un 'contatore'
+    ; 0: persona non contata
+    ; 1: persona contata
+    (setq lst (dup (dup 0 N) N))
+    ; i 'contatore' hanno già contato se stesse
+    ; (elementi della diagonale della matrice con valore 1)
+    (for (i 0 (- N 1)) (setf (lst i i) 1))
+    ; prima persona scelta
+    (setq prev (rand N))
+    ; conta il numero di persone scelte
+    (setq conta 1)
+    ; ciclo fino a che un 'contatore' non ha contato tutte le altre persone...
+    (setq stop nil)
+    (until stop
+      ; persone corrente scelta
+      (setq curr (rand N))
+      (++ conta)
+      ; se la persona corrente non è uguale alla precedente
+      ; e
+      ; la persona precedente non è stata ancora conteggiata
+      ; allora marca la persona corrente come conteggiata
+      ; per il 'contatore' corrente 'curr'
+      (if (and (!= curr prev) (zero? (lst curr prev))) (setf (lst curr prev) 1))
+      ;(print prev { } curr { } lst) (read-line)
+      ; controllo fine del conteggio per il 'contatore' corrente:
+      ; se tutte le persone della riga del 'contatore' corrente hanno valore 1,
+      ; allora sono state tutte contate e termina il ciclo
+      (if (for-all (fn(x) (= x 1)) (lst curr))
+          (setq stop true))
+          ; altrimenti la persona corrente diventa la persona precedente
+          (setq prev curr)
+    )
+    ;(println (list curr lst))
+    ; restituisce il numero di persone scelte
+    conta))
+
+(div (apply add (collect (simula2 4) 1e5)) 1e5)
+;-> 15.32489
+(mul 4 4)
+;-> 16
+
+Spiegazione strategia A
+-----------------------
+L'unica informazione globale disponibile è la sequenza delle coppie consecutive (prev -> curr)
+Ogni persona può usare solo le coppie in cui compare come 'curr'.
+Quindi ogni persona vede una sottosequenza casuale di transizioni.
+Questi implica che per una persona (i):
+- ogni volta che viene chiamata, osserva 'prev'
+- quindi sta raccogliendo valori in (1,...,N) tranne i.
+Questo è esattamente un "collezione di figurine" su (N-1) elementi, ma con osservazioni 'diluite':
+- viene chiamata con probabilità (1/N)
+- quindi osserva una figurina ogni ~(N) chiamate
+
+Il tempo per vedere tutti i predecessori:
+
+  (N-1)*log(N-1)
+
+ma ogni osservazione costa (N) chiamate, quindi il tempo vale:
+
+  O(N^2*log(N))
+
+Il contatore registra un numero solo se appare immediatamente prima di lui
+cioè raccoglie valori nuovi solo nelle transizioni X -> contatore.
+Inoltre questo processo NON è indipendente, infatti i 'prev' non indipendenti e identicamente distribuiti poichè c'è correlazione nella sequenza (spesso si ripetono gli stessi valori).
+Questo introduce un fattore di rallentamento r(N) e il tempo diventa:
+
+  O(N^2*log(N) + r(N))
+
+Spiegazione strategia B
+-----------------------
+La strategia 2 fa in modo che basta fermarsi quando qualunque persona ha completato il suo conteggio.
+Quindi stiamo prendendo il minimo su N processi.
+Questo riduce il tempo di un fattore circa (N): O(N^2)
+Comunque anche in questo caso i processi non sono indipendenti perchè competono sugli stessi dati (la stessa sequenza) e molti aggiornamenti sono "sprecati".
+Quindi anche qui abbiamo un fattore di rallentamento r(N) e il tempo diventa:
+
+  O(N^2 + r(N))
+
+Si può fare meglio?
+Non credo.
+Infatti per qualunque strategia:
+- una persona deve vedere almeno (N-1) persone diverse
+- ogni osservazione avviene solo quando viene chiamata
+- quindi servono almeno O(N^2) passi
+
+Nota: il problema equivale a trovare un nodo in una catena di Markov casuale che abbia visto tutti gli altri stati come predecessori (e questo richiede inevitabilmente tempo quadratico).
+
 ============================================================================
 

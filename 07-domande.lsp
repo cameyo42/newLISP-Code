@@ -8277,7 +8277,7 @@ Scrivere una funzione per determinare se un numero è strobogrammatico.
 Rappresentiamo la mappa dei numeri (1 -> 1), (8 -> 8), (0 -> 0), (6 -> 9) e (9 -> 6) con una lista associativa.
 
 Usiamo due puntatori (sinistra e destra) che si muovono, rispettivamente verso destra e verso sinistra.
-Fino  a che non risulta sinistra = destra:
+Fino a che non risulta sinistra = destra:
   se il numero corrente di sinistra non compare nella lista di mappatura (link) oppure
   se il carattere che mappa il numero corrente di sinistra è diverso
   dal carattere corrente di destra, allora restituiamo nil.
@@ -8299,7 +8299,8 @@ Al termine restituiamo true.
     )
     true)))
 
-(setq num 69)
+Proviamo:
+
 (strobogrammatic? 69)
 ;-> true
 (strobogrammatic? 169)

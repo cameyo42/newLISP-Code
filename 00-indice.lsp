@@ -3413,6 +3413,10 @@ NOTE LIBERE 35
   X*Y = reverse(Y)
   Probabilità di superare un esame
   Duello tra pistoleri
+  Il cammello e le banane
+  Primi strobogrammatici
+  Somma delle cifre delle potenze di un numero
+  Conteggio di detenuti
 
 PROBLEMI SUI DADI
 =================
