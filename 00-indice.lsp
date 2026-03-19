@@ -3417,6 +3417,9 @@ NOTE LIBERE 35
   Primi strobogrammatici
   Somma delle cifre delle potenze di un numero
   Conteggio di detenuti
+  Primi bilanciati
+  Film a diverse velocità
+  Question on $idx
 
 PROBLEMI SUI DADI
 =================

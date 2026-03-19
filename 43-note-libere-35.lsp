@@ -6345,9 +6345,8 @@ ma ogni osservazione costa (N) chiamate, quindi il tempo vale:
 
   O(N^2*log(N))
 
-Il contatore registra un numero solo se appare immediatamente prima di lui
-cioè raccoglie valori nuovi solo nelle transizioni X -> contatore.
-Inoltre questo processo NON è indipendente, infatti i 'prev' non indipendenti e identicamente distribuiti poichè c'è correlazione nella sequenza (spesso si ripetono gli stessi valori).
+Il contatore registra un numero solo se appare immediatamente prima di lui, cioè raccoglie valori nuovi solo nelle transizioni X -> contatore.
+Quindi nel processo spesso si ripetono gli stessi valori.
 Questo introduce un fattore di rallentamento r(N) e il tempo diventa:
 
   O(N^2*log(N) + r(N))
@@ -6357,7 +6356,7 @@ Spiegazione strategia B
 La strategia 2 fa in modo che basta fermarsi quando qualunque persona ha completato il suo conteggio.
 Quindi stiamo prendendo il minimo su N processi.
 Questo riduce il tempo di un fattore circa (N): O(N^2)
-Comunque anche in questo caso i processi non sono indipendenti perchè competono sugli stessi dati (la stessa sequenza) e molti aggiornamenti sono "sprecati".
+Comunque anche in questo caso molti aggiornamenti sono "sprecati".
 Quindi anche qui abbiamo un fattore di rallentamento r(N) e il tempo diventa:
 
   O(N^2 + r(N))
@@ -6370,6 +6369,140 @@ Infatti per qualunque strategia:
 - quindi servono almeno O(N^2) passi
 
 Nota: il problema equivale a trovare un nodo in una catena di Markov casuale che abbia visto tutti gli altri stati come predecessori (e questo richiede inevitabilmente tempo quadratico).
+
+
+----------------
+Primi bilanciati
+----------------
+
+Un numero primo bilanciato è un numero primo che è uguale alla media aritmetica dei numeri primi precedente e successivo, cioè se risulta:
+
+          p(n-1) + p(n+1)
+  p(n) = -----------------
+                 2
+  
+Sequenza OEIS A006562:
+Balanced primes (of order one): primes which are the average of the previous prime and the following prime.
+  5, 53, 157, 173, 211, 257, 263, 373, 563, 593, 607, 653, 733, 947, 977,
+  1103, 1123, 1187, 1223, 1367, 1511, 1747, 1753, 1907, 2287, 2417, 2677,
+  2903, 2963, 3307, 3313, 3637, 3733, 4013, 4409, 4457, 4597, 4657, 4691,
+  4993, 5107, 5113, 5303, 5387, 5393, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((< num 2) '())
+        ((< num 3) '(2))
+        (true
+          (letn ((m (/ (- num 3) 2))
+                 (arr (array (+ m 1)))
+                 (lim (/ (- (int (sqrt num)) 3) 2))
+                 (lst '(2)))
+            (for (i 0 lim)
+              (when (nil? (arr i))
+                (letn ((p (+ (* 2 i) 3))
+                       (j (/ (- (* p p) 3) 2)))
+                  (for (k j m p (> k m))
+                    (setf (arr k) true)))))
+            (for (i 0 m)
+              (when (nil? (arr i))
+                (push (+ (* 2 i) 3) lst -1)))
+            lst))))
+
+(define (balanced limit)
+  (letn ( (out '())
+          (primi (primes-to limit))
+          (len (length primi)) )
+  (setq primi (array len primi))
+  (for (i 1 (- len 2))
+    (if (= (primi i) (div (+ (primi (- i 1)) (primi (+ i 1))) 2))
+        (push (primi i) out -1)))
+  out))
+
+(balanced 5400)
+;-> (5 53 157 173 211 257 263 373 563 593 607 653 733 947 977
+;->  1103 1123 1187 1223 1367 1511 1747 1753 1907 2287 2417 2677
+;->  2903 2963 3307 3313 3637 3733 4013 4409 4457 4597 4657 4691
+;->  4993 5107 5113 5303 5387 5393)
+
+
+-----------------------
+Film a diverse velocità
+-----------------------
+
+Abbiamo un film registrato su DVD che ha una durata di 1h 40m 21 s.
+Usando il tasto Forward (avanzamento) con un fattore di velocità maggiore di 1, il film viene velocizzato e termina prima.
+Con un fattore di velocità minore di 1 il film viene visto al rallentatore e impiega più tempo a terminare.
+Scrivere una funzione che prende la durata del film e il fattore di velocità e restituisce il tempo di durata del film a quella velocità.
+
+La funzione è molto semplice, ma bisogna capire che si tratta di una proporzionalità inversa.
+Maggiore è il fattore di velocità e minore è la durata del film e viceversa.
+
+(define (film durata fattore)
+  (if (zero? fattore) "infinito"
+      (div durata fattore)))
+
+Proviamo:
+
+(film 100 1)
+;-> 100
+(film 100 0.5)
+;-> 200
+(film 100 1.25)
+;-> 80
+(film 100 0)
+;-> "infinito"
+(film 100 100)
+;-> 1
+
+
+----------------
+Question on $idx
+----------------
+
+Scriviamo una funzione che associa ogni indice di una lista con un indice diverso della stessa lista.
+
+(define (sel-idx lst)
+  (let ((out '()) (len (length lst)))
+    (dolist (el lst)
+      ; select and index of the list different from the current
+      (while (= (setq idx (rand len)) $idx))
+      ;(println "coppia: " $idx idx)
+      (push (list $idx idx) out -1))
+    out))
+
+Adesso se lst a un solo valore la funzione dovrebbe entrare in loop (perchè non è possibile selezionare un indice diverso da 0):
+(sel-idx '(1))
+;-> ((0 0))  --> ERRORE
+
+Se invece lst ha più di un valore allora la funzione dovrebbe funzionare corrrettamente:
+(sel-idx '(1 2))
+;-> ((0 1) (1 0))  --> OK
+(sel-idx '(1 2))
+;-> ((0 1) (1 1))  --> ERRORE
+
+Perchè la funzione non produce risultati corretti?
+
+Perchè anche 'until' (e 'while') ha una variabile interna $idx.
+Quindi non stiamo confrontando il valore generato 'idx' con $idx di 'dolist', ma con $idx di 'until'.
+
+Per risolvere il problema dobbiamo copiare il valore '$idx' di 'dolist' in una variabile e utilizzarlo all'interno del ciclo 'until'.
+
+(define (sel-idx-ok lst)
+  (let ((out '()) (len (length lst)) (tmp 0))
+    (dolist (el lst)
+      (setq tmp $idx)
+      ; select and index of the list different from the current
+      (while (= (setq idx (rand len)) tmp))
+      ;(println "coppia: " $idx idx)
+      (push (list tmp idx) out -1))
+    out))
+
+(sel-idx-ok '(1))
+;-> ... --> ciclo infinito
+(sel-idx-ok '(1 2))
+;-> ((0 1) (1 0)) --> OK
+(sel-idx '(0 1 2 3 4 5 6 7 8 9))
+;-> ((0 4) (1 9) (2 4) (3 8) (4 8) (5 9) (6 1) (7 1) (8 6) (9 6))
 
 ============================================================================
 
