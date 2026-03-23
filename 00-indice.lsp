@@ -3420,6 +3420,11 @@ NOTE LIBERE 35
   Primi bilanciati
   Film a diverse velocità
   Question on $idx
+  Numeri zigzag di Eulero
+  Primo elemento ripetuto
+  Primo elemento non ripetuto
+  a^b * c^d * ... = ... * x^y * z^w
+  Slap sort
 
 PROBLEMI SUI DADI
 =================

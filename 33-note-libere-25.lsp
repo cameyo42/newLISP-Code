@@ -1781,6 +1781,22 @@ Proviamo:
 (what?)
 ;-> "0E5718A8-22D4-4FF3-9DF3-4A24EA226C72"
 
+Quanti UUID possiamo generare?
+
+(uuid)
+"62611959-2943-465E-A232-977A6F6B8015"
+
+Lunghezza UUID:
+(length (replace "-" (uuid) ""))
+;-> 32
+
+Numero simboli:
+26 caratteri (A..Z) + 10 cifre (0..9) --> 36 simboli
+
+Numero totale di UUID:
+(pow 36 32)
+;-> 6.334028666297328e+049
+
 
 -------------------------------------
 Sequenze di numeri senza alcune cifre

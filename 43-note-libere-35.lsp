@@ -6504,5 +6504,580 @@ Per risolvere il problema dobbiamo copiare il valore '$idx' di 'dolist' in una v
 (sel-idx '(0 1 2 3 4 5 6 7 8 9))
 ;-> ((0 4) (1 9) (2 4) (3 8) (4 8) (5 9) (6 1) (7 1) (8 6) (9 6))
 
+
+-----------------------
+Numeri zigzag di Eulero
+-----------------------
+
+I numeri a zigzag di Eulero sono sequenze di numeri interi che costituiscono un numero di permutazioni di tali numeri in modo che ogni elemento sia alternativamente maggiore o minore dell'elemento precedente.
+c1, c2, c3, c4 è una permutazione alternata in cui:
+c1 < c2
+c3 < c2
+c3 < c4...
+
+Sequenza OEIS A000111:
+Euler or up/down numbers: e.g.f. sec(x) + tan(x). Also for n >= 2, half the number of alternating permutations on n letters (A001250).
+  1, 1, 1, 2, 5, 16, 61, 272, 1385, 7936, 50521, 353792, 2702765, 22368256,
+  199360981, 1903757312, 19391512145, 209865342976, 2404879675441,
+  29088885112832, 370371188237525, 4951498053124096, 69348874393137901,
+  1015423886506852352, 15514534163557086905, 246921480190207983616,
+  4087072509293123892361, ...
+
+Definizione della sequenza ZigZag:
+
+  a(0) = 1
+  a(1) = 1
+  a(n+1) = (1/2)*Sum[k=0,n](binom n k)*a(k)*a(n-k)
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+Versione 1
+----------
+Applicazione diretta della formula
+
+(define (zz1 N)
+  (setq out '(1 1))
+  (for (i 2 (- N 1))
+    (setq somma 0)
+    (for (k 0 (- i 1))
+      (++ somma (* (binom (- i 1) k) (out k) (out (- i 1 k)))))
+    (push (/ somma 2) out -1))
+  out)
+
+(zz1 8)
+;-> (1 1 1 2 5 16 61 272)
+
+Versione 1
+----------
+Creazione del triangolo di Pascal
+
+(define (zz2 N)
+  ; out contiene i valori della sequenza ZigZag, inizializzata con a(0)=1 e a(1)=1
+  ; coeff contiene la riga corrente del triangolo di Pascal
+  (letn ((out '(1 1)) (coeff '(1)))
+    ; ciclo principale: calcola a(i) per i da 2 a N-1
+    (for (i 2 (- N 1))
+      ; costruisce la nuova riga dei coefficienti binomiali (Pascal)
+      (letn ((nuovi '(1)))
+        ; se la riga precedente ha almeno 2 elementi, somma elementi adiacenti
+        (if (> (length coeff) 1)
+          (for (k 1 (- (length coeff) 1))
+            ; coeff[k-1] + coeff[k]
+            (push (+ (coeff (- k 1)) (coeff k)) nuovi -1)))
+        ; aggiunge l'ultimo 1 della riga di Pascal
+        (push 1 nuovi -1)
+        ; aggiorna la riga corrente: coeff = binom(i-1,k)
+        (setq coeff nuovi))
+      ; inizializza accumulatore per la convoluzione
+      (setq somma 0)
+      ; calcola la somma: sum binom(i-1,k)*a(k)*a(i-1-k)
+      (for (k 0 (- i 1))
+        (++ somma (* (coeff k) (out k) (out (- i 1 k)))))
+      ; divide per 2 e aggiunge il nuovo termine alla sequenza
+      (push (/ somma 2) out -1))
+    ; restituisce la lista dei valori
+    out))
+
+(zz2 8)
+;-> (1 1 1 2 5 16 61 272)
+
+Versione 3
+----------
+Creazione del triangolo di Pascal (solo la riga corrente)
+
+(define (zz3 N)
+  ; out contiene i valori della sequenza ZigZag, inizializzata con a(0)=1 e a(1)=1
+  ; coeff contiene la riga corrente del triangolo di Pascal
+  (letn ((out '(1 1)) (coeff '(1)))
+    ; ciclo principale: calcola a(i) per i da 2 a N-1
+    (for (i 2 (- N 1))
+      ; costruisce la nuova riga di Pascal: coeff = (1 ... 1)
+      ; somma elementi adiacenti della riga precedente usando map su liste allineate
+      (setq coeff
+        (cons 1
+          (append
+            ; (slice coeff ...) prende tutti gli elementi tranne l'ultimo
+            ; (rest coeff) prende tutti gli elementi tranne il primo
+            ; map + somma le coppie corrispondenti → elementi centrali della nuova riga
+            (map + (slice coeff 0 (- (length coeff) 1)) (rest coeff))
+            '(1))))
+      ; inizializza accumulatore per la convoluzione
+      (setq somma 0)
+      ; calcola la somma: sum binom(i-1,k)*a(k)*a(i-1-k)
+      (for (k 0 (- i 1))
+        (++ somma (* (coeff k) (out k) (out (- i 1 k)))))
+      ; divide per 2 e aggiunge il nuovo termine alla sequenza
+      (push (/ somma 2) out -1))
+    ; restituisce la lista dei valori della sequenza
+    out))
+
+(zz3 8)
+;-> (1 1 1 2 5 16 61 272)
+
+Versione 4
+----------
+Niente Pascal
+Niente liste di coefficienti
+Niente 'map', 'slice', 'append'
+Niente chiamate a 'binom'
+Binomiali aggiornati incrementalmente 'c'
+
+(define (zz4 N)
+  ; sequenza iniziale
+  ;(let ((out '(1 1))) ; con le liste
+  (let ( (out (array N '(1))) ) ; con i vettori
+    ; calcola a(n) per n>=2
+    (for (n 2 (- N 1))
+      ; c = binom(n-1,0)
+      (let ( (somma 0) (c 1) )
+        (for (k 0 (- n 1))
+          ; somma += binom(n-1,k) * a(k) * a(n-1-k)
+          (++ somma (* c (out k) (out (- n 1 k))))
+          ; aggiorna binomiale: binom(n-1,k+1)
+          (setq c (/ (* c (- n 1 k)) (+ k 1))))
+        ; fattore 1/2 finale
+        (setf (out n) (/ somma 2)))) ; con i vettori
+        ;(push (/ somma 2) out -1))) ; con le liste
+    out))
+
+(zz4 8)
+;-> (1 1 1 2 5 16 61 272)
+
+Test di correttezza:
+(= (zz1 24) (zz2 24) (zz3 24) (zz4 24))
+;-> true
+
+Test di velocità:
+(time (zz1 24) 1e4)
+;-> 8679.228
+(time (zz2 24) 1e4)
+;-> 834.119
+(time (zz3 24) 1e4)
+;-> 622.406
+(time (zz4 24) 1e4)
+;-> 662.449
+
+Versione 5
+----------
+Come la versione 4, ma modificata per gestire i big-integer
+
+(define (zz5 N)
+  ; sequenza iniziale
+  ;(let ((out '(1 1))) ; con le liste
+  (let ( (out (array N '(1L))) ) ; con i vettori
+    ; calcola a(n) per n>=2
+    (for (n 2 (- N 1))
+      ; c = binom(n-1,0)
+      (let ( (somma 0L) (c 1L) )
+        (for (k 0 (- n 1))
+          ; somma += binom(n-1,k) * a(k) * a(n-1-k)
+          (++ somma (* c (out k) (out (- n 1 k))))
+          ; aggiorna binomiale: binom(n-1,k+1)
+          (setq c (/ (* c (- n 1 k)) (+ k 1))))
+        ; fattore 1/2 finale
+        (setf (out n) (/ somma 2)))) ; con i vettori
+        ;(push (/ somma 2) out -1))) ; con le liste
+    out))
+
+(zz5 8)
+;-> (1L 1L 1L 2L 5L 16L 61L 272L)
+
+(zz5 30)
+;-> (1L 1L 1L 2L 5L 16L 61L 272L 1385L 7936L 50521L 353792L 2702765L 22368256L
+;->  199360981L 1903757312L 19391512145L 209865342976L 2404879675441L
+;->  29088885112832L 370371188237525L 4951498053124096L 69348874393137901L
+;->  1015423886506852352L 15514534163557086905L 246921480190207983616L
+;->  4087072509293123892361L 70251601603943959887872L
+;->  1252259641403629865468285L 23119184187809597841473536L)
+
+L'uso dei big-integer rallenta molto la funzione:
+ 
+(time (zz5 24) 1e4)
+;-> 2051.94
+
+
+-----------------------
+Primo elemento ripetuto
+-----------------------
+
+Trovare il primo elemento ripetuto di una stringa e di una lista.
+
+; stringhe e liste (doppio ciclo)
+(define (first-repeat1 obj)
+  (let ( (len (length obj)) (out nil) (stop nil) )
+    ; Iterate through each element in the list/string
+    (for (i 1 (- len 1) 1 stop)
+      ; Check if the current element is a repeating element
+      (for (j 0 (- i 1) 1 stop)
+          (when (= (obj i) (obj j))
+            (setq out (obj i))
+            ; element found --> stop
+            (setq stop true))))
+    ; If no repeating element is found, return nil
+    ; else return the repeating element
+    out))
+
+(first-repeat1 "abcfgdhrtujkda")
+;-> "d"
+(first-repeat1 "aba")
+;-> "a"
+(first-repeat1 "abccba")
+;-> "c"
+(first-repeat1 "-+!@#$%^&*[]!#abccba")
+;-> "!"
+
+; stringhe (vettore 256)
+(define (first-repeat2 str)
+  (let ( (len (length str))
+         (arr (array 256 '(nil)))
+         (out nil) (stop nil) )
+    (dostring (c str stop)
+      (if (arr c)
+          (set 'out (char c) 'stop true))
+          ;else
+          (setf (arr c) true))
+    out))
+
+(first-repeat2 "abcfgdhrtujkda")
+;-> "d"
+(first-repeat2 "aba")
+;-> "a"
+(first-repeat2 "abccba")
+;-> "c"
+(first-repeat2 "-+!@#$%^&*[]!#abccba")
+;-> "!"
+
+; liste (lista visitati + member)
+(define (first-repeat3 lst)
+  (let ( (visti '()) (out nil) (stop nil) )
+    (dolist (el lst stop)
+      (if (member el visti)
+          (set 'out el 'stop true))
+          ;else
+          (push el visti))
+    out))
+
+(first-repeat3 (explode "abcfgdhrtujkda"))
+;-> "d"
+(first-repeat3 (explode "aba"))
+;-> "a"
+(first-repeat3 (explode "abccba"))
+;-> "c"
+(first-repeat3 (explode "-+!@#$%^&*[]!#abccba"))
+;-> "!"
+
+; liste (hash-map)
+(define (first-repeat4 lst)
+  (new Tree 'visti) ; hash-map degli elementi visitati (globale)
+  (let ( (out nil) (stop nil) )
+    ; ciclo che cerca il primo elemento ripetuto (se esiste)
+    ; altrimenti restituisce nil
+    (dolist (el lst stop)
+      ; se elemento esiste nella hash-map, allora ferma il ciclo
+      (if (visti el)
+          (set 'out el 'stop true))
+          ;altrimenti inserisce l'elemento nella hash-map
+          (visti el el))
+    ; elimina la hash-map
+    (delete 'visti)
+    out))
+
+(first-repeat4 (explode "abcfgdhrtujkda"))
+;-> "d"
+(first-repeat4 (explode "aba"))
+;-> "a"
+(first-repeat4 (explode "abccba"))
+;-> "c"
+(first-repeat4 (explode "-+!@#$%^&*[]!#abccba"))
+;-> "!"
+
+Test di velocità:
+
+(time (first-repeat1 "-+!@#$%^&*[]!#abccba") 1e5)
+;-> 1713.239
+(time (first-repeat2 "-+!@#$%^&*[]!#abccba") 1e5)
+;-> 514.908
+
+(setq t (explode "-+!@#$%^&*[]!#abccba"))
+(time (first-repeat3 t) 1e5)
+;-> 783.902
+
+(setq t (explode "-+!@#$%^&*[]!#abccba"))
+(time (first-repeat4 t) 1e5)
+;-> 1734.481
+
+(setq t '(1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 1 2))
+(time (first-repeat4 t) 1e5)
+;-> 1015.599
+
+(setq t (rand 1000 1000))
+(time (first-repeat4 t) 1e5)
+;-> 4109.701
+
+
+---------------------------
+Primo elemento non ripetuto
+---------------------------
+
+Trovare il primo elemento non ripetuto di una stringa e di una lista.
+
+; stringhe (vettore 256)
+(define (first-no-repeat1 str)
+  (let ( (len (length str))
+         (arr (array 256 '(0)))
+         (out nil) (stop nil) )
+    ; riempimento del vettore
+    ; zero volte carattere -> 0
+    ; prima volta carattere -> 1
+    ; seconda volta carattere -> 2
+    ; terza volta carattere -> 2
+    ; ...
+    (dostring (c str) (if (< (arr c) 2) (++ (arr c))))
+    ; per ogni carattere verifica se è comparso una sola volta
+    ; (nel vettore vale 1)
+    ; il primo carattere è la soluzione
+    (dostring (c str stop) (if (= (arr c) 1) (set 'out (char c) 'stop true)))
+    out))
+
+(first-no-repeat1 "abcdabcf")
+;-> "d"
+
+; liste (lista associativa)
+(define (first-no-repeat2 lst)
+  (let ( (freq '()) (out nil) (stop nil) )
+    ; ciclo per creare la lista delle frequenze (elemento occorrenze)
+    (dolist (el lst)
+      (if (lookup el freq)
+          ; se elemento esiste, allora aumenta la frequenza
+          (++ (lookup el freq))
+          ;else
+          ; altrimenti inserisce l'elemento nella lista 'freq'
+          ; con frequenza 1
+          (push (list el 1) freq -1)))
+    ; cerca e restituisce il primo elemento con frequenza 1 (se esiste)
+    ; altrimenti restituisce nil
+    (if (find '(? 1) freq match)
+        ($0 0)
+        nil)))
+
+(setq a '(1 2 3 4 6 5 1 2 3 4))
+(first-no-repeat2 a)
+;-> 6
+(first-no-repeat2 '(1 2 1 2 3 3))
+;-> nil
+
+; liste (hash-map)
+(define (first-no-repeat3 lst)
+  (new Tree 'freq) ; hash-map delle frequenze (globale)
+  (let ( (out nil) (stop nil) )
+    ; ciclo per creare la hash-map delle frequenze (elemento occorrenze)
+    (dolist (el lst)
+      (if (freq el)
+          ; se elemento esiste, allora aumenta la frequenza
+          (freq el (+ $it 1))
+          ;else
+          ; altrimenti inserisce l'elemento nella hash-map 'freq'
+          ; con frequenza 1
+          (freq el 1)))
+    ; cerca e restituisce il primo elemento con frequenza 1 (se esiste)
+    ; altrimenti restituisce nil
+    (dolist (el lst stop)
+      (if (= (freq el) 1) (set 'out el 'stop true)))
+    ; elimina la hash-map
+    (delete 'freq)
+    out))
+
+(setq a '(1 2 3 4 6 5 1 2 3 4))
+(first-no-repeat3 a)
+;-> 6
+(first-no-repeat3 '(1 2 1 2 3 3))
+;-> nil
+
+Test di velocità:
+100 elementi:
+(setq t (rand 10 100))
+(push 111 t (rand 100))
+(time (first-no-repeat2 t) 1e4)
+;-> 147.164
+(time (first-no-repeat3 t) 1e4)
+;-> 395.554
+
+1000 elementi:
+(setq t (rand 100 1000))
+(push 1111 t (rand 1000))
+(time (first-no-repeat2 t) 1e4)
+;-> 5154.071
+(time (first-no-repeat3 t) 1e4)
+;-> 4780.08
+
+10000 elementi:
+(setq t (rand 1000 10000))
+(push 11111 t (rand 10000))
+(time (first-no-repeat2 t) 1e4)
+;-> 493901.883
+(time (first-no-repeat3 t) 1e4)
+;-> 48338.125
+
+Le liste associative scalano molto male.
+
+
+---------------------------------
+a^b * c^d * ... = ... * x^y * z^w
+---------------------------------
+
+Consideriamo l'equazione a^b * c^d * ... = ... * x^y * z^w, dove a,b,...,w sono numeri interi.
+Dato un numero intero pari N < 11, determinare se i numeri da 1 a N generano un'equazione valida.
+
+Esempio
+  N = 6
+  Equazione: 4^3 = 2^6 * 1^5  --> 64 = 64 * 1 
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i)
+          )))
+    out))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+; Funzione che determina le equazioni valide
+(define (potenze N dbg)
+  (local (out nums len tagli permute sx dx val-sx val-dx)
+    (setq out '())
+    (setq nums (sequence 1 N))
+    (setq len (length nums))
+    ; numero di tagli
+    (setq tagli (- (/ len 2) 1))
+    (setq permute (perm nums))
+    ; ciclo per ogni permutazione...
+    (dolist (p permute)
+      ; creazione delle coppie del tipo: a^b)
+      (setq p (explode p 2))
+      ; ciclo per provare tutte le combinazioni di '=' nella permutazione corrente
+      (for (t 1 tagli)
+        ; parte sinistra dell'equazione
+        (setq sx (slice p 0 t))
+        (setq dx (slice p t))
+        ; parte destra dell'equazione
+        ; valore parte sinistra
+        (setq val-sx (apply * (map (fn(x) (** (x 0) (x 1))) sx)))
+        ; valore parte destra
+        (setq val-dx (apply * (map (fn(x) (** (x 0) (x 1))) dx)))
+        (when dbg
+          (println t)
+          (println sx { = } dx)
+          (println val-sx { } val-dx)
+          (read-line))
+        ; controllo correttezza dell'equazione
+        ; (uguaglianza tra val-sx e val-dx)
+        (if (= val-sx val-dx)
+          (push (list sx dx val-sx) out -1))))
+    ; stampa della soluzione
+    (dolist (el out)
+      (setq sx (el 0))
+      (setq dx (el 1))
+      (dolist (c sx) 
+        (print (c 0) "^" (c 1))
+        (if (!= $idx (- (length sx) 1)) (print " * ")))
+      (print " = ")
+      (dolist (c dx)
+        (print (c 0) "^" (c 1))
+        (if (!= $idx (- (length dx) 1))  (print " * ")))
+      (println " = " val-sx)) '>))
+
+Proviamo:
+
+(potenze 4)
+;->
+
+(potenze 6)
+;-> 1^5 * 4^3 = 2^6 = 8192L
+;-> 4^3 = 1^5 * 2^6 = 8192L
+;-> 4^3 * 1^5 = 2^6 = 8192L
+;-> 2^6 = 4^3 * 1^5 = 8192L
+;-> 4^3 = 2^6 * 1^5 = 8192L
+;-> 2^6 = 1^5 * 4^3 = 8192L
+;-> 2^6 * 1^5 = 4^3 = 8192L
+;-> 1^5 * 2^6 = 4^3 = 8192L
+
+(potenze 8)
+;-> 8^5 = 2^3 * 4^6 * 1^7 = 2293235712L
+;-> 4^6 * 2^3 = 8^5 * 1^7 = 2293235712L
+;-> ...
+;-> 4^7 = 2^5 * 8^3 * 1^6 = 2293235712L
+;-> 4^7 = 8^3 * 2^5 * 1^6 = 2293235712L
+
+(time (potenze 10))
+;-> 4^3 * 2^7 * 9^5 = 8^1 * 6^10 = 307792887033102336L
+;-> 2^7 * 4^3 * 9^5 = 8^1 * 6^10 = 307792887033102336L
+;-> ...
+;-> 3^5 * 8^7 = 9^2 * 4^10 * 6^1 = 307792887033102336L
+;-> 8^7 * 3^5 = 9^2 * 4^10 * 6^1 = 307792887033102336L
+;-> 108098.837
+
+
+---------
+Slap sort
+---------
+
+"Slap sort" è un termine specialistico utilizzato nella programmazione competitiva per descrivere una strategia di ordinamento che prevede lo spostamento ripetuto del primo elemento maggiore del suo successore alla fine della lista, fino a quando la lista non è ordinata.
+
+Algoritmo
+Identificare la prima coppia di elementi A e B tali che (A > B) e spostare A alla fine della lista.
+Ripetere questa operazione finché non esistono più coppie di questo tipo (ovvero, la lista è in ordine non-decrescente).
+
+(define (slap-sort lst)
+  (let ((ordinata nil))
+    (until ordinata
+      (setq ordinata true)
+      (setq coppia-trovata nil)
+      (for (i 0 (- (length lst) 2) 1 coppia-trovata)
+        (when (> (lst i) (lst (+ i 1)))
+          (setq ordinata nil)
+          (setq coppia-trovata true)
+          (push (pop lst i) lst -1))
+        (println "i: " i { } coppia-trovata { } lst)))
+    lst))
+
+(slap-sort '(3 2 1))
+;-> i: 0 true (2 1 3)
+;-> i: 0 true (1 3 2)
+;-> i: 0 nil (1 3 2)
+;-> i: 1 true (1 2 3)
+;-> i: 0 nil (1 2 3)
+;-> i: 1 nil (1 2 3)
+;-> (1 2 3)
+
 ============================================================================
 
