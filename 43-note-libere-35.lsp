@@ -7079,5 +7079,221 @@ Ripetere questa operazione finché non esistono più coppie di questo tipo (ovve
 ;-> i: 1 nil (1 2 3)
 ;-> (1 2 3)
 
+
+-------------------------------------------------
+Il gioco della catena di parole (Word chain game)
+-------------------------------------------------
+
+Le regole del gioco sono le seguenti:
+a) un gruppo di giocatori si alternano nel pronunciare le parole di qualche gruppo specifico (es. animali, nomi, verbi, ecc.)
+b) al proprio turno ogni giocatore deve pronunciare una parola del gruppo che inizia con la stessa lettera con cui termina il nome dell'ultima parola pronunciata e non deve essere stata già ststa pronunciata nei turni precedenti.
+c) Se un giocatore non riesce a trovare una parola valida entro un dato intervallo di tepo, allora viene eliminato.
+d) L'ultimo giocatore che rimane è il vincitore.
+
+Scriviamo un programma che simula il gioco tra un utente e il computer.
+Per fare questo dobbiamo cambiare alcune regole.
+Il gruppo di parole viene passato come parametro (lista di parole).
+Il computer può scegliere solo dalla lista di parole data.
+L'utente puo scegliere anche parole nuove (che vengono poi aggiunte alla lista iniziale).
+Il computer cerca di trovare una parola per cui non esiste altra parola che inizia con il carattere finale della parola scelta. 
+Se tale parola non esiste, allora sceglie una parola a caso dalla lista iniziale.
+
+Algoritmo della parola 'quasi' vincente (l'utente può scegliere una parola nuova)
+1. Per ogni parola non utilizzata x che inizia con l'ultima lettera della parola precedente, verificate se non esistono parole non utilizzate che iniziano con l'ultima lettera di x (in tal caso, x è vincente).
+2. Caso speciale: x inizia e finisce con la stessa lettera.
+
+(setq gruppo '("asino" "ornitorinco" "oca" "ragno" "serpente" "otaria"
+               "anatra" "iguana" "opossum"))
+
+; Funzione che cerca parole che iniziano con il carattere 'ch'
+(define (words-start ch parole)
+  (filter (fn(x) (starts-with x ch)) parole))
+
+(words-start "o" gruppo)
+;-> ("ornitorinco" "oca" "otaria" "opossum")
+
+; Funzione che cerca parole che terminano con il carattere 'ch'
+(define (words-end ch parole)
+  (filter (fn(x) (ends-with x ch)) parole))
+
+(words-end "o" gruppo)
+;-> ("asino" "ornitorinco" "ragno")
+
+; Funzione che cerca una parola 'quasi' vincente
+(define (winning-move)
+  (local (out possible-words stop ch valid-words)
+    (setq out "")
+    ; crea una lista 'possible-words' di tutte le parole che
+    ; iniziano con il primo carattere della parola 'curr-word'
+    (setq possible-words (words-start (curr-word -1) parole))
+    ;(println possible-words)
+    (setq stop nil)
+    ; ciclo per ogni parola possibile...
+    (dolist (el possible-words stop)
+      ; carattere finale della parola possibile corrente
+      (setq ch (el -1))
+      ; trova tutte le parole valide che terminano con
+      ; l'ultimo carattere della parola possibile corrente 'ch'
+      (setq valid-words (words-start ch parole))
+      ; Caso delle parole che iniziano e terminano con lo stesso carattere:
+      ; rimuove, se esiste, la parola possibile corrente dalla lista delle
+      ; parole valide.
+      ; In questo modo si considera la parola possibile corrente
+      ; come candidata a parola vincente
+      (replace el valid-words)
+      ;(print el { } ch { } valid-words) (read-line)
+      ; se non esistono parole valide, (cioè se 'valid-words' è vuota)
+      ; allora la parola possibile corrente 'el' è una parola vincente
+      (when (= valid-words '())
+            (setq out el)
+            (setq stop true)))
+    out))
+
+(setq curr-word "ragno")
+(setq parole gruppo)
+(winning-move)
+;-> "opossum"
+
+; Funzione che calcola una parola per il computer
+(define (computer-move)
+  (local (win possible-words)
+    (println "Computer: ")
+    ;(println parole)
+    ; elimina la parola corrente dalla lista delle parole
+    (replace curr-word parole)
+    ; cerca una parola vincente
+    (setq win (winning-move))
+    (if (!= win "")
+        (begin ; parola vincente
+          (setq curr-word win)
+          ; elimina la parola dalla lista delle parole
+          (replace curr-word parole)
+          ; aggiunge la parola alle parole usate
+          (push curr-word parole-usate -1)
+          ;stampa la parola corrente
+          (println "Parola corrente vincente: " curr-word))
+        (begin ; parola casuale
+          ; crea una lista 'possible-words' di tutte le parole che
+          ; iniziano con il primo carattere della parola 'curr-word'
+          (setq possible-words (words-start (curr-word -1) parole))
+          ; parola trovata nella lista delle parole
+          (if possible-words
+              (begin ; esistono parole valide --> ne sceglie una a caso
+                ; sceglie una parola a caso tra quelle possibili
+                (setq curr-word (parole (rand (length parole))))
+                ; elimina la parola dalla lista delle parole
+                (replace curr-word parole)
+                ; aggiunge la parola alle parole usate
+                (push curr-word parole-usate -1)
+                ;stampa la parola corrente
+                (println "Parola corrente: " curr-word))
+              (begin ; non esistono parole valide --> fine del gioco
+                (setq end-game true)
+                (println "Non esistono parole valide: " parole)
+                (println "Fine del gioco.")))))))
+
+; Funzione che permette all'utente di scegliere una parola
+(define (user-move)
+    (local (input possible-words)
+    (println "User: ")
+    ;(println parole)
+    ; elimina la parola corrente dalla lista delle parole
+    (replace curr-word parole)
+    ; crea una lista 'possible-words' di tutte le parole che
+    ; iniziano con il primo carattere della parola 'curr-word'
+    (setq possible-words (words-start (curr-word -1) parole))
+    ;(println possible-words)
+    (print "Parola che inizia con " (curr-word -1) "? ") (read-line)
+    (setq input (current-line))
+    (cond
+        ; Parola che non inizia con la lettera corretta
+          ((!= (input 0) (curr-word -1)) ;
+            ;(println curr-word)
+            (println input " non inizia con " (curr-word -1))
+            (user-move))
+        ; Parola già usata
+          ((find input parole-usate)
+            (println input " è stata già usata.")
+            (user-move))
+        ; Parola trovata nella lista delle parole
+            ((find input possible-words)
+            ; elimina la parola dalla lista delle parole
+            (replace input parole)
+            ; aggiunge la parola alle parole usate
+            (push input parole-usate -1)
+            ; imposta la parola corrente
+            (setq curr-word input)
+            ;stampa la parola corrente
+            (println "Parola corrente: " curr-word))
+          ; Parola non trovata nella lista delle parole
+          (true
+            (println input " non esiste nelle parole.")
+            (print "è una parola valida? (y/n) " (read-line))
+            (if (= (current-line) "y")
+                (begin
+                  ; aggiorna la lista globale delle parole (lst)
+                  (push input lst -1)
+                  ; aggiunge la parola alle parole usate
+                  (push input parole-usate -1)
+                  ; imposta la parola corrente
+                  (setq curr-word input)
+                  ;stampa la parola corrente
+                  (println "Parola corrente: " curr-word))
+                ;else
+                (user-move))))))
+
+; Funzione che simula il gioco
+(define (words-game gruppo curr-word)
+  ; lista iniziale delle parole
+  (setq parole gruppo)
+  ; lista di tutte le parole (iniziale + quelle nuove inserite dall'utente)
+  (setq lst gruppo)
+  ; lista delle parole usate
+  (setq parole-usate '())
+  ; flag per la fine del gioco
+  (setq end-game nil)
+  ; ciclo del gioco
+  (until end-game
+    (user-move)
+    (computer-move))
+  (println "Parole rimaste:" parole)
+  (println "Parole totali:" lst) '>)
+
+Proviamo:
+
+(setq curr-word "oca")
+(setq gruppo '("asino" "ornitorinco" "oca" "ragno" "serpente" "otaria"
+               "anatra" "iguana" "opossum"))
+(words-game gruppo "oca")
+
+(words-game gruppo "oca")
+;-> User:
+;-> Parola che inizia con a? anatra
+;-> Parola corrente: anatra
+;-> Computer:
+;-> Parola corrente: serpente
+;-> User:
+;-> Parola che inizia con e? epor
+;-> epor non esiste nelle parole.
+;-> è una parola valida? (y/n) y
+;-> yParola corrente: epor
+;-> Computer:
+;-> Parola corrente: ornitorinco
+;-> User:
+;-> Parola che inizia con o? otte
+;-> otte non esiste nelle parole.
+;-> è una parola valida? (y/n) n
+;-> nUser:
+;-> Parola che inizia con o? oriz
+;-> oriz non esiste nelle parole.
+;-> è una parola valida? (y/n) y
+;-> yParola corrente: oriz
+;-> Computer:
+;-> Non esistono parole valide: ("asino" "ragno" "otaria" "iguana" "opossum")
+;-> Fine del gioco.
+;-> Parole rimaste:("asino" "ragno" "otaria" "iguana" "opossum")
+;-> Parole totali:("asino" "ornitorinco" "oca" "ragno" "serpente" "otaria" "anatra" "iguana" "opossum"
+;->  "epor" "oriz")
+
 ============================================================================
 

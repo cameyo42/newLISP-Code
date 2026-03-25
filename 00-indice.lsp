@@ -3425,6 +3425,7 @@ NOTE LIBERE 35
   Primo elemento non ripetuto
   a^b * c^d * ... = ... * x^y * z^w
   Slap sort
+  Il gioco della catena di parole (Word chain game)
 
 PROBLEMI SUI DADI
 =================
