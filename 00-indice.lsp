@@ -3426,6 +3426,7 @@ NOTE LIBERE 35
   a^b * c^d * ... = ... * x^y * z^w
   Slap sort
   Il gioco della catena di parole (Word chain game)
+  Il problema delle biglie di Lewis Carrol
 
 PROBLEMI SUI DADI
 =================
@@ -3473,7 +3474,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (399 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (400 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

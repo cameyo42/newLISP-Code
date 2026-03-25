@@ -7276,24 +7276,145 @@ Proviamo:
 ;-> Parola che inizia con e? epor
 ;-> epor non esiste nelle parole.
 ;-> è una parola valida? (y/n) y
-;-> yParola corrente: epor
+;-> Parola corrente: epor
 ;-> Computer:
 ;-> Parola corrente: ornitorinco
 ;-> User:
 ;-> Parola che inizia con o? otte
 ;-> otte non esiste nelle parole.
 ;-> è una parola valida? (y/n) n
-;-> nUser:
+;-> User:
 ;-> Parola che inizia con o? oriz
 ;-> oriz non esiste nelle parole.
 ;-> è una parola valida? (y/n) y
-;-> yParola corrente: oriz
+;-> Parola corrente: oriz
 ;-> Computer:
 ;-> Non esistono parole valide: ("asino" "ragno" "otaria" "iguana" "opossum")
 ;-> Fine del gioco.
 ;-> Parole rimaste:("asino" "ragno" "otaria" "iguana" "opossum")
-;-> Parole totali:("asino" "ornitorinco" "oca" "ragno" "serpente" "otaria" "anatra" "iguana" "opossum"
-;->  "epor" "oriz")
+;-> Parole totali:("asino" "ornitorinco" "oca" "ragno" "serpente" "otaria"
+;->  "anatra" "iguana" "opossum" "epor" "oriz")
+
+
+----------------------------------------
+Il problema delle biglie di Lewis Carrol
+----------------------------------------
+
+Nel 1887, Lewis Carroll, celebre per aver scritto il romanzo "Alice nel Paese delle Meraviglie", propone un interessante problema probabilistico.
+
+All'interno di un'urna esiste una sola pallina.
+Questa pallina può essere Gialla o Rossa.
+Inseriamo una pallina Gialla nell'urna.
+Adesso l'urna contiene due palline
+Estraiamo (a caso) una pallina dall'urna e notiamo che è Gialla.
+Adesso l'urna contiene una sola pallina.
+Qual è la probabilità che la pallina rimasta nell'urna sia Rossa?
+
+Note:
+a) le palline nell'urna non sono visibili dall'esterno
+b) se estraiamo una pallina Rossa, allora si ripete il processo dall'inizio
+
+
+Situazione iniziale
+La pallina '?' può essere Gialla (50%) o Rossa (50%)
+|     |
+|     |
+|  ?  |
++-----+
+
+Inseriamo una pallina Gialla
+|     |
+|     |
+| ? G |
++-----+
+
+Estraiamo una pallina a caso che è Gialla ('?' oppure 'G')
+Caso 1: abbiamo estratto '?'    Caso 2: abbiamo estratto 'G'
+        (che risulta Gialla)            (che è Gialla)
+|     |                         |     |
+|     |                         |     |
+|  G  |                         |  ?  |
++-----+                         +-----+
+
+La pallina rimasta che probabilità ha di essere Rossa?
+
+Il problema è simile a quello di Monty Hall.
+Vedi "Il problema Monty Hall" su "Problemi vari".
+
+La risposta 50% è errata.
+
+Scriviamo una funzione per simulare il processo.
+0 = Gialla
+1 = Rossa
+
+(define (simula)
+  (local (p urna estatto)
+    ; pallina inizialmente nell'urna
+    (setq p (rand 2))
+    (setq urna (list p))
+    ; inseriamo nell'urna una pallina Gialla (0)
+    (push 0 urna)
+    ; mischiamo le palline nell'urna
+    (setq urna (randomize urna))
+    ; estraiamo una pallina a caso dall'urna
+    ; se è Gialla, restituisce il colore della pallina rimasta nell'urna
+    ; se non è Gialla, restituisce 'nil'
+    (setq estratto (rand 2)) ; indice
+    (if (zero? (urna estratto))
+        (begin (pop urna estratto) (first urna))
+        nil)))
+
+(map simula (sequence 1 10))
+;-> (1 0 0 0 nil 0 0 nil nil 1)
+
+(define (prob iter)
+  (local (R G k res)
+    (setq R 0)
+    (setq G 0)
+    (setq k 0)
+    (while (< k iter)
+      (setq res (simula))
+      (cond ((= res 0) (++ G) (++ k))
+            ((= res 1) (++ R) (++ k))))
+    (list G R (div G iter) (div R iter))))
+
+Proviamo:
+
+(time (println (prob 1e6)))
+;-> (666667 333333 0.666667 0.333333)
+;-> 896.1900000000001
+
+La pallina rimasta nell'urna ha le seguenti probabilità:
+66.66% di essere Gialla
+33.33% di essere Rossa
+
+Facciamo una modifica al processo:
+quando estraiamo a caso la pallina non ci interessa di che colore è.
+
+(define (simula2)
+  (local (p urna estatto)
+    ; pallina inizialmente nell'urna
+    (setq p (rand 2))
+    (setq urna (list p))
+    ; inseriamo nell'urna una pallina Gialla (0)
+    (push 0 urna)
+    ; mischiamo le palline nell'urna
+    (setq urna (randomize urna))
+    ; estraiamo una pallina a caso dall'urna
+    (pop urna (rand 2))
+    (first urna)))
+
+(simula2)
+;-> 1
+(simula2)
+;-> 0
+
+(count '(0 1) (collect (simula2) 1e7))
+;-> (7499100 2500900)
+
+In questo caso la pallina rimasta nell'urna ha le seguenti probabilità:
+75% di essere Gialla
+25% di essere Rossa
 
 ============================================================================
 
