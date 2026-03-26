@@ -7416,5 +7416,264 @@ In questo caso la pallina rimasta nell'urna ha le seguenti probabilità:
 75% di essere Gialla
 25% di essere Rossa
 
+
+------------------
+Hash-map dinamiche
+------------------
+
+Come creare una hash-map sempre in modo dinamico?
+
+Un metodo può essere il seguente:
+
+; Funzione che restituisce una hash-map con il nome generato da 'uuid':
+(define (make-hash)
+  (let (nome (sym (string "Hash-" (uuid))))
+    (new Tree nome)
+    nome))
+
+Adesso possiamo creare una hash-map in questo modo:
+
+(setq h1 (make-hash))
+;-> Hash-1FF76883-00A3-4BBA-A390-85584D144856
+
+Purtroppo ogni volta che usiamo la hash-map dobbiamo usare la funzione 'eval':
+
+((eval h1) "a" "1")
+;-> "1"
+((eval h1) "b" "2")
+;-> "2"
+((eval h1))
+;-> (("a" "1") ("b" "2"))
+
+Un altro metodo è il seguente:
+
+(define (make-hash nome) (new Tree (sym (eval nome))))
+
+Che usiamo in questo modo:
+
+(make-hash "hash")
+;-> hash
+(hash 1 1)
+;-> 1
+(hash 2 2)
+;-> 2
+(hash)
+;-> (("1" 1) ("2" 2))
+
+Un'altra idea: invece di creare tante hash-map, usiamo un solo Tree globale e simuliamo più hash-map usando una chiave composta.
+
+(new Tree 'HT)
+; crea un nome univoco (parte della chiave)
+(define (make-hash) (uuid))
+
+; Inserimento elemento
+(define (hash-set h k v) (HT (string h "|" k) v))
+
+; Recupero elemento
+(define (hash-get h k) (HT (string h "|" k)))
+
+; creazione degli hash
+(setq h1 (make-hash))
+;-> "4A1E26A6-6FFA-41CC-A3D7-83588015B052"
+(setq h2 (make-hash))
+;-> "6A927E8B-42BA-47B5-89EB-946534245F49"
+
+Inseriamo alcuni valori:
+
+(hash-set h1 "a" 1)
+;-> 1
+(hash-set h2 "b" 2)
+;-> 2
+
+Vediamo il Tree globale:
+(HT)
+;-> (("4A1E26A6-6FFA-41CC-A3D7-83588015B052|a" 1)
+;->  ("6A927E8B-42BA-47B5-89EB-946534245F49|b" 2))
+
+Inseriamo altri valori:
+
+(hash-set h1 "d" 11)
+;->
+(hash-set h2 "e" 22)
+;-> 22
+
+Vediamo il Tree globale:
+(HT)
+;-> (("4A1E26A6-6FFA-41CC-A3D7-83588015B052|a" 11)
+;->  ("6A927E8B-42BA-47B5-89EB-946534245F49|b" 22))
+;-> ...
+
+Usiamo solo chiavi stringa (tipo "h|k").
+
+; delete singola chiave
+(define (hash-del h k) (HT (string h "|" k) nil) true)
+(hash-del h1 "a")
+;-> true
+(hash-del h2 "b")
+;-> true
+(HT)
+
+; delete completa di una hash
+Dobbiamo cancellare tutte le chiavi che iniziano con "h|".
+(define (hash-clear h)
+  (let ( (hash (string h "|")) )
+    (dolist (entry (HT))
+      (if (starts-with hash entry)
+      ;(if (= pre (slice (entry 0) 0 plen))
+          (HT (entry 0) nil)))))
+
+Se 'hash-clear' è frequente, questa operazione è O(n) su tutta la tabella.
+
+Soluzione alternativa (molto più veloce):
+invece di cancellare, cambiamo direttamente ID hash
+(setq h (make-hash)) ; nuovo UUID -> vecchi dati ignorati
+È praticamente O(1).
+
+; Funzione che verifica se un simbolo è una hash-map
+(define (hash? hash)
+"Check if a symbol is a hash-map"
+  (and (context? (eval hash))
+       (not (list? (eval (sym (term hash) hash nil))))))
+
+
+-------------------------
+k-esimo elemento ripetuto
+-------------------------
+
+Data una lista, determinare il k-esimo elemento ripetuto.
+Se tale elemento non esiste, allora restituire nil.
+
+Algoritmo
+Create an empty hash map to store element counts.
+Loop through the list and update the counts of each element in the hash map.
+Loop through the list again and find the kth non-repeating element by checking the count of each element in the hash map.
+
+(define (k-repeat k lst)
+  (let ( (freq '()) (out nil) (stop nil) )
+    ; ciclo per creare la lista delle frequenze (elemento occorrenze)
+    (dolist (el lst)
+      (if (lookup el freq)
+          ; se elemento esiste, allora aumenta la frequenza
+          (++ (lookup el freq))
+          ;else
+          ; altrimenti inserisce l'elemento nella lista 'freq'
+          ; con frequenza 1
+          (push (list el 1) freq -1)))
+    ;(println freq)
+    ; cerca e restituisce il primo elemento con frequenza k (se esiste)
+    ; altrimenti restituisce nil
+    (setq stop nil)
+    (setq i 0)
+    (dolist (f freq stop)
+      (if (>= (f 1) k) (++ i))
+      ;(print (f 1) { } i) (read-line)
+      (when (= i k)
+        (setq out (f 0))
+        (setq stop true)))
+    out))
+
+Proviamo:
+
+(setq a '(1 2 3 1 2 3 1 2 3))
+(k-repeat 2 a)
+;-> 2
+(k-repeat 3 a)
+;-> 3
+
+(setq b '(1 2 3 4 5 6 2 2 2 3 3 3 3))
+(k-repeat 2 b)
+;-> 3
+(k-repeat 3 b)
+;-> nil
+
+(setq c '(a b d d b))
+(k-repeat 2 c)
+;-> d
+
+
+----------------------------------
+Semplificazione errata di frazioni
+----------------------------------
+
+Esistono alcune frazioni in cui una cancellazione illegale fornisce il risultato corretto.
+Per esempio:
+
+  16                      1
+  -- = cancellando il 6 = -
+  64                      4
+            
+  19                      1
+  -- = cancellando il 9 = -
+  95                      5
+            
+  26                      2
+  -- = cancellando il 6 = -
+  65                      5
+            
+  49                      4   1
+  -- = cancellando il 9 = - = -
+  98                      8   2
+
+Trovare tutte le frazioni con numeri di 2 cifre al numeratore e al denominatore che risultano corrette con una cancellazione illegale.
+
+; Funzione che riduce una frazione n/d ai minimi termini
+(define (rat n d)
+  (let (g (gcd n d))
+    (map (curry * 1L)
+         (list (/ n g) (/ d g)))))
+
+; Funzione che converte 0 in 1 e 1 in 0
+(define (flip01 x) (+ 1 0 (- x)))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (fraction)
+  (setq out '())
+  (setq numer (sequence 10 99))
+  (setq denom (sequence 10 99))
+  (dolist (num numer)
+    (dolist (den denom)
+      (setq val (rat num den))
+      (setq num-cifre (int-list num))
+      (setq den-cifre (int-list den))
+      ;(println num-cifre { } den-cifre)
+      (dolist (c num-cifre)
+        (when (setq idx (find c den-cifre))
+          (setq a (num-cifre (flip01 $idx)))
+          (setq b (den-cifre (flip01 idx)))
+          ;(print a { } b) (read-line))
+          (when (and (!= b 0) (= (rat a b) val))
+            (push (list num-cifre den-cifre a b val) out -1))))))
+   out)
+
+Proviamo:
+
+(setq sol (fraction))
+
+Solo frazioni diverse da 1/1:
+(filter (fn(x) (!= (x 4) '(1L 1L))) sol)
+;-> (((1 0) (2 0) 1 2 (1L 2L)) ((1 0) (3 0) 1 3 (1L 3L))
+;->  ((1 0) (4 0) 1 4 (1L 4L)) ((1 0) (5 0) 1 5 (1L 5L))
+;-> ...
+;->  ((9 0) (7 0) 9 7 (9L 7L)) ((9 0) (8 0) 9 8 (9L 8L))
+;->  ((9 5) (1 9) 5 1 (5L 1L)) ((9 8) (4 9) 8 4 (2L 1L)))
+
+Solo frazioni diverse da 1/1 e con cifre diverse da 0:
+(filter (fn(x) (and (!= (x 4) '(1L 1L)) (!= (x 0 0) 0) (!= (x 0 1) 0))) sol)
+;-> (((1 6) (6 4) 1 4 (1L 4L))
+;->  ((1 9) (9 5) 1 5 (1L 5L))
+;->  ((2 6) (6 5) 2 5 (2L 5L))
+;->  ((4 9) (9 8) 4 8 (1L 2L))
+;->  ((6 4) (1 6) 4 1 (4L 1L))
+;->  ((6 5) (2 6) 5 2 (5L 2L))
+;->  ((9 5) (1 9) 5 1 (5L 1L))
+;->  ((9 8) (4 9) 8 4 (2L 1L)))
+
 ============================================================================
 

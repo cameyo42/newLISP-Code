@@ -3427,6 +3427,9 @@ NOTE LIBERE 35
   Slap sort
   Il gioco della catena di parole (Word chain game)
   Il problema delle biglie di Lewis Carrol
+  Hash-map dinamiche
+  k-esimo elemento ripetuto
+  Semplificazione errata di frazioni
 
 PROBLEMI SUI DADI
 =================
