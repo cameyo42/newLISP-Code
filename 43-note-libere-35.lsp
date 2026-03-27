@@ -7675,5 +7675,95 @@ Solo frazioni diverse da 1/1 e con cifre diverse da 0:
 ;->  ((9 5) (1 9) 5 1 (5L 1L))
 ;->  ((9 8) (4 9) 8 4 (2L 1L)))
 
+
+--------------------------------------------------------------
+Somma minima della differenza assoluta tra coppie di due liste
+--------------------------------------------------------------
+
+Abbiamo due liste 'A' e 'B' di uguale lunghezza.
+Il problema è quello di abbinare ogni elemento della lista 'A' a un elemento della lista 'B', in modo tale che la somma S delle differenze assolute di tutte le coppie sia minima.
+
+Esempio:
+  A = (3 2 1)
+  B = (2 1 3)
+  Output = 0
+Spiegazione
+  Accoppiamento 1: |3 - 2| + |2 - 1| + |1 - 3| = 1 + 1 + 2 = 4
+  Accoppiamento 2: |3 - 2| + |1 - 1| + |2 - 3| = 1 + 0 + 1 = 2
+  Accoppiamento 3: |2 - 2| + |3 - 1| + |1 - 3| = 0 + 2 + 2 = 4
+  Accoppiamento 4: |1 - 2| + |2 - 1| + |3 - 3| = 1 + 1 + 0 = 2
+  Accoppiamento 5: |2 - 2| + |1 - 1| + |3 - 3| = 0 + 0 + 0 = 0
+  Accoppiamento 6: |1 - 2| + |3 - 1| + |2 - 3| = 1 + 2 + 1 = 4
+Quindi l'accoppiamento 5 ha la somma minima (0) delle differenze assolute.
+
+Esempio
+  A = (4 1 8 7)
+  B = (2 3 6 5)
+  Output = 6
+
+Algoritmo
+1) Ordinare entrambe le liste (tempo: O(n*log(n))).
+2) Trovare la differenza assoluta di ogni coppia di elementi corrispondenti (elementi con lo stesso indice) di entrambe le liste e aggiungere il risultato alla somma totale (tempo O(n)).
+Complessità temporale O(n*log(n))
+
+(define (somma-minima A B)
+  (sort A)
+  (sort B)
+  (apply + (map (fn(x y) (abs (- x y))) A B)))
+
+Proviamo:
+
+(setq A '(3 2 1))
+(setq B '(2 1 3))
+(somma-minima A B)
+;-> 0
+
+(setq A '(4 1 8 7))
+(setq B '(2 3 6 5))
+
+(somma-minima A B)
+;-> 6
+
+
+--------------------------------------------------------
+Numeri maggiori con lo stesso numero di 1 e 0 in binario
+--------------------------------------------------------
+
+Dato un numero intero non-negativo N, trovare il numero più grande che nella sua rappresentazione binaria ha lo stesso numero di 0 e 1 di N.
+
+Sequenza OEIS A073138:
+Largest number having in its binary representation the same number of 0's and 1's as n.
+  0, 1, 2, 3, 4, 6, 6, 7, 8, 12, 12, 14, 12, 14, 14, 15, 16, 24, 24, 28,
+  24, 28, 28, 30, 24, 28, 28, 30, 28, 30, 30, 31, 32, 48, 48, 56, 48, 56,
+  56, 60, 48, 56, 56, 60, 56, 60, 60, 62, 48, 56, 56, 60, 56, 60, 60, 62,
+  56, 60, 60, 62, 60, 62, 62, 63, 64, 96, 96, 112, 96, 112, 112, ...
+
+(define (pop-count1 num)
+"Calculate the number of 1 in binary value of an integer number"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter))
+    counter))
+
+; Funzione che restituisce il numero più grande che nella sua 
+; rappresentazione binaria ha lo stesso numero di 0 e 1 di un dato N
+(define (biggest num)
+  (letn ( (bin (bits num))
+          (len (length bin))
+          (bit1 (pop-count1 num)) )
+    ; il numero maggiore è quello con gli 1 tutti davanti (a sinistra)
+    ; cioè gli 1 occupano i posti delle cifre più significative
+    (int (string (dup "1" bit1) (dup "0" (- len bit1))) 0 2)))
+
+(biggest 123)
+;-> (126)
+
+(map biggest (sequence 1 70))
+;-> (1 2 3 4 6 6 7 8 12 12 14 12 14 14 15 16 24 24 28
+;->  24 28 28 30 24 28 28 30 28 30 30 31 32 48 48 56 48 56
+;->  56 60 48 56 56 60 56 60 60 62 48 56 56 60 56 60 60 62
+;->  56 60 60 62 60 62 62 63 64 96 96 112 96 112 112)
+
 ============================================================================
 

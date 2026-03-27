@@ -3430,6 +3430,8 @@ NOTE LIBERE 35
   Hash-map dinamiche
   k-esimo elemento ripetuto
   Semplificazione errata di frazioni
+  Somma minima della differenza assoluta tra coppie di due liste
+  Numeri maggiori con lo stesso numero di 1 e 0 in binario
 
 PROBLEMI SUI DADI
 =================
