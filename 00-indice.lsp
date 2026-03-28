@@ -3431,7 +3431,9 @@ NOTE LIBERE 35
   k-esimo elemento ripetuto
   Semplificazione errata di frazioni
   Somma minima della differenza assoluta tra coppie di due liste
-  Numeri maggiori con lo stesso numero di 1 e 0 in binario
+  Numeri maggiori/minori con lo stesso numero di 1 e 0 in binario
+  Costante 2.648102...
+  Solitario bulgaro
 
 PROBLEMI SUI DADI
 =================

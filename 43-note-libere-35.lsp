@@ -7725,11 +7725,11 @@ Proviamo:
 ;-> 6
 
 
---------------------------------------------------------
-Numeri maggiori con lo stesso numero di 1 e 0 in binario
---------------------------------------------------------
+---------------------------------------------------------------
+Numeri maggiori/minori con lo stesso numero di 1 e 0 in binario
+---------------------------------------------------------------
 
-Dato un numero intero non-negativo N, trovare il numero più grande che nella sua rappresentazione binaria ha lo stesso numero di 0 e 1 di N.
+Dato un numero intero non-negativo N, trovare il numero più grande e il numero più piccolo che nella sua rappresentazione binaria ha lo stesso numero di 0 e 1 di N.
 
 Sequenza OEIS A073138:
 Largest number having in its binary representation the same number of 0's and 1's as n.
@@ -7737,6 +7737,13 @@ Largest number having in its binary representation the same number of 0's and 1'
   24, 28, 28, 30, 24, 28, 28, 30, 28, 30, 30, 31, 32, 48, 48, 56, 48, 56,
   56, 60, 48, 56, 56, 60, 56, 60, 60, 62, 48, 56, 56, 60, 56, 60, 60, 62,
   56, 60, 60, 62, 60, 62, 62, 63, 64, 96, 96, 112, 96, 112, 112, ...
+
+Sequenza OEIS A073137:
+a(n) is the least number whose binary representation has the same number of 0's and 1's as n.
+  0, 1, 2, 3, 4, 5, 5, 7, 8, 9, 9, 11, 9, 11, 11, 15, 16, 17, 17, 19, 17,
+  19, 19, 23, 17, 19, 19, 23, 19, 23, 23, 31, 32, 33, 33, 35, 33, 35, 35,
+  39, 33, 35, 35, 39, 35, 39, 39, 47, 33, 35, 35, 39, 35, 39, 39, 47, 35,
+  39, 39, 47, 39, 47, 47, 63, 64, 65, 65, 67, 65, 67, 67, 71, 65, ...
 
 (define (pop-count1 num)
 "Calculate the number of 1 in binary value of an integer number"
@@ -7757,13 +7764,316 @@ Largest number having in its binary representation the same number of 0's and 1'
     (int (string (dup "1" bit1) (dup "0" (- len bit1))) 0 2)))
 
 (biggest 123)
-;-> (126)
+;-> 126
 
-(map biggest (sequence 1 70))
-;-> (1 2 3 4 6 6 7 8 12 12 14 12 14 14 15 16 24 24 28
+(map biggest (sequence 0 70))
+;-> (0 1 2 3 4 6 6 7 8 12 12 14 12 14 14 15 16 24 24 28
 ;->  24 28 28 30 24 28 28 30 28 30 30 31 32 48 48 56 48 56
 ;->  56 60 48 56 56 60 56 60 60 62 48 56 56 60 56 60 60 62
 ;->  56 60 60 62 60 62 62 63 64 96 96 112 96 112 112)
+
+; Funzione che restituisce il numero più piccolo che nella sua 
+; rappresentazione binaria ha lo stesso numero di 0 e 1 di un dato N
+(define (smallest num)
+  (if (zero? num) 0
+  ;else
+  (letn ( (bin (bits num))
+          (len (length bin))
+          (bit1 (pop-count1 num)) )
+    ; il numero minore è quello con un 1 a destra. poi tutti gli zeri e poi
+    ; i restanti 1
+    (int (string "1" (dup "0" (- len bit1)) (dup "1" (- bit1 1))) 0 2))))
+
+(smallest 123)
+;-> 95
+
+(map smallest (sequence 0 72))
+;-> (0 1 2 3 4 5 5 7 8 9 9 11 9 11 11 15 16 17 17 19 17
+;->  19 19 23 17 19 19 23 19 23 23 31 32 33 33 35 33 35 35
+;->  39 33 35 35 39 35 39 39 47 33 35 35 39 35 39 39 47 35
+;->  39 39 47 39 47 47 63 64 65 65 67 65 67 67 71 65)
+
+
+--------------------
+Costante 2.648102...
+--------------------
+
+https://cameroncounts.wordpress.com/2021/05/23/a-new-constant/
+
+In un articolo del 2021 il matematico Peter Cameron congettura che il rapporto:
+
+  f(n)/phi(n)
+  dove: f(n) = A345965, phi(n) = toziente(n)
+
+è limitato dal valore 2.648102...
+
+Sequenza OEIS A345965:
+a(1) = 1, for n>1: a(n) = phi(n) + a(n/p) where p is the least prime divisor of n.
+  1, 2, 3, 4, 5, 5, 7, 8, 9, 9, 11, 9, 13, 13, 13, 16, 17, 15, 19, 17, 19,
+  21, 23, 17, 25, 25, 27, 25, 29, 21, 31, 32, 31, 33, 31, 27, 37, 37, 37,
+  33, 41, 31, 43, 41, 37, 45, 47, 33, 49, 45, 49, 49, 53, 45, 51, 49, 55,
+  57, 59, 37, 61, 61, 55, 64, 61, 51, 67, 65, 67, 55, ...
+
+(define (totient num)
+"Calculate the eulero totient of a given number"
+  (if (= num 1) 1
+    (let (res num)
+      (dolist (f (unique (factor num)))
+        (setq res (- res (/ res f))))
+      res)))
+
+(map totient (sequence 1 10))
+;-> (1 1 2 2 4 2 6 4 6 4)
+
+(define (calc n)
+  (if (= n 1) 1
+  ;else
+    (setq f (factor n))
+    (if (= (length f) 1)
+        (setf (a n) n)
+        ;else
+        (begin
+          (setq p (f 0))
+          ;(println n { } p { } (/ n p))
+          (setf (a n) (+ (totient n) (a (/ n p))))))))
+
+(define (seq1 N)
+  (let (a (array (+ N 1) '(0)))
+    (setf (a 1) 1)
+    (map calc (sequence 1 N))))
+
+(seq1 20)
+;-> (1 2 3 4 5 5 7 8 9 9 11 9 13 13 13 16 17 15 19 17)
+
+Versione veloce:
+1) Precalcoliamo phi(n) per tutti i valori con un sieve
+2) Precalcoliamo anche il più piccolo divisore primo (spf)
+3) Poi usiamo direttamente la formula: a(n) = phi(n) + a(n / spf(n))
+
+(define (seq2 N)
+  (letn ((phi (array (+ N 1) '(0)))
+         (spf (array (+ N 1) '(0)))
+         (a   (array (+ N 1) '(0))))
+    ; inizializzazione
+    (for (i 1 N)
+      (setf (phi i) i)
+      (setf (spf i) 0))
+    ; sieve per phi e spf
+    (for (i 2 N)
+      (when (= (spf i) 0) ; i è primo
+        (for (j i N i)
+          (if (= (spf j) 0) (setf (spf j) i))
+          (setf (phi j) (- (phi j) (/ (phi j) i))))))
+    ; base
+    (setf (a 1) 1)
+    ; costruzione sequenza
+    (for (n 2 N)
+      (setf (a n) (+ (phi n) (a (/ n (spf n))))))
+    ; output lista
+    (map (fn (x) (a x)) (sequence 1 N))))
+
+(seq2 20)
+;-> (1 2 3 4 5 5 7 8 9 9 11 9 13 13 13 16 17 15 19 17)
+
+Test di correttezza:
+
+(= (seq1 1000) (seq2 1000))
+;-> true
+
+Test di velocità:
+
+(time (seq1 10000) 100)
+;-> 1329.187
+(time (seq2 10000) 100)
+;-> 749.266
+
+(time (seq1 100000) 100)
+;-> 16110.41
+(time (seq2 100000) 100)
+;-> 8172.882
+
+Verifichiamo la congettura:
+
+(apply max (map div (seq1 100) (map totient (sequence 1 100))))
+;-> 2.625
+
+(apply max (map div (seq2 1e5) (map totient (sequence 1 1e5))))
+;-> 2.648090277777778
+
+(time (println (apply max (map div (seq2 1e7) (map totient (sequence 1 1e7))))))
+;-> 2.64810173128858
+;-> 36531.436
+
+
+-----------------
+Solitario bulgaro
+-----------------
+
+Martin Gardner presentò il gioco nel numero di agosto 1983 di Scientific American.
+
+Nel gioco, un mazzo di N carte viene diviso in diverse pile.
+Da ogni pila si estrae una carta.
+Le carte estratte vengono raccolte insieme per formare una nuova pila.
+(le pile di dimensione zero vengono ignorate).
+
+Se N e' un numero triangolare (cioe': N = 1 + 2 + ... + k per qualche k), allora e' noto che il solitario bulgaro raggiunge una configurazione stabile in cui le dimensioni delle pile sono: 1, 2, ..., k.
+Questo stato viene raggiunto in al piu': k^2 - k mosse.
+
+Se N non è triangolare, non esiste una configurazione stabile e viene raggiunto un ciclo limite.
+
+Nel gioco le configurazioni con gli stessi numeri sono equivalenti.
+
+Infatti le due liste:
+  (1 2 3 4)
+  (2 1 4 3)
+rappresentano le stesse pile, solo in ordine diverso (non importa dove stanno o in che ordine sono scritte).
+
+Perché l'ordine non conta?
+
+La trasformazione del gioco è:
+1) Da ogni pila togliere 1 carta
+2) Contare quante pile c'erano --> nuova pila
+3) Rimuovere le pile diventate 0
+
+Queste operazioni dipendono solo da:
+  a) quante pile abbiamo
+  b) e quanto sono grandi
+NON dalla posizione nella lista
+
+Esempio
+Partiamo da:
+  (1 2 3 4)
+oppure:
+  (2 1 4 3)
+Facciamo una mossa:
+- sottraiamo 1:
+  (0 1 2 3)
+  (1 0 3 2)
+- aggiungiamo nuova pila (4 elementi):
+  (0 1 2 3 4)
+  (1 0 3 2 4)
+- togliamo gli zeri:
+(1 2 3 4)
+(1 3 2 4)
+che sono ancora la stessa configurazione
+
+Questo comporta che quando confrontiamo gli stati dobbiamo usare una forma canonica (in questo caso ordiniamo la lista), altrimenti perdiamo cicli o contiamo stati diversi che sono uguali.
+
+; Funzione per calcolare le partizioni di un numero intero
+(define (partition-num num)
+"Generate a list of all the partitions of a positive integer"
+(catch
+  (local (part k temp-value out)
+    (setq out '())
+    (setq part (array num '(0)))
+    (setq k 0)
+    (setf (part k) num)
+    ; Questo ciclo prima aggiunge la partizione corrente alla lista
+    ; poi genera la partizione successiva.
+    ; Il ciclo termina quando la partizione corrente è costituita da tutti 1.
+    (while true
+      ; Aggiunge la partizione corrente alla lista delle soluzioni
+      (push (slice part 0 (+ k 1)) out -1)
+      ;
+      ; Genera la partizione successiva
+      ;
+      ; Trova il valore non-uno più a destra di part[]
+      ; Aggiorna anche il valore di temp-value
+      ; (cioè quanti valori possono essere inseriti)
+      (setq temp-value 0)
+      (while (and (>= k 0) (= (part k) 1))
+        (setq temp-value (+ temp-value (part k)))
+        (-- k))
+      ; se k < 0, tutti i valori valgono 1
+      ; quindi non ci sono altre partizioni da generare
+      (if (< k 0) (throw out))
+      ; Decrementa part[k] trovato sopra e calcola il valore di temp-value
+      (setf (part k) (- (part k) 1))
+      (++ temp-value)
+      ; Se rem_val è maggiore, allora l'ordine è violato.
+      ; Divide temp-value in diversi valori di dimensione part[k] e
+      ; copia questi valori in posizioni diverse dopo part[k]
+      (while (> temp-value (part k))
+        (setf (part (+ k 1)) (part k))
+        (setq temp-value (- temp-value (part k)))
+        (++ k))
+      ; Copia rem_val nella posizione successiva e incrementa la posizione
+      (setf (part (+ k 1)) temp-value)
+      (++ k)))))
+
+(time (println (length (partition-num 40))))
+;-> 37338
+;-> 94.334
+
+; Funzione per l'analisi del solitario bulgaro
+(define (analisi part iter)
+  (local (values nums stop nuova-pila trasf indici)
+    (setq nums part)
+    ; lista degli stati
+    (setq values (list (sort nums)))
+    ; numero di trasformazioni di stato
+    (setq trasf 0)
+    ; flag di terminazione del ciclo degli stati
+    (setq stop nil)
+    ; ciclo degli stati
+    (for (k 1 iter 1 stop)
+      ; calcolo della nuova pila
+      (setq nuova-pila (length nums))
+      ; sottrazione di 1 alle pile
+      (setq nums (map (fn(x) (- x 1)) nums))
+      ; creazione nuovo stato
+      (push nuova-pila nums -1)
+      ; rimozione delle pile a 0
+      (replace 0 nums)
+      ; ordinamento della pila (forma canonica)
+      (sort nums)
+      ;(print nums (read-line))
+      ; controllo ciclo
+      (when (ref nums values)
+        ; stato corrente già presente --> stop ciclo 'for'
+        (setq stop true)
+        ; numero totale di trasformazioni
+        (setq trasf k))
+      ; inserimento stato nella lista degli stati
+      (push nums values -1))
+    (println "Trasformazioni: " trasf)
+    (setq indici (flat (ref-all nums values)))
+    (println "Lunghezza ciclo: "
+             (- (indici 1) (indici 0)) " (" (indici 0) "," (indici 1) ")")
+    values))
+
+Proviamo:
+
+(analisi '(1 2 3) 100)
+;-> Trasformazioni: 1
+;-> Lunghezza ciclo: 1 (0,1)
+;-> ((1 2 3) (1 2 3))
+
+(analisi '(1 2 3 5) 100)
+;-> Trasformazioni: 5
+;-> Lunghezza ciclo: 5 (0,5)
+;-> ((1 2 3 5) (1 2 4 4) (1 3 3 4) (2 2 3 4) (1 1 2 3 4) (1 2 3 5))
+
+(analisi '(10 10 10 10) 1000)
+;-> (analisi '(10 10 10 10) 1000)
+;-> Trasformazioni: 21
+;-> Lunghezza ciclo: 9 (12,21)
+;-> ((10 10 10 10) (4 9 9 9 9) (3 5 8 8 8 8) (2 4 6 7 7 7 7) 
+;->  (1 3 5 6 6 6 6 7) (2 4 5 5 5 5 6 8) (1 3 4 4 4 4 5 7 8)
+;->  (2 3 3 3 3 4 6 7 9) (1 2 2 2 2 3 5 6 8 9) (1 1 1 1 2 4 5 7 8 10)
+;->  (1 3 4 6 7 9 10) (2 3 5 6 7 8 9) (1 2 4 5 6 7 7 8)
+;->  (1 3 4 5 6 6 7 8) (2 3 4 5 5 6 7 8) (1 2 3 4 4 5 6 7 8)
+;->  (1 2 3 3 4 5 6 7 9) (1 2 2 3 4 5 6 8 9) (1 1 2 3 4 5 7 8 9)
+;->  (1 2 3 4 6 7 8 9) (1 2 3 5 6 7 8 8) (1 2 4 5 6 7 7 8))
+
+(analisi '(1 7 2 3 5 3) 100)
+;-> Trasformazioni: 23
+;-> Lunghezza ciclo: 1 (22,23)
+;-> ((1 2 3 3 5 7) (1 2 2 4 6 6) (1 1 3 5 5 6) (2 4 4 5 6) (1 3 3 4 5 5)
+;->  (2 2 3 4 4 6) (1 1 2 3 3 5 6) (1 2 2 4 5 7) (1 1 3 4 6 6) (2 3 5 5 6)
+;->  (1 2 4 4 5 5) (1 3 3 4 4 6) (2 2 3 3 5 6) (1 1 2 2 4 5 6) (1 1 3 4 5 7)
+;->  (2 3 4 6 6) (1 2 3 5 5 5) (1 2 4 4 4 6) (1 3 3 3 5 6) (2 2 2 4 5 6)
+;->  (1 1 1 3 4 5 6) (2 3 4 5 7) (1 2 3 4 5 6) (1 2 3 4 5 6))
 
 ============================================================================
 

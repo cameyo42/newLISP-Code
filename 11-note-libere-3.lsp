@@ -1139,17 +1139,17 @@ Un grafo aciclico diretto (Directed acyclic graph, DAG) è un grafo diretto che 
 
 Un esempio di DAG è il seguente:
 
-  +---------+-        +---------+        +---------+          +---------+
+  +---------+         +---------+        +---------+          +---------+
   |         |         |         |        |         |          |         |
   |    A    |-------->|    C    |------->|    D    |--------->|    E    |
-  |         |   ----->|         |        |         |------    |         |
+  |         |   +---->|         |        |         |-----+    |         |
   +---------+   |     +---------+        +---------+     |    +---------+
                 |         |                              |
   +---------+   |         |                              |    +---------+
   |         |   |         |                              |    |         |
-  |    B    |----         |        +---------+           ---->|    F    |
+  |    B    |---+         |        +---------+           +--->|    F    |
   |         |             |        |         |                |         |
-  +---------+             -------->|    G    |                +---------+
+  +---------+             +------->|    G    |                +---------+
                                    |         |
                                    +---------+
 
@@ -1454,8 +1454,6 @@ Vediamo la velocità delle funzioni:
 ;-> 11216.188
 
 Se abbiamo bisogno di tutti i totienti di tutti i numeri compresi tra 1 e n, la fattorizzazione di tutti gli n numeri non è efficiente. Possiamo usare la stessa idea del crivello di Eratostene: troviamo tutti i numeri primi e per ciascuno aggiorniamo i risultati temporanei di tutti i numeri che sono divisibili per quel numero primo.
-
-(array (+ 3 1) '(0))
 
 (define (totients-to num)
   (let (phi (array (+ num 1) '(0)))
