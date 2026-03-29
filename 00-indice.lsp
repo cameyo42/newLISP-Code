@@ -3434,6 +3434,7 @@ NOTE LIBERE 35
   Numeri maggiori/minori con lo stesso numero di 1 e 0 in binario
   Costante 2.648102...
   Solitario bulgaro
+  Divisione di un terreno in lotti quadrati
 
 PROBLEMI SUI DADI
 =================

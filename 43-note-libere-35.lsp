@@ -7909,14 +7909,14 @@ Verifichiamo la congettura:
 Solitario bulgaro
 -----------------
 
-Martin Gardner presentò il gioco nel numero di agosto 1983 di Scientific American.
+Martin Gardner presentò questo gioco nel numero di agosto 1983 di Scientific American.
 
-Nel gioco, un mazzo di N carte viene diviso in diverse pile.
+Un mazzo di N carte viene diviso in diverse pile.
 Da ogni pila si estrae una carta.
 Le carte estratte vengono raccolte insieme per formare una nuova pila.
 (le pile di dimensione zero vengono ignorate).
 
-Se N e' un numero triangolare (cioe': N = 1 + 2 + ... + k per qualche k), allora e' noto che il solitario bulgaro raggiunge una configurazione stabile in cui le dimensioni delle pile sono: 1, 2, ..., k.
+Se N è un numero triangolare (cioè: N = 1 + 2 + ... + k per qualche k), allora è noto che il solitario bulgaro raggiunge una configurazione stabile in cui le dimensioni delle pile sono: 1, 2, ..., k.
 Questo stato viene raggiunto in al piu': k^2 - k mosse.
 
 Se N non è triangolare, non esiste una configurazione stabile e viene raggiunto un ciclo limite.
@@ -7953,8 +7953,8 @@ Facciamo una mossa:
   (0 1 2 3 4)
   (1 0 3 2 4)
 - togliamo gli zeri:
-(1 2 3 4)
-(1 3 2 4)
+  (1 2 3 4)
+  (1 3 2 4)
 che sono ancora la stessa configurazione
 
 Questo comporta che quando confrontiamo gli stati dobbiamo usare una forma canonica (in questo caso ordiniamo la lista), altrimenti perdiamo cicli o contiamo stati diversi che sono uguali.
@@ -8074,6 +8074,239 @@ Proviamo:
 ;->  (1 2 4 4 5 5) (1 3 3 4 4 6) (2 2 3 3 5 6) (1 1 2 2 4 5 6) (1 1 3 4 5 7)
 ;->  (2 3 4 6 6) (1 2 3 5 5 5) (1 2 4 4 4 6) (1 3 3 3 5 6) (2 2 2 4 5 6)
 ;->  (1 1 1 3 4 5 6) (2 3 4 5 7) (1 2 3 4 5 6) (1 2 3 4 5 6))
+
+; Funzione che analizza un mazzo intero
+; restituisce la lunghezza del ciclo di ogni permutazione
+(define (analisi2 carte iter)
+  (local (out values nums stop nuova-pila trasf indici)
+    (setq iter (or iter 1e3))
+    (setq out '())
+    (setq partizioni (partition-num carte))
+    (dolist (part partizioni)
+      (setq nums part)
+      (setq values (list (sort nums)))
+      (setq trasf 0)
+      (setq stop nil)
+      (for (k 1 iter 1 stop)
+        (setq nuova-pila (length nums))
+        (setq nums (map (fn(x) (- x 1)) nums))
+        (push nuova-pila nums -1)
+        (replace 0 nums)
+        (sort nums)
+        (when (ref nums values)
+          (setq stop true)
+          (setq trasf k))
+        (push nums values -1))
+      (setq indici (flat (ref-all nums values)))
+      (push (- (indici 1) (indici 0)) out -1))
+    out))
+
+Proviamo:
+
+(analisi2 8)
+;-> (4 4 4 2 2 4 4 4 4 2 4 2 4 2 4 4 4 2 4 2 4 4)
+
+I numeri triangolari (es. 6) danno sempre tutti 1:
+(analisi2 6)
+;-> (1 1 1 1 1 1 1 1 1 1 1)
+
+Il 32 è il primo numero che ha 3 lunghezze diverse:
+(unique (analisi2 32))
+;-> (8 4 2)
+
+Il 64 ha 11 lunghezze diverse:
+(time (println (unique (analisi2 64))))
+;-> (11)
+;-> 786994.7780000001
+
+
+-----------------------------------------
+Divisione di un terreno in lotti quadrati
+-----------------------------------------
+
+Un agricoltore ha un terreno di forma rettangolare che vuole suddividere in modo uniforme in lotti di forma quadrata. Inoltre vuole che i lotti siano i più grandi possibili.
+
+Si tratta di trovare la dimensione più grande usando la strategia 'divide et impera'.
+Questa strategia si basa sui due passi seguenti:
+1) scoprire il caso base (cioè il caso più semplice).
+2) Dividere/ridurre il problema fino a farlo diventare il caso base.
+
+1) Individuiamo il caso base
+La situazione più semplice si ha quando un lato è un multiplo dell'altro.
+Esempio:
+Rettangolo di lati 'a' e 'b' (con a = 3*b)
+In questo caso la suddivisione è semplice:
+dividiamo il rettangolo per 3 e otteniamo 3 quadrati uguali
+
+             a                           b      b      b  
+   +--------------------+             +------+------+------+
+   |                    |             |      |      |      |
+ b |                    |             |      |      |      | b
+   +--------------------+             +------+------+------+
+
+2) Riduzione del problema
+Se i lati non sono multipli, allora scegliamo il quadrato con il lato più grande possibile e dividiamo il rettangolo.
+Al terreno rimanente applichiamo lo stesso metodo di riduzione fino a che non incontriamo un caso base.
+In altre parole, ad ogni passo togliamo il quadrato più grande possibile (di lato = min(a,b)) e continuiamo sul rettangolo residuo.
+
+Il procedimento è identico a quello del MCD: stiamo applicando l'algoritmo di Algoritmo di Euclide.
+L'ultimo lato non nullo è proprio il lato massimo del quadrato finale, cioè il MCD(a,b)
+Il numero totale di quadrati dipende dalla sequenza dei quozienti Euclidei.
+
+(define (lotti-quadrati a b)
+  (let ((out '()) (lato 0) (q 0) (r 0) (iter 1))
+    ; ciclo finché esiste un rettangolo non nullo
+    (while (and (> a 0) (> b 0))
+      ; assicura a <= b
+      (if (> a b) (swap a b))
+      ; lato del quadrato massimo
+      (setq lato a)
+      ; numero di quadrati estraibili
+      (setq q (/ b a))
+      ; resto del rettangolo
+      (setq r (% b a))
+      ; stampa iterazione
+      (println iter ": " q " lotti di lato " lato)
+      ; aggiunge i lati alla lista
+      (extend out (dup lato q))
+      ; aggiorna rettangolo residuo
+      (setq b r)
+      ; incrementa iterazione
+      (++ iter))
+    ; ritorna lista dei lati
+    out))
+
+Proviamo:
+
+(lotti-quadrati 13 5)
+;-> 1: 2 lotti di lato 5
+;-> 2: 1 lotti di lato 3
+;-> 3: 1 lotti di lato 2
+;-> 4: 2 lotti di lato 1
+;-> (5 5 3 2 1 1)
+
+Adesso scriviamo una funzione che restituisce anche le coordinate di ogni quadrato.
+In output avremo una lista con elementi del tipo:
+
+  (lato (x1 y1 x2 y2 x3 y3 x4 y4))
+
+Strategia: ad ogni iterazione riempiamo una striscia del rettangolo con q quadrati di lato a, mantenendo un sistema di coordinate con origine in alto a sinistra.
+
+Usiamo 'lotti-quadrati' come base.
+Le coordinate sono sempre in ordine: (alto-sinistra -> alto-destra -> basso-destra -> basso-sinistra)
+Il rettangolo viene riempito 'a strisce':
+- orizzontali quando a <= b
+- verticali quando avviene lo swap
+L'output rappresenta un vero tiling geometrico completo del rettangolo.
+
+(define (lotti-quadrati-coord a b)
+  (let ((out '()) (q 0) (r 0) (iter 1)
+        (x0 0) (y0 0) (swapf nil) (i 0)
+        (x1 0) (y1 0) (x2 0) (y2 0) (x3 0) (y3 0) (x4 0) (y4 0))
+    ; ciclo finché esiste un rettangolo non nullo
+    (while (and (> a 0) (> b 0))
+      ; assicura a <= b e traccia se abbiamo scambiato
+      (setq swapf nil)
+      (if (> a b) (begin (swap a b) (setq swapf true)))
+      ; numero di quadrati estraibili
+      (setq q (/ b a))
+      ; resto del rettangolo
+      (setq r (% b a))
+      ; stampa iterazione
+      (println iter ": " q " lotti di lato " a)
+      ; genera i quadrati della striscia
+      (for (i 0 (- q 1))
+        ; coordinate locali nella striscia
+        (if (not swapf)
+          (begin
+            (setq x1 (+ x0 (* i a))) (setq y1 y0)
+            (setq x2 (+ x0 (* (+ i 1) a))) (setq y2 y0)
+            (setq x3 (+ x0 (* (+ i 1) a))) (setq y3 (+ y0 a))
+            (setq x4 (+ x0 (* i a))) (setq y4 (+ y0 a)))
+          (begin
+            (setq x1 x0) (setq y1 (+ y0 (* i a)))
+            (setq x2 (+ x0 a)) (setq y2 (+ y0 (* i a)))
+            (setq x3 (+ x0 a)) (setq y3 (+ y0 (* (+ i 1) a)))
+            (setq x4 x0) (setq y4 (+ y0 (* (+ i 1) a)))))
+        ; aggiunge (lato (coord))
+        (push (list a (list x1 y1 x2 y2 x3 y3 x4 y4)) out -1))
+      ; aggiorna rettangolo residuo
+      (if (not swapf)
+        (begin
+          (setq y0 (+ y0 a))
+          (setq b r))
+        (begin
+          (setq x0 (+ x0 a))
+          (setq b r)))
+      ; incrementa iterazione
+      (++ iter))
+    ; ritorna lista (lato coordinate)
+    out))
+
+Proviamo:
+
+(lotti-quadrati-coord 13 5)
+;-> 1: 2 lotti di lato 5
+;-> 2: 1 lotti di lato 3
+;-> 3: 1 lotti di lato 2
+;-> 4: 2 lotti di lato 1
+;-> ((5 (0 0 5 0 5 5 0 5))
+;->  (5 (0 5 5 5 5 10 0 10))
+;->  (3 (5 0 8 0 8 3 5 3))
+;->  (2 (8 0 10 0 10 2 8 2))
+;->  (1 (10 0 11 0 11 1 10 1))
+;->  (1 (10 1 11 1 11 2 10 2)))
+
+Adesso scriviamo una funzione che esporta il risultato della suddivisione in un file SVG:
+
+(define (export-svg lotti filename scala padding)
+  (let ((maxx 0) (maxy 0) (x1 0) (y1 0) (lato 0) (coords nil)
+        (W 0) (H 0) (out "") (sx 0) (sy 0) (sl 0) (sw 0))
+    ; calcola bounding box
+    (dolist (el lotti)
+      (setq lato (el 0))
+      (setq coords (el 1))
+      (setq x1 (coords 0))
+      (setq y1 (coords 1))
+      (if (> (+ x1 lato) maxx) (setq maxx (+ x1 lato)))
+      (if (> (+ y1 lato) maxy) (setq maxy (+ y1 lato))))
+    ; dimensioni svg scalate + padding
+    (setq W (+ (* maxx scala) (* 2 padding)))
+    (setq H (+ (* maxy scala) (* 2 padding)))
+    ; stroke width proporzionale
+    (setq sw (/ scala 20))
+    ; header svg
+    (setq out (string "<svg xmlns='http://www.w3.org/2000/svg' "
+                      "width='" W "' height='" H "' "
+                      "viewBox='0 0 " W " " H "'>\n"))
+    ; disegna quadrati scalati
+    (dolist (el lotti)
+      (setq lato (el 0))
+      (setq coords (el 1))
+      (setq x1 (coords 0))
+      (setq y1 (coords 1))
+      (setq sx (+ padding (* x1 scala)))
+      (setq sy (+ padding (* y1 scala)))
+      (setq sl (* lato scala))
+      (setq out (string out
+                        "<rect x='" sx "' y='" sy "' width='" sl "' height='" sl
+                        "' fill='none' stroke='black' stroke-width='" sw "'/>\n")))
+    ; chiusura svg
+    (setq out (string out "</svg>\n"))
+    ; scrittura file
+    (write-file filename out)))
+
+Proviamo:
+
+(setq campo (lotti-quadrati-coord 13 5))
+(export-svg campo "rettangolo.svg" 40 10)
+
+Vedi file "rettangolo.svg" nella cartella "data".
+
+Il file prodotto è coerente con il dato geometrico, ma non con l’aspettativa visiva 'rettangolare'.
+La struttura produce un tiling corretto, ma non un rettangolo uniforme visibile come blocco unico.
+Infatti non stiamo costruendo una griglia uniforme, ma una decomposizione tipo Euclide geometrico (non una tassellazione regolare).
+In altre parole stiamo visualizzando la struttura dell'algoritmo di Euclide nello spazio.
 
 ============================================================================
 

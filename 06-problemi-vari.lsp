@@ -10581,10 +10581,11 @@ Poniamo lupo e cavoli uguale ad "x" e capra uguale a "y".
 Un contadino deve attraversare un fiume con due x e una y. La barca può trasportare (oltre a lui) soltanto una tra le due x o la y. Non è possibile lasciare da sole x e y. Quindi come trasportare tutti sull'altra riva del fiume?
 
 Adesso il problema è molto più facile da risolvere perchè esiste una sola soluzione:
+
 attraversare con y
 tornare indietro         (y)
 
-atraversare con x
+attraversare con x
 tornare indietro con y   (x)
 
 attraversare con x
