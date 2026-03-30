@@ -3435,6 +3435,9 @@ NOTE LIBERE 35
   Costante 2.648102...
   Solitario bulgaro
   Divisione di un terreno in lotti quadrati
+  Aule e lezioni
+  Riempimento di liste con valori vuoti
+  L'anno X ha avuto la maggiore quantità di pioggia dall'anno Y
 
 PROBLEMI SUI DADI
 =================

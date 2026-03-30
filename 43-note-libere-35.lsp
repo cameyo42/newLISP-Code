@@ -8308,5 +8308,186 @@ La struttura produce un tiling corretto, ma non un rettangolo uniforme visibile 
 Infatti non stiamo costruendo una griglia uniforme, ma una decomposizione tipo Euclide geometrico (non una tassellazione regolare).
 In altre parole stiamo visualizzando la struttura dell'algoritmo di Euclide nello spazio.
 
+
+--------------
+Aule e lezioni
+--------------
+
+Data una lista di lezioni scolastiche (materia inizio fine) determinare il massimo numero di lezioni che possono essere tenute in un'unica aula.
+
+Esempio:
+
+Materia      Inizio     Fine
+----------------------------
+Inglese        9:30    10:30
+Matematica     9:00    10:00
+Storia        11:00    12:00
+Musica        10:30    11:30
+Arte          10:00    11:00
+
+Timeline
+
+  9:00       9:30      10:00      10:30      11:00      11:30      12:00
+   +----------+----------+----------+----------+----------+----------+
+   Matematica |          |          |          |          |          |
+   ***********************          |          |          |          |
+              Inglese    |          |          |          |          |
+              ***********************          |          |          |
+                         Arte       |          |          |          |
+                         ***********************          |          |
+                                    Musica     |          |          |
+                                    ***********************          |
+                                               Storia     |          |
+                                               ***********************
+
+Non possiamo tenere tutte le lezioni in un'unica aula perchè gli orari di alcune di esse si sovrappongono.
+Il problema è quello di scegliere quali lezioni tenere in modo da ospitare il maggior numero possibile di lezioni in un'unica aula.
+
+Algoritmo Greedy
+----------------
+1) Scegliere la materia che finisce prima.
+Questa è la prima lezione da tenere.
+2) Scegliere la lezione che inizia dopo la precedente ed è la prima a terminare.
+
+Un algoritmo greedy sceglie ad ogni passo la mossa ottimale locale.
+Forniscono risultati corretti se la somma delle mosse ottimali locali equivale alla soluzione ottima.
+In alcuni casi vengono usati per avere una soluzione buona ma non-ottimale per problemi che sono intrattabili dal punto di vista computazionale (troppo tempo per avere una soluzione ottima).
+
+Algoritmo
+---------
+1) Ordinare per fine crescente
+2) Prendere la prima disponibile
+3) Continuare scegliendo solo quelle compatibili
+
+(setq m '(("Inglese" 9.30 10.30)
+          ("Matematica" 9.00 10.00)
+          ("Storia" 11.00 12.00)
+          ("Musica" 10.30 11.30)
+          ("Arte" 10.00 11.00)))
+
+(define (max-lezioni lst)
+  (let ((scelte '()) (ultima-fine 0))
+    ; Ordina le lezioni per tempo di fine crescente (indice 2)
+    (setq lst (sort lst (fn (a b) (<= (a 2) (b 2)))))
+    ; Scansiona tutte le lezioni ordinate
+    (dolist (lez lst)
+      ; Se la lezione corrente inizia dopo (o uguale) alla fine dell'ultima scelta
+      (when (>= (lez 1) ultima-fine)
+        ; Aggiungi la lezione alla soluzione
+        (push lez scelte -1)
+        ; Aggiorna il tempo di fine dell'ultima lezione scelta
+        (setq ultima-fine (lez 2))))
+    ; Restituisce la lista delle lezioni selezionate
+    scelte))
+
+Proviamo:
+
+(max-lezioni m)
+;-> (("Matematica" 9 10) ("Arte" 10 11) ("Storia" 11 12))
+
+Il greedy è ottimo in questo caso perché scegliere sempre l'intervallo che finisce prima lascia più spazio per i successivi.
+
+
+-------------------------------------
+Riempimento di liste con valori vuoti
+-------------------------------------
+
+Abbiamo una lista con elementi del tipo: (numero dato).
+I numeri sono in sequenza, ma le coppie che hanno come dato 'nil' non vengono riportate.
+
+Esempio:
+  lista: ((2000 100) (2001 120) (2004 110) (2009 130))
+In questo caso mancano le misure dei numeri 2002, 2003 e quelli da 2005 a 2009.
+
+Vogliamo riempire con (numero nil) i numeri non riportati.
+
+Nell'esempio la lista diventa:
+nuova lista = ((2000 100) (2001 120) (2002 nil) (2003 nil) (2004 110)
+               (2005 nil) (2006 nil) (2007 nil) (2008 nil) (2009 130))
+
+(define (fill-nil lst)
+  ; se la lista è vuota restituisce lista vuota
+  (if (empty? lst) '()
+    (let ((out '()) (len (length lst)) (a1 nil) (a2 nil)) 
+      ; scorre la lista confrontando elementi consecutivi
+      (for (i 0 (- len 2))
+        ; estrae i numeri delle due coppie consecutive
+        (setq a1 (lst i 0))
+        (setq a2 (lst (+ i 1) 0))
+        ; se non sono consecutivi ci sono valori mancanti
+        (if (!= a2 (+ a1 1))
+          (begin
+            ; inserisce l'elemento corrente
+            (push (lst i) out -1)
+            ; inserisce tutte le coppie mancanti con valore nil
+            (for (k (+ a1 1) (- a2 1))
+              (push (list k nil) out -1)))
+          ; se sono consecutivi inserisce solo l'elemento corrente
+          (push (lst i) out -1)))
+      ; inserisce l'ultimo elemento della lista originale
+      (push (lst -1) out -1)
+      ; restituisce la nuova lista completa
+      out)))
+
+Proviamo:
+
+(setq L '((2000 100) (2001 120) (2004 110) (2009 130)))
+(fill-nil L)
+;-> ((2000 100) (2001 120) (2002 nil) (2003 nil) (2004 110)
+;->  (2005 nil) (2006 nil) (2007 nil) (2008 nil) (2009 130))
+
+(setq L '((2000 100) (2001 120) (2002 110)))
+(fill-nil L)
+;-> ((2000 100) (2001 120) (2002 110))
+
+
+-------------------------------------------------------------
+L'anno X ha avuto la maggiore quantità di pioggia dall'anno Y
+-------------------------------------------------------------
+
+Date le informazioni sulla quantità di pioggia caduta durante diversi anni e una serie di affermazioni del tipo "L'anno X ha avuto la maggiore quantità di pioggia dall'anno Y", determinare se queste affermazioni sono vere o potrebbero essere vere o sono false.
+
+Diciamo che un'affermazione è 'vera' se:
+a) La quantità di pioggia caduta durante questi due anni e in tutti gli anni intermedi è nota.
+b) Nell'anno X ha piovuto al massimo tanto quanto nell'anno Y.
+c) Per ogni anno Z tale che Y < Z < X, la quantità di pioggia caduta durante l'anno Z è stata inferiore alla quantità di pioggia caduta durante l'anno X.
+Diciamo che un'affermazione è 'possibile' se esiste un'assegnazione di quantità di pioggia agli anni per i quali non ci sono informazioni, tale che l'affermazione diventi vera.
+Altrimenti, diciamo che l'affermazione è 'falsa'.
+
+(define (pioggia X Y lst)
+  (let ((pX (lookup X lst)) (pY (lookup Y lst)) (out "vero") (stop nil))
+    ; recupera la pioggia negli anni X e Y
+    (if (or (nil? pX) (nil? pY))
+        ; se uno dei due anni non è noto, non può essere "vero"
+        (setq out "possibile")
+        ; altrimenti controlla la condizione pY <= pX
+        (if (> pY pX)
+            ; se pY > pX l'affermazione è falsa
+            (setq out "falso")
+            ; altrimenti verifica gli anni intermedi
+            (for (anno (+ Y 1) (- X 1) 1 stop)
+              (let ((p (lookup anno lst)))
+                (cond
+                  ; se manca un valore intermedio, diventa "possibile"
+                  ((nil? p) (if (= out "vero") (setq out "possibile")))
+                  ; se un anno intermedio ha pioggia >= pX, è falso
+                  ((>= p pX) (setq out "falso") (setq stop true)))))))
+    ; restituisce il risultato finale
+    out))
+
+Proviamo:
+
+(setq L '((2000 100) (2001 90) (2002 nil) (2003 140) (2004 130) (2005 150)))
+(pioggia 2004 2000 L)
+;-> "falso"
+(pioggia 2001 2000 L)
+;-> "falso"
+(pioggia 2003 2000 L)
+;-> "possibile"
+(pioggia 2005 2003 L)
+;-> "vero"
+(pioggia 2010 2003 L)
+;-> "possibile"
+
 ============================================================================
 
