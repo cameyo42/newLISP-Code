@@ -3438,6 +3438,9 @@ NOTE LIBERE 35
   Aule e lezioni
   Riempimento di liste con valori vuoti
   L'anno X ha avuto la maggiore quantità di pioggia dall'anno Y
+  Ricerca di minimo e massimo in sottoliste
+  Da 1 a 99
+  Set Cover Problem - Problema della copertura di un insieme
 
 PROBLEMI SUI DADI
 =================

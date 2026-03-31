@@ -1409,7 +1409,7 @@ Algoritmo
    Altrimenti -> radice più grande -> aumenta 'a'
    Complessità: O(log x)
 3. Terminazione
-   Quando (a > b), l’ultimo valore valido è (a-1), che è:
+   Quando (a > b), l'ultimo valore valido è (a-1), che è:
    il massimo 'm' tale che (m*m <= x).
 
 In pratica è una 'binary search' su [1, 2^(bits/2)].
@@ -4074,7 +4074,7 @@ Spiegazione:
    - len = target (solo lettere dei numeri)
 4. Start index: permette di riusare numeri, evitando duplicati e combinazioni già viste in ordine diverso.
 5. (append lst (list n)): crea una nuova lista per il ramo ricorsivo, evitando di modificare 'lst' originale.
-6. (push ... out -1): aggiunge la combinazione finale all’output in coda alla lista.
+6. (push ... out -1): aggiunge la combinazione finale all'output in coda alla lista.
 
 ; ---------------------------------------------------------
 ; Funzione: find-NSC (senza commenti)
@@ -4858,7 +4858,7 @@ Costruzione del percorso
 Per andare da (x(i),y(i)) a (x(i+1),y(i+1)) (coppia di punti consecutivi):
 1. muoversi orizzontalmente fino a raggiungere x(i+1)
 2. muoversi verticalmente fino a raggiungere y(i+1)
-oppure viceversa (l’ordine è indifferente).
+oppure viceversa (l'ordine è indifferente).
 
 Esempio: (2,3) -> (5,1)
   (2,3), muove lungo X
@@ -8303,7 +8303,7 @@ Proviamo:
 
 Vedi file "rettangolo.svg" nella cartella "data".
 
-Il file prodotto è coerente con il dato geometrico, ma non con l’aspettativa visiva 'rettangolare'.
+Il file prodotto è coerente con il dato geometrico, ma non con l'aspettativa visiva 'rettangolare'.
 La struttura produce un tiling corretto, ma non un rettangolo uniforme visibile come blocco unico.
 Infatti non stiamo costruendo una griglia uniforme, ma una decomposizione tipo Euclide geometrico (non una tassellazione regolare).
 In altre parole stiamo visualizzando la struttura dell'algoritmo di Euclide nello spazio.
@@ -8488,6 +8488,404 @@ Proviamo:
 ;-> "vero"
 (pioggia 2010 2003 L)
 ;-> "possibile"
+
+
+-----------------------------------------
+Ricerca di minimo e massimo in sottoliste
+-----------------------------------------
+
+Data una lista composta da sottoliste, ricercare il minimo e il massimo elemento nelle sottoliste.
+
+Esempio:
+  lista = ((12 5 -6) (3 6 23) (9 -3 42))
+  Per l'indice 0 l'elemento minimo vale 3 --> (3 6 23)
+  Per l'indice 1 l'elemento minimo vale -3 --> (9 -3 42)
+  Per l'indice 2 l'elemento minimo vale -6 --> (12 5 -6)
+  Per l'indice 0 l'elemento massimo vale 12 --> (12 5 -6)
+  Per l'indice 1 l'elemento massimo vale 6 --> (3 6 23)
+  Per l'indice 2 l'elemento massimo vale 42 --> (9 -3 42)
+
+Versione 1: Attraversamento della lista --> O(n)
+------------------------------------------------
+
+(define (min-list lst idx)
+  (let ( (min-el (lst 0)) (min-val (lst 0 idx)) )
+    (dolist (el lst)
+      (if (< (el idx) min-val)
+          (setq min-el el min-val (el idx))))
+    min-el))
+
+(setq a '((12 5 -6) (3 6 23) (9 -3 42)))
+(min-list a 0)
+;-> (3 6 23)
+(min-list a 1)
+;-> (9 -3 42)
+(min-list a 2)
+;-> (12 5 -6)
+
+(define (max-list lst idx)
+  (let ( (max-el (lst 0)) (max-val (lst 0 idx)) )
+    (dolist (el lst)
+      (if (> (el idx) max-val)
+          (setq max-el el max-val (el idx))))
+    max-el))
+
+(max-list a 0)
+;-> (12 5 -6)
+(max-list a 1)
+;-> (3 6 23)
+(max-list a 2)
+;-> (9 -3 42)
+
+Versione 2: Ordinamento della lista --> O(n*log(n))
+---------------------------------------------------
+
+(define (min-list2 lst idx)
+  (first (sort lst (fn (a b) (<= (a idx) (b idx))))))
+
+(min-list a 0)
+;-> (3 6 23)
+(min-list a 1)
+;-> (9 -3 42)
+(min-list a 2)
+;-> (12 5 -6)
+
+(define (max-list2 lst idx)
+  (first (sort lst (fn (a b) (>= (a idx) (b idx))))))
+
+(max-list2 a 0)
+;-> (12 5 -6)
+(max-list a 1)
+;-> (3 6 23)
+(max-list a 2)
+;-> (9 -3 42)
+
+Test di velocità:
+
+(setq test (collect (collect (rand 1000) 10) 1e1))
+(time (max-list test 5) 1e3)
+;-> 1.995
+(time (max-list2 test 5) 1e3)
+;-> 13.999
+
+(setq test (collect (collect (rand 1000) 10) 1e2))
+(time (max-list test 5) 1e3)
+;-> 23.935
+(time (max-list2 test 5) 1e3)
+;-> 267.61
+
+(setq test (collect (collect (rand 1000) 10) 1e3))
+(time (max-list test 5) 1e3)
+;-> 234.402
+(time (max-list2 test 5) 1e3)
+;-> 4126.967
+
+(setq test (collect (collect (rand 1000) 3) 1e3))
+(time (max-list test 1) 1e3)
+;-> 122.674
+(time (max-list2 test 1) 1e3)
+;-> 2613.012
+
+(silent (setq test (collect (collect (rand 100) 3) 1e5)))
+(time (max-list test 1) 1e2)
+;-> 120.674
+(time (max-list2 test 1) 1e3)
+;-> 38249.704
+
+La versione 1 (che è O(n)) è molto più veloce della versione 2 (O(n*log(n))).
+Anche se il 'sort' è implementato in C (quindi molto veloce) e il nostro ciclo è interpretato (quindi più lento), la semplicità delle istruzioni nel ciclo rendono la versione 1 migliore.
+
+Adesso vogliamo trovare la sottolista che ha il valore minimo (o massimo) in assoluto, cioè su qualunque indice.
+
+Esempio:
+  lista = ((12 5 -6) (3 6 23) (9 -3 42))
+  Valore minimo assoluto = -6  -> (12 5 -6)
+  Valore massimo assoluto = 42 -> (9 -3 42)
+
+(define (min-list-all lst)
+  (let ( (min-el (lst 0)) (min-val (lst 0 0)) )
+    (dolist (el lst)
+      (setq val (apply min el))
+      (if (< val min-val)
+          (setq min-el el min-val val)))
+    min-el))
+
+(define (max-list-all lst)
+  (let ( (max-el (lst 0)) (max-val (lst 0 0)) )
+    (dolist (el lst)
+      (setq val (apply max el))
+      (if (> val max-val)
+          (setq max-el el max-val val)))
+    max-el))
+
+Proviamo:
+
+(setq a '((12 5 -6) (3 6 23) (9 -3 42)))
+(max-list-all a)
+;-> (9 -3 42)
+(min-list-all a)
+;-> (12 5 -6)
+
+(setq test (collect (collect (rand 1000) 10) 1e3))
+(time (max-list-all test) 1e3)
+;-> 411.653
+
+
+---------
+Da 1 a 99
+---------
+
+Si parte da un numero a caso tra 1 e 99.
+Il numero successivo deve iniziare con l'ultima cifra del numero precedente.
+Nessun numero scelto può terminare con 0, cioè non sono possibili i numeri:
+10, 20, 30, 40, 50 ,60 ,70 ,80, 90 (quindi abbiamo 90 numeri in tutto).
+Il processo termina quando non è più possibile generare un numero.
+Questo può avvenire in due casi:
+1) nei numeri rimasti non esiste alcun numero che inizia con la cifra corrente
+2) sono terminati i numeri da scegliere
+
+Qual è la probabilità che vengano usati tutti numeri?
+
+; Funzione che simula il processo
+(define (processo)
+  (local (nums usati cur finito start candidati)
+    ; creazione dei numeri da 1 a 99
+    (setq nums (sequence 1 99))
+    ; rimozione dei valori 10,20,30,...
+    (for (k 10 90 10) (replace k nums))
+    ; lista dei numeri utilizzati
+    (setq usati '())
+    ; numero corrente
+    (setq cur (nums (rand (length nums))))
+    ;(println cur)
+    ; inserimento numero corrente 'cur' nella lista 'usati'
+    (push cur usati)
+    ; elimina il numero corrente 'cur' dalla lista dei numeri
+    (replace cur nums)
+    (setq finito nil)
+    ; ciclo che genera il prossimo numero fino a che il gioco non finisce
+    ; 1) fine dei numeri
+    ; 2) non esiste un numero successivo che inizia con l'ultima
+    ;    cifra del numero corrente 'cur'
+    (until finito
+      ; cifra con cui deve iniziare il prossimo numero
+      (setq start (int (last (string cur)) 0 10))
+      ;(println start)
+      ; numeri candidati che iniziano con la cifra corretta
+      (setq candidati (filter (fn(x) (= start (int (first (string x)) 0 10))) nums))
+      ;(println candidati)
+      ; se esistono numero candidati...
+      (if candidati
+        ; selezione casuale di un numero dalla lista dei candidati
+        (begin 
+          (setq cur (candidati (rand (length candidati))))
+          ;(print cur) (read-line)
+          ; inserimento numero corrente 'cur' nella lista 'usati'
+          (push cur usati)
+          (replace cur nums))
+        ; altrimenti il gioco finisce
+        (setq finito true))
+      ; se la lista dei numeri è vuota, allora il gioco finisce
+      (if (empty? nums) (setq finito true))
+    )
+    ; se la lista 'nums' è vuota, allora abbiamo usato tutti i numeri
+    (empty? nums)))
+
+(processo)
+;-> nil
+
+; Funzione che calcola la probabilità di usare tutti i numeri
+(define (prob iter)
+  (let (all 0)
+    (for (i 1 iter) (if (processo) (++ all)))
+    (div all iter)))
+
+Proviamo:
+
+(prob 1e2)
+;-> 0.05
+(prob 1e3)
+;-> 0.049
+(time (println (prob 1e4)))
+;-> 0.0487
+;-> 27087.125
+(time (println (prob 1e5)))
+;-> 0.04777
+;-> 269061.943
+
+
+----------------------------------------------------------
+Set Cover Problem - Problema della copertura di un insieme
+----------------------------------------------------------
+
+Abbiamo N stazioni radio e ognuna copre una area definita da un insieme di zone.
+Esempio:
+
+Stazione   Zone coperte
+1          A B C
+2          D C
+3          D E F
+...
+
+Come selezionare il minor numero di stazioni radio che coprono tutte le zone (A, B, C, ...).
+
+Questo è il classico problema di copertura insiemistica: Set Cover Problem
+Descrizione:
+- Universo U: tutte le zone da coprire (A, B, C, D, ...)
+- Insiemi S(i): ogni stazione copre un sottoinsieme di U
+- Obiettivo: scegliere il minor numero di insiemi tali che la loro unione sia U 
+
+Si tratta di un problema NP-difficile e non esiste (in generale) un algoritmo efficiente che garantisca sempre la soluzione ottima per grandi valori di N.
+Dobbiamo esplorare tutti i sottoinsiemi delle stazioni.
+Abbiamo N stazioni.
+Per ognuna abbiamo due possibilità:
+- la prendiamo
+- non la prendiamo
+Questo porta direttamente a: 2*2*2*... = 2^N
+(perché ci sono N scelte binarie indipendenti)
+
+Infatti ogni soluzione possibile è un sottoinsieme delle stazioni e il numero totale di sottoinsiemi di un insieme con N elementi è: 2^N.
+
+Usiamo un algoritmo greedy:
+Scegliamo ogni volta la stazione che copre più zone ancora scoperte.
+È una soluzione standard (veloce e molto efficace).
+
+Algoritmo
+zone_scoperte = tutte le zone
+stazioni_scelte = ()
+finché zone_scoperte non è vuoto:
+    scegli la stazione che copre più elementi di zone_scoperte
+    aggiungi la stazione a stazioni_scelte
+    rimuovi le zone coperte da zone_scoperte
+
+Stazioni:
+  1: A B C
+  2: C D
+  3: D E F
+Zone_scoperte = (A B C D E F)
+1. scegliere 1 -> copre 3 elementi -> restano (D E F)
+2. scegliere 3 -> copre 3 elementi -> finito
+Soluzione: (1, 3)
+
+Il greedy garantisce una soluzione entro un fattore: ln(|U|) + 1
+dall'ottimo (ottimo teorico per problemi NP-difficili).
+
+(define (set-cover stazioni)
+  (local (zone tutte scoperte scelta best best-cop)
+    ; costruisce l'insieme di tutte le zone (unione di tutte le stazioni)
+    (setq tutte '())
+    (dolist (s stazioni)
+      (setq tutte (union tutte (last s))))
+    ; inizialmente tutte le zone sono scoperte
+    (setq scoperte tutte)
+    ; lista delle stazioni selezionate (output)
+    (setq scelta '())
+    ; ciclo finché restano zone da coprire
+    (while scoperte
+      ; migliore stazione corrente
+      (setq best nil)
+      ; insieme di zone coperte dalla migliore stazione
+      (setq best-cop '())
+      ; esamina tutte le stazioni
+      (dolist (s stazioni)
+        ; calcola le zone che questa stazione copre tra quelle ancora scoperte
+        (let (cop (intersect scoperte (last s)))
+          ; se copre più zone della migliore trovata finora -> aggiorna
+          (when (> (length cop) (length best-cop))
+            (setq best s)
+            (setq best-cop cop))))
+      ; aggiunge l'indice della stazione scelta alla soluzione
+      (push (first best) scelta -1)
+      ; rimuove le zone appena coperte
+      (setq scoperte (difference scoperte best-cop)))
+    ; restituisce la lista delle stazioni scelte
+    scelta))
+
+(setq stazioni '((1 (A B C)) (2 (C D)) (3 (D E F))))
+
+(set-cover stazioni)
+;-> (1 3)
+
+Vediamo una versione esatta con backtracking
+
+(define (set-cover-exact stazioni)
+  (local (tutte best-sol best-len stack N)
+    ; costruisce l'insieme di tutte le zone
+    (setq tutte '())
+    (dolist (s stazioni)
+      (setq tutte (union tutte (last s))))
+    ; numero stazioni
+    (setq N (length stazioni))
+    ; migliore soluzione trovata
+    (setq best-sol nil)
+    (setq best-len (+ N 1))
+    ; stack degli stati: (indice copertura soluzione)
+    (setq stack (list (list 0 '() '())))
+    ; ciclo principale
+    (while stack
+      (letn ((stato (pop stack))
+             (i (stato 0))
+             (cop (stato 1))
+             (sol (stato 2)))
+        ; potatura: se già peggio del best
+        (when (< (length sol) best-len)
+          ; se copertura completa -> aggiorna best
+          (if (= (length cop) (length tutte))
+              (begin
+                (setq best-sol sol)
+                (setq best-len (length sol)))
+              ; se restano stazioni da considerare
+              (when (< i N)
+                (let (s (stazioni i))
+                  ; ramo 1: NON prendere la stazione i
+                  (push (list (+ i 1) cop sol) stack -1)
+                  ; ramo 2: prendere la stazione i
+                  (push (list (+ i 1)
+                              (union cop (last s))
+                              (append sol (list (first s))))
+                        stack -1)))))))
+    best-sol))
+
+Proviamo:
+
+(set-cover-exact stazioni)
+;-> (1 3)
+
+(setq stazioni '((1 (A B C)) (2 (C D)) (3 (D E F)) (4 (Q W)) (5 (F H W))
+                 (6 (H K G)) (7 (O F K)) (8 (W Q)) (9 (J H G W)) (10 (J K))))
+
+(set-cover stazioni)
+;-> (9 1 3 7 4)
+(set-cover-exact stazioni)
+;-> (1 3 7 8 9)
+
+Le due funzioni restituiscano soluzioni diverse, ma sono corrette.
+Verifica soluzioni
+Le zone totali sono: (A B C D E F Q W H K G O J)
+
+Soluzione greedy: (9 1 3 7 4)
+Copertura:
+  9 -> J H G W
+  1 -> A B C
+  3 -> D E F
+  7 -> O F K
+  4 -> Q W
+Unione: A B C D E F G H J K O Q W  --> Copre tutto con 5 stazioni
+
+Soluzione esatta: (1 3 7 8 9)
+Copertura:
+  1 -> A B C
+  3 -> D E F
+  7 -> O F K
+  8 -> W Q
+  9 -> J H G W
+Unione: A B C D E F G H J K O Q W  --> Copre tutto con 5 stazioni
+
+La funzione 'set-cover-exact' trova una soluzione di lunghezza 5, quindi non esiste soluzione con 4 stazioni.
+(perché altrimenti l'avrebbe trovata)
+Le soluzioni sono diverse perché il problema ha più soluzioni ottimali.
+
+Il greedy non garantisce l'ottimo, ma in questo caso ci arriva comunque (prendendo una strada diversa).
 
 ============================================================================
 
