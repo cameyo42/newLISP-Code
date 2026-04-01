@@ -3441,6 +3441,12 @@ NOTE LIBERE 35
   Ricerca di minimo e massimo in sottoliste
   Da 1 a 99
   Set Cover Problem - Problema della copertura di un insieme
+  Analisi di sequenze Testa o Croce
+  Spezzare un bastone in due o tre parti
+
+NOTE LIBERE 36
+==============
+
 
 PROBLEMI SUI DADI
 =================

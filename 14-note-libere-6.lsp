@@ -5666,6 +5666,8 @@ Calcoliamo il massimo errore tra la simulazione (10000 prove) e la formula teori
 
 I valori teorici e quelli simulati concordano.
 
+Vedi anche "Spezzare un bastone in due o tre parti" su "Note libere 35".
+
 
 ---------------------
 Modello  di Ehrenfest

@@ -8887,5 +8887,245 @@ Le soluzioni sono diverse perché il problema ha più soluzioni ottimali.
 
 Il greedy non garantisce l'ottimo, ma in questo caso ci arriva comunque (prendendo una strada diversa).
 
+
+---------------------------------
+Analisi di sequenze Testa o Croce
+---------------------------------
+
+Testa = 0
+Croce = 1
+
+; Funzione di simulazione
+; Genera una lista con elementi del tipo:
+; (lancio nun-teste num-croci differenza perc-teste perc-croci)
+(define (simula iter)
+  (local (out res diff perc0 perc1)
+    (setq out '())
+    (setq res (array 2 '(0)))
+    (for (i 1 iter)
+      (++ (res (rand 2)))
+      (setq diff (abs (- (res 0) (res 1))))
+      (setq perc0 (div (res 0) i))
+      (setq perc1 (div (res 1) i))
+      (push (list i (res 0) (res 1) diff perc0 perc1) out -1))
+    out))
+
+(silent (setq sol (simula 1e6)))
+(silent (setq sol (simula 1e5)))
+
+
+(define (min-list lst idx)
+  (let ( (min-el (lst 0)) (min-val (lst 0 idx)) )
+    (dolist (el lst)
+      (if (< (el idx) min-val)
+          (setq min-el el min-val (el idx))))
+    min-el))
+
+(define (max-list lst idx)
+  (let ( (max-el (lst 0)) (max-val (lst 0 idx)) )
+    (dolist (el lst)
+      (if (> (el idx) max-val)
+          (setq max-el el max-val (el idx))))
+    max-el))
+
+; Funzioni per analisi del risultato di 'simula'
+(define (delta-max lst) (max-list lst 3))
+(define (delta-min lst) (min-list lst 3))
+(define (perc0-max lst) (max-list lst 4))
+(define (perc0-min lst) (min-list lst 4))
+(define (perc1-max lst) (max-list lst 5))
+(define (perc1-min lst) (min-list lst 5))
+
+(delta-max sol)
+(delta-min sol)
+(perc0-max sol)
+(perc0-min sol)
+(perc1-max sol)
+(perc1-min sol)
+
+In media, quante volte risulta (numero Teste = numero Croci) con N lanci?
+
+Calcoliamo i valori per cui num-Teste = num-Croci per N lanci:
+
+(define (uguali num-lanci)
+  (let ( (res (array 2 '(0))) (eq 0) )
+    (for (l 1 num-lanci)
+      (++ (res (rand 2)))
+      (if (= (res 0) (res 1)) (++ eq)))
+    eq))
+
+I risultati sono molto variabili:
+
+(collect (uguali 1000) 10)
+;-> (6 25 33 28 6 35 43 43 7 50)
+
+Calcoliamo la media dei valori per cui num-Teste = num-Croci per N lanci:
+
+(define (uguali-media num-lanci iter)
+  (let (tot 0)
+    (for (i 1 iter)
+      (++ tot (uguali num-lanci)))
+    (div tot iter)))
+
+(uguali-media 100 10000)
+;-> 7.0601
+(uguali-media 1000 10000)
+;-> 23.9743
+(time (println (uguali-media 10000 10000)))
+;-> 78.3535
+;-> 11704.304
+
+
+--------------------------------------
+Spezzare un bastone in due o tre parti
+--------------------------------------
+
+Abbiamo un bastone di lunghezza L.
+Se spezziamo il bastone in due pezzi in modo casuale, quanto è lunga, in media, la parte più corta?
+
+; Funzione che spezza un bastone unitario in due parti un dato numero di volte
+; e calcola il valore medio della parte più corta
+(define (spezza iter)
+  (setq short 0)
+  (for (i 1 iter)
+    (setq point (random 0 1))
+    ;(while (or (= point 0) (= point 1)) (setq point (random 0 1)))
+    (if (> point 0.5) 
+      (inc short (sub 1 point))
+      (inc short point)))
+  (div short iter))
+
+Proviamo:
+
+(spezza 1e6)
+;-> 0.2499768008362036
+(time (println (spezza 1e7)))
+;-> 0.2500418689749276
+;-> 1296.733
+
+In termini matematici:
+quando scegliamo il punto di rottura (X in (0,1)), la parte corta è:
+
+Y = min(X, 1 - X)
+
+Inoltre:
+- Se (X in [0, 0.5]) --> (Y = X)
+- Se (X in [0.5, 1]) --> (Y = 1 - X)
+
+quindi ogni valore y in [0, 0.5] può essere ottenuto in due modi:
+1) (X = y)
+2) (X = 1 - y)
+
+Dato che X è uniforme su [0,1]:
+- la probabilità di cadere vicino a y è la stessa che cadere vicino a (1-y)
+- questi due contributi si sommano
+
+Quindi la densità di (Y) è:
+
+  fY(y) = 1 + 1 = 2, per y in [0, 0.5]
+
+che è esattamente la densità uniforme su [0,0.5].
+
+In definitiva, ogni lunghezza y viene 'contata due volte' (da sinistra e da destra), compensando il fatto che l'intervallo è dimezzato, quindi la distribuzione diventa uniforme perché la trasformazione (Y = min(X,1-X)) somma due contributi simmetrici.
+Quindi il valore medio della parte più corta vale 0.25.
+
+Adesso spezziamo il bastone in tre parti.
+Quanto è lunga, in media, la parte più corta?
+
+In questo caso abbiamo due modi per spezzare il bastone:
+
+1) Due punti a caso (spezzamento simultaneo)
+
+(define (spezza3-caso iter)
+  ; Metodo:
+  ; scegliamo due punti indipendenti uniformi in [0,1]
+  ; questo equivale a spezzare il bastone in due punti 'tutti ugualmente probabili'
+  ; quindi tutte le partizioni in tre pezzi sono simmetriche
+  (local (x y a b c m somma)
+    (setq somma 0)
+    (for (i 1 iter)
+      ; due punti casuali indipendenti
+      (setq x (random 0 1))
+      (setq y (random 0 1))
+      ; ordiniamo i punti: x <= y
+      (if (> x y) (swap x y))
+      ; lunghezze dei tre pezzi
+      ; a: da 0 a x
+      ; b: da x a y
+      ; c: da y a 1
+      (setq a x)
+      (setq b (sub y x))
+      (setq c (sub 1 y))
+      ; prendiamo il pezzo più corto
+      (setq m (min a b c))
+      (inc somma m))
+    ; media del minimo
+    (div somma iter)))
+
+(spezza3-caso 1e6)
+;-> 0.1110475720084046
+
+2) Spezzamento sequenziale (locale)
+
+(define (spezza3-seq iter)
+  ; Metodo:
+  ; 1) scegliamo un primo punto x uniforme
+  ; 2) scegliamo uno dei due pezzi con probabilità 1/2
+  ; 3) spezziamo quel pezzo con un punto uniforme al suo interno
+  ; quindi il secondo punto NON è globale, ma locale al pezzo scelto
+  ; questo introduce un bias nelle partizioni
+  (local (x y a b c m somma)
+    (setq somma 0)
+    (for (i 1 iter)
+      ; primo taglio
+      (setq x (random 0 1))
+      ; scelta casuale del pezzo da spezzare
+      (if (< (random 0 1) 0.5)
+        ; spezziamo il pezzo sinistro [0, x]
+        ; y è uniforme in [0, x]
+        (setq y (mul x (random 0 1)))
+        ; altrimenti
+        ; spezziamo il pezzo destro [x, 1]
+        ; y è uniforme in [x, 1]
+        (setq y (add x (mul (sub 1 x) (random 0 1)))))
+      ; ordiniamo i punti
+      (if (> x y) (swap x y))
+      ; lunghezze dei tre pezzi
+      (setq a x)
+      (setq b (sub y x))
+      (setq c (sub 1 y))
+      ; minimo
+      (setq m (min a b c))
+      (inc somma m))
+    ; media
+    (div somma iter)))
+
+(spezza3-seq 1e6)
+;-> 0.09451312850291424
+
+Differenza concettuale:
+
+1) Caso (due punti globali indipendenti)
+In 'spezza3-caso' i punti sono scelti globalmente, quindi lo spazio delle partizioni è uniforme.
+Qui abbiamo la massima 'libertà geometrica':
+- i due tagli sono indipendenti
+- ogni configurazione (x,y) è equiprobabile nel quadrato unitario
+- la simmetria è totale
+Quindi nel caso globale abbiamo
+a) alta probabilità di b, c non troppo piccoli insieme
+b) i tre segmenti competono 'alla pari'
+Questo alza il valore medio del minimo.
+
+2) Sequenziale locale (due punti dipendenti)
+In 'spezza3-seq' il secondo punto dipende dal primo, quindi lo spazio delle partizioni è distorto (alcune configurazioni sono più probabili di altre).
+Qui cambia tutto perchè scegliamo un primo taglio x e poi il secondo è condizionato al primo e soprattutto: è uniforme solo dentro un pezzo.
+Introduciamo una correlazione, infatti se il primo taglio crea un pezzo piccolo, allora il secondo tende a 'insistere' su quella regione
+Nel caso globale questo genera:
+a) più spesso due segmenti piccoli vicini
+b) più probabilità che il minimo sia molto piccolo
+Questo diminuisce il valore medio del minimo.
+
+Vedi anche "Spezzare un bastone" su "Note libere 6".
+
 ============================================================================
 

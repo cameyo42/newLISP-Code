@@ -4699,7 +4699,7 @@ Spiegazione:
 ;->  ("AAB" 7 3) ("AB" 8 2) ("ADccAAAB" 11 8) ("AAAB" 15 4) ("AAB" 16 3)
 ;->  ("AB" 17 2))
 
-Perché usare .*? invece di .*?
+Perché usare .*? invece di .*
 Se usi "A.*B" (senza ?), otterresti un match avido, cioè prende da prima A fino all'ultima B:
 (regex "A.*B" a)
 ;-> ("AAAaBAAAABcADccAAAB" 0 19)
@@ -4804,7 +4804,6 @@ However, one can use collect and a small helper function to get the following al
 ;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 15 3))
 (regex-all "[A]{3}" a 0 true)
 ;-> (("AAA" 0 3) ("AAA" 5 3) ("AAA" 6 3) ("AAA" 15 3))
-
 
 Cerca la sottostringa che si trova tra la seconda parentesi aperta e
  il primo spazio che incontriamo dopo
