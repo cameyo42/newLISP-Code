@@ -3446,7 +3446,8 @@ NOTE LIBERE 35
 
 NOTE LIBERE 36
 ==============
-
+  Scatole e monete
+  Sondaggi e elezioni
 
 PROBLEMI SUI DADI
 =================

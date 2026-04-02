@@ -8910,9 +8910,13 @@ Croce = 1
       (push (list i (res 0) (res 1) diff perc0 perc1) out -1))
     out))
 
-(silent (setq sol (simula 1e6)))
+Proviamo:
+
 (silent (setq sol (simula 1e5)))
 
+;
+; Funzioni per analisi del risultato di 'simula'
+;
 
 (define (min-list lst idx)
   (let ( (min-el (lst 0)) (min-val (lst 0 idx)) )
@@ -8928,7 +8932,6 @@ Croce = 1
           (setq max-el el max-val (el idx))))
     max-el))
 
-; Funzioni per analisi del risultato di 'simula'
 (define (delta-max lst) (max-list lst 3))
 (define (delta-min lst) (min-list lst 3))
 (define (perc0-max lst) (max-list lst 4))
@@ -8937,11 +8940,17 @@ Croce = 1
 (define (perc1-min lst) (min-list lst 5))
 
 (delta-max sol)
+;-> (76872 38592 38280 312 0.5020293474867312 0.4979706525132688)
 (delta-min sol)
+;-> (2 1 1 0 0.5 0.5)
 (perc0-max sol)
+;-> (15 11 4 7 0.7333333333333333 0.2666666666666667)
 (perc0-min sol)
+;-> (1 0 1 1 0 1)
 (perc1-max sol)
+;-> (1 0 1 1 0 1)
 (perc1-min sol)
+;-> (15 11 4 7 0.7333333333333333 0.2666666666666667)
 
 In media, quante volte risulta (numero Teste = numero Croci) con N lanci?
 
