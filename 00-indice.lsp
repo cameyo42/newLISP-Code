@@ -3448,10 +3448,15 @@ NOTE LIBERE 36
 ==============
   Scatole e monete
   Sondaggi e elezioni
+  Contare i punti di una stringa
+  Windows years
+  Numero più grande
+  Corde parallele
+  Attacco tra pezzi degli scacchi
 
 PROBLEMI SUI DADI
 =================
-  Problemi 1,...,80
+  Problemi 1,..,80
 
 APPENDICI
 =========
