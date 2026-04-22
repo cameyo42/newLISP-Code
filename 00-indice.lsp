@@ -3453,6 +3453,7 @@ NOTE LIBERE 36
   Numero più grande
   Corde parallele
   Attacco tra pezzi degli scacchi
+  Numeri e cifre casuali
 
 PROBLEMI SUI DADI
 =================

@@ -887,5 +887,221 @@ Proviamo:
 
 Per verificare eventuali ostacoli basta controllare che tutte le caselle del 'path' siano libere.
 
+
+----------------------
+Numeri e cifre casuali
+----------------------
+
+Per generare un numero casuale tra 0 e N usiamo due metodi:
+1) generazione del numero casuale con la primitiva 'rand'
+2) generazione del numero casuale usando K volte la primitiva 'rand' per generare le K cifre di cui è composto il numero.
+Per esempio con N = 999:
+
+Metodo 1
+--------
+(setq N 999)
+(rand (+ N 1))
+;-> 563
+
+Metodo 2
+--------
+; numero delle cifre
+(setq K (length N))
+; creazione del numero casuale unendo K cifre causali
+(setq val (int (join (collect (string (rand 10)) K)) 0 10))
+;-> 175
+
+I due metodi sono equivalenti?
+Cioè, la probabilità di ottenere un numero qualsiasi tra 0 e N è la stessa per entrambi i metodi?
+
+Per semplicità consideriamo il numero N composto da K cifre tutte uguali a 9.
+In questo caso con il primo metodo la probabilità di ottenere un certo numero tra 0 e N vale:
+
+  P(x) = 1/(N+1)
+
+Con il secondo metodo la probabilità di ottenere un certo numero tra 0 e N vale:
+
+  P(x) = Prod[i=0..K](1/10)
+
+Per K = 2
+1) N = 99 --> P(x) = 1/100 = 0.01
+2) P(x) = 1/10 * 1/10 = 0.01
+
+Per K = 3
+1) N = 999 --> P(x) = 1/1000 = 0.001
+2) P(x) = 1/10 * 1/10 * 1/10 = 0.001
+
+Quindi i due metodi sono equivalenti.
+
+Scriviamo una funzione di simulazione per verificare questo risultato.
+Per confrontare i due metodi calcoliamo l'errore percentuale tra i valori teorici e i valori ottenuti dalla simulazione.
+L'errore percentuale si calcola dividendo l'errore assoluto (cioè la differenza assoluta tra valore misurato e reale) per il valore reale (o atteso), moltiplicando poi il risultato per 100.
+La formula è:
+
+              abs(ValoreMisurato - ValoreReale)
+  Errore% = ------------------------------------- * 100
+                         ValoreReale
+
+Esprime l'incertezza relativa in percentuale, indicando la precisione della misura.
+
+; Funzione di simulazione dei due metodi di generazione di numeri casuali
+; Restituisce l'errore percentuale massimo di entrambi i metodi
+; Genera risultati corretti solo per num = 9, 99, 999, ...
+(define (simula num iter)
+  (local (len l1 l2 freq freq2 val1 val2 f1 f2 fp1 fp2 err1 err2)
+    (setq len (length num))
+    (setq l1 (pow 10 len))
+    (setq l2 l1)
+    ; vettore per contare le occorrenze dei numeri ottenuti col metodo 1
+    (setq freq1 (array l1 '(0)))
+    ; vettore per contare le occorrenze dei numeri ottenuti col metodo 2
+    (setq freq2 (array l2 '(0)))
+    ; ciclo di generazione dei numeri casuali...
+    (for (i 1 iter)
+      ; metodo 1
+      (setq val1 (rand (+ num 1)))
+      (++ (freq1 val1))
+      ; metodo 2
+      ;(setq val2 (int (join (collect (string (rand 10)) len)) 0 10))
+      (setq val2 0)
+      (for (k 1 len) (setq val2 (+ (rand 10) (* val2 10))))
+      (++ (freq2 val2))
+      ;(print val1 { } val2) (read-line)
+    )
+    ; calcolo delle frequenze dei numeri casuali generati
+    (setq f1 (array-list freq1))
+    (setq f2 (array-list freq2))
+    (setq fp1 (map (fn(x) (div x iter)) f1))
+    (setq fp2 (map (fn(x) (div x iter)) f2))
+    ; Probabilità teorica di ogni numero
+    (setq prob (div (+ num 1)))
+    ; calcolo degli errori percentuali tra la probabilità teorica e
+    ; le frequenze dei numeri casuali generati con i due metodi
+    (setq err1 (map (fn(x) (mul (div (abs (sub x prob)) prob) 100)) fp1))
+    (setq err2 (map (fn(x) (mul (div (abs (sub x prob)) prob) 100)) fp2))
+    ; restituisce i valori degli errori massimi per i due metodi
+    (list (apply max err1) (apply max err2))))
+
+Proviamo:
+
+(simula 9 1e4)
+;-> (6.499999999999992 4.600000000000007)
+(simula 9 1e5)
+;-> (1.680000000000001 1.990000000000006)
+(simula 9 1e6)
+;-> (0.5259999999999987 0.5750000000000061)
+
+(simula 999 1e4)
+;-> (100 130)
+(simula 999 1e5)
+;-> (33 31)
+(simula 999 1e6)
+;-> (12.6 9.799999999999999)
+(time (println (simula 999 1e7)))
+;-> (4.770000000000002 3.729999999999988)
+;-> 4859.716
+
+(simula 9999 1e4)
+;-> (499.9999999999999 599.9999999999999)
+(simula 9999 1e5)
+;-> (150 130)
+(simula 9999 1e6)
+;-> (71 46.99999999999999)
+(time (println (simula 9999 1e7)))
+;-> (33.49999999999999 11.60000000000001)
+;-> 5812.763
+
+Gli errori dei due metodi sono sempre simili (stesso ordine di grandezza).
+I risultati della simulazione confermano che i due metodi sono equivalenti.
+
+Attenzione:
+Il metodo 2 è valido solo se N vale 9, 99, 999, ecc.
+Perchè è uniforme su (0, 1, ..., 10^K - 1) solo quando l'intervallo coincide esattamente con questo insieme.
+Appena cambiamo N, NON sono più equivalenti
+Esempio: N=500 e K=3
+Il metodo 2 genera numeri da 000 a 999, tutti con probabilità 1/1000.
+Ma noi vogliamo solo (0..500).
+Quindi i numeri 0–500 compaiono con probabilità 1/1000, ma i numeri 501–999 vengono comunque generati.
+Se li scartiamo (rejection sampling), allora la distribuzione finale torna uniforme.
+Se NON li scartiamo, allora la distribuzione NON è uniforme.
+
+Rejection sampling
+------------------
+Generiamo un numero come nel metodo 2
+Se il numero è <= N -> lo accettiamo
+Se il numero è > N -> lo scartiamo e generiamo un nuovo numero
+
+; Funzione di simulazione dei due metodi di generazione di numeri casuali
+; Restituisce l'errore percentuale massimo di entrambi i metodi
+(define (simula2 num iter)
+  (local (len l1 l2 freq freq2 val1 val2 f1 f2 fp1 fp2 err1 err2 ok)
+    (setq len (length num))
+    (setq l1 (+ num 1))
+    (setq l2 l1)
+    ; vettore per contare le occorrenze dei numeri ottenuti col metodo 1
+    (setq freq1 (array l1 '(0)))
+    ; vettore per contare le occorrenze dei numeri ottenuti col metodo 2
+    (setq freq2 (array l2 '(0)))
+    ; ciclo di generazione dei numeri casuali...
+    (for (i 1 iter)
+      ; metodo 1
+      (setq val1 (rand (+ num 1)))
+      (++ (freq1 val1))
+      ; metodo 2 (rejection sampling)
+      (setq ok nil)
+      (until ok
+        (setq val2 0)
+        (for (k 1 len) (setq val2 (+ (rand 10) (* val2 10))))
+        (if (<= val2 num) (setq ok true)))
+      (++ (freq2 val2))
+      ;(print val1 { } val2) (read-line)
+    )
+    ; calcolo delle frequenze dei numeri casuali generati
+    (setq f1 (array-list freq1))
+    (setq f2 (array-list freq2))
+    (setq fp1 (map (fn(x) (div x iter)) f1))
+    (setq fp2 (map (fn(x) (div x iter)) f2))
+    ; Probabilità teorica di ogni numero
+    (setq prob (div (+ num 1)))
+    ; calcolo degli errori percentuali tra la probabilità teorica e
+    ; le frequenze dei numeri casuali generati con i due metodi
+    (setq err1 (map (fn(x) (mul (div (abs (sub x prob)) prob) 100)) fp1))
+    (setq err2 (map (fn(x) (mul (div (abs (sub x prob)) prob) 100)) fp2))
+    ; restituisce i valori degli errori massimi per i due metodi
+    (list (apply max err1) (apply max err2))))
+
+Proviamo:
+
+(simula2 50 1e4)
+;-> (19.41999999999999 16.79)
+(simula2 50 1e5)
+;-> (5.904999999999993 5.417000000000006)
+(simula2 50 1e6)
+;-> (1.473100000000002 1.6073)
+
+(simula2 500 1e4)
+;-> (85.37000000000002 59.92)
+(simula2 500 1e5)
+;-> (20.24 23.74700000000001)
+(simula2 500 1e6)
+;-> (7.615599999999996 6.81320000000002)
+(time (println (simula2 500 1e7)))
+;-> (3.200990000000005 2.239070000000003)
+;-> 9703.915000000001
+
+(simula2 5000 1e4)
+;-> (350.09 400.1)
+(simula2 5000 1e5)
+;-> (110.042 85.03700000000001)
+(simula2 5000 1e6)
+;-> (30.02599999999999 26.02520000000001)
+(time (println (simula2 5000 1e7)))
+;-> (15.53310999999999 7.631530000000002)
+;-> 11485.042
+
+(time (println (simula2 5000 1e8)))
+;-> (10.277059 2.445485)
+;-> 115422.249
+
 ============================================================================
 
