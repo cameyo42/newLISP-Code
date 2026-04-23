@@ -3454,6 +3454,8 @@ NOTE LIBERE 36
   Corde parallele
   Attacco tra pezzi degli scacchi
   Numeri e cifre casuali
+  Indice di correlazione di Pearson
+  Indice di correlazione di Spearman
 
 PROBLEMI SUI DADI
 =================

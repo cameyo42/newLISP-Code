@@ -893,7 +893,7 @@ Numeri e cifre casuali
 ----------------------
 
 Per generare un numero casuale tra 0 e N usiamo due metodi:
-1) generazione del numero casuale con la primitiva 'rand'
+1) generazione del numero casuale con la primitiva 'rand'.
 2) generazione del numero casuale usando K volte la primitiva 'rand' per generare le K cifre di cui è composto il numero.
 Per esempio con N = 999:
 
@@ -1098,10 +1098,181 @@ Proviamo:
 (time (println (simula2 5000 1e7)))
 ;-> (15.53310999999999 7.631530000000002)
 ;-> 11485.042
-
 (time (println (simula2 5000 1e8)))
 ;-> (10.277059 2.445485)
 ;-> 115422.249
+
+
+---------------------------------
+Indice di correlazione di Pearson
+---------------------------------
+
+Il coefficiente di correlazione di Pearson (r) è una misura statistica che valuta la forza e la direzione della relazione lineare tra due variabili quantitative.
+Varia da -1 (correlazione negativa perfetta) a +1 (correlazione positiva perfetta), dove 0 indica assenza di relazione lineare.
+
+Indica come una variabile cambia al variare dell'altra e misura solo relazioni di tipo lineare (una linea retta).
+Un valore vicino a +1 indica che all'aumentare di una variabile, l'altra aumenta.
+Un valore vicino a -1 indica che all'aumentare di una, l'altra diminuisce.
+Un valore vicino a 0 suggerisce nessuna relazione lineare.
+
+Non implica causalità, cioè una correlazione alta non significa che una variabile causa l'altra.
+Questo indice è molto sensibile agli 'outlier'.
+
+Formula matematica:
+
+Date due liste X e Y con lo stesso numero di elementi:
+
+ X = (x1, x2, ..., xn)
+ Y = (y1, y2, ..., yn)
+
+L'indice si calcola dividendo la covarianza tra le due variabili per il prodotto dei loro scarti quadratici medi:
+
+
+        Sum[i=1,n](x(i) - xm)*(y(i) - ym)
+  r = ---------------------------------------------------
+        Sum[i=1,n](x(i) - xm)^2*Sum[i=1,n](y(i) - ym)^2
+
+  dove xm = media di X, ym = media di Y
+
+Formula computazionale:
+
+  r = (n*sum(x*y) - sum(x)*sum(y)) / sqrt((n*sum(x^2) - (sum(x))^2) * (n*sum(y^2) - (sum(y))^2))
+
+1) Calcolare le medie delle due liste
+2) Sottrarre la media a ogni valore (centratura)
+3) Moltiplicare i valori corrispondenti
+4) Sommare tutto (numeratore)
+5) Calcolare le somme dei quadrati per ciascuna lista
+6) Dividere per il prodotto delle radici
+
+Casi particolari:
+- liste di lunghezza diversa -> errore
+- n < 2 -> correlazione non definita
+- varianza nulla (tutti i valori uguali in X o Y) -> denominatore = 0
+
+(define (pearson x y)
+  ; calcolo lunghezza delle liste
+  (letn (n (length x))
+    (cond
+      ; caso 1: liste di lunghezza diversa -> non definito
+      ((!= n (length y)) nil)
+      ; caso 2: meno di 2 elementi -> non definito
+      ((< n 2) nil)
+      ; caso normale:
+      (true
+        ; calcolo delle somme necessarie
+        (letn ( ; somma elementi di x
+                (sx (apply add x))
+                ; somma elementi di y
+                (sy (apply add y))
+                ; somma dei prodotti x_i * y_i
+                (sxy (apply add (map mul x y)))
+                ; somma dei quadrati di x
+                (sx2 (apply add (map (fn (v) (mul v v)) x)))
+                ; somma dei quadrati di y
+                (sy2 (apply add (map (fn (v) (mul v v)) y)))
+                ; numeratore della formula di Pearson
+                (num (sub (mul n sxy) (mul sx sy)))
+                ; termine varianza (non normalizzata) di x
+                (denx (sub (mul n sx2) (mul sx sx)))
+                ; termine varianza (non normalizzata) di y
+                (deny (sub (mul n sy2) (mul sy sy)))
+              )
+          ; controllo dei casi degeneri: varianza nulla
+          (if (or (= denx 0) (= deny 0))
+              nil
+              ; valore finale: divisione per il prodotto delle radici
+              (div num (sqrt (mul denx deny)))))))))
+
+Proviamo:
+
+(setq a '(1 2 3 4 5))
+(setq b '(2 4 6 8 10))
+(setq c '(10 8 6 4 2))
+(setq d '(1 5 2 4 3))
+(pearson a b)
+;-> 1
+(pearson a c)
+;-> -1
+(pearson b c)
+;-> -1
+(pearson a d)
+;-> 0.3
+(pearson b d)
+;-> 0.3
+(pearson c d)
+;-> -0.3
+
+
+----------------------------------
+Indice di correlazione di Spearman
+----------------------------------
+
+L'indice di correlazione di Spearman (rs) misura la relazione monotona tra due liste, usando il metodo di Pearson con i ranghi invece dei valori originali.
+È più robusto di Pearson quando i dati non sono lineari o hanno outlier.
+
+Formula:
+Se non ci sono valori uguali:
+  
+  rs = 1 - (6 * sum(d^2)) / (n * (n^2 - 1))
+
+dove:
+
+  d(i) = rank(x(i)) - rank(y(i))
+
+Metodo di calcolo:
+1. Trasformare le due liste nei rispettivi ranghi
+2. Calcolare le differenze d(i)
+3. Applicare la formula sopra
+
+Se ci sono valori uguali:
+- bisogna assegnare il rango medio (average rank)
+- oppure usare direttamente Pearson sui ranghi (metodo generale)
+
+Casi particolari (non considerati):
+- lunghezze diverse -> nil
+- n < 2 -> nil
+- tutti i ranghi uguali -> nil
+
+Funzione generale (funziona anche con valori duplicati e usa Pearson sui ranghi)
+
+; Funzione che calcola i ranghi con gestione dei pari valori (media dei ranghi)
+(define (rank lst)
+  (letn ((sorted (sort (copy lst)))
+         (ranks '()))
+    (dolist (x lst)
+      ;(letn ((pos (first (ref x sorted)))
+      (letn ((pos (find x sorted))
+             (counts (length (filter (fn (v) (= v x)) sorted)))
+             ; rango medio: posizione + (count-1)/2 + 1 (per indice base 1)
+             (r (add pos (div (sub counts 1) 2) 1)))
+        (push r ranks -1)))
+    ranks))
+
+; Spearman = Pearson applicato ai ranghi
+(define (spearman x y)
+  (letn (rx (rank x)
+         ry (rank y))
+    (pearson rx ry)))
+
+Proviamo:
+
+(setq a '(1 2 3 4 5))
+(setq b '(2 4 6 8 10))
+(setq c '(10 8 6 4 2))
+(setq d '(1 5 2 4 3))
+(spearman a b)
+;-> 1
+(spearman a c)
+;-> -1
+(spearman b c)
+;-> -1
+(spearman a d)
+;-> 0.3
+(spearman b d)
+;-> 0.3
+(spearman c d)
+;-> -0.3
 
 ============================================================================
 
