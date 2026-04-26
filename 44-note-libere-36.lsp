@@ -1274,5 +1274,324 @@ Proviamo:
 (spearman c d)
 ;-> -0.3
 
+
+--------------------
+Sequenze di Sturmian
+--------------------
+
+Le sequenze di Sturmian sono sequenze binarie infinite (su {0,1}) che stanno esattamente 'al confine' tra ordine e complessità.
+Una sequenza binaria infinita è sturmiana se ha complessità minima non banale:
+
+Il numero di sottostringhe distinte di lunghezza n è:
+  p(n) = n + 1
+Questo è il minimo possibile per una sequenza non periodica.
+
+Costruzione delle sequenze
+
+Le sequenze di Sturmian si ottengono da una 'rotazione su un cerchio' (costruzione geometrica).
+
+Poniamo:
+ alpha in (0,1) irrazionale (pendenza)
+ rho in [0,1) (fase iniziale)
+
+Definiamo:
+
+ s(n) = floor((n+1)*alpha + rho) - floor((n*alpha) + rho)
+
+Questo produce una sequenza di 0 e 1.
+
+Interpretazione:
+Stiamo seguendo la retta y = alpha*x + rho
+Ogni volta che attraversiamo un intero -> mettiamo 1, altrimenti 0
+
+Proprietà
+1. Bilanciamento
+Per ogni due sottostringhe della stessa lunghezza, il numero di 1 differisce al massimo di 1
+Questa proprietà indica che le sequenze sono uniformemente distribuite.
+2. Non periodicità
+Non sono periodiche, ma sono 'quasi periodiche' (struttura altamente regolare)
+3. Codifica di rotazioni
+Le sequenze di Sturmian sono equivalenti a orbite di rotazioni irrazionali su S^1.
+Questo le collega alla teoria ergodica e ai sistemi dinamici.
+4. Parole caratteristiche
+Ogni pendenza alpha ha una sequenza speciale detta 'parola caratteristica', che è la più 'canonica' per quella pendenza.
+
+Un altro modo di vederle:
+- Tracciamo una retta con pendenza irrazionale su una griglia
+- Ogni volta che attraversiamo:
+  a) una linea verticale -> 0
+  b) una linea orizzontale -> 1
+In questo modo ottieniamo una sequenza sturmiana
+
+Altra definizione:
+Una sequenza è sturmiana se e solo se:
+- ha complessità (n+1)
+- è bilanciata e non periodica
+- è codifica di una rotazione irrazionale
+- è limite di parole ottenute da frazioni continue
+
+Scriviamo una funzione che genera i primi 'n' termini della sequenza.
+alpha = pendenza (idealmente irrazionale)
+rho = offset iniziale
+Ogni passo verifica se la retta y = alpha*x+rho supera un intero
+se sì -> 1
+altrimenti -> 0
+
+(define (sturmian-line n alpha rho)
+  ; genera i primi n termini di una sequenza sturmiana
+  ; usando la definizione con le parti intere:
+  ; s(k) = floor((k+1)*alpha + rho) - floor(k*alpha + rho)
+  (letn (res '() a0 0 a1 0)
+    ; res = lista risultato
+    ; a0, a1 = valori delle parti intere successive
+    (for (k 0 (- n 1))
+      ; calcola floor(k*alpha + rho)
+      (setq a0 (floor (add (mul k alpha) rho)))
+      ; calcola floor((k+1)*alpha + rho)
+      (setq a1 (floor (add (mul (add k 1) alpha) rho)))
+      ; differenza tra i due valori:
+      ; vale 1 se si attraversa un intero, altrimenti 0
+      (push (sub a1 a0) res -1))
+    ; restituisce la sequenza binaria
+    res))
+
+(sturmian-line 20 0.6180339887 0)
+;-> (0 1 0 1 1 0 1 0 1 1 0 1 1 0 1 0 1 1 0 1)
+
+Nota che 'alpha' deve essere irrazionale per avere una vera sequenza sturmiana.
+Con valori razionali otteniamo una sequenza periodica.
+La versione 'sturmian-line' può introdurre errori numerici.
+Per sequenze lunghe è meglio la seguente versione con (p q) interi.
+
+(define (sturmian-rat n p q)
+  ; genera i primi n termini della sequenza sturmiana
+  ; usando alpha = p/q (approssimazione razionale)
+  (letn (res '() x 0)
+    ; x rappresenta la posizione accumulata (mod q)
+    (for (k 0 (- n 1))
+      ; aggiunge p (simula x <- x + alpha)
+      (setq x (add x p))
+      ; se si supera q, si "attraversa" un intero -> output 1
+      (if (>= x q)
+          (begin
+            (push 1 res -1) ; aggiunge 1 alla sequenza
+            (setq x (sub x q))) ; riduce x modulo q
+          ; altrimenti non si attraversa -> output 0
+          (push 0 res -1)))
+    res))
+
+(sturmian-rat 20 987 1597)
+;-> (0 1 0 1 1 0 1 0 1 1 0 1 1 0 1 0 1 1 0 1)
+
+Adesso scriviamo una funzione per verificare se una data parola è 'sturmina'.
+Nota: una stringa finita non può essere 'sturmiana' in senso stretto (la definizione è per sequenze infinite).
+Però si usa un criterio equivalente: una parola finita è 'sturmiana' se e solo se è 'bilanciata'.
+Una parola è 'bilanciata' se: per ogni lunghezza k, e per ogni due sottostringhe di lunghezza k, il numero di '1' differisce al massimo di 1.
+
+Algoritmo
+1) Per ogni lunghezza ( k = 1..n )
+2) scorrere tutte le sottostringhe di lunghezza ( k )
+3) calcolare il numero di '1'
+4) controllare: max - min <= 1
+
+Funzione per verificare se una sequenza finita è sturmiana
+
+(define (sturmian? lst)
+  ; verifica se una lista binaria è sturmiana (cioè bilanciata)
+  (letn (n (length lst) ok true)
+    ; per ogni lunghezza k delle sottostringhe
+    (for (k 1 n)
+      (letn (min1 nil max1 nil cnt 0)
+        ; scorri tutte le sottostringhe di lunghezza k
+        (for (i 0 (- n k))
+          ; conta il numero di 1 nella sottostringa corrente
+          (setq cnt (apply add (slice lst i k)))
+          ; aggiorna minimo
+          (if (or (= min1 nil) (< cnt min1))
+              (setq min1 cnt))
+          ; aggiorna massimo
+          (if (or (= max1 nil) (> cnt max1))
+              (setq max1 cnt)))
+        ; se la differenza supera 1 → non sturmiana
+        (if (> (sub max1 min1) 1)
+            (setq ok nil))))
+    ok))
+
+(sturmian? (sturmian-line 20 0.6180339887 0))
+;-> true
+(sturmian? (sturmian-rat 100 987 1597))
+;-> true
+(sturmian? '(0 1 1 0 1 1 1 1 1 1))
+;-> nil
+
+Vediamo una parola 'sturmiana' particolare: Fibonacci-word.
+
+Sequenza OEIS A003849:
+The infinite Fibonacci word (start with 0, apply 0->01, 1->0, take limit).
+223
+  0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0,
+  1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0,
+  0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1,
+  0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, ...
+
+(define (fibonacci-word n)
+  (letn (a '(0) b '(0 1) tmp)
+    (while (< (length b) n)
+      (setq tmp (append b a))
+      (setq a b)
+      (setq b tmp))
+    (slice b 0 n)))
+
+(fibonacci-word 50)
+;-> (0 1 0 0 1 0 1 0 0 1 0 0 1 0 1 0 0 1 0 1 0 0 1 0 0
+;->  1 0 1 0 0 1 0 0 1 0 1 0 0 1 0 1 0 0 1 0 0 1 0 1 0)
+
+
+--------------------------
+La funzione matematica EML
+--------------------------
+
+"All elementary functions from a single binary operator" Andrzej Odrzywołek
+https://arxiv.org/abs/2603.21852
+
+A single two-input gate suffices for all of Boolean logic in digital hardware.
+No comparable primitive has been known for continuous mathematics: computing elementary functions such as sin, cos, sqrt, and log has always required multiple distinct operations.
+Here I show that a single binary operator, eml(x,y)=exp(x)-ln(y), together with the constant 1, generates the standard repertoire of a scientific calculator.
+This includes constants such as e, pi, and 'i' and arithmetic operations including addition, subtraction, multiplication, division, and exponentiation as well as the usual transcendental and algebraic functions.
+For example, exp(x)=eml(x,1), ln(x)=eml(1,eml(eml(1,x),1)), and likewise for all other operations.
+That such an operator exists was not anticipated.
+I found it by systematic exhaustive search and established constructively that it suffices for the concrete scientific-calculator basis.
+In EML (Exp-Minus-Log) form, every such expression becomes a binary tree of identical nodes, yielding a grammar as simple as S -> 1 | eml(S,S).
+This uniform structure also enables gradient-based symbolic regression: using EML trees as trainable circuits with standard optimizers (Adam), I demonstrate the feasibility of exact recovery of closed-form elementary functions from numerical data at shallow tree depths up to 4.
+The same architecture can fit arbitrary data, but when the generating law is elementary, it may recover the exact formula.
+
+"All elementary functions from a single binary operator" Andrzej Odrzywołek
+https://arxiv.org/abs/2603.21852
+
+In poche parole con la formula eml(x,y)=exp(x)-ln(y), insieme alla costante 1, è possibile generare il repertorio standard di una calcolatrice scientifica.
+
+Formula: eml(x,y = exp(x) - ln(x)
+
+(define (eml x y) (sub (exp x) (log y)))
+
+Nota:
+(log 0)
+;-> -1.#INF
+(exp (log 0))
+;-> 0
+
+Operazioni equivalenti:
+
+Costante di Eulero
+(define (_e) (eml 1 1))
+(_e)
+
+Esponenziale:
+(define (_exp x) (eml x 1))
+(_exp)
+
+Zero:
+(define (_zero) (eml 1 (_exp (_exp 1))))
+(_zero)
+
+Infinito:
+(define (_inf) (eml 1 0))
+(_inf)
+;-> 1.#INF
+
+Infinito negativo:
+(define (_neg-inf) (eml 1 (_inf)))
+(_neg-inf)
+;-> -1.#INF
+
+Negazione:
+(define (_neg x) (eml (_neg-inf) (_exp x)))
+(_neg 2)
+;-> -2
+
+Logaritmo naturale:
+(define (_log x) (eml 1 (_exp (eml 1 x))))
+(_log 10)
+;-> 2.302585092994046
+
+Inversione:
+(define (_inv x) (_exp (eml (_neg-inf) x)))
+(_inv 2)
+;-> 0.5
+
+Sottrazione:
+(define (_sub x y) (eml (_log x) (_exp y)))
+(_sub 10.3 1.1)
+;-> 9.199999999999999
+
+Addizione:
+(define (_add x y) (eml 1 (_exp (eml (_log (eml 1 (_exp x))) (_exp y)))))
+(_add 2 2)
+;-> 4
+(_add 3 4)
+;-> 1.#QNAN
+La formula è formalmente corretta, ma instabile numericamente.
+
+(_add 10 2)
+Moltiplicazione:
+(define (_mul x y) (_exp (eml 1 (_exp (eml (_log (eml 1 x)) y)))))
+(_mul 3.5 4)
+;-> 14
+
+Divisione:
+(define (_div x y) (_exp(eml (_log (_log x)) y)))
+(_div 14 4)
+;-> 3.500000000000001
+
+Potenza:
+(define (_pow x y) (_exp (_mul (_log x) y)))
+(_pow 10 2)
+;-> 100.0000000000001
+
+Costante 2:
+(define (_two) (_add 1 1))
+(_two)
+;-> 2
+
+Costante immaginaria:
+(define (_i) (_exp (_div (_log (_neg 1)) (_two))))
+(_i)
+;-> 1.#QNAN
+
+Radice quadrata:
+(define (_sqrt x) (_pow x (_inv (_two))))
+(_sqrt 16)
+;-> 4
+
+Pi greco: (sqrt(- (log(-1))^2))
+(define (_pi) (_sqrt (_neg (_pow (_log (_neg 1)) (two)))))
+(_pi)
+;-> 1.#QNAN ; otteniamo NaN, ma formalmente è corretto
+
+Radice n-esima:
+(define (_root x n) (_pow x (_inv n)))
+
+Valore assoluto: abs(x) = sqrt(x^2)
+(define (_abs x) (_sqrt (_mul x x)))
+
+Segno: sign(x) = x/|x|
+(define (_sign x) (_div x (_abs x)))
+
+Logaritmo in base arbitraria: log-b(x) = log(x)/log(b)
+(define (_logb x b) (_div (_log x) (_log b)))
+
+Funzione sigmoid: s = 1/(1 + e^(-x))
+(define (_sigmoid x) (_inv (_add 1 (_exp (_neg x)))))
+
+Min e Max (senza branching):
+min(x, y) = (x + y - abs(x - y))/2
+(define (_min x y) (_div (_sub (_add x y) (_abs (_sub x y))) (_two)))
+max(x, y) = (x + y + abs(x - y))/2
+(define (_max x y) (_div (_add (_add x y) (_abs (_sub x y))) (_two)))
+
+La formula EML mescola una funzione moltiplicativa (exp) e una inversa (log), quindi  è una sorta di 'ponte' tra struttura additiva e moltiplicativa.
+Questo è probabilmente il motivo per cui riesce a generare tutto.
+Comunque anche se EML è funzionalmente completo non tutte le rappresentazioni sono numericamente equivalenti.
+
 ============================================================================
 

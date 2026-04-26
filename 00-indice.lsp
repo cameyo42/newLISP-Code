@@ -3456,6 +3456,8 @@ NOTE LIBERE 36
   Numeri e cifre casuali
   Indice di correlazione di Pearson
   Indice di correlazione di Spearman
+  Sequenze di Sturmian
+  La funzione matematica EML
 
 PROBLEMI SUI DADI
 =================
