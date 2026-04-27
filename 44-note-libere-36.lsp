@@ -1593,5 +1593,331 @@ La formula EML mescola una funzione moltiplicativa (exp) e una inversa (log), qu
 Questo è probabilmente il motivo per cui riesce a generare tutto.
 Comunque anche se EML è funzionalmente completo non tutte le rappresentazioni sono numericamente equivalenti.
 
+---------------------
+Lichess Time controls
+---------------------
+
+Il controllo del tempo di Lichess si basa sulla durata stimata della partita = (tempo iniziale dell'orologio in secondi) + 40*(incremento dell'orologio).
+Ad esempio, la durata stimata di una partita 5+3 è 5*60 + 40*3 = 420 secondi.
+
+(define (durata t plus) (add t (mul 40 plus)))
+t = tempo iniziale (secondi)
+plus = tempo aggiunto per ogni mossa (secondi)
+
+3m+3s
+(durata 180 3)
+;-> 300 (5 minuti)
+5m+3s
+(durata 300 3)
+;-> 420 (7 minuti)
+
+
+--------------------------
+Swap letter and digit runs
+--------------------------
+
+https://codegolf.stackexchange.com/questions/129840/swap-letter-and-digit-runs
+Nota:
+Tutto il contenuto dei siti di Stack Exchange è rilasciato sotto la licenza CC BY-SA 4.0 (Creative Commons Attribution-ShareAlike 4.0).
+
+Given an input string containing only alphanumeric ASCII characters and starting with a letter, swap each letter run with the digit run which follows.
+A run is a sequence of consecutive letters or digits.
+Note that in the case where the input string ends with a run of letters, this run is left untouched.
+
+Example:
+  input string = uV5Pt3I0
+  Separate runs of letters and runs of digits: uV 5 Pt 3 I 0
+  Identify pairs of runs: (uV 5) (Pt 3) (I 0)
+  Swap pairs of runs: (5 uV) (3 Pt) (0 I)
+  Concatenate: 5uV3Pt0I
+
+Examples:
+  uV5Pt3I0 -> 5uV3Pt0I
+  J0i0m8 -> 0J0i8m
+  abc256 -> 256abc
+  Hennebont56Fr -> 56HennebontFr
+  Em5sA55Ve777Rien -> 5Em55sA777VeRien
+  nOoP -> nOoP
+
+(define (digit? c) (and (>= c "0") (<= c "9")))
+
+Metodo
+'tmp' accumula le lettere (o non-cifre)
+Quando arrivano le cifre: emettere prima le cifre poi tmp.
+Alla fine, se restano non-cifre -> append finale
+
+(define (swap-digits s)
+  (letn (res '() tmp '() i 0 n (length s))
+    ; res = risultato finale (lista di caratteri)
+    ; tmp = buffer temporaneo per blocco di non-cifre
+    (while (< i n)
+      (if (digit? (s i))
+          ; caso: blocco di cifre
+          (let (j i)
+            (while (and (< j n) (digit? (s j))) (inc j))
+            ; prima aggiungi le cifre
+            (let (k i)
+              (while (< k j)
+                (push (s k) res -1)
+                (++ k)))
+            ; poi eventuale blocco precedente di non-cifre
+            (if tmp (extend res tmp))
+            (set 'tmp '())   ; svuota buffer non-cifre
+            (setq i j))
+          ; caso: non-cifra → accumula in tmp
+          (begin
+            (push (s i) tmp -1)
+            (++ i))))
+    ; se la stringa finisce con non-cifre, aggiungile
+    (if tmp (extend res tmp))
+    (join res)))
+
+Proviamo:
+
+(swap-digits "uV5Pt3I0")
+;-> 5uV3Pt0I
+(swap-digits "J0i0m8")
+;-> 0J0i8m
+(swap-digits "abc256")
+;-> 256abc
+(swap-digits "Hennebont56Fr")
+;-> 56HennebontFr
+(swap-digits "Em5sA55Ve777Rien")
+;-> 5Em55sA777VeRien
+(swap-digits "nOoP")
+;-> nOoP
+
+Adesso vediamo una versione che utilizza le espressioni regolari.
+
+(define (swap-digits2 s) (replace {(\D+)(\d+)} s (append $2 $1) 0))
+
+(swap-digits2 "uV5Pt3I0")
+;-> 5uV3Pt0I
+(swap-digits2 "J0i0m8")
+;-> 0J0i8m
+(swap-digits2 "abc256")
+;-> 256abc
+(swap-digits2 "Hennebont56Fr")
+;-> 56HennebontFr
+(swap-digits2 "Em5sA55Ve777Rien")
+;-> 5Em55sA777VeRien
+(swap-digits2 "nOoP")
+;-> nOoP
+
+'replace', quando usiamo una funzione o un'espressione, rende disponibili i gruppi catturati come variabili '$0', '$1', '$2', ...
+'(append $2 $1)' costruisce la nuova stringa concatenando:
+- prima le cifre '$2'
+- poi i caratteri non numerici '$1'
+
+Questo è un punto in cui newLISP è più LISP-like di JavaScript:
+non usa una sostituzione testuale, ma una valutazione dinamica, quindi possiamo fare cose più complesse dei semplici '$1', '$2'.
+
+Ad esempio anche trasformare i gruppi:
+
+(define (swap-upper s)
+  (replace {(\D+)(\d+)} s (append (upper-case $2) $1) 0))
+  
+Qui modifichiamo direttamente il contenuto durante la sostituzione.
+
+Test di velocità
+
+(define (rand-str n) (join (slice (randomize 
+              (map char (flat (map sequence '(48 65 97) '(57 90 122))))) 0 n)))
+
+(setq nums (map string (rand 10000 300)))
+(setq letters (collect (rand-str (+ (rand 4) 1)) 300))
+(setq test (join (flat (map list nums letters))))
+
+(= (swap-digits test) (swap-digits2 test))
+;-> true
+
+(time (swap-digits test) 100)
+;-> 2702.742
+(time (swap-digits2 test) 100)
+;-> 19.68
+
+Infine la versione più corta (51 caratteri):
+
+(define(f s)(replace {(\D+)(\d+)}s(append $2 $1)0))
+(f "Em5sA55Ve777Rien")
+;-> 5Em55sA777VeRien
+
+
+---------------------------
+Numeri random con blacklist
+---------------------------
+
+Dato un numero N e una lista con numeri minori di N (blacklist), scrivere una funzione che sceglie a caso un numero tra 0 e N-1 in modo uniforme.
+
+Rejection sampling
+------------------
+Generiamo un numero casuale tra 0 e N-1.
+Se il numero si trova nella blacklist, allora lo scartiamo, altrimenti è un risultato valido.
+Tutti i valori nella blacklist sono unici.
+
+(define (rand1 n lst)
+  (let (num (rand n))
+    (while (member num lst) (setq num (rand n)))
+    num))
+
+(collect (rand1 10 '(1 2 3 4 5)) 10)
+;-> (6 0 6 7 8 8 7 9 9 8)
+
+Questo metodo è inefficiente se la blacklist è grande.
+Se k = length(lst), la probabilità di accettazione è:
+
+  p = (n - k) / n
+
+Numero medio di tentativi:
+
+  E = 1 / p = n / (n - k)
+
+Quindi quando k è vicino a n, diventa molto lento.
+
+Valid List creation
+-------------------
+Creiamo una lista che contiene solo i numeri validi (difference).
+Selezioniamo in modo random un indice dalla lista creata e restituiamo il valore associato.
+
+(define (rand2 n lst)
+  (let (lista (difference (sequence 0 (- n 1)) lst))
+    (lista (rand (length lista)))))
+
+(collect (rand2 10 '(1 2 3 4 5)) 10)
+;-> (6 9 0 6 0 8 0 0 9 6)
+
+Il tempo di costruzione della lista è O(n) con memoria: O(n) e non va bene se n è molto grande.
+
+Remapping strategy
+------------------
+In questo caso non costruiamo tutta la lista, ma solo una mappa per "riparare" i valori vietati.
+Sia m = n - k (numero di valori validi)
+Generiamo x uniforme in [0, m-1]
+Se x è nella blacklist -> lo rimappiamo a un valore valido ≥ m
+
+; Costruisce la mappa di remapping per evitare i valori in blacklist
+; n   = limite superiore (numeri da 0 a n-1)
+; lst = blacklist (valori unici < n)
+; Metodo:
+; - m = numero di valori validi = n - |lst|
+; - genereremo numeri solo in [0, m-1]
+; - se un valore in [0, m-1] è nella blacklist,
+;   lo rimappiamo a un valore valido nella parte alta [m, n-1]
+(define (build-map n lst)
+  (letn ( ; numero di valori validi
+          (m (- n (length lst)))
+          ; blacklist ordinata (serve per controlli sequenziali)
+          (bad (sort lst))
+          ; lista associativa (chiave -> valore rimappato)
+          (mp '())
+          ; puntatore all'ultimo valore disponibile (parte alta)
+          (ultimo (- n 1)) )
+    ; scorriamo tutti i valori della blacklist
+    (dolist (b bad)
+      ; consideriamo solo quelli nella parte bassa [0, m-1]
+      (if (< b m)
+          (begin
+            ; troviamo un valore valido nella parte alta
+            ; (saltiamo quelli già nella blacklist)
+            (while (ref ultimo bad) (-- ultimo))
+            ; creiamo il mapping b -> ultimo
+            (push (list b ultimo) mp -1)
+            ; passiamo al prossimo candidato alto
+            (-- ultimo)
+          )
+      )
+    )
+    mp))
+
+; Estrae un numero casuale uniforme tra i valori NON in blacklist
+; Metodo:
+; - generiamo x in [0, m-1]
+; - se x è blacklistato, lo rimappiamo usando mp
+; - altrimenti x è già valido
+(define (rand3 n lst)
+  (letn ( ; numero di valori validi
+          (m (- n (length lst)))
+          ; mappa di remapping
+          ; 'mp' contiene solo i mapping necessari -> dimensione O(k)
+          (mp (build-map n lst))
+          ; numero casuale nella parte bassa
+          (x (rand m))
+          ; cerchiamo se x va rimappato
+          (r (assoc x mp)) )
+    ; se esiste mapping restituiamo il valore associato
+    ; altrimenti restituiamo x direttamente
+    (if r (r 1) x)))
+
+(collect (rand3 10 '(1 2 3 4 5)) 10)
+;-> (8 0 9 6 0 8 7 8 0 6)
+
+Test di correttezza
+
+(define (test f n lst iter)
+  (let ( (valid (difference (sequence 0 (- n 1)) lst))
+         (nums (collect (f n lst) iter)) )
+    (count valid nums)))
+
+(test rand1 20 '(1 2 3 4 5) 1e5)
+;-> (6754 6769 6749 6592 6694 6600 6718 6765 6739 6654 6638 6542 6740 6480 6566)
+(test rand2 20 '(1 2 3 4 5) 1e5)
+;-> (6514 6585 6493 6660 6601 6874 6692 6561 6747 6731 6670 6697 6720 6714 6741)
+(test rand3 20 '(1 2 3 4 5) 1e5)
+;-> (6762 6767 6528 6797 6639 6622 6775 6565 6604 6586 6669 6715 6544 6700 6727)
+
+Test di velocità (i risultati reali sono un pò diversi dalla teoria)
+
+(define (speed f n lst iter) (time (collect (f n lst) iter)))
+
+(speed rand1 10 '(1 2 3 4 5 6 7 8) 1e6)
+;-> 703.142
+(speed rand2 10 '(1 2 3 4 5 6 7 8) 1e6)
+;-> 1158.897
+(speed rand3 10 '(1 2 3 4 5 6 7 8) 1e6)
+;-> 1363.882
+
+(speed rand1 20 '(1 2 3 4 5) 1e6)
+;-> 250.537
+(speed rand2 20 '(1 2 3 4 5) 1e6)
+;-> 1892.05
+(speed rand3 20 '(1 2 3 4 5) 1e6)
+;-> 1766.539
+
+(speed rand1 1000 (sequence 0 999 2) 1e4)
+;-> 93.245
+(speed rand2 1000 (sequence 0 999 2) 1e4)
+;-> 1248.688
+(speed rand3 1000 (sequence 0 999 2) 1e4)
+;-> 17015.836
+
+Il benchmark misura:
+  
+  funzione completa = build + sampling
+
+ma rand3 è pensato per:
+
+build una volta + sampling molte volte
+
+Scriviamo una funzione ad hoc per misurare la velocità di 'rand3':
+
+(define (speed3 n lst iter)
+  (let (mp (build-map n lst))
+    (time (collect
+            (let (x (rand n))
+              (let (r (assoc x mp))
+                (if r (r 1) x)))
+          iter))))
+
+Proviamo:
+
+(speed3 20 '(1 2 3 4 5) 1e6)
+;-> 141.141
+
+(speed3 10 '(1 2 3 4 5 6 7 8) 1e6)
+;-> 140.631
+
+(speed3 1000 (sequence 0 999 2) 1e4)
+;-> 15.65
+
 ============================================================================
 

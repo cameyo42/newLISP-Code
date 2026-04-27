@@ -3458,6 +3458,9 @@ NOTE LIBERE 36
   Indice di correlazione di Spearman
   Sequenze di Sturmian
   La funzione matematica EML
+  Lichess Time controls
+  Swap letter and digit runs
+  Numeri random con blacklist
 
 PROBLEMI SUI DADI
 =================
