@@ -5506,9 +5506,9 @@ Mediana
 -------
 La mediana di una lista finita di numeri è il numero che si trova "in mezzo ", quando i numeri sono ordinati dal più piccolo al più grande (ordine crescente).
 
-             x[(n+1)/2],                 se n è pari
+              x[(n+1)/2],                se n è dispari
   Mediana =
-             (x[(n/2)] + x[(n/2+1)])/2,  se n è dispari
+             (x[(n/2)] + x[(n/2+1)])/2,  se n è pari
 
 (define (mediana lst)
   (let (mid (/ (length lst) 2))

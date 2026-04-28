@@ -1912,12 +1912,354 @@ Proviamo:
 
 (speed3 20 '(1 2 3 4 5) 1e6)
 ;-> 141.141
-
 (speed3 10 '(1 2 3 4 5 6 7 8) 1e6)
 ;-> 140.631
-
 (speed3 1000 (sequence 0 999 2) 1e4)
 ;-> 15.65
+
+
+------------------------------------------------------------------------
+Ordinare una lista con distanza assoluta unitaria tra elementi adiacenti
+------------------------------------------------------------------------
+
+Data una lista non ordinata di numeri interi, ordinarla in modo tale che la differenza assoluta tra due elementi adiacenti qualsiasi sia sempre uguale a 1.
+Se non è possibile, restituire nil.
+La lista data ha almeno due elementi.
+Esempio: (3 0 1 1 2 4) -> (1 0 1 2 3 4) o (4 3 2 1 0 1)
+
+Rappresentiamo la lista come un grafo lineare con multiset di nodi:
+- ogni valore è un nodo
+- ogni occorrenza è una 'copia' del nodo
+- possiamo muoverci solo a:
+  a) x - 1
+  b) x + 1
+
+Trovare un cammino che:
+- parte da un qualsiasi nodo
+- usa tutte le occorrenze
+- non viola mai la disponibilità dei nodi
+
+Stiamo cercando un cammino che visita ogni copia esattamente una volta, rispettando solo transizioni +-1 tra valori.
+Questo è equivalente a:
+Hamiltonian path su grafo con multiset di nodi compressi
+oppure più correttamente:
+Euler-like trail su struttura di adiacenza lineare con vincoli di capacità
+
+Usiamo:
+- backtracking iterativo (stack esplicito)
+- stato = (posizione corrente, frequenze residue, path)
+- esplorazione di entrambe le direzioni +-1
+- terminazione garantita (spazio finito)
+
+La funzione:
+- costruisce le frequenze dei numeri
+- prova ogni possibile punto di partenza
+- esplora tutte le sequenze valide con differenza ±1
+- usa backtracking iterativo (stack)
+- restituisce la prima soluzione completa trovata
+- oppure 'nil' se impossibile
+
+(define (ordina-diff1 lst)
+(catch
+  (letn (freq '() n (length lst))
+    ; 1. COSTRUZIONE FREQUENZE
+    ; freq è una lista associativa del tipo:
+    ; ((valore1 occorrenze1) (valore2 occorrenze2) ...)
+    ; Serve per sapere quante volte ogni numero è disponibile.
+    (dolist (x lst)
+      (if (lookup x freq)
+          (setf (lookup x freq) (+ $it 1))   ; incremento conteggio
+          (push (list x 1) freq -1)))       ; prima occorrenza
+    ; 2. SCELTA DEI POSSIBILI PUNTI DI PARTENZA
+    ; Proviamo a partire da ogni valore distinto presente.
+    ; Questo evita di perdere soluzioni dipendenti dal punto iniziale.
+    (setq start-vals (map first freq))
+    ; 3. BACKTRACKING ITERATIVO (STACK)
+    ; Ogni stato nello stack è una tripla:
+    ; (valore_corrente frequenze_residue percorso_costruito)
+    (dolist (start start-vals)
+      (letn (stack (list (list start (copy freq) (list start))))
+        (while stack
+          ; Estrazione ultimo stato (DFS iterativo)
+          (letn (top (pop stack))
+            (letn (cur (top 0)
+                   f   (top 1)
+                   path (top 2))
+              ; 4. CASO FINALE: percorso completo
+              ; Se abbiamo usato tutti gli elementi, abbiamo
+              ; trovato una soluzione valida.
+              (if (= (length path) n)
+                  (throw path)
+                  ; 5. ESPANSIONE DELLO STATO
+                  ; Da ogni nodo possiamo muoverci solo a:
+                  ;   cur + 1 oppure cur - 1
+                  ; purché il valore sia ancora disponibile.
+                  (begin
+                    ; RAMO +1
+                    (letn (nx (+ cur 1) v (lookup nx f))
+                      (if (and v (> v 0))
+                        (push (list nx
+                                    ; copia delle frequenze
+                                    ; per evitare contaminazione tra rami
+                                    (letn (nf (copy f))
+                                      (setf (lookup nx nf) (- v 1))
+                                      nf)
+                                    (append path (list nx)))
+                              stack)))
+                    ; RAMO -1
+                    (letn (nx (- cur 1) v (lookup nx f))
+                      (if (and v (> v 0))
+                        (push (list nx
+                                    (letn (nf (copy f))
+                                      (setf (lookup nx nf) (- v 1))
+                                      nf)
+                                    (append path (list nx)))
+                              stack))))))))))
+    ; 6. SE NON ESISTE SOLUZIONE
+    nil)))
+
+Proviamo:
+
+(ordina-diff1 '(3 0 1 1 2 4))
+;-> (3 4 3 2 1 0)
+(ordina-diff1 '(2 2 3 3 4 4))
+;-> (2 3 4 3 2 3)
+(ordina-diff1 '(1 3 5))
+;-> nil
+(ordina-diff1 '(1 7 5 2 6 4 4 3 3))
+;-> (1 2 3 4 3 4 5 6 7)
+(ordina-diff1 '(6 10 2 12 13 5 7 1 14 9 2 1 4 10 13 11 11 12 8 3 9))
+;-> (10 9 10 11 12 13 14 13 12 11 10 9 8 7 6 5 4 3 2 1 2)
+(ordina-diff1 '(1 3 5 4 2 8 7 9))
+;-> nil
+
+Adesso scriviamo una funzione che verifica la 'fattibilità', cioè se la lista data può essere ordinata oppure no.
+Il test di fattibilità è basato sulle due condizioni necessarie e sufficienti:
+1) nessun 'buco' nell'intervallo: per ogni k in [min, max], --> f(k) > 0
+L'intervallo deve essere intero continuo (senza buchi).
+2) vincolo locale: per ogni nodo interno di k deve valre: f(k) ≤ f(k-1) + f(k+1) + 1
+Ogni 'punto' può essere attraversato entrando da sinistra e destra eventualmente rimanendo 'centrale'.
+Quindi i vicini devono avere abbastanza 'capacità' per sostenere tutte le visite di k.
+
+(define (fattibile? lst)
+  (letn (freq '() keys '() ok true)
+    ; 1. COSTRUZIONE FREQUENZE
+    (dolist (x lst)
+      (if (lookup x freq)
+          (setf (lookup x freq) (+ $it 1))
+          (push (list x 1) freq -1)))
+    ; 2. CHIAVI ORDINATE
+    (setq keys (sort (map first freq)))
+    ; 3. CONTROLLO "BUCHI" (continuità intervallo)
+    (for (i 0 (- (length keys) 2))
+      (if (and ok
+               (!= (+ (keys i) 1) (keys (+ i 1))))
+          (setq ok nil)))
+    ; 4. CONTROLLO VINCOLO LOCALE
+    ;    f(k) ≤ f(k-1) + f(k+1) + 1
+    (if ok
+      (dolist (k keys)
+        (letn (fk (lookup k freq)
+               fL (lookup (- k 1) freq)
+               fR (lookup (+ k 1) freq))
+          (setq fL (if fL fL 0))
+          (setq fR (if fR fR 0))
+          (if (> fk (+ fL fR 1))
+              (setq ok nil)))))
+    ok))
+
+Proviamo:
+
+(fattibile? '(3 0 1 1 2 4))
+;-> true
+(fattibile? '(2 2 3 3 4 4))
+;-> true
+(fattibile? '(1 3 5))
+;-> nil
+(fattibile? '(1 7 5 2 6 4 4 3 3))
+;-> true
+(fattibile? '(6 10 2 12 13 5 7 1 14 9 2 1 4 10 13 11 11 12 8 3 9))
+;-> true
+(fattibile? '(1 3 5 4 2 8 7 9))
+;-> nil
+
+
+-------------------------------------------------
+Somme distinte della fattorizzazione di un intero
+-------------------------------------------------
+
+Dato un intero N:
+a) calcolare tutte le possibili fattorizzazioni
+b) per ogni fattorizzazione sommare i relativi numeri
+c) determinare le somme con valore unico
+d) restituire il numero delle somme uniche
+
+Esempi
+  Le fattorizzazioni di 12 sono (2,2,3), (2,6), (3,4) e (12).
+  Le somme distinte sono: 7, 8 e 12.
+  Quindi a(12) = 3.
+
+  Le fattorizzazioni di 30 sono (2,3,5), (2,15), (3,10), (5,6) e (30).
+  Le 5 somme distinte sono: 10, 17, 13, 11 e 30.
+  Quindi a(30) = 5.
+
+Sequenza OEIS A069016:
+Look at all the different ways to factorize n as a product of numbers bigger than 1, and for each factorization write down the sum of the factors: a(n) = number of different sums.
+  1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 1, 3, 1, 2, 2, 3, 1, 4, 1, 3, 2, 2, 1, 5,
+  2, 2, 3, 3, 1, 5, 1, 4, 2, 2, 2, 7, 1, 2, 2, 5, 1, 5, 1, 3, 4, 2, 1, 8,
+  2, 4, 2, 3, 1, 7, 2, 5, 2, 2, 1, 9, 1, 2, 4, 6, 2, 5, 1, 3, 2, 5, 1, 10,
+  1, 2, 4, 3, 2, 5, 1, 8, 5, 2, 1, 8, 2, 2, 2, 5, 1, 10, 2, 3, 2, 2, 2, 12,
+  1, 4, 4, 7, 1, 5, 1, ...
+
+(define (factorizations num)
+"Calculate all the factorizations of an integer number"
+  (let (afc '())
+    (factorizations-aux num '() num)))
+; funzione ausiliaria
+(define (factorizations-aux num parfac parval)
+  (let ((newval parval) (i (- num 1)))
+    (while (>= i 2)
+      (cond ((zero? (% num i))
+              (if (> newval 1) (setq newval i))
+              (if (and (<= (/ num i) parval) (<= i parval) (>= (/ num i) i))
+                  (begin
+                    (push (append parfac (list i (/ num i))) afc -1)
+                    (setq newval (/ num i))))
+              (if (<= i parval)
+                  (factorizations-aux (/ num i) (append parfac (list i)) newval)
+              ))
+      )
+      (-- i)
+    )
+    (sort (unique (map sort afc)))))
+
+(setq n 24)
+(setq fac (list (list n)))
+;-> ((24))
+(extend fac (factorizations n))
+;-> ((24) (2 2 2 3) (2 2 6) (2 3 4) (2 12) (3 8) (4 6))
+(setq sums (map (fn(x) (apply + x)) fac))
+;-> (24 9 10 9 14 11 10)
+(setq unique-sums (unique sums))
+;-> (24 9 10 14 11)
+(setq num-sums (length unique-sums))
+;-> 5
+
+(define (distinct-sums n)
+  (let (fac (list (list n)))
+    (extend fac (factorizations n))
+    (length (unique (map (fn(x) (apply + x)) fac)))))
+
+(distinct-sums 24)
+;-> 5
+
+Calcoliamo i primi 72 termini della sequenza:
+
+(map distinct-sums (sequence 1 72))
+;-> (1 1 1 1 1 2 1 2 2 2 1 3 1 2 2 3 1 4 1 3 2 2 1 5
+;->  2 2 3 3 1 5 1 4 2 2 2 7 1 2 2 5 1 5 1 3 4 2 1 8
+;->  2 4 2 3 1 7 2 5 2 2 1 9 1 2 4 6 2 5 1 3 2 5 1 10)
+
+
+----------------------------------
+Mediana dalle occorrenze di valori
+----------------------------------
+
+Data una lista di coppie del tipo (valore occorrenze), determinare la mediana dei valori.
+
+Esempio:
+lista = ((1 3) (2 1) (3 4))
+lista-valori = (1 1 1 2 3 3 3 3)
+mediana = 2.5
+
+La mediana di una lista finita di numeri è il numero che si trova "in mezzo ", quando i numeri sono ordinati dal più piccolo al più grande (ordine crescente).
+
+            | x[(n+1)/2],                 se n è dispari
+  Mediana = | 
+            | (x[(n/2)] + x[(n/2)+1)])/2, se n è pari
+
+(define (median lst)
+"Calculate the median of a list of numbers"
+  (let (len (length lst))
+    (sort lst)
+    (if (odd? len)
+        (lst (/ len 2))
+        (div (add (lst (- (/ len 2) 1)) (lst (/ len 2))) 2))))
+
+(median '(1 1 1 2 3 3 3 3))
+;-> 2.5
+
+Metodo 1 (Espansione della lista)
+---------------------------------
+Ricreiamo la lista originale e poi calcoliamo la mediana.
+
+(define (to-median lst)
+  (let (L '())
+    (dolist (el lst)
+      (extend L (dup (el 0) (el 1))))
+    (median L)))
+
+(to-median '((1 3) (2 1) (3 4)))
+;-> 2.5
+
+Metodo2 (Calcolo diretto senza espansione)
+------------------------------------------
+Per trovare la mediana senza espandere la lista:
+1. si calcola il numero totale di elementi (`tot`)
+2. si individuano le posizioni centrali:
+   - pos1 = (tot+1)/2
+   - pos2 = pos1 se 'tot' è dispari, altrimenti 'pos1+1'
+3. si scorre la lista accumulando le occorrenze ('cum')
+4. appena 'cum' raggiunge 'pos1' si salva il primo valore ('res1')
+5. appena 'cum' raggiunge 'pos2' si salva il secondo valore ('res2')
+6. risultato:
+   - se dispari -> res1
+   - se pari -> (res1 + res2)/2
+Questo metodo evita di costruire la lista completa ed è lineare nel numero di coppie.
+
+(define (to-median2 lst)
+  ; tot = numero totale di elementi
+  ; pos1,pos2 = posizioni mediane
+  ; cum = somma cumulativa delle occorrenze
+  ; res1,res2 = valori mediani trovati
+  (letn (tot 0 pos1 0 pos2 0 cum 0 res1 nil res2 nil)
+    ; ordinamento della lista
+    (sort lst)
+    ; calcolo del totale delle occorrenze
+    (dolist (el lst)
+      (inc tot (el 1)))
+    ; calcolo delle posizioni mediane
+    (setq pos1 (/ (+ tot 1) 2))
+    (setq pos2 (if (= (mod tot 2) 0) (+ pos1 1) pos1))
+    ; scansione unica della lista
+    (dolist (el lst)
+      ; aggiorna cumulata
+      (setq cum (add cum (el 1)))
+      ; se non ancora trovato, verifica prima posizione
+      (if (and (nil? res1) (>= cum pos1))
+          (setq res1 (el 0)))
+      ; se non ancora trovato, verifica seconda posizione
+      (if (and (nil? res2) (>= cum pos2))
+          (setq res2 (el 0))))
+    ; restituzione risultato finale
+    (if (= pos1 pos2)
+        res1
+        (div (add res1 res2) 2))))
+
+(to-median2 '((1 3) (2 1) (3 4)))
+;-> 2.5
+
+(setq a '( (7 10) (8 11) (9 5) (1 4) (2 5) (3 8) (4 4) (5 20) (6 15)))
+(to-median a)
+;-> 5.5
+(to-median2 a)
+;-> 5.5
+
+(setq b '( (7 10) (8 11) (9 5) (1 4) (2 5) (3 8) (4 4) (5 20) (6 14)))
+(to-median b)
+;-> 5
+(to-median2 b)
+;-> 5
 
 ============================================================================
 

@@ -3461,6 +3461,9 @@ NOTE LIBERE 36
   Lichess Time controls
   Swap letter and digit runs
   Numeri random con blacklist
+  Ordinare una lista con distanza assoluta unitaria tra elementi adiacenti
+  Somme distinte della fattorizzazione di un intero
+  Mediana dalle occorrenze di valori
 
 PROBLEMI SUI DADI
 =================
