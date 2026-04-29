@@ -3464,6 +3464,8 @@ NOTE LIBERE 36
   Ordinare una lista con distanza assoluta unitaria tra elementi adiacenti
   Somme distinte della fattorizzazione di un intero
   Mediana dalle occorrenze di valori
+  The Lost sequence
+  Precedente e prossima stringa in ordine lessicografico
 
 PROBLEMI SUI DADI
 =================

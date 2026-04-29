@@ -2261,5 +2261,206 @@ Questo metodo evita di costruire la lista completa ed è lineare nel numero di c
 (to-median2 b)
 ;-> 5
 
+
+-----------------
+The Lost sequence
+-----------------
+
+La sequenza 4, 8, 15, 16, 23, 42 proviene dalla serie TV "Lost".
+Questi numeri sono chiamati 'The Numbers' nella trama.
+Compaiono in diversi contesti:
+a) nella lotteria vinta da Hugo
+b) nel codice della botola (la 'hatch')
+c) associati ai personaggi principali
+
+Sequenza OEIS A104101:
+The Lost Numbers.
+  4, 8, 15, 16, 23, 42
+
+Scriviamo una funzione per generarli.
+
+(define (lost n)
+  (let (x 45487288836) ; numero codificato
+    (& 63 (>> x (* 6 n)))))
+
+(map lost (sequence 0 5))
+;-> (4 8 15 16 23 42)
+
+Come funziona?
+
+Vediamo alcune funzioni per definire il 'metodo di codifica a blocchi di bit'.
+Questo metodo crea una specie di 'array compresso in bit'.
+- ogni numero occupa k bit
+- tutti i numeri vengono 'impacchettati' in un intero
+- accesso tramite:
+  - shift -> seleziona blocco
+  - mask -> estrae valore
+è una specie di 'array compresso in bit'.
+Il metodo funziona solo per interi maggiori o uguali a 0.
+
+; Funzione 'bits-needed'
+; calcola quanti bit servono per rappresentare il massimo
+(define (bits-needed x)
+  ; Calcola il numero minimo di bit necessari
+  ; per rappresentare l'intero non negativo x
+  (let (b 0)
+    (while (> x 0)
+      ; shift a destra di 1 bit (divide per 2)
+      (setq x (>> x 1))
+      ; conta quanti shift servono
+      (++ b))
+    ; caso speciale: x = 0 -> serve comunque 1 bit
+    (if (= b 0) 1 b)))
+
+  x = 42 -> 6 bit (101010)
+  x = 0  -> 1 bit
+
+; Funzione 'pack-list'
+; Usa k bit per ogni numero e costruisce un unico intero 'acc'
+(define (pack-list lst)
+  ; Codifica una lista di interi in un unico numero
+  ; usando blocchi di k bit per elemento
+  (letn (maxv (apply max lst)   ; valore massimo della lista
+         k (bits-needed maxv)   ; bit necessari per ogni elemento
+         acc 0                  ; accumulatore finale (numero codificato)
+         i 0)                   ; indice posizione elemento
+    (dolist (v lst)
+      ; inserisce v nel blocco i-esimo:
+      ; shift a sinistra di (k * i) bit e OR con acc
+      (setq acc (| acc (<< v (* k i))))
+      (++ i))
+    ; restituisce:
+    ; acc = numero codificato
+    ; k   = bit per elemento
+    (list acc k)))
+
+[ v0 | v1 | v2 | ... ]   (ognuno largo k bit)
+
+; Funzione 'make-packed-func'
+; Crea una funzione anonima che estrae l'elemento n
+(define (make-packed-func lst)
+  ; Costruisce una funzione che restituisce l'elemento n-esimo
+  ; della lista codificata, senza usare la lista stessa
+  (letn (pk (pack-list lst)
+         x (pk 0)   ; numero codificato
+         k (pk 1)   ; bit per elemento
+         mask (- (<< 1 k) 1)) ; maschera: k bit a 1 (es. 6 bit -> 63)
+    ; 'letex' sostituisce i valori direttamente nel codice della funzione
+    ; evitando problemi di scope dinamico
+    (letex (x x k k mask mask)
+      (fn (n)
+        ; Estrazione:
+        ; 1. shift a destra di k*n -> porta il valore in fondo
+        ; 2. AND con mask -> estrae solo i k bit
+        (& mask (>> x (mul k n)))))))
+
+Esempio:
+
+(setq lost (make-packed-func '(4 8 15 16 23 42)))
+;-> (lambda (n) (& 63 (>> 45487288836 (mul 6 n))))
+
+(map lost (sequence 0 5))
+;-> (4 8 15 16 23 42)
+
+
+------------------------------------------------------
+Precedente e prossima stringa in ordine lessicografico
+------------------------------------------------------
+
+Data una stringa, determinare la precedente e la prossima stringa in ordine lessicografico.
+
+Prossima stringa (in ordine lessicografico)
+-------------------------------------------
+Algoritmo
+Parti dall'ultimo carattere e spostati a sinistra finché tutti i caratteri sono uguali a 'z'.
+Se tutti i caratteri sono 'z', aggiungi 'a' alla stringa originale e restituiscila.
+Altrimenti, trova il carattere più a destra diverso da 'z' e incrementalo di uno.
+Rimuovi tutti i caratteri a destra della posizione incrementata.
+Restituisci la stringa finale aggiornata, che ora rappresenta la successiva stringa lessicografica.
+
+(define (str-next str)
+  (let (i (- (length str) 1))
+    ; Muove a sinistra mentre i caratteri sono 'z'
+    (while (and (>= i 0) (= (str i) "z"))
+      (-- i))
+    ; ora 'i' è l'indice del prossimo carattere della 'z' più a destra
+    ;(println "i: " i)
+    (if (= i -1)
+          ; quando tutti i caratteri sono 'z', aggiunge il carattere 'a'
+          (setq out (extend str "a"))
+          ; altrimenti, incrementa il prossimo carattere della 'z' più a destra
+          (setf (str i) (char (+ (char (str i)) 1))))
+          ; e rimuove i caratteri a destra della posizione incrementata
+          (setq str (slice str 0 (+ i 1)))
+    str))
+
+(str-next "pazzo")
+;-> "pazzp"
+(str-next "abczz")
+;-> "abd"
+(str-next "azz")
+;-> "b"
+
+Precedente stringa (in ordine lessicografico)
+---------------------------------------------
+Algoritmo
+La funzione implementa una 'sottrazione in base 26' con alfabeto 'a..z':
+- 'a' è lo 'zero'
+- 'z' è il valore massimo
+- quando trovi 'a', devi fare 'prestito' (come 0 -> 9 nei numeri decimali)
+Per esempio, "ac"  -> "abz"
+- parti da destra: 'c' != 'a' -> decrementi -> 'b'
+- tutto ciò che sta a destra diventa 'z'
+
+(define (str-prev str)
+  ; i parte dall'ultimo indice della stringa
+  (let (i (- (length str) 1))
+    ; scorri da destra verso sinistra finché trovi solo 'a'
+    ; (gli 'a' sono il minimo, quindi vanno "presi in prestito")
+    (while (and (>= i 0) (= (str i) "a"))
+      (-- i))
+    ; se i == -1 significa che tutti i caratteri erano 'a'
+    ; quindi non esiste una stringa precedente (caso minimo assoluto)
+    (if (= i -1)
+        nil
+        (begin
+          ; decrementa il primo carattere da destra diverso da 'a'
+          ; (equivalente al "prestito" in una sottrazione)
+          (setf (str i) (char (- (char (str i)) 1)))
+          ; ricostruisce la stringa finale:
+          ; - prende il prefisso fino a i incluso
+          ; - riempie la parte destra con 'z' (massimo possibile)
+          ;   per ottenere la stringa lessicograficamente immediatamente precedente
+          (extend (slice str 0 (+ i 1))
+                  (dup "z" (- (length str) (+ i 1))))))))
+
+(str-prev "abd")
+;-> "abc"
+(str-prev "pazzp")
+;-> "pazzo"
+(str-prev "abc")
+;-> "abb"
+(str-prev "b")
+;-> "a"
+(str-prev (str-next "aaa"))
+;-> "aaa"
+(str-prev (str-next "zzz"))
+;-> nil
+
+Per le due funzioni vale:
+
+1) (str-prev (str-next str) = str
+Solo sulle stringhe che NON sono del tipo "zzz...z".
+
+2) (str-next (str-next prev) = str
+Solo sulle stringhe che NON sono del tipo "aaa...a"
+
+(str-prev "a")
+;-> nil
+(str-prev "aaa")
+;-> nil
+(str-next "zzz")
+;-> ""
+
 ============================================================================
 
