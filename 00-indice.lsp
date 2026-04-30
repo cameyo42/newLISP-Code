@@ -3466,6 +3466,8 @@ NOTE LIBERE 36
   Mediana dalle occorrenze di valori
   The Lost sequence
   Precedente e prossima stringa in ordine lessicografico
+  K Empty Slots
+  N come somma di 2 e 3
 
 PROBLEMI SUI DADI
 =================

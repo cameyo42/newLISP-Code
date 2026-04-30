@@ -2462,5 +2462,418 @@ Solo sulle stringhe che NON sono del tipo "aaa...a"
 (str-next "zzz")
 ;-> ""
 
+
+-------------
+K Empty Slots
+-------------
+
+Abbiamo n lampadine disposte in fila, numerate da 1 a n.
+Inizialmente, tutte le lampadine sono spente.
+Ogni giorno accendiamo esattamente una lampadina e, dopo n giorni, tutte le lampadine saranno accese.
+Ti viene fornito un array di lampadine di lunghezza n, dove bulbs[i] = x significa che il giorno (i+1) accendiamo la lampadina in posizione x.
+Nota che i è indicizzato da 0 (inizia da 0) mentre le posizioni delle lampadine x sono indicizzate da 1 (iniziano da 1).
+Dato un intero k, trovare il numero minimo di giorni in cui esistono due lampadine accese che hanno esattamente k lampadine tra di loro e tutte le k lampadine intermedie sono spente.
+Ad esempio, se k = 1 e in un certo giorno abbiamo le lampadine nelle posizioni 3 e 5 accese e la lampadina 4 spenta, questo soddisfa la condizione (esattamente 1 lampadina spenta tra di loro).
+Se non esiste un giorno in cui questa condizione sia soddisfatta, restituire nil.
+
+Questo è il classico problema noto come 'K Empty Slots': si cerca il primo giorno in cui due lampadine accese hanno esattamente 'k' lampadine spente tra loro.
+
+Algoritmo
+---------
+Invece di simulare giorno per giorno (che sarebbe costoso), si fa una trasformazione fondamentale:
+a) trasformiamo il problema in uno statico sui giorni
+b) poi usiamo una 'finestra intelligente' per verificare la condizione
+
+1) Costruzione dell'array 'day'
+
+  day(pos) = giorno in cui si accende la lampadina in posizione 'pos'
+
+Esempio:
+  bulbs = (2 1 3 5 4)
+  giorno 1 -> accendiamo posizione 2
+  giorno 2 -> accendiamo posizione 1
+  giorno 3 -> accendiamo posizione 3
+  giorno 4 -> accendiamo posizione 5
+  giorno 5 -> accendiamo posizione 4
+Otteniamo day = (2 1 3 5 4), cioè
+- posizione 1 -> giorno 2
+- posizione 2 -> giorno 1
+- ecc.
+
+2) Riduzione del problema
+
+Cerchiamo due posizioni 'l' e 'r' tali che:
+- r = l + k + 1
+- tutte le posizioni tra 'l' e 'r' si accendono dopo entrambe
+
+Formalmente:
+per ogni i in (l+1 ... r-1):
+    day[i] > max(day[l], day[r])
+
+Questo garantisce che le due estremità sono accese e quelle in mezzo sono ancora spente.
+
+3) Sliding window
+
+Usiamo una finestra [l ........ r] con lunghezza 'k + 2'.
+(l = left, sinistra e r = right, destra)
+Si scorre con indice 'i' tra 'l' e 'r' e abbiamo due casi:
+Caso A — finestra valida
+ Se arriviamo a (i == r) senza violazioni:
+ - abbiamo trovato una soluzione
+ - giorno = 'max(day[l], day[r])'
+ - aggiorniamo 'out'
+ - facciamo scorrere la finestra
+Caso B — violazione
+Se troviamo un indice 'i' tale che day[i] < max(day[l], day[r]) significa che la lampadina interna si accende troppo presto -> rompe la condizione.
+Allora spostiamo 'l = i' e ricostruiamo 'r = i + k + 1'.
+
+(define (kempty bulbs k)
+  (local (n out day left right i)
+    ; numero totale di lampadine
+    (setq n (length bulbs))
+    ; valore sentinella per "nessuna soluzione trovata"
+    (setq out 99999999)
+    ; day[i] = giorno in cui si accende la lampadina i+1
+    (setq day (array n '(0)))
+    ; costruzione dell'array day
+    ; bulbs[i] = posizione accesa al giorno i+1
+    (for (i 0 (- n 1))
+      (setf (day (- (bulbs i) 1)) (+ i 1)))
+    ; inizializzazione finestra
+    ; left = sinistra, right = destra
+    ; distanza tra left e right = k lampadine in mezzo
+    (setq left 0)
+    (setq right (+ left k 1))
+    ; i scorre tra left e right
+    (setq i (+ left 1))
+    (while (< right n)
+      ; caso 1: abbiamo controllato tutta la finestra
+      (if (= i right)
+        (begin
+          ; finestra valida:
+          ; giorno in cui entrambe sono accese
+          (setq out (min out (max (day left) (day right))))
+          ; sposta la finestra
+          (setq left i)
+          (setq right (+ left k 1))
+          (setq i (+ left 1))
+        )
+        ; caso 2: controllo posizione interna
+        (begin
+          ; se una lampadina interna si accende troppo presto
+          (if (< (day i) (max (day left) (day right)))
+            (begin
+              ; finestra non valida -> riparti da i
+              (setq left i)
+              (setq right (+ left k 1))
+              (setq i (+ left 1))
+            )
+            ; altrimenti continua a controllare
+            (++ i)
+          )
+        )
+      )
+    )
+    ; se mai aggiornato -> nessuna soluzione
+    (if (= out 99999999) nil out)))
+
+Proviamo:
+
+(kempty '(2 1 3 5 4) 1)
+;-> 4
+
+(kempty '(9 8 2 1 3 5 4 6 7) 1)
+;-> 6
+
+Complessità: 
+Tempo:  O(n) (ogni indice viene visitato al massimo una volta)
+Spazio: O(n) (array 'day')
+
+
+---------------------
+N come somma di 2 e 3
+---------------------
+
+Dato un intero N maggiore di 0, scriverlo come somma di 2 e 3.
+
+Algoritmo 1
+-----------
+Sottrarre 2 finché la somma non è un multiplo di 3, quindi calcolare i 3 che rimangono (oppure viceversa).
+Restituiamo una lista del tipo (a b), dove 'a' è il numero di 2 e 'b' e il numero di 3 che devono essere sommati per arrivare a N.
+
+(define (sum23 n)
+  (let (tmp n)
+    ; sottrae 2 a N (tmp) fino a che non N (tmp) diventa multiplo di 3
+    (until (zero? (% tmp 3)) (-- tmp 2))
+    ; calcola i 2 e i 3 necessari
+    (list (/ (- n tmp) 2) (/ tmp 3))))
+
+(sum23 6)
+;-> (0 2)
+(sum23 10)
+;-> (2 2)
+(sum23 22)
+;-> (2 6)
+
+(define (sum32 n)
+  (let (tmp n)
+    ; sottrae 3 a N (tmp) fino a che non N (tmp) diventa multiplo di 2
+    (until (zero? (% tmp 2)) (-- tmp 3))
+    ; calcola i 2 e i 3 necessari
+    (list (/ tmp 2) (/ (- n tmp) 3))))
+
+(sum32 6)
+;-> (3 0)
+(sum32 22)
+;-> (11 0)
+
+Algoritmo 2
+-----------
+Dobbiamo trovare tutte le soluzioni intere non negative dell'equazione diofantea:
+
+  2x + 3y = N,  con x,y > 0
+
+1) Condizione di esistenza
+Poichè gcd(2,3) = 1, esiste sempre almeno una soluzione intera per ogni N >= 0.
+
+2) Forma generale delle soluzioni
+Ricaviamo x:
+  x = (N - 3y) / 2
+Per avere x intero N - 3y deve essere pari, cioè deve risultare N - y ≡ 0 (mod 2), quindi y ≡ N (mod 2).
+3) Vincoli
+Inoltre deve essere:
+- y >= 0
+- x >= 0  ->  N - 3y >= 0  ->  y <= floor(N/3)
+
+4) Procedura
+Tutte le soluzioni si ottengono nel modo seguente:
+- si fa variare y da 0 a floor(N / 3)
+- si prendono solo i valori di y con stessa parità di N
+- poi si calcola: x = (N - 3y) / 2
+
+Esempio
+  Per N = 10:
+  - y <= 3
+  - N è pari -> y deve essere pari
+  Valori validi:
+  - y = 0 -> x = 5
+  - y = 2 -> x = 2
+  Soluzioni: (5,0) e (2,2)
+
+Il numero totale di soluzioni dipende da N:
+
+  numero_soluzioni = floor((floor(N/3) - (N mod 2)) / 2) + 1
+  (se il risultato è >= 0)
+
+Ecco la funzione `soluzioni` riscritta con commenti dettagliati (seguendo il tuo stile):
+
+(define (sum23-all N)
+  ; Restituisce tutte le coppie (x y) tali che:
+  ;   2x + 3y = N
+  ; con x >= 0 e y >= 0 interi
+  (let (out '()) ; lista delle soluzioni trovate
+    ; y può variare da 0 fino a floor(N / 3)
+    ; oltre questo valore, 3y > N e quindi x diventerebbe negativo
+    (for (y 0 (/ N 3))
+      ; condizione di integrita':
+      ; x = (N - 3y) / 2 deve essere intero
+      ; questo equivale a richiedere che (N - 3y) sia pari
+      ; cioe': N - y è pari  <=>  y ha la stessa parità di N
+      (if (= (% (- N y) 2) 0)
+        ; calcolo di x
+        (let (x (/ (- N (* 3 y)) 2))
+          ; controllo di sicurezza (in teoria sempre vero per il range scelto)
+          ; garantisce x >= 0
+          (if (>= x 0)
+            ; aggiunge la soluzione in fondo alla lista
+            ; formato: (x y)
+            (push (list x y) out -1)
+          )
+        )
+      )
+    )
+    ; restituisce la lista completa delle soluzioni
+    out))
+
+Proviamo:
+
+(sum23-all 6)
+;-> ((3 0) (0 2))
+(sum23-all 10)
+;-> ((5 0) (2 2))
+(sum23-all 22)
+;-> ((11 0) (8 2) (5 4) (2 6))
+
+Scriviamo una versione piu' efficiente che evita il test di parita' dentro il ciclo (salta direttamente ai valori validi di y).
+
+(define (sum23-all-fast N)
+  ; Restituisce tutte le coppie (x y) tali che:
+  ;   2x + 3y = N
+  ; con x >= 0 e y >= 0 interi
+  ; Invece di provare tutti i valori di y e filtrare per parita',
+  ; generiamo direttamente solo i valori validi di y.
+  (letn (
+         out '()              ; lista delle soluzioni
+         ymax (/ N 3)         ; massimo valore possibile per y (floor(N/3))
+         ; y deve avere la stessa parita' di N:
+         ; y == N (mod 2)
+         ; quindi:
+         ; - se N e' pari -> y parte da 0
+         ; - se N e' dispari -> y parte da 1
+         y0 (% N 2)
+        )
+    ; ciclo sui soli valori validi di y:
+    ; partiamo da y0 e incrementiamo di 2 per mantenere la parita'
+    (for (y y0 ymax 2)
+      ; calcolo di x:
+      ; x = (N - 3y) / 2
+      ; qui e' garantito intero per costruzione (parita' gia' rispettata)
+      (let (x (/ (- N (* 3 y)) 2))
+        ; non serve controllare la parita' ne' x >= 0:
+        ; - la parita' e' gia' soddisfatta
+        ; - x >= 0 e' garantito da y <= ymax
+        ; aggiungiamo la soluzione
+        (push (list x y) out -1)
+      )
+    )
+    ; lista finale delle soluzioni
+    out))
+
+Proviamo:
+
+(sum23-all-fast 6)
+;-> ((3 0) (0 2))
+(sum23-all-fast 10)
+;-> ((5 0) (2 2))
+(sum23-all-fast 22)
+;-> ((11 0) (8 2) (5 4) (2 6))
+
+(= (sum23-all 1000) (sum23-all-fast 1000))
+
+(length (sum23-all 500))
+
+(time (sum23-all 500) 1e3)
+;-> 100.031
+(time (sum23-all-fast 500) 1e3)
+;-> 84.982
+
+(time (sum23-all 2000) 1e3)
+;-> 1255.283
+(time (sum23-all-fast 500) 1e3)
+;-> 1180.370
+
+(time (sum23-all 5000) 1e3)
+;-> 7175.231
+(time (sum23-all-fast 5000) 1e3)
+;-> 6967.301
+
+Algoritmo 3
+-----------
+Possiamo evitare completamente il ciclo 'for' costruendo la lista tramite una 'mappa su una sequenza di indici':
+I valori validi di y sono: y = y0 + 2k
+con (y0 = N mod 2) e   - (k = 0,1,...,kmax)
+dove: (kmax = floor((ymax - y0)/2)) e  (ymax = floor(N/3))
+Poi per ogni y calcoliamo x = (N - 3y)/2.
+In pratica, non si itera su y, ma su un indice k e si generano solo i valori validi.
+Non occorre alcun controllo dentro il ciclo perchè tutto è già garantito.
+
+(define (sum23-all-fast2 N)
+  ; Restituisce tutte le coppie (x y) tali che:
+  ;   2x + 3y = N
+  ; con x >= 0 e y >= 0 interi
+  ;
+  ; Versione senza ciclo esplicito:
+  ; costruiamo direttamente le soluzioni usando una sequenza di indici k
+  (letn (
+         ymax (/ N 3)                 ; massimo y possibile
+         y0 (% N 2)                   ; prima y valida (stessa parita' di N)
+         ; numero massimo di passi k:
+         ; y = y0 + 2k <= ymax
+         ; -> k <= (ymax - y0)/2
+         kmax (if (>= ymax y0)
+                  (/ (- ymax y0) 2)
+                  -1)
+        )
+    ; se non esistono soluzioni, restituisce lista vuota
+    (if (< kmax 0)
+        '()
+        ; per ogni k costruiamo (x y)
+        (map
+          (fn (k)
+            (letn (
+                   y (+ y0 (* 2 k))          ; valore di y
+                   x (/ (- N (* 3 y)) 2)     ; valore di x (intero garantito)
+                  )
+              (list x y)))
+          (sequence 0 kmax)))))
+
+Proviamo:
+
+(sum23-all-fast2 6)
+;-> ((3 0) (0 2))
+(sum23-all-fast2 10)
+;-> ((5 0) (2 2))
+(sum23-all-fast2 22)
+;-> ((11 0) (8 2) (5 4) (2 6))
+
+Test di correttezza
+
+(define (check-sol N lst)
+  (let (out nil)
+    (dolist (el lst out)
+      (if (!= N (+ (* (el 0) 2) (* (el 1) 3))) (setq out true)))
+    (not out)))
+
+(check-sol 1000 (sum23-all 1000))
+;-> true
+
+(= (sum23-all 1000) (sum23-all-fast 1000) (sum23-all-fast2 1000))
+;-> true
+
+Test di velocità
+
+(time (sum23-all 500) 1e3)
+;-> 100.031
+(time (sum23-all-fast 500) 1e3)
+;-> 84.982
+(time (sum23-all-fast2 500) 1e3)
+;-> 19.984
+
+(time (sum23-all 2000) 1e3)
+;-> 1255.283
+(time (sum23-all-fast 2000) 1e3)
+;-> 1180.370
+(time (sum23-all-fast2 2000) 1e3)
+;-> 82.982
+
+(time (sum23-all 5000) 1e3)
+;-> 7175.231
+(time (sum23-all-fast 5000) 1e3)
+;-> 6967.301
+(time (sum23-all-fast2 5000) 1e3)
+;-> 195.331
+
+Infine una versione 'one-liner':
+La logica è la stessa di 'sum23-fast2':
+- genera (k = 0..kmax)
+- costruisce (y = y0 + 2k)
+- calcola (x = (N - 3y)/2)
+- restituisce direttamente la lista delle soluzioni
+
+(define (f N) (letn (ymax (/ N 3) y0 (% N 2) kmax (if (>= ymax y0) (/ (- ymax y0) 2) -1)) (if (< kmax 0) '() (map (fn (k) (let (y (+ y0 (* 2 k))) (list (/ (- N (* 3 y)) 2) y))) (sequence 0 kmax)))))
+
+  ymax -> Y
+  kmax -> K
+  y0 -> B
+
+(define(f N)(letn(Y(/ N 3)B(% N 2)K(if(>= Y B)(/(- Y B)2)-1))(if(< K 0)'()(map(fn(k)(let(y(+ B(* 2 k)))(list(/(- N(* 3 y))2)y)))(sequence 0 K)))))
+
+Proviamo:
+
+(= (sum23-all 1000) (f 1000))
+;-> true
+(time (f 5000) 1e3)
+;-> 201.651
+
 ============================================================================
 
