@@ -2205,7 +2205,7 @@ Ricreiamo la lista originale e poi calcoliamo la mediana.
 Metodo2 (Calcolo diretto senza espansione)
 ------------------------------------------
 Per trovare la mediana senza espandere la lista:
-1. si calcola il numero totale di elementi (`tot`)
+1. si calcola il numero totale di elementi 'tot'
 2. si individuano le posizioni centrali:
    - pos1 = (tot+1)/2
    - pos2 = pos1 se 'tot' è dispari, altrimenti 'pos1+1'
@@ -2665,8 +2665,6 @@ Il numero totale di soluzioni dipende da N:
   numero_soluzioni = floor((floor(N/3) - (N mod 2)) / 2) + 1
   (se il risultato è >= 0)
 
-Ecco la funzione `soluzioni` riscritta con commenti dettagliati (seguendo il tuo stile):
-
 (define (sum23-all N)
   ; Restituisce tutte le coppie (x y) tali che:
   ;   2x + 3y = N
@@ -2874,6 +2872,176 @@ Proviamo:
 ;-> true
 (time (f 5000) 1e3)
 ;-> 201.651
+
+
+---------------------
+Lancio di 2 dadi su 3
+---------------------
+
+Abbiamo 3 dadi con 6 valori interi nelle facce.
+I dadi non hanno necessariamente gli stessi valori.
+Il giocatore A sceglie un dado e poi il giocatore B ne sceglie uno dei due rimanenti.
+Entrambi lanciano il dado scelto.
+Se ottengono lo stesso numero, entrambi rilanciano il dado.
+Altrimenti, vince chi ha ottenuto il numero più alto.
+
+Dati i valori numerici di 3 dadi, determinare le probabilità di vittoria di ogni dado.
+
+Algoritmo Brute-force
+Le probabilità di vittoria si trovano calcolando tutte le combinazioni dei risultati del lancio dei dadi tra loro.
+
+Esempio:
+  Dadi -> D1, D2, D3
+  P(D1)= P(D1 vs D2) + P(D1 vs D3)
+  P(D2)= P(D2 vs D1) + P(D2 vs D3)
+  P(D3)= P(D3 vs D1) + P(D3 vs D2)
+
+(define (lanci L1 L2)
+; prende due liste (facce dei dadi)
+; restituisce tutti i lanci possibili tra due dadi (coppie di valori)
+  (let (out '())
+    (dolist (el1 L1)
+      (dolist (el2 L2)
+        (push (list el1 el2) out -1)))
+    out))
+
+(define (calc-prob lst)
+; prende la lista di tutti i lanci possibili tra due dadi
+; restituisce una lista: (vittorie pareggi sconfitte)
+  (list  (length (filter (fn(x) (> (x 0) (x 1))) lst))
+         (length (filter (fn(x) (= (x 0) (x 1))) lst))
+         (length (filter (fn(x) (< (x 0) (x 1))) lst))))
+
+(define (print-result-vs dado)
+; stampa i risultati del dado corrente contro 'dado'
+  (println "contro " dado ": "
+          (format "%0.2f" (div (res 0) tot-lanci)) "% win, "
+          (format "%0.2f" (div (res 1) tot-lanci)) "% draw, "
+          (format "%0.2f" (div (res 2) tot-lanci)) "% lose"))
+
+; Funzione che calcola le probabilità di vittoria di tutti i dadi
+(define (dado D1 D2 D3)
+  (local (facce tot-lanci res)
+    (setq facce (length D1))
+    (setq tot-lanci (* facce facce))
+    ; *** D1 ***
+    (println "*** D1 ***")
+    ; D1 vs D2
+    (setq res (calc-prob (lanci D1 D2)))
+    (print-result-vs "D2")
+    ; D1 vs D3
+    (setq res (calc-prob (lanci D1 D3)))
+    (print-result-vs "D3")
+    ; *** D2 ***
+    (println "*** D2 ***")
+    ; D2 vs D1
+    (setq res (calc-prob (lanci D2 D1)))
+    (print-result-vs "D1")
+    ; D2 vs D3
+    (setq res (calc-prob (lanci D2 D3)))
+    (print-result-vs "D3")
+    ; *** D3 ***
+    (println "*** D3 ***")
+    ; D3 vs D1
+    (setq res (calc-prob (lanci D3 D1)))
+    (print-result-vs "D1")
+    ; D3 vs D2
+    (setq res (calc-prob (lanci D3 D2)))
+    (print-result-vs "D2") '>))
+
+Proviamo:
+
+(setq D1 '(1 2 3 4 5 6))
+(setq D2 '(1 2 3 4 5 6))
+(setq D3 '(1 2 3 4 5 6))
+(dado D1 D2 D3)
+;-> *** D1 ***
+;-> contro D2: 0.42% win, 0.17% draw, 0.42% lose
+;-> contro D3: 0.42% win, 0.17% draw, 0.42% lose
+;-> *** D2 ***
+;-> contro D1: 0.42% win, 0.17% draw, 0.42% lose
+;-> contro D3: 0.42% win, 0.17% draw, 0.42% lose
+;-> *** D3 ***
+;-> contro D1: 0.42% win, 0.17% draw, 0.42% lose
+;-> contro D2: 0.42% win, 0.17% draw, 0.42% lose
+
+; dadi non-transitivi
+(setq D1 '(2 2 4 4 9 9))
+(setq D2 '(1 1 6 6 8 8))
+(setq D3 '(7 7 5 5 3 3))
+(dado D1 D2 D3)
+;-> *** D1 ***
+;-> contro D2: 0.56% win, 0.00% draw, 0.44% lose
+;-> contro D3: 0.44% win, 0.00% draw, 0.56% lose
+;-> *** D2 ***
+;-> contro D1: 0.44% win, 0.00% draw, 0.56% lose
+;-> contro D3: 0.56% win, 0.00% draw, 0.44% lose
+;-> *** D3 ***
+;-> contro D1: 0.56% win, 0.00% draw, 0.44% lose
+;-> contro D2: 0.44% win, 0.00% draw, 0.56% lose
+
+(setq D1 '(3 3 3 4 5 6))
+(setq D2 '(2 2 3 5 5 5))
+(setq D3 '(2 2 3 4 6 6))
+(dado D1 D2 D3)
+;-> *** D1 ***
+;-> contro D2: 0.50% win, 0.17% draw, 0.33% lose
+;-> contro D3: 0.47% win, 0.17% draw, 0.36% lose
+;-> *** D2 ***
+;-> contro D1: 0.33% win, 0.17% draw, 0.50% lose
+;-> contro D3: 0.39% win, 0.14% draw, 0.47% lose
+;-> *** D3 ***
+;-> contro D1: 0.36% win, 0.17% draw, 0.47% lose
+;-> contro D2: 0.47% win, 0.14% draw, 0.39% lose
+
+
+--------------------------------------
+Inserimento di N elementi in una lista
+--------------------------------------
+
+Vogliamo inserire gli elementi di una lista in un'altra lista in determinati indici.
+
+Esempio:
+  Lista = (0 1 2 3 4 5 6 7 8 9)
+  Elementi = ("one" "three" "four" "nine")
+  Indici = (1 3 4 9)
+
+Dobbiamo inserire "one" all'indice 1 di Lista
+Dobbiamo inserire "three" all'indice 3 di Lista
+Dobbiamo inserire "four" all'indice 4 di Lista
+Dobbiamo inserire "nine" all'indice 9 di Lista
+
+Possiamo farlo in due modi:
+
+1) inserendo gli elementi agli indici dati (1 3 4 9)
+  indici = (1 3 4 9)
+  risultato = (0 "one" 1 "three" "four" 2 3 4 5 "nine" 6 7 8 9)
+
+2) inserendo gli elementi considerando che ogni inserimento sposta in avanti di 1 gli indici successivi (1 4 6 12).
+  indici = (1 4 6 12)
+  risultato = (0 "one" 1 2 "three" 3 "four" 4 5 6 7 8 "nine" 9)
+In questo caso gli elementi inseriti ("one" "three" "four" "nine") si trovano nelle posizioni relative che avevano gli elementi originali (cioè "one" al posto che aveva '1', "three" al posto che aveva '3', ecc).
+
+(define (insert-at lst indexes values shift)
+"Insert elements at indexes of a list"
+  ; shift indexes to new positions
+  (if shift (setq indexes (map (curry + $idx) indexes)))
+  (println indexes)
+  (dolist (el indexes)
+    (push (values $idx) lst el))
+  lst)
+
+Proviamo:
+
+(setq L '(0 1 2 3 4 5 6 7 8 9))
+(setq E '("one" "three" "four" "nine"))
+(setq I '(1 3 4 9))
+
+(insert-at L I E)
+;-> (0 "one" 1 "three" "four" 2 3 4 5 "nine" 6 7 8 9)
+
+(insert-at L I E true)
+;-> (0 "one" 1 2 "three" 3 "four" 4 5 6 7 8 "nine" 9)
 
 ============================================================================
 

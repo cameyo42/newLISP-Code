@@ -3468,6 +3468,8 @@ NOTE LIBERE 36
   Precedente e prossima stringa in ordine lessicografico
   K Empty Slots
   N come somma di 2 e 3
+  Lancio di 2 dadi su 3
+  Inserimento di N elementi in una lista
 
 PROBLEMI SUI DADI
 =================
