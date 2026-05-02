@@ -3043,5 +3043,373 @@ Proviamo:
 (insert-at L I E true)
 ;-> (0 "one" 1 2 "three" 3 "four" 4 5 6 7 8 "nine" 9)
 
+
+------------------------------
+Visita di punti in una griglia
+------------------------------
+
+Dati K punti casuali in una griglia MxN, visitarli tutti in ordine senza mai intersecare il percorso (evitare anche di visitare lo stesso punto due volte).
+Il percorso può attraversare i valori le celle vuote per connettere i punti.
+Ogni riga della griglia contiene almeno un punto.
+
+; Funzione che stampa la griglia
+(define (print-grid grid ch0 ch1 coord)
+"Print a matrix with only digits (0..9)"
+  (local (row col)
+    (setq row (length grid))
+    (setq col (length (first grid)))
+    ; indici di colonna della griglia
+    (if coord
+        (println "  " (join (map (fn(x) (format "%2d" x)) (sequence 0 (- col 1))))))
+    (for (i 0 (- row 1))
+      ; indice di riga della griglia
+      (if coord (print (format "%2d" i)))
+      ; stampa della griglia
+      (for (j 0 (- col 1))
+        (if (and (!= ch0 "") (!= ch1 ""))
+            (begin
+              (cond ((= (grid i j) 0) (print ch0))
+                    ((= (grid i j) 1) (print ch1))
+                    (true
+                      (print (format "%2d" (grid i j))))))
+            ;else
+            (print (format "%2d" (grid i j)))))
+      (println))))
+
+(setq g (collect (rand 2 10) 8))
+
+(print-grid g "0 " "1 ")
+;-> 0 0 1 1 1 0 1 1 1 1
+;-> 0 0 0 1 0 1 0 1 0 0
+;-> 1 0 1 0 0 1 0 0 1 1
+;-> 0 0 1 1 1 1 1 1 1 0
+;-> 0 1 1 1 0 0 1 1 1 0
+;-> 0 0 1 1 1 1 1 0 1 1
+;-> 1 1 1 0 1 1 0 1 0 0
+;-> 0 1 1 1 0 0 0 0 1 1
+
+Algoritmo
+---------
+Creazione di un percorso a zig-zag (tipo serpente)
+  Cella vuota -> 0
+  Cella piena -> 1
+Cominciando dalla riga 0:
+1)
+  1.1) Partire dal primo '1' a sinistra della riga corrente
+  1.2) Andare a destra nella riga fino all'indice massimo tra l'indice dell'ultimo '1' della riga corrente e l'indice dell'ultimo '1' della riga successiva
+  1.3) Memorizzare tutti gli indici attraversati (riga colonna)
+  1.4) Passare alla riga successiva
+2)
+  2.1) Partire dal primo '1' a destra della riga corrente
+  2.2) Andare a sinistra nella riga fino all'indice minimo tra l'indice del primo '1' della riga corrente e l'indice del primo '1' della riga successiva
+  1.3) Memorizzare tutti gli indici attraversati (riga colonna)
+  1.4) Passare alla riga successiva
+3) Ripetere 1) e 2) fino al termine delle righe.
+
+Prima di ogni operazione sulla 'riga successiva' bisogna controllare che la riga corrente non sia l'ultima riga della griglia.
+
+Esempio:
+
+griglia = (0 0 0 1)
+          (0 1 0 0)
+          (0 0 1 0)
+          (1 0 0 0)
+
+Il percorso di soluzione sono le celle numerate da 1 a 9:
+  0 0 0 1
+  0 4 3 2
+  0 5 6 0
+  9 8 7 0
+
+Le coordinate delle celle del percorso sono:
+  (0 3) (1 3) (1 2) (1 1) (2 1) (2 2) (3 2) (3 1) (3 0)
+
+La matrice soluzione è la seguente:
+
+; Funzione per cercare l'indice del valore '1' più a destra di una lista
+(define (right1 row) (let (idx (ref-all 1 row)) (if idx ((idx -1) 0) nil)))
+(right1 '(0 1 0 1 0))
+;-> 3
+
+; Funzione per cercare l'indice del valore '1' più a sinistra di una lista
+(define (left1 row) (find 1 row))
+(left1 '(0 1 0 1 0))
+;-> 1
+
+; Funzione che trova il percorso a serpente (per griglie senza righe vuote)
+(define (snake grid)
+  (letn ( (rows (length grid))        ; numero colonne della griglia
+          (cols (length (grid 0)))    ; numero colonne della griglia
+          (path '()) ; lista delle celle del percorso di soluzione
+          (mt (array rows cols '(0))) ; matrice soluzione
+          (dir 1)    ; 1 = sx -> dx , -1 = sx <- dx
+          (riga '()) ; riga corrente
+          (sx1 -1)   ; indice dell'1 più a sinistra
+          (dx1 -1)   ; indice dell'1 più a destra
+          (r 0)      ; numero riga corrente
+          (c 0) )    ; numero colonna corrente
+    (while (< r rows)
+      (setq riga (grid r))
+      (cond ((= dir 1) ; da sinistra a destra  --->
+              ; indice di sinistra
+              (setq sx1 (left1 riga))
+              ; indice di destra
+              (if (= r (- rows 1)) ; ultima riga?
+                (setq dx1 (right1 riga))
+                ; else
+                ; calcola l'indice dell'1 più a destra
+                (setq dx1 (max (right1 riga) (right1 (grid (+ r 1))))))
+              ; aggiorna path
+              (for (c sx1 dx1)
+                (push (list r c) path -1))
+              ; prossima riga
+              (++ r)
+              ; cambia direzione per la prossima riga
+              (setq dir -1))
+            ((= dir -1) ; da destra a sinistra  <---
+              ; indice di destra
+              (setq dx1 (right1 riga))
+              ; indice di sinistra
+              (if (= r (- rows 1)) ; ultima riga?
+                (setq sx1 (left1 riga))
+                ; else
+                ; calcola l'indice dell'1 più a sinistra
+                (setq sx1 (min (left1 riga) (left1 (grid (+ r 1))))))
+              ; aggiorna path
+              (for (c dx1 sx1)
+                (push (list r c) path -1))
+              ; prossima riga
+              (++ r)
+              ; cambia direzione per la prossima riga
+              (setq dir 1))
+      )
+    )
+    (println path)
+    ; Costruzione della matrice soluzione
+    (dolist (el path) (setf (mt (el 0) (el 1)) 1))
+    ; restituisce la matrice soluzione
+    mt))
+
+Proviamo:
+
+(setq g '((0 0 1 0)))
+(snake g)
+;-> ((0 2))
+;-> ((0 0 1 0))
+
+(setq g '((0 0 1 0)
+          (1 0 1 0)))
+(snake g)
+;-> ((0 2) (1 2) (1 1) (1 0))
+;-> ((0 0 1 0) (1 1 1 0))
+
+(setq g '((0 0 0 1 0)
+          (0 1 0 1 0)
+          (1 0 0 1 0)))
+(print-grid (snake g) "0 " "1 ")
+;-> ((0 3) (1 3) (1 2) (1 1) (1 0) (2 0) (2 1) (2 2) (2 3))
+;-> 0 0 0 1 0
+;-> 1 1 1 1 0
+;-> 1 1 1 1 0
+
+(setq g '((0 0 1 1 0)
+          (0 1 0 1 0)
+          (1 0 0 1 0)
+          (0 0 0 0 1)))
+
+(print-grid (snake g) "0 " "1 ")
+;-> ((0 2) (0 3)
+;->  (1 3) (1 2) (1 1) (1 0)
+;->  (2 0) (2 1) (2 2) (2 3) (2 4)
+;->  (3 4))
+;-> 0 0 1 1 0
+;-> 1 1 1 1 0
+;-> 1 1 1 1 1
+;-> 0 0 0 0 1
+
+
+-----------------------------------------
+Punto intero esterno ad una circonferenza
+-----------------------------------------
+
+Data una circonferenza di raggio intero R e centro C in (0,0), determinare il punto P(x,y) di coordinate intere ed esterno alla circonferenza la cui distanza dal centro è minima.
+Scrivere la funzione più corta possibile.
+
+Equazione circonferenza centrata in C = (0,0) di raggio R:
+
+  X^2 + Y^2 = R^2
+
+per il punto P(x,y) deve risultare:
+
+  x^2 + y^2 > R^2 <--> x^2 + y^2 >= (+ R^2 1)
+
+Dato 'R' bisogna la seguente equazione in x e y:
+
+  x^2 + y^2 >= (+ R^2 1)
+
+Algoritmo
+Costruire un quadrato minimo centrato in (0,0) di lato (R + 1) che include il cerchio
+Scansionare solo il quadrato minimo centrato in (0,0)
+Calcolare i punti dentro il box, ma fuori dal cerchio
+Calcolare tra questi punti quello a distanza minima dal centro.
+
+(define (dist2d p1 p2)
+"Calculate 2D Cartesian distance of two points P1 = (x1 y1) and P2 = (x2 y2)"
+  (let ( (x1 (p1 0)) (y1 (p1 1))
+         (x2 (p2 0)) (y2 (p2 1)) )
+    (sqrt (add (mul (sub x1 x2) (sub x1 x2))
+               (mul (sub y1 y2) (sub y1 y2))))))
+
+(define (dist2d-2 p1 p2)
+"Calculate the square of 2D Cartesian distance of two points P1 = (x1 y1) and P2 = (x2 y2)"
+  (let ( (x1 (p1 0)) (y1 (p1 1))
+         (x2 (p2 0)) (y2 (p2 1)) )
+  (add (mul (sub x1 x2) (sub x1 x2))
+       (mul (sub y1 y2) (sub y1 y2)))))
+
+; Funzione che calcola i punti esterni al cerchio e interni al quadrato minimo
+(define (punti-esterni r)
+  (letn (res '() soglia (+ (* r r) 1))
+    (for (x (- r) r)
+      (for (y (- r) r)
+        (if (>= (+ (* x x) (* y y)) soglia)
+            (push (list x y) res -1))))
+    res))
+
+Proviamo:
+
+(setq pts (punti-esterni 5))
+;-> ((-5 -5) (-5 -4) (-5 -3) (-5 -2) (-5 -1) (-5 1) (-5 2) (-5 3) (-5 4)
+;->  (-5 5) (-4 -5) (-4 -4) (-4 4) (-4 5) (-3 -5) (-3 5) (-2 -5) (-2 5)
+;->  (-1 -5) (-1 5) (1 -5) (1 5) (2 -5) (2 5) (3 -5) (3 5) (4 -5) (4 -4)
+;->  (4 4) (4 5) (5 -5) (5 -4) (5 -3) (5 -2) (5 -1) (5 1) (5 2) (5 3)
+;->  (5 4) (5 5))
+
+Calcoliamo la distanza dal centro di questi punti:
+
+(map (fn(x) (dist2d-2 '(0 0) x)) pts)
+;-> (50 41 34 29 26 26 29 34 41 50 41 32 32 41 34 34 29 29 26 26
+;->  26 26 29 29 34 34 41 32 32 41 50 41 34 29 26 26 29 34 41 50)
+
+Possiamo costruire direttamente la 'corona minima', cioè tutti i punti interi (x,y) tali che:
+
+  x^2 + y^2 >= R^2 + 1
+
+che sono 'appena fuori' (cioè vicini al bordo)
+
+Per ogni x, troviamo il più piccolo y >= 0 che soddisfa la disequazione.
+
+  y = (ceil(sqrt(max(0, R^2 + 1 - x^2))))
+
+Questa dà il primo punto valido sopra il bordo del cerchio.
+
+Algoritmo
+1) per ogni (x in x >= 0)
+2) calcolare il primo punto fuori dal cerchio
+3) riflettere nei 4 quadranti evitando duplicati
+
+(define (corona-esterna r)
+  (letn (res '() soglia (+ (* r r) 1) y0)
+    (for (x (- r) r)
+      (setq y0 (ceil (sqrt (max 0 (- soglia (* x x))))))
+      (push (list x y0) res -1)
+      (if (!= y0 0)
+          (push (list x (- y0)) res -1)))
+    res))
+
+Proviamo:
+
+(setq pts (corona-esterna 5))
+;-> ((0 6) (0 -6) (1 5) (-1 5) (1 -5) (-1 -5) (2 5) (-2 5) (2 -5) (-2 -5)
+;->  (3 5) (-3 5) (3 -5) (-3 -5) (4 4) (-4 4) (4 -4) (-4 -4) (5 1) (-5 1)
+;->  (5 -1) (-5 -1))
+
+(map (fn(x) (dist2d-2 '(0 0) x)) pts)
+;-> (36 36 26 26 26 26 29 29 29 29 34 34 34 34 32 32 32 32 26 26 26 26)
+
+Osservazione:
+Se il cerchio è centrato in (0,0) e il raggio R è intero, allora il punto intero piu' vicino al centro, ma fuori dal cerchio è sempre dato dal punto Q = (R, 1) o uno degli altri 7 punti simmetrici (es. Q = (-R, 1)).
+
+Infatti la condizione
+
+  x^2 + y^2 >= R^2 + 1
+
+indica che stiamo cercando il punto intero che minimizza** (x^2 + y^2) sotto questo vincolo.
+Il minimo valore possibile fuori dal cerchio è (R^2 + 1) (il primo intero dopo (R^2))
+Il punto (R,1) soddisfa:
+
+  R^2 + 1^2 = R^2 + 1
+
+Quindi raggiunge esattamente il minimo possibile.
+
+Non può esistere di meglio, perchè se esistesse un punto più vicino, dovrebbe avere:
+
+  x^2 + y^2 < R^2 + 1
+
+ma allora:
+
+  x^2 + y^2 >= R^2
+
+sarebbe dentro o sul cerchio, quindi non valido.
+
+Per simmetria, abbiamo sempre almeno questi 8 punti:
+
+  (+-R, +-1) e (+-1, +-R)
+
+Quindi la funzione che risolve il problema è molto semplice e corta.
+
+(define (punto r) (list r 1))
+
+Code-golf (23 caratteri):
+
+(define(f r)(list r 1))
+
+Comunque, oltre a questi 8 punti, potrebbero esistere altre soluzioni (cioè altri punti fuori dal cerchio che hanno distanza minima), però una soluzione del tipo (R,1) esiste sempre ed è sempre a distanza minima.
+
+Se vogliamo calcolare quando esistono altre soluzioni oltre (R,1) dobbiamo utilizzare il seguente teorema:
+
+Un intero N è somma di due quadrati in più modi se e solo se nella sua fattorizzazione:
+- i primi p≡1(mod4) possono comparire liberamente
+- i primi p≡3(mod4) devono comparire con esponente pari
+ma il numero di rappresentazioni dipende da quanti primi ≡1(mod4) compaiono.
+
+Vogliamo le soluzioni intere di:
+
+  x^2 + y^2 = R^2 + 1
+
+Le soluzioni "banali" esistono sempre:
+
+  (+-R, +-1) e (+-1, +-R)
+
+Esistono ALTRE soluzioni se e solo se (R^2 + 1) ha almeno due fattori primi distinti p == 1 (mod 4).
+Se (R^2 + 1) e' primo, oppure ha al piu' un fattore p == 1 (mod 4), allora NON ci sono altre soluzioni.
+
+; Funzione che conta i fattori primi == 1 (mod 4)
+(define (conta-primi-1mod4 n)
+  (letn (f (factor n) unici '() cnt 0)
+    (dolist (p f)
+      (if (nil? (ref p unici)) (push p unici -1)))
+    (dolist (p unici)
+      (if (= (% p 4) 1) (++ cnt)))
+    cnt))
+
+; Funzione che verifica se esistono soluzioni extra
+; Restituisce 'nil' quando esistono solo (R,1) e simmetrici
+; oppure 'true' quando esistono altre coppie (piu' "bilanciate")
+(define (soluzioni-extra? R)
+  (let (n (+ (* R R) 1))
+    (>= (conta-primi-1mod4 n) 2)))
+
+Proviamo:
+
+(soluzioni-extra? 5)
+;-> nil
+
+(soluzioni-extra? 8)
+;-> true   ; 65 = 5 * 13
+
+(soluzioni-extra? 18)
+;-> true   ; 325 = 5^2 * 13
+
 ============================================================================
 

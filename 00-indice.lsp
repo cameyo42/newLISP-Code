@@ -3470,6 +3470,8 @@ NOTE LIBERE 36
   N come somma di 2 e 3
   Lancio di 2 dadi su 3
   Inserimento di N elementi in una lista
+  Visita di punti in una griglia
+  Punto intero esterno ad una circonferenza
 
 PROBLEMI SUI DADI
 =================
