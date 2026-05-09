@@ -3411,5 +3411,510 @@ Proviamo:
 (soluzioni-extra? 18)
 ;-> true   ; 325 = 5^2 * 13
 
+
+---------------------
+Problema di Apollonio
+---------------------
+
+Dati 3 cerchi di raggi r1, r2 e r3 e centri (x1, y1), (x2, y2) e (x3, y3), determinare il centro e il raggio di un quarto cerchio tangente ai cerchi dati.
+
+Dati
+
+Tre cerchi C1, C2, C3 con centri (x1,y1), (x2,y2), (x3,y3) e raggi r1, r2, r3.
+Cerchio soluzione: centro (x, y), raggio r.
+
+Equazioni di tangenza
+
+  (x - x1)^2 + (y - y1)^2 = (r + s1*r1)^2
+  (x - x2)^2 + (y - y2)^2 = (r + s2*r2)^2
+  (x - x3)^2 + (y - y3)^2 = (r + s3*r3)^2
+  con (s1, s2, s3) in {-1, +1}^3  (8 combinazioni).
+
+Ogni sistema si ottiene scegliendo i segni s1, s2, s3 in {+1, -1}:
+Per ogni combinazione si ottiene una soluzione (x, y, r) con r >= 0.
+
+Passo 1 - Linearizzazione
+-------------------------
+Espandendo la eq(i) e sottraendo eq(1) da eq(2) e da eq(3), i termini x^2, y^2, r^2 si cancellano.
+Si ottiene il sistema lineare 2x2 con r come parametro:
+
+  A21*x + B21*y + C21*r = D21
+  A31*x + B31*y + C31*r = D31
+
+con coefficienti:
+
+  A21 = 2*(x1 - x2)
+  B21 = 2*(y1 - y2)
+  C21 = 2*(s1*r1 - s2*r2)
+  D21 = x1^2 - x2^2 + y1^2 - y2^2 + r2^2 - r1^2
+
+  A31 = 2*(x1 - x3)
+  B31 = 2*(y1 - y3)
+  C31 = 2*(s1*r1 - s3*r3)
+  D31 = x1^2 - x3^2 + y1^2 - y3^2 + r3^2 - r1^2
+
+Passo 2 - Soluzione parametrica con la regola di Cramer
+-------------------------------------------------------
+Determinante del sottosistema 2x2 in x e y:
+
+  det = A21*B31 - A31*B21
+
+Se |det| < eps: i tre centri sono collineari, caso degenere, skip.
+
+Con la regola di Cramer, x e y risultano lineari in r:
+
+  x(r) = x0 + xr * r
+  y(r) = y0 + yr * r
+
+con:
+
+  x0 = (D21*B31 - D31*B21) / det
+  xr = (C31*B21 - C21*B31) / det
+
+  y0 = (A21*D31 - A31*D21) / det
+  yr = (A31*C21 - A21*C31) / det
+
+Passo 3 - Equazione quadratica in r
+-----------------------------------
+Sostituendo x(r) e y(r) nella eq(1) espansa:
+
+  (x(r) - x1)^2 + (y(r) - y1)^2 = (r + s1*r1)^2
+
+Posti dx0 = x0 - x1 e dy0 = y0 - y1, espandendo e raccogliendo:
+
+  P * r^2 + 2*Q * r + R = 0
+
+con:
+
+  P = xr^2 + yr^2 - 1
+  Q = dx0*xr + dy0*yr - s1*r1
+  R = dx0^2  + dy0^2  - r1^2
+
+Passo 4 - Radici
+----------------
+Caso generale,  |P| > eps:
+
+  delta = Q^2 - P*R
+
+Se delta < 0: nessuna soluzione reale per questo vettore (s1,s2,s3).
+
+  r = (-Q +/- sqrt(delta)) / P       (due candidati)
+
+Caso degenere,  |P| <= eps  (tre cerchi tangenti a una retta comune):
+
+  r = -R / (2*Q)                     (un candidato)
+
+Si scartano i candidati con r < 0.
+
+Passo 5 - Centro della soluzione
+--------------------------------
+  x = x0 + xr * r
+  y = y0 + yr * r
+
+Passo 6 - Verifica
+------------------
+Per ogni cerchio Ci la soluzione (x, y, r) deve soddisfare
+esattamente una delle due condizioni:
+
+  dist((x,y), (xi,yi)) = r + ri      (tangenza esterna)
+  dist((x,y), (xi,yi)) = |r - ri|    (tangenza interna)
+  dove dist((x,y), (xi,yi)) = sqrt((x-xi)^2 + (y-yi)^2).
+
+Riepilogo
+---------
+Per ognuna delle 8 combinazioni (s1,s2,s3) in {-1,+1}^3:
+  1. Calcola A21, B21, C21, D21, A31, B31, C31, D31
+  2. Calcola det = A21*B31 - A31*B21
+     Se |det| < eps: skip
+  3. Calcola x0, xr, y0, yr  (Cramer)
+  4. Calcola P, Q, R
+  5. Se |P| > eps:
+       delta = Q^2 - P*R
+       Se delta < 0: skip
+       r = (-Q +/- sqrt(delta)) / P   --> fino a 2 soluzioni
+     Se |P| <= eps:
+       r = -R / (2*Q)                 --> 1 soluzione
+  6. Scarta r < 0 (solo cerchi reali)
+  7. x = x0 + xr*r,   y = y0 + yr*r
+  8. Verifica tangenza
+
+In totale si ottengono al piu' 16 soluzioni candidate (8 sistemi x 2 radici), che si riducono alle classiche 8 soluzioni di Apollonio dopo aver scartato i duplicati e le soluzioni con r < 0.
+
+; Problema di Apollonio
+; Ogni cerchio e' rappresentato come lista (x y r)
+; Restituisce lista di soluzioni ((x y r) ...)
+; Per ogni soluzione (xc yc rc) vale:
+;   dist((xc,yc), (xi,yi)) = rc + ri  (tangenza esterna)
+;   dist((xc,yc), (xi,yi)) = |rc - ri| (tangenza interna)
+(define (apollonius c1 c2 c3)
+  (let ((x1 (c1 0)) (y1 (c1 1)) (r1 (c1 2))
+        (x2 (c2 0)) (y2 (c2 1)) (r2 (c2 2))
+        (x3 (c3 0)) (y3 (c3 1)) (r3 (c3 2))
+        (solutions '()))
+    (dolist (signs '((1  1  1) (1  1 -1) (1 -1  1) (1 -1 -1)
+                    (-1  1  1)(-1  1 -1)(-1 -1  1)(-1 -1 -1)))
+      (let ((s1 (signs 0)) (s2 (signs 1)) (s3 (signs 2)))
+        ; Linearizzazione: eq(i)-eq(1) elimina x^2, y^2, r^2
+        ; Risultato: A*x + B*y + C*r = D  con
+        ;   A = 2*(x1-xi), B = 2*(y1-yi), C = 2*(s1*r1 - si*ri)
+        ;   D = x1^2-xi^2 + y1^2-yi^2 + ri^2-r1^2
+        (let ((A21 (mul 2 (sub x1 x2)))
+              (B21 (mul 2 (sub y1 y2)))
+              (C21 (mul 2 (sub (mul s1 r1) (mul s2 r2))))
+              (D21 (add (sub (mul x1 x1) (mul x2 x2))
+                        (sub (mul y1 y1) (mul y2 y2))
+                        (sub (mul r2 r2) (mul r1 r1))))
+              (A31 (mul 2 (sub x1 x3)))
+              (B31 (mul 2 (sub y1 y3)))
+              (C31 (mul 2 (sub (mul s1 r1) (mul s3 r3))))
+              (D31 (add (sub (mul x1 x1) (mul x3 x3))
+                        (sub (mul y1 y1) (mul y3 y3))
+                        (sub (mul r3 r3) (mul r1 r1)))))
+          ; Cramer 2x2: x(r) = x0 + xr*r,  y(r) = y0 + yr*r
+          (let ((deter (sub (mul A21 B31) (mul A31 B21))))
+            (when (> (abs deter) 1e-12)
+              (let ((x0 (div (sub (mul D21 B31) (mul D31 B21)) deter))
+                    (xr (div (sub (mul C31 B21) (mul C21 B31)) deter))
+                    (y0 (div (sub (mul A21 D31) (mul A31 D21)) deter))
+                    (yr (div (sub (mul A31 C21) (mul A21 C31)) deter)))
+                ; Sostituisce in eq(1): P*r^2 + 2*Q*r + R = 0
+                (let ((dx0 (sub x0 x1))
+                      (dy0 (sub y0 y1)))
+                  (let ((P (sub (add (mul xr xr) (mul yr yr)) 1))
+                        (Q (sub (add (mul dx0 xr) (mul dy0 yr)) (mul s1 r1)))
+                        (R (sub (add (mul dx0 dx0) (mul dy0 dy0)) (mul r1 r1))))
+                    (if (> (abs P) 1e-12)
+                      ; Caso generale: due radici
+                      (let ((delta (sub (mul Q Q) (mul P R))))
+                        (when (>= delta 0)
+                          (let ((sq (sqrt delta)))
+                            (dolist (sign '(1 -1))
+                              (let ((r (div (add (sub Q) (mul sign sq)) P)))
+                                (when (>= r -1e-9)
+                                  (push (list (add x0 (mul xr (max 0 r)))
+                                              (add y0 (mul yr (max 0 r)))
+                                              (max 0 r))
+                                        solutions -1)))))))
+                      ; Caso degenere P=0: una radice
+                      (when (> (abs Q) 1e-12)
+                        (let ((r (div (sub R) (mul 2 Q))))
+                          (when (>= r -1e-9)
+                            (push (list (add x0 (mul xr (max 0 r)))
+                                        (add y0 (mul yr (max 0 r)))
+                                        (max 0 r))
+                                  solutions -1))))))))))))
+    ; Rimuove duplicati (entro tolleranza 1e-6)
+    (remove-duplicates solutions 1e-6))))
+
+; Rimuove soluzioni duplicate entro una tolleranza eps
+(define (remove-duplicates sols eps)
+  (let ((result '()))
+    (dolist (s sols)
+      (unless (exists (fn (u) (and (< (abs (sub (u 0) (s 0))) eps)
+                                   (< (abs (sub (u 1) (s 1))) eps)
+                                   (< (abs (sub (u 2) (s 2))) eps))) result)
+        (push s result -1)))
+    result))
+
+(define (print-solutions sols)
+  (if (null? sols)
+    (println "Nessuna soluzione reale trovata.")
+    (begin
+      (println (format "Trovate %d soluzioni:" (length sols)))
+      (let ((i 1))
+        (dolist (s sols)
+          (println (format "  [%d]  centro=(%.6f, %.6f)  raggio=%.6f"
+                           i (s 0) (s 1) (s 2)))
+          (++ i))))))
+
+(define (verify sol c1 c2 c3)
+  (let ((xc (sol 0)) (yc (sol 1)) (rc (sol 2)) (ok true))
+    (dolist (c (list c1 c2 c3))
+      (let ((d    (sqrt (add (mul (sub xc (c 0)) (sub xc (c 0)))
+                             (mul (sub yc (c 1)) (sub yc (c 1))))))
+            (ext  (add rc (c 2)))
+            (intern  (abs (sub rc (c 2)))))
+        (let ((tang (or (< (abs (sub d ext)) 1e-4)
+                        (< (abs (sub d intern)) 1e-4))))
+          (unless tang (setq ok nil))
+          (println (format "    C%d: dist=%.6f  ext=%.6f  int=%.6f  %s"
+                           (+ $idx 1) d ext intern
+                           (if tang "OK" "FAIL"))))))
+    ok))
+
+(define (test name c1 c2 c3)
+  (println (format "\n=== %s ===" name))
+  (let ((sols (apollonius c1 c2 c3)))
+    (print-solutions sols)
+    (let ((all-ok true))
+      (dolist (s sols)
+        (println (format "Sol [%d]:" (+ $idx 1)))
+        (unless (verify s c1 c2 c3) (setq all-ok nil)))
+      (println (if all-ok ">>> Tutte le soluzioni verificate OK"
+                          ">>> ATTENZIONE: alcune soluzioni falliscono")))))
+
+Proviamo:
+
+(test "C1=(0,0,1) C2=(4,0,1) C3=(2,3,1)"
+      '(0 0 1) '(4 0 1) '(2 3 1))
+
+(test "C1=(10,0,1) C2=(13,0,1) C3=(18,15,2)"
+      '(10 0 1) '(13 0 1) '(18 15 2))
+
+(test "Cerchi concentrici-like C1=(0,0,3) C2=(10,0,2) C3=(5,8,1)"
+      '(0 0 3) '(10 0 2) '(5 8 1))
+;-> === Cerchi concentrici-like C1=(0,0,3) C2=(10,0,2) C3=(5,8,1) ===
+;-> Trovate 8 soluzioni:
+;->   [1]  centro=(5.608679, 3.453774)  raggio=3.586792
+;->   [2]  centro=(5.687531, 4.695450)  raggio=4.375315
+;->   [3]  centro=(7.873373, 2.453328)  raggio=5.246746
+;->   [4]  centro=(8.386855, 3.957571)  raggio=6.273711
+;->   [5]  centro=(2.318063, 1.681774)  raggio=5.863874
+;->   [6]  centro=(1.891025, 3.201122)  raggio=6.717951
+;->   [7]  centro=(4.497364, -0.511533)  raggio=7.526361
+;->   [8]  centro=(4.482141, 1.341514)  raggio=7.678594
+;-> Sol [1]:
+;->     C1: dist=6.586792  ext=6.586792  int=0.586792  OK
+;->     C2: dist=5.586792  ext=5.586792  int=1.586792  OK
+;->     C3: dist=4.586792  ext=4.586792  int=2.586792  OK
+;-> Sol [2]:
+;->     C1: dist=7.375315  ext=7.375315  int=1.375315  OK
+;->     C2: dist=6.375315  ext=6.375315  int=2.375315  OK
+;->     C3: dist=3.375315  ext=5.375315  int=3.375315  OK
+;-> Sol [3]:
+;->     C1: dist=8.246746  ext=8.246746  int=2.246746  OK
+;->     C2: dist=3.246746  ext=7.246746  int=3.246746  OK
+;->     C3: dist=6.246746  ext=6.246746  int=4.246746  OK
+;-> Sol [4]:
+;->     C1: dist=9.273711  ext=9.273711  int=3.273711  OK
+;->     C2: dist=4.273711  ext=8.273711  int=4.273711  OK
+;->     C3: dist=5.273711  ext=7.273711  int=5.273711  OK
+;-> Sol [5]:
+;->     C1: dist=2.863874  ext=8.863874  int=2.863874  OK
+;->     C2: dist=7.863874  ext=7.863874  int=3.863874  OK
+;->     C3: dist=6.863874  ext=6.863874  int=4.863874  OK
+;-> Sol [6]:
+;->     C1: dist=3.717951  ext=9.717951  int=3.717951  OK
+;->     C2: dist=8.717951  ext=8.717951  int=4.717951  OK
+;->     C3: dist=5.717951  ext=7.717951  int=5.717951  OK
+;-> Sol [7]:
+;->     C1: dist=4.526361  ext=10.526361  int=4.526361  OK
+;->     C2: dist=5.526361  ext=9.526361  int=5.526361  OK
+;->     C3: dist=8.526361  ext=8.526361  int=6.526361  OK
+;-> Sol [8]:
+;->     C1: dist=4.678594  ext=10.678594  int=4.678594  OK
+;->     C2: dist=5.678594  ext=9.678594  int=5.678594  OK
+;->     C3: dist=6.678594  ext=8.678594  int=6.678594  OK
+;-> >>> Tutte le soluzioni verificate OK
+
+
+---------------------------------------------------
+Riempimento simmetrico di una griglia lineare (1xN)
+---------------------------------------------------
+
+Abbiamo, una griglia rettilinea lunga N (cioè 1xN).
+Vogliamo inserire nella griglia dei segni partendo dal centro e in modo simmetrico.
+Ogni segno ha una data larghezza (S celle).
+Vincolo: la larghezza del segno S e la lunghezza della griglia N hanno la stessa parità (sono entrambe pari o entrambe dispari).
+Inoltre, lo spazio tra i segni è essere sempre maggiore di 0.
+
+Esempio:
+  Lunghezza Griglia N = 15
+  Larghezza Segno -> S = 1
+  Distanza tra i segni = 2 (simmetria)
+
+                             Centro
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |   | S |   |   | S |   |   | S |   |   | S |   |   | S |   |
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+
+  Distanza tra i segni = 3 (simmetria)
+
+Dati N e S, scriviamo una funzione che genera tutti i possibili modi di inserire i segni nella griglia.
+
+(define (configurazioni N S)
+  ; Restituisce tutte le configurazioni simmetriche di segni su una griglia 1xN (celle 0..N-1)
+  ; Ogni segno ha larghezza S ed è rappresentato come intervallo (start end)
+  ; Vincolo: N e S devono avere la stessa parità (altrimenti non esiste un centro discreto coerente)
+  (let (res '())
+    (if (!= (% N 2) (% S 2)) nil
+      (let (c (/ N 2)) ; centro discreto della griglia (indice intero)
+        (let (s0 (- c (/ S 2))) ; inizio del segno centrale (sempre intero grazie alla parità)
+          (for (d 1 N) ; d = spazio tra segni (>=1), genera tutte le configurazioni possibili
+            (let (step (+ S d)) ; distanza tra inizi di segni consecutivi
+              (letn (
+                     ; calcolo diretto dei limiti per k tale che i segni restino dentro [0, N-S]
+                     ; s(k) = s0 + k*step deve soddisfare: 0 <= s(k) <= N-S
+                     kmin (ceil (/ (- s0) step))  ; limite inferiore per k
+                     kmax (floor (/ (- (- N S) s0) step))  ; limite superiore per k
+                    )
+                ;(println "kmin: " kmin ", kmax: " kmax)
+                (if (<= kmin kmax) ; esiste almeno un segno valido
+                  (let (conf '()) ; costruisce una configurazione per questo valore di d
+                    (for (k kmin kmax) ; genera tutti i segni simmetrici rispetto al centro
+                      (let (start (+ s0 (* k step))) ; posizione iniziale del segno
+                        (push (list start (- (+ start S) 1)) conf -1))) ; intervallo [start, start+S-1]
+                        (push conf res -1)))))))) ; aggiunge la configurazione alla lista dei risultati
+    (unique res))))
+
+Proviamo:
+
+(configurazioni 5 1)
+;-> (((0 0) (2 2) (4 4)) ((2 2)))
+(configurazioni 15 1)
+;-> (((1 1) (3 3) (5 5) (7 7) (9 9) (11 11) (13 13))
+;->  ((1 1) (4 4) (7 7) (10 10) (13 13))
+;->  ((3 3) (7 7) (11 11))
+;->  ((2 2) (7 7) (12 12))
+;->  ((1 1) (7 7) (13 13))
+;->  ((0 0) (7 7) (14 14))
+;->  ((7 7)))
+(configurazioni 15 3)
+;-> (((2 4) (6 8) (10 12))
+;->  ((1 3) (6 8) (11 13))
+;->  ((0 2) (6 8) (12 14))
+;->  ((6 8)))
+(configurazioni 13 9)
+;-> (((2 10)))
+(configurazioni 16 2)
+;-> (((1 2) (4 5) (7 8) (10 11) (13 14))
+;->  ((3 4) (7 8) (11 12)) ((2 3) (7 8) (12 13))
+;->  ((1 2) (7 8) (13 14))
+;->  ((0 1) (7 8) (14 15))
+;->  ((7 8)))
+(configurazioni 16 4)
+;-> (((1 4) (6 9) (11 14))
+;->  ((0 3) (6 9) (12 15)) ((6 9)))
+
+Adesso scriviamo una funzione che stampa il grafico di una configurazione.
+Esempio:
+                             Centro
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |   | S |   |   | S |   |   | S |   |   | S |   |   | S |   |
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+
+; Funzione che stampa graficamente una configurazione
+; di segni su una griglia 1xN
+(define (mostra-config N conf)
+  ; conf = lista di intervalli ((a b) (c d) ...)
+  ; Esempio:
+  ; ((3 3) (7 7) (11 11))
+  (let (grid (dup " " N))
+    ; inserisce i segni nella griglia
+    (dolist (segno conf)
+      (for (i (segno 0) (segno 1))
+        (setf (grid i) "S")))
+    ; posizione centrata della scritta "Centro"
+    (letn (
+           larg (+ (* 4 N) 1)
+           pos (- (/ larg 2) 3)
+          )
+      (println (dup " " pos) "Centro"))
+    ; bordo superiore
+    (print "+")
+    (for (i 0 (- N 1))
+      (print "---+"))
+    (println)
+    ; contenuto celle
+    (print "|")
+    (for (i 0 (- N 1))
+      (print " " (grid i) " |"))
+    (println)
+    ; bordo inferiore
+    (print "+")
+    (for (i 0 (- N 1))
+      (print "---+"))
+    (println)
+    ; numeri celle (0..N-1)
+    (for (i 0 (- N 1))
+      (print (format "%4d" i)))
+    (println)))
+
+Proviamo:
+
+(setq c '((3 3) (7 7) (11 11)))
+(mostra-config 15 c)
+                           Centro
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+|   |   |   | S |   |   |   | S |   |   |   | S |   |   |   |
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+
+(dolist (c (configurazioni 15 1))
+  (mostra-config 15 c)
+  (println))
+;->                            Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   | S |   | S |   | S |   | S |   | S |   | S |   | S |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+;-> 
+;->                            Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   | S |   |   | S |   |   | S |   |   | S |   |   | S |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+;-> ...
+;-> ...
+;->                            Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   |   |   |   |   | S |   |   |   |   |   |   |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+
+(dolist (c (configurazioni 13 9))
+  (mostra-config 13 c)
+  (println))
+;->                        Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   |   | S | S | S | S | S | S | S | S | S |   |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12
+
+(dolist (c (configurazioni 16 2))
+  (mostra-config 16 c)
+  (println))
+;->                              Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   | S | S |   | S | S |   | S | S |   | S | S |   | S | S |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16
+;-> 
+;->                              Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   | S | S |   |   | S | S |   |   | S | S |   |   |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16
+;-> ...
+;-> ...
+;->                              Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   |   |   |   |   | S | S |   |   |   |   |   |   |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16
+
+(dolist (c (configurazioni 16 4))
+  (mostra-config 16 c)
+  (println))
+;->                              Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   | S | S | S | S |   | S | S | S | S |   | S | S | S | S |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+;-> 
+;->                              Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> | S | S | S | S |   |   | S | S | S | S |   |   | S | S | S | S |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+;-> 
+;->                              Centro
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   |   |   |   | S | S | S | S |   |   |   |   |   |   |
+;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+
 ============================================================================
 

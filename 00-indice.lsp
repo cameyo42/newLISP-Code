@@ -3472,6 +3472,8 @@ NOTE LIBERE 36
   Inserimento di N elementi in una lista
   Visita di punti in una griglia
   Punto intero esterno ad una circonferenza
+  Problema di Apollonio
+  Riempimento simmetrico di una griglia lineare (1xN)
 
 PROBLEMI SUI DADI
 =================
