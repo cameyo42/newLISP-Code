@@ -3916,5 +3916,143 @@ Proviamo:
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
 
+
+--------------------------------------
+Liste che differiscono per un elemento
+--------------------------------------
+
+Abbiamo una lista di elementi e poi un'altra lista degli stessi elementi, tranne uno.
+Quale elemento è stato rimosso?
+
+Se nelle liste non esistono elementi ripetuti (cioè le liste sono 'set') allora possiamo usare la primitiva 'difference'.
+
+(define (absent1 lst1 lst2)
+  (difference lst1 lst2))
+
+(setq L1 '(1 4 3 8 5 2))
+(setq L2 '(1 4   8 5 2))
+(absent1 L1 L2)
+;-> (3)
+
+Se nelle liste esistono elementi ripetuti, allora 'difference' fallisce:
+
+(setq L1 '(1 4 3 8 5 1 3 2))
+(setq L2 '(1 4   8 5 1 3 2))
+(absent1 L1 L2)
+;-> ()
+
+Se la lista contiene solo numeri interi, allora il numero mancante è dato dalla differenza tra la somma dei numeri della prima lista e la somma dei numeri della seconda lista:
+
+  x = Sum(lst1) - Sum(lst2))
+
+(define (absent2 lst1 lst2)
+  (- (apply + lst1) (apply + lst2)))
+
+(setq L1 '(1 4 3 8 5 1 3 2))
+(setq L2 '(1 4   8 5 1 3 2))
+(absent2 L1 L2)
+;-> 3
+
+Questo metodo potrebbe fallire nel caso di numeri float a causa di arrotondamenti durante le operazioni.
+
+Se la lista contiene solo caratteri (stringhe di lunghezza 1), allora possiamo usare lo stesso metodo convertendo i caratteri nei rispettivi codici ASCII:
+
+(define (absent3 lst1 lst2)
+  (char (- (apply + (map char lst1)) (apply + (map char lst2)))))
+
+(setq L1 '("a" "c" "h" "k" "c" "a" "z"))
+(setq L2 '("a" "c" "h" "k" "c"     "z"))
+(absent3 L1 L2)
+;-> "a"
+
+Se le liste contengono elementi diversi (es. interi, float e stringhe), allora dobbiamo usare un altro metodo.
+
+Algoritmo
+1) contare le occorrenze nella lista corta
+2) consumare le occorrenze scorrendo la lista lunga
+3) il primo elemento senza frequenza disponibile è quello mancante
+Funziona anche con simboli, liste annidate e valori eterogenei.
+
+(define (absent4 lst1 lst2)
+  (let ( (freq '()) (out nil) (stop nil) (res nil) )
+    ; ciclo per creare la lista delle frequenze (elemento occorrenze)
+    ; della seconda lista (quella con elemento mancante)
+    (dolist (el lst2)
+      (if (lookup el freq)
+          ; se elemento esiste, allora aumenta la frequenza
+          (++ (lookup el freq))
+          ;else
+          ; altrimenti inserisce l'elemento nella lista 'freq'
+          ; con frequenza 1
+          (push (list el 1) freq -1)))
+    ; ciclo per ogni elemento della prima lista...
+    (setq stop nil)
+    (dolist (el lst1 stop)
+      (setq res (lookup el freq))
+      (cond
+          ; se l'elemento corrente non esiste,
+          ; allora è l'elemento mancante
+          ((nil? res)
+            (setq out el) 
+            (setq stop true))
+          ; se la frequenza dell'elemento corrente vale 0,
+          ; allora è l'elemento mancante
+          ((zero? res)
+            (setq out el) 
+            (setq stop true))          
+          (true ; altrimenti diminuisce la frequenza
+            (-- (lookup el freq)))))
+    out))
+
+Proviamo:
+
+(setq L1 '("a" "c" "h" "k" "c" "a" "z"))
+(setq L2 '("a" "c" "h" "k" "c"     "z"))
+(absent4 L1 L2)
+;-> "a"
+
+(setq L1 '("a" 1.2345 "ha" "k1" c 'a 2.89 "z"))
+(setq L2 '("a" 1.2345 "ha" "k1" c 'a      "z"))
+(absent4 L1 L2)
+;-> 2.89
+
+
+------------------
+Coppia di formiche
+------------------
+
+Una coppia di specie di formiche appare ogni 'a' e 'b' anni, ed è stata osservata l'ultima volta nell'anno 'y'.
+Trovare il prossimo anno in cui appariranno di nuovo insieme.
+
+Algoritmo
+Per ogni anno z = y + 1, y + 2, y + 3, ...
+  Verificare se z - y è divisibile sia per a che per b.
+  Interrompere quando viene trovato il primo z di questo tipo.
+Questo processo continua al massimo per a*b passaggi, poiché a*b divide sicuramente sia a che b.
+
+(define (next-year a b y)
+  (let ( (out nil) (stop nil) )
+    (for (z (+ y 1) (+ y (* a b)) 1 stop)
+      (if (and (zero? (% (- z y) a)) (zero? (% (- z y) b)))
+        (set 'out z 'stop true)))
+    out))
+
+(next-year 10 13 1980)
+;-> 2110
+(next-year 2 4 1980)
+;-> 1984
+
+In altre parole, le due specie ricompaiono insieme ogni: mcm(a,b)
+
+; Funzione che calcola il Minimo Comune Multiplo di due numeri interi
+(define (mcm a b) (/ (* a b) (gcd a b)))
+
+(define (next-year a b y) (+ y (mcm a b)))
+
+(next-year 10 13 1980)
+;-> 2110
+(next-year 2 4 1980)
+;-> 1984
+
 ============================================================================
 

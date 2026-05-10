@@ -3474,6 +3474,8 @@ NOTE LIBERE 36
   Punto intero esterno ad una circonferenza
   Problema di Apollonio
   Riempimento simmetrico di una griglia lineare (1xN)
+  Liste che differiscono per un elemento
+  Coppia di formiche
 
 PROBLEMI SUI DADI
 =================
