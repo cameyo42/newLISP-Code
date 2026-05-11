@@ -878,7 +878,7 @@ Funzione che converte un numero intero in un numero di Peano (lista):
 
 (define (numero-peano num)
   (if (= num 0) (cons 'Z)
-      (cons 'S (cons (peano (- num 1))))))
+      (cons 'S (cons (numero-peano (- num 1))))))
 
 Facciamo alcune prove:
 
@@ -912,7 +912,7 @@ Facciamo alcune prove:
 ;-> 0
 (peano-numero '(S(Z)))
 ;-> 1
-(peano-numero (peano 42))
+(peano-numero (numero-peano 42))
 ;-> 42
 
 Funzione che applica l'operatore "op" (+,-,*,/) a due numeri di Peano:

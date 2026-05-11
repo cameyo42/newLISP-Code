@@ -3476,6 +3476,7 @@ NOTE LIBERE 36
   Riempimento simmetrico di una griglia lineare (1xN)
   Liste che differiscono per un elemento
   Coppia di formiche
+  Rimozione di pile di monete
 
 PROBLEMI SUI DADI
 =================

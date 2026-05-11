@@ -4054,5 +4054,76 @@ In altre parole, le due specie ricompaiono insieme ogni: mcm(a,b)
 (next-year 2 4 1980)
 ;-> 1984
 
+
+---------------------------
+Rimozione di pile di monete
+---------------------------
+
+Abbiamo N pile ognuna contenente un certo numero di monete.
+Possiamo rimuovere tutte le monete prendendone una da due pile distinte a ogni mossa?
+
+È possibile rimuovere tutte le monete se:
+1) il numero di monete è pari e
+2) nessuna pila contiene più monete di tutte le altre pile messe insieme.
+
+Metodo: scegliere sempre le due pile con il maggior numero di monete.
+Con questa strategia se 1) e 2) sono valide prima di una tale mossa, lo sono anche dopo.
+
+Rappresentiamo le pile con una lista, es. P = (3 5 2 7 1).
+
+(define (svuota-pile P)
+  (let ( (max-val (apply max P))
+         (somma (apply + P)) )
+    (cond ((odd? somma)
+            (println "Impossibile: numero dispari di monete"))
+          ((> max-val (- somma max-val))
+            (println "Impossibile: esiste una pila troppo grande"))
+          (true
+            (until (for-all zero? P)
+              (sort P >)
+              (println (P 0) " - 1 = " (- (P 0) 1))
+              (println (P 1) " - 1 = " (- (P 1) 1))
+              (-- (P 0))
+              (-- (P 1))
+              (println P)))) '>))
+
+Proviamo:
+
+(svuota-pile '(1 2 3 4 5))
+;-> Impossibile: numero dispari di monete
+
+(svuota-pile '(1 2 3 4 12))
+;-> Impossibile: esiste una pila troppo grande
+
+(setq lst '(3 5 2 7 1))
+(rimuove-pile lst)
+;-> 7 - 1 = 6
+;-> 5 - 1 = 4
+;-> (6 4 3 2 1)
+;-> 6 - 1 = 5
+;-> 4 - 1 = 3
+;-> (5 3 3 2 1)
+;-> 5 - 1 = 4
+;-> 3 - 1 = 2
+;-> (4 2 3 2 1)
+;-> 4 - 1 = 3
+;-> 3 - 1 = 2
+;-> (3 2 2 2 1)
+;-> 3 - 1 = 2
+;-> 2 - 1 = 1
+;-> (2 1 2 2 1)
+;-> 2 - 1 = 1
+;-> 2 - 1 = 1
+;-> (1 1 2 1 1)
+;-> 2 - 1 = 1
+;-> 1 - 1 = 0
+;-> (1 0 1 1 1)
+;-> 1 - 1 = 0
+;-> 1 - 1 = 0
+;-> (0 0 1 1 0)
+;-> 1 - 1 = 0
+;-> 1 - 1 = 0
+;-> (0 0 0 0 0)
+
 ============================================================================
 
