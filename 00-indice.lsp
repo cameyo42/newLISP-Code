@@ -3477,6 +3477,9 @@ NOTE LIBERE 36
   Liste che differiscono per un elemento
   Coppia di formiche
   Rimozione di pile di monete
+  Ordinamento tramite confronto delle cifre dei numeri
+  Costruzione di un polinomio dalla sue radici
+  Dividere o moltiplicare
 
 PROBLEMI SUI DADI
 =================

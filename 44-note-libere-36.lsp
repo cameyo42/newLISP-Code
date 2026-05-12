@@ -4125,5 +4125,272 @@ Proviamo:
 ;-> 1 - 1 = 0
 ;-> (0 0 0 0 0)
 
+
+----------------------------------------------------
+Ordinamento tramite confronto delle cifre dei numeri
+----------------------------------------------------
+
+Ordinare una lista di numeri interi con il seguente metodo:
+1) due numeri 'a' e 'b' sono uguali solo se a == b.
+2) 'a' è maggiore di 'b' se lenght(a) > lenght(b).
+   'a' è maggiore di 'b' se nel confronto delle cifre ha più cifre maggiori.
+   Se il confronto delle cifre è pari, allora verificare se a > b.
+3) 'a' è minore di 'b' se lenght(a) < lenght(b).
+   'a' è minore di 'b' se nel confronto delle cifre ha più cifre minori.
+    Se il confronto delle cifre è pari, allora verificare se a < b.
+
+Confronto delle cifre
+---------------------
+Esempio: a = 237, b = 189
+Si confrontano le cifre che hanno la stessa posizione:
+  2 > 1
+  3 < 8
+  7 < 9
+Abbiamo una cifra maggiore (2) e due cifre minori (3 e 7), quindi 237 è minore di 189.
+
+Scriviamo una funzione che prende due liste di interi e calcola quanti elementi della prima lista sono maggiori, quanti minori e quanti uguali confrontando le coppie di numeri con lo stesso indice.
+
+(define (confronta L1 L2)
+  (let ( (maggiori 0) (uguali 0) (minori 0) (diff '()) )
+    (setq diff (map - L1 L2))
+    (dolist (el diff)
+      (if (= el 0) (++ uguali)
+          (> el 0) (++ maggiori)
+          (< el 0) (++ minori)))
+    (list maggiori uguali minori)))
+
+Proviamo:
+
+(confronta '(2 3 7) '(1 8 9))
+;-> (1 0 2)
+(confronta '(3 4 6) '(3 7 1))
+;-> (1 1 1)
+(confronta (sort (rand 10 12)) (sort (rand 10 12)))
+;-> (10 1 1)
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(confronta (int-list 237) (int-list 189))
+;-> (1 0 2)
+
+Adesso scriviamo una funzione che confronta due numeri con questo metodo.
+
+(define (comp op a b)
+  (cond ((= op =) (= a b))
+        ((= op >)
+          (if (= (length a) (length b))
+              (let ( (out nil) (res (confronta (int-list a) (int-list b))) )
+                ;(println res)
+                (cond ((> (res 0) (res 2)) (setq out true))
+                      ((= (res 0) (res 2))
+                        (if (>= a b) (setq out true))))
+                out)
+              ;else
+              (if (> (length a) (length b)) true nil)))
+        ((= op <)
+          (if (= (length a) (length b))
+              (let ( (out nil) (res (confronta (int-list a) (int-list b))) )
+                ;(println res)
+                (cond ((< (res 0) (res 2)) (setq out true))
+                      ((= (res 0) (res 2))
+                        (if (< a b) (setq out true))))
+                out)
+              ;else
+              (if (< (length a) (length b)) true nil)))
+        (true (println "Errore: operatore " op " sconosciuto."))))
+
+Proviamo:
+
+(comp = 222 222)
+;-> true
+(comp > 237 189)
+;-> nil
+(comp < 237 189)
+;-> true
+(comp > 123 321)
+;-> nil
+(comp < 123 321)
+;-> true
+(comp < 1234 321)
+;-> nil
+(comp > 1234 321)
+;-> true
+
+Adesso usiamo la funzione di ordinamento (bubble-sort):
+
+(define (bubbleSort lst)
+  (let ( (len (length lst)) (cambio true) )
+    (while cambio
+      (setq cambio nil)
+      (for (i 1 (- len 1))
+        (when (< (lst i) (lst (- i 1)))
+               (swap (lst i) (lst (- i 1)))
+               (setq cambio true)))
+      (-- j))
+  lst))
+
+(bubbleSort (sequence 10 1))
+;-> (1 2 3 4 5 6 7 8 9 10)
+(bubbleSort '(2 3 6 1 7 9 4 3 7 8 2))
+;-> (1 2 2 3 3 4 6 7 7 8 9)
+
+Modifichiamo 'bubbleSort' per ordinare con il nostro metodo:
+
+(define (bubble lst)
+  (let ( (len (length lst)) (cambio true) )
+    (while cambio
+      (setq cambio nil)
+      (for (i 1 (- len 1))
+        ;(when (< (lst i) (lst (- i 1)))     ; 'bubbleSort' originale
+        (when (comp < (lst i) (lst (- i 1))) ; linea modificata
+               (swap (lst i) (lst (- i 1)))
+               (setq cambio true)))
+      (-- j))
+  lst))
+
+Proviamo:
+
+(bubble (sequence 10 1))
+;-> (1 2 3 4 5 6 7 8 9 10)
+(bubble '(2 3 6 1 7 9 4 3 7 8 2))
+;-> (1 2 2 3 3 4 6 7 7 8 9)
+
+I numeri da 0 a 199 hanno lo stesso ordinamento anche con questo metodo.
+(bubble (sequence 0 199))
+;-> (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+;->  27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+;-> ...
+;->  167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184
+;->  185 186 187 188 189 190 191 192 193 194 195 196 197 198 199)
+
+Le differenze cominciano con i numeri che hanno almeno 3 cifre e sono maggiori di 199:
+
+(setq a '(4123 389 426 70 50 73 409  569 911 612 198 1877 187 587 11111))
+(bubble a)
+;-> (50 70 73 426 389 409 612 911 187 198 569 587 4123 1877 11111)
+
+Verifica che ogni elemento dell'output è minore o uguale al successivo:
+
+(setq res (bubble a))
+(for (i 0 (- (length res) 2))
+  (if (comp > (res i) (res (+ i 1)))
+      (println "Errore: " (res i) " " (res (+ i 1)))))
+;-> nil
+
+(bubble (rand 1e5 20))
+;-> (3509 12302 36780 51701 42622 72191 47529 68224 10467 47172 31687
+;->  92138 83468 34598 94933 54954 75585 66298 37498 84698)
+
+La funzione è lenta (ma non è importante):
+
+(time (bubble (sequence 1000 9999)))
+;-> 14274.59
+
+
+--------------------------------------------
+Costruzione di un polinomio dalla sue radici
+--------------------------------------------
+
+Data una lista di numeri interi che rappresentano le soluzioni di un polinomio, generare i coefficienti del polinomio.
+
+Esempio:
+S = (1 -3)
+Polinomio = (x - 1)*(x + 3) = x^2 + 3x - x - 3 = x^2 + 2x - 3
+
+Se le radici (soluzioni) del polinomio sono:
+  
+  r1, r2, r3, ..., rn
+
+allora il polinomio associato è:
+
+  P(x) = (x - r1)(x - r2)...(x - rn)
+
+Algoritmo
+I coefficienti si ottengono espandendo il prodotto.
+Si parte dal polinomio costante:
+
+  1
+
+e per ogni radice 'r' si moltiplica il polinomio corrente per:
+
+  (x - r)
+
+Esempio con radici (1 2 3):
+
+  1
+  (x - 1) => (1 -1)
+  (x - 1)(x - 2) => x^2 - 3x + 2 => (1 -3 2)
+  (x - 1)(x - 2)(x - 3) => x^3 - 6x^2 + 11x - 6 => (1 -6 11 -6)
+
+; Funzione che ricostruisce un polinomio partendo dalla lista delle sue radici
+(define (roots-poly roots)
+  (let (poly '(1))
+    ; ciclo per ogni radice...
+    (dolist (r roots)
+      (let (pl (dup 0 (+ (length poly) 1)))
+        (for (i 0 (- (length poly) 1))
+          ; termine * x
+          (++ (pl i) (poly i))
+          ; termine * (-r)
+          (++ (pl (+ i 1)) (* -1 r (poly i))))
+        (setq poly pl)))
+    poly))
+
+Proviamo:
+
+(roots-poly '(1 -3))
+;-> (1 2 -3)
+
+(roots-poly '(1 2 3))
+;-> (1 -6 11 -6)
+
+(roots-poly '(2 2))
+;-> (1 -4 4)
+
+(roots-poly '(0 1))
+;-> (1 -1 0)
+
+La lista (a b c d) rappresenta a*x^3 + b*x^2 + c*x + d.
+Per esempio, (1 -6 11 -6) significa x^3 - 6x^2 + 11x - 6.
+
+
+-----------------------
+Dividere o moltiplicare
+-----------------------
+
+Calcolare la seguente sequenza:
+
+  a(1) = 1
+  a(n) = a(n-1)*n,        se a(n-1) < n
+  a(n) = floor(a(n-1)/n), se a(n-1) >= n
+
+Sequenza OEIS A076039
+Start with 1. Multiply or divide by n accordingly as a(n-1) is smaller or greater than n and then take the integer value (this is to ensure that a(n) > 0 for all n).
+  1, 2, 6, 1, 5, 30, 4, 32, 3, 30, 2, 24, 1, 14, 210, 13, 221, 12, 228,
+  11, 231, 10, 230, 9, 225, 8, 216, 7, 203, 6, 186, 5, 165, 4, 140, 3,
+  111, 2, 78, 1, 41, 1722, 40, 1760, 39, 1794, 38, 1824, 37, 1850, 36,
+  1872, 35, 1890, 34, 1904, 33, 1914, 32, 1920, 31, 1922, 30, 1920, ...
+
+(define (seq limit)
+  (let (a (array (+ limit 1) '(0)))
+    (setf (a 1) 1)
+    (for (n 2 limit)
+      (if (< (a (- n 1)) n)
+        (setf (a n) (* (a (- n 1)) n))
+        (setf (a n) (int (div (a (- n 1)) n)))))
+    a))
+
+(seq 64)
+;-> (0 1 2 6 1 5 30 4 32 3 30 2 24 1 14 210 13 221 12 228
+;->  11 231 10 230 9 225 8 216 7 203 6 186 5 165 4 140 3
+;->  111 2 78 1 41 1722 40 1760 39 1794 38 1824 37 1850 36
+;->  1872 35 1890 34 1904 33 1914 32 1920 31 1922 30 1920)
+
 ============================================================================
 
