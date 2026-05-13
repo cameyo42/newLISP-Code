@@ -3360,7 +3360,7 @@ Quindi la funzione che risolve il problema è molto semplice e corta.
 
 (define (punto r) (list r 1))
 
-Code-golf (23 caratteri):
+Versione code-golf (23 caratteri):
 
 (define(f r)(list r 1))
 
@@ -4294,7 +4294,7 @@ La funzione è lenta (ma non è importante):
 
 
 --------------------------------------------
-Costruzione di un polinomio dalla sue radici
+Costruzione di un polinomio dalle sue radici
 --------------------------------------------
 
 Data una lista di numeri interi che rappresentano le soluzioni di un polinomio, generare i coefficienti del polinomio.
@@ -4391,6 +4391,303 @@ Start with 1. Multiply or divide by n accordingly as a(n-1) is smaller or greate
 ;->  11 231 10 230 9 225 8 216 7 203 6 186 5 165 4 140 3
 ;->  111 2 78 1 41 1722 40 1760 39 1794 38 1824 37 1850 36
 ;->  1872 35 1890 34 1904 33 1914 32 1920 31 1922 30 1920)
+
+
+--------------------------------
+Somma delle cifre di una stringa
+--------------------------------
+
+Scrivere una funzione che somma tutte le cifre (0..9) contenute in una stringa di caratteri ASCII (32..126).
+La funzione deve essere la più corta possibile.
+
+Tutte le cifre vengono considerate come intero positivo.
+Per esempio, la stringa str = "1abc -2 xyz3" contiene le cifre 1, 2 e 3, quindi la loro somma vale 6.
+Il segno "-" in "-2" non viene considerato.
+
+(char "0")
+;-> 48
+(char "9")
+;-> 57
+
+Metodo 1 (ciclo 'dostring')
+---------------------------
+
+(define (summa1 str)
+  (let (tot 0)
+    (dostring (ch str)
+      (if (and (> ch 47) (< ch 58))
+          (++ tot (- ch 48))))
+    tot))
+
+(summa1 "1abc -2 xyz3")
+;-> 6
+(setq s "1aba4.1xyz-10.4e-4qwe +10.4e1 last -1")
+(summa1 s)
+;-> 22
+
+Metodo 2 (espressione regolare)
+-------------------------------
+
+(define (summa2 str)
+  (apply + (map int (find-all {\d} str))))
+
+(summa2 "1abc -2 xyz3")
+;-> 6
+(setq s "1aba4.1xyz-10.4e-4qwe +10.4e1 last -1")
+(summa2 s)
+;-> 22
+
+Test di velocità
+
+; Funzione che genera una stringa casuale in un intervallo di caratteri
+; la funzione prende caratteri e/o codici ASCII dei caratteri
+(define (rand-ascii len start-char end-char)
+  (let ( (min-val (if (string? start-char) (char start-char) start-char))
+         (max-val (if (string? end-char)   (char end-char) end-char))
+       )
+    (if (> min-val max-val) (swap min-val max-val))
+    (join (collect (char (+ min-val (rand (+ (- max-val min-val) 1)))) len))))
+
+(setq t (rand-ascii 2000 32 126))
+
+(summa1 t)
+;-> 952
+(summa2 t)
+;-> 952
+
+(time (summa1 t) 1e4)
+;-> 1562.179
+(time (summa2 t) 1e4)
+;-> 751.961
+
+Versione code-golf (47 caratteri):
+(define(f s)(apply +(map int(find-all {\d}s))))
+(f t)
+;-> 952
+
+
+---------------------
+Sequenza Look and Say
+---------------------
+
+Sequenza OEIS A045918:
+Describe n. Also called the "Say What You See" or "Look and Say" sequence LS(n).
+  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 1110, 21, 1112, 1113, 1114, 1115,
+  1116, 1117, 1118, 1119, 1210, 1211, 22, 1213, 1214, 1215, 1216, 1217,
+  1218, 1219, 1310, 1311, 1312, 23, 1314, 1315, 1316, 1317, 1318, 1319,
+  1410, 1411, 1412, 1413, 24, 1415, 1416, 1417, ...
+
+0 ha "uno 0", quindi a(0) = 10
+23 ha "un 2, un 3", quindi a(23) = 1213.
+121 ha "un 1, un 2, un 1", quindi a(121) = 111211
+122 ha "un 1, due 2", quindi a(122) = 1122
+
+(define (rle-encode lst)
+"Encode list with Run Length Encoding"
+  (local (palo conta out)
+    (cond ((= lst '()) '())
+          (true
+           (setq out '())
+           (setq palo (first lst))
+           (setq conta 0)
+           (dolist (el lst)
+              ; se l'elemento è uguale al precedente aumentiamo il suo conteggio
+              (if (= el palo) (++ conta)
+                  ; altrimenti costruiamo la coppia (conta el) e la aggiungiamo al risultato
+                  (begin (extend out (list (list conta palo)))
+                         (setq conta 1)
+                         (setq palo el)
+                  )
+              )
+           )
+           ; aggiungiamo l'ultima coppia di valori
+           (extend out (list (list conta palo)))
+           out))))
+
+; Funzione che prende un intero e genera il relativo numero 'Look and Say'
+(define (LS num)
+  (local (digits res)
+    ; converte il numero in lista di cifre
+    (setq digits (map int (explode (string num))))
+    ; rimuove l'eventuale nil (dovuto alla 'L' dei big-integer)
+    (replace nil digits)
+    ; calcola il numero 'Look and Say' (lista di cifre)
+    (setq res (flat (rle-encode digits)))
+    ; genera in numero intero (anche big-integer) 'Look and Say'
+    ; (int 321478135781235789123579125)
+    ; -> ERR: number out of range in function int
+    (eval-string (join (map string res)))))
+
+Proviamo:
+
+(LS 10)
+;-> 1110
+(LS 121)
+;-> 111211
+(LS 122)
+;-> 1122
+(LS 3333)
+;-> 43
+
+(map LS (sequence 0 50))
+;-> (10 11 12 13 14 15 16 17 18 19 1110 21 1112 1113 1114 1115
+;->  1116 1117 1118 1119 1210 1211 22 1213 1214 1215 1216 1217
+;->  1218 1219 1310 1311 1312 23 1314 1315 1316 1317 1318 1319
+;->  1410 1411 1412 1413 24 1415 1416 1417 1418 1419 1510)
+
+Versione stile lisp:
+
+(define (LS1 num)
+  (eval-string
+    (join
+      (map string
+           (flat
+             (rle-encode
+               (map int
+                    (explode
+                      (replace "L" (string num) "")))))))))
+
+(map LS1 (sequence 0 50))
+;-> (10 11 12 13 14 15 16 17 18 19 1110 21 1112 1113 1114 1115
+;->  1116 1117 1118 1119 1210 1211 22 1213 1214 1215 1216 1217
+;->  1218 1219 1310 1311 1312 23 1314 1315 1316 1317 1318 1319
+;->  1410 1411 1412 1413 24 1415 1416 1417 1418 1419 1510)
+
+
+--------------------
+Sequenze conta cifre
+--------------------
+
+Dato un numero intero applicare i passi seguenti:
+1) contare quante volte appare ogni cifra del numero e 
+   costruire una lista di coppie: (occorrenze-cifre cifra)
+2) ordinare la lista in modo non decrescente sulle occorrenze e poi sulle cifre
+3) creare un nuovo numero unendo tutti i numeri della lista ordinata
+
+Esempio:
+numero =  423220
+1) lista di coppie (occorrenze-cifra cifra)
+  ((1 0) (3 2) (1 3) (1 4))
+Il numero contiene una cifra 0, tre cifre 2, una cifra 3 e 1 cifra 4.
+2) ordinamento non decrescente sulle occorrenze e poi sulle cifre
+  ((1 0) (1 3) (1 4) (3 2))
+3) creazione nuovo numero
+  ((1 0) (1 3) (1 4) (3 2)) --> 1 0 1 3 1 4 3 2 --> 10131432
+
+; Funzione che prende un intero e genera un nuovo numero conta cifre
+; gestisce anche i big-integer
+(define (conta num)
+  (local (s unici coppie)
+    ; converte il numero in lista di cifre
+    (setq s (sort (map int (explode (string num)))))
+    ; rimuove l'eventuale nil (dovuto alla 'L' dei big-integer)
+    (replace nil s)
+    ; cifre uniche
+    (setq unici (unique s))
+    ; crazione coppie e ordinamento
+    (setq coppie (sort (map (fn(x y) (list x y)) (count unici s) unici)))
+    ; costruzione nuovo numero
+    (eval-string (join (map string (flat coppie))))))
+
+Proviamo:
+
+(conta 423220)
+;-> 10131432
+
+(conta 3184712348712345871234581273451283745L)
+;-> 45525758616364
+
+(conta 111111111111111111111111111111111111111111)
+;-> 421
+
+Se applichiamo la funzione 'conta' in modo iterativo partendo da un numero N, otteniamo una sequenza di numeri:
+
+(series 423220 conta 10)
+;-> (423220 10131432 1012142331 1014222341 1013243132 1014223133
+;->  1014223133 1014223133 1014223133 1014223133)
+
+(series 1 conta 15)
+;-> (1 11 21 1112 1231 121321 132231 212223 111342 12131431 12142341
+;->  13222431 14212332 14212332 14212332)
+
+(series 2 conta 15)
+;-> (2 12 1112 1231 121321 132231 212223 111342 12131431 12142341 13222431
+;->  14212332 14212332 14212332 14212332)
+
+Notiamo che le sequenze generate raggiungono un punto fisso, cioè un numero che rigenera se stesso:
+(conta 14212332)
+;-> 14212332
+
+In altri casi le sequenze incontrano un ciclo, cioè un numero genera un nuovo numero già presente nella sequenza:
+(series 94 conta 12)
+;-> (94 1419 141921 12141931 1213141941 1213192451 131415192241
+;->  131519222451 131419253241 151922232441 131519243142 151922232441)
+                               ------------              ------------
+
+Perchè partendo da qualsiasi intero positivo arriviamo sempre ad un ciclo (o a un punto fisso)?
+
+Partendo da qualunque intero positivo, la sequenza deve inevitabilmente entrare in un ciclo (eventualmente di lunghezza 1).
+
+L'idea fondamentale è che la funzione 'conta' riduce drasticamente lo spazio dei numeri possibili.
+Sia N un numero con K cifre.
+Dopo l'applicazione di 'conta':
+- ci sono al massimo 10 coppie (occorrenze cifra)
+- ogni cifra occupa 1 cifra decimale
+- il conteggio di una cifra è al massimo K
+
+Quindi il nuovo numero ha una dimensione molto più controllata del precedente.
+Per esempio, 999999999999999999999999999999999999 diventa 369, perché ci sono 36 cifre 9.
+
+Dopo poche iterazioni, tutti i numeri finiscono dentro un insieme finito di stati possibili.
+A questo punto vale il principio dei cassetti:
+- una sequenza infinita in un insieme finito deve ripetere un valore.
+E siccome la trasformazione è deterministica abbiamo che:
+se x(i) = x(j), allora tutta la sequenza successiva si ripete periodicamente, quindi si entra necessariamente in un ciclo.
+
+Quindi per ogni intero positivo N, la successione N, conta(N), conta(conta(N)), ... è ultimamente periodica.
+I cicli possono avere:
+- lunghezza 1 (punti fissi)
+- lunghezza > 1
+
+Per esempio,
+  14212332 è un punto fisso.
+  151922232441 <-> 131519243142 è un ciclo di periodo 2.
+
+Scriviamo una funzione che restituisce la sequenza di un numero fino al raggiugimento di un ciclo (o punto fisso):
+
+(define (fixed-point num)
+  (local (values cur fixed)
+    ; lista dei valori della sequenza
+    (setq values (list num))
+    ; numero corrente
+    (setq cur num)
+    (setq fixed nil)
+    ; ciclo di trasformazione del numero corrente fino
+    ; a raggiungere un punto fisso o un ciclo
+    (until fixed
+      (setq cur (conta cur))
+      ;(println values)
+      ; verifica se il numero corrente è già presente nella sequenza
+      (if (member cur values) (setq fixed true))
+      ; inserisce il numero corrente nella lista
+      (push cur values -1))
+    values))
+
+Proviamo:
+
+(fixed-point 0)
+;-> (0 10 1011 1031 101321 10121331 10122341 1013142231 1014222341
+;->  1013243132 1014223133 1014223133)
+
+(fixed-point 123)
+;-> (123 111213 121341 12131431 12142341 13222431 14212332 14212332)
+
+Calcoliamo la lunghezza delle sequenze partendo dai numeri 0..1000:
+
+(map (fn(x) (length (fixed-point x))) (sequence 0 1000))
+;-> (12 14 13 14 10 12 12 12 12 12 11 13 12 13 9 11 11 11 11 11 8 12 2
+;->  ...
+;->  15 16 16 16 15 16 15 16 15 15 16 16 16 8 8 14 13 12 15 16 16 11 10)
 
 ============================================================================
 

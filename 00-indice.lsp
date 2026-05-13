@@ -3478,8 +3478,11 @@ NOTE LIBERE 36
   Coppia di formiche
   Rimozione di pile di monete
   Ordinamento tramite confronto delle cifre dei numeri
-  Costruzione di un polinomio dalla sue radici
+  Costruzione di un polinomio dalle sue radici
   Dividere o moltiplicare
+  Somma delle cifre di una stringa
+  Sequenza Look and Say
+  Sequenze conta cifre
 
 PROBLEMI SUI DADI
 =================

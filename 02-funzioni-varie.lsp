@@ -5212,6 +5212,22 @@ Il più semplice dei generatori casuali utilizza la funzione "rand-char" per cre
 (rand-string 10 vowels)
 ;-> "eiuiuoeaoi"
 
+Un altro metodo genera numeri casuali in un determinato intervallo e li converte in caratteri.
+
+; Funzione che genera una stringa casuale in un intervallo di caratteri
+; la funzione prende caratteri e/o codici ASCII dei caratteri
+(define (rand-ascii len start-char end-char)
+  (let ( (min-val (if (string? start-char) (char start-char) start-char))
+         (max-val (if (string? end-char)   (char end-char) end-char))
+       )
+    (if (> min-val max-val) (swap min-val max-val))
+    (join (collect (char (+ min-val (rand (+ (- max-val min-val) 1)))) len))))
+
+(rand-ascii 10 "a" "z")
+;-> "sclzxfiubh"
+(rand-ascii 10 32 126)
+;-> "8,6+9^kasm"
+
 Adesso ci proponiamo di scrivere una funzione che genera stringhe "leggibili". Per stringa "leggibile" intendiamo una stringa che segue le regole generali della lingua italiana e quindi può essere letta senza difficoltà (es. "unhwsyyodm" è illeggibile).
 Vediamo alcune di queste regole (che hanno quasi sempre delle eccezioni):
 1) non ci sono tre vocali di seguito (eccez. aiuola)
