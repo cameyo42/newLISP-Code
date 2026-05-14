@@ -3482,7 +3482,10 @@ NOTE LIBERE 36
   Dividere o moltiplicare
   Somma delle cifre di una stringa
   Sequenza Look and Say
-  Sequenze conta cifre
+  Sequenze conta cifre (Look All and Say)
+  Numeri con la cifra x
+  L'Aritmetica di Treviso (Problema Signoria di Venezia)
+  Coppie con somme uguali con 4 dadi
 
 PROBLEMI SUI DADI
 =================

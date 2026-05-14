@@ -4554,9 +4554,9 @@ Versione stile lisp:
 ;->  1410 1411 1412 1413 24 1415 1416 1417 1418 1419 1510)
 
 
---------------------
-Sequenze conta cifre
---------------------
+---------------------------------------
+Sequenze conta cifre (Look All and Say)
+---------------------------------------
 
 Dato un numero intero applicare i passi seguenti:
 1) contare quante volte appare ogni cifra del numero e 
@@ -4573,6 +4573,8 @@ Il numero contiene una cifra 0, tre cifre 2, una cifra 3 e 1 cifra 4.
   ((1 0) (1 3) (1 4) (3 2))
 3) creazione nuovo numero
   ((1 0) (1 3) (1 4) (3 2)) --> 1 0 1 3 1 4 3 2 --> 10131432
+
+Questo metodo applicato ai numeri naturali genera una sequenza 'Look All and Say'.
 
 ; Funzione che prende un intero e genera un nuovo numero conta cifre
 ; gestisce anche i big-integer
@@ -4688,6 +4690,256 @@ Calcoliamo la lunghezza delle sequenze partendo dai numeri 0..1000:
 ;-> (12 14 13 14 10 12 12 12 12 12 11 13 12 13 9 11 11 11 11 11 8 12 2
 ;->  ...
 ;->  15 16 16 16 15 16 15 16 15 15 16 16 16 8 8 14 13 12 15 16 16 11 10)
+
+
+---------------------
+Numeri con la cifra x
+---------------------
+
+Quanti sono i numeri di k cifre che hanno la cifra x?
+
+Per esempio, quanti sono i numeri di 3 cifre che hanno la cifra 7?
+
+Metodo 1 (ciclo for per ogni numero di k cifre)
+-----------------------------------------------
+
+(define (with1 k x)
+  (let ((min-val (** 10 (- k 1)))
+        (max-val (- (** 10 k) 1))
+        (con 0)
+        (d (string x))
+       )
+    (for (i min-val max-val)
+      (when (find d (string i)) 
+        ;(println i)
+        (++ con)))
+    con))
+
+(with1 3 7)
+;-> 252
+
+(with1 3 0)
+;-> 171
+
+Metodo 2 (calcolo del totale dei numeri)
+----------------------------------------
+Calcolare quanti sono i numeri di k cifre (tutti).
+Calcolare quanti sono i numeri di k cifre SENZA la cifra x (senza).
+Numeri di k cifre CON la cifra x: con = tutti - senza
+
+Per generare un numero di k cifre dobbiamo:
+1) per la prima cifra possiamo scegliere 9 cifre (tutte meno lo 0)
+2) per le altre (k - 1) cifre possiamo scegliere 10 cifre (0..9))
+Quindi il totale dei numeri di k cifre vale:
+  
+  tutti = 9 * 10^(k-1)
+
+Per generare un numero di k cifre SENZA la cifra x dobbiamo:
+1) se x = 0, allora per la prima cifra possiamo scegliere 9 cifre (tutte meno la cifra x)
+   se x <> 0, allora per la prima cifra possiamo scegliere 8 cifre (tutte meno lo 0 e la cifra x)
+2) per le altre (k - 1) cifre possiamo scegliere 9 cifre (tutte meno la cifra x)
+Quindi il totale dei numeri di k cifre senza la cifra x vale:
+
+          9 * 9^(k-1),  se x = 0
+  senza = 
+          8 * 9^(k-1),  se x <> 0
+
+Quindi il totale di numeri di k cifre CON la cifra x vale:
+
+  con = tutti - senza
+
+(define (with2 k x)
+  (let ( (tutti (* 9 (pow 10 (- k 1))))
+         (senza (if (zero? x) (pow 9 k) (* 8 (pow 9 (- k 1))))) )
+    (- tutti senza)))
+
+(with2 3 7)
+;-> 252
+
+(with1 3 0)
+;-> 171
+
+(for (k 1 5) (println "Cifre " k ": " (map (curry with1 k) '(0 1))))
+;-> Cifre 1: (0 1)
+;-> Cifre 2: (9 18)
+;-> Cifre 3: (171 252)
+;-> Cifre 4: (2439 3168)
+;-> Cifre 5: (30951 37512)
+I numeri di 3 cifre con la cifra 0 sono 171.
+I numeri di 3 cifre con la cifra 1..9 sono 252.
+
+
+------------------------------------------------------
+L'Aritmetica di Treviso (Problema Signoria di Venezia)
+------------------------------------------------------
+
+Questo problema è tratto dal libro del Quattrocento "L'Aritmetica di Treviso", il più antico manuale di argomento matematico edito a stampa in Occidente.
+
+Problema
+Il Santo Padre ha mandato un corriere da Roma a Venezia, ordinandogli di raggiungere Venezia in 7 giorni.
+La più illustre signoria di Venezia ha mandato un altro corriere a Roma e dovrebbe raggiungere Roma in 9 giorni.
+Da Roma a Venezia ci sono 250 miglia.
+I due corrieri hanno iniziato il loro viaggio contemporaneamente.
+In quanti giorni i corrieri si incontreranno?
+Quante miglia avranno percorso?
+
+   v1                     v2
+   -->                    <-
+   ..............X..........
+   <----- s1 ---> <-- s2 -->
+   <---------- s ---------->
+
+Spazio totale:
+
+  s = 250
+
+Tempo di percorrenza dei corrieri:
+
+  t1 = 7
+  t2 = 9
+
+Velocità dei corrieri:
+
+  v1 = s/t1
+  v2 = s/t2
+
+Spazio percorso dai corrieri quando si incontrano (al tempo tx):
+
+  s1 = v1*tx
+  s2 = v2*tx
+
+Inoltre risulta:
+
+  s = s1 + s2
+
+Quindi al tempo tx deve risultare:
+
+  s1/v1 = s2/v2
+  s1/v1 = (s - s1)/v2
+
+Ricaviamo s1:
+
+  s1/v1 = s/v2 - s1/v2
+  s1/v1 + s1/v2 = s/v2
+  s1*(v1 + v2)/(v1 * v2) = s/v2
+
+        s*(v1 * v2)
+  s1 = --------------
+        v2*(v1 + v2)
+
+Calcoliamo s2:
+
+  s2 = s - s1
+
+Tempo di incontro dei corrieri:
+
+  tx = s1/v1
+  tx = s2/v2
+
+Verifica del risultato:
+
+ tx = s1/v1
+ s2 = v2*tx deve essere uguale a s2 = s - s1
+
+(setq s 250)
+250
+(setq v1 (div 250 7))
+;-> 35.71428571428572
+(setq v2 (div 250 9))
+;-> 27.77777777777778
+(setq s1 (div (mul s v1 v2) (mul v2 (add v1 v2))))
+;-> 140.625
+(setq tx (div s1 v1))
+;-> 3.9375
+(setq s2 (mul tx v2))
+;-> 109.375
+(setq s2 (sub s s1))
+;-> 109.375
+
+
+----------------------------------
+Coppie con somme uguali con 4 dadi
+----------------------------------
+
+Lanciando quattro dadi a sei facce non truccati, qual è la probabilità di poter suddividere i dadi in due coppie, in modo che ciascuna coppia abbia la stessa somma?
+
+Con 4 elementi (a, b, c, d) esistono solo 3 suddivisioni possibili:
+
+1) (a,b) e (c,d)
+2) (a,c) e (b,d)
+3) (a,d) e (b,c)
+
+Quindi basta controllare una delle seguenti condizioni:
+
+  a + b == c + d
+  a + c == b + d
+  a + d == b + c
+
+Se almeno una è vera, allora la suddivisione esiste.
+
+Condizione unica:
+
+  (a+b=c+d) OR (a+c=b+d) OR (a+d=b+c)
+
+Equivalentemente:
+
+  1) a + b + c + d deve essere pari e
+  2) deve esistere una coppia con somma = totale / 2
+
+Infatti, se (a + b) = (c + d), allora entrambe le somme valgono metà del totale.
+
+; Funzione che simula il processo
+(define (simula iter)
+  (local (conta a b c d)
+    (setq conta 0)
+    ; ciclo di 'iter' simulazioni...
+    (for (i 1 iter)
+      ; generazione casuale del lancio di 4 dadi
+      (setq a (+ (rand 6) 1))
+      (setq b (+ (rand 6) 1))
+      (setq c (+ (rand 6) 1))
+      (setq d (+ (rand 6) 1))
+      ; verifica esistenza di coppie con somme uguali
+      (if (or (= (+ a b) (+ c d)) (= (+ a c) (+ b d)) (= (+ a d) (+ b c)))
+          (++ conta)))
+    (div conta iter)))
+
+(simula 1e5)
+;-> 0.25975
+(simula 1e6)
+;-> 0.259373
+(simula 1e6)
+;-> 0.259824
+(simula 1e7)
+;-> 0.2594451
+(time (println (simula 1e8)))
+;-> 0.25923368
+;-> 46969.786
+
+; Funzione che calcola la probabilità matematica del processo
+(define (calcola)
+  (local (tot conta)
+    ; numero totale di combinazioni possibili
+    (setq tot (* 6 6 6 6))
+    ; combinazioni favorevoli --> coppie con somme uguali
+    (setq conta 0)
+    ; generazione di ogni combinazione con 4 cicli for...
+    (for (a 1 6)
+      (for (b 1 6)
+        (for (c 1 6)
+          (for (d 1 6)
+          ; verifica esistenza di coppie con somme uguali
+            (if (or (= (+ a b) (+ c d)) (= (+ a c) (+ b d)) (= (+ a d) (+ b c)))
+                (++ conta))))))
+    (println "Totale combinazioni: " tot)
+    (println "Combinazioni favorevoli: " conta)
+    (println "Probabilità(somme uguali): " (mul 100 (div conta tot)))))
+
+(calcola)
+;-> Totale combinazioni: 1296
+;-> Combinazioni favorevoli: 336
+;-> Probabilità(somme uguali): 25.92592592592592
+;-> 25.92592592592592
 
 ============================================================================
 

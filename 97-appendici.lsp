@@ -7327,10 +7327,13 @@ Alcuni articoli trattano le tecniche generali di "Risoluzione dei problemi".
 Ogni articolo è autosufficiente, nel senso che in ognuno sono riportate tutte le funzioni necessarie per eseguire le istruzioni riportate.
 Alcuni problemi sono ottimi esercizi di programmazione per principianti.
 Ci sono tantissime sequenze OEIS (On-line Encyclopedia of Integer Sequences).
+Alcuni articoli hanno anche un risvolto culturale (poca roba comunque).
 In genere i programmi/algoritmi/funzioni sono scritti per essere leggibili/comprensibili e possono essere sicuramente migliorati/ottimizzati.
 Mi sono divertito anche a programmare diversi giochi (carte, dadi, griglie, ecc.).
+Ogni tanto ho preso qualche pausa.
 Ci sono degli errori? Sicuramente si (anche se mi sono impegnato abbastanza).
 Fatemi sapere cosa ne pensate.
+
 
 ============================================================================
 Non sei roba tua
