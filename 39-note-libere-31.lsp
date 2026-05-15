@@ -279,7 +279,7 @@ Proviamo:
   ("G" "H" "I")))
 
 ; crea la pagina html (stringa)
-(setq html (matrice2html "Matrice di Test" matrix '("uno" "due" "tre"))
+(setq html (matrice2html "Matrice di Test" matrix '("uno" "due" "tre")))
 ; salva su file
 (write-file "matrice.html" html)
 ; visualizza il file html sul browser predefinito

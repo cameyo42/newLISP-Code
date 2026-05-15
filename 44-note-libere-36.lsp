@@ -4916,7 +4916,8 @@ Infatti, se (a + b) = (c + d), allora entrambe le somme valgono metà del totale
 ;-> 0.25923368
 ;-> 46969.786
 
-; Funzione che calcola la probabilità matematica del processo
+; Funzione che calcola la probabilità del processo
+; generando tutte le possibili combinazioni
 (define (calcola)
   (local (tot conta)
     ; numero totale di combinazioni possibili
@@ -4940,6 +4941,331 @@ Infatti, se (a + b) = (c + d), allora entrambe le somme valgono metà del totale
 ;-> Combinazioni favorevoli: 336
 ;-> Probabilità(somme uguali): 25.92592592592592
 ;-> 25.92592592592592
+
+
+------------------------------------------
+Sequenze di bit in una stringa (e ritorno)
+------------------------------------------
+
+Data una stringa di bit determinare quante sequenze esistono di "00", "01", "10", "11".
+Le sequenze possono essere sovrapposte.
+
+Esempio
+stringa = "000101"
+sequenze = 00        00        01        10        01   
+          "000101" "000101" "000101" "000101" "000101"
+
+Metodo 1 (iterativo)
+--------------------
+
+(define (coppie1 str)
+  (let ( (len (length str))
+         (b00 0) (b01 0) (b10 0) (b11 0)
+         (cur "") )
+    (for (i 0 (- len 2))
+      (setq cur (string (str i) (str (+ i 1))))
+      (if (= cur "00") (++ b00)
+          (= cur "01") (++ b01)
+          (= cur "10") (++ b10)
+          (= cur "11") (++ b11)))
+    (list b00 b01 b10 b11)))
+
+(coppie1 "000101")
+;-> (2 2 1 0)
+
+(coppie1 "0001011010011011001")
+;-> (4 6 5 3)
+
+Metodo 2 (funzionale)
+---------------------
+
+(define (coppie2 str)
+  (let (lst (explode str))
+    (count '("00" "01" "10" "11") (map string (chop lst) (rest lst)))))
+
+(coppie2 "000101")
+;-> (2 2 1 0)
+
+(coppie2 "0001011010011011001")
+;-> (4 6 5 3)
+
+Adesso vogliamo fare il contrario, cioè vogliamo ricostruire la stringa partendo dal numero delle sequenze.
+
+Data una stringa binaria, definiamo:
+  a = numero di "00"
+  b = numero di "01"
+  c = numero di "10"
+  d = numero di "11"
+dove le coppie sono sottostringhe consecutive e sovrapposte.
+
+Esempio:
+  stringa = "000101"
+  coppie: 00 00 01 10 01
+quindi:
+  a=2 b=2 c=1 d=0
+
+Ogni coppia rappresenta una transizione tra bit consecutivi:
+  00: 0 -> 0
+  01: 0 -> 1
+  10: 1 -> 0
+  11: 1 -> 1
+
+Quindi il problema equivale a costruire un cammino che usa:
+a archi 00, b archi 01, c archi 10, d archi 11
+
+Algoritmo:
+1. Da: x(x-1)/2 = numero_00 ricaviamo quanti zeri contiene la stringa.
+2. Analogamente per gli uni.
+3. Sapendo quanti 0 e 1 esistono il numero totale di coppie miste deve essere:
+   01 + 10 = zeri * uni
+4. A questo punto basta costruire una stringa che produca esattamente:
+   - numero desiderato di 01
+   - automaticamente il resto sarà 10.
+   Costruzione greedy:
+   - mettere uno 0 il più a sinistra possibile massimizza i contributi a 01
+   - spostarlo verso destra diminuisce il numero di 01.
+
+Condizioni di esistenza
+Il sistema è consistente solo se:
+  a = x(x-1)/2
+  d = y(y-1)/2
+ammettono soluzioni intere x,y.
+e inoltre:
+  b + c = x*y
+dove: a=00, b=01, c=10, d=11
+Queste condizioni sono anche sufficienti.
+
+Esempio:
+  00 = 3
+  01 = 5
+  10 = 1
+  11 = 1
+  Da: x(x-1)/2 = 3 --> x = 3
+  Da: y(y-1)/2 = 1 --> y = 2
+Verifica:
+  x*y = 6 e infatti 01 + 10 = 5 + 1 = 6, quindi la stringa esiste.
+Una soluzione: 00101
+
+Casi degeneri
+Il caso 00 = 0, produce x(x-1)/2 = 0 e ha due soluzioni:
+- x=0
+- x=1
+stesso discorso per 11.
+
+Questi casi sono importanti perché:
+- la stringa deve essere non vuota
+- se tutte le quantità sono 0, la risposta può essere "0" o "1"
+
+Condizione di esistenza
+Una stringa esiste se e solo se abs(b - c) <= 1
+Infatti:
+- ogni passaggio 0->1 deve quasi sempre essere compensato da un passaggio 1->0
+- quindi i conteggi di 01 e 10 possono differire al massimo di 1
+
+Scelta del bit iniziale
+Caso 1: (b > c)
+La stringa deve iniziare con 0 e terminare con 1
+
+Caso 2: (c > b)
+La stringa deve iniziare con 1 e terminare con 0
+
+Caso 3: (b = c)
+La stringa puo' iniziare indifferentemente con 0 o 1
+
+Algoritmo greedy
+----------------
+Una volta scelto il bit corrente:
+se il bit corrente e' 0:
+- usare prima una coppia 00 se disponibile
+- altrimenti usare una coppia 01
+se il bit corrente e' 1:
+- usare prima una coppia 11 se disponibile
+- altrimenti usare una coppia 10
+
+Ogni coppia consumata aggiunge un nuovo bit alla stringa.
+
+La lunghezza finale vale sempre a + b + c + d + 1 perche' le coppie consecutive condividono un bit.
+
+(define (coppie->str b00 b01 b10 b11)
+  (local (out cur)
+    ; verifica la condizione necessaria e sufficiente:
+    ; il numero di transizioni 01 e 10 deve differire
+    ; al massimo di 1
+    (if (> (abs (- b01 b10)) 1)
+        nil
+        (begin
+          ; scelta del bit iniziale:
+          ; se 01 > 10 bisogna iniziare con 0
+          ; se 10 > 01 bisogna iniziare con 1
+          ; se sono uguali si preferisce:
+          ; - 0 se esistono coppie 00
+          ; - altrimenti 1
+          (cond ((> b01 b10) (setq cur "0"))
+                ((> b10 b01) (setq cur "1"))
+                (true
+                  (if (> b00 0)
+                      (setq cur "0")
+                      (setq cur "1"))))
+          ; inizializza la stringa risultato
+          ; con il primo bit
+          (setq out cur)
+          ; continua finche' esistono coppie da usare
+          (while (or (> b00 0) (> b01 0)
+                     (> b10 0) (> b11 0))
+            (cond
+              ; caso: bit corrente = 0
+              ((= cur "0")
+               (cond
+                 ; usa preferibilmente una coppia 00
+                 ; per rimanere nello stesso stato
+                 ((> b00 0)
+                  (-- b00)
+                  (push "0" out -1)
+                  (setq cur "0"))
+                 ; altrimenti usa una coppia 01
+                 ; passando allo stato 1
+                 ((> b01 0)
+                  (-- b01)
+                  (push "1" out -1)
+                  (setq cur "1"))
+                 ; nessuna coppia disponibile:
+                 ; costruzione impossibile
+                 (true
+                  (setq out nil)
+                  (setq b00 0 b01 0 b10 0 b11 0))))
+              ; caso: bit corrente = 1
+              (true
+               (cond
+                 ; usa preferibilmente una coppia 11
+                 ; per rimanere nello stesso stato
+                 ((> b11 0)
+                  (-- b11)
+                  (push "1" out -1)
+                  (setq cur "1"))
+                 ; altrimenti usa una coppia 10
+                 ; passando allo stato 0
+                 ((> b10 0)
+                  (-- b10)
+                  (push "0" out -1)
+                  (setq cur "0"))
+                 ; nessuna coppia disponibile:
+                 ; costruzione impossibile
+                 (true
+                  (setq out nil)
+                  (setq b00 0 b01 0 b10 0 b11 0))))))
+          ; verifica finale:
+          ; tutte le coppie devono essere state consumate
+          (if (and out
+                   (= b00 0) (= b01 0)
+                   (= b10 0) (= b11 0))
+              out
+              nil)))))
+
+Proviamo:
+
+(coppie->str 2 2 1 0)
+;-> "000101"
+
+(coppie1 (coppie->str 2 2 1 0))
+;-> (2 2 1 0)
+
+(coppie->str 4 6 5 3)
+;-> "0000011110101010101"
+
+(coppie1 (coppie->str 4 6 5 3))
+;-> (4 6 5 3)
+
+(coppie->str 0 4 1 0)
+;-> nil
+
+(coppie->str 1 0 0 1)
+;-> nil
+
+(coppie->str 0 0 0 0)
+;-> "1"
+
+; Funzione che verifica una stringa e una coppia
+(define (check str i j k l)
+  (letn ( (lst (explode str))
+          (coppie (map string (chop lst) (rest lst)))
+          (conta (count '("00" "01" "10" "11") coppie)) )
+    (= conta (list i j k l))))
+
+(check "0000011110101010101" 4 6 5 3)
+;-> true
+
+
+---------------
+Staffetta 4x100
+---------------
+
+Dobbiamo selezionare i velocisti per una staffetta 4x100 metri.
+Si potrebbe pensare che la squadra migliore sia semplicemente composta dai 4 velocisti più veloci sui 100 metri, ma c'è un dettaglio importante da tenere in considerazione: la partenza lanciata.
+Nella seconda, terza e quarta frazione, il corridore è già in corsa quando viene passato il testimone.
+Ciò significa che alcuni corridori – quelli con una fase di accelerazione lenta – possono ottenere prestazioni migliori in una staffetta se si trovano nella seconda, terza o quarta frazione.
+Abbiamo a disposizione una lista di corridori tra cui scegliere.
+Per ogni corridore sono forniti due tempi (partenza da fermo e lanciata):
+- il tempo che impiegherebbe per correre la prima frazione (partenza da fermo)
+- il tempo che impiegherebbe per correre le altre frazioni (partenza lanciata)
+Un velocista può correre solo una frazione.
+Determinare la squadra più veloce.
+
+Se abbiamo pochi velocisti (al massimo 10) possiamo utilizzare il metodo brute-force calcolando i tempi di tutte le possibili formazioni (permutazioni) e trovare il tempo migliore.
+
+Se abbiamo un numero maggiore di velocisti possiamo usare il seguente algoritmo:
+
+1) Pre-ordinare i corridori in base al loro tempo di partenza lanciata.
+2) Provare ogni corridore nella prima frazione,
+   per ogni scelta, completare con i 3 corridori rimanenti
+   che hanno il tempo di partenza lanciata più veloce.
+
+Gli elementi della lista dei tempi hanno la seguente struttura:
+
+  (numero tf tl)
+
+dove: numero -> codice velocista (0..N-1)
+      tf --> tempo partenza da fermo
+      tl --> tempo partenza da lanciato
+
+(define (staffetta lst)
+  (local (out tmin fast cur-staf stop t)
+    ; lista dei velocisti (soluzione)
+    (setq out '())
+    ; tempo minimo iniziale
+    (setq tmin 999)
+    ; lista dei velocisti ordinata dal più veloce con partenza lanciata
+    (setq fast (sort (copy lst) (fn (x y) (<= (last x) (last y)))))
+    ; ciclo per tutti i velocisti...
+    (dolist (vel lst)
+      ; staffetta corrente
+      (setq cur-staf (list vel))
+      (setq stop nil)
+      ; aggiunge alla staffetta corrente i 3 velocisti
+      ; che hanno tempi migliori nella partenza da lanciati
+      (dolist (f fast stop)
+        (if (!= (f 0) (vel 0)) (push f cur-staf -1))
+        ; controllo staffetta corrente terminata
+        (if (= (length cur-staf) 4) (setq stop true))
+      )
+      ; calcolo del tempo totale della staffetta corrente
+      (setq t (add (cur-staf 0 1) (cur-staf 1 2) (cur-staf 2 2) (cur-staf 3 2)))
+      ; confronto tra tempo minimo e tempo corrente
+      ; ed eventuale aggiornamento della soluzione
+      (when (< t tmin) (setq tmin t) (setq out cur-staf)))
+    (println tmin)
+    out))
+
+Proviamo:
+
+(setq L '((0 4.3 3.14) (1 4.3 3.15) (2 4.1 3.12) (3 4.2 3.17) (4 3.9 3.11)))
+(staffetta L)
+;-> 13.31
+;-> ((4 3.9 3.11) (2 4.1 3.12) (0 4.3 3.14) (1 4.3 3.15))
+
+(setq L '((0 4.3 3.14) (1 4.3 3.15) (2 4.1 3.12) (3 4.2 3.17) (4 3.9 2.0)))
+(staffetta L)
+;-> 12.39
+;-> ((2 4.1 3.12) (4 3.9 2) (0 4.3 3.14) (1 4.3 3.15))
 
 ============================================================================
 
