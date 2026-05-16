@@ -7297,7 +7297,7 @@ Se cross=0 le direzioni sono parallele:
      v1 * t = d0 + v2 * t
      t = d0 / (v1 - v2)
      Poi calcoliamo X = A + u1 * (v1 * t).
-     Restituiamo (list X t t)` se l'incontro avviene.
+     Restituiamo (list X t t) se l'incontro avviene.
      Se v1=v2:
        - Se d0=0 --> partono insieme --> infiniti incontri.
        - Altrimenti --> mai.
@@ -7555,7 +7555,7 @@ Analizziamo il pattern per i numeri pari seguendo la stessa logica.
 - Riga 3: 6 numeri (14, 16, 18, 20, 22, 24)
 - Riga 4: 8 numeri (26, 28, 30, 32, 34, 36, 38, 40)
 
-La riga N contiene `2N` numeri pari consecutivi.
+La riga N contiene 2N numeri pari consecutivi.
 
 Formula per il Primo Numero:
 ----------------------------

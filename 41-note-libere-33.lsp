@@ -8566,12 +8566,12 @@ Esempio:
 
 Algoritmo
 ---------
-1. Generiamo tutti i sottoinsiemi unici di L che sommano a K` con 'sublists-sum-to'.
+1. Generiamo tutti i sottoinsiemi unici di L che sommano a K con 'sublists-sum-to'.
 2. Generiamo tutte le combinazioni possibili di questi sottoinsiemi usando una maschera binaria.
 3. Per ogni combinazione:
    - Uniamo i sottoinsiemi in una lista 'unione'.
-   - Controlliamo che ogni elemento di 'unione' sia presente in 'L' usando `sublist?`.
-4. Se la combinazione è valida, la aggiungiamo alla lista dei risultati `ris`.
+   - Controlliamo che ogni elemento di 'unione' sia presente in 'L' usando 'sublist?'.
+4. Se la combinazione è valida, la aggiungiamo alla lista dei risultati 'ris'.
 5. Alla fine, usiamo 'unique' su 'ris' per eliminare duplicati.
 
 (define (sublists-sum-to lst sum)
@@ -8966,7 +8966,7 @@ a) Funzione di iterazione parametrizzabile
    (define (g x c num) (% (+ (* x x) c) num))
    e passalo a 'pollard-rho'.
 b) Reinizializzazione casuale
-   Se (d = num)`, significa che il tentativo ha fallito.
+   Se (d = num), significa che il tentativo ha fallito.
    Si può riprovare con un altro 'x' o 'c'.
    Altrimenti 'nil' non è informativo:
    (if (= d num) (pollard-rho num) d)
@@ -9260,7 +9260,7 @@ Proviamo:
 Vediamo alcune implementazioni che applicano solo i segni alternati (+ - + ...) dal primo termine:
 
 1) Versione ricorsiva elegante
-Questa sfrutta il fatto che la somma alternata può essere vista come: `a - (b - (c - (d - ...)))`
+Questa sfrutta il fatto che la somma alternata può essere vista come: a - (b - (c - (d - ...)))
 
 (define (sum-diff1 lst)
   (cond 
@@ -9273,7 +9273,7 @@ Questa sfrutta il fatto che la somma alternata può essere vista come: `a - (b -
 ;-> -4
 
 2) Versione con fold/reduce
-Qui $idx parte da 0 per gli elementi di `(rest lst)`, quindi gli indici pari corrispondono a sottrazioni.
+Qui $idx parte da 0 per gli elementi di (rest lst), quindi gli indici pari corrispondono a sottrazioni.
 
 (define (sum-diff2 lst)
   (if (null? lst) 0

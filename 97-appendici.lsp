@@ -7317,7 +7317,7 @@ Un numero è divisibile per 12 se è divisibile per 3 e per 4.
  Considerazioni lungo il tragitto
 ============================================================================
 
-Dal 2019 al 2024 sono 5 anni.
+Dal 2019 al 2026 sono 7 anni.
 Scrivo questi articoli per tenere allenata la mente (over 60).
 Non sono un programmatore. Solo un amatore.
 Niente di trascendentale, ma di tutto un pò (e ci saranno anche argomenti ripetuti...dovuti alla mia labile memoria).

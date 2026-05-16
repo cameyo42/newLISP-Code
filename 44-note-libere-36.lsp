@@ -5267,5 +5267,327 @@ Proviamo:
 ;-> 12.39
 ;-> ((2 4.1 3.12) (4 3.9 2) (0 4.3 3.14) (1 4.3 3.15))
 
+
+-------------------------------------
+Aggiornare la posizione in classifica
+-------------------------------------
+
+In una gara di programmazione, N squadre risolvono M problemi.
+Dopo ogni problema risolto da qualunque squadra, restituire la posizione in classifica della propria squadra.
+I punteggi uguali sono tutti alla stessa posizione.
+Per esempio:
+  punteggi = (23 34 22 23 26 25 26 25)
+  ordinamento =
+  1) 34
+  2) 26 26
+  3)
+  4) 25 25
+  5)
+  6) 23 23
+  7)
+  8) 22
+
+Algoritmo
+1) Mantenere una lista S delle squadre e relativo punteggio.
+2) Calcolare quante squadre (K) hanno un punteggio maggiore del nostro.
+   La nostra posizione in classifica è (K + 1).
+
+(define (rank team solved)
+  (local (teams punteggi punti pos)
+    (setq teams (sort (unique solved)))
+    (setq punteggi (map list teams (dup 0 (length teams))))
+    (dolist (el solved)
+      ; aumenta di 1 il punteggio del team corrente
+      (++ (lookup el punteggi))
+      ; punti del nostro team
+      (setq punti (lookup team punteggi))
+      ; posizione del nostro team
+      (setq pos (+ (length (find-all punti (map last punteggi) $it <)) 1))
+      (println "Punteggi: " punteggi)
+      (println "Punti " team ": " punti)
+      (println "Posizione " team ": " pos)
+      (read-line)) '>))
+
+Proviamo:
+
+(setq solved '("A" "B" "C" "D" "A" "B" "B" "C" "D" "A" "B" "D" "D" "A"))
+(rank "A" solved)
+;-> Punteggi: (("A" 1) ("B" 0) ("C" 0) ("D" 0))
+;-> Punti A: 1
+;-> Posizione A: 1
+;-> 
+;-> Punteggi: (("A" 1) ("B" 1) ("C" 0) ("D" 0))
+;-> Punti A: 1
+;-> Posizione A: 1
+;-> 
+;-> ...
+;-> 
+;-> Punteggi: (("A" 2) ("B" 3) ("C" 1) ("D" 1))
+;-> Punti A: 2
+;-> Posizione A: 2
+;-> 
+;-> ...
+;-> 
+;-> Punteggi: (("A" 3) ("B" 4) ("C" 2) ("D" 4))
+;-> Punti A: 3
+;-> Posizione A: 3
+;-> 
+;-> Punteggi: (("A" 4) ("B" 4) ("C" 2) ("D" 4))
+;-> Punti A: 4
+;-> Posizione A: 1
+
+
+----------------
+Solitario del re
+----------------
+
+Regole del solitario:
+- si usano 36 carte disposte in 4 file da 9 carte coperte
+- le 4 carte rimanenti sono la 'mano iniziale'
+- ogni carta scoperta determina la prossima posizione da aprire sulla griglia
+- i Re chiudono la catena e vengono riciclati in fondo (nuova carta iniziale)
+- lo scopo è scoprire tutta la griglia
+
+Struttura dati:
+  Semi: intero (0..3)
+  Numeri: intero (0..9)
+  Carte: lista (seme numero)
+
+; Funzione che inizializza un solitario
+(define (init)
+  (let (m '())
+    ; creazione mazzo di carte (lista 4x10)
+    (for (r 0 3)
+      (for (c 0 9)
+        (push (list r c) m -1)))
+    ; creazione griglia casuale 4x9 (36 carte)
+    (setq g (array 4 9 (randomize m)))
+    ; carte rimaste (4) (mano iniziale)
+    (setq c4 (difference m (flat (array-list g) 1)))
+    ; rimozione dei Re (? 9) dalla mano iniziale
+    (while (find '(? 9) c4 match)
+      (pop c4 (find '(? 9) c4 match)))
+    ; carta iniziale corrente
+    ; controlla se la mano iniziale era composta solo da Re
+    (if c4 (setq cur (pop c4))
+        ;else
+        nil)))
+
+(init)
+
+; Funzione che stampa la griglia 4x9 (36 carte) e le carte iniziali
+(define (print-sol grid carte corrente)
+  (for (r 0 3)
+    (for (c 0 8)
+      (if (= (grid r c) (list r c))
+          (print " !!!  ")
+          (print (grid r c) " ")))
+    (println))
+  (println "Carte: " carte)
+  (println "Corrente: " corrente) '>)
+
+(print-sol g c4 cur)
+
+; Funzione che controlla se tutte le carte sono al posto giusto
+(define (check grid)
+  (let (stop nil)
+    (for (r 0 3 1 stop)
+      (for (c 0 8 1 stop)
+        (if (!= (grid r c) (list r c)) (setq stop true))))
+    (not stop)))
+
+(check g)
+
+; Funzione che cambia la carta corrente con la relativa carta della griglia
+; se dalla griglia pesca un Re,
+; allora prende una carta dalla mano iniziale (se possibile)
+; restituisce true se possibile, nil altrimenti
+(define (exchange-current)
+  (swap cur (g (cur 0) (cur 1)))
+  ;se dalla griglia abbiamo pescato un 10...
+  (if (= (cur 1) 9)
+      ; allora, se esistono carte iniziali disponibili...
+      (if c4 (setq cur (pop c4)) ; prendiamo la prima
+                ; altrimenti restituisce nil (gioco terminato)
+                nil)
+      ; altrimenti restituisce true
+      true))
+
+; Funzione che gestisce il solitario
+(define (solitaire)
+  (local (g c4 cur sfiga finito)
+    ; inizializza il gioco
+    ; sfiga è quando la mano iniziale è composta da 4 Re.
+    (if (nil? (init)) (setq sfiga true) (setq sfiga nil))
+    ; stampa situazione corrente
+    (print-sol g c4 cur)
+    (setq finito nil)
+    ; ciclo di scambi ...
+    (until (or finito sfiga)
+      ; scambio corrente possibile
+      (if (nil? (exchange-current)) (setq finito true))
+      ; stampa situazione corrente
+      (print-sol g c4 cur)
+      (read-line)
+    )
+    ; controllo solitario risolto
+    (if (check g)
+        (println "Bravo!!!")
+        (println "Riprova, sarai più fortunato")) '>))
+
+Proviamo:
+
+(solitaire)
+
+;-> (3 7) (0 8) (3 1) (2 6) (2 7) (3 6) (2 1) (0 0) (2 9)
+;-> (1 3) (0 1) (0 4) (2 3) (3 8) (2 8) (1 0) (1 4) (2 2)
+;-> (0 3) (1 8) (2 0) (0 5) (2 5) (2 4) (3 0) (3 3) (1 9)
+;-> (1 5) (1 1) (0 6) (3 4) (1 6) (0 7) (0 2) (0 9) (1 7)
+;-> Carte: ((3 2) (3 5))
+;-> Corrente: (1 2)
+;-> (3 7) (0 8) (3 1) (2 6) (2 7) (3 6) (2 1) (0 0) (2 9)
+;-> (1 3) (0 1)  !!!  (2 3) (3 8) (2 8) (1 0) (1 4) (2 2)
+;-> (0 3) (1 8) (2 0) (0 5) (2 5) (2 4) (3 0) (3 3) (1 9)
+;-> (1 5) (1 1) (0 6) (3 4) (1 6) (0 7) (0 2) (0 9) (1 7)
+;-> Carte: ((3 2) (3 5))
+;-> Corrente: (0 4)
+;->
+;-> (3 7) (0 8) (3 1) (2 6)  !!!  (3 6) (2 1) (0 0) (2 9)
+;-> (1 3) (0 1)  !!!  (2 3) (3 8) (2 8) (1 0) (1 4) (2 2)
+;-> (0 3) (1 8) (2 0) (0 5) (2 5) (2 4) (3 0) (3 3) (1 9)
+;-> (1 5) (1 1) (0 6) (3 4) (1 6) (0 7) (0 2) (0 9) (1 7)
+;-> Carte: ((3 2) (3 5))
+;-> Corrente: (2 7)
+;->
+;-> ...
+;->
+;-> (3 7)  !!!   !!!  (2 6)  !!!   !!!  (2 1) (0 0) (2 9)
+;->  !!!   !!!   !!!   !!!  (3 8) (2 8)  !!!  (1 4) (2 2)
+;-> (0 3) (1 8) (2 0)  !!!  (2 5) (2 4) (3 0)  !!!  (1 9)
+;-> (1 5)  !!!  (0 6)  !!!   !!!  (0 7)  !!!  (0 9) (1 7)
+;-> Carte: ((3 2) (3 5))
+;-> Corrente: (0 8)
+;->
+;-> (3 7)  !!!   !!!  (2 6)  !!!   !!!  (2 1) (0 0)  !!!
+;->  !!!   !!!   !!!   !!!  (3 8) (2 8)  !!!  (1 4) (2 2)
+;-> (0 3) (1 8) (2 0)  !!!  (2 5) (2 4) (3 0)  !!!  (1 9)
+;-> (1 5)  !!!  (0 6)  !!!   !!!  (0 7)  !!!  (0 9) (1 7)
+;-> Carte: ((3 2) (3 5))
+;-> Corrente: (2 9)
+;->
+;-> Riprova, sarai più fortunato
+
+Il solitario non è realmente 'casuale'.
+Una volta fissata la disposizione iniziale la partita è completamente deterministica.
+Quindi o è risolvibile o non lo è fin dall'inizio.
+
+Calcoliamo la probabilità di riuscita del solitario simulando un certo numero di partite.
+
+; Funzione che simula un solitario casuale (Metodo di Monte Carlo)
+; restituisce true se il solitario viene risolto, nil altrimenti
+(define (solitaire-prob)
+  (local (g c4 cur sfiga finito)
+    ; inizializza il gioco
+    ; sfiga è quando la mano iniziale è composta da 4 Re.
+    (if (nil? (init)) (setq sfiga true) (setq sfiga nil))
+    (setq finito nil)
+    ; ciclo di scambi ...
+    (until (or finito sfiga)
+      ; scambio corrente possibile
+      (if (nil? (exchange-current)) (setq finito true))
+    )
+    ; controllo solitario risolto
+    (if (check g) true nil)))
+
+(solitaire-prob)
+;->  nil
+
+; Funzione che calcola la probabilità di riuscita del solitario
+; con una simulazione di 'iter' partite
+(define (prob iter)
+  (let (sol 0)
+    (for (i 1 iter)
+      (if (solitaire-prob) (++ sol)))
+    (div sol iter)))
+
+(time (println (prob 1e5)))
+;-> 0.25026
+;-> 2500.484
+
+(time (println (prob 1e6)))
+;-> 0.25157
+;-> 24899.407
+
+(time (println (prob 1e7)))
+;-> 0.2514447
+;-> 248870.123
+
+L'errore statistico di Monte Carlo è circa:
+
+  sigma ~= sqrt(p*(1-p)/N)
+
+Con p ~= 0.25 e N = 10^7 si ottiene:
+
+  sigma ~= 1.4x10-4
+
+quindi il risultato 0.2514447 è già molto accurato.
+
+Esiste anche un metodo per vedere se il solitario e' risolvibile senza effettuare tutto il processo.
+
+Il solitario è equivalente alla 'copertura totale di un grafo funzionale mediante 4 ingressi iniziali' che è un problema classico di teoria dei grafi e permutazioni.
+Formalmente il gioco è una permutazione su 36 posizioni con:
+- 4 punti di ingresso iniziali (le 4 carte fuori griglia)
+- 4 stati speciali (i Re)
+Quindi la risolvibilità può essere determinata analizzando la struttura dei cicli della permutazione, senza simulare tutte le mosse.
+
+1) Interpretazione come funzione
+Ogni posizione della griglia contiene una carta: (riga colonna)
+La carta indica direttamente la prossima posizione da visitare.
+Quindi ogni cella definisce una funzione: f(posizione) = nuova-posizione
+Esempio:
+  g[1][4] = (2 7)
+significa:
+  (1,4) -> (2,7)
+
+2) Grafo funzionale
+La griglia genera un grafo orientato dove ogni nodo ha uscita 1 e i Re sono nodi terminali speciali.
+Quindi il grafo è composto da catene e cicli
+
+3) Quando il solitario è risolvibile
+Il solitario è risolvibile se e solo se:
+a) ogni ciclo del grafo contiene almeno un Re
+oppure
+b) è raggiungibile da una delle 4 carte iniziali
+Perchè se esiste un ciclo chiuso senza Re e ingressi iniziali, allora quel ciclo non verrà mai visitato.
+Le carte del ciclo resteranno sempre errate.
+
+4) Caso fondamentale
+Supponiamo:
+A -> B
+B -> C
+C -> A
+e nessuna delle 4 carte iniziali punta a A,B,C
+Allora il ciclo è isolato e non verrà mai attraversato, quindi il solitario è impossibile.
+
+5) Interpretazione equivalente
+Risolvere il solitario = visitare tutte le posizioni almeno una volta.
+Quindi il problema diventa che le 4 carte iniziali + i Re devono raggiungere tutto il grafo.
+
+6) Algoritmo
+Passo 1
+  Costruire il grafo:
+  nodo = posizione
+  arco = carta contenuta
+Passo 2
+  Marcare come sorgenti:
+  - le 4 carte iniziali
+  - i Re
+Passo 3
+  Fare DFS/BFS seguendo gli archi.
+Passo 4
+  Controllare se tutti i 36 nodi sono stati visitati:
+  - sì -> solitario risolvibile
+  - no -> impossibile
+
 ============================================================================
 

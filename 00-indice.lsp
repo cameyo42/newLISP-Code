@@ -3488,6 +3488,8 @@ NOTE LIBERE 36
   Coppie con somme uguali con 4 dadi
   Sequenze di bit in una stringa (e ritorno)
   Staffetta 4x100
+  Aggiornare la posizione in classifica
+  Solitario del re
 
 PROBLEMI SUI DADI
 =================
