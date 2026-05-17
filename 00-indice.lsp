@@ -3490,6 +3490,8 @@ NOTE LIBERE 36
   Staffetta 4x100
   Aggiornare la posizione in classifica
   Solitario del re
+  Eliminazione di un istogramma
+  Piantare alberi
 
 PROBLEMI SUI DADI
 =================

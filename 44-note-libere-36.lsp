@@ -5589,5 +5589,292 @@ Passo 4
   - sì -> solitario risolvibile
   - no -> impossibile
 
+
+-----------------------------
+Eliminazione di un istogramma
+-----------------------------
+
+Dato un istogramma e due mosse (rimuovi-riga, rimuovi-colonna):
+trovare il numero minimo di mosse per svuotare l'intero istogramma.
+L'istogramma viene rappresentato con una lista di numeri che sono l'altezza di ogni colonna.
+
+Per minimizzare le mosse:
+a) Se rimuoviamo una colonna, dobbiamo rimuovere quella più alta.
+b) Se rimuoviamo una riga, dobbiamo rimuovere quella più bassa.
+
+Quindi se rimuoviamo le X colonne più alte, il numero di righe rimanenti da rimuovere sarà pari all'altezza della colonna più alta rimasta: la (X + 1)-esima più alta.
+
+Algoritmo
+Se eliminiamo X colonne, conviene eliminare le X più alte.
+Dopo averle eliminate, il numero minimo di righe da togliere è l'altezza massima rimasta.
+Ordinando in ordine decrescente:
+  h0 >= h1 >= h2 >= ...
+se eliminiamo le prime X colonne, restano colonne con altezza massima hX.
+Quindi il costo totale è:
+- X + hX se 0 <= X < N
+- N se eliminiamo tutte le colonne.
+L'algoritmo quindi prova tutti i possibili valori di X e prende il minimo:
+min( h0,
+     1 + h1,
+     2 + h2,
+     ...
+     (N-1) + h(N-1),
+     N )
+La complessità è O(N*log*N) (ordinamento: O(N*log*N) e scansione: O(N))
+
+; Funzione che elimina un'istogramma con il minor numero di mosse
+(define (clear histo)
+  ; se le colonne sono tutte alte 1, allora basta eliminare una riga
+  (if (for-all (fn(x) (= x 1)) histo)
+    '(0 1 1)
+  ;else
+  (local (len min-mosse mosse sol)
+    ; numero colonne dell'istogramma
+    (setq len (length histo))
+    ; numero minimo di moss
+    (setq min-mosse 999999)
+    ; ordina i valori dell'istogramma (decrescente)
+    (sort histo >)
+    ; se non togliamo alcuna colonna, allora il numero di mosse vale:
+    ; max(histo)
+    (when (> min-mosse (histo 0)) 
+      (setq min-mosse (histo 0))
+      (setq sol (list 0 (histo 0) (histo 0))))
+    (println 0 { } (histo 0) { } (histo 0))
+    ; se togliamo X colonne (da 1 a N-1), allora le righe da togliere
+    ; sono il prossimo valore dopo quelli tolti.
+    ; X = c + 1
+    ; (X+1) = (histo (+ c 1))
+    (for (c 0 (- len 2))
+      (setq mosse (+ (+ c 1) (histo (+ c 1))))
+      (println (+ c 1) { } (histo (+ c 1)) { } mosse)
+      ; verifica se le mosse correnti sono il minimo
+      (when (< mosse min-mosse)
+        (setq min-mosse mosse)
+        (setq sol (list (+ c 1) (histo (+ c 1)) mosse))))
+    ; se togliamo tutte le colonne, allora il numero di mosse vale:
+    ; length(histo)
+    (when (> min-mosse len)
+      (setq min-mosse len)
+      (setq sol (list len 0 len)))
+    (println len { } 0 { } len)
+    sol)))
+
+Proviamo:
+
+(setq h '(2 2 2 2))
+(clear h)
+;-> 0 2 2  ; colonne tolte, righe tolte, mosse minime
+;-> 1 2 3 
+;-> 2 2 4
+;-> 3 2 5
+;-> 4 0 4
+;-> (0 2 2)
+
+(setq h '(4 4 4 4))
+(clear h)
+;-> 0 4 4
+;-> 1 4 5
+;-> 2 4 6
+;-> 3 4 7
+;-> 4 0 4
+;-> (0 4 4)
+
+(setq h '(5 5 2 2 7 3 5 4))
+(clear h)
+;-> 0 7 7
+;-> 1 5 6
+;-> 2 5 7
+;-> 3 5 8
+;-> 4 4 8
+;-> 5 3 8
+;-> 6 2 8
+;-> 7 2 9
+;-> 8 0 8
+;-> (1 5 6)
+
+(setq h '(15 5 12 2 6 11 10 10))
+(clear h)
+;-> 0 15 15
+;-> 1 12 13
+;-> 2 11 13
+;-> 3 10 13
+;-> 4 10 14
+;-> 5 6 11
+;-> 6 5 11
+;-> 7 2 9
+;-> 8 0 8
+;-> (8 0 8)
+
+(setq h '(1 1 1 2 2))
+(clear h)
+;-> 0 2 2
+;-> 1 2 3
+;-> 2 1 3
+;-> 3 1 4
+;-> 4 1 5
+;-> 5 0 5
+;-> (0 2 2)
+
+(setq h '(1 1 1 1))
+(clear h)
+;-> (0 1 1)
+
+(setq h '(0 0 0))
+(clear h)
+;-> 0 0 0
+;-> 1 0 1
+;-> 2 0 2
+;-> 3 0 3
+;-> (0 0 0)
+
+(setq h '(1 0 2))
+(clear h)
+;-> 0 2 2
+;-> 1 1 2
+;-> 2 0 2
+;-> 3 0 3
+;-> (0 2 2)
+
+Due funzioni per visualizzare l'istogramma.
+
+; Funzione che trasforma l'istogramma in una matrice binaria
+; ogni colonna rappresenta una colonna dell'istogramma
+(define (make-matrix histo)
+  (local (matrix max-col col)
+    (setq matrix '())
+    ; valore massimo dell' istogramma (colonna più alta)
+    (setq max-col (apply max histo))
+    ; crea la matrice  dell'istogramma (riga x riga)
+    ; 1 -> valore pieno, 0 -> valore vuoto
+    (dolist (el histo)
+      (setq col (append (dup 0 (- max-col el)) (dup 1 el)))
+      (push col matrix -1))
+    ; traspone le righe della matrice in colonne
+    (transpose matrix)))
+
+(make-matrix h)
+
+; Funzione che stampa una matrice binaria
+(define (print-matrix matrix)
+  (let ((row (length matrix))
+        (col (length (matrix 0))))
+    (for (r 0 (- row 1))
+      (for (c 0 (- col 1))
+        (print (matrix r c) " "))
+        (println)) '>))
+
+(setq h '(5 5 2 2 7 3 5 4))
+(print-matrix (make-matrix h))
+;-> 0 0 0 0 1 0 0 0
+;-> 0 0 0 0 1 0 0 0
+;-> 1 1 0 0 1 0 1 0
+;-> 1 1 0 0 1 0 1 1
+;-> 1 1 0 0 1 1 1 1
+;-> 1 1 1 1 1 1 1 1
+;-> 1 1 1 1 1 1 1 1
+(print-matrix (make-matrix (sort h >)))
+;-> 1 0 0 0 0 0 0 0
+;-> 1 0 0 0 0 0 0 0
+;-> 1 1 1 1 0 0 0 0
+;-> 1 1 1 1 1 0 0 0
+;-> 1 1 1 1 1 1 0 0
+;-> 1 1 1 1 1 1 1 1
+;-> 1 1 1 1 1 1 1 1
+
+
+---------------
+Piantare alberi
+---------------
+
+Abbiamo N piante che producono frutti dopo tempi diversi.
+Vogliamo trovare i tempi di posa di ciascun albero in modo che tutti gli alberi producano frutta nel minor tempo possibile.
+Possiamo posare (piantare) solo un albero al giorno.
+I tempi sono calcolati in giorni.
+Per esempio:
+  N = 4
+  tempi di produzione = (6 3 8 1)
+
+Il modo ottimale di piantare gli alberi è in ordine decrescente di tempo di crescita.
+Perchè se due alberi qualsiasi non sono in quest'ordine, scambiarli non può migliorare il risultato.
+
+Algoritmo: ordinare gli alberi in base al tempo di crescita decrescente e calcolare il valore massimo di (posizione + tempo di crescita).
+
+; ------------------------------------------------------------
+; piantagione
+; ------------------------------------------------------------
+; Data una lista di tempi di crescita degli alberi,
+; stampa:
+;
+; - l'ordine ottimale di piantagione
+; - il giorno in cui ogni albero viene piantato
+; - il giorno in cui produrrà frutti
+; - il tempo minimo totale necessario
+;
+; Ipotesi:
+; - ogni giorno può essere piantato un solo albero
+; - un albero con tempo T produce frutti T giorni
+;   dopo essere stato piantato
+;
+; Strategia ottimale:
+; - piantare prima gli alberi con crescita più lenta
+; - quindi ordinare i tempi in ordine decrescente
+; ------------------------------------------------------------
+
+(define (piantagione lst)
+  (local (ordinata massimo giorno-produzione)
+        ; ordina i tempi in ordine decrescente
+    (setq ordinata (sort lst >))
+    ; inizializza il massimo
+    (setq massimo 0)
+    (println "Ordine ottimale di piantagione:")
+    (println ordinata)
+    (println)
+    ; per ogni albero:
+    ; i = giorno di piantagione
+    (for (i 0 (- (length ordinata) 1))
+      ; giorno in cui l'albero produce frutti
+      (setq giorno-produzione (+ i (ordinata i)))
+      ; aggiorna il massimo
+      (setq massimo (max massimo giorno-produzione))
+      ; stampa informazioni
+      (println "Albero con crescita "
+               (ordinata i)
+               " giorni")
+      (println "  piantato al giorno: " i)
+      (println "  produce frutti al giorno: "
+               giorno-produzione)
+      (println))
+    (println "Tutti gli alberi produrranno")
+    (println "frutti entro il giorno: "
+             massimo)
+    ; restituisce il valore finale
+    massimo))
+
+Proviamo:
+
+(piantagione '(6 3 8 1))
+;-> Ordine ottimale di piantagione:
+;-> (8 6 3 1)
+;-> 
+;-> Albero con crescita 8 giorni
+;->   piantato al giorno: 0
+;->   produce frutti al giorno: 8
+;-> 
+;-> Albero con crescita 6 giorni
+;->   piantato al giorno: 1
+;->   produce frutti al giorno: 7
+;-> 
+;-> Albero con crescita 3 giorni
+;->   piantato al giorno: 2
+;->   produce frutti al giorno: 5
+;-> 
+;-> Albero con crescita 1 giorni
+;->   piantato al giorno: 3
+;->   produce frutti al giorno: 4
+;-> 
+;-> Tutti gli alberi produrranno
+;-> frutti entro il giorno: 8
+
 ============================================================================
 
