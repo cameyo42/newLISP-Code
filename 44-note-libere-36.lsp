@@ -5739,7 +5739,7 @@ Proviamo:
 Due funzioni per visualizzare l'istogramma.
 
 ; Funzione che trasforma l'istogramma in una matrice binaria
-; ogni colonna rappresenta una colonna dell'istogramma
+; ogni colonna della matrice rappresenta una colonna dell'istogramma
 (define (make-matrix histo)
   (local (matrix max-col col)
     (setq matrix '())
@@ -5820,10 +5820,10 @@ Algoritmo: ordinare gli alberi in base al tempo di crescita decrescente e calcol
 ; - piantare prima gli alberi con crescita più lenta
 ; - quindi ordinare i tempi in ordine decrescente
 ; ------------------------------------------------------------
-
+;
 (define (piantagione lst)
   (local (ordinata massimo giorno-produzione)
-        ; ordina i tempi in ordine decrescente
+    ; ordina i tempi in ordine decrescente
     (setq ordinata (sort lst >))
     ; inizializza il massimo
     (setq massimo 0)
@@ -5875,6 +5875,229 @@ Proviamo:
 ;-> 
 ;-> Tutti gli alberi produrranno
 ;-> frutti entro il giorno: 8
+
+
+-------------------------------------------
+Posizionamento di rettangoli in una griglia
+-------------------------------------------
+
+In una griglia MxN in quanti modi possiamo posizionare un rettangolo AxB.
+Il rettangolo può essere ruotato di 90 gradi.
+
+Esempio:
+
+griglia 2x4
+  +---+---+---+---+
+  |   |   |   |   |
+  +---+---+---+---+
+  |   |   |   |   |
+  +---+---+---+---+
+  |   |   |   |   |
+  +---+---+---+---+
+
+rettangolo 2x3
+  +---+---+---+
+  |   |   |   |
+  +---+---+---+
+  |   |   |   |
+  +---+---+---+
+
+Numero posizioni = 7
+
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+   
+| * | * | * |   |    |   | * | * | * |    |   |   |   |   |   |   |   |   |   |
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+
+| * | * | * |   |    |   | * | * | * |    | * | * | * |   |   |   | * | * | * |
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+
+|   |   |   |   |    |   |   |   |   |    | * | * | * |   |   |   | * | * | * |
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+
+
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+
+| * | * |   |   |    |   | * | * |   |    |   |   | * | * |
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+   
+| * | * |   |   |    |   | * | * |   |    |   |   | * | * |
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+
+| * | * |   |   |    |   | * | * |   |    |   |   | * | * |
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+
+
+Algoritmo
+---------
+1) Numero di posizioni senza rotazione
+Un rettangolo AxB entra nella griglia se:
+  A <= M e B <= N
+Le posizioni possibili sono:
+  (M - A + 1)*(N - B + 1)
+perchè ci sono M-A+1 scelte verticali e ci sono N-B+1 scelte orizzontali.
+
+2) Numero di posizioni con rotazione
+Ruotando il rettangolo otteniamo BxA.
+Un rettangolo AxB entra nella griglia se:
+  B <= M e A <= N
+Le posizioni possibili sono:
+  (M - B + 1)*(N - A + 1)
+
+3) Caso speciale: quadrato
+Se A = B, la rotazione non produce nuove configurazioni.
+Quindi bisogna contare una sola volta.
+
+4) Formula finale
+Se (A != B) --> P = (M - A + 1)*(N - B + 1) + (M - B + 1)*(N - A + 1)
+Se (A = B)  --> P = (M - B + 1)*(N - A + 1)
+
+Esempio:
+  Griglia 3x4
+  Rettangolo 2x3
+  Orientazione 2x3
+    (3-2+1)*(4-3+1) = 2*2 = 4
+  Orientazione 3x2
+    (3-3+1)*(4-2+1) = 1*3 = 3
+  Totale:
+    4 + 3 = 7
+
+La formula funziona anche quando il rettangolo non entra nella griglia.
+Per esempio, (M-A+1) <= 0 significa semplicemente:
+- nessuna posizione valida
+- contributo uguale a zero
+quindi in pratica: max(0,(M-A+1)*(N-B+1)).
+E analogamente per la rotazione.
+
+; -------------------------------------------------------------------------
+; Conta il numero di posizioni di un rettangolo AxB dentro una griglia MxN.
+; Il rettangolo puo' anche essere ruotato di 90 gradi.
+; posizioni(AxB) = (M-A+1)*(N-B+1)
+; posizioni(BxA) = (M-B+1)*(N-A+1)
+; Se A = B la rotazione non aggiunge nuove posizioni.
+; -------------------------------------------------------------------------
+;
+(define (rettangoli M N A B)
+  (letn ( (p1 0) (p2 0) )
+    ; numero posizioni rettangolo AxB
+    (if (and (>= M A) (>= N B)) ; il rettangolo entra nella griglia?
+        (setq p1 (* (+ M (- A) 1)
+                    (+ N (- B) 1))))
+    ; numero posizioni rettangolo BxA (solo se il rettangolo non è quadrato)
+    (if (and (!= A B) ; il rettangolo non è quadrato?
+             (>= M B) (>= N A)) ; il rettangolo entra nella griglia?
+        (setq p2 (* (+ M (- B) 1)
+                    (+ N (- A) 1))))
+    ; totale posizioni
+    (+ p1 p2)))
+
+Proviamo:
+
+(rettangoli 3 4 2 3)
+;-> 7
+(rettangoli 4 4 2 2)
+;-> 9
+(rettangoli 5 7 1 3)
+;-> 46
+(rettangoli 2 2 3 3)
+;-> 0
+(rettangoli 10 10 1 1)
+;-> 100
+
+
+----------------------------
+Consumo di bottiglie d'acqua
+----------------------------
+
+Una bottiglia d'acqua può essere acquistata con C bottiglie vuote della stessa acqua.
+Alcune bottiglie vuote possono trovarsi in giro.
+Se abbiamo P bottiglie piene, E bottiglie vuote, F bottiglie trovate e una bottiglia piena costa C bottiglie vuote, quante bottiglie d'acqua possiamo bere?
+
+Algoritmo
+Mantenere il numero attuale di bottiglie vuote e il numero di bottiglie consumate.
+Continuare a bere finché è possibile comprarne un'altra:
+- Comprare una nuova bottiglia.
+- Bere tutta l'acqua della nuova bottiglia
+- Conservare la bottiglia vuota.
+
+(define (acqua piene-inizio vuote-inizio trovate costo-bottiglia)
+  (cond ((= costo-bottiglia 0)
+          (list 'INF 0))
+        ((> costo-bottiglia (+ piene-inizio vuote-inizio trovate))
+          (list 0 (+ piene-inizio vuote-inizio trovate)))
+    (true
+      (let ( (vuote-totale (+ piene-inizio vuote-inizio trovate))
+            (bevute-totale piene-inizio) )
+      (while (>= vuote-totale costo-bottiglia)
+        (setq vuote-totale (- vuote-totale costo-bottiglia))
+        (setq bevute-totale (+ bevute-totale 1))
+        (setq vuote-totale (+ vuote-totale 1)))
+      (list bevute-totale vuote-totale)))))
+
+Proviamo:
+
+(acqua 0 9 0 3)
+;-> (4 1)
+(acqua 0 5 5 2)
+;-> (9 1)
+(acqua 1 5 5 2)
+;-> (11 1)
+(acqua 2 5 5 3)
+;-> (7 2)
+(acqua 0 0 0 1)
+;-> (0 0)
+(acqua 0 0 0 0)
+;-> (INF 0)
+(acqua 1 0 0 2)
+;-> (0 1)
+
+È possibile derivare una formula chiusa.
+
+Poniamo:
+  P --> piene-inizio
+  E --> vuote-inizio
+  F --> trovate
+  C --> costo-bottiglia
+  V --> vuote-totale
+  T --> bevute-totale
+  K --> vuote-finale
+
+Se il numero di bottiglie vuote totali vale:
+
+  V = P + E + F
+
+allora il numero massimo di bottiglie bevibili aggiuntive è:
+
+  floor((V - 1)/(C - 1))
+
+quindi:
+
+  T = P + floor((V - 1)/(C - 1)), per (C > 1)
+  (se C = 1, allora si possono bere infinite bottiglie)
+
+Alla fine le bottiglie vuote rimanenti sono:
+
+  K = ((V - 1) % (C - 1)) + 1
+
+Per C = 2, il risultato finale è sempre 1
+Per C > 2, il risultato può essere 1, 2, ..., C-1
+
+(define (acqua2 P E F C)
+  (let (V (+ P E F))
+    (cond ((> C V) (list 0 V))
+          ((= C 0) (list 'INF 0))
+          ((> C 1)
+            (list (+ P (/ (- V 1) (- C 1)))
+                  (+ (% (- V 1) (- C 1)) 1))))))
+
+Proviamo:
+
+(acqua2 0 9 0 3)
+;-> (4 1)
+(acqua2 0 5 5 2)
+;-> (9 1)
+(acqua2 1 5 5 2)
+;-> (11 1)
+(acqua2 2 5 5 3)
+;-> (7 2)
+(acqua2 0 0 0 1)
+;-> (0 0)
+(acqua2 0 0 0 0)
+;-> (INF 0)
+(acqua2 1 0 0 2)
+;-> (0 1)
 
 ============================================================================
 

@@ -3492,6 +3492,8 @@ NOTE LIBERE 36
   Solitario del re
   Eliminazione di un istogramma
   Piantare alberi
+  Posizionamento di rettangoli in una griglia
+  Consumo di bottiglie d'acqua
 
 PROBLEMI SUI DADI
 =================
