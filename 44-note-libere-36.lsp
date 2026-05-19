@@ -6099,5 +6099,170 @@ Proviamo:
 (acqua2 1 0 0 2)
 ;-> (0 1)
 
+
+--------------------------------
+Misura della quantità di pioggia
+--------------------------------
+
+La quantità di pioggia si misura in millimetri.
+La pioggia viene raccolta in un tubo trasparente verticale con tacche graduate in millimetri e, una volta che la pioggia ha smesso di cadere, è possibile controllare l'altezza dell'acqua nel tubo.
+Nel nostro problema, il tubo presenta purtroppo una perdita all'altezza L millimetri (mm).
+Se il livello dell'acqua è al di sopra della perdita, l'acqua fuoriesce dal tubo a una velocità di K millimetri all'ora (mm/h).
+Vogliamo calcolare quanta pioggia è caduta durante una particolare precipitazione.
+Supponiamo che il tubo sia sufficientemente alto da non traboccare.
+Supponiamo inoltre che la pioggia cada a un'intensità uniforme (sconosciuta)
+Supponiamo che l'acqua non evapori dal tubo.
+L'altezza della perdita è inoltre trascurabile.
+
+Input:
+Cinque numeri positivi L, K, T1, T2, H, dove:
+- L indica la posizione della perdita (mm)
+- K indica la velocità di perdita dell'acqua (mm/h)
+- T1 indica la durata della pioggia (h)
+- T2 indica il tempo intercorso tra la fine della pioggia e l'osservazione del livello dell'acqua (h)
+- H indica il livello dell'acqua nel tubo al momento dell'osservazione (mm)
+
+Output:
+Due numeri F1 e F2 dove:
+- F1 indica la quantità minima di pioggia (mm) che porterebbe all'osservazione data,
+- F2 indica la quantità massima di pioggia (mm) che porterebbe all'osservazione data.
+
+Durante la pioggia:
+- prima di raggiungere L: nessuna perdita
+- dopo aver raggiunto L: l'acqua fuoriesce con una velocità K
+- l'aumento netto diventa (R - K)
+
+Dopo la pioggia:
+- nessuna pioggia, solo perdite se il livello > L
+
+Caso 1: H < L
+-------------
+Il livello dell'acqua non ha mai raggiunto la perdita.
+Pertanto: F1 = F2 = H
+
+Caso 2: H > L
+-------------
+L'acqua deve aver superato il livello della perdita.
+Subito dopo la pioggia:
+  livello = H + K*T2
+Durante la pioggia:
+- tempo per raggiungere la perdita: L / R
+- tempo rimanente: T1 - L/R
+- guadagno netto dopo la perdita: (R - K)
+Equazione:
+  L + (R - K)*(T1 - L/R) = H + K*T2
+Espansione:
+  R*T1 - K*T1 + K*L/R = H + K*T2
+Moltiplicazione per R:
+  T1*R^2 - (K*T1 + H + K*T2)*R + K*L = 0
+Questa è un'equazione quadratica in R.
+Soluzioni:
+  R1 = (B - sqrt(D)) / (2*T1)
+  R2 = (B + sqrt(D)) / (2*T1)
+dove:
+  B = K*T1 + H + K*T2
+  D = B^2 - 4*T1*K*L
+Quantità di pioggia:
+  F1 = R1 * T1
+  F2 = R2 * T1
+
+Caso 3: H = L
+-------------
+Questo è un caso limite.
+Esistono due possibilità:
+(1) Non si è verificato alcun overflow:
+    F = L
+(2) Si è verificato un overflow e il sistema è tornato a L:
+    Si applica lo stesso modello quadratico di H > L
+    Pertanto:
+    F1 = L
+    F2 = R2 * T1 (radice superiore dell'equazione quadratica nel caso 2)
+
+Formule finali
+--------------
+Se H < L:  F1 = F2 = H
+Se H >= L: Equazione --> T1*R^2 - (K*T1 + H + K*T2)*R + K*L = 0
+           F1 = min(R1, R2) * T1
+           F2 = max(R1, R2) * T1
+
+; -----------------------------------------------------------
+; Funzione rain
+; Calcola l'intervallo delle possibili quantità di pioggia
+; Input:
+;   L  = altezza perdita (mm)
+;   K  = perdita (mm/h)
+;   T1 = durata pioggia (h)
+;   T2 = tempo dopo pioggia (h)
+;   H  = livello osservato (mm)
+; Output:
+;   F1 = livello minimo di pioggia possibile
+;   F2 = livello massimo di pioggia possibile
+; -----------------------------------------------------------
+(define (rain L K T1 T2 H)
+  (letn (A B C D R1 R2 F1 F2)
+    ;--------------------------------------------
+    ; caso: mai raggiunta la perdita
+    ;--------------------------------------------
+    (if (< H L)
+        (list H H)
+        ;----------------------------------------
+        ; caso H >= L (caso generale + limite)
+        ;----------------------------------------
+        (begin
+          ; quadratica:
+          ; T1*R^2 - (K*T1 + H + K*T2)*R + K*L = 0
+          (setq A T1)
+          (setq B (add (mul K T1) H (mul K T2)))
+          (setq C (mul K L))
+          (setq D (sub (mul B B) (mul 4 A C)))
+          (if (< D 0) ; caso di soluzioni immaginarie
+              (list nil nil)
+              (begin
+                ; radici
+                (setq R1 (div (sub B (sqrt D)) (mul 2 A)))
+                (setq R2 (div (add B (sqrt D)) (mul 2 A)))
+                ; conversione in pioggia totale
+                (setq F1 (mul (min R1 R2) T1))
+                (setq F2 (mul (max R1 R2) T1))
+                (list F1 F2)))))))
+
+Proviamo:
+
+(rain 10 2 5 1 7)
+; -> (7 7)
+
+(rain 10 2 5 1 12)
+; -> (5.36675 18.63325)
+
+(rain 10 2 5 3 10)
+;-> (4.693376137081925 21.30662386291807)
+
+
+
+----------------
+Somma dei debiti
+----------------
+
+Ci sono N persone che hanno dei debiti tra loro.
+Un debito, 'a' deve dare 'x' soldi a 'b', viene rappresentato con una lista del tipo:
+  (a b x)
+Scrivere una funzione che somma i debiti e i crediti di ogni persona.
+
+Esempio:
+  debiti = (a b 40) (b a 50) (c f 30) (d f 20) (c a 20) (f e 10)
+  somme = (a 30) (b -10) (c -50) (d -20) (e 10) (f 40)
+
+(define (debiti lst)
+  ; lista associativa delle persone (a 0) (b 0) ...
+  (let (persone (map (fn(x) (list x 0)) (sort (unique (flat (map chop lst))))))
+    ; ciclo per ogni debito
+    (dolist (el lst)
+      (-- (lookup (el 0) persone) (el 2))  ; debito
+      (++ (lookup (el 1) persone) (el 2))) ; credito
+    persone))
+
+(debiti '((a b 40) (b a 50) (c f 30) (d f 20) (c a 20) (f e 10)))
+;-> ((a 30) (b -10) (c -50) (d -20) (e 10) (f 40))
+
 ============================================================================
 

@@ -3494,6 +3494,8 @@ NOTE LIBERE 36
   Piantare alberi
   Posizionamento di rettangoli in una griglia
   Consumo di bottiglie d'acqua
+  Misura della quantità di pioggia
+  Somma dei debiti
 
 PROBLEMI SUI DADI
 =================
