@@ -3496,6 +3496,12 @@ NOTE LIBERE 36
   Consumo di bottiglie d'acqua
   Misura della quantità di pioggia
   Somma dei debiti
+  Fila al semaforo
+  Distanza minima tra auto
+  Vacanze di gruppo
+  Tre per due
+  Griglia con tesori da raccogliere
+  Percorsi minimi tra due punti (manhattan)
 
 PROBLEMI SUI DADI
 =================

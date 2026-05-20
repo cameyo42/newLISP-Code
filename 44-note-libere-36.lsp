@@ -6238,7 +6238,6 @@ Proviamo:
 ;-> (4.693376137081925 21.30662386291807)
 
 
-
 ----------------
 Somma dei debiti
 ----------------
@@ -6263,6 +6262,534 @@ Esempio:
 
 (debiti '((a b 40) (b a 50) (c f 30) (d f 20) (c a 20) (f e 10)))
 ;-> ((a 30) (b -10) (c -50) (d -20) (e 10) (f 40))
+
+
+----------------
+Fila al semaforo
+----------------
+
+Siamo fermi ad un semaforo rosso dietro a N auto.
+Tutte le auto sono lunghe X metri e distano tra loro Y metri.
+Il semaforo diventa verde e ogni auto parte una dopo l'altra con un ritardo di W secondi.
+Le auto si muovono con una velocità costante di K metri/sec
+Dopo quanto tempo arriviamo al semaforo?
+
+Abbiamo
+  N = numero di auto davanti a noi
+  X = lunghezza di ogni auto
+  Y = distanza tra due auto consecutive
+  W = ritardo di partenza tra un'auto e la successiva
+  K = velocità costante delle auto (m/s)
+
+Assumiamo che:
+  - anche la nostra auto abbia lunghezza X
+  - siamo fermi dietro l'ultima auto
+  - il primo veicolo parte al tempo t = 0
+  - ogni auto successiva parte dopo W secondi
+  - tutte mantengono velocità costante K
+
+La nostra auto è la numero N+1 della fila, quindi parte dopo:
+
+  Tpartenza = N*W
+
+Quando iniziamo a muoverci, dobbiamo ancora percorrere la distanza che ci separa dal semaforo.
+Davanti a noi ci sono N auto lunghe X e N spazi lunghi Y
+Quindi la distanza totale dal semaforo vale:
+
+  D = N*(X + Y)
+
+Il tempo necessario per percorrere questa distanza a velocità K è:
+
+  Tmoto = D/K = N*(X + Y)/K
+
+Pertanto il tempo totale dall'istante in cui il semaforo diventa verde fino a quando arriviamo al semaforo è:
+
+  T = N*W + N*(X + Y)/K = N * (W + (X + Y)/K)
+
+Esempio:
+  N = 5
+  X = 4 m
+  Y = 2 m
+  W = 1.5 s
+  K = 10 m/s
+  T = 5 * (1.5 + (4 + 2)/10) = 5 * (1.5 + 0.6) = 5 * 2.1 = 10.5 secondi
+
+(define (fila N X Y W K)
+  (mul N (add W (div (add X Y) K))))
+
+(fila 5 4 2 1.5 10)
+;-> 10.5
+
+
+------------------------
+Distanza minima tra auto
+------------------------
+
+Siamo in fondo a una lunga fila di auto.
+Vogliamo mantenere la giusta distanza dall'auto che ci precede.
+Abbiamo calcolato calcolato che per non dover mai frenare, dobbiamo mantenere una distanza di almeno p(n + 1), dove 'n' è il numero di auto che ci precedono e 'p' è una costante determinata dal tipo di auto che stiamo guidando.
+Dato il valore di 'p' e le distanze attuali (in ordine casuale) da ciascuna delle auto davanti, calcolare la distanza minima che bisonga mantenere dall'auto che ci precede per non dover frenare.
+
+Abbiamo:
+ S[i] = distanza dell'i-esima auto davanti dopo l'ordinamento crescente
+ p(k) = distanza minima necessaria quando ci sono k auto davanti
+ noi siamo in fondo alla fila
+
+Se un'auto si trova a distanza S[i], allora tra noi e quell'auto ci sono esattamente (i + 1) auto.
+Per evitare di frenare dobbiamo avere:
+
+  D + S[i] >= p(i + 1)
+dove:
+  D e' la nostra distanza dalla macchina immediatamente davanti
+  S[i] e' la distanza dell'auto considerata rispetto alla macchina davanti a noi
+
+Quindi:
+
+  D >= p(i + 1) - S[i]
+
+e questo deve valere per tutti gli i.
+
+Pertanto:
+
+  M = max(p(i + 1) - S[i])   con i in [0..n-1]
+
+e la distanza minima corretta dalla macchina davanti sara':
+
+  D = M
+
+D rappresenta la distanza finale che dobbiamo mantenere dalla macchina immediatamente davanti.
+
+Esempio 1
+---------
+Supponiamo:
+  p(k) = 10*k
+e distanze casuali:
+  (35 12 27 50)
+Ordiniamo:
+  S = (12 27 35 50)
+Calcoliamo:
+  10 - 12 = -2
+  20 - 27 = -7
+  30 - 35 = -5
+  40 - 50 = -10
+Quindi:
+  M = -2
+Questo significa che siamo gia' troppo lontani e possiamo avvicinarci di 2 metri.
+La distanza finale minima e':
+  D = 10
+infatti:
+  D = max(10 - 12, 20 - 27, 30 - 35, 40 - 50) = -2
+ma la distanza reale dalla prima auto e':
+  12 + (-2) = 10
+quindi il valore finale corretto della distanza e' 10.
+
+Esempio 2
+---------
+S = (3 11 25 31)
+Calcoliamo:
+  10 - 3  = 7
+  20 - 11 = 9
+  30 - 25 = 5
+  40 - 31 = 9
+Quindi:
+  M = 9
+La nuova distanza dalla macchina davanti deve essere:
+  D = 3 + 9 = 12
+Verifica:
+  auto 1: 12 >= 10
+  auto 2: 12 + 11 = 23 >= 20
+  auto 3: 12 + 25 = 37 >= 30
+  auto 4: 12 + 31 = 43 >= 40
+Tutti i vincoli sono soddisfatti.
+
+; pfun = funzione p(k)
+; dist = lista delle distanze casuali delle auto davanti
+;
+; Restituisce:
+; (distanza-minima incremento lista-ordinata)
+
+(define (distanza-minima pfun dist)
+  (local (s n m cur distanza)
+    ; ordina le distanze
+    (setq s (sort dist))
+    ; numero auto
+    (setq n (length s))
+    ; valore iniziale
+    (setq m -1e99)
+    ; calcola:
+    ; M = max(p(i + 1) - S[i])
+    (for (i 0 (- n 1))
+      (setq cur (sub (pfun (+ i 1)) (s i)))
+      (if (> cur m) (setq m cur)))
+    ; distanza finale dalla prima auto
+    (setq distanza (add (s 0) m))
+    ; risultati
+    (list distanza m s)))
+
+Proviamo:
+
+; funzione p(k) = 10*k
+(define (p k) (mul 10 k))
+
+(distanza-minima p '(35 12 27 50))
+;-> (10 -2 (12 27 35 50))
+
+(distanza-minima p '(3 11 25 31))
+;-> (12 9 (3 11 25 31))
+
+
+-----------------
+Vacanze di gruppo
+-----------------
+
+Per organizzare una vacanza abbiamo i seguenti dati:
+  N, il numero di partecipanti,
+  B, il budget,
+  W, il numero di settimane tra cui scegliere.
+  H, la lista di hotel da considerare
+
+Ogni hotel viene rappresentato con la seguente lista:
+
+  ((P(0) P(1) ... P(W-1)) (D(0) D(1) ... D(W-1)))
+
+dove:
+  P = lista di W numeri che indicano il prezzo per una persona che soggiorna in hotel per ogni weekend.
+  D = lista di W numeri che indicano il numero di posti letto disponibili in hotel per ogni weekend.
+
+Trovare il costo minimo della vacanza, oppure "restare a casa" se non è possibile trovare nulla che rientri nel budget.
+
+(define (vacanze N B W H)
+  (local (out costo-minimo week-minimo hotel-minimo
+          costi posti costo-totale letti)
+    (setq out '())
+    (setq costo-minimo (+ B 1))
+    (setq week-minimo nil)
+    (setq hotel-minimo nil)
+    ; ciclo per ogni hotel...
+    (dolist (hotel H)
+      (println "HOTEL: " (+ $idx 1))
+      ; costi hotel corrente
+      (setq costi (hotel 0))
+      ; posti hotel corrente
+      (setq posti (hotel 1))
+      ; ciclo per ogni settimana...
+      (for (i 0 (- W 1))
+        (print "  Settimana: " (+ i 1))
+        ; costo totale per la settimana corrente
+        (setq costo-totale (* N (costi i)))
+        ; posti/letti disponibili per la settimana corrente
+        (setq letti (posti i))
+        (print "  Costo: " costo-totale)
+        (print "  Posti: " letti)
+        ; verifica possibilità di soggiorno nella settimana corrente
+        (if (and (>= letti N) (>= B costo-totale))
+            (begin
+              (println "  -->  POSSIBILE")
+              ; controllo costo minimo
+              (when (<= costo-totale costo-minimo)
+                (setq hotel-minimo (+ $idx 1))
+                (setq costo-minimo costo-totale)
+                (setq week-minimo (+ i 1))
+                (push (list hotel-minimo week-minimo costo-minimo) out -1)))
+            ;else
+            (println "  -->  IMPOSSIBILE"))))
+    out))
+
+Proviamo:
+
+(setq N 3)
+(setq B 20)
+(setq W 3)
+(setq H '(((4 4 5) (3 2 2)) ((4 5 5) (4 3 2)) ((4 5 6) (2 4 4))))
+
+(vacanze N B W H)
+;-> HOTEL: 1
+;->   Settimana: 1  Costo: 12  Posti: 3  -->  POSSIBILE
+;->   Settimana: 2  Costo: 12  Posti: 2  -->  IMPOSSIBILE
+;->   Settimana: 3  Costo: 15  Posti: 2  -->  IMPOSSIBILE
+;-> HOTEL: 2
+;->   Settimana: 1  Costo: 12  Posti: 4  -->  POSSIBILE
+;->   Settimana: 2  Costo: 15  Posti: 3  -->  POSSIBILE
+;->   Settimana: 3  Costo: 15  Posti: 2  -->  IMPOSSIBILE
+;-> HOTEL: 3
+;->   Settimana: 1  Costo: 12  Posti: 2  -->  IMPOSSIBILE
+;->   Settimana: 2  Costo: 15  Posti: 4  -->  POSSIBILE
+;->   Settimana: 3  Costo: 18  Posti: 4  -->  POSSIBILE
+;-> ((1 1 12) (2 1 12))
+
+
+-----------
+Tre per due
+-----------
+
+Il negozio sotto casa vende tutti gli articoli con la promozione "3x2".
+Per 3 articoli acquistati, l'articolo con prezzo minore viene regalato.
+Se si acquistano N articoli, gli N/3 articoli con prezzo minore vengono regalati.
+
+Esempio:
+  Prezzo Articoli acquistati: 10 35 20 30 20 40
+  Articoli da pagare: 40 35 30 20
+  Costo: 40 + 35 + 30 + 20 = 125
+  Articoli in regalo: 20 10
+  Risparmio = 20 + 10 = 30
+
+Dati i prezzi degli articoli da acquistare, scrivere una funzione che restituisce il risparmio massimo.
+La funzione deve essere la più corta possibile.
+
+Il risparmio massimo si ottiene comprando ogni volta i 3 articoli con il prezzo massimo.
+Quindi basta ordinare i prezzi e sommare ogni 3 articoli.
+
+(define (risparmio lst)
+  (apply + (select (sort lst >) (sequence 2 (- (length lst) 1) 3))))
+
+(setq prezzi '(10 35 20 30 20 40))
+(risparmio prezzi)
+;-> 40
+
+Versione code-golf (67 caratteri):
+
+(define(r l)(apply +(select(sort l >)(sequence 2(-(length l)1)3))))
+(r prezzi)
+;-> 40
+
+
+---------------------------------
+Griglia con tesori da raccogliere
+---------------------------------
+
+In una griglia MxN ci sono K celle che contengono un tesoro.
+Partendo da una posizione P(x,y) trovare un percorso 'soddisfacente' che raccoglie tutti i tesori.
+I movimenti possono essere solo verticali o orizzontali.
+La posizione iniziale P e i tesori si trovano tutti i posizioni diverse.
+
+Cosa intendiamo per 'soddisfacente'?
+Intendiamo un percorso abbastanza vicino all'ottimo.
+
+Tra due punti qualunque A(x1,y1) e B(x2,y2), il percorso minimo sulla griglia è:
+
+  |x1 - x2| + |y1 - y2|
+
+Quindi non serve cercare cammini: la griglia induce già una metrica completa.
+
+Algoritmo ottimo
+----------------
+Trasformazione del problema
+Abbiamo un punto iniziale P e K celle con tesoro.
+Costruire un insieme di nodi:
+- nodo 0 = P
+- nodi 1..K = tesori
+Definire una matrice distanze:
+- dist(i,j) = distanza Manhattan tra i e j
+A questo punto il problema diventa:
+trovare il percorso minimo che parte da 0 e visita tutti i nodi 1..K almeno una volta
+cioè un "TSP con partenza fissata".
+
+Algoritmo greedy
+----------------
+Attraversare tutta la matrice e trovare dove sono i tesori.
+  Da P andare al tesoro più vicino,
+  poi da lì scegliere sempre il tesoro non ancora visitato più vicino
+  ripetere finché sono stati visitati tutti i tesori.
+
+L'algoritmo è semplice e veloce e sfrutta bene la distanza Manhattan.
+Quindi come euristica pratica è una buona scelta.
+Comunque non garantisce ottimalità.
+Infatti una scelta localmente ottima può costringerci a fare un grande salto dopo.
+Quindi può chiuderci in una regione e lasciarci l 'ultimo tesoro molto lontano.
+In pratica funziona discretamente se:
+- i tesori sono 'sparsi uniformemente'
+- non ci sono cluster molto separati
+- la distribuzione è quasi isotropa
+In questi casi spesso è vicino all'ottimo.
+
+; greedy nearest-neighbor per raccolta tesori su griglia (distanza Manhattan)
+; input:
+; P = posizione iniziale (x y)
+; T = lista di tesori ((x1 y1) (x2 y2) ...)
+
+; ------------------------------------------------------------
+; Distanza Manhattan tra due celle della griglia
+; La distanza e':
+; |x1 - x2| + |y1 - y2|
+; ------------------------------------------------------------
+(define (manha a b)
+  (+ (abs (- (a 0) (b 0)))
+     (abs (- (a 1) (b 1)))))
+
+; ------------------------------------------------------------
+; Cerca il tesoro non ancora visitato piu' vicino
+; alla posizione corrente.
+; Input:
+; pos = posizione corrente (x y)
+; lst = lista di tesori ((x1 y1) (x2 y2) ...)
+; used = array booleano dei tesori gia' visitati
+; Output:
+; indice del tesoro piu' vicino
+; ------------------------------------------------------------
+(define (min-index-from-pos pos lst used)
+  (letn (
+         ; indice del miglior tesoro trovato
+         best-i -1
+         ; distanza minima corrente
+         best-d 999999999
+         ; variabili temporanee
+         i 0
+         d 0)
+    ; analizza tutti i tesori
+    (for (i 0 (- (length lst) 1))
+      ; considera solo i tesori non visitati
+      (if (not (used i))
+        (begin
+          ; distanza tra posizione corrente
+          ; e tesoro i-esimo
+          (setq d (manha pos (lst i)))
+          ; se troviamo un tesoro piu' vicino
+          ; aggiorniamo il migliore
+          (if (< d best-d)
+            (begin
+              (setq best-d d)
+              (setq best-i i))))))
+    ; restituisce l'indice del tesoro scelto
+    best-i))
+
+; ------------------------------------------------------------
+; Algoritmo greedy nearest-neighbor
+; Strategia:
+; 1) partiamo da P
+; 2) scegliamo il tesoro piu' vicino
+; 3) ci spostiamo su quel tesoro
+; 4) ripetiamo fino a visitare tutti i tesori
+; Input:
+; P = posizione iniziale -> (x y)
+; T = lista tesori
+; Output:
+; lista ordinata delle posizioni visitate
+; ------------------------------------------------------------
+(define (greedy-treasure P T)
+  (letn ( ; numero totale dei tesori
+          (n (length T))
+          ; array booleano:
+          ; true  -> tesoro gia' visitato
+          ; nil   -> tesoro non visitato
+          (used (array n '(nil)))
+          ; posizione corrente
+          (cur P)
+          ; percorso finale
+          (path '())
+          ; variabili temporanee
+          (i 0)
+          (next 0) )
+    ; eseguiamo una scelta greedy
+    ; per ogni tesoro
+    (for (i 0 (- n 1))
+      ; trova il tesoro piu' vicino
+      ; alla posizione corrente
+      (setq next (min-index-from-pos cur T used))
+      ; marca il tesoro come visitato
+      (setf (used next) true)
+      ; aggiunge il tesoro al percorso
+      (push (T next) path -1)
+      ; aggiorna la posizione corrente
+      (setq cur (T next)))
+    ; aggiunge la posizione iniziale
+    ; all'inizio del percorso
+    (push P path)
+    ; restituisce il percorso completo
+    path))
+
+Proviamo:
+
+(setq pp '(0 0))
+(setq tt '((2 3) (3 4) (5 5) (10 10)))
+(greedy-treasure pp tt)
+;-> ((0 0) (2 3) (3 4) (5 5) (10 10))
+
+
+-----------------------------------------
+Percorsi minimi tra due punti (manhattan)
+-----------------------------------------
+
+Scrivere una funzione che prende due punti P1 e P2 e restituisce una lista con tutti i percorsi minimi possibili da P1 a P2 (lista di punti per ogni percorso).
+Le connessioni possibili sono quelle della distanza di manhattan (solo movimenti orizzontali e verticali).
+
+Dati i punti P1 = (x1 y1) e P2 = (x2 y2), un percorso e' una lista di punti consecutivi che collega P1 a P2 usando solo mosse:
+- destra  (x+1 y)
+- sinistra (x-1 y)
+- alto    (x y+1)
+- basso   (x y-1)
+
+Consideriamo solo i percorsi minimi.
+Se:
+
+  dx = |x2 - x1|
+  dy = |y2 - y1|
+
+allora ogni percorso minimo contiene dx mosse orizzontali e dy mosse verticali in ordine arbitrario.
+Il numero totale dei percorsi e':
+
+  binom((dx + dy) dx)
+
+Esempio:
+  P1 = (0 0)
+  P2 = (2 1)
+Occorrono:
+  2 mosse a destra (Right)
+  1 mossa in alto (Up)
+I percorsi minimi sono:
+  1) R R U
+  2) R U R
+  3) U R R
+
+; Funzione che genera tutti i percorsi minimi tra p1 e p2
+; Ogni percorso e' una lista di punti
+(define (percorsi p1 p2)
+  (local (x1 y1 x2 y2 sx sy)
+    (setq x1 (p1 0))
+    (setq y1 (p1 1))
+    (setq x2 (p2 0))
+    (setq y2 (p2 1))
+    ; direzione orizzontale
+    (setq sx (if (< x1 x2) 1 -1))
+    ; direzione verticale
+    (setq sy (if (< y1 y2) 1 -1))
+    ; funzione ricorsiva
+    (define (walk x y)
+      (cond
+        ; arrivati
+        ((and (= x x2) (= y y2))
+          (list (list (list x y))))
+        ; possiamo muoverci sia in x che in y
+        ((and (!= x x2) (!= y y2))
+          (append
+            (map
+              (fn (p) (cons (list x y) p))
+              (walk (+ x sx) y))
+            (map
+              (fn (p) (cons (list x y) p))
+              (walk x (+ y sy)))))
+        ; solo movimento orizzontale
+        ((!= x x2)
+          (map
+            (fn (p) (cons (list x y) p))
+            (walk (+ x sx) y)))
+        ; solo movimento verticale
+        (true
+          (map
+            (fn (p) (cons (list x y) p))
+            (walk x (+ y sy))))))
+    (walk x1 y1)))
+
+Proviamo:
+
+(percorsi '(0 0) '(2 1))
+;-> (((0 0) (1 0) (2 0) (2 1))
+;->  ((0 0) (1 0) (1 1) (2 1))
+;->  ((0 0) (0 1) (1 1) (2 1)))
+
+(length (percorsi '(0 0) '(3 2)))
+;-> 10
+
+Infatti, binom(5 3) = 10
 
 ============================================================================
 

@@ -5645,6 +5645,8 @@ Proviamo:
 ;->  (4.275948362681967 0.3308206427198095 2.139042329172643)
 ;->  (2.866756187627796 1.511429181798761 2.740256965849788))
 
+Vedi anche "Generazione di liste con elementi casuali" su "Note libere 36".
+
 
 ----------------------------
 Alcune funzioni sugli angoli
