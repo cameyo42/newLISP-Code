@@ -6791,5 +6791,470 @@ Proviamo:
 
 Infatti, binom(5 3) = 10
 
+
+-----------------------------
+Sovrapposizione di rettangoli
+-----------------------------
+
+Abbiamo N rettangoli posizionati con la base lungo l'asse X.
+I rettangoli possono anche sovrapporsi tra loro (totalmente o parzialmente).
+Ogni rettangolo viene rappresentato con due coordinate intere:
+1) P1 = (x1 y1) --> punto basso sinistra
+2) P2 = (x2 y2) --> punto alto destra
+L'indice di ogni rettangolo rappresenta l'ordine con cui sono stati posizionati.
+In questo modo prendendo due rettangoli possiamo stabilire quale rettangolo si trova sopra (e quale sotto).
+
+Esempio:     
+rettangoli: R1 = ((a1 b1) (a2 b2))
+            R2 = ((a3 b3) (a4 b4))
+            R3 = ((a5 b5) (a6 b7))
+
+R1 viene posizionato per primo, R2 per secondo e R3 per terzo.
+
+   Y
+   |
+   |      +----------+
+   |      | R1       |
+   |      |     +--------+
+   | +------+   | R3 |   |
+   | | R2 | |   |    |   |
+   | |    | |   |    |   |
+   | |    | |   |    |   |
+   +-+----+-+---+----+---+----X
+
+Data una lista di rettangoli trovare per ogni rettangolo l'area della parte visibile.
+L'area deve essere un numero da 0 (rettangolo completamente coperto) e 1 (rettangolo completamente visibile).
+
+Algoritmo
+---------
+Per ogni rettangolo:
+  a) calcolare la sua area (A)
+  b) calcolare le aree di sovrapposizione del rettangolo corrente con tutti gli altri rettangoli che sono stati posizionati dopo il rettangolo corrente.
+  c) Sommare le aree di sovrapposizione (AS)
+  d) Calcolare la percentuale visibile del rettangolo corrente P = (A - AS)/A.
+
+Nota:
+Questo algoritmo è valido SOLO SE non esistono tre o più rettangoli che hanno un'area di sovrapposizione in comune.
+In altre parole, un rettangolo puo essere coperto da più di un rettangolo, basta che i rettangoli di 'copertura' non si sovrappongono tra loro in alcun modo.
+
+Calcolo dell'intersezione di due rettangoli:
+
+Rettangolo A: ((x0A y0A) (x1A y1A))
+(x0A y0A) (angolo inferiore sinistro)
+(x1A y1A) (angolo superiore destro)
+
+Rettangolo B: ((x0B y0B) (x1B y1B))
+(x0B y0B) (angolo inferiore sinistro)
+(x1B y1B) (angolo superiore destro)
+
+La coordinata x-minima dell'intersezione sarà il massimo tra x0A e x0B.
+La coordinata x-massima dell'intersezione sarà il minimo tra x1A e x1B.
+La coordinata y-minima dell'intersezione sarà il massimo tra y0A e y0B.
+La coordinata y-massima dell'intersezione sarà il minimo tra y1A e y1B.
+
+L'intersezione esiste solo se:
+1) Il valore massimo della coordinata x-minima è minore del valore minimo della coordinata x-massima e
+2) Il valore massimo della coordinata y-minima è minore del valore minimo della coordinata y-massima.
+
+(define (overlay A B)
+  (local (x0A y0A x1A y1A x0B y0B x1B y1B
+          xmin ymin xmax ymax)
+    (setq x0A (A 0 0)) (setq y0A (A 0 1))
+    (setq x1A (A 1 0)) (setq y1A (A 1 1))
+    (setq x0B (B 0 0)) (setq y0B (B 0 1))
+    (setq x1B (B 1 0)) (setq y1B (B 1 1))
+    (setq xmin (max x0A x0B))
+    (setq ymin (max y0A y0B))
+    (setq xmax (min x1A x1B))
+    (setq ymax (min y1A y1B))
+    # verifica dell'intersezione
+    (if (and (< xmin xmax) (< ymin ymax))
+        (list (list xmin ymin)
+              (list xmax ymax))
+        ; else (nessuna intersezione)
+        nil)))
+
+(define (overlay1 A B)
+  (let ( (xmin (max (A 0 0) (B 0 0)))
+         (ymin (max (A 0 1) (B 0 1)))
+         (xmax (min (A 1 0) (B 1 0)))
+         (ymax (min (A 1 1) (B 1 1))) )
+    # verifica dell'intersezione
+    (if (and (< xmin xmax) (< ymin ymax))
+        (list (list xmin ymin)
+              (list xmax ymax))
+        ; else (nessuna intersezione)
+        nil)))
+
+(overlay '((1 1) (4 4)) '((2 2) (5 5)))
+(overlay1 '((1 1) (4 4)) '((2 2) (5 5)))
+;-> ((2 2) (4 4))
+
+(overlay '((2 2) (4 4)) '((3 3) (4 5)))
+(overlay1 '((2 2) (4 4)) '((3 3) (4 5)))
+;-> ((3 3) (4 4))
+
+(overlay '((1 1) (4 4)) '((4 1) (6 4)))
+(overlay1 '((1 1) (4 4)) '((4 1) (6 4)))
+;-> nil
+
+; Funzione che stampa una matrice di numeri interi
+; nil -> "-"
+(define (print-grid grid)
+  (local (row col)
+    (setq row (length grid))
+    (setq col (length (first grid)))
+    (for (i 0 (- row 1))
+      ; stampa della griglia
+      (for (j 0 (- col 1))
+        (if (= (grid i j) nil)
+            (print "  -")
+            ;else
+            (print (format "%3d" (grid i j)))))
+      (println))))
+
+Se i rettangoli non sono molto grandi, allora possiamo 'discretizzare' il problema.
+
+Algoritmo (lento)
+-----------------
+Per ogni rettangolo:
+  - creare una matrice vuota che copre tutti i rettangoli
+  Per ogni rettangolo:
+  - aggiornare le celle della matrice aggiungendo 1 nelle celle coperte dal rettangolo corrente
+  Calcolare il rapporto tra area visibile e area totale del rettangolo corrente
+  - leggere dalla matrice le celle che ricopre
+  - le celle con valore 1 sono quelle visibili
+
+Il metodo della discretizzazione evita automaticamente tutti i problemi di:
+- doppio conteggio
+- tripla sovrapposizione
+- inclusione/esclusione
+- geometria complicata
+perchè lavora direttamente sulle celle elementari della griglia.
+Per ogni rettangolo Ri:
+1) costruisce una matrice contenente:
+   - solo Ri
+   - tutti i rettangoli sopra Ri
+2) ogni cella contiene:
+   - 0 -> vuota
+   - 1 -> coperta solo da Ri
+   - > 1 -> coperta anche da rettangoli superiori
+3) le celle con valore 1 sono visibili
+
+Quindi: visibile = celle-con-valore-1 / area-rettangolo
+Il trucco fondamentale è: (pop rects)
+Perchè in questo modo:
+- il primo rettangolo viene confrontato con tutti
+- il secondo solo con quelli sopra
+- il terzo solo con quelli ancora sopra
+- ecc.
+quindi rispetta perfettamente l'ordine di disegno.
+La griglia rappresenta una rasterizzazione del piano.
+Ogni cella (row,col) rappresenta il quadratino [col,col+1] x [row,row+1]
+Quindi l'algoritmo calcola l'area visibile tramite conteggio di pixel/celle.
+Questo equivale ad un algoritmo Z-buffer discreto usato in grafica 2D/3D.
+La complessità vale circa O(N^2 * W * H)
+dove N = numero rettangoli, W = larghezza griglia, H = altezza griglia
+perchè per ogni rettangolo ricrea tutta la griglia e ridisegni tutti i rettangoli superiori
+Quindi è corretto ma lento.
+
+(define (rettangoli rects show)
+  ; lista delle soluzioni
+  (setq out '())
+  ; calcolo coordinate minime e massime della griglia 
+  ; che ricopre tutti i rettangoli
+  (setq xcoords (flat (map (fn(x) (list (x 0 0) (x 1 0))) rects)))
+  (setq ycoords (flat (map (fn(y) (list (y 0 1) (y 1 1))) rects)))
+  (setq xmin (apply min xcoords))
+  (setq xmax (apply max xcoords))
+  (setq ymin (apply min ycoords))
+  (setq ymax (apply max ycoords))
+  ; Ciclo per ogni rettangolo per calcolare la visibilità
+  (while rects
+    (setq r (first rects))
+    ; Crea una griglia vuota (0)
+    (setq grid (array (+ ymax 1) (+ xmax 1) '(0)))
+    ; Aggiorna i valori della griglia sovrapponendo tutti i rettangoli
+    ; (+1 per ogni sovrapposizione)
+    (dolist (s rects)
+      ; Calcolo coordinate minime e massime del rettangolo corrente
+      (setq row-min (s 0 1))
+      (setq row-max (s 1 1))
+      (setq col-min (s 0 0))
+      (setq col-max (s 1 0))
+      (for (row row-min (- row-max 1))
+        (for (col col-min (- col-max 1))
+          (++ (grid row col)))))
+    (if show (print-grid (reverse (copy grid)) "" ""))
+    ; calcolo coordinate minime e massime del rettangolo corrente
+    (setq row-min (r 0 1))
+    (setq row-max (r 1 1))
+    (setq col-min (r 0 0))
+    (setq col-max (r 1 0))
+    (setq conta 0)
+    ; Conta il numero di 1 contenuti nelle celle del rettangolo
+    ; contenuto nella griglia (celle visibili)
+    (for (row row-min (- row-max 1))
+      (for (col col-min (- col-max 1))
+        (if (= (grid row col) 1) (++ conta))))
+    ; Calcola l'area visibile del rettangolo corrente
+    (setq area (* (- row-max row-min) (- col-max col-min)))
+    (setq visibile (div conta area))
+    (if show (println conta { } area { } visibile))
+    ; Aggiorna la lista delle soluzioni
+    (push (list conta area visibile) out -1)
+    ; elimina il rettangolo corrente
+    ; (perchè non deve essere più usato)
+    (pop rects))
+  out)
+
+(setq lst '(((3 0) (9 8)) ((1 0) (5 4)) ((4 0) (11 6))))
+(rettangoli lst true)
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 1 1 1 1 1 1 0 0 0
+;->  0 0 0 1 1 1 1 1 1 0 0 0
+;->  0 0 0 1 2 2 2 2 2 1 1 0
+;->  0 0 0 1 2 2 2 2 2 1 1 0
+;->  0 1 1 2 3 2 2 2 2 1 1 0
+;->  0 1 1 2 3 2 2 2 2 1 1 0
+;->  0 1 1 2 3 2 2 2 2 1 1 0
+;->  0 1 1 2 3 2 2 2 2 1 1 0
+;-> 14 48 0.2916666666666667
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 1 1 1 2 1 1 1 1 1 1 0
+;->  0 1 1 1 2 1 1 1 1 1 1 0
+;->  0 1 1 1 2 1 1 1 1 1 1 0
+;->  0 1 1 1 2 1 1 1 1 1 1 0
+;-> 12 16 0.75
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;->  0 0 0 0 1 1 1 1 1 1 1 0
+;-> 42 42 1
+;-> ((14 48 0.2916666666666667) (12 16 0.75) (42 42 1))
+
+(setq lst '(((2 0) (10 8)) ((2 0) (14 4))))
+(rettangoli lst true)
+;->  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 1 1 1 1 1 1 1 1 0 0 0 0 0
+;->  0 0 1 1 1 1 1 1 1 1 0 0 0 0 0
+;->  0 0 1 1 1 1 1 1 1 1 0 0 0 0 0
+;->  0 0 1 1 1 1 1 1 1 1 0 0 0 0 0
+;->  0 0 2 2 2 2 2 2 2 2 1 1 1 1 0
+;->  0 0 2 2 2 2 2 2 2 2 1 1 1 1 0
+;->  0 0 2 2 2 2 2 2 2 2 1 1 1 1 0
+;->  0 0 2 2 2 2 2 2 2 2 1 1 1 1 0
+;-> 32 64 0.5
+;->  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+;->  0 0 1 1 1 1 1 1 1 1 1 1 1 1 0
+;->  0 0 1 1 1 1 1 1 1 1 1 1 1 1 0
+;->  0 0 1 1 1 1 1 1 1 1 1 1 1 1 0
+;->  0 0 1 1 1 1 1 1 1 1 1 1 1 1 0
+;-> 48 48 1
+;-> ((32 64 0.5) (48 48 1))
+
+Ottimizzazione
+--------------
+Possiamo creare UNA SOLA griglia finale.
+Invece di contare le sovrapposizioni, scriviamo nella cella l'indice del rettangolo visibile più alto.
+Esempio:
+(grid row col) = indice-ultimo-rettangolo
+Poi percorriamo la griglia una sola volta e contiamo quante celle appartengono a ciascun rettangolo
+Questa volta la complessità vale O(N * area-media) invece di O(N^2 * area-griglia).
+
+Inizializzare: (grid row col) = nil
+Poi disegnare i rettangoli in ordine: (setf (grid row col) idx)
+Alla fine ogni cella contiene il rettangolo visibile.
+Poi contiamo: conteggio[idx] e ottieniamo direttamente l'area visibile di ogni rettangolo.
+
+In pratica passiamo da "contare le coperture" a: "salvare direttamente il rettangolo visibile finale" che è il metodo tipico dei renderer raster.
+
+;------------------------------------------------------------
+; Calcola la parte visibile di una lista di rettangoli
+;
+; Ogni rettangolo ha forma:
+; ((x1 y1) (x2 y2))
+; dove:
+; (x1,y1) = basso-sinistra
+; (x2,y2) = alto-destra
+;
+; I rettangoli vengono disegnati nell'ordine della lista.
+; I rettangoli successivi coprono quelli precedenti.
+;
+; La funzione restituisce per ogni rettangolo:
+; (celle-visibili area-totale percentuale-visibile)
+;
+; Metodo:
+; -------
+; 1) Creare una sola griglia
+; 2) Disegnare tutti i rettangoli in ordine
+; 3) Ogni cella contiene l'indice dell'ultimo rettangolo
+;    che la copre (quello visibile)
+; 4) Contare le celle visibili per ogni rettangolo
+;
+; Complessità:
+; -------------
+; O(area totale coperta dai rettangoli)
+;------------------------------------------------------------
+
+(define (rettangoli-fast rects show)
+  (local (out xcoords ycoords xmin xmax ymin ymax larghezza altezza grid
+          aree visibili idx r row-min row-max col-min col-max area)
+    ; Calcolo coordinate minime e massime
+    (setq xcoords (flat (map (fn(x) (list (x 0 0) (x 1 0))) rects)))
+    (setq ycoords (flat (map (fn(y) (list (y 0 1) (y 1 1))) rects)))
+    (setq xmin (apply min xcoords))
+    (setq xmax (apply max xcoords))
+    (setq ymin (apply min ycoords))
+    (setq ymax (apply max ycoords))
+    ; Dimensioni della griglia
+    (setq larghezza (- xmax xmin))
+    (setq altezza  (- ymax ymin))
+    ; Creazione griglia
+    ; Ogni cella contiene:
+    ; - nil -> vuota
+    ; - indice del rettangolo visibile
+    (setq grid (array altezza larghezza '(nil)))
+    ; Lista aree rettangoli
+    (setq aree '())
+    (dolist (r rects)
+      (setq area
+            (* (- (r 1 1) (r 0 1))
+               (- (r 1 0) (r 0 0))))
+      (push area aree -1))
+    ; Disegna i rettangoli in ordine
+    ; I rettangoli successivi sovrascrivono quelli precedenti.
+    (setq idx 0)
+    (dolist (r rects)
+      (setq row-min (- (r 0 1) ymin))
+      (setq row-max (- (r 1 1) ymin))
+      (setq col-min (- (r 0 0) xmin))
+      (setq col-max (- (r 1 0) xmin))
+      ; Disegna il rettangolo corrente
+      (for (row row-min (- row-max 1))
+        (for (col col-min (- col-max 1))
+          (setf (grid row col) idx)))
+      (++ idx))
+    ; Visualizza la griglia finale
+    (if show
+      (begin
+        (println "Griglia finale:")
+        (print-grid (reverse (copy grid)) "" "")))
+    ; Conta le celle visibili
+    (setq visibili (dup 0 (length rects)))
+    (for (row 0 (- altezza 1))
+      (for (col 0 (- larghezza 1))
+        (if (grid row col)
+            (++ (visibili (grid row col))))))
+    ; Costruzione output finale
+    (setq out '())
+    (for (i 0 (- (length rects) 1))
+      (push (list (visibili i) (aree i) (div (visibili i) (aree i))) out -1))
+    out))
+
+Proviamo:
+
+(setq lst '( ((3 0) (9 8)) ((1 0) (5 4)) ((4 0) (11 6)) ))
+(rettangoli-fast lst true)
+;-> Griglia finale:
+;->   -  -  0  0  0  0  0  0  -  -
+;->   -  -  0  0  0  0  0  0  -  -
+;->   -  -  0  2  2  2  2  2  2  2
+;->   -  -  0  2  2  2  2  2  2  2
+;->   1  1  1  2  2  2  2  2  2  2
+;->   1  1  1  2  2  2  2  2  2  2
+;->   1  1  1  2  2  2  2  2  2  2
+;->   1  1  1  2  2  2  2  2  2  2
+;-> ((14 48 0.2916666666666667) (12 16 0.75) (42 42 1))
+
+(setq lst '(((2 0) (10 8)) ((2 0) (14 4))))
+(rettangoli-fast lst true)
+;-> Griglia finale:
+;->   0  0  0  0  0  0  0  0  -  -  -  -
+;->   0  0  0  0  0  0  0  0  -  -  -  -
+;->   0  0  0  0  0  0  0  0  -  -  -  -
+;->   0  0  0  0  0  0  0  0  -  -  -  -
+;->   1  1  1  1  1  1  1  1  1  1  1  1
+;->   1  1  1  1  1  1  1  1  1  1  1  1
+;->   1  1  1  1  1  1  1  1  1  1  1  1
+;->   1  1  1  1  1  1  1  1  1  1  1  1
+;-> ((32 64 0.5) (48 48 1))
+
+Vedi anche "Area di sovrapposizione di rettangoli" su "Note libere 14".
+Vedi anche "Intersezione di rettangoli" su "Note libere 27".
+
+
+-----------------------------------------
+Generazione di liste con elementi casuali
+-----------------------------------------
+
+Scriviamo una funzione che genra liste con elementi casuali dello stesso tipo.
+
+Parametri
+  nums    -> numero di elementi da generare
+  min-val -> valore minimo dell'intervallo (numero o carattere)
+  max-val -> valore massimo dell'intervallo (numero o carattere)
+  type    -> genera interi "i" o floating "f" o caratteri "c" o stringhe "s"
+  min-len -> lunghezza minima della stringa
+  max-len -> lunghezza massima della stringa
+
+(define (rand-list nums min-val max-val type min-len max-len)
+  (let (out '())
+    (cond ((= type "i") ; numeri interi
+            (for (i 1 nums)
+              (push (+ min-val (rand (+ (- max-val min-val) 1))) out -1)))
+          ((= type "f") ; numeri floating
+            (for (i 1 nums)
+              (push (add min-val (random 0 (sub max-val min-val))) out -1)))
+          ((= type "c") ; caratteri
+            (if (string? min-val) (setq min-val (char min-val)))
+            (if (string? max-val) (setq max-val (char max-val)))
+            (for (i 1 nums)
+               (push (char (+ min-val (rand (+ (- max-val min-val) 1)))) out -1)))
+          ((= type "s") ; stringhe
+            (if (string? min-val) (setq min-val (char min-val)))
+            (if (string? max-val) (setq max-val (char max-val)))
+            (for (i 1 nums)
+              (setq len (+ min-len (rand (+ (- max-len min-len) 1))))
+              (push (join (collect (char (+ min-val (rand (+ (- max-val min-val) 1)))) len)) out -1)))
+    )
+    out))
+
+Proviamo:
+
+(rand-list 10 5 25 "i")
+;-> (8 5 13 10 7 22 6 13 25 11)
+
+(rand-list 10 0 1 "f")
+;-> (0.6226386303292947 0.6444898831141087 0.7817926572466201
+;->  0.5518051698355052 0.8243964964751122 0.3734550004577776
+;->  0.7815790276802881 0.424054689168981 0.2977996154667806
+;->  0.5674306466872158)
+
+(rand-list 10 48 57 "c")
+;-> ("7" "1" "9" "9" "3" "9" "4" "8" "6" "0")
+
+(rand-list 10 "A" "Z" "c")
+;-> ("R" "I" "X" "H" "A" "A" "L" "F" "X" "M")
+
+(rand-list 4 "a" "z" "s" 1 6)  --> ("ucdiwl" "pjw" "m" "qtd")
+(rand-list 10 "a" "z" "s" 1 6)
+;-> ("asc" "wmtm" "uoj" "qejdty" "aibq" "w" "pswads" "fbeq" "ijr" "unpux")
+
+Vedi anche "Creazione di vettori/matrici (array) e liste con valori casuali" su "Note libere 7".
+
 ============================================================================
 

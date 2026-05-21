@@ -3843,6 +3843,9 @@ Proviamo:
 (overlay '((1 1) (4 4)) '((4 1) (6 4)))
 ;-> ()
 
+Vedi anche "Area di sovrapposizione di rettangoli" su "Note libere 14".
+Vedi anche "Sovrapposizione di rettangoli" su "Note libere 36".
+
 
 ------------------------------------------------------------------------
 Posizione migliore per un centro di servizi (Gradient descent algorithm)

@@ -5851,6 +5851,9 @@ Vediamo la velocità della funzione:
 
 Nota: questo metodo permette anche di calcolare l'area delle sovrapposizioni multiple.
 
+Vedi anche "Intersezione di rettangoli" su "Note libere 27".
+Vedi anche "Sovrapposizione di rettangoli" su "Note libere 36".
+
 
 ----------------------------------------------------------
 Network programming and distributed scripting with newLISP

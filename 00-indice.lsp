@@ -3502,6 +3502,8 @@ NOTE LIBERE 36
   Tre per due
   Griglia con tesori da raccogliere
   Percorsi minimi tra due punti (manhattan)
+  Sovrapposizione di rettangoli
+  Generazione di liste con elementi casuali
 
 PROBLEMI SUI DADI
 =================
