@@ -3504,6 +3504,9 @@ NOTE LIBERE 36
   Percorsi minimi tra due punti (manhattan)
   Sovrapposizione di rettangoli
   Generazione di liste con elementi casuali
+  Parcheggio intelligente
+  Segmenti e poligoni
+  Trucco con le carte
 
 PROBLEMI SUI DADI
 =================
@@ -3551,7 +3554,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (400 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (403 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

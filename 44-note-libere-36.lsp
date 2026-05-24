@@ -7201,7 +7201,7 @@ Vedi anche "Intersezione di rettangoli" su "Note libere 27".
 Generazione di liste con elementi casuali
 -----------------------------------------
 
-Scriviamo una funzione che genra liste con elementi casuali dello stesso tipo.
+Scriviamo una funzione che genera liste con elementi casuali dello stesso tipo.
 
 Parametri
   nums    -> numero di elementi da generare
@@ -7254,7 +7254,502 @@ Proviamo:
 (rand-list 10 "a" "z" "s" 1 6)
 ;-> ("asc" "wmtm" "uoj" "qejdty" "aibq" "w" "pswads" "fbeq" "ijr" "unpux")
 
+
+Scriviamo una funzione che genera liste con la struttura di una lista data con valori casuali in determinati intervalli.
+
+(define (index-list lst)
+"Create a list of indexes for all the elements of a list"
+  (ref-all nil lst (fn(x) true)))
+
+(setq L1 '((1 "c") "abc" -1.45 (1 ("xyz" (("qwe"))))))
+
+(index-list L1)
+;-> ((0) (0 0) (0 1) (1) (2) (3) (3 0) (3 1)
+;->  (3 1 0) (3 1 1) (3 1 1 0) (3 1 1 0 0))
+
+; Funzione che genera liste con la struttura di una lista data
+; con valori casuali in determinati intervalli
+(define (random-list nums lst min-int max-int min-float max-float min-len max-len min-char max-char)
+  ; Parametri:
+  ; nums      -> numero di elementi da generare
+  ; lst       -> lista con la struttura desiderata
+  ; min-int   -> valore minimo per gli interi
+  ; max-int   -> valore massimo per gli interi
+  ; min-float -> valore minimo per i float
+  ; max-float -> valore massimo per i float
+  ; min-len   -> lunghezza minima delle stringhe
+  ; max-len   -> lunghezza massima delle stringhe
+  ; min-char  -> valore minimo caratteri (numero o carattere)
+  ; max-char  -> valore massimo dei caratteri (numero o carattere)
+  (local (out indexes cur)
+    ; lista di output
+    (setq out '())
+    ; lista degli indici della lista data
+    (setq indexes (index-list lst))
+    (for (i 1 nums)
+      ; ciclo per ogni indice della lista data
+      (dolist (el indexes)
+        (setq cur (lst el))
+        ; aggiorna solo i valori atomici
+        ;(if-not (list? cur)
+        (if (atom? cur)
+          (cond ((integer? cur) ; intero
+                  (setf (lst el) (+ min-int (rand (+ (- max-int min-int) 1)))))
+                ((float? cur)   ; float
+                  (setf (lst el) 
+                      (add min-float (random 0 (sub max-float min-float)))))
+                ((string? cur)  ; stringa
+                  (if (string? min-char) (setq min-char (char min-char)))
+                  (if (string? max-char) (setq max-char (char max-char)))
+                  (if (> min-char max-char) (swap min-char max-char))
+                  (setq len (+ min-len (rand (+ (- max-len min-len) 1))))
+                  (setf (lst el)
+                    (join (collect 
+                        (char (+ min-char (rand (+ (- max-char min-char) 1))))
+                        len)))))))
+      ; aggiunge la lista corrente alla lista di output
+      (push lst out))
+    out))
+
+Proviamo:
+
+(setq L1 '((1 "c") "df" -1.45 (1 ("gh" "gh"))))
+(random-list 10 L1 0 9 0 1 1 5 48 57)
+;-> (((0 "535") "31" 0.8080385753959777 (1 ("78" "7638")))
+;->  ((6 "33") "8856" 0.7981810968352305 (9 ("6" "218")))
+;->  ((1 "17") "60306" 0.1316263313699759 (8 ("57801" "6201")))
+;->  ((5 "65") "3071" 0.6230658894619587 (8 ("743" "5396")))
+;->  ((7 "690") "63152" 0.2902920621356853 (9 ("614" "47")))
+;->  ((0 "8544") "45" 0.152653584398938 (3 ("3898" "3910")))
+;->  ((1 "896") "0693" 0.5692007202368237 (3 ("1" "87130")))
+;->  ((8 "67531") "5921" 0.6047242652668844 (6 ("340" "6668")))
+;->  ((1 "49060") "908" 0.2900173955504013 (2 ("4266" "456")))
+;->  ((0 "262") "255" 0.6286812952055422 (1 ("969" "3"))))
+
+Se abbiamo bisogno di vincoli più stringenti possiamo creare delle funzioni specifiche.
+
+Esempio:
+
+Struttura dell'elemento della lista:
+  (codice (anno mese giorno) (spesa nome)
+dove:
+ codice --> indice sequenziale (1..N)
+ anno, mese, giorno --> data (dal 2000 al 2026)
+ spesa --> numero intero (tra 1 e 1e4)
+ nome  --> lista di nomi predefinita
+
+(setq L '(2 (2026 11 4) (150 "Piero")))
+
+; Calcolo degli indici della lista
+(setq indici (index-list L))
+;-> ((0) (1) (1 0) (1 1) (1 2) (2) (2 0) (2 1))
+
+; Posizione degli elementi nella lista
+(dolist (idx indici) (println idx { } (L idx)))
+;-> (0) 2
+;-> (1) (2026 11 4)
+;-> (1 0) 2026
+;-> (1 1) 11
+;-> (1 2) 4
+;-> (2) (150 "Piero")
+;-> (2 0) 150
+;-> (2 1) Piero
+
+Adesso scriviamo una funzione che genera 'nums' sottoliste con valori casuali.
+
+(define (my-list nums lst)
+  ; Parametri:
+  ; nums      -> numero di elementi da generare
+  ; lst       -> lista con la struttura desiderata
+  (local (out nomi)
+    ; lista di output
+    (setq out '())
+    ; lista dei nomi
+    (setq nomi '("Paolo" "Sara" "Luca" "Piero"))
+    ; ciclo per nums elementi...
+    (for (i 1 nums)
+      ;(setq cur lst)
+      ; codice sequenziale
+      (setf (lst 0) i)
+      ; data: anno
+      (setf (lst 1 0) (+ 2000 (rand 27)))
+      ; data: mese
+      (setf (lst 1 1) (+ 1 (rand 12)))
+      ; data: giorno
+      (setf (lst 1 1) (+ 1 (rand 31)))
+      ; spesa
+      (setf (lst 2 0) (+ 1 (rand 10000)))
+      ; nome
+      (setf (lst 2 1) (nomi (rand (length nomi))))
+      ; aggiunge l'elemento corrente (sottilista) alla lista di output
+      (push lst out -1))
+    out))
+
+Proviamo:
+
+(setq L '(2 (2026 11 4) (150 "Piero")))
+(my-list 10 L)
+;-> ((1 (2017 27 4) (1234 "Paolo"))
+;->  (2 (2020 30 4) (2861 "Sara"))
+;->  (3 (2003 26 4) (7080 "Luca"))
+;->  (4 (2020 5 4) (17 "Paolo"))
+;->  (5 (2021 7 4) (1157 "Luca"))
+;->  (6 (2000 15 4) (7523 "Luca"))
+;->  (7 (2014 14 4) (2020 "Luca"))
+;->  (8 (2007 8 4) (5779 "Luca"))
+;->  (9 (2016 16 4) (9631 "Luca"))
+;->  (10 (2024 11 4) (1784 "Piero")))
+
 Vedi anche "Creazione di vettori/matrici (array) e liste con valori casuali" su "Note libere 7".
+
+
+-----------------------
+Parcheggio intelligente
+-----------------------
+
+Lungo una strada rettilinea esistono N negozi.
+Vogliamo visitare tutti i negozi una volta.
+Arrivando con un automobile, in quale punto dobbiamo parcheggiare per minimizzare il percorso del nostro shopping?
+Scrivere una funzione che calcola la lunghezza del percorso minimo che permette di visitare tutti i negozi.
+La funzione deve essere la più corta possibile.
+
+Modello matematico
+Abbiamo N punti diversi con posizionati lungo l'asse X.
+I punti hanno coordinate intere.
+Dobbiamo visitare tutti i punti partendo da un punto P lungo la linea.
+Quale punto P minimizza il percorso di visita?
+
+È ovvio che parcheggiare a sinistra del negozio più a sinistra o a destra del negozio più a destra non è la soluzione ottimale.
+Parcheggiando tra questi due estremi, dobbiamo sempre camminare dall'auto al negozio più a sinistra e tornare indietro, e poi dall'auto al negozio più a destra e tornare indietro.
+Questo significa che percorriamo sempre il doppio della distanza che separa il negozio più a sinistra da quello più a destra.
+
+(define (park pts)
+  (let ( (min-val (first pts))
+         (max-val (last pts))
+         (dx 0) (sx 0) )
+    ; prova ogni posizione nell'intervallo dei punti
+    (for (p min-val max-val)
+      ; percorso dei punti a destra di p
+      (setq dx (* 2 (- max-val p)))
+      ; percorso dei punti a sinistra di p
+      (setq sx (* 2 (- p min-val)))
+      (println (format "%s %2d %s %2d %s %2d %s %2d"
+               "Pos:" p "sx:" sx "dx:" dx "tot:" (+ sx dx)))) '>))
+
+Proviamo:
+
+(setq lst '(1 2 5 7))
+(park lst)
+;-> Pos:  1 sx:  0 dx: 12 tot: 12
+;-> Pos:  2 sx:  2 dx: 10 tot: 12
+;-> Pos:  3 sx:  4 dx:  8 tot: 12
+;-> Pos:  4 sx:  6 dx:  6 tot: 12
+;-> Pos:  5 sx:  8 dx:  4 tot: 12
+;-> Pos:  6 sx: 10 dx:  2 tot: 12
+;-> Pos:  7 sx: 12 dx:  0 tot: 12
+
+Morale: parcheggiamo dove c'è posto!
+
+; Funzione che calcola la lunghezza del percorso
+
+(define (len path) (* 2 (- (path -1) (path 0))))
+(len lst)
+;-> 12
+
+Versione code-golf (32  caratteri)
+(define(l p)(* 2(-(p -1)(p 0))))
+(l lst)
+;-> 12
+
+
+-------------------
+Segmenti e poligoni
+-------------------
+
+Dati N segmenti di lunghezza diversa, quali poligoni possiamo costruire?
+
+Esempio: 
+  segmenti = (1 3 4 6 9)
+  poligoni = (1 4 6) (1 6 9) (1 3 4 6) (3 4 6 9) ecc.
+
+Per costruire un poligono con un insieme di segmenti, deve valere la condizione:
+il segmento più lungo deve essere strettamente minore della somma di tutti gli altri segmenti.
+In formula: 
+
+  (max-length < sum-others)
+
+oppure equivalentemente:
+
+  (sum-total > (2 * max-length))
+
+Questa è la generalizzazione della disuguaglianza triangolare a poligoni con qualunque numero di lati.
+
+Nell'esempio:
+  (1 3 4 6 9)
+  (1 4 6)        -> 1+4 > 6
+  (1 6 9)        -> 1+6 > 9
+  (1 3 4 6)      -> 1+3+4 > 6
+  (3 4 6 9)      -> 3+4+6 > 9
+
+Algoritmo
+---------
+1) Generare tutti i sottoinsiemi con almeno 3 segmenti.
+2) Per ogni sottoinsieme:
+   - calcolare la somma totale
+   - trovare il massimo
+   - verificare: (somma > 2 * massimo)
+3) Aggiornare la soluzione
+
+(define (powerset lst)
+"Generate all sublists of a list"
+  (if (empty? lst)
+      (list '())
+      (let ((element (first lst))
+            (p (powerset (rest lst))))
+         (extend (map (fn (subset) (cons element subset)) p) p))))
+
+; Verifica se i segmenti formano un poligono
+(define (poligono? lst)
+  (letn ((somma (apply + lst))
+         (maxi (apply max lst)))
+    (> somma (mul 2 maxi))))
+
+(poligono? '(1 4 6))
+;-> nil
+
+; Restituisce tutti i poligoni possibili
+(define (poligoni segmenti)
+  (let (out '())
+    (dolist (p (powerset segmenti))
+      (if (and (>= (length p) 3)
+               (poligono? p))
+          (push p out -1)))
+    out))
+
+Proviamo:
+
+(poligoni '(1 3 4 6 9))
+;-> ((1 3 4 6 9) (1 3 4 6) (1 3 6 9) (1 4 6 9) (3 4 6 9) (3 4 6) (4 6 9))
+
+La soluzione brute-force genera tutti i sottoinsiemi O(2^N), quindi va bene per valori piccoli o medi di N.
+
+
+-------------------
+Trucco con le carte
+-------------------
+
+Prendiamo un mazzo di carte, lo teniamo a faccia in giù ed eseguiamo la seguente procedura:
+1. La prima carta in cima al mazzo viene spostata in fondo.
+La nuova carta in cima viene distribuita scoperta sul tavolo. È l'Asso di Cuori.
+2. Due carte vengono spostate una alla volta dall'alto verso il basso.
+La carta successiva viene distribuita scoperta sul tavolo. È il Due di Cuori.
+3. Tre carte vengono spostate una alla volta...
+4. Si continua così fino a quando l'n-esima e ultima carta non risulta essere il N di Cuori.
+Supponendo N = 13 (cioè tutte le carte di Cuori in sequenza dall'Asso fino al Re), come bisogna ordinare le carte per eseguire questo trucco?
+
+La soluzione non è banale. Infatti non basta inserire i Cuori dopo 1,2,3, ecc. carte, perchè il mazzo finisce prima di inserire tutte le 13 carte.
+Quindi alcune carte di Cuori vanno inserite considerando le carte che vengono messe in fondo al mazzo durante il processo.
+
+La soluzione per un mazzo di 52 carte è la seguente (indici 0-based):
+
+  Indice   Carta
+  1        (Asso Cuori))
+  2        (9 Cuori))
+  4        (2 Cuori))
+  8        (3 Cuori))
+  11       (Re Cuori))
+  13       (4 Cuori))
+  16       (10 Cuori))
+  19       (5 Cuori))
+  26       (6 Cuori))
+  30       (Jack Cuori))
+  34       (7 Cuori))
+  43       (8 Cuori))
+  45       (Donna Cuori))))
+
+Vediamo una funzione che simula il preocesso del trucco:
+
+(define (magic)
+  (local (pos values suits cards hearts others)
+    ; posizioni dei Cuori
+    (setq pos '((1 (Asso Cuori)) (2 (9 Cuori)) (4 (2 Cuori)) (8 (3 Cuori))
+                (11 (Re Cuori)) (13 (4 Cuori)) (16 (10 Cuori)) (19 (5 Cuori))
+                (26 (6 Cuori)) (30 (Jack Cuori)) (34 (7 Cuori)) (43 (8 Cuori))
+                (45 (Donna Cuori))))
+    ; valori delle carte
+    (setq values '(Asso 2 3 4 5 6 7 8 9 10 Jack Donna Re))
+    ; semi delle carte
+    (setq suits '(Cuori Quadri Fiori Picche))
+    ; creazione mazzo di carte completo
+    (setq cards '())
+    (dolist (suit suits)
+      (dolist (val values)
+        (push (list val suit) cards)))
+    ; creazione carte di Cuori
+    (setq hearts '())
+    (dolist (val values) (push (list val 'Cuori) hearts -1))
+    ; mischia il mazzo senza le carte Cuori
+    (setq others (randomize (difference cards hearts)))
+    ; inserisce le carte di Cuori nelle posizioni corrette
+    (dolist (p pos) (push (p 1) others (p 0)))
+    ; visualizza tutto il processo
+    (setq trick others)
+    (for (i 1 13)
+      (print "Sposto " i " carte e poi scopro la carta: ")
+      (for (k 1 i) (push (pop trick) trick -1))
+      (print (pop trick)) (read-line)) '>))
+
+(magic)
+;-> Sposto 1 carte e poi scopro la carta: (Asso Cuori)
+;-> Sposto 2 carte e poi scopro la carta: (2 Cuori)
+;-> Sposto 3 carte e poi scopro la carta: (3 Cuori)
+;-> Sposto 4 carte e poi scopro la carta: (4 Cuori)
+;-> Sposto 5 carte e poi scopro la carta: (5 Cuori)
+;-> Sposto 6 carte e poi scopro la carta: (6 Cuori)
+;-> Sposto 7 carte e poi scopro la carta: (7 Cuori)
+;-> Sposto 8 carte e poi scopro la carta: (8 Cuori)
+;-> Sposto 9 carte e poi scopro la carta: (9 Cuori)
+;-> Sposto 10 carte e poi scopro la carta: (10 Cuori)
+;-> Sposto 11 carte e poi scopro la carta: (Jack Cuori)
+;-> Sposto 12 carte e poi scopro la carta: (Donna Cuori)
+;-> Sposto 13 carte e poi scopro la carta: (Re Cuori)
+
+Vediamo un metodo per risolvere il problema.
+Sia M il numero totale di carte del mazzo e siano numerate le posizioni (0..M-1) (0-based).
+Nel nostro caso M = 52 e vogliamo che le 13 carte di cuori escano nell'ordine:
+  Asso,2,3,...,10,Jack,Donna,Re
+La procedura per ogni passo 'k' (1-based) è:
+- si spostano 'k' carte dalla cima al fondo
+- la carta successiva viene rivelata
+
+Invece di simulare le carte, simuliamo le POSIZIONI del mazzo.
+Consideriamo una lista circolare delle posizioni ancora disponibili.
+All'inizio: 0 1 2 3 4 ... 51
+Quando al passo 'k' spostiamo 'k' carte dalla cima al fondo, equivale a fare una rotazione di 'k' posizioni nella lista circolare.
+La posizione successiva è quella dove va la carta richiesta.
+Dopo aver usato quella posizione, la eliminiamo dalla lista.
+La regola è:
+- ruotare di k
+- prendere quella posizione
+- rimuoverla dalla lista
+- il conteggio successivo riparte dalla posizione immediatamente dopo quella rimossa
+
+Algoritmo
+---------
+'L' è la lista delle posizioni ancora libere e 'p' è l'indice corrente, allora al passo 'k':
+
+  p = (p + k) mod length(L)
+
+la posizione scelta è:
+
+  L[p]
+
+poi si elimina L[p].
+
+Sia:
+- 'Lk' = lista delle posizioni ancora libere al passo 'k'
+- 'mk' = length(Lk)
+
+Manteniamo un indice circolare 'p'.
+
+All'inizio:
+
+  p = 0
+  L1 = (0 1 2 ... 51)
+
+Al passo 'k':
+
+  p = (p + k) mod mk
+
+La posizione scelta è:
+
+  Lk[p]
+
+Poi quella posizione viene rimossa.
+
+Eseguiamo i primi passi.
+## PASSO 1
+L = 0 1 2 3 ... 51
+m = 52
+p = (0 + 1) mod 52 = 1
+Posizione scelta: 1
+Quindi: Asso di Cuori -> posizione 1
+Rimuoviamo 1.
+
+## PASSO 2
+Ora:
+L = 0 2 3 4 5 ... 51
+m = 51
+L'indice corrente resta sul punto successivo alla rimozione.
+p = (1 + 2) mod 51 = 3
+Elemento L[3]: 4
+Quindi: 2 di Cuori -> posizione 4
+
+## PASSO 3
+m = 50
+p = (3 + 3) mod 50 = 6
+La posizione corrispondente è: 8
+Quindi: 3 di Cuori -> posizione 8
+
+Continuando si ottiene:
+
+  1   -> Asso
+  4   -> 2
+  8   -> 3
+  13  -> 4
+  19  -> 5
+  26  -> 6
+  34  -> 7
+  43  -> 8
+  2   -> 9
+  16  -> 10
+  30  -> Jack
+  45  -> Donna
+  11  -> Re
+
+che è la soluzione.
+
+Questo problema è una variante del problema di Josephus.
+Infatti, le posizioni rimaste formano un cerchio, ad ogni passo si conta ciclicamente e una posizione viene eliminata.
+La differenza rispetto al Josephus classico è che il passo cambia:
+1,2,3,4,...
+invece di essere costante.
+
+; Funzione che inserisce N carte in un mazzo di M carte
+; per simulare il trucco
+(define (trick-pos num-carte num-valori)
+  (local (libere p out)
+    ; posizioni libere del mazzo
+    (setq libere (sequence 0 (- num-carte 1)))
+    ; indice circolare
+    (setq p 0)
+    (setq out '())
+    ; k = numero di carte spostate
+    (for (k 1 num-valori)
+      ; nuova posizione circolare
+      (setq p (% (+ p k) (length libere)))
+      ; salva posizione della carta
+      (push (list (libere p) k) out -1)
+      ; elimina posizione usata
+      (pop libere p))
+    out))
+
+Proviamo:
+
+(trick-pos 52 13)
+;-> ((1 1)
+;->  (4 2)
+;->  (8 3)
+;->  (13 4)
+;->  (19 5)
+;->  (26 6)
+;->  (34 7)
+;->  (43 8)
+;->  (2 9)
+;->  (16 10)
+;->  (30 11)
+;->  (45 12)
+;->  (11 13))
 
 ============================================================================
 
