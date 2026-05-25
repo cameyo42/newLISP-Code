@@ -1793,7 +1793,7 @@ Remapping strategy
 In questo caso non costruiamo tutta la lista, ma solo una mappa per "riparare" i valori vietati.
 Sia m = n - k (numero di valori validi)
 Generiamo x uniforme in [0, m-1]
-Se x è nella blacklist -> lo rimappiamo a un valore valido ≥ m
+Se x è nella blacklist -> lo rimappiamo a un valore valido >= m
 
 ; Costruisce la mappa di remapping per evitare i valori in blacklist
 ; n   = limite superiore (numeri da 0 a n-1)
@@ -7254,7 +7254,6 @@ Proviamo:
 (rand-list 10 "a" "z" "s" 1 6)
 ;-> ("asc" "wmtm" "uoj" "qejdty" "aibq" "w" "pswads" "fbeq" "ijr" "unpux")
 
-
 Scriviamo una funzione che genera liste con la struttura di una lista data con valori casuali in determinati intervalli.
 
 (define (index-list lst)
@@ -7456,7 +7455,8 @@ Morale: parcheggiamo dove c'è posto!
 (len lst)
 ;-> 12
 
-Versione code-golf (32  caratteri)
+Versione code-golf (32 caratteri):
+
 (define(l p)(* 2(-(p -1)(p 0))))
 (l lst)
 ;-> 12
@@ -7647,8 +7647,8 @@ la posizione scelta è:
 poi si elimina L[p].
 
 Sia:
-- 'Lk' = lista delle posizioni ancora libere al passo 'k'
-- 'mk' = length(Lk)
+- Lk = lista delle posizioni ancora libere al passo 'k'
+- mk = length(Lk)
 
 Manteniamo un indice circolare 'p'.
 
@@ -7667,29 +7667,30 @@ La posizione scelta è:
 
 Poi quella posizione viene rimossa.
 
-Eseguiamo i primi passi.
-## PASSO 1
-L = 0 1 2 3 ... 51
-m = 52
-p = (0 + 1) mod 52 = 1
-Posizione scelta: 1
-Quindi: Asso di Cuori -> posizione 1
-Rimuoviamo 1.
+Eseguiamo i primi passi:
 
-## PASSO 2
-Ora:
-L = 0 2 3 4 5 ... 51
-m = 51
-L'indice corrente resta sul punto successivo alla rimozione.
-p = (1 + 2) mod 51 = 3
-Elemento L[3]: 4
-Quindi: 2 di Cuori -> posizione 4
+Passo 1
+  L = 0 1 2 3 ... 51
+  m = 52
+  p = (0 + 1) mod 52 = 1
+  Posizione scelta: 1
+  Quindi: Asso di Cuori -> posizione 1
+  Rimuoviamo 1.
 
-## PASSO 3
-m = 50
-p = (3 + 3) mod 50 = 6
-La posizione corrispondente è: 8
-Quindi: 3 di Cuori -> posizione 8
+Passo 2
+  Ora:
+  L = 0 2 3 4 5 ... 51
+  m = 51
+  L'indice corrente resta sul punto successivo alla rimozione.
+  p = (1 + 2) mod 51 = 3
+  Elemento L[3]: 4
+  Quindi: 2 di Cuori -> posizione 4
+
+Passo 3
+  m = 50
+  p = (3 + 3) mod 50 = 6
+  La posizione corrispondente è: 8
+  Quindi: 3 di Cuori -> posizione 8
 
 Continuando si ottiene:
 
@@ -7703,17 +7704,16 @@ Continuando si ottiene:
   43  -> 8
   2   -> 9
   16  -> 10
-  30  -> Jack
-  45  -> Donna
-  11  -> Re
+  30  -> 11 (Jack)
+  45  -> 12 (Donna)
+  11  -> 13 (Re)
 
 che è la soluzione.
 
-Questo problema è una variante del problema di Josephus.
+Questo problema è una variante del problema di Giuseppe (Josephus Problem).
 Infatti, le posizioni rimaste formano un cerchio, ad ogni passo si conta ciclicamente e una posizione viene eliminata.
 La differenza rispetto al Josephus classico è che il passo cambia:
-1,2,3,4,...
-invece di essere costante.
+1,2,3,4,..., invece di essere costante.
 
 ; Funzione che inserisce N carte in un mazzo di M carte
 ; per simulare il trucco
@@ -7750,6 +7750,455 @@ Proviamo:
 ;->  (30 11)
 ;->  (45 12)
 ;->  (11 13))
+
+
+
+-------------------------
+Lisp 1960 (John McCarthy)
+-------------------------
+
+https://paulgraham.com/rootsoflisp.html
+Di seguito le funzioni LISP definite da McCarthy nel 1960 e tradotte in Common Lisp (CL) da Paul Graham.
+Dopo ogni funzione in CL troviamo la funzione tradotta in newLISP.
+
+;-----------------------------------------------------------------
+; The Lisp defined in McCarthy's 1960 paper, translated into CL.
+; Assumes only quote, atom, eq, cons, car, cdr, cond.
+; Written by Paul Graham
+; Bug reports to lispcode@paulgraham.com
+; The symbol nil is () (the empty list).
+;
+; Translate in newLISP by cameyo
+;-----------------------------------------------------------------
+
+;-----------------------------------------------------------------
+; C????R (four levels)
+;-----------------------------------------------------------------
+(define (car x)    (first x))
+(define (cdr x)    (rest x))
+(define (caar x)   (first (first x)))
+(define (cadr x)   (first (rest x)))
+(define (cdar x)   (rest (first x)))
+(define (cddr x)   (rest (rest x)))
+(define (caaar x)  (first (first (first x))))
+(define (caadr x)  (first (first (rest x))))
+(define (cadar x)  (first (rest (first x))))
+(define (caddr x)  (first (rest (rest x))))
+(define (cdaar x)  (rest (first (first x))))
+(define (cdadr x)  (rest (first (rest x))))
+(define (cddar x)  (rest (rest (first x))))
+(define (cdddr x)  (rest (rest (rest x))))
+(define (caaaar x) (first (first (first (first x)))))
+(define (caaadr x) (first (first (first (rest x)))))
+(define (caadar x) (first (first (rest (first x)))))
+(define (caaddr x) (first (first (rest (rest x)))))
+(define (cadaar x) (first (rest (first (first x)))))
+(define (cadadr x) (first (rest (first (rest x)))))
+(define (caddar x) (first (rest (rest (first x)))))
+(define (cadddr x) (first (rest (rest (rest x)))))
+(define (cdaaar x) (rest (first (first (first x)))))
+(define (cdaadr x) (rest (first (first (rest x)))))
+(define (cdadar x) (rest (first (rest (first x)))))
+(define (cdaddr x) (rest (first (rest (rest x)))))
+(define (cddaar x) (rest (rest (first (first x)))))
+(define (cddadr x) (rest (rest (first (rest x)))))
+(define (cdddar x) (rest (rest (rest (first x)))))
+(define (cddddr x) (rest (rest (rest (rest x)))))
+
+;-----------------------------------------------------------------
+; ATOM.
+;-----------------------------------------------------------------
+; Nel Lisp originale (atom '()) restituisce 't' (true)
+; In newLISP (atom? '()) restituisce 'nil'
+; 
+; Questo è IMPORTANTISSIMO perché cambia il comportamento di 'eval.'
+; Quindi definiamo una funzione 'atom.' che si comporta come il Lisp e
+; la usiamo al posto di 'atom'
+; Questo è necessario perché nel Lisp del 1960 'nil' e '()' sono atomi.
+; In newLISP invece no.
+; newLISP
+(define (atom. x)
+  (or (atom? x) (null. x)))
+
+(atom. '())
+;-> true
+(atom. '(1))
+;-> nil
+(atom. zz)
+;-> true
+(atom. 'zz)
+;-> true
+(setq ww 1)
+(atom. ww)
+;-> true
+(atom. 'ww)
+;-> true
+
+;-----------------------------------------------------------------
+; NULL
+;-----------------------------------------------------------------
+; Common Lisp
+(defun null. (x)
+  (eq x '()))
+
+; newLISP
+(define (null. x)
+  (= x '()))
+
+(null. 1)
+;-> nil
+(null. '())
+;-> true
+
+;-----------------------------------------------------------------
+; AND
+;-----------------------------------------------------------------
+; Common Lisp
+(defun and. (x y)
+  (cond (x (cond (y 't) ('t '())))
+        ('t '())))
+
+; newLISP
+(define (and. x y)
+  (cond (x (cond (y true) (true '())))
+        (true '())))
+
+(and. true true)
+;-> true
+(and. true '())
+;-> ()
+(and. '() '())
+;-> ()
+(and. true '())
+;-> ()
+
+;-----------------------------------------------------------------
+; NOT
+;-----------------------------------------------------------------
+; Common Lisp
+(defun not. (x)
+  (cond (x '())
+        ('t 't)))
+
+; newLISP
+(define (not. x)
+  (cond (x '())
+        (true true)))
+
+(not. true)
+;-> ()
+(not. '())
+;-> true
+
+;-----------------------------------------------------------------
+; APPEND
+;-----------------------------------------------------------------
+; Common Lisp
+(defun append. (x y)
+  (cond ((null. x) y)
+        ('t (cons (car x) (append. (cdr x) y)))))
+
+; newLISP
+(define (append. x y)
+  (cond ((null. x) y)
+        (true (cons (car x) (append. (cdr x) y)))))
+
+(append. '(1 2) '(3 4))
+;-> (1 2 3 4)
+(append. '() '(3 4))
+;-> (3 4)
+(append. '(1 2) '())
+;-> (1 2)
+
+;-----------------------------------------------------------------
+; LIST
+;-----------------------------------------------------------------
+; Common Lisp
+(defun list. (x y)
+  (cons x (cons y '())))
+
+; newLISP
+(define (list. x y)
+  (cons x (cons y '())))
+
+(list. 1 3)
+;-> (1 3)
+
+;-----------------------------------------------------------------
+; PAIR
+;-----------------------------------------------------------------
+; Common Lisp
+(defun pair. (x y)
+  (cond ((and. (null. x) (null. y)) '())
+        ((and. (not. (atom x)) (not. (atom y)))
+         (cons (list. (car x) (car y))
+               (pair. (cdr x) (cdr y))))))
+
+; newLISP
+(define (pair. x y)
+  (cond ((and. (null. x) (null. y)) '())
+        ((and. (not. (atom. x)) (not. (atom. y)))
+         (cons (list. (car x) (car y))
+               (pair. (cdr x) (cdr y))))))
+
+(pair. '(1) '(2))
+;-> ((1 2))
+
+(pair. '(1 2) '(3 4))
+;-> ((1 3) (2 4))
+
+;-----------------------------------------------------------------
+; ASSOC
+;-----------------------------------------------------------------
+; Common Lisp
+(defun assoc. (x y)
+  (cond ((eq (caar y) x) (cadar y))
+        ('t (assoc. x (cdr y)))))
+
+; newLISP
+(define (assoc. x y)
+  (cond ((null. y) '()) ; perchè (cdr y) può restituire errore in newLISP (in CL restituisce nil)
+        ((= (caar y) x) (cadar y))
+        (true (assoc. x (cdr y)))))
+
+(setq L '((1 a) (2 b)))
+(assoc. 1 L)
+;-> a
+(assoc. 3 L)
+;-> ()
+
+;-----------------------------------------------------------------
+; EVCON
+;-----------------------------------------------------------------
+; Common Lisp
+(defun evcon. (c a)
+  (cond ((eval. (caar c) a)
+         (eval. (cadar c) a))
+        ('t (evcon. (cdr c) a))))
+
+; newLISP
+(define (evcon. c a)
+  (cond ((eval. (caar c) a)
+         (eval. (cadar c) a))
+        (true (evcon. (cdr c) a))))
+
+;-----------------------------------------------------------------
+; EVLIS
+;-----------------------------------------------------------------
+; Common Lisp
+(defun evlis. (m a)
+  (cond ((null. m) '())
+        ('t (cons (eval.  (car m) a)
+                  (evlis. (cdr m) a)))))
+
+; newLISP
+(define (evlis. m a)
+  (cond ((null. m) '())
+        (true (cons (eval.  (car m) a)
+                    (evlis. (cdr m) a)))))
+
+;-----------------------------------------------------------------
+; EVAL
+;-----------------------------------------------------------------
+; Common Lisp
+(defun eval. (e a)
+  (cond
+    ((atom e) (assoc. e a))
+    ((atom (car e))
+     (cond
+       ((eq (car e) 'quote) (cadr e))
+       ((eq (car e) 'atom)  (atom   (eval. (cadr e) a)))
+       ((eq (car e) 'eq)    (eq     (eval. (cadr e) a)
+                                    (eval. (caddr e) a)))
+       ((eq (car e) 'car)   (car    (eval. (cadr e) a)))
+       ((eq (car e) 'cdr)   (cdr    (eval. (cadr e) a)))
+       ((eq (car e) 'cons)  (cons   (eval. (cadr e) a)
+                                    (eval. (caddr e) a)))
+       ((eq (car e) 'cond)  (evcon. (cdr e) a))
+       ('t (eval. (cons (assoc. (car e) a)
+                        (cdr e))
+                  a))))
+    ((eq (caar e) 'label)
+     (eval. (cons (caddar e) (cdr e))
+            (cons (list. (cadar e) (car e)) a)))
+    ((eq (caar e) 'lambda)
+     (eval. (caddar e)
+            (append. (pair. (cadar e) (evlis. (cdr e) a))
+                     a)))))
+
+; newLISP
+(define (eval. e a)
+  (cond
+    ; variabile
+    ((atom. e)
+     (assoc. e a))
+    ; forma speciale o funzione
+    ((atom. (car e))
+     (cond
+       ; quote
+       ((= (car e) 'quote)
+        (cadr e))
+       ; atom
+       ((= (car e) 'atom)
+        (atom. (eval. (cadr e) a)))
+       ; eq
+       ((= (car e) 'eq)
+        (= (eval. (cadr e) a)
+           (eval. (caddr e) a)))
+       ; car
+       ((= (car e) 'car)
+        (car (eval. (cadr e) a)))
+       ; cdr
+       ((= (car e) 'cdr)
+        (cdr (eval. (cadr e) a)))
+       ; cons
+       ((= (car e) 'cons)
+        (cons (eval. (cadr e) a)
+              (eval. (caddr e) a)))
+       ; cond
+       ((= (car e) 'cond)
+        (evcon. (cdr e) a))
+       ; applicazione funzione
+       (true
+        (eval.
+          (cons (assoc. (car e) a)
+                (cdr e))
+          a))))
+    ; label
+    ((= (caar e) 'label)
+     (eval.
+       (cons (caddar e) (cdr e))
+       (cons (list. (cadar e) (car e)) a)))
+    ; lambda
+    ((= (caar e) 'lambda)
+     (eval.
+       (caddar e)
+       (append.
+         (pair. (cadar e)
+                (evlis. (cdr e) a))
+         a)))))
+
+La linea "(= (caar e) lambda)" è stata sostituita con: "(= (caar e) 'lambda.)".
+Infatti nel meta-circolare di John McCarthy (lambda (x) ...) non è una lambda di newLISP.
+È soltanto una LISTA DI DATI che rappresenta una funzione Lisp.
+Quindi (caar e) deve restituire il simbolo lambda e non una vera closure/function di newLISP.
+Ma 'lambda e' riservata in newlisp, quindi ridefiniamo il simbolo 'lambda' come 'lambda.'
+In questo modo le espressioni da valutare diventano:
+  '((lambda. (x) (cons x '(b))) '(a))
+invece di:
+  '((lambda (x) (cons x '(b))) '(a))
+
+Il problema reale è che il meta-interprete di McCarthy assume:
+- valutazione simbolica pura
+- nessuna valutazione automatica degli argomenti
+mentre newLISP valuta automaticamente gli argomenti delle funzioni.
+
+La soluzione migliore sarebbe quella di rinominare i simboli speciali del Lisp originale.
+Per esempio:
+  lambda  -> lambda.
+  label   -> label.
+  quote   -> quote.
+  cond    -> cond.
+
+Questa è una tecnica standard quando si implementa un meta-circolare Lisp dentro un altro Lisp con simboli riservati.
+
+Per esempio questo è SBAGLIATO: (eval. ((lambda (x) x) 'a) '())
+perché newLISP tenta di valutare: ((lambda (x) x) 'a) prima di chiamare eval..
+Bisogna invece scrivere: (eval. '((lambda (x) x) 'a) '())
+cioè con quote esterna.
+
+
+------------------
+Cuscinetti a sfera
+------------------
+
+Abbiamo un cuscinetto a sfera che rappresentiamo come da due cerchi concentrici e con un numero di cerchi (sfere del cuscinetto) posizionate in modo uniforme tra i due cerchi.
+Dati il diametro del cerchio esterno D1 e il diametro del cerchio interno D2, determinare il massimo numero di cerchi/sfere che possiamo inserire tra i due cerchi (N) e la distanza tra due cerchi/sfere (gap).
+
+Le sfere si dispongono sulla pista mediana di diametro:
+
+  Dm = (D1 + D2) / 2.
+
+Il diametro massimo di ogni sfera è limitato dallo spazio radiale disponibile:
+
+  ds = (D1 − D2) / 2.
+
+Il numero massimo di sfere N si ricava dalla condizione che la corda tra due centri adiacenti (sulla pista mediana) sia almeno pari a 'ds':
+
+  (2 * Rm sin(pi/N) >= ds  -->  N = floor(pi / arcsin(ds / (D1 + D2)))
+  dove Rm è il raggio della pista mediana.
+
+La distanza libera tra due sfere consecutive è la corda tra i centri meno il diametro di una sfera:
+
+  gap = 2 * Rm * sin(pi/N) − ds.
+
+Per N massimo questo valore è minimo (>= 0).
+
+Angolo tra due sfere adiacenti:
+  theta = 2*pi/N      (radianti)
+  theta = 360/N       (gradi)
+
+Distanza tra i centri di due sfere adiacenti (corda):
+
+  dcc = 2 * Rm * sin(pi/N)
+  dove Rm = (D1 + D2) / 4
+
+Distanza libera tra le superfici (gap):
+
+  gap = dcc - ds = 2 * Rm * sin(pi/N) - (D1 - D2) / 2
+
+Relazione tra le tre quantità:
+
+  theta = 2*pi/N
+  dcc   = 2 * Rm * sin(theta/2)
+  gap   = dcc - ds
+
+; Funzione che prende due diametri D1 e D2 e restituisce una lista:
+; (N gap theta dcc-arc dcc-chord)
+; dove: N = il numero massimo di sfere tra D1 e D2
+;       gap = la distanza tra due sfere
+;       theta = l'angolo tra due sfere
+;       dcc-arc = la distanza tra i centri di due sfere (arco)
+;       dcc-chord = la distanza tra i centri di due sfere (corda)
+(define (ball-bearing D1 D2)
+  (local (ds Rm sin-val N gap theta dcc pi)
+    ; pi
+    (setq pi (mul 2 (acos 0)))
+    ; ds = diametro massimo delle sfere = spazio radiale disponibile
+    (setq ds (div (sub D1 D2) 2))
+    ; Rm = raggio della pista mediana
+    (setq Rm (div (add D1 D2) 4))
+    ; sin-val = ds / (2*Rm) usato per calcolare l'angolo minimo tra due sfere
+    (setq sin-val (div ds (mul 2 Rm)))
+    ; valori di default
+    (setq N 0  gap 0  theta 0  dcc 0)
+    (when (and (> D1 D2) (> D2 0) (<= sin-val 1))
+      ; N = floor(pi / arcsin(ds / (2*Rm)))
+      (setq N (int (div pi (asin sin-val))))
+      (when (< N 2) (setq N 0))
+      (when (> N 0)
+        ; theta = 360/N  (angolo tra due sfere adiacenti, in gradi)
+        (setq theta (div 360 N))
+        ; dcc-arc  = Rm * 2*pi/N  (distanza centro-centro lungo l'arco)
+        (setq dcc-arc (mul Rm (div (mul 2 pi) N)))
+        ; dcc-chord = 2 * Rm * sin(pi/N)  (distanza centro-centro in linea retta)
+        (setq dcc-chord (mul 2 Rm (sin (div pi N))))
+        ; gap = dcc-chord - ds  (distanza libera tra le superfici, usando la corda)
+        (setq gap (sub dcc-chord ds))))
+    (list N gap theta dcc-arc dcc-chord)))
+
+Proviamo:
+
+(ball-bearing 80 40)
+;-> (9 0.5212085995401239 40 20.94395102393196 20.52120859954012)
+(ball-bearing 100 60)
+;-> (12 0.7055236082016592 30 20.94395102393195 20.70552360820166)
+(ball-bearing 50 45)
+;-> (59 0.02805330500348591 6.101694915254237 2.529248322805342 2.528053305003486)
+(ball-bearing 100 10)
+;-> (3 2.631397208144122 120 57.59586531581287 47.63139720814412)
+(ball-bearing 30 28)
+;-> (91 0.00096803012153579 3.956043956043956 1.001166889605538 1.000968030121536)
 
 ============================================================================
 

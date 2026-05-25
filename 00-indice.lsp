@@ -3507,6 +3507,8 @@ NOTE LIBERE 36
   Parcheggio intelligente
   Segmenti e poligoni
   Trucco con le carte
+  Lisp 1960 (John McCarthy)
+  Cuscinetti a sfera
 
 PROBLEMI SUI DADI
 =================

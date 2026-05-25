@@ -5484,7 +5484,7 @@ Se ogni risposta corretta = +1, errata = -1, allora:
 Quindi, per ottenere almeno P punti, serve almeno:
   need = ceil((K + P)/2)
 
-Il problema si riduce a calcolare la probabilità di avere ≥ 'need' risposte corrette tra le K domande scelte.
+Il problema si riduce a calcolare la probabilità di avere >= 'need' risposte corrette tra le K domande scelte.
 Possiamo usare DP 1D classico:
   dp(c) = probabilità di avere esattamente c risposte corrette
 
