@@ -3509,6 +3509,7 @@ NOTE LIBERE 36
   Trucco con le carte
   Lisp 1960 (John McCarthy)
   Cuscinetti a sfera
+  Matrici di Hadamard
 
 PROBLEMI SUI DADI
 =================

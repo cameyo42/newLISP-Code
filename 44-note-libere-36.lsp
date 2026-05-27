@@ -8200,5 +8200,231 @@ Proviamo:
 (ball-bearing 30 28)
 ;-> (91 0.00096803012153579 3.956043956043956 1.001166889605538 1.000968030121536)
 
+
+-------------------
+Matrici di Hadamard
+-------------------
+
+Una matrice di Hadamard (Hn) di ordine n è una matrice n x n contenente solo 1 e -1 tale che:
+
+  Hn*Hn(Trasposta) = n*In
+
+dove In è la matrice identità n x n.
+
+In base a questa definizione la matrice H è non singolare ed invertibile e quindi il prodotto è commutativo:
+
+ Hn*Hn(Trasposta) = Hn(Trasposta)*Hn = Hn*Hn
+
+Una matrice di Hadamard ha il più grande determinante possibile (in valore assoluto) per qualsiasi matrice nxn i cui elementi sono compresi nell'intervallo [1,-1].
+
+Le matrici di Hadamard trovano applicazione nei codici di correzione degli errori e nei modelli di pesatura ottimali.
+
+Costruzione di Sylvester
+------------------------
+La costruzione di Sylvester è un metodo per creare una matrice di Hadamard di dimensione 2*n data Hn.
+H2n può essere costruita come:
+
+       |Hn  Hn|
+ H2n = |      |
+       |Hn -Hn|
+
+Esempio:
+
+  H1 = ((1))
+  
+       |1  1|
+  H2 = |    |
+       |1 -1|
+
+; Funzione che stampa una matrice di Hadamard [- 1 1]
+(define (print-grid matrix)
+  (let ( (row (length matrix)) (col (length (first matrix))) )
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        (print (format "%3d" (matrix i j))))
+      (println)) '>))
+
+; Funzione che crea una matrice di Hadamard (metodo di Sylvester)
+; Input:  matrice Hn
+; Output: matrice H2n
+(define (sylv h)
+  (let (h2 '())
+    ; inserisce |Hn  Hn| in h2
+    (dolist (el h) (push (append el el) h2 -1))
+    ; inserisce |Hn -Hn| in h2
+    (dolist (el h) (push (append el (map (curry * -1) el)) h2 -1))
+  h2))
+
+(setq a '((1)))
+(print-grid (setq b (sylv a)))
+;-> 1  1
+;-> 1 -1
+
+(setq c '((1 1) (1 -1)))
+(print-grid (setq c (sylv b)))
+;-> 1  1  1  1
+;-> 1 -1  1 -1
+;-> 1  1 -1 -1
+;-> 1 -1 -1  1
+
+(print-grid (setq d (sylv c)))
+;-> 1  1  1  1  1  1  1  1
+;-> 1 -1  1 -1  1 -1  1 -1
+;-> 1  1 -1 -1  1  1 -1 -1
+;-> 1 -1 -1  1  1 -1 -1  1
+;-> 1  1  1  1 -1 -1 -1 -1
+;-> 1 -1  1 -1 -1  1 -1  1
+;-> 1  1 -1 -1 -1 -1  1  1
+;-> 1 -1 -1  1 -1  1  1 -1
+
+(hadamard? (sylv c))
+;-> true
+
+(setq d '((-1 1 -1) (1 -1 -1) (-1 -1 1)))
+
+; Funzione che verifica se una data matrice è una matrice Identità
+; (1 nella diagonale principale e tutti gli altri elementi 0)
+(define (identity? matrix)
+  (let ( (row (length matrix)) (col (length (first matrix))) (error nil) )
+    (for (r 0 (- row 1))
+      (for (c 0 (- col 1))
+        (if (or (and (= r c) (!= (matrix r c) 1))
+                (and (!= r c) (!= (matrix r c) 0)))
+            (setq error true))))
+    (not error)))
+
+(identity? '((1 0 0) (0 1 0) (0 0 1)))
+;-> true
+(identity? '((1 0 0) (0 1 0) (0 1 1)))
+;-> nil
+
+; Funzione che verifica se una data matrice è una matrice di Hadamard
+(define (hadamard? matrix)
+  ;(tutti valori 1 o -1) AND (Hn*Hn = In)
+  (and (for-all (fn(x) (or (= x 1) (= x -1))) (flat matrix))
+       (identity? (mat / (multiply matrix matrix) (length matrix)))))
+
+Proviamo:
+
+(map hadamard? (list a b c d))
+;-> (true true true true)
+
+Costruzione di Kronecker
+------------------------
+Il prodotto di Kronecker, indicato con "**", è un'operazione tra due matrici di dimensioni arbitrarie, sempre applicabile, al contrario della normale moltiplicazione di matrici.
+Se A è una matrice (m x n) e B è una matrice (p x q), allora il loro prodotto di Kronecker A**B è una matrice (m*p x n*q) definita a blocchi nel modo seguente:
+
+           | a11*B ... a1n*B |
+  A ** B = |  ...  ... ...   | = C
+           | am1*B ... amn*B |
+
+Per esempio se A è una matrice 2x2:
+
+                             | a11*b11 a11*b12  a12*b11 a12*b12 |
+           | a11*B a12*B |   | a11*b21 a11*b22  a12*b21 a12*b22 |
+  A ** B = |             | = |                                  | = C
+           | a21*B a22*B |   | a21*b11 a21*b12  a22*b11 a22*b12 |
+                             | a21*b21 a21*b22  a22*b21 a22*b22 |
+
+Se A e B sono matrici di Hadamard, allora anche C è una matrice di Hadamard.
+
+; Funzione che calcola il prodotto di kronecker tra due matrici
+; Matrice A(m x n) --> (r1xc1)
+; Matrice B(p x q) --> (r2xc2)
+(define (kron A B)
+  (letn ( (r1 (length A))
+          (c1 (length (A 0)))
+          (r2 (length B))
+          (c2 (length (B 0)))
+          (C (array (mul r1 r2) (mul c1 c2) '(0))) )
+    (for (i 0 (- r1 1))
+      (for (j 0 (- c1 1))
+        (for (k 0 (- r2 1))
+          (for (l 0 (- c2 1))
+            ; ogni elemento della matrice A viene
+            ; moltiplicato per tutta la matrice B
+            ; e memorizzato nella matrice C (C)
+            (setf (C (+ (* i r2) k) (+ (* j c2) l))
+                  (mul (A i j) (B k l)))))))
+    (array-list C)))
+
+Proviamo:
+
+(hadamard? (kron a b))
+;-> true
+
+(hadamard? (kron b c))
+;-> true
+
+(hadamard? (kron c d))
+;-> true
+
+(setq m1 '((2 5) (2 9)))
+(setq m2 '((1 6) (-7 4)))
+(hadamard? (kron m1 m2))
+;-> nil
+
+(setq m1 '((1 1) (1 1)))
+(setq m2 '((1 1) (-1 1)))
+(hadamard? (kron m1 m2))
+;-> nil
+
+Matrici equivalenti
+-------------------
+Ricordiamo che su una matrice quadrata M possiamo eseguire le operazioni elementari sulle righe per trasformarla in una equivalente.
+Operazioni elementari:
+- Scambiare tra loro due righe.
+- Sommare o sottrarre ad una riga un'altra riga.
+- Moltiplicare una riga per uno scalare diverso da zero.
+Operazioni elementari combinate:
+- Sommare o sottrarre ad una riga un'altra riga moltiplicata per uno scalare diverso da zero.
+- Sommare o sottrarre ad una riga la somma di due o più righe.
+E poiché risulta det(M) = det(M(Trasposta)) le stesse operazioni possono essere eseguite sulle colonne.
+
+Sulle matrici di Hadamard possiamo invece eseguire solo un numero limitato di queste operazioni per ottenere una matrice equivalente.
+Operazioni consentite:
+- scambiare tra loro due righe o due colonne
+- moltiplicare gli elementi di una riga o di una colonna per -1 (negazione di riga o di colonna)
+- effettuare una trasposizione (operazione che combina le due precedenti)
+
+Esistono altri metodi per la costruzione delle matrici di Hadamard:
+- costruzione di Paley
+- costruzione di Williamson
+- costruzione con matrici binarie
+
+Codici sequenziali
+------------------
+Definiamo come sequenze di riga il numero di cambiamenti di segno di ogni riga e come codice sequenziale la sequenza di questi numeri, come spiega la seguente tabella:
+
+  Righe 0 1 2 3 4 5 6 7
+  H2    0 1
+  H4    0 3 1 2
+  H8    0 7 3 4 1 6 2 5
+
+Ogni matrice H ha quindi un suo codice sequenziale che è unico e la identifica.
+Come si vede i codici sequenziali non collimano con l'ordine delle righe.
+Quindi per calcolare il codice sequenziale di una matrice occorre contare e memorizzare i passaggi di segno di ogni riga.
+
+(define (same-sign? x y)
+"Check if two numbers have same sign"
+  (= (> x 0) (> y 0)))
+
+; Funzione che calcola il codice sequenziale di una matrice
+; Restituisce la lista dei passaggi di segno di ogni riga della matrice
+(define (code matrix)
+  (let (out '())
+    (dolist (row matrix)
+      (push (first (count '(nil)
+                    (map same-sign? (rest row) (chop row)))) out -1))))
+
+Proviamo:
+
+(code b)
+;-> (0 1)
+(code c)
+;-> (0 3 1 2)
+(code d)
+;-> (0 7 3 4 1 6 2 5)
+
 ============================================================================
 
