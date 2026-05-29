@@ -3510,6 +3510,9 @@ NOTE LIBERE 36
   Lisp 1960 (John McCarthy)
   Cuscinetti a sfera
   Matrici di Hadamard
+  Telefono difettoso
+  Compressione teorica di file
+  Testo scorrevole
 
 PROBLEMI SUI DADI
 =================

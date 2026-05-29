@@ -7752,7 +7752,6 @@ Proviamo:
 ;->  (11 13))
 
 
-
 -------------------------
 Lisp 1960 (John McCarthy)
 -------------------------
@@ -7770,7 +7769,7 @@ Dopo ogni funzione in CL troviamo la funzione tradotta in newLISP.
 ;
 ; Translate in newLISP by cameyo
 ;-----------------------------------------------------------------
-
+;
 ;-----------------------------------------------------------------
 ; C????R (four levels)
 ;-----------------------------------------------------------------
@@ -8425,6 +8424,126 @@ Proviamo:
 ;-> (0 3 1 2)
 (code d)
 ;-> (0 7 3 4 1 6 2 5)
+
+
+------------------
+Telefono difettoso
+------------------
+
+Abbiamo un telefono che funziona in modo anomalo.
+Quando inseriamo un numero la telefonata parte appena trova una corrispondenza con un numero in rubrica.
+Data una lista di numeri telefonici, determinare quali numeri non possono essere chiamati con la tastiera.
+
+Esempio:
+Rubrica = (911 97625999 91125426)
+Con questa rubrica non possiamo mai inserire il numero 91125426, perchè appena digitiamo 911 parte la chiamata al 911 (cioè un numero che abbiamo in rubrica).
+
+Algoritmo
+1) Ordinare i numeri di telefono in ordine lessicografico non decrescente.
+2) Controllare se ogni numero di telefono è un prefisso del numero successivo.
+
+
+(define (phone lst)
+  (sort lst)
+  (dolist (el (chop lst))
+    (if (starts-with (lst (+ $idx 1)) el)
+        (println el { } (lst (+ $idx 1))))) '>)
+
+(setq L '("113" "054442781" "054123456" "12345" "123"))
+(phone L)
+;-> 123 12345
+
+(setq L '("911" "97625999" "91125426"))
+(phone L)
+;-> 911 91125426
+
+
+----------------------------
+Compressione teorica di file
+----------------------------
+
+Dati N file diversi, è possibile memorizzarli come file compressi di lunghezza al massimo b?
+Teoricamente, il codice sorgente del programma di decompressione potrebbe contenere il contenuto di tutti i file, ma deve essere in grado di distinguerli.
+Quindi, la domanda è: quanti file unici di lunghezza al massimo b bit si possono avere?
+
+Considerazioni:
+- Si possono avere file compressi di lunghezza 0, ..., b.
+- 2^b file unici di lunghezza b, 2^(b-1) di lunghezza (b - 1), ecc.
+- Somma[i=0,b](2^i) = 2^(b+1) - 1
+Quindi:
+
+  if ((2^(b+1) - 1) >= N)
+     (print "si")
+     ;else
+     (print "no")
+
+Se consideriamo tutti i possibili bitstring di lunghezza da '0' a 'b' e vogliamo associare a ciascun file originale un codice compresso univoco, allora il numero massimo di codici distinti disponibili è:
+
+  Sum[i=0,b](2^i) = 2^(b+1) - 1
+
+Di conseguenza, per poter rappresentare N file distinti serve:
+
+  N <= 2^(b+1) - 1
+
+e quindi il codice logico è:
+
+  (if (>= (- (pow 2 (+ b 1)) 1) N)
+      (println "si")
+      (println "no"))
+
+La parte teorica importante è questa:
+- il decompressore può contenere arbitrariamente molti dati "hardcoded"
+- il file compresso serve solo come indice/selettore
+- quindi basta avere abbastanza codici distinti
+
+Per esempio con b = 3 i codici possibili sono:
+
+  lunghezza 0: 1
+  lunghezza 1: 2
+  lunghezza 2: 4
+  lunghezza 3: 8
+  totale = 15
+
+quindi si possono distinguere al massimo 15 file diversi.
+
+Questo è anche collegato al principio fondamentale della teoria dell'informazione:
+non esiste una compressione lossless universale che accorci tutti i file, perché i codici corti disponibili sono troppo pochi rispetto ai file possibili.
+
+
+----------------
+Testo scorrevole
+----------------
+
+Creazione di un semplice testo scorrevole.
+
+(define (cls)
+"Clear screen of REPL (ANSI sequence)"
+  (print "\027[H\027[2J"))
+
+(setq A1 " L      OOO  V   V EEEEE             ")
+(setq A2 " L     O   O V   V E                 ")
+(setq A3 " L     O   O V   V EEEE              ")
+(setq A4 " L     O   O  V V  E                 ")
+(setq A5 " LLLLL  OOO    V   EEEEE             ")
+(setq banner (list A1 A2 A3 A4 A5))
+
+(define (move txt dir pause)
+  (let ((linee (length txt))
+        (vuota (dup " " (length (txt 0)))))
+    (while true
+      (cls)
+      (for (i 0 (- linee 1))
+        (print vuota "\r")
+        (println (txt i))
+        (rotate (txt i) dir))
+      (sleep pause))))
+
+Proviamo:
+
+; da sx a dx
+(move banner 1 50)
+; da dx a sx
+(move banner -1 75)
 
 ============================================================================
 
