@@ -130,7 +130,7 @@ Rappresentiamo i gruppi nel modo segeunte:
       (println "C: " cX { } cY { } (+ cX cY))
       (println "Totale: " vX " per A e " vY " per Y")
       ;(println (+ aX bX cX) { } (+ aY bY cY))
-      (println 
+      (println
         "Perc: " (div vX (+ vX vY)) " per A e " (div vY (+ vX vY)) " per Y"))
   (list vX vY)))
 
@@ -507,16 +507,16 @@ Risolviamo il sistema (incognite x, y e r):
 | x + y = 8                  (3)
 
 Ricaviamo x dalla (1)
-  
+
   x = sqrt(r^2 - 81)         (4)
 
 Ricaviamo y^2 dalla (2):
-  
+
   y^2 = r^2 - 49             (5)
 
 Ricaviamo y dalla (3):
-  
-  y = 8 - x                  (6)  
+
+  y = 8 - x                  (6)
 
 Sostituiamo la (6) nella (5):
 (a + b)^2 = a^2 + b^2 + 2ab
@@ -533,7 +533,7 @@ Sotituiamo la (4) nella (8)
  r^2 = r^2 - 81 - 16*sqrt(r^2 - 81) + 113  (9)
 
 Semplificando la (9) otteniamo:
- 
+
   16*sqrt(r^2 - 81) = 32
   sqrt(r^2 - 81) = 2
   (r^2 - 81) = 4
@@ -1213,7 +1213,7 @@ L'indice di correlazione di Spearman (rs) misura la relazione monotona tra due l
 
 Formula:
 Se non ci sono valori uguali:
-  
+
   rs = 1 - (6 * sum(d^2)) / (n * (n^2 - 1))
 
 dove:
@@ -1716,12 +1716,12 @@ Ad esempio anche trasformare i gruppi:
 
 (define (swap-upper s)
   (replace {(\D+)(\d+)} s (append (upper-case $2) $1) 0))
-  
+
 Qui modifichiamo direttamente il contenuto durante la sostituzione.
 
 Test di velocità
 
-(define (rand-str n) (join (slice (randomize 
+(define (rand-str n) (join (slice (randomize
               (map char (flat (map sequence '(48 65 97) '(57 90 122))))) 0 n)))
 
 (setq nums (map string (rand 10000 300)))
@@ -1891,7 +1891,7 @@ Test di velocità (i risultati reali sono un pò diversi dalla teoria)
 ;-> 17015.836
 
 Il benchmark misura:
-  
+
   funzione completa = build + sampling
 
 ma rand3 è pensato per:
@@ -2175,7 +2175,7 @@ mediana = 2.5
 La mediana di una lista finita di numeri è il numero che si trova "in mezzo ", quando i numeri sono ordinati dal più piccolo al più grande (ordine crescente).
 
             | x[(n+1)/2],                 se n è dispari
-  Mediana = | 
+  Mediana = |
             | (x[(n/2)] + x[(n/2)+1)])/2, se n è pari
 
 (define (median lst)
@@ -2585,7 +2585,7 @@ Proviamo:
 (kempty '(9 8 2 1 3 5 4 6 7) 1)
 ;-> 6
 
-Complessità: 
+Complessità:
 Tempo:  O(n) (ogni indice viene visitato al massimo una volta)
 Spazio: O(n) (array 'day')
 
@@ -3850,7 +3850,7 @@ Proviamo:
 ;-> |   | S |   | S |   | S |   | S |   | S |   | S |   | S |   |
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
-;-> 
+;->
 ;->                            Centro
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;-> |   | S |   |   | S |   |   | S |   |   | S |   |   | S |   |
@@ -3881,7 +3881,7 @@ Proviamo:
 ;-> |   | S | S |   | S | S |   | S | S |   | S | S |   | S | S |   |
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;->    1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16
-;-> 
+;->
 ;->                              Centro
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;-> |   |   |   | S | S |   |   | S | S |   |   | S | S |   |   |   |
@@ -3903,13 +3903,13 @@ Proviamo:
 ;-> |   | S | S | S | S |   | S | S | S | S |   | S | S | S | S |   |
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-;-> 
+;->
 ;->                              Centro
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;-> | S | S | S | S |   |   | S | S | S | S |   |   | S | S | S | S |
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;->    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-;-> 
+;->
 ;->                              Centro
 ;-> +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 ;-> |   |   |   |   |   |   | S | S | S | S |   |   |   |   |   |   |
@@ -3993,13 +3993,13 @@ Funziona anche con simboli, liste annidate e valori eterogenei.
           ; se l'elemento corrente non esiste,
           ; allora è l'elemento mancante
           ((nil? res)
-            (setq out el) 
+            (setq out el)
             (setq stop true))
           ; se la frequenza dell'elemento corrente vale 0,
           ; allora è l'elemento mancante
           ((zero? res)
-            (setq out el) 
-            (setq stop true))          
+            (setq out el)
+            (setq stop true))
           (true ; altrimenti diminuisce la frequenza
             (-- (lookup el freq)))))
     out))
@@ -4304,7 +4304,7 @@ S = (1 -3)
 Polinomio = (x - 1)*(x + 3) = x^2 + 3x - x - 3 = x^2 + 2x - 3
 
 Se le radici (soluzioni) del polinomio sono:
-  
+
   r1, r2, r3, ..., rn
 
 allora il polinomio associato è:
@@ -4559,7 +4559,7 @@ Sequenze conta cifre (Look All and Say)
 ---------------------------------------
 
 Dato un numero intero applicare i passi seguenti:
-1) contare quante volte appare ogni cifra del numero e 
+1) contare quante volte appare ogni cifra del numero e
    costruire una lista di coppie: (occorrenze-cifre cifra)
 2) ordinare la lista in modo non decrescente sulle occorrenze e poi sulle cifre
 3) creare un nuovo numero unendo tutti i numeri della lista ordinata
@@ -4710,7 +4710,7 @@ Metodo 1 (ciclo for per ogni numero di k cifre)
         (d (string x))
        )
     (for (i min-val max-val)
-      (when (find d (string i)) 
+      (when (find d (string i))
         ;(println i)
         (++ con)))
     con))
@@ -4731,7 +4731,7 @@ Per generare un numero di k cifre dobbiamo:
 1) per la prima cifra possiamo scegliere 9 cifre (tutte meno lo 0)
 2) per le altre (k - 1) cifre possiamo scegliere 10 cifre (0..9))
 Quindi il totale dei numeri di k cifre vale:
-  
+
   tutti = 9 * 10^(k-1)
 
 Per generare un numero di k cifre SENZA la cifra x dobbiamo:
@@ -4741,7 +4741,7 @@ Per generare un numero di k cifre SENZA la cifra x dobbiamo:
 Quindi il totale dei numeri di k cifre senza la cifra x vale:
 
           9 * 9^(k-1),  se x = 0
-  senza = 
+  senza =
           8 * 9^(k-1),  se x <> 0
 
 Quindi il totale di numeri di k cifre CON la cifra x vale:
@@ -4952,7 +4952,7 @@ Le sequenze possono essere sovrapposte.
 
 Esempio
 stringa = "000101"
-sequenze = 00        00        01        10        01   
+sequenze = 00        00        01        10        01
           "000101" "000101" "000101" "000101" "000101"
 
 Metodo 1 (iterativo)
@@ -5315,23 +5315,23 @@ Proviamo:
 ;-> Punteggi: (("A" 1) ("B" 0) ("C" 0) ("D" 0))
 ;-> Punti A: 1
 ;-> Posizione A: 1
-;-> 
+;->
 ;-> Punteggi: (("A" 1) ("B" 1) ("C" 0) ("D" 0))
 ;-> Punti A: 1
 ;-> Posizione A: 1
-;-> 
+;->
 ;-> ...
-;-> 
+;->
 ;-> Punteggi: (("A" 2) ("B" 3) ("C" 1) ("D" 1))
 ;-> Punti A: 2
 ;-> Posizione A: 2
-;-> 
+;->
 ;-> ...
-;-> 
+;->
 ;-> Punteggi: (("A" 3) ("B" 4) ("C" 2) ("D" 4))
 ;-> Punti A: 3
 ;-> Posizione A: 3
-;-> 
+;->
 ;-> Punteggi: (("A" 4) ("B" 4) ("C" 2) ("D" 4))
 ;-> Punti A: 4
 ;-> Posizione A: 1
@@ -5637,7 +5637,7 @@ La complessità è O(N*log*N) (ordinamento: O(N*log*N) e scansione: O(N))
     (sort histo >)
     ; se non togliamo alcuna colonna, allora il numero di mosse vale:
     ; max(histo)
-    (when (> min-mosse (histo 0)) 
+    (when (> min-mosse (histo 0))
       (setq min-mosse (histo 0))
       (setq sol (list 0 (histo 0) (histo 0))))
     (println 0 { } (histo 0) { } (histo 0))
@@ -5665,7 +5665,7 @@ Proviamo:
 (setq h '(2 2 2 2))
 (clear h)
 ;-> 0 2 2  ; colonne tolte, righe tolte, mosse minime
-;-> 1 2 3 
+;-> 1 2 3
 ;-> 2 2 4
 ;-> 3 2 5
 ;-> 4 0 4
@@ -5856,23 +5856,23 @@ Proviamo:
 (piantagione '(6 3 8 1))
 ;-> Ordine ottimale di piantagione:
 ;-> (8 6 3 1)
-;-> 
+;->
 ;-> Albero con crescita 8 giorni
 ;->   piantato al giorno: 0
 ;->   produce frutti al giorno: 8
-;-> 
+;->
 ;-> Albero con crescita 6 giorni
 ;->   piantato al giorno: 1
 ;->   produce frutti al giorno: 7
-;-> 
+;->
 ;-> Albero con crescita 3 giorni
 ;->   piantato al giorno: 2
 ;->   produce frutti al giorno: 5
-;-> 
+;->
 ;-> Albero con crescita 1 giorni
 ;->   piantato al giorno: 3
 ;->   produce frutti al giorno: 4
-;-> 
+;->
 ;-> Tutti gli alberi produrranno
 ;-> frutti entro il giorno: 8
 
@@ -5904,7 +5904,7 @@ rettangolo 2x3
 
 Numero posizioni = 7
 
-+---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+   
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+
 | * | * | * |   |    |   | * | * | * |    |   |   |   |   |   |   |   |   |   |
 +---+---+---+---+    +---+---+---+---+    +---+---+---+---+   +---+---+---+---+
 | * | * | * |   |    |   | * | * | * |    | * | * | * |   |   |   | * | * | * |
@@ -5914,7 +5914,7 @@ Numero posizioni = 7
 
 +---+---+---+---+    +---+---+---+---+    +---+---+---+---+
 | * | * |   |   |    |   | * | * |   |    |   |   | * | * |
-+---+---+---+---+    +---+---+---+---+    +---+---+---+---+   
++---+---+---+---+    +---+---+---+---+    +---+---+---+---+
 | * | * |   |   |    |   | * | * |   |    |   |   | * | * |
 +---+---+---+---+    +---+---+---+---+    +---+---+---+---+
 | * | * |   |   |    |   | * | * |   |    |   |   | * | * |
@@ -6804,7 +6804,7 @@ Ogni rettangolo viene rappresentato con due coordinate intere:
 L'indice di ogni rettangolo rappresenta l'ordine con cui sono stati posizionati.
 In questo modo prendendo due rettangoli possiamo stabilire quale rettangolo si trova sopra (e quale sotto).
 
-Esempio:     
+Esempio:
 rettangoli: R1 = ((a1 b1) (a2 b2))
             R2 = ((a3 b3) (a4 b4))
             R3 = ((a5 b5) (a6 b7))
@@ -6961,7 +6961,7 @@ Quindi è corretto ma lento.
 (define (rettangoli rects show)
   ; lista delle soluzioni
   (setq out '())
-  ; calcolo coordinate minime e massime della griglia 
+  ; calcolo coordinate minime e massime della griglia
   ; che ricopre tutti i rettangoli
   (setq xcoords (flat (map (fn(x) (list (x 0 0) (x 1 0))) rects)))
   (setq ycoords (flat (map (fn(y) (list (y 0 1) (y 1 1))) rects)))
@@ -7295,7 +7295,7 @@ Scriviamo una funzione che genera liste con la struttura di una lista data con v
           (cond ((integer? cur) ; intero
                   (setf (lst el) (+ min-int (rand (+ (- max-int min-int) 1)))))
                 ((float? cur)   ; float
-                  (setf (lst el) 
+                  (setf (lst el)
                       (add min-float (random 0 (sub max-float min-float)))))
                 ((string? cur)  ; stringa
                   (if (string? min-char) (setq min-char (char min-char)))
@@ -7303,7 +7303,7 @@ Scriviamo una funzione che genera liste con la struttura di una lista data con v
                   (if (> min-char max-char) (swap min-char max-char))
                   (setq len (+ min-len (rand (+ (- max-len min-len) 1))))
                   (setf (lst el)
-                    (join (collect 
+                    (join (collect
                         (char (+ min-char (rand (+ (- max-char min-char) 1))))
                         len)))))))
       ; aggiunge la lista corrente alla lista di output
@@ -7468,13 +7468,13 @@ Segmenti e poligoni
 
 Dati N segmenti di lunghezza diversa, quali poligoni possiamo costruire?
 
-Esempio: 
+Esempio:
   segmenti = (1 3 4 6 9)
   poligoni = (1 4 6) (1 6 9) (1 3 4 6) (3 4 6 9) ecc.
 
 Per costruire un poligono con un insieme di segmenti, deve valere la condizione:
 il segmento più lungo deve essere strettamente minore della somma di tutti gli altri segmenti.
-In formula: 
+In formula:
 
   (max-length < sum-others)
 
@@ -7809,7 +7809,7 @@ Dopo ogni funzione in CL troviamo la funzione tradotta in newLISP.
 ;-----------------------------------------------------------------
 ; Nel Lisp originale (atom '()) restituisce 't' (true)
 ; In newLISP (atom? '()) restituisce 'nil'
-; 
+;
 ; Questo è IMPORTANTISSIMO perché cambia il comportamento di 'eval.'
 ; Quindi definiamo una funzione 'atom.' che si comporta come il Lisp e
 ; la usiamo al posto di 'atom'
@@ -8230,7 +8230,7 @@ H2n può essere costruita come:
 Esempio:
 
   H1 = ((1))
-  
+
        |1  1|
   H2 = |    |
        |1 -1|
@@ -8544,6 +8544,189 @@ Proviamo:
 (move banner 1 50)
 ; da dx a sx
 (move banner -1 75)
+
+
+-----------------------------------------------------
+Generazione di pagine html (immagini, testo, tabelle)
+-----------------------------------------------------
+
+Vogliamo generare una semplici pagina HTML partendo da una lista i cui elementi possono essere uno dei seguenti tipi:
+1) testo (stringa)
+2) matrice/tabella (lista di liste)
+3) immagine (nome (stringa) di una immagine))
+
+Esempio
+  L = (t1 i1 t2 m1 t3)
+  dove:
+  t1 = "Pagina HTML di prova"
+  i1 = "demo.jpg"
+  t2 = "demo"
+  m1 = ((1 2) ("a" "b"))
+  i2 = "tabella"
+
+Specifiche:
+1) Tutti gli elementi sono centrati e inseriti nella pagina uno di seguito all'altro nell'ordine in cui si trovano nella lista.
+2) la matrice e' sempre bidimensionale (MxN) e i suoi elementi vanno inseriti in tabella cosi come sono.
+3) se un testo contiene \n, allora inseriamo tutte le righe in una 'casella di testo'.
+La 'casella di testo' e' centrata nella pagina, ma le righe sono tutte allineate a sinistra nella 'casella di testo'.
+In pratica:
+- la 'casella' viene centrata nella pagina
+- il testo interno resta allineato a sinistra
+- i ritorni a capo vengono mantenuti
+4) le dimensioni delle celle della tabella devono essere tutte uguali in altezza, ma diverse per ogni colonna.
+Dobbiamo calcolare la dimensione massima del contenuto di ogni colonna della matrice e poi applicarla alla relativa colonna.
+5) vedere i commenti al codice per i dettagli
+
+;----------------------------------------------------------
+; HTML GENERATOR PER LISTA ETEROGENEA
+; Tipi supportati:
+; 1) stringa testo (anche multilinea con \n)
+; 2) immagine (stringa .jpg)
+; 3) matrice (MxN) (lista di liste -> tabella HTML)
+;
+; REGOLE LAYOUT:
+; - ogni elemento è dentro un <div style="text-align:center">
+; - testi multilinea: "casella" centrata, contenuto left-aligned
+; - tabelle: centrate e con celle a larghezza per colonna
+;----------------------------------------------------------
+;
+;----------------------------------------------------------
+; calcola lunghezza massima per ogni colonna della matrice
+; restituisce una lista (w1 w2 ... wn)
+;----------------------------------------------------------
+(define (col-widths m)
+  (if (null? m)
+    '()
+    (letn ((cols (length (m 0))))
+      (map (lambda (j)
+        (apply max
+          (map (lambda (r)
+            (length (string (r j))))
+          m)))
+      (sequence 0 (- cols 1))))))
+
+;----------------------------------------------------------
+; converte matrice in HTML <table>
+; usa larghezza per colonna
+;
+; HTML usato:
+; <table> -> contenitore tabella
+; <tr> -> riga
+; <td> -> cella
+;
+; style:
+; - margin:auto -> centra la tabella come blocco
+; - border-collapse -> elimina doppio bordo
+; - width per colonna -> controllo layout orizzontale
+; - text-align:center -> centra contenuto cella
+; - vertical-align:middle -> centra verticalmente
+;----------------------------------------------------------
+(define (matrice->html m widths)
+  (join
+    (map (lambda (r)
+      (string
+        "<tr>"
+        (join
+          (map (lambda (j)
+            (string
+              "<td style=\""
+              "width:" (* 12 (+ (widths j) 1)) "px;"
+              "text-align:center;"
+              "vertical-align:middle;"
+              "\">"
+              (r j)
+              "</td>"))
+          (sequence 0 (- (length r) 1))))
+        "</tr>"))
+    m)
+  "\n"))
+
+;----------------------------------------------------------
+; converte testo multilinea in "casella di testo"
+;
+; HTML usato:
+; <div style="text-align:center">
+;   -> centra il blocco nella pagina
+;
+; <div style="display:inline-block;text-align:left">
+;   -> crea una box con larghezza adattata al contenuto
+;   -> testo interno allineato a sinistra
+;
+; <br> -> mantiene i ritorni a capo
+;----------------------------------------------------------
+(define (text->html txt)
+  (letn ((lines (parse txt "\n")))
+    (string
+      "<div style=\"text-align:center\">"
+      "<div style=\"display:inline-block;text-align:left\">"
+      (join lines "<br>")
+      "</div>"
+      "</div>")))
+
+;----------------------------------------------------------
+; converte un singolo elemento in HTML
+;----------------------------------------------------------
+(define (element->html e)
+  (cond
+    ; MATRICE -> TABELLA HTML
+    ((list? e)
+      (letn ((w (col-widths e)))
+        (string
+          "<div style=\"text-align:center\">"
+          "<table border=\"1\" style=\"margin:auto;border-collapse:collapse\">"
+          (matrice->html e w)
+          "</table>"
+          "</div>")))
+    ; STRINGA
+    ((string? e)
+      (cond
+        ; IMMAGINE JPG
+        ; solo immagini .jpg e senza spazi nel nome        
+        ((find ".jpg" e)
+          (string
+            "<div style=\"text-align:center\">"
+            "<img src=\"" e "\">"
+            "</div>"))
+        ; TESTO MULTILINEA
+        ((find "\n" e)
+          (text->html e))
+        ; TESTO NORMALE
+        (true
+          (string
+            "<div style=\"text-align:center\">"
+            e
+            "</div>"))))))
+
+;----------------------------------------------------------
+; genera pagina HTML completa e salva su file
+;
+; STRUTTURA HTML:
+; <html>
+;   <body>
+;     ... elementi centrati ...
+;   </body>
+; </html>
+;
+; ogni elemento è separato da un blocco centrato indipendente
+;----------------------------------------------------------
+(define (html-page L file)
+  (setq html "<html><body>")
+  (dolist (e L)
+    (extend html (string (element->html e) "<br>")))
+  (extend html "</body></html>")
+  (write-file file html)
+  html)
+
+Proviamo:
+
+(setq L (list
+          "Pagina HTML di prova\nseconda riga"
+          "rmp.jpg"
+          "testo immagine"
+          '((1 2 3 4 5) ((a 4) (b c) (f g) ("a x") 'z))
+          "testo tabella"))
+
+(html-page L "pagina.html")
 
 ============================================================================
 

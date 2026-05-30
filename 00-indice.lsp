@@ -3513,6 +3513,7 @@ NOTE LIBERE 36
   Telefono difettoso
   Compressione teorica di file
   Testo scorrevole
+  Generazione di pagine html (immagini, testo, tabelle)
 
 PROBLEMI SUI DADI
 =================
