@@ -8728,5 +8728,205 @@ Proviamo:
 
 (html-page L "pagina.html")
 
+
+------------------------------------
+Movimento di un punto in una griglia
+------------------------------------
+
+Abbiamo una griglia NxM.
+Posizioniamo un punto in una cella della griglia.
+Il punto parte e si muove in una data direzione:
+Nord, Sud, Est, Ovest, Nord-Est, Sud-Est, Sud-Ovest, Nord-Ovest.
+Quando il punto incontra un bordo della griglia (cioe' quando tenta di superarlo):
+1) se il punto si muove in diagonale, allora viene riflesso di 45 gradi e continua la sua corsa.
+   (se incontra un angolo della griglia, allora ritorna indietro)
+2) se il punto si muove in orizzontale o verticale, allora continua la sua corsa in direzione opposta.
+
+Data una griglia, la posizione del punto e la sua direzione, determinare il percorso del punto nella griglia (che entra sicuramente in un ciclo).
+
+Esempio:
+N = 4, M = 5, P=(2 1), Dir = 1 1 (Sud-Est)
+  0  1  0  1  0
+  1  0  1  0  1
+  0  2  0  1  0
+  1  0  1  0  1
+
+; Funzione che stampa una matrice di interi
+(define (print-matrix-int matrix)
+  (let ( (row (length matrix))
+         (col (length (first matrix)))
+         (len-cols '()) (fmt "") )
+    ; calcola la larghezza di ogni colonna
+    ; (in base all'intero più grande/lungo di ogni colonna)
+    (setq len-cols (map (fn(col) (apply max (map length (flat col))))
+                           (transpose matrix)))
+    ; ciclo per ogni numero intero della matrice...
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        ; formattazione dell'intero corrente --> (larghezza-colonna + 2)
+        ; (uno spazio ed un eventuale segno -)
+        (setq fmt (string "%" (+ (len-cols j) 2) "d"))
+        ; stampa dell'intero corrente
+        (print (format fmt (matrix i j))))
+      (println)) '>))
+
+;-----------------------------------------------------------------------------
+; SIMULA IL MOTO DI UN PUNTO IN UNA GRIGLIA NxM
+;
+; Parametri:
+;   N  = numero di righe
+;   M  = numero di colonne
+;   r  = riga iniziale
+;   c  = colonna iniziale
+;   dr = direzione verticale
+;   dc = direzione orizzontale
+;
+;   Direzione    dr   dc   Movimento
+;   Nord         -1    0   Verticale
+;   Sud          +1    0   Verticale
+;   Est           0   +1   Orizzontale
+;   Ovest         0   -1   Orizzontale
+;   Nord-Est     -1   +1   Diagonale (45 gradi)
+;   Sud-Est      +1   +1   Diagonale (45 gradi)
+;   Sud-Ovest    +1   -1   Diagonale (45 gradi)
+;   Nord-Ovest   -1   -1   Diagonale (45 gradi)
+;   nessuna       0    0   Nullo (Punto fermo)
+;
+; Ogni stato è rappresentato da:
+;   (r c dr dc)
+;
+; Casi:
+; 1) movimento orizzontale: restituisce la riga del punto
+; 2) movimento verticale: restituisce la colonna del punto
+; 3) movimenti diagonali:
+;    Ad ogni passo:
+;      1) si tenta di avanzare di una cella in diagonale
+;      2) se si supera il bordo superiore o inferiore
+;         si inverte dr
+;      3) se si supera il bordo sinistro o destro
+;         si inverte dc
+;      4) il punto entra nella nuova cella
+;   
+;    La simulazione termina quando uno stato già visto
+;    viene incontrato nuovamente.
+;
+; Valore restituito:
+;   Percorso: lista delle celle visitate in ordine fino alla prima ripetizione
+;   Opzionale: stampa della griglia con le celle visitate
+;-----------------------------------------------------------------------------
+
+(define (simula N M r c dr dc show)
+  (local (stato visitati celle nr nc y x out)
+    ; memorizza punto di partenza (y -> riga, x -> colonna)
+    (setq y r x c)
+    (cond
+      ; nessun movimento (punto fermo)
+      ((and (= dr 0) (= dc 0))
+        (setq out (list (list y x)))
+        (setq celle (list (list y x))))
+      ; movimento solo orizzontale
+      ((= dr 0)
+        (setq celle (map (lambda (x) (list r x)) (sequence 0 (- M 1))))
+        (setq out celle))
+      ; movimento solo verticale
+      ((= dc 0)
+        (setq celle (map (lambda (x) (list x c)) (sequence 0 (- N 1))))
+        (setq out celle))
+      ; movimenti diagonali (45 gradi)
+      (true
+        (setq visitati '())
+        (setq celle '())
+        (setq stato (list r c dr dc))
+        (while (not (ref stato visitati))
+          ; memorizza cella corrente (in ordine temporale)
+          (push (list r c) celle -1)
+          (push stato visitati -1)
+          ; posizione tentata al passo successivo
+          (setq nr (+ r dr))
+          (setq nc (+ c dc))
+          ; riflessione sul bordo superiore/inferiore
+          (if (or (< nr 0) (>= nr N))
+              (begin
+                (setq dr (- dr))
+                (setq nr (+ r dr))))
+          ; riflessione sul bordo sinistro/destro
+          (if (or (< nc 0) (>= nc M))
+              (begin
+                (setq dc (- dc))
+                (setq nc (+ c dc))))
+          ; aggiorna posizione corrente
+          (setq r nr c nc)
+          ; costruisce nuovo stato
+          (setq stato (list r c dr dc)))
+        ; percorso ordinato = celle
+        (setq out celle)))
+    ; Opzionale: stampa la griglia con il percorso del punto
+    (when show
+      (let (griglia (array-list (array N M '(0))))
+        ; inserisce le celle visitate nella griglia (valore 1)
+        (dolist (el out) (setf (griglia (el 0) (el 1)) 1))
+        ; inserisce il punto di partenza (valore 2)
+        (setf (griglia y x) 2)
+        ; stampa la griglia con il percorso
+        (print-matrix-int griglia)))
+    out))
+
+Proviamo:
+
+(simula 5 7 2 3 1 1 true)
+;->   0  1  0  1  0  1  0
+;->   1  0  1  0  1  0  1
+;->   0  1  0  2  0  1  0
+;->   1  0  1  0  1  0  1
+;->   0  1  0  1  0  1  0
+;-> ((2 3) (3 4) (4 5) (3 6) (2 5) (1 4) (0 3) (1 2) (2 1)
+;->  (3 0) (4 1) (3 2) (0 5) (1 6) (4 3) (1 0) (0 1))
+
+Separazione delle funzioni/responsabilità:
+- la simulazione genera dinamica
+- le proprietà (insiemi, periodi) sono trasformazioni successive
+
+; lunghezza periodo
+(length (simula 5 7 2 3 1 1))
+;-> 24
+
+; celle univoche visitate
+(unique (simula 5 7 2 3 1 1))
+;-> ((2 3) (3 4) (4 5) (3 6) (2 5) (1 4) (0 3) (1 2) (2 1)
+;->  (3 0) (4 1) (3 2) (0 5) (1 6) (4 3) (1 0) (0 1))
+
+(simula 3 3 0 0 1 1 true)
+;->   2  0  0
+;->   0  1  0
+;->   0  0  1
+;-> ((0 0) (1 1) (2 2))
+
+(simula 4 5 2 2 1 0 true)
+;->   0  0  1  0  0
+;->   0  0  1  0  0
+;->   0  0  2  0  0
+;->   0  0  1  0  0
+;-> ((0 2) (1 2) (2 2) (3 2))
+
+(simula 4 5 2 1 0 1 true)
+;->   0  0  0  0  0
+;->   0  0  0  0  0
+;->   1  2  1  1  1
+;->   0  0  0  0  0
+;-> ((2 0) (2 1) (2 2) (2 3) (2 4))
+
+(simula 2 2 1 1 0 0 true)
+;->   0  0
+;->   0  2
+;-> ((1 1))
+
+(simula 4 5 2 1 1 1 true)
+;->   0  1  0  1  0
+;->   1  0  1  0  1
+;->   0  2  0  1  0
+;->   1  0  1  0  1
+;-> ((2 1) (3 2) (2 3) (1 4) (0 3) (1 2) (2 1) (3 0) (2 1) (1 2) (0 3) (1 4)
+;->  (2 3) (3 2) (2 1) (1 0) (0 1) (1 2) (2 3) (3 4) (2 3) (1 2) (0 1) (1 0))
+
 ============================================================================
 

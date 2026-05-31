@@ -3514,6 +3514,7 @@ NOTE LIBERE 36
   Compressione teorica di file
   Testo scorrevole
   Generazione di pagine html (immagini, testo, tabelle)
+  Movimento di un punto in una griglia
 
 PROBLEMI SUI DADI
 =================
