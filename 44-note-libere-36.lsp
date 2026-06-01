@@ -8928,5 +8928,306 @@ Separazione delle funzioni/responsabilità:
 ;-> ((2 1) (3 2) (2 3) (1 4) (0 3) (1 2) (2 1) (3 0) (2 1) (1 2) (0 3) (1 4)
 ;->  (2 3) (3 2) (2 1) (1 0) (0 1) (1 2) (2 3) (3 4) (2 3) (1 2) (0 1) (1 0))
 
+
+-----------------------------------------------
+Addizioni e sottrazioni con una lista di interi
+-----------------------------------------------
+
+Abbiamo una lista di interi non negativi.
+Utilizzando tutti i numeri e gli operatori di addizione (+) e sottrazione (-) possiamo generare diverse espressioni.
+
+Per esempio:
+  Lista = (1 2 3)
+  Operatori = (+ -)
+  Espressioni = (+ 1 + 2 + 3), (- 1 + 2 + 3), (+ 1 - 2 + 3), (- 1 - 2 + 3),
+                (+ 1 + 2 - 3), (- 1 + 2 - 3), (+ 1 - 2 - 3), (- 1 - 2 - 3)
+
+Ogni espressione genera un risultato, in questo caso:
+
+  (-6 -4 -2 0 0 2 4 6)
+
+Scrivere una funzione che prende una lista di interi e restituisce tutti i risultati unici possibili.
+
+Primo metodo
+------------
+(setq L '(1 2 3))
+(setq O '(+ -))
+
+(define (perm-rep k lst)
+"Generate all permutations of k elements with repetition from a list of items"
+  (if (zero? k) '(())
+      (flat (map (lambda (p) (map (lambda (e) (cons e p)) lst))
+                         (perm-rep (- k 1) lst)) 1)))
+
+Lista degli operatori per ogni espressione
+
+(setq ops (perm-rep (length L) O))
+;-> ((+ + +) (- + +) (+ - +) (- - +) (+ + -) (- + -) (+ - -) (- - -))
+
+Il numero di espressioni è pari al numero di elementi della lista degli operatori che vale:
+
+ (length O)^(length lst) = 2^(length lst)
+
+(define (riffle)
+"Create a list that alternates the elements of lists and atoms"
+  (flat (transpose (args))))
+
+(setq expr (riffle '(+ + -) '(1 2 3)))
+;-> (+ 1 + 2 - 3)
+
+; Funzione che risolve una espressione
+(define (solve lst)
+  (let ( (res 0) (op ++) )
+    (dolist (el lst)
+      (cond ((= el '+) (setq op ++))
+            ((= el '-) (setq op --))
+            (true (op res el))))))
+
+(solve expr)
+;-> 6
+
+; Funzione che calcola il numero di risultati diversi
+(define (calc lst)
+  (let ((out '())
+        (ops  (perm-rep (length lst) '(+ -))))
+    (dolist (op ops) (push (solve (riffle op lst)) out))
+    (unique (sort out))))
+
+Proviamo:
+
+(calc '(1 2 3))
+;-> (-6 -4 -2 0 2 4 6)
+
+(calc '(1 2 3 4 5 6 7 8 9 10))
+;-> (-55 -53 -51 -49 -47 -45 -43 -41 -39 -37 -35 -33 -31 -29 -27 -25 -23 -21
+;->  -19 -17 -15 -13 -11 -9 -7 -5 -3 -1 1 3 5 7 9 11 13 15 17 19 21 23 25 27
+;->  29 31 33 35 37 39 41 43 45 47 49 51 53 55)
+
+Per liste piccole funziona bene, ma presenta un limite importante:
+- numero di espressioni = (2^n)
+- tempo = O(n*2^n) (ogni espressione richiede di elaborare n numeri)
+- memoria = O(2^n) per la lista degli operatori
+
+Per esempio:
+ +----+---------------+
+ | n  |   espressioni |
+ +----+---------------+
+ | 10 |         1.024 |
+ | 20 |     1.048.576 |
+ | 30 | 1.073.741.824 |
+ +----+---------------+
+
+quindi diventa rapidamente impraticabile.
+
+Secondo metodo
+--------------
+Se S è la somma totale dei numeri:
+
+  S = a(1) + a(2) + ... + a(n)
+
+allora ogni risultato può essere scritto come:
+
+  S - 2T
+
+dove T è la somma di un sottoinsieme degli elementi.
+Infatti gli elementi con segno negativo contribuiscono due volte:
+
+ +a(i) --> a(i)
+ -a(i) --> -a(i) = a(i) - 2a(i)
+
+Quindi il problema è equivalente a trovare tutte le somme di sottoinsiemi.
+
+Per l'esempio (1 2 3) abbiamo S = 6 e la somme dei sottoinsiemi: 0 1 2 3 4 5 6.
+Calcoliamo i risultati:
+
+  6-2*0 = 6
+  6-2*1 = 4
+  6-2*2 = 2
+  6-2*3 = 0
+  6-2*4 = -2
+  6-2*5 = -4
+  6-2*6 = -6
+
+e otteniamo (-6 -4 -2 0 2 4 6) senza generare nessuna espressione.
+
+Ogni risultato ha la forma: R = S - 2T dove:
+  S = somma totale degli elementi
+  T = somma di un sottoinsieme
+Quindi basta calcolare (incrementalmente) tutte le somme di sottoinsiemi distinte.
+calc-fast
+
+(define (calc-fast lst)
+  ; tot = somma totale degli elementi della lista
+  ; sums = somme dei sottoinsiemi distinte trovate finora
+  ; inizialmente esiste solo il sottoinsieme vuoto con somma 0
+  (letn ((tot (apply + lst))
+         (sums '(0))
+         out)
+    ; per ogni elemento x della lista:
+    ; - manteniamo tutte le somme già esistenti
+    ; - aggiungiamo le nuove somme ottenute sommando x
+    ;   a ciascuna somma esistente
+    ; - eliminiamo eventuali duplicati
+    (dolist (x lst)
+      (setq sums
+            (unique
+              (append sums
+                      (map (fn (s) (+ s x)) sums)))))
+    ; ogni risultato dell'espressione vale:
+    ;   risultato = somma_totale - 2 * somma_sottoinsieme
+    ; infatti scegliere il segno '-' davanti ad un elemento
+    ; equivale a sottrarre due volte il suo valore dalla
+    ; somma totale di tutti gli elementi
+    (setq out
+          (map (fn (s) (- tot (* 2 s))) sums))
+    ; restituisce tutti i risultati distinti ordinati
+    (unique (sort out))))
+
+Proviamo:
+
+(calc-fast '(1 2 3))
+;-> (-6 -4 -2 0 2 4 6)
+
+(calc-fast '(1 2 3 4 5 6 7 8 9 10))
+;-> (-55 -53 -51 -49 ... 49 51 53 55)
+
+Questa versione è molto più veloce quando esistono molte collisioni tra le somme di sottoinsiemi.
+Per esempio:
+
+(calc-fast '(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1))
+
+Le espressioni possibili sono: 2^20 = 1.048.576, ma le somme di sottoinsiemi distinte sono soltanto (0 1 2 ... 20), cioè 21 valori.
+
+(= (calc (sequence 1 20)) (calc-fast (sequence 1 20)))
+;-> true
+
+(time (calc (sequence 1 20)))
+;-> 8045.89
+(time (calc-fast (sequence 1 20)))
+;-> 0
+
+La complessità di 'calc-fast' dipende dal numero di somme distinte di sottoinsiemi che vengono generate.
+Indichiamo con:
+  N = numero di elementi della lista
+  K = numero di somme di sottoinsiemi distinte finali
+La funzione mantiene nella variabile 'sums' tutte le somme distinte raggiungibili.
+Ad ogni iterazione:
+
+(setq sums (unique (append sums (map (fn (s) (+ s x)) sums))))
+
+se 'sums' contiene m elementi:
+- map costa O(m)
+- append costa O(m)
+- unique costa circa O(m log m) perché internamente ordina la lista
+quindi ogni passo costa circa:
+  O(m log m)
+dove m cresce fino a K.
+Sommando tutti i passi:
+  O(sum[i=1,N](K(i)*log(K(i)))
+dove K(i) è il numero di somme distinte dopo aver elaborato i primi i elementi.
+Caso migliore
+  Lista: (1 1 1 1 1 ... 1)
+  Dopo i elementi le somme possibili sono: 0 1 2 ... i
+  quindi: K = N + 1
+  complessita: O(N^2 log N)
+Caso peggiore
+Se quasi tutte le somme di sottoinsiemi sono diverse: K ~= 2^N
+quindi: O(N*2^N)
+che è dello stesso ordine della generazione esplicita delle espressioni.
+
+Terzo metodo
+------------
+Si può fare ancora meglio usando una programmazione dinamica tipo "subset sum".
+Se la somma totale vale S, manteniamo un vettore booleano di lunghezza (S+1) che indica quali somme sono raggiungibili.
+La complessità diventa: O(nS)
+Con il metodo subset-sum manteniamo un vettore booleano 'reach', dove:
+  reach[s] = true
+significa che esiste un sottoinsieme con somma 's'.
+Per ogni elemento 'x' aggiorniamo il vettore da destra verso sinistra.
+
+(define (calc-dp lst)
+  ; somma totale degli elementi
+  (letn ((tot (apply + lst))
+         ; reach[s] = true se la somma s è raggiungibile
+         (reach (dup nil (+ tot 1)))
+         (out '()))
+    ; il sottoinsieme vuoto produce la somma 0
+    (setf (reach 0) true)
+    ; aggiorna le somme raggiungibili
+    (dolist (x lst)
+      ; scansione inversa per non riutilizzare x
+      ; più di una volta nello stesso passo
+      (for (s tot x -1)
+        (if (reach (- s x))
+            (setf (reach s) true))))
+    ; per ogni somma raggiungibile s
+    ; genera il risultato:
+    ;   tot - 2*s
+    (for (s 0 tot)
+      (if (reach s)
+          (push (- tot (* 2 s)) out -1)))
+    (sort out)))
+
+Proviamo:
+(calc-dp (sequence 1 10))
+(calc-dp '(1 2 3))
+;-> (-6 -4 -2 0 2 4 6)
+
+Vediamo l'evoluzione di 'reach'.
+
+All'inizio:
+  somma totale = 6
+  s:      0 1 2 3 4 5 6
+  reach:  T F F F F F F
+
+Dopo il numero 1:
+  reach:  T T F F F F F
+Dopo il numero 2:
+  reach:  T T T T F F F
+Dopo il numero 3:
+  reach:  T T T T T T T
+Quindi tutte le somme da 0 a 6 sono raggiungibili e otteniamo:
+  6 4 2 0 -2 -4 -6
+che ordinate danno:
+(-6 -4 -2 0 2 4 6)
+
+La complessità è:
+  Tempo   : O(N * S)
+  Memoria : O(S)
+  dove S è la somma degli elementi.
+
+Questa versione è molto più veloce quando S è relativamente piccolo rispetto a 2^N.
+Ad esempio, con 100 numeri compresi tra 0 e 100 si eseguono circa 100 * 10000 = 10^6 aggiornamenti, invece di 2^100 combinazioni.
+
+Funzione      Complessita
+  calc          O(N*2^N)
+  calc-fast     O(K*log(K)) circa
+  calc-dp       O(N*S)
+  dove: K = numero di somme distinte,  S = somma totale degli elementi
+
+Conclusioni
+- calc-dp e' migliore quando S e' piccolo
+- calc-fast e' migliore quando ci sono molte collisioni tra somme
+- entrambi peggiorano fino a O(N*2^N) (calc) nel caso peggiore
+
+(= (calc (sequence 1 20))
+   (calc-fast (sequence 1 20))
+   (calc-dp (sequence 1 20)))
+;-> true
+
+(time (calc (sequence 1 20)))
+;-> 8045.89
+(time (calc-fast (sequence 1 20)))
+;-> 0
+(time (calc-dp (sequence 1 20)))
+;-> 0
+
+(time (calc (dup 1 20)))
+;-> 81432.73
+(time (calc-fast (dup 1 20)))
+;-> 0
+(time (calc-dp (dup 1 20)))
+;-> 0
+
 ============================================================================
 

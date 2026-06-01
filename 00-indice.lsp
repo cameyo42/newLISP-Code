@@ -3515,6 +3515,7 @@ NOTE LIBERE 36
   Testo scorrevole
   Generazione di pagine html (immagini, testo, tabelle)
   Movimento di un punto in una griglia
+  Addizioni e sottrazioni con una lista di interi
 
 PROBLEMI SUI DADI
 =================
