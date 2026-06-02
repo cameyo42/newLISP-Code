@@ -6754,7 +6754,7 @@ e dai seguenti polinomi:
                    (mul   -4 b b c c c e)
                    (mul    1 b b c c d d)))
   (setq P (add (mul 8 a c) (mul -3 b b b)))
-  (setq R (add (mul b b b) (mul 8 d a a) (mul -4 a b a)))
+  (setq R (add (mul b b b) (mul 8 d a a) (mul -4 a b c)))
   (setq d0 (add (mul 12 a e) (mul -3 b d) (mul c c)))
   (setq D (add (mul  64 a a a e)
                (mul -16 a a c c)
@@ -8182,7 +8182,7 @@ Facciamo alcune prove:
 (multiply m1 m2)
 ;-> ERR: wrong dimensions in function multiply
 
-La funzione "multiply" è una primitiva di newLISp che moltiplica due matrici.
+La funzione "multiply" è una primitiva di newLISP che moltiplica due matrici.
 
 (define (print-matrix matrix)
 "Print a matrix m x n"

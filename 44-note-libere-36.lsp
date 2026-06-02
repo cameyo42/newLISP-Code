@@ -9009,6 +9009,7 @@ Per liste piccole funziona bene, ma presenta un limite importante:
 - memoria = O(2^n) per la lista degli operatori
 
 Per esempio:
+
  +----+---------------+
  | n  |   espressioni |
  +----+---------------+
@@ -9179,7 +9180,6 @@ All'inizio:
   somma totale = 6
   s:      0 1 2 3 4 5 6
   reach:  T F F F F F F
-
 Dopo il numero 1:
   reach:  T T F F F F F
 Dopo il numero 2:
@@ -9189,11 +9189,11 @@ Dopo il numero 3:
 Quindi tutte le somme da 0 a 6 sono raggiungibili e otteniamo:
   6 4 2 0 -2 -4 -6
 che ordinate danno:
-(-6 -4 -2 0 2 4 6)
+  (-6 -4 -2 0 2 4 6)
 
 La complessità è:
-  Tempo   : O(N * S)
-  Memoria : O(S)
+  Tempo: O(N * S)
+  Memoria: O(S)
   dove S è la somma degli elementi.
 
 Questa versione è molto più veloce quando S è relativamente piccolo rispetto a 2^N.
@@ -9228,6 +9228,320 @@ Conclusioni
 ;-> 0
 (time (calc-dp (dup 1 20)))
 ;-> 0
+
+
+---------------------------------------
+Polinomio caratteristico di una matrice
+---------------------------------------
+
+Il polinomio caratteristico di una matrice quadrata A è:
+
+   p(λ) = det(λI - A) = λ^n + c1*λ^(n-1) + ... + cn
+
+Algoritmo di Faddeev–LeVerrier
+È lo standard teorico per calcolare il polinomio caratteristico.
+Si basa su:
+- tracce delle potenze della matrice
+- ricorrenza sui coefficienti del polinomio
+
+Crea: p(λ) = λ^n + c1*λ^(n-1) + ... + c_n
+Con:  c(k) calcolati da tr(A^k)
+
+Evita il calcolo diretto del determinante e costruisce i coefficienti c(k) iterativamente usando solo:
+- tracce di matrici
+- moltiplicazioni matrice-matrice
+- combinazioni lineari
+
+Il metodo costruisce iterativamente, per k = 1, ..., n:
+
+  M(k) = A*M(k-1) - c(k-1)*I
+  c(k) = -tr(M(k))/k
+
+partendo da M(0) = I e c(0) = 1.
+
+I coefficienti c(1), ..., c(n) danno direttamente il polinomio caratteristico:
+
+  λ^n + c(1)*λ^(n-1) + c(2)*λ^(n-2) + ... + c(n)
+
+La traccia di una matrice n x n è semplicemente la somma degli elementi sulla diagonale principale.
+
+L'algoritmo è stabile numericamente, evita determinanti simbolici ed ha una complessità O(n^4).
+La complessità è O(n^4) perchè ad ogni passo si fa un prodotto matriciale O(n^3), ripetuto n volte.
+Per matrici grandi conviene usare l'algoritmo di Hessenberg $O(n^3), ma per matrici piccole Faddeev-LeVerrier è ottimo.
+
+; Matrice identità n x n
+(define (matrix-eye n)
+  (let (m (array-list (array n n '(0))))
+    (dotimes (i n) (setf (m i i) 1))
+    m))
+
+; Traccia di una matrice (somma elementi diagonale)
+(define (matrix-trace M)
+  (let ((n (length M)) (s 0))
+    (dotimes (i n)
+      (setf s (add s (M i i))))
+    s))
+
+; Matrice - scalare*I
+(define (matrix-sub-scalar-eye A c I)
+  (mat - A (mat * I c)))
+
+; ============================================================
+;  Faddeev-LeVerrier
+;  p(λ) = λ^n + c1·λ^(n-1) + ... + cn
+; ============================================================
+(define (char-poly matrix)
+  (letn ((n (length matrix))
+         (M (matrix-eye n))   ; M(k), parte da identità
+         (coeffs (list 1))    ; c[0] = 1 (coefficiente di λ^n)
+         (ck 0)               ; coefficiente corrente
+         (I M))               ; matrice identità
+    (dotimes (k n)
+      ; M(k+1) = A * M(k) - c(k) * I   (con M(1) = A)
+      (setf M (multiply matrix M))
+      ; c(k+1) = -tr(M(k+1)) / (k+1)
+      ;(setf ck (div (mul -1 (matrix-trace M)) (+ k 1)))
+      (setf ck (div (matrix-trace M) (- (+ k 1))))
+      (push ck coeffs -1)
+      ; aggiorna M togliendo il termine scalare prima della prossima iter.
+      (setf M (matrix-sub-scalar-eye M (mul -1 ck) I)))
+    coeffs))
+
+Proviamo:
+
+(char-poly '((3 1)(2 4)))
+;-> (1 -7 10)
+
+(char-poly '((1 0 0)(0 1 0)(0 0 1)))
+;-> (1 -3 3 -1)
+
+(char-poly '((2 1 0)(1 3 1)(0 1 2)))
+;-> (1 -7 14 -8)  ; autovalori 1, 2, 4
+
+(char-poly '((1 2)(3 4)))
+;-> (1 -5 -2)
+
+
+-------------------------------------
+Sottostringhe binarie delimitate da 1
+-------------------------------------
+
+Data una stringa binaria, trovare tutte le sottostringhe che iniziano e finiscono con il carattere '1'.
+Una sottostringa valida deve avere sia il primo che l'ultimo carattere '1' e include 0 o più caratteri intermedi.
+
+Esempi:
+  string = "10001"
+  substring = ("10001")
+  
+  string = "111"
+  substring = ("11 111 11")
+
+  string = "00100101"
+  substring = ("1001" "100101" "101")
+  
+  string = "00100111"
+  substring = ("1001" "10011" "100111" "11" "111" "11")
+
+Algoritmo
+---------
+Esplorare ogni possibile sottostringa della stringa binaria data utilizzando due cicli annidati.
+Controlliamo ogni coppia di indici per vedere se entrambe le estremità sono '1'.
+Per ogni coppia valida, incrementiamo il contatore.
+
+(define (sub11 str)
+  (let ( (len (length str)) (coppie '()) )
+    ; ciclo per attraversare la stringa (fino al penultimo carattere)
+    (for (i 0 (- len 2))
+      ; se il carattere corrente vale "1"...
+      (if (= (str i) "1")
+          ; ciclo per cercare il prossimo "1" nella stringa
+          (for (j (+ i 1) (- len 1))
+            ; se troviamo il carattere "1", allora
+            ; abbiamo trovato un sottostringa valida
+            (if (= (str j) "1")
+                ; inserisce la sottostringa nella lista di output
+                (push (slice str i (+ (- j i) 1)) coppie -1)))))
+    coppie))
+
+Proviamo:
+
+(sub11 "10001")
+;-> ("10001")
+(sub11 "111")
+;-> ("11" "111" "11")
+(sub11 "00100101")
+;-> ("1001" "100101" "101")
+(sub11 "00100111")
+;-> ("1001" "10011" "100111" "11" "111" "11")
+(sub11 "00")
+;-> ()
+
+Se vogliamo solo contare il numero di sottostringhe racchiuse da "1", allora possiamo evitare il doppio ciclo.
+Se ci sono N occorrenze di '1', il numero totale di tali sottostringhe vale:
+
+  (N * (N - 1))/2
+
+Supponiamo che ci siano N occorrenze di "1" nella stringa.
+Per formare una sottostringa valida, dobbiamo scegliere due posizioni diverse in cui compare "1": una come inizio e una come fine.
+Il numero di modi per scegliere 2 "1" diversi da N posizioni è dato dalla formula combinatoria:
+
+   binom(n k) = N!/(K!*(N - K)!
+
+Nel nostro caso K = 2:
+
+  binom(n 2) = N!/2!*(N-2)!
+  
+  N! = N*(N-1)*(N-2)!
+  
+                N*(N-1)*(N-2)!     N*(N-1)
+  binom(n 2) = ---------------- = ---------
+                  2*(N-2)!            2 
+
+(define (conta-sub11 str)
+  (let (N (length (find-all "1" str)))
+    (/ (* N (- N 1)) 2)))
+
+(conta-sub11 "10001")
+;-> 1
+(conta-sub11 "111")
+;-> 3
+(conta-sub11 "00100101")
+;-> 3
+(conta-sub11 "00100111")
+;-> 6
+(conta-sub11 "00")
+;-> 0
+
+
+---------------------------------------------------
+Abbinamenti tra liste diverse (prodotto cartesiano)
+---------------------------------------------------
+
+Abbiamo K liste con lunghezze non necessariamente uguali.
+Esempio:
+  L1 = (a b c)
+  L2 = (1 2 3)
+  L3 = (x y z)
+Vogliamo costruire la lista di tutte le combinazioni possibili tra gli elementi di tutte le liste.
+Ogni combinazione deve contenere un elemento da ogni lista.
+Output = (a 1 x) (b 2 y) (c 3 z) (a 1 w) (a 2 y) ecc.
+
+Il problema si risolve calcolando il prodotto cartesiano delle liste.
+Ogni posizione della combinazione viene scelta indipendentemente:
+- primo elemento da L1
+- secondo elemento da L2
+- terzo elemento da L3
+
+Un modo equivalente di vederlo è associare a ogni combinazione un vettore di indici:
+  (0 0 0)
+  (0 0 1)
+  (0 0 2)
+  (0 1 0)
+  ...
+  (2 2 2)
+dove:
+- il primo indice sceglie un elemento di L1,
+- il secondo di L2,
+- il terzo di L3.
+
+Questi vettori sono semplicemente tutti i numeri da 0 a N^K−1 scritti in base N.
+Per esempio con N=3:
+  000 -> (a 1 x)
+  001 -> (a 1 y)
+  002 -> (a 1 z)
+  010 -> (a 2 x)
+  ...
+  222 -> (c 3 z)
+
+Questa interpretazione permette di generare le combinazioni senza ricorsione e senza costruire strutture intermedie.
+
+Usiamo la primitiva 'args' per gestire gli argomenti variabili e costruire il prodotto cartesiano iterativamente.
+
+L'algoritmo non usa in alcun modo l'ipotesi che le liste abbiano la stessa lunghezza.
+Per ogni lista prende semplicemente tutti gli elementi disponibili e li combina con le combinazioni parziali costruite fino a quel momento.
+
+In generale, se le lunghezze delle liste sono n1, n2, ..., nk, allora il numero totale di combinazioni vale:
+
+  n1*n2*...*nk
+
+;------------------------------------------------------------
+; cartesian
+; Calcola il prodotto cartesiano di un numero variabile di liste.
+; Ogni combinazione contiene esattamente un elemento preso
+; da ciascuna lista.
+; Esempio:
+;   (cartesian '(a b)
+;              '(1 2 3)
+;              '(x y))
+; produce:
+;   ((a 1 x) (a 1 y)
+;    (a 2 x) (a 2 y)
+;    (a 3 x) (a 3 y)
+;    (b 1 x) (b 1 y)
+;    (b 2 x) (b 2 y)
+;    (b 3 x) (b 3 y))
+; Metodo:
+; 1) Si parte con una sola combinazione vuota:
+;      out = (())
+; 2) Per ogni lista in input:
+;      - si prendono tutte le combinazioni parziali
+;        già presenti in out;
+;      - ad ognuna di esse si aggiunge ciascun elemento
+;        della nuova lista;
+;      - le nuove combinazioni vengono memorizzate in tmp.
+; 3) Al termine dell'elaborazione della lista corrente:
+;      out <- tmp
+; 4) Dopo aver elaborato tutte le liste:
+;      out contiene tutte le combinazioni possibili.
+; Numero di combinazioni generate:
+;      n1 * n2 * ... * nk
+; dove ni è la lunghezza della i-esima lista.
+; Se almeno una lista è vuota il risultato finale è ().
+;------------------------------------------------------------
+
+(define (cartesian)
+  (let (out '(()))
+    (dolist (lst (args))
+      (let (tmp '())
+        (dolist (parz out)
+          (dolist (el lst)
+            (push (append parz (list el)) tmp -1)))
+        (setq out tmp)))
+    out))
+
+Evoluzione dell'algoritmo per:
+(cartesian '(a b) '(1 2) '(x y))
+out = (())
+
+dopo '(a b):
+((a) (b))
+
+dopo '(1 2):
+((a 1) (a 2)
+ (b 1) (b 2))
+
+dopo '(x y):
+((a 1 x) (a 1 y)
+ (a 2 x) (a 2 y)
+ (b 1 x) (b 1 y)
+ (b 2 x) (b 2 y))
+
+Ad ogni passo il numero di combinazioni viene moltiplicato per la lunghezza della lista corrente.
+
+(setq L1 '(a b c))
+(setq L2 '(1 2 3))
+(setq L3 '(x y z))
+
+(cartesian L1 L2 L3)
+;-> ((a 1 x) (a 1 y) (a 1 z) (a 2 x) (a 2 y) (a 2 z) (a 3 x) (a 3 y) (a 3 z)
+;->  (b 1 x) (b 1 y) (b 1 z) (b 2 x) (b 2 y) (b 2 z) (b 3 x) (b 3 y) (b 3 z)
+;->  (c 1 x) (c 1 y) (c 1 z) (c 2 x) (c 2 y) (c 2 z) (c 3 x) (c 3 y) (c 3 z))
+
+(cartesian '(a b) '(1) '(x y z))
+;-> ((a 1 x) (a 1 y) (a 1 z) (b 1 x) (b 1 y) (b 1 z))
+
+(apply cartesian (list '(a b) '(1) '(x y z)))
+;-> ((a 1 x) (a 1 y) (a 1 z) (b 1 x) (b 1 y) (b 1 z))
 
 ============================================================================
 

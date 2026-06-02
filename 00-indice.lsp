@@ -3516,6 +3516,9 @@ NOTE LIBERE 36
   Generazione di pagine html (immagini, testo, tabelle)
   Movimento di un punto in una griglia
   Addizioni e sottrazioni con una lista di interi
+  Polinomio caratteristico di una matrice
+  Sottostringhe binarie delimitate da 1
+  Abbinamenti tra liste diverse (prodotto cartesiano)
 
 PROBLEMI SUI DADI
 =================
