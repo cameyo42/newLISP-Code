@@ -6272,6 +6272,8 @@ Possiamo però "correggere" la densità dei punti moltiplicando le coordinate x 
 
 I risultati sono visibili nell'immagine "punti-cerchio.png" che si trova nella cartella "data".)
 
+Vedi anche "Dartboard" su "Note libere 36".
+
 
 ---------------------------------
 Esponenziazione (potenza) binaria

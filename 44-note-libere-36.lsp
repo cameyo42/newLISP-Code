@@ -9543,5 +9543,297 @@ Ad ogni passo il numero di combinazioni viene moltiplicato per la lunghezza dell
 (apply cartesian (list '(a b) '(1) '(x y z)))
 ;-> ((a 1 x) (a 1 y) (a 1 z) (b 1 x) (b 1 y) (b 1 z))
 
+
+---------------------
+Freccette (Dartboard)
+---------------------
+
+Vogliamo calcolare il valore medio del punteggio ottenuto simulando il lancio casuale di N freccette su un bersaglio circolare.
+Il bersaglio è quello ufficiale (vedi figura "dartboard.jpg" nella cartella "data").
+
+Punteggi del bersaglio
+Il punteggio base di ogni settore è il numero stampato sul bordo.
+I cerchi colorati modificano il punteggio:
+Anello esterno (Doppio): Raddoppia il valore del settore.
+Anello interno (Triplo): Triplica il valore del settore.
+Bullseye (cerchio rosso al centro): Vale 50 punti.
+Bull (anello verde intorno al centro): Vale 25 punti
+
+Dimensioni del bersaglio
+Diametro totale: 453 mm (170 mm la parte che ci interessa).
+Diametro del Bullseye (Centro rosso): 12.7 mm.
+Diametro del Single Bull (Anello verde): 31.8 mm
+Raggi dell'Anello del Doppio: 162.0 mm e 170.0 mm.
+Raggi dell'Anello del Triplo: 99.4 mm e 107.4 .
+Spessore degli anelli doppio e triplo: 8.0 mm.
+
+Generazione di punti interni alla circonferenza
+-----------------------------------------------
+Il metodo di accettazione/rifiuto produce una distribuzione uniforme all'interno del disco.
+Generiamo punti casuali nel quadrato [-1,1] x [-1,1] e scarta quelli che cadono all'esterno della circonferenza unitaria tramite il test:
+
+  x^2 + y^2 <= 1
+
+I punti accettati vengono aggiunti alla lista di output fino a raggiungere n elementi.
+In media viene accettata una frazione pari a pi/4 ~= 0.785 dei punti generati, quindi per ottenere N punti vengono effettuati circa 1.27*N tentativi.
+
+; Funzione che genera N punti casuali interni
+; alla circonferenza con centro in (0,0) e raggio unitario
+; genera x e y
+(define (rand-circle n)
+  (local (out i x y)
+    (setq out '())
+    (setq i 1)
+    (while (<= i n)
+      (setq x (add -1 (random 0 2)))
+      (setq y (add -1 (random 0 2)))
+      (when (<= (add (mul x x) (mul y y)) 1)
+            (push (list x y) out -1)
+            (++ i)))
+    out))
+
+Se generiamo prima punti uniformi nel disco unitario e poi moltiplichiamo entrambe le coordinate per R:
+
+  (x,y) -> (R*x,R*y)
+
+otteniamo punti uniformi nel disco di raggio R.
+
+Se il centro del disco è C = (cx, cy) e abbiamo già generato un punto (x, y) nel disco centrato nell'origine, basta applicare una traslazione:
+
+  (x,y) -> (x+cx, y+cy)
+
+Possiamo combinare scala e traslazione:
+
+  (x,y) -> (cx + R*x, cy + R*y)
+
+dove (x,y) è un punto uniforme nel disco unitario.
+
+In altre parole:
+1. Generare (x,y) nel disco unitario.
+2. Moltiplicare per R.
+3. Aggiungere le coordinate del centro (cx,cy).
+La trasformazione affine:
+
+  (x,y) -> (cx + R*x, cy + R*y)
+
+trasforma il disco unitario nel disco di centro (cx,cy) e raggio R, mantenendo uniforme la distribuzione dei punti.
+
+Anche il metodo diretto in coordinate polari produce una distribuzione uniforme all'interno del disco.
+Generiamo casualmente un angolo (theta) uniforme e un raggio (r) con densità corretta:
+
+  r = sqrt(u)
+
+; Funzione che genera N punti casuali interni
+; alla circonferenza con centro in (0,0) e raggio unitario
+; genera r e theta
+(define (rand-circle n)
+  (local (out i u r theta x y pi)
+    (setq out '())
+    (setq i 0)
+    (setq pi (mul 2 (acos 0)))
+    (for (i 1 n)
+      (setq u (random))
+      (setq r (sqrt u))
+      (setq theta (mul (random) (mul 2 pi)))
+      (setq x (mul r (cos theta)))
+      (setq y (mul r (sin theta)))
+      (push (list x y) out -1))
+    out))
+
+Verifica della correttezza delle funzioni 'rand-circle':
+
+(define (check-density points r1 r2 r3 r4)
+  (local (c1 c2 a1 a2 x y d2)
+    (setq c1 0)
+    (setq c2 0)
+    ; conta punti nei due anelli
+    (dolist (p points)
+      (setq x (p 0))
+      (setq y (p 1))
+      (setq d2 (add (mul x x) (mul y y)))
+      (cond
+        ((and (>= d2 (mul r1 r1)) (< d2 (mul r2 r2))) (++ c1))
+        ((and (>= d2 (mul r3 r3)) (<= d2 (mul r4 r4))) (++ c2))
+      )
+    )
+    ; aree (senza pi, inutile per il rapporto)
+    (setq a1 (sub (mul r2 r2) (mul r1 r1)))
+    (setq a2 (sub (mul r4 r4) (mul r3 r3)))
+    ; densità
+    (println "inner count: " c1)
+    (println "outer count: " c2)
+    (println "inner density: " (div c1 a1))
+    (println "outer density: " (div c2 a2))
+    (println "ratio (should ~1): " (div (div c1 a1) (div c2 a2)))
+  )
+)
+
+Per 'rand-circle' (x e y):
+(setq pts (rand-circle 10000))
+(check-density pts 0.6 0.8 0.1 0.3)
+;-> inner count: 2806
+;-> outer count: 838
+;-> inner density: 10021.42857142857
+;-> outer density: 10475
+;-> ratio (should ~1): 0.9566996249573809
+
+Per 'rand-circle' (r e theta):
+(setq pts (rand-circle 10000))
+(check-density pts 0.6 0.8 0.1 0.3)
+;-> inner count: 2801
+;-> outer count: 838
+;-> inner density: 10003.57142857142
+;-> outer density: 10475
+;-> ratio (should ~1): 0.9549948857824747
+;-> 0.9549948857824747
+
+Calcolo dei settori
+-------------------
+Abbiamo un cerchio con centro in C=(0,0) e raggio R=1 e lo dividiamo in N settori circolari tutti uguali.
+Dato un punto P(x,y) interno al cerchio, vogliamo calcolare in quale settore ricade.
+Per esempio, per N = 10 ogni settore circolare ha un apertura di 360/10 = 36 gradi.
+Il primo settore parte dall'asse X con angolo positivo in senso antiorario.
+- settore 0: da 0° a 36°
+- settore 1: da 36° a 72°
+- ...
+- settore N−1: ultimo intervallo fino a 360°
+
+La soluzione è basata sull'angolo polare del punto rispetto all'origine.
+
+1) Calcolo dell'angolo
+Dato P(x,y)), calcolare prima l'angolo:
+
+  theta = atan2(y,x)
+
+atan2 restituisce l'angolo in radianti in (-pi, pi]
+
+2) Normalizzazione angolo:
+Trasformazione in [0, 2*pi) (se necessaria):
+
+  Se (theta < 0) --> theta = theta + 2*pi
+
+3) Ampiezza settore
+Con (N) settori:
+
+  Delta = 2*pi/N
+
+3. Indice del settore
+L'indice del settore vale:
+
+  k = floor(theta/delta), con (k in [0, N-1])
+
+; Funzione che prende un punto x,y interno ad un cerchio e
+; il numero di settori in cui è diviso il cerchio
+; e restituisce in quale settore si trova il punto.
+(define (settore x y n)
+  (letn ( (pi (mul 2 (acos 0)))
+          (a (atan2 y x))
+          (a (if (< a 0) (add a (mul 2 pi)) a))
+          (step (div (mul 2 pi) n)) )
+    (% (int (div a step)) n)))
+
+Il raggio R non serve per determinare il settore.
+
+Calcolo delle corone circolari
+------------------------------
+Abbiamo un cerchio con centro in C=(0,0) e raggio R4.
+Inoltre abbiamo altri 3 cerchi con centro in C=(0,0) con raggi R1 < R2 < R3 < R4.
+Dato un punto interno al cerchio P=(x,y) vogliamo calcolare se ricade in una delle due corone circolari
+formate dai cerchi di raggio R1,R2 e dai cerchi di raggio R3,R4.
+
+Calcoliamo il quadrato della distanza del punto dal centro:
+
+  d^2 = x*x + y*y
+
+Le regioni sono:
+ a) Disco interno: 0 <= d2 < R1*R1
+ b) Prima corona: R1*R1 <= d2 < R2*R2
+ c) Anello intermedio: R2*R2 <= d2 < R3*R3
+ d) Seconda corona: R3*R3 <= d2 <= R*R4
+
+Quindi:
+- P appartiene alla corona (R1,R2) se R1*R1 <= d2 < R2*R2
+- P appartiene alla corona (R3,R4) se R3*R3 <= d2 <= R4*R4
+
+; Funzione che determina se un punto cade nella prima corona o
+; nella seconda corona o in nessuna delle due
+; 1 -> il punto non appartiene a nessuna delle due corone
+; 2 -> il punto appartiene alla corona (R1,R2)
+; 3 -> il punto appartiene alla corona (R3,R4)
+(define (corona x y r1 r2 r3 r4)
+  (let (d2 (add (mul x x) (mul y y)))
+    (cond ((and (>= d2 (mul r1 r1)) (< d2 (mul r2 r2))) 2)
+          ((and (>= d2 (mul r3 r3)) (<= d2 (mul r4 r4))) 3)
+          (true 1))))
+
+Funzione 'dartboard'
+--------------------
+
+; Funzione che calcola il valore medio del punteggio di N lanci casuali
+; in un bersaglio per freccette (dartboard)
+(define (dartboard iter)
+  (local (out sector-values sector-point anelli eye bull r1T r2T r1D r2D
+          points x y dxy sector res bonus)
+    (setq out '())
+    ; valore di ogni settore
+    (setq sector-values '(6 13 4 18 1 20 5 12 9 14 11 8 16 7 19 3 17 2 15 10))
+    (length sector-values)
+    ; vettore che contiene il numero di punti caduti in ogni settore
+    (setq sector-point (array 20 '(0)))
+    (setq anelli (array 4 '(0)))
+    ; raggi dei cerchi normalizzati per un cerchio di raggio 1
+    ; (define (norm x) (div x 170))
+    (setq eye 0.07470588235294118)
+    (setq bull 0.1870588235294118)
+    ; raggi anello triplo
+    (setq r1T 0.5847058823529412)
+    (setq r2T 0.631764705882353)
+    ; raggi anello doppio
+    (setq r1D 0.9529411764705882)
+    (setq r2D 1)
+    ; generazione dei punti interni al cerchio
+    (setq points (rand-circle iter))
+    ; ciclo per ogni punto
+    (dolist (pt points)
+      (setq x (pt 0))
+      (setq y (pt 1))
+      ; distanza del punto corrente dal centro
+      (setq dxy (sqrt (add (mul x x) (mul y y))))
+      (cond
+        ; colpito bullseye?
+        ((>= eye dxy) (setq res 50))
+        ; colpito bull?
+        ((>= bull dxy) (setq res 20))
+        (true
+          ; calcolo del settore in cui ricade il punto
+          (setq sector (settore x y 20))
+          ; aggiorna il numero di punti caduti nel settore corrente
+          (if (or (< sector 0) (>= sector 20)) (println x { } y { } sector))
+          (++ (sector-point sector))
+          ; calcolo del valore del settore corrente
+          (setq res (sector-values sector))
+          ; colpito anello doppio o anello triplo?
+          (setq bonus (corona x y r1D r2D r1T r2T))
+          ; aggiorna il numero di punti caduti negli anelli
+          (++ (anelli bonus))
+          ; punteggio del lancio corrente
+          (setq res (* bonus res))))
+      ;(println "x,y:" x {, } y)
+      ;(println "dxy: " dxy)
+      ;(println "settore:" sector)
+      ;(println "Valore settore:" (sector-values sector))
+      ;(println "Bonus:" bonus)
+      ;(println "Res:" res) (read-line)
+      (push res out)
+    )
+    ;(println "sector: " sector-point)
+    ;(println "anelli: " anelli)
+    (div (apply + out) (length out))))
+
+Proviamo:
+
+(dartboard 1e6)
+;-> 13.177355
+
 ============================================================================
 

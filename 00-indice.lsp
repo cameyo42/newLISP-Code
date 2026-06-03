@@ -3519,6 +3519,7 @@ NOTE LIBERE 36
   Polinomio caratteristico di una matrice
   Sottostringhe binarie delimitate da 1
   Abbinamenti tra liste diverse (prodotto cartesiano)
+  Freccette (Dartboard)
 
 PROBLEMI SUI DADI
 =================
