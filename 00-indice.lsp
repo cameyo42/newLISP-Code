@@ -3520,6 +3520,9 @@ NOTE LIBERE 36
   Sottostringhe binarie delimitate da 1
   Abbinamenti tra liste diverse (prodotto cartesiano)
   Freccette (Dartboard)
+  Numeri Fit
+  Lista di Noè
+  Somma dei cubi di sezioni di un intero uguali all'intero
 
 PROBLEMI SUI DADI
 =================
@@ -3567,7 +3570,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (403 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (410 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

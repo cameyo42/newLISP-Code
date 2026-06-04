@@ -9835,5 +9835,204 @@ Proviamo:
 (dartboard 1e6)
 ;-> 13.177355
 
+
+----------
+Numeri Fit
+----------
+
+I numeri fit si ottengono con il seguente procedimento:
+1) Si parte  da un numero intero non negativo N
+2) Si converte il numero in binario (senza zeri iniziali)
+3) Nel binario si sostituisce ripetutamente ogni coppia di "00" con un singolo "0".
+4) Si converte il nuovo binario in decimale.
+
+Sequenza OEIS A090078:
+In binary expansion of n, reduce contiguous blocks of 0's to 0.
+  0, 1, 2, 3, 2, 5, 6, 7, 2, 5, 10, 11, 6, 13, 14, 15, 2, 5, 10, 11, 10, 21,
+  22, 23, 6, 13, 26, 27, 14, 29, 30, 31, 2, 5, 10, 11, 10, 21, 22, 23, 10,
+  21, 42, 43, 22, 45, 46, 47, 6, 13, 26, 27, 26, 53, 54, 55, 14, 29, 58, 59,
+  30, 61, 62, 63, 2, 5, 10, 11, 10, 21, 22, 23, 10, 21, ...
+
+(define (a n)
+  (let (bin (bits n))
+    (while (find "00" bin) (replace "00" bin "0"))
+    (int bin 0 2)))
+
+(map a (sequence 0 50))
+;-> (0 1 2 3 2 5 6 7 2 5 10 11 6 13 14 15 2 5 10 11 10 21
+;->  22 23 6 13 26 27 14 29 30 31 2 5 10 11 10 21 22 23 10
+;->  21 42 43 22 45 46 47 6 13 26)
+
+
+------------
+Lista di Noè
+------------
+
+Data una lista di interi, determinare se esistono solo coppie uniche degli stessi numeri.
+La lista di Noè: di ogni specie animale --> una coppia
+La funzione deve essere la più corta possibile
+
+Esempi:
+
+  L = (2 2 4 3 4 3 4 4)
+  coppie = (2 2) (3 3) (4 4) (4 4) --> falso, (4 4) non è unica
+
+  L = (2 1 6 3 4 3 1 6 4 2)
+  coppie = (1 1) (2 2) (3 3) (4 4) (6 6) --> vero
+
+(define (noe lst)
+  (let (unici (unique lst))
+    (for-all (fn(x) (= x 2)) (count unici lst))))
+
+Proviamo:
+
+(setq L1 '(2 2 4 3 4 3 4 4))
+(noe L1)
+;-> nil
+
+(setq L2 '(2 1 6 3 4 3 1 6 4 2))
+(noe L2)
+;-> true
+
+Versione code-golf (65 caratteri):
+(define(f l)(let(u(unique l))(for-all(fn(x)(= x 2))(count u l))))
+
+(f L1)
+;-> nil
+(f L2)
+;-> true
+
+
+--------------------------------------------------------
+Somma dei cubi di sezioni di un intero uguali all'intero
+--------------------------------------------------------
+
+Determinare la sequenza dei numeri che sono uguali alla somma dei cubi di almeno una delle sue divisioni in tre sezioni.
+
+Dato un intero N, dividerlo in tutti i modi in cui esistono tre sezioni.
+Per ogni sezione controllare se la somma dei loro cubi è uguale a N.
+Gli eventuali zeri iniziali delle sezioni devono essere eliminati (es. 002 --> 2).
+
+Esempi:
+  N = 153
+  Sezioni da 3: (1 5 3)
+  Somma dei cubi: (1^3 + 3^3 + 5^3 = 153  ---> uguale a N
+
+  N = 1000
+  Sezioni da 3: (10 0 0) (1 0 0)
+  Somma dei cubi: (10^3 + 0^3 + 0^3 = 1000)  ---> uguale a N
+
+  N = 12345
+  Sezioni da 3: ((123 4 5) (12 34 5) (12 3 45) (1 234 5) (1 23 45) (1 2 345))
+  Somma dei cubi: nessuna delle sezioni somma a 12345
+
+Sequenza OEIS A271730:
+Each number is the sum of the cubes of its 3 sections (not necessarily having the same length and without leading zeros).
+  153, 370, 371, 407, 1000, 1001, 2213, 4160, 4161, 41833, 165033, 221859,
+  341067, 444664, 487215, 982827, 983221, 166500333, 296584415, 710656413,
+  828538472, 3351425749, 4741646560, 5363441729, 6410801727, 13681182232,
+  15812239860, 16066842264, 18722248929, 67229383464, ...
+
+I primi quattro termini sono anche chiamati numeri narcisistici o numeri di Armstrong.
+
+(define (split-integer num)
+"Generate all the splits of an integer in order"
+(if (= (length num) 1) (list (list num))
+  ;else
+  (local (str out len max-tagli taglio fmt cur-str)
+    ; convert integer to string
+    (setq str (string num))
+    (setq out '())
+    (setq len (length str))
+    ; numero massimo di tagli
+    (setq max-tagli (- len 1))
+    ; formattazione con 0 davanti
+    (setq fmt (string "%0" max-tagli "s"))
+    (for (i 0 (- (pow 2 max-tagli) 1))
+      ; taglio corrente
+      (setq taglio (format fmt (bits i)))
+      ; taglia la stringa con taglio corrente
+      (setq cur-str (split-aux str taglio))
+      ; trova tutti i numeri interi della stringa tagliata corrente e
+      ; li inserisce come elemento nella soluzione
+      (push (map (fn(x) (int x 0 10)) (find-all {-?\d+} cur-str)) out -1)
+      ;(push (divide str taglio) out -1)
+    )
+    out)))
+; Auxiliary function
+(define (split-aux str binary)
+  (let (out "")
+    (for (i 0 (- (length binary) 1))
+      (if (= (binary i) "1")
+          ; taglio
+          (extend out (string (str i) { }))
+          ; nessun taglio
+          (extend out (str i))))
+    ; inserisce caratteri finali
+    (extend out (str -1))
+    out))
+
+; Funzione che calcola i numeri della sequenza fino ad un dato limite
+; (sezioni del numero di qualunque lunghezza)
+; (non ottimizzata)
+(define (cube3 limit)
+  (local (out terne)
+    (setq out '())
+    (for (num 100 limit)
+      (setq terne (filter (fn(x) (= (length x) 3)) (split-integer num)))
+      (dolist (el terne)
+        (if (= num (+ (pow (el 0) 3) (pow (el 1) 3) (pow (el 2) 3)))
+          (push el out))))
+    (unique (sort out))))
+
+Proviamo:
+
+(time (println (cube3 10000)))
+;-> ((1 5 3) (3 7 0) (3 7 1) (4 0 7) (10 0 0) (10 0 1))
+;-> 335.125
+(time (println (cube3 100000)))
+;-> ((1 5 3) (3 7 0) (3 7 1) (4 0 7) (10 0 0) (10 0 1))
+;-> 7403.946
+(time (println (cube3 1000000)))
+;-> ((1 5 3) (2 2 13) (3 7 0) (3 7 1) (4 0 7) (4 16 0) (4 16 1) (4 18 33)
+;->  (6 84 45) (10 0 0) (10 0 1) (16 50 33) (22 18 59) (33 67 0) (33 67 1)
+;->  (34 0 67) (34 10 67) (40 70 0) (40 70 1) (44 46 64) (48 72 15) (98 28 27)
+;->  (98 32 21) (100 0 0))
+;-> 157734.062
+
+Esiste un'altra sequenza in cui le sezioni del numero devono avere tutte la stessa lunghezza.
+
+Sequenza OEIS A056733:
+Each number is the sum of the cubes of its 3 sections with equal length.
+  153, 370, 371, 407, 165033, 221859, 336700, 336701, 340067, 341067, 407000,
+  407001, 444664, 487215, 982827, 983221, 166500333, 296584415, 333667000,
+  333667001, 334000667, 710656413, 828538472, 142051701000, 166650003333,
+  262662141664, 333366670000, ...
+
+; Funzione che calcola i numeri della sequenza fino ad un dato limite
+; (sezioni del numero di lunghezza uguale)
+(define (cube3eq limit)
+  (local (out terne)
+    (setq out '())
+    (for (num 100 limit)
+      (setq len (length num))
+      (when (zero? (% len 3))
+        (setq terna (map (fn(x) (int x 0 10)) (explode (string num) (/ len 3))))
+        ;(println terna)
+        (if (= num (+ (pow (terna 0) 3) (pow (terna 1) 3) (pow (terna 2) 3)))
+            (push terna out))))
+    (unique (sort out))))
+
+Proviamo:
+
+(time (println (cube3eq 100000)))
+;-> ((1 5 3) (3 7 0) (3 7 1) (4 0 7))
+;-> 16.99
+(time (println (cube3eq 1000000)))
+;-> ((1 5 3) (3 7 0) (3 7 1) (4 0 7) (16 50 33) (22 18 59) (33 67 0)
+;->  (33 67 1) (34 0 67) (34 10 67) (40 70 0) (40 70 1) (44 46 64)
+;->  (48 72 15) (98 28 27) (98 32 21))
+;-> 3517.197
+
 ============================================================================
 
