@@ -3523,6 +3523,9 @@ NOTE LIBERE 36
   Numeri Fit
   Lista di Noè
   Somma dei cubi di sezioni di un intero uguali all'intero
+  Solve "X +- A = B"
+  Somma di un intervallo di una somma di un intervallo
+  Sottolista con il maggior numero di 1
 
 PROBLEMI SUI DADI
 =================

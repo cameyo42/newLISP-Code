@@ -10034,5 +10034,120 @@ Proviamo:
 ;->  (48 72 15) (98 28 27) (98 32 21))
 ;-> 3517.197
 
+
+------------------
+Solve "X +- A = B"
+------------------
+
+Data una stringa del tipo "X +- A = B", dove A e B sono numeri interi, scrivere una funzione che calcola il valore di X.
+La funzione deve essere la più corta possibile.
+
+Esempi:
+  stringa = "X + 5 = 3" --> X = -2
+  stringa = "X - 5 = 3")  --> X = 8
+  stringa = "X - 100 = -250" --> X = -150
+
+(define (solve expr)
+(let (T (parse expr " "))
+  (eval-string (string (if (= (T 1) "+") "(- " "(+ ") (T 4) " " (T 2) ")"))))
+
+Versione code-golf (96 caratteri):
+
+(define(f s)(let(T(parse s" "))(eval-string(string(if(=(T 1)"+")"(- " "(+ ")(T 4)" "(T 2)")"))))
+
+(setq str "N + 5 = 3")
+(setq str "N - 5 = 3")
+(setq str "N - 5 = -3")
+(setq str "N - 100 = -250")
+(f str)
+;-> -150
+
+
+----------------------------------------------------
+Somma di un intervallo di una somma di un intervallo
+----------------------------------------------------
+
+Dato un valore intero N, scrivere una funzione che calcola la somma dell'intervallo della somma dell'intervallo di N.
+La funzione deve essere la più corta possibile.
+
+Esempio:
+  N = 3
+  Sum(1..3) = 6
+  Sum(1..6) = 21
+
+Sequenza OEIS A002817:
+Doubly triangular numbers: a(n) = n*(n+1)*(n^2+n+2)/8.
+  0, 1, 6, 21, 55, 120, 231, 406, 666, 1035, 1540, 2211, 3081, 4186,
+  5565,  7260, 9316, 11781, 14706, 18145, 22155, 26796, 32131, 38226,
+  45150, 52975, 61776, 71631, 82621, 94830, 108345, 123256, 139656,
+  157641, 177310, 198765, 222111, 247456, 274911, 304590, 336610, ...
+
+(define (sum-sum N)
+  (apply + (sequence 1 (apply + (sequence 1 N)))))
+
+(map sum-sum (sequence 1 20))
+;-> (1 6 21 55 120 231 406 666 1035 1540 2211 3081 4186
+;->  5565 7260 9316 11781 14706 18145 22155)
+
+La formula a(n) = n*(n+1)*(n^2+n+2)/8 può essere trasformata in una più breve:
+
+  a(n) = ((n^2+n+1)^2 - 1)/8
+
+(define (sum-sum2 n) (/ (- (pow (+ (* n n) n 1) 2) 1) 8))
+
+(map sum-sum2 (sequence 1 20))
+;-> (1 6 21 55 120 231 406 666 1035 1540 2211 3081 4186
+;->  5565 7260 9316 11781 14706 18145 22155)
+
+Versione code-golf (40 caratteri):
+(define(f n)(/(-(pow(+(* n n)n 1)2)1)8))
+
+(map f (sequence 1 20))
+;-> (1 6 21 55 120 231 406 666 1035 1540 2211 3081 4186
+;->  5565 7260 9316 11781 14706 18145 22155)
+
+
+-------------------------------------
+Sottolista con il maggior numero di 1
+-------------------------------------
+
+Data una lista di binaria (0 e 1) e un intero N, determinare l'indice iniziale della prima sottolista lunga N che ha il maggior numero di 1.
+
+Esempio:
+  lista = (0 1 1 0 0 1 1 1 0 1 0 1)
+  N = 3                      
+                             . . .
+  Indice = 5  --> (0 1 1 0 0 1 1 1 0 1 0 1)
+                   0 1 2 3 4 5
+
+(define (max-1 lst N)
+  (local (len max-val max-lst parte conta)
+    (setq max-val 0)
+    (setq max-lst '())
+    (setq len (length lst))
+    ; ciclo sulla lista per parti lunghe N
+    (for (i 0 (- len N))
+      ; parte corrente
+      (setq parte (slice lst i N))
+      ; numero di 1 nella parte corrente
+      (setq conta ((count '(1) parte) 0))
+      ;(println parte { } conta)
+      ; aggiornare il valore massimo?
+      (when (> conta max-val)
+        (setq max-val conta)
+        (setq max-lst parte)))
+    (list max-val max-lst)))
+
+Proviamo:
+
+(max-1 '(0 1 1 0 0 1 1 1 0 1 0 1) 3)
+;-> (3 (1 1 1))
+
+(max-1 '(0 1 1 0 0 1 1 1 0 1 0 1) 5)
+;-> (4 (1 1 1 0 1))
+
+(max-1 '(0 1 0 1 1 0 0 1 1 1 0 0 1 1 1 0 0 0 0 0) 5)
+;-> (3 (0 1 0 1 1))
+
 ============================================================================
 
