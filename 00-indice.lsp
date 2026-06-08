@@ -3526,6 +3526,15 @@ NOTE LIBERE 36
   Solve "X +- A = B"
   Somma di un intervallo di una somma di un intervallo
   Sottolista con il maggior numero di 1
+  
+NOTE LIBERE 37
+==============
+  Sottolista più lunga con elementi di un'altra lista
+  Modulo/resto tra due frazioni
+  Teorema di Dirichlet
+  Funzioni alternate
+  Bitwise and, or, xor, not per big-integer
+  Matematica con le frazioni (rationale.lsp)
 
 PROBLEMI SUI DADI
 =================

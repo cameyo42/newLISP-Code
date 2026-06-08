@@ -1391,6 +1391,58 @@ https://pls.scienze.unipd.it/matematica/wp-content/uploads/sites/3/2018/07/2018.
    7/9 = 1/2 + 1/6 + 1/12 + 1/36
    7/9 = 1/2 + 1/6 + 1/9
    ...
+---
+
+In realtà non sappiamo con certezza quale algoritmo generale usassero gli antichi egizi.
+Le nostre principali fonti sono il Rhind Mathematical Papyrus e il Moscow Mathematical Papyrus, che contengono molte decomposizioni in frazioni unitarie, ma non spiegano un metodo universale.
+Sappiamo però alcune cose:
+
+1. Non usavano il metodo greedy moderno
+Il metodo greedy (attribuito nel Medioevo a Fibonacci) prende sempre la frazione unitaria più grande possibile:
+a/b --> 1/ceil(b/a)
+Per esempio:
+4/13 = 1/4 + 3/52
+e continua ricorsivamente.
+
+Molte decomposizioni del papiro Rhind non coincidono con quelle greedy, quindi gli Egizi non sembrano aver seguito sistematicamente questo algoritmo.
+
+2. Preferivano decomposizioni "eleganti"
+Gli scribi cercavano spesso:
+- pochi termini;
+- denominatori piccoli;
+- denominatori distinti;
+- schemi regolari.
+Ad esempio:
+2/101 = 1/101 + 1/202 + 1/303 + 1/606
+anziché la decomposizione greedy, che sarebbe diversa.
+
+3. Avevano una grande tabella per le frazioni 2/n
+L'inizio del papiro Rhind contiene una tabella completa di tutte le frazioni
+2/3, 2/5, 2/7, ..., 2/101
+scritte come somme di frazioni unitarie.
+Per esempio:
+2/15 = 1/10 + 1/30
+2/35 = 1/30 + 1/42
+Probabilmente gli scribi consultavano questa tabella e poi trasformavano altre frazioni usando identità algebriche.
+
+4. Un metodo plausibile
+Molti storici pensano che per una frazione a/b gli Egizi cercassero una decomposizione del tipo:
+  a/b = 1/x + r
+ma non necessariamente scegliendo il minimo `x` come nel greedy.
+Spesso sceglievano 'x' in modo che il resto avesse una forma particolarmente semplice da scomporre.
+Per esempio con la frazione 4/1801 dopo 1/451 resta 3/812251 e uno scriba avrebbe potuto cercare direttamente 3/812251 = 1/x + 1/y ottenendo la decomposizione a soli due termini:
+1/295364 + 1/3249004.
+Questa soluzione è molto più "egiziana" del risultato greedy, che produce denominatori giganteschi.
+
+Non esiste evidenza che gli Egizi usassero il metodo greedy.
+Le prove suggeriscono invece una combinazione di:
+- tabelle precompilate (specialmente per 2/n),
+- ricerca di decomposizioni con pochi termini,
+- manipolazioni algebriche e fattorizzazioni,
+- preferenza per denominatori relativamente piccoli.
+
+Il metodo greedy è semplice e garantisce sempre una soluzione, ma produce spesso denominatori enormi.
+(proprio per questo molti studiosi ritengono improbabile che fosse il metodo abituale degli scribi egizi).
 
 
 ------------------------------------
