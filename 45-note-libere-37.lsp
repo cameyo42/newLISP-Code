@@ -569,5 +569,409 @@ Matematica con le frazioni (rationale.lsp)
 ;(test "*r" '(*r '(2 3) '(3 5) '(5 7)) '(2 7))
 ;(test "/r" '(/r '(2 3) '(3 5) '(5 7)) '(14 9))
 
+
+----------------------------------
+Prodotto dei divisori di un numero
+----------------------------------
+
+Scrivere una funzione che calcola il prodotto di tutti i divisori di un numero intero.
+
+Sequenza OEIS A007955:
+Product of divisors of n.
+  1, 2, 3, 8, 5, 36, 7, 64, 27, 100, 11, 1728, 13, 196, 225, 1024, 17, 5832,
+  19, 8000, 441, 484, 23, 331776, 125, 676, 729, 21952, 29, 810000, 31,
+  32768, 1089, 1156, 1225, 10077696, 37, 1444, 1521, 2560000, 41, 3111696,
+  43, 85184, 91125, 2116, 47, 254803968, 343, ...
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1)
+        )
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+; Funzione che calcola il prodotto dei divisori di un numero intero
+(define (prod-div n)
+  (apply * (divisors n)))
+
+(map prod-div (sequence 1 40))
+;-> (1 2 3 8 5 36 7 64 27 100 11 1728 13 196 225 1024 17 5832
+;->  19 8000 441 484 23 331776 125 676 729 21952 29 810000 31
+;->  32768 1089 1156 1225 10077696 37 1444 1521 2560000)
+
+Possiamo usare un altro metodo (più veloce):
+il prodotto di tutti i divisori di n è sempre n^((numero di divisori di n)/2).
+
+(define (divisors-count num)
+"Count the divisors of an integer number"
+  (if (= num 1)
+      1
+      (let (lst (factor-group num))
+        (apply * (map (fn(x) (+ 1 (last x))) lst)))))
+
+(define (prod-div2 n)
+  (pow n (div (divisors-count n) 2)))
+
+(= (map prod-div (sequence 1 40)) (map prod-div2 (sequence 1 40)))
+;-> true
+
+(time (prod-div 200) 1e5)
+;-> 651.793
+(time (prod-div2 200) 1e5)
+;-> 210.373
+
+
+-----------------------------
+Numeri primi con Miller-Rabin
+-----------------------------
+
+Il test di Miller–Rabin è un algoritmo per stabilire se un numero intero n è primo oppure composto.
+Non prova la primalità in modo assoluto per tutti i numeri, ma identifica i composti con altissima affidabilità.
+Per alcuni insiemi di basi e per intervalli limitati (ad esempio interi a 64 bit), diventa di fatto deterministico.
+
+1) Idea di base
+Si parte da un numero dispari n > 2.
+Si scrive:
+  n - 1 = d * 2^s
+d è dispari e s >= 1.
+Questo serve a separare la parte "dispari" da quella con fattori di 2.
+
+2) Scelta della base
+Si sceglie un numero a tale che:
+  2 <= a <= n - 2
+Questo numero viene usato per testare la struttura modulare di n.
+
+3) Primo test
+Si calcola:
+  x = a^d mod n
+Se:
+  x = 1 oppure x = n - 1
+allora il numero supera questo test e potrebbe essere primo.
+
+4) Test delle potenze successive
+Se il primo test fallisce, si continua a elevare al quadrato:
+  x = x^2 mod n
+ripetendo fino a s - 1 volte.
+Se in uno di questi passi si ottiene:
+  x = n - 1
+allora n passa il test per questa base.
+
+5) Fallimento del test
+Se nessuno dei valori raggiunge n - 1, allora:
+  n è sicuramente composto.
+
+6) Ripetizione su più basi
+Il test viene ripetuto per più valori di a.
+Se n passa tutti i test, allora è:
+- probabilmente primo
+- oppure un caso raro (pseudoprimo forte per quelle basi)
+
+7) Caso pratico (numeri grandi)
+Per numeri fino a circa 2^64, esiste un insieme fisso di basi che rende il test deterministico in pratica.
+Questo significa che:
+- nessun numero composto passa tutti i test
+- il risultato è equivalente a un test deterministico
+
+8) Perché funziona
+L'idea matematica è che in un campo modulo primo, le radici dell'unità hanno struttura molto rigida.
+Se n è composto, questa struttura si rompe quasi sempre, tranne in casi molto rari (pseudoprimi forti).
+
+9) Vantaggi
+- molto veloce (logaritmico)
+- funziona bene su numeri grandi (anche 100+ cifre)
+- molto più efficiente della divisione per tentativi
+
+10) Limite
+Non è un test puramente deterministico per numeri arbitrari (a meno di basi speciali su intervalli limitati), ma in pratica è uno dei metodi più affidabili e usati in crittografia e teoria dei numeri applicata.
+
+Caratteristiche:
+powmod: esponenziazione modulare veloce per bigint.
+mr-test: esegue un singolo round di Miller-Rabin per una base a.
+prime-i?: prova più basi fisse e restituisce true solo se il numero supera tutti i test.
+
+; ============================================================
+; Modular exponentiation: computes (a^d mod n)
+; Works with big integers safely
+; Complexity: O(log d)
+; ============================================================
+(define (powmod a d n)
+  (let (res 1L)
+    ; reduce base modulo n at start
+    (setq a (% a n))
+    ; exponentiation by squaring
+    (while (> d 0)
+      ; if current exponent bit is 1, multiply result
+      (if (!= (% d 2) 0)
+        (setq res (% (* res a) n)))
+      ; shift exponent right (divide by 2)
+      (setq d (/ d 2))
+      ; square base modulo n
+      (setq a (% (* a a) n)))
+    res))
+
+; ============================================================
+; Single Miller-Rabin round
+; Returns:
+;   true  -> "probably prime for this base"
+;   nil   -> composite detected
+; ============================================================
+(define (mr-test n a)
+  (letn (
+          ; write n-1 = d * 2^s
+          (d (- n 1))
+          (s 0)
+          ; working variable
+          (x 0)
+          ; flag for detecting success inside loop
+          (found nil)
+          (i 0)
+        )
+    ; factor out powers of 2 from n-1
+    (while (zero? (% d 2))
+      (setq d (/ d 2))
+      (++ s))
+    ; compute a^d mod n
+    (setq x (powmod a d n))
+    ; first Miller-Rabin condition
+    (if (or (= x 1) (= x (- n 1)))
+        true
+        (begin
+          ; square x up to s-1 times
+          (setq i 1)
+          (setq found nil)
+          (while (and (<= i (- s 1)) (not found))
+            ; x = x^2 mod n
+            (setq x (% (* x x) n))
+            ; if we hit n-1, this base passes
+            (if (= x (- n 1)) (setq found true))
+            (++ i))
+          found))))
+
+; ============================================================
+; Full primality test using multiple bases
+; For 64-bit integers, this is deterministic in practice
+; ============================================================
+(define (prime-i? n)
+  (letn (
+          ; fixed set of bases (good for large integers)
+          (bases '(2L 3L 5L 7L 11L 13L 17L 19L 23L 29L 31L 37L))
+          ; index and current base
+          (i 0)
+          (a 0)
+          ; global primality flag
+          (is-prime true)
+        )
+    ; small cases
+    (cond
+      ((< n 2) nil)
+      ((or (= n 2) (= n 3)) true)
+      ((zero? (% n 2)) nil)
+      (true
+        ; test all bases until failure
+        (while (and is-prime (< i (length bases)))
+          (setq a (bases i))
+          ; skip invalid base
+          (if (< a n)
+            (if (not (mr-test n a)) (setq is-prime nil)))
+          (++ i))
+        is-prime))))
+
+; Funzione che verifica se un numero è primo (no big-integer)
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Proviamo:
+
+Test di correttezza (fino a 1e6):
+
+(= (filter prime? (sequence 2 1e6)) (filter prime-i? (sequence 2 1e6)))
+;-> true
+
+Test di velocità:
+
+Numeri fino a 6 cifre:
+(time (filter prime? (sequence 2 1e6)))
+;-> 929.907
+(time (filter prime-i? (sequence 2 1e6)))
+;-> 16770.194
+
+Numeri con 15 cifre:
+  100000000000031 --> primo
+  100000000000067 --> primo
+  100000000000097 --> primo
+  100000000000073 --> 7478413 * 13371821
+  100000000000039 --> 821 * 3163 * 38508593
+  100000000000045 --> 5 * 41 * 487 * 10243 * 97789
+  100000000000055 --> 5 * 827087 * 24181253
+  100000000000065 --> 3 * 5 * 11 * 31 * 15809 * 1236659
+  100000000000075 --> 5 * 5 * 7 * 571428571429
+
+(setq big1 '(100000000000031 100000000000067 100000000000097 
+             100000000000073 100000000000039 100000000000045
+             100000000000055 100000000000065 100000000000075))
+
+(map prime? big1)
+;-> (true true true nil nil nil nil nil nil)
+(map prime-i? big1)
+;-> (true true true nil nil nil nil nil nil)
+(map prime-i? big1)
+
+(time (filter prime? big1) 10)
+;-> 1169.968
+(time (filter prime-i? big1) 10)
+;-> 15.112
+
+Con numeri di 15 cifre Miller-Rabin è molto più veloce.
+
+Il più grande numero primo minore di 9223372036854775807 = 2^63−1 è:
+
+  9223372036854775783
+
+È uno dei più grandi primi rappresentabili in signed 64-bit ed è comunemente usato come 'largest 64-bit prime'.
+
+(setq max-int 9223372036854775807)
+(setq primo64 9223372036854775783)
+
+(time (println (prime-i? primo64)))
+;-> true
+;-> 0
+(time (println (prime? primo64))) --> tanto tanto tempo...
+
+Numeri con 25 cifre:
+  1000000000000000000000007 --> primo
+  1000000000000000000000049 --> primo
+  1000000000000000000000091 --> 34429 * 29045281594005053879
+  1000000000000000000000121 --> primo
+  1000000000000000000000159 --> 328043 * 3048380852510189213
+  1000000000000000000000177 --> primo
+  1000000000000000000000183 --> primo
+  1000000000000000000000189 --> 89 * 11235955056179775280901
+  1000000000000000000000663 --> primo
+
+(setq big2 '(1000000000000000000000007 1000000000000000000000049
+             1000000000000000000000091 1000000000000000000000121
+             1000000000000000000000159 1000000000000000000000177
+             1000000000000000000000183 1000000000000000000000189
+             1000000000000000000000663))
+
+(map prime-i? big2)
+;-> (true true nil true nil true true nil true)
+
+Considerazioni sulle basi
+-------------------------
+L'insieme di basi usate:
+
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37
+
+è molto forte in pratica, ma NON è una garanzia deterministica per tutti i numeri a 64 bit.
+Per numeri fino a 64 bit esistono insiemi di basi che rendono Miller–Rabin deterministico al 100%.
+Per esempio (risultato noto in teoria dei numeri computazionale):
+Set deterministico per 64 bit (classico):
+
+  2, 325, 9375, 28178, 450775, 9780504, 1795265022
+
+Con queste basi:
+- ogni intero < 2^64 viene classificato correttamente
+- nessun composto passa tutti i test
+
+Le basi piccole (tipo 2–37):
+- eliminano quasi tutti i composti
+- funzionano perfettamente in pratica su numeri casuali
+- ma esistono 'strong pseudoprimes' a quelle basi
+Quindi non sono sufficienti per la determinazione teorica su tutto l'intervallo 64-bit.
+
+Praticamente:
+  + ----------------------- + -------------------------------------- +
+  | Set di basi             | Sicurezza                              |
+  + ----------------------- + -------------------------------------- |
+  | 2–37                    | molto alta (uso pratico, 100 cifre ok) |
+  | basi 64-bit certificate | deterministico assoluto                |
+  | basi casuali (random)   | probabilistico                         |
+  + ----------------------- + -------------------------------------- +
+
+Cambiamo la funzione 'prime-i?' per utilizzare un set di basi come parametro.
+In questo modo possiamo stabilire la 'sicurezza' del risultato.
+La funzione diventa '(prime-i? n bases)'.
+
+; ============================================================
+; Full primality test using multiple bases
+; Examples:
+; (2L 3L 5L 7L 11L 13L 17L 19L 23L 29L 31L 37L) (probabilistic to 100+ digits)
+; (2 325 9375 28178 450775 9780504 1795265022) (64-bit deterministic)
+; For 64-bit integers, this is deterministic in practice
+; ============================================================
+(define (prime-i? n bases)
+  (letn (
+          ; index and current base
+          (i 0)
+          (a 0)
+          ; global primality flag
+          (is-prime true)
+        )
+    ; small cases
+    (cond
+      ((< n 2) nil)
+      ((or (= n 2) (= n 3)) true)
+      ((zero? (% n 2)) nil)
+      (true
+        ; test all bases until failure
+        (while (and is-prime (< i (length bases)))
+          (setq a (bases i))
+          ; skip invalid base
+          (if (< a n)
+            (if (not (mr-test n a)) (setq is-prime nil)))
+          (++ i))
+        is-prime))))
+
+Proviamo:
+
+; (probabilistic to 100+ digits)
+(setq b1 '(2L 3L 5L 7L 11L 13L 17L 19L 23L 29L 31L 37L))
+; (64-bit deterministic)
+(setq b2 '(2L 325L 9375L 28178L 450775L 9780504L 1795265022L))
+
+(map (fn(x) (prime-i? x b1)) big1)
+;-> (true true true nil nil nil nil nil nil)
+(map (fn(x) (prime-i? x b2)) big1)
+;-> (true true true nil nil nil nil nil nil)
+
+(map (fn(x) (prime-i? x b1)) big2)
+;-> (true true nil true nil true true nil true)
+(map (fn(x) (prime-i? x b2)) big2)
+;-> (true true nil true nil true true nil true)
+
+Possiamo scegliere:
+- poche basi -> velocissimo (probabilistico)
+- molte basi -> quasi certezza
+- basi speciali -> determinismo su intervalli noti
+Possiamo anche combinare strategie:
+- prime basi piccole per filtraggio rapido
+- poi basi 'forti' per conferma
+
+Il parametro 'bases' diventa concettualmente un insieme di test indipendenti
+Ogni base è un "controllo" della struttura modulare di n.
+Più basi aggiungiamo più riduciamo la probabilità di errore, ma aumentiamo anche il costo computazionale.
+
 ============================================================================
 

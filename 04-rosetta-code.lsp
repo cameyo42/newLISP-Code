@@ -539,6 +539,66 @@ Attenzione: la funzione è molto lenta con numeri grandi.
 (time (fattori-primi 9223372036854775809L))
 ;-> 551342.497 ; 9 minuti e 11 secondi
 
+Altra funzione che calcola la fattorizzazione di un intero big-integer.
+
+(define (factor-i num)
+"Factorize a big integer number"
+  (local (f k i dist out)
+    ; Distanze tra due elementi consecutivi della ruota (wheel)
+    (setq dist (array 48 '(2 4 2 4 6 2 6 4 2 4 6 6 2 6 4 2 6 4
+                           6 8 4 2 4 2 4 8 6 4 6 2 4 6 2 6 6 4
+                           2 4 6 2 6 4 2 4 2 10 2 10)))
+    (setq out '())
+    (while (zero? (% num 2)) (push '2L out -1) (setq num (/ num 2)))
+    (while (zero? (% num 3)) (push '3L out -1) (setq num (/ num 3)))
+    (while (zero? (% num 5)) (push '5L out -1) (setq num (/ num 5)))
+    (while (zero? (% num 7)) (push '7L out -1) (setq num (/ num 7)))
+    (setq k 11L i 0)
+    (while (<= (* k k) num)
+      (if (zero? (% num k))
+        (begin
+          (push k out -1)
+          (setq num (/ num k)))
+        (begin
+          (setq k (+ k (dist i)))
+          (if (< i 47) (++ i) (setq i 0)))
+      )
+    )
+    (if (> num 1) (push (bigint num) out -1))
+    out))
+
+Questa funzione usa una wheel modulo:
+
+  2 * 3 * 5 * 7 = 210
+
+quindi prova soltanto i candidati coprimi con 210.
+Questo riduce il numero di divisioni a phi(210)=48 ogni 210 numeri, cioè circa il 22.9% dei candidati.
+È una buona ottimizzazione, ma la complessità resta O(sqrt(n)).
+
+Scriviamo una funzione che verifica se un big-integer è primo usando lo schema della funzione 'factor-i'.
+
+(define (prime-i? num)
+"Check if a big integer is prime"
+  (local (k i dist)
+    (cond
+      ((< num 2) nil)
+      ((or (= num 2) (= num 3) (= num 5) (= num 7)) true)
+      ((or (zero? (% num 2)) (zero? (% num 3))
+           (zero? (% num 5)) (zero? (% num 7)))
+       nil)
+      (true
+        ; Distanze tra due elementi consecutivi della wheel
+        (setq dist
+          (array 48 '(2 4 2 4 6 2 6 4 2 4 6 6 2 6 4 2 6 4
+                      6 8 4 2 4 2 4 8 6 4 6 2 4 6 2 6 6 4
+                      2 4 6 2 6 4 2 4 2 10 2 10)))
+        (setq k 11L i 0)
+        (while (and (<= (* k k) num)
+                    (!= (% num k) 0))
+          (setq k (+ k (dist i)))
+          (if (< i 47) (++ i) (setq i 0)))
+        (> (* k k) num)))))
+
 Altra funzione che controlla se un numero è primo:
 
 (define (isPrime n)

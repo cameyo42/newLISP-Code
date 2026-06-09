@@ -3535,6 +3535,8 @@ NOTE LIBERE 37
   Funzioni alternate
   Bitwise and, or, xor, not per big-integer
   Matematica con le frazioni (rationale.lsp)
+  Prodotto dei divisori di un numero
+  Numeri primi con Miller-Rabin
 
 PROBLEMI SUI DADI
 =================
