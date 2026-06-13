@@ -8299,6 +8299,10 @@ Vediamo alcuni esempi:
 ;->  (6 7 4 8 2 5 1 3 9))
 ;-> 9305.376
 
+Vedi anche "Sudoku" su "Rosetta Code".
+Vedi anche "Sudoku test" su "Note libere 2".
+Vedi anche "yass - yet another sudoku solver" su "Note libere 37".
+
 
 ---------------------------------------
 Radici quadrate con il metodo di Newton

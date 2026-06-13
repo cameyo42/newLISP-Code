@@ -653,7 +653,7 @@ Si parte da un numero dispari n > 2.
 Si scrive:
   n - 1 = d * 2^s
 d è dispari e s >= 1.
-Questo serve a separare la parte "dispari" da quella con fattori di 2.
+Questo serve a separare la parte 'dispari' da quella con fattori di 2.
 
 2) Scelta della base
 Si sceglie un numero a tale che:
@@ -691,7 +691,7 @@ Questo significa che:
 - nessun numero composto passa tutti i test
 - il risultato è equivalente a un test deterministico
 
-8) Perché funziona
+8) Perchè funziona
 L'idea matematica è che in un campo modulo primo, le radici dell'unità hanno struttura molto rigida.
 Se n è composto, questa struttura si rompe quasi sempre, tranne in casi molto rari (pseudoprimi forti).
 
@@ -969,9 +969,1106 @@ Possiamo anche combinare strategie:
 - prime basi piccole per filtraggio rapido
 - poi basi 'forti' per conferma
 
-Il parametro 'bases' diventa concettualmente un insieme di test indipendenti
+Il parametro 'bases' diventa concettualmente un insieme di test indipendenti.
 Ogni base è un "controllo" della struttura modulare di n.
 Più basi aggiungiamo più riduciamo la probabilità di errore, ma aumentiamo anche il costo computazionale.
+
+
+--------------------------------------------
+Scomposizione di interi con prodotto massimo
+--------------------------------------------
+
+Dato un numero intero n, scomporlo nella somma di k numeri interi positivi, dove k >= 2, e massimizzare il prodotto di tali numeri.
+
+Metodo 1 (Brute-force)
+----------------------
+
+Generiamo tutte le partizioni del numero e poi prendiamo quella con prodotto massimo.
+
+(define (partition-num num)
+"Generate a list of all the partitions of a positive integer"
+(catch
+  (local (part k temp-value out)
+    (setq out '())
+    (setq part (array num '(0)))
+    (setq k 0)
+    (setf (part k) num)
+    ; Questo ciclo prima aggiunge la partizione corrente alla lista
+    ; poi genera la partizione successiva.
+    ; Il ciclo termina quando la partizione corrente è costituita da tutti 1.
+    (while true
+      ; Aggiunge la partizione corrente alla lista delle soluzioni
+      ;(push (slice part 0 (+ k 1)) out -1)             ; array
+      (push (array-list (slice part 0 (+ k 1))) out -1) ; list
+      ; Genera la partizione successiva
+      ; Trova il valore non-uno più a destra di part[]
+      ; Aggiorna anche il valore di temp-value
+      ; (cioè quanti valori possono essere inseriti)
+      (setq temp-value 0)
+      (while (and (>= k 0) (= (part k) 1))
+        (setq temp-value (+ temp-value (part k)))
+        (-- k)
+      )
+      ; se k < 0, tutti i valori valgono 1
+      ; quindi non ci sono altre partizioni da generare
+      (if (< k 0) (throw out))
+      ; Decrementa part[k] trovato sopra e calcola il valore di temp-value
+      (setf (part k) (- (part k) 1))
+      (++ temp-value)
+      ; Se rem_val è maggiore, allora l'ordine è violato.
+      ; Divide temp-value in diversi valori di dimensione part[k] e
+      ; copia questi valori in posizioni diverse dopo part[k]
+      (while (> temp-value (part k))
+        (setf (part (+ k 1)) (part k))
+        (setq temp-value (- temp-value (part k)))
+        (++ k)
+      )
+      ; Copia rem_val nella posizione successiva e incrementa la posizione
+      (setf (part (+ k 1)) temp-value)
+      (++ k)))))
+
+(length (partition-num 10))
+;-> 42
+(length (partition-num 50))
+;-> 204226
+
+(setq par (partition-num 10))
+(list? (par 0))
+(setq par (array-list par))
+
+(define (max-prod1 n)
+  (let ((max-val 0) (max-lst '())
+        (part (partition-num n)))
+    (dolist (el part)
+      (when (> (apply * el) max-val)
+        (setq max-val (apply * el))
+        (setq max-lst el)))
+    (setq max-lst (flat (replace 4 max-lst '(2 2))))
+    (list (apply + max-lst) max-lst (apply * max-lst))))
+
+Proviamo:
+
+(max-prod1 4)
+;-> (4 (2 2) 4)
+(max-prod1 10)
+;-> (10 (2 2 3 3) 36)
+(time (println (max-prod1 50)))
+;-> (50 (3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2) 86093442)
+;-> 695.915
+(time (println (max-prod1 65)))
+;-> (65 (3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2) 20920706406)
+;-> 7729.944
+
+Metodo 2 (dynamic programming)
+------------------------------
+Creiamo un vettore V di dimensione (n + 1) dove V[i] memorizza il prodotto massimo ottenibile suddividendo l'intero i.
+Inizializziamo tutti i valori a 1 poichè il prodotto minimo per qualsiasi intero positivo è 1.
+
+Algoritmo:
+  Caso base: V[1] = 1 (già impostato durante l'inizializzazione)
+  Iterazione: Per ogni intero i da 2 a n:
+  Prova tutti i modi possibili per suddividere i in due parti
+  Per ogni possibile posizione di suddivisione j da 1 a i-1:
+    Calcola il prodotto quando dividiamo i in j e i-j
+    Abbiamo due opzioni per il resto i-j:
+      Non suddividere ulteriormente: prodotto = (i - j) * j
+      Suddividere in modo ottimale: prodotto = V[i - j] * j
+    Aggiorna V[i] con il massimo tra il valore corrente e entrambe le opzioni
+
+Equazione di transizione di stato:
+
+  V[i] = max(V[i], V[i - j] * j, (i - j) * j), dove j in [1, i)
+
+(define (max-prod2 n) 
+    ; (dp i) rappresenta il massimo prodotto che
+    ; possiamo avere spezzando l'intero 'i'
+    (let (dp (array (+ n 1) '(0)))
+      ; Caso base: per n=1, il massimo prodotto vale 1
+      (setf (dp 1) 1L)
+      ; Riempie il vettore 'dp' per ogni numero da 2 a n
+      (for (i 2 n)
+      ; Prova tutti i modi possibili di spezzare l'intero 'i' in
+      ; due parti: i e (i-j)
+        (for (j 1 (- i 1))
+          ; Per ogni suddivisione, abbiamo due possibilità:
+          ; 1. Non suddividere ulteriormente (i-j): prodotto = (* j (- i j))
+          ; 2. Suddividere ulteriormente (i-j): prodotto = (* j (dp (- i j)))
+          ; Prendere il valore massimo tra il valore corrente e 
+          ; la somma dei due risultati.
+          (setf (dp i) (max (dp i) (max (* j (- i j)) (* j (dp (- i j))))))))
+      ; il prodotto massimo di n si trova in (dp n)
+      (dp n)))
+
+Proviamo:
+
+(max-prod2 4)
+;-> 4
+(max-prod2 10)
+;-> 36
+(time (println (max-prod2 50)))
+;-> 86093442
+;-> 0
+(time (println (max-prod2 65)))
+;-> (65 (3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2) 20920706406)
+;-> 0
+
+Metodo 3 (matematica)
+---------------------
+
+Per massimizzare il prodotto:
+- 3 è il 'miglior mattone' (3*3 > 2*2*2) perchè massimizza il prodotto locale
+- 4 è l’unico caso in cui 3+1 è peggio di 2+2
+- evitare 1 nei fattori finali
+
+Regola
+1. usare il più possibile 3
+2. quando il resto è:
+   - 2 -> si tiene
+   - 3 -> si tiene
+   - 4 -> si sostituisce con 2 + 2
+3. se resta 1, si trasforma (3 + 1) in (2 + 2)
+   se resta 2, si lascia 2
+4. nessun 1 deve comparire
+
+Algoritmo
+1) Affinchè (n > 4): prendere 3)
+2) alla fine:
+  - se n == 4  -> (2 2)
+  - altrimenti -> (n)
+
+(define (max-prod3 n)
+  (setq n (bigint n))
+  (cond
+    ((< n 2) '())
+    ((= n 2) '(2L (2L) 2L))
+    ((= n 3) '(3L (3L) 3L))
+    (true
+      (let (res '())
+        (while (> n 4)
+          (push 3L res -1)
+          (setf n (- n 3)))
+        (if (= n 4)
+            (extend res '(2L 2L))
+            (push n res -1))
+        (list (apply + res) res (apply * res))))))
+
+Proviamo:
+
+(max-prod3 4)
+;-> (4L (2L 2L) 4L)
+(max-prod3 10)
+;-> (10L (3L 3L 2L 2L) 36L)
+(max-prod3 50)
+;-> (50L (3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 2L) 86093442L)
+(max-prod3 65)
+;-> (65L (3L 3L 3L 3L 3L 3L 3L ... 2L) 20920706406L)
+(time (println (max-prod3 100)))
+;-> (100L (3L 3L 3L 3L 3L 3L 3L 3L ... 2L 2L) 7412080755407364L)
+;-> 0
+
+Versione ottimizzata
+
+(define (max-prod4 n)
+  (cond
+    ((< n 2) '())
+    ((= n 2) '(2L (2L) 2L))
+    ((= n 3) '(3L (3L) 3L))
+    (true
+      (let ((out '()) (num3 (/ n 3)) (resto (% n 3)))
+        (cond ((= resto 0) 
+                (setq out (dup 3L num3)))
+              ((= resto 1)
+                (setq out (append (dup 3L (- num3 1)) '(2L 2L))))
+              ((= resto 2)
+                (setq out (append (dup 3L num3) '(2L)))))
+        (list (apply + out) out (apply * out))))))
+
+Proviamo:
+
+(max-prod4 4)
+;-> (4L (2L 2L) 4L)
+(max-prod4 10)
+;-> (10L (3L 3L 2L 2L) 36L)
+(max-prod4 50)
+;-> (50L (3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 3L 2L) 86093442L)
+(max-prod4 65)
+;-> (65L (3L 3L 3L 3L 3L 3L 3L ... 2L) 20920706406L)
+(time (println (max-prod3 100)))
+;-> (100L (3L 3L 3L 3L 3L 3L 3L 3L ... 2L 2L) 7412080755407364L)
+;-> 0
+
+Test di velocità:
+
+(time (max-prod2 1000) 100)
+;-> 11144.695
+(time (max-prod3 1000) 100)
+;-> 29.94
+(time (max-prod4 1000) 100)
+;-> 19.594
+
+
+-------------------------------------------------
+Indicizzazione mista di liste, vettori e stringhe
+-------------------------------------------------
+
+Le strutture dati come liste, vettori e stringhe possono essere utilizzate in combinazione tra loro.
+Per esempio possiamo avere una lista di vettori o un vettore di liste, ecc.
+In questi casi bisogna fare attenzione al metodo per indicizzare gli elementi.
+
+Regola: quando si usano insieme strutture di tipo diverso bisogna utilizzare una 'doppia' indicizzazione.
+
+Vediamo alcuni esempi.
+
+Lista di liste
+--------------
+(setq L1 '((1 2 3) (4 5 6) (7 8 9)))
+(L1 0 2)  ; indicizzazione 'normale' (due indici lineari)
+;-> 3
+
+Lista di vettori
+----------------
+(setq v1 (array 3 '(1 2 3)))
+(setq v2 (array 3 '(4 5 6)))
+(setq v3 (array 3 '(7 8 9)))
+Errato:
+(setq L2 (list v1 v2 v3)) ; v1,v2 e v3 vengono trasformati in liste
+(array? (L2 0))
+;-> nil
+Corretto:
+(setq L2 '())
+(push v1 L2 -1)
+(push v2 L2 -1)
+(push v3 L2 -1)
+(array? (L2 0))
+;-> true
+(L2 0 2)   ; l'indicizzazione 'normale' restituisce il vettore con indice 0
+;-> (1 2 3)
+((L2 0) 2) ; quindi occorre una doppia indicizzazione
+;-> 3
+
+Vettore di liste
+----------------
+(setq l1 (list 1 2 3))
+(setq l2 (list 4 5 6))
+(setq l3 (list 7 8 9))
+(setq V1 (array 3 (list l1 l2 l3)))
+(list? (V1 0))
+;-> true
+(V1 0 2)   ; l'indicizzazione 'normale' restituisce la lista con indice 0
+;-> (1 2 3)
+((V1 0) 2) ; quindi occorre una doppia indicizzazione
+;-> 3
+
+Vettore di vettori
+------------------
+(setq V2 (array 3 3 '(1 2 3 4 5 6 7 8 9)))
+(array? (V2 0))
+;-> true
+(V2 0 2)  ; indicizzazione 'normale' (due indici lineari)
+;-> 3
+
+Lista di stringhe
+-----------------
+(setq s1 "abc" s2 "xyz" s3 "ijk")
+(setq L3 (list s1 s2 s3))
+(string? (L3 0))
+;-> true
+(L3 1 0)  ; l'indicizzazione 'normale' restituisce la stringa con indice 0
+;-> "xyz"
+((L3 1) 0); quindi occorre una doppia indicizzazione
+;-> "x"
+
+Vettore di stringhe
+-------------------
+(setq V3 (array 3 (list s1 s2 s3)))
+(string? (V3 0))
+;-> true
+(V3 1 0)  ; l'indicizzazione 'normale' restituisce la stringa con indice 0
+;-> "xyz"
+((V3 1) 0); quindi occorre una doppia indicizzazione
+;-> "x"
+
+
+-----------------
+Treni e biglietti
+-----------------
+
+Un treno che compie un percorso effettuando K fermate.
+Abbiamo i seguenti dati per ogni biglietto che è stato venduto:
+
+  (stazione-partenza stazione-arrivo)
+
+Non possono essere venduti ulteriori biglietti.
+Sapendo che il treno può contenere al massimo N persone, determinare se tutti i possessori di biglietto possono effettuare il proprio viaggio.
+
+Per risolvere il problema simuliamo il percorso del treno.
+
+Algoritmo
+Alla partenza il numero di passeggeri vale P.
+Ad ogni stazione:
+  1) salgono alcuni passeggeri  (+ x)
+  2) scendono alcuni passeggeri (- y)
+  3) P = P + x - y
+  4) controllo sul numero massimo dei passeggeri
+     (cioè se qualche passeggero rimane a terra)
+     Eventuale aggiornamento del numero di passeggeri
+  5) stampa della situazione
+
+Per applicare l'algoritmo dobbiamo trasformare i dati iniziali in una lista con elementi del tipo:
+
+  (numero-stazione persone-salite persone-scese)
+
+Inoltre il treno parte dalla stazione 0 ed effettua N fermate.
+
+Prima scriviamo una funzione che genera i biglietti dei passeggeri:
+
+(define (crea-biglietti num-biglietti num-fermate)
+  (let ( (out '()) (start 0) (end 0) )
+    (for (i 1 num-biglietti)
+      ; stazione di partenza
+      (setq start (rand (+ num-fermate 1)))
+      ; stazione di arrivo
+      (setq end (rand (+ num-fermate 1)))
+      ; controllo sui valori di arrivo e partenza
+      ; deve essere: end > start e start != end e end > 0 
+      (cond ((> start end) (swap start end))
+            ((= start end)
+              (if (zero? start)
+                  (++ end)
+                  (-- start))))
+      (push (list start end) out -1))
+    out))
+
+(setq pass (crea-biglietti 10 5))
+;-> ((0 1) (0 1) (4 5) (0 1) (2 5) (1 5) (2 4) (2 3) (3 5) (3 4))
+
+(define (trasforma-dati data num-fermate)
+  (let ((stazioni '())
+        (in (array (+ num-fermate 1) '(0)))
+        (out (array (+ num-fermate 1) '(0))))
+    (dolist (el data)
+      (++ (in (el 0)))
+      (++ (out (el 1))))
+    (map list in out)))
+
+(trasforma-dati pass 5)
+;-> ((3 0) (1 3) (3 0) (2 1) (1 2) (0 4))
+
+Cosa significano i dati:
+L'indice dell'elemento si riferisce al numero della stazione
+(3 0) --> alla partenza 3 passeggeri (non scende mai nessuno)
+(1 3) --> alla stazione 1 salgono in 1 e scendono in 3
+(3 0) --> alla stazione 2 salgono in 3 e scendono in 0
+...
+
+Scriviamo la funzione che simula il viaggio del treno
+
+La simulazione si interrompe alla stazione in cui rimane a terra qualche passeggero.
+Infatti quando qualcuno NON sale poi NON scende e nelle fermate successive i dati sono falsati.
+
+(define (viaggio capienza num-fermate num-biglietti)
+(catch
+  (local (ok ground pas percorso in out totale)
+    (setq ok true)
+    ; numero di passeggeri rimasti a terra
+    (setq ground 0)
+    ; creazione dei num-biglietti random
+    (setq pass (crea-biglietti num-biglietti num-fermate))
+    (println pass)
+    ; trasformazione dei dati
+    (setq percorso (trasforma-dati pass num-fermate))
+    (println percorso)
+    (setq totale 0)
+    ; ciclo per ogni fermata
+    (dolist (f percorso)
+      (setq in (f 0))  ; saliti
+      (setq out (f 1)) ; scesi
+      (setq totale (+ totale in (- out))) ; totale passeggeri
+      ; controllo superamento capienza del treno
+      ; e calcolo dei passeggeri rimasti a terra
+      (when (> totale capienza)
+        (setq ground (- totale capienza))
+        (setq in (- in ground))
+        (setq totale capienza)
+        (setq ok nil))
+      ; stampa della situazione della stazione corrente
+      (println "Stazione: " $idx)
+      (println "scese: " out)
+      (println "salite: " in)
+      (println "passeggeri: " totale)
+      (when (> ground 0)
+        (println "Errore --> " ground " persone a terra")
+        (setq ground 0)
+        (throw ok))
+      (println))
+    ok)))
+
+Proviamo:
+
+(viaggio 10 5 20)
+;-> ((1 3) (0 3) (0 4) (2 5) (3 5) (0 1) (1 2) (2 4) (2 5) (2 4) (0 4) (0 4)
+;->  (3 5) (1 2) (0 2) (1 2) (1 5) (0 1) (1 2) (0 1))
+;->  ((8 0) (6 3) (4 5) (2 2) (0 5) (0 5))
+;-> Stazione: 0
+;-> scese: 0
+;-> salite: 8
+;-> passeggeri: 8
+;-> 
+;-> Stazione: 1
+;-> scese: 3
+;-> salite: 5
+;-> passeggeri: 10
+;-> Errore --> 1 persone a terra
+;-> nil
+
+(viaggio 10 5 20)
+;-> ((0 1) (4 5) (1 5) (0 4) (0 1) (0 3) (2 3) (0 1) (0 1) (0 2) (1 4) (1 3)
+;->  (4 5) (0 1) (2 4) (1 2) (3 4) (0 3) (3 4) (0 3))
+;-> ((10 0) (4 5) (2 2) (2 5) (2 5) (0 3))
+;-> Stazione: 0
+;-> scese: 0
+;-> salite: 10
+;-> passeggeri: 10
+;-> 
+;-> Stazione: 1
+;-> scese: 5
+;-> salite: 4
+;-> passeggeri: 9
+;-> 
+;-> Stazione: 2
+;-> scese: 2
+;-> salite: 2
+;-> passeggeri: 9
+;-> 
+;-> Stazione: 3
+;-> scese: 5
+;-> salite: 2
+;-> passeggeri: 6
+;-> 
+;-> Stazione: 4
+;-> scese: 5
+;-> salite: 2
+;-> passeggeri: 3
+;-> 
+;-> Stazione: 5
+;-> scese: 3
+;-> salite: 0
+;-> passeggeri: 0
+;-> true
+
+
+--------------------------------
+yass - yet another sudoku solver
+--------------------------------
+
+Progettiamo un solver per sudoku con un metodo brute-force.
+
+Un solver Sudoku brute-force effettua una ricerca sistematica nello spazio di tutte le possibili configurazioni della griglia.
+
+Metodo di soluzione
+-------------------
+Dato un Sudoku 9×9 con o senza celle già riempite:
+1) Si cerca una cella vuota.
+2) Si prova a inserire un numero da 1 a 9.
+3) Dopo ogni inserimento si verifica che:
+   - il numero non sia già presente nella riga;
+   - il numero non sia già presente nella colonna;
+   - il numero non sia già presente nel blocco 3×3.
+4) Se il numero è valido, si passa alla cella vuota successiva.
+5) Se in una cella non esiste alcun numero valido:
+   - si torna indietro (backtracking);
+   - si modifica l'ultima scelta effettuata.
+6) Se tutte le celle sono riempite correttamente, il Sudoku è risolto.
+
+Esempio:
+Supponiamo di avere una cella vuota.
+Prova 1: se valido -> continua
+Prova 2: se valido -> continua
+ ...
+Ogni scelta genera un nuovo livello dell'albero.
+Se una strada porta a una contraddizione, l'intero ramo viene scartato.
+
+Il cuore del metodo è il backtracking.
+Esempio:
+- Cella A -> scelgo 4
+- Cella B -> scelgo 7
+- Cella C -> nessun numero possibile
+
+Allora:
+- annullo la scelta di B
+- provo un altro valore per B
+- se non esistono alternative:
+  - annullo anche A
+  - provo un altro valore per A
+
+In pratica il solver esplora l'albero in profondità (Depth First Search).
+
+Complessità teorica
+-------------------
+Se ci sono n celle vuote e per ciascuna si provano fino a 9 valori: O(9^n)
+Nel caso peggiore 9^81 che è astronomico.
+Fortunatamente i vincoli del Sudoku eliminano quasi tutti i rami molto presto.
+
+Ottimizzazione fondamentale
+---------------------------
+Anche restando nel brute-force conviene non scegliere la prima cella vuota.
+Si sceglie invece la cella con il minor numero di candidati.
+Esempio:
+  +-------+------------------+
+  | Cella | Possibili valori |
+  +-------+------------------+
+  | A     | (1 2 3 4 5)      |
+  | B     | (7)              |
+  | C     | (2 8)            |
+  +-------+------------------+
+Conviene scegliere B.
+Se B fallisce, il ramo viene eliminato immediatamente.
+Questa semplice euristica riduce enormemente il numero di tentativi.
+
+Rappresentazione dei candidati
+------------------------------
+Per ogni cella vuota si può mantenere:
+- insieme dei valori ammessi;
+- numero di candidati.
+
+Ad ogni inserimento:
+- si aggiornano i candidati della stessa riga;
+- della stessa colonna;
+- dello stesso blocco.
+
+Se una cella rimane senza candidati:
+- il ramo è impossibile;
+- si effettua immediatamente il backtracking.
+
+Algoritmo per un solver brute-force efficiente:
+1) Calcola i candidati di tutte le celle vuote.
+2) Se esiste una cella senza candidati -> fallimento.
+3) Se non esistono celle vuote -> soluzione trovata.
+4) Seleziona la cella con meno candidati.
+5) Prova ciascun candidato:
+   - inserisci il valore;
+   - aggiorna i candidati;
+   - richiama ricorsivamente il solver.
+6) Se nessun candidato funziona -> backtracking.
+
+Questo è ancora un metodo brute-force, ma con una forte potatura dell'albero di ricerca, sufficiente per risolvere praticamente tutti i Sudoku classici in tempi molto brevi.
+
+Struttura dei dati
+------------------
+Usiamo una matrice 9×9 per i valori e matrice 9×9 parallela per i candidati.
+
+Ad esempio:
+(grid 0 0) --> 5
+(grid 0 1) --> 3
+(grid 0 2) --> 0
+(cand 0 2) --> (1 2 4)
+
+Quindi ogni posizione (r,c) ha:
+  valore[r][c]
+  candidati[r][c]
+
+Quando assegniamo un numero:
+- aggiorniamo il valore nella griglia;
+- eliminiamo quel numero dai candidati della stessa riga;
+- della stessa colonna;
+- dello stesso blocco.
+
+Inoltre possiamo scegliere sempre la cella con il minor numero di candidati (euristica 'minimum remaining values'), che riduce drasticamente il numero di tentativi rispetto al brute-force che sceglie semplicemente la prima cella vuota.
+
+La prima funzione da scrivere è quella che calcola la matrice dei candidati:
+
+(define (build-candidates grid)
+  (local (cand used r0 c0)
+    (setq cand (array-list (array 9 9 '(()))))
+    (for (row 0 8)
+      (for (col 0 8)
+        (if (!= (grid row col) 0)
+            (setf (cand row col) '())
+            (begin
+              (setq used '())
+              ; riga
+              (for (c 0 8)
+                (if (!= (grid row c) 0)
+                    (push (grid row c) used -1)))
+              ; colonna
+              (for (r 0 8)
+                (if (!= (grid r col) 0)
+                    (push (grid r col) used -1)))
+              ; blocco 3x3
+              (setq r0 (* (/ row 3) 3))
+              (setq c0 (* (/ col 3) 3))
+              (for (r r0 (+ r0 2))
+                (for (c c0 (+ c0 2))
+                  (if (!= (grid r c) 0)
+                      (push (grid r c) used -1))))
+              (setf (cand row col)
+                    (difference '(1 2 3 4 5 6 7 8 9)
+                                (unique used)))))))
+    cand))
+
+(setq grid '(
+  (5 3 0 0 7 0 0 0 0)
+  (6 0 0 1 9 5 0 0 0)
+  (0 9 8 0 0 0 0 6 0)
+  (8 0 0 0 6 0 0 0 3)
+  (4 0 0 8 0 3 0 0 1)
+  (7 0 0 0 2 0 0 0 6)
+  (0 6 0 0 0 0 2 8 0)
+  (0 0 0 4 1 9 0 0 5)
+  (0 0 0 0 8 0 0 7 9)))
+
+(setq cand (build-candidates grid))
+(cand 0 2)
+;-> (1 2 4)
+(cand 4 4)
+;-> (5)
+
+A questo punto il solver può:
+1) costruire cand;
+2) cercare la cella vuota con meno candidati;
+3) provare ciascun candidato;
+4) aggiornare grid;
+5) ricalcolare cand;
+6) continuare ricorsivamente;
+7) fare backtracking in caso di fallimento.
+
+Non si cerchiamo di mantenere coerente la matrice dei candidati dopo ogni assegnazione.
+La ricostruiamo da zero.
+Supponiamo di avere:
+grid  = valori del sudoku
+cand  = candidati
+All'inizio:
+1) Leggiamo il Sudoku.
+2) Calcoliamo tutti i candidati.
+3) Ottieniamo la matrice cand.
+Per esempio:
+  grid(0,2) = 0
+  cand(0,2) = (1 2 4)
+  grid(4,5) = 0
+  cand(4,5) = (3 9)
+Ora scegliamo la cella con meno candidati.
+Supponiamo:
+  (4,5) --> (3 9)
+Proviamo il valore 3.
+La griglia diventa:
+  grid(4,5) = 3
+A questo punto non aggiorniamo nessun candidato.
+Invece eseguiamo:
+  cand = build-candidates(grid)
+cioè ricalcoliamo completamente tutti i candidati della nuova configurazione.
+Questo funziona perchè i candidati dipendono esclusivamente dallo stato corrente della griglia.
+Se la griglia è corretta:
+  grid --> candidati univocamente determinati
+Non serve ricordare cosa è cambiato.
+
+Il passo successivo è una funzione che, data la matrice 'cand', trova la cella vuota con il 'minor numero di candidati'.
+La funzione deve restituire qualcosa del tipo: (row col lista-candidati)
+Ad esempio:
+(4 4 (5))
+oppure:
+(2 3 (1 7))
+
+Algoritmo
+---------
+1) Scorrere tutte le 81 celle.
+2) Ignorare le celle con lista vuota:
+   - possono essere celle già assegnate;
+   - oppure celle impossibili (0 candidati).
+3) Mantenere la lunghezza minima trovata.
+4) Salvare coordinate e candidati della cella corrispondente.
+5) Restituire la migliore cella trovata.
+
+Inoltre conviene rilevare subito una contraddizione:
+  cella vuota + 0 candidati
+In questo caso il ramo corrente è impossibile e il solver deve fare immediatamente backtracking.
+Quindi, durante la scansione, per ogni posizione (r,c):
+- se grid(r,c) != 0 -> ignorare;
+- se grid(r,c) = 0 e cand(r,c) è vuota -> fallimento;
+- altrimenti confrontare il numero di candidati con il minimo corrente.
+
+La funzione potrebbe quindi restituire nil se trova una contraddizione, oppure (row col candidati) se esiste almeno una cella vuota, oppure un valore speciale (ad esempio `'solved`) se non esistono più celle vuote e il Sudoku è completato.
+
+(define (best-cell grid cand)
+  (local (best-r best-c best-list min-len found)
+    (setq best-r nil)
+    (setq best-c nil)
+    (setq best-list nil)
+    (setq min-len 10)
+    (setq found nil)
+    (for (r 0 8)
+      (for (c 0 8)
+        (if (= (grid r c) 0)
+            (let (cur (cand r c))
+              ; cella impossibile
+              (if (= (length cur) 0)
+                  (setq found 'fail)
+                  ; nuovo minimo
+                  (if (< (length cur) min-len)
+                      (begin
+                        (setq min-len (length cur))
+                        (setq best-r r)
+                        (setq best-c c)
+                        (setq best-list cur)
+                        (setq found true))))))))
+    (cond
+      ((= found 'fail) nil)
+      ((= found nil) 'solved)
+      (true (list best-r best-c best-list)))))
+
+(best-cell grid cand)
+-> (4 4 (5))
+
+A questo punto abbiamo:
+
+a) grid = matrice dei valori.
+b) build-candidates = costruisce 'cand'.
+c) best-cell = sceglie la prossima cella da esplorare.
+
+Dobbiamo scrivere il solver vero e proprio.
+
+Algoritmo
+---------
+solve(grid)
+1. cand = build-candidates(grid)
+2. scelta = best-cell(grid, cand)
+3. se scelta = solved
+      soluzione trovata
+4. se scelta = nil
+      fallimento
+5. estrarre:
+      row
+      col
+      candidati
+6. per ogni candidato:
+      copiare la griglia
+      assegnare il candidato
+      richiamare solve(copia)
+      se trova una soluzione
+          restituiscila
+
+7. nessun candidato funziona
+      fallimento
+
+In pratica il backtracking agisce solo sulla griglia.
+La matrice dei candidati non viene mai salvata né ripristinata:
+
+  grid -> build-candidates -> cand
+
+viene sempre ricostruita da zero.
+
+Per evitare problemi durante il backtracking conviene lavorare su una copia della griglia:
+  grid
+   ├─ prova 1
+   │    └─ solve(...)
+   ├─ prova 2
+   │    └─ solve(...)
+   └─ prova 3
+        └─ solve(...)
+Ogni ramo modifica la propria copia.
+Così non occorre annullare le mosse quando si torna indietro.
+
+Schema finale
+-------------
+solve(grid)
+cand = build-candidates(grid)
+scelta = best-cell(grid cand)
+se solved -> return grid
+se nil -> return nil
+per ogni candidato
+    new-grid = copia(grid)
+    assegna candidato
+    soluzione = solve(new-grid)
+    se soluzione
+       return soluzione
+return nil
+
+(define (solve grid)
+  (local (cand choice row col vals new-grid sol)
+    (setq cand (build-candidates grid))
+    (setq choice (best-cell grid cand))
+    (cond
+      ; soluzione trovata
+      ((= choice 'solved)
+       grid)
+      ; ramo impossibile
+      ((nil? choice)
+       nil)
+      ; continua la ricerca
+      (true
+        (setq row (choice 0))
+        (setq col (choice 1))
+        (setq vals (choice 2))
+        (setq sol nil)
+        (dolist (v vals)
+          (if (nil? sol)
+              (begin
+                ;(setq new-grid (copy-grid grid))
+                (setq new-grid grid)
+                (setf (new-grid row col) v)
+                (setq sol (solve new-grid)))))
+        sol))))
+
+(define (sudoku grid) (solve grid))
+
+(setq sol (sudoku grid))
+;-> ((5 3 4 6 7 8 9 1 2) 
+;->  (6 7 2 1 9 5 3 4 8)
+;->  (1 9 8 3 4 2 5 6 7)
+;->  (8 5 9 7 6 1 4 2 3)
+;->  (4 2 6 8 5 3 7 9 1)
+;->  (7 1 3 9 2 4 8 5 6)
+;->  (9 6 1 5 3 7 2 8 4)
+;->  (2 8 7 4 1 9 6 3 5)
+;->  (3 4 5 2 8 6 1 7 9))
+
+Per finire scriviamo una funzione di verifica di una soluzione.
+(verifica righe, colonne e blocchi)
+
+(define (valid-group lst)
+  (= (sort lst) '(1 2 3 4 5 6 7 8 9)))
+
+(define (sudoku? grid)
+  (local (ok group)
+    (setq ok true)
+    ; righe
+    (dolist (el grid (not ok))
+      (setq ok (valid-group el)))
+    ; colonne
+    (dolist (el (transpose grid) (not ok))
+      (setq ok (valid-group el)))
+    ; blocchi 3x3
+    (for (r0 0 6 3 (not ok))
+      (for (c0 0 6 3 (not ok))
+        (setq group '())
+        (for (r r0 (+ r0 2))
+          (for (c c0 (+ c0 2))
+            (push (grid r c) group -1)))
+        (setq ok (valid-group group))))
+    ok))
+
+(sudoku? sol)
+;-> true
+
+Test:
+
+(setq x
+'((0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)))
+
+(time (println (sudoku x)))
+;-> ((1 2 3 4 5 6 7 8 9)
+;->  (4 5 6 7 8 9 1 2 3)
+;->  (7 8 9 1 2 3 4 5 6)
+;->  (2 1 4 3 6 5 8 9 7)
+;->  (3 6 5 8 9 7 2 1 4)
+;->  (8 9 7 2 1 4 3 6 5)
+;->  (5 3 1 6 4 2 9 7 8)
+;->  (6 4 2 9 7 8 5 3 1)
+;->  (9 7 8 5 3 1 6 4 2))
+;-> 31.235
+
+I dieci sudoku più difficili:
+
+(setq escargot
+'((1 0 0 0 0 7 0 9 0)
+  (0 3 0 0 2 0 0 0 8)
+  (0 0 9 6 0 0 5 0 0)
+  (0 0 5 3 0 0 9 0 0)
+  (0 1 0 0 8 0 0 0 2)
+  (6 0 0 0 0 4 0 0 0)
+  (3 0 0 0 0 0 0 1 0)
+  (0 4 0 0 0 0 0 0 7)
+  (0 0 7 0 0 0 3 0 0)))
+(time (println (sudoku escargot)))
+;-> 46.788
+
+(setq killer
+'((0 0 0 0 0 0 0 7 0)
+  (0 6 0 0 1 0 0 0 4)
+  (0 0 3 4 0 0 2 0 0)
+  (8 0 0 0 0 3 0 5 0)
+  (0 0 2 9 0 0 7 0 0)
+  (0 4 0 0 8 0 0 0 9)
+  (0 2 0 0 6 0 0 0 7)
+  (0 0 0 1 0 0 9 0 0)
+  (7 0 0 0 0 8 0 6 0)))
+(time (println (sudoku killer)))
+;-> 1329.315
+
+(setq diamond
+'((1 0 0 5 0 0 4 0 0)
+  (0 0 9 0 3 0 0 0 0)
+  (0 7 0 0 0 8 0 0 5)
+  (0 0 1 0 0 0 0 3 0)
+  (8 0 0 6 0 0 5 0 0)
+  (0 9 0 0 0 7 0 0 8)
+  (0 0 4 0 2 0 0 1 0)
+  (2 0 0 8 0 0 6 0 0)
+  (0 0 0 0 0 1 0 0 2)))
+(time (println (sudoku diamond)))
+;-> 1004.084
+
+(setq wormhole
+'((0 8 0 0 0 0 0 0 1)
+  (0 0 7 0 0 4 0 2 0)
+  (6 0 0 3 0 0 7 0 0)
+  (0 0 2 0 0 9 0 0 0)
+  (1 0 0 0 6 0 0 0 8)
+  (0 3 0 4 0 0 0 0 0)
+  (0 0 1 7 0 0 6 0 0)
+  (0 9 0 0 0 8 0 0 5)
+  (0 0 0 0 0 0 0 4 0)))
+(time (println (sudoku wormhole)))
+;-> 160.744
+
+(setq labyrinth
+'((1 0 0 4 0 0 8 0 0)
+  (0 4 0 0 3 0 0 0 9)
+  (0 0 9 0 0 6 0 5 0)
+  (0 5 0 3 0 0 0 0 0)
+  (0 0 0 0 0 1 6 0 0)
+  (0 0 0 0 7 0 0 0 2)
+  (0 0 4 0 1 0 9 0 0)
+  (7 0 0 8 0 0 0 0 4)
+  (0 2 0 0 0 4 0 8 0)))
+(time (println (sudoku labyrinth)))
+;-> 266.684
+
+(setq circles
+'((0 0 5 0 0 9 7 0 0)
+  (0 6 0 0 0 0 0 2 0)
+  (1 0 0 8 0 0 0 0 6)
+  (0 1 0 7 0 0 0 0 4)
+  (0 0 7 0 6 0 0 3 0)
+  (6 0 0 0 0 3 2 0 0)
+  (0 0 0 0 0 6 0 4 0)
+  (0 9 0 0 5 0 1 0 0)
+  (8 0 0 1 0 0 0 0 2)))
+(time (println (sudoku circles)))
+;-> 299.263
+
+(setq squadron
+'((6 0 0 0 0 0 2 0 0)
+  (0 9 0 0 0 1 0 0 5)
+  (0 0 8 0 3 0 0 4 0)
+  (0 0 0 0 0 2 0 0 1)
+  (5 0 0 6 0 0 9 0 0)
+  (0 0 7 0 9 0 0 0 0)
+  (0 7 0 0 0 3 0 0 2)
+  (0 0 0 4 0 0 5 0 0)
+  (0 0 6 0 7 0 0 8 0)))
+(time (println (sudoku squadron)))
+;-> 252.293
+
+(setq honeypot
+'((1 0 0 0 0 0 0 6 0)
+  (0 0 0 1 0 0 0 0 3)
+  (0 0 5 0 0 2 9 0 0)
+  (0 0 9 0 0 1 0 0 0)
+  (7 0 0 0 4 0 0 8 0)
+  (0 3 0 5 0 0 0 0 2)
+  (5 0 0 4 0 0 0 0 6)
+  (0 0 8 0 6 0 0 7 0)
+  (0 7 0 0 0 5 0 0 0)))
+(time (println (sudoku honeypot)))
+;-> 1266.399
+
+(setq tweezers
+'((1 0 0 0 0 0 0 6 0)
+  (0 0 0 1 0 0 0 0 3)
+  (0 0 5 0 0 2 9 0 0)
+  (0 0 9 0 0 1 0 0 0)
+  (7 0 0 0 4 0 0 8 0)
+  (0 3 0 5 0 0 0 0 2)
+  (5 0 0 4 0 0 0 0 6)
+  (0 0 8 0 6 0 0 7 0)
+  (0 7 0 0 0 5 0 0 0)))
+(time (println (sudoku tweezers)))
+;-> 1292.902
+
+(setq brokenbrick
+'((4 0 0 0 6 0 0 7 0)
+  (0 0 0 0 0 0 6 0 0)
+  (0 3 0 0 0 2 0 0 1)
+  (7 0 0 0 0 8 5 0 0)
+  (0 1 0 4 0 0 0 0 0)
+  (0 2 0 9 5 0 0 0 0)
+  (0 0 0 0 0 0 7 0 5)
+  (0 0 9 1 0 0 0 3 0)
+  (0 0 3 0 4 0 0 8 0)))
+(time (println (sudoku brokenbrick)))
+;-> 687.381
+
+The World's Hardest Sudoku:
+
+(setq world
+'((8 0 0 0 0 0 0 0 0)
+  (0 0 3 6 0 0 0 0 0)
+  (0 7 0 0 9 0 2 0 0)
+  (0 5 0 0 0 7 0 0 0)
+  (0 0 0 0 4 5 7 0 0)
+  (0 0 0 1 0 0 0 3 0)
+  (0 0 1 0 0 0 0 6 8)
+  (0 0 8 5 0 0 0 1 0)
+  (0 9 0 0 0 0 4 0 0)))
+(time (println (sudoku world)))
+;-> 2687.746
+
+In genere i puzzle più difficili per gli umani vengono risolti in breve tempo (pochi secondi) con la nostra funzione brute-force. Adesso vediamo un puzzle considerato difficile per il metodo brute-force:
+
+(setq beast
+'((0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 3 0 8 5)
+  (0 0 1 0 2 0 0 0 0)
+  (0 0 0 5 0 7 0 0 0)
+  (0 0 4 0 0 0 1 0 0)
+  (0 9 0 0 0 0 0 0 0)
+  (5 0 0 0 0 0 0 7 3)
+  (0 0 2 0 1 0 0 0 0)
+  (0 0 0 0 4 0 0 0 9)))
+(time (println (sudoku beast)))
+;-> 11672.643
+
+Un altro sudoku difficile con la tecnica brute-force:
+
+(setq hell
+'((9 0 0 8 0 0 0 0 0)
+  (0 0 0 0 0 0 5 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 2 0 0 1 0 0 0 3)
+  (0 1 0 0 0 0 0 6 0)
+  (0 0 0 4 0 0 0 7 0)
+  (7 0 8 6 0 0 0 0 0)
+  (0 0 0 0 3 0 1 0 0)
+  (4 0 0 0 0 0 2 0 0)))
+(time (println (sudoku hell)))
+;-> 1594.429
+
+Un sudoku con solo 4 numeri di partenza:
+
+(setq only4
+'((0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (3 8 4 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 0)
+  (0 0 0 0 0 0 0 0 2)))
+(time (println (sudoku only4)))
+;-> 84.744
+
+Vedi anche "Sudoku" su "Rosetta Code".
+Vedi anche "Sudoku test" su "Note libere 2".
+Vedi anche "Sudoku mania" su "Note libere 3".
 
 ============================================================================
 

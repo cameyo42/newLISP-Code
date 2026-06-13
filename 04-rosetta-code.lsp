@@ -8347,6 +8347,10 @@ Sudoku 2:
 Il numero possibile di griglie sudoku (senza riflessioni, simmetrie, ...) vale:
 6670903752021072936960
 
+Vedi anche "Sudoku test" su "Note libere 2".
+Vedi anche "Sudoku mania" su "Note libere 3".
+Vedi anche "yass - yet another sudoku solver" su "Note libere 37".
+
 
 --------------------
 CHESS960 (FREESTYLE)

@@ -3537,6 +3537,10 @@ NOTE LIBERE 37
   Matematica con le frazioni (rationale.lsp)
   Prodotto dei divisori di un numero
   Numeri primi con Miller-Rabin
+  Scomposizione di interi con prodotto massimo
+  Indicizzazione mista di liste, vettori e stringhe
+  Treni e biglietti
+  yass - yet another sudoku solver
 
 PROBLEMI SUI DADI
 =================

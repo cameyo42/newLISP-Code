@@ -814,7 +814,7 @@ Versione senza commenti
 Ecco una versione che genera direttamente le caselle intermedie.
 Utile per verificare ostacoli (basta controllare la lista restituita).
 ; Q/T/A -> lista caselle tra i pezzi
-; C/K/P -> lista vuota () perché saltano o sono adiacenti
+; C/K/P -> lista vuota () perchè saltano o sono adiacenti
 ; Se non c'è attacco -> nil
 
 (define (attacco-path tipo1 tipo2 r1 c1 r2 c2)
@@ -1993,7 +1993,7 @@ La funzione:
                   ; 5. ESPANSIONE DELLO STATO
                   ; Da ogni nodo possiamo muoverci solo a:
                   ;   cur + 1 oppure cur - 1
-                  ; purché il valore sia ancora disponibile.
+                  ; purchè il valore sia ancora disponibile.
                   (begin
                     ; RAMO +1
                     (letn (nx (+ cur 1) v (lookup nx f))
@@ -2372,7 +2372,7 @@ Data una stringa, determinare la precedente e la prossima stringa in ordine less
 Prossima stringa (in ordine lessicografico)
 -------------------------------------------
 Algoritmo
-Parti dall'ultimo carattere e spostati a sinistra finché tutti i caratteri sono uguali a 'z'.
+Parti dall'ultimo carattere e spostati a sinistra finchè tutti i caratteri sono uguali a 'z'.
 Se tutti i caratteri sono 'z', aggiungi 'a' alla stringa originale e restituiscila.
 Altrimenti, trova il carattere più a destra diverso da 'z' e incrementalo di uno.
 Rimuovi tutti i caratteri a destra della posizione incrementata.
@@ -2415,7 +2415,7 @@ Per esempio, "ac"  -> "abz"
 (define (str-prev str)
   ; i parte dall'ultimo indice della stringa
   (let (i (- (length str) 1))
-    ; scorri da destra verso sinistra finché trovi solo 'a'
+    ; scorri da destra verso sinistra finchè trovi solo 'a'
     ; (gli 'a' sono il minimo, quindi vanno "presi in prestito")
     (while (and (>= i 0) (= (str i) "a"))
       (-- i))
@@ -2598,7 +2598,7 @@ Dato un intero N maggiore di 0, scriverlo come somma di 2 e 3.
 
 Algoritmo 1
 -----------
-Sottrarre 2 finché la somma non è un multiplo di 3, quindi calcolare i 3 che rimangono (oppure viceversa).
+Sottrarre 2 finchè la somma non è un multiplo di 3, quindi calcolare i 3 che rimangono (oppure viceversa).
 Restituiamo una lista del tipo (a b), dove 'a' è il numero di 2 e 'b' e il numero di 3 che devono essere sommati per arrivare a N.
 
 (define (sum23 n)
@@ -4028,7 +4028,7 @@ Algoritmo
 Per ogni anno z = y + 1, y + 2, y + 3, ...
   Verificare se z - y è divisibile sia per a che per b.
   Interrompere quando viene trovato il primo z di questo tipo.
-Questo processo continua al massimo per a*b passaggi, poiché a*b divide sicuramente sia a che b.
+Questo processo continua al massimo per a*b passaggi, poichè a*b divide sicuramente sia a che b.
 
 (define (next-year a b y)
   (let ( (out nil) (stop nil) )
@@ -4638,7 +4638,7 @@ Dopo l'applicazione di 'conta':
 - il conteggio di una cifra è al massimo K
 
 Quindi il nuovo numero ha una dimensione molto più controllata del precedente.
-Per esempio, 999999999999999999999999999999999999 diventa 369, perché ci sono 36 cifre 9.
+Per esempio, 999999999999999999999999999999999999 diventa 369, perchè ci sono 36 cifre 9.
 
 Dopo poche iterazioni, tutti i numeri finiscono dentro un insieme finito di stati possibili.
 A questo punto vale il principio dei cassetti:
@@ -5052,7 +5052,7 @@ Il caso 00 = 0, produce x(x-1)/2 = 0 e ha due soluzioni:
 - x=1
 stesso discorso per 11.
 
-Questi casi sono importanti perché:
+Questi casi sono importanti perchè:
 - la stringa deve essere non vuota
 - se tutte le quantità sono 0, la risposta può essere "0" o "1"
 
@@ -6007,7 +6007,7 @@ Se abbiamo P bottiglie piene, E bottiglie vuote, F bottiglie trovate e una botti
 
 Algoritmo
 Mantenere il numero attuale di bottiglie vuote e il numero di bottiglie consumate.
-Continuare a bere finché è possibile comprarne un'altra:
+Continuare a bere finchè è possibile comprarne un'altra:
 - Comprare una nuova bottiglia.
 - Bere tutta l'acqua della nuova bottiglia
 - Conservare la bottiglia vuota.
@@ -6589,7 +6589,7 @@ Algoritmo greedy
 Attraversare tutta la matrice e trovare dove sono i tesori.
   Da P andare al tesoro più vicino,
   poi da lì scegliere sempre il tesoro non ancora visitato più vicino
-  ripetere finché sono stati visitati tutti i tesori.
+  ripetere finchè sono stati visitati tutti i tesori.
 
 L'algoritmo è semplice e veloce e sfrutta bene la distanza Manhattan.
 Quindi come euristica pratica è una buona scelta.
@@ -7810,10 +7810,10 @@ Dopo ogni funzione in CL troviamo la funzione tradotta in newLISP.
 ; Nel Lisp originale (atom '()) restituisce 't' (true)
 ; In newLISP (atom? '()) restituisce 'nil'
 ;
-; Questo è IMPORTANTISSIMO perché cambia il comportamento di 'eval.'
+; Questo è IMPORTANTISSIMO perchè cambia il comportamento di 'eval.'
 ; Quindi definiamo una funzione 'atom.' che si comporta come il Lisp e
 ; la usiamo al posto di 'atom'
-; Questo è necessario perché nel Lisp del 1960 'nil' e '()' sono atomi.
+; Questo è necessario perchè nel Lisp del 1960 'nil' e '()' sono atomi.
 ; In newLISP invece no.
 ; newLISP
 (define (atom. x)
@@ -8102,7 +8102,7 @@ Per esempio:
 Questa è una tecnica standard quando si implementa un meta-circolare Lisp dentro un altro Lisp con simboli riservati.
 
 Per esempio questo è SBAGLIATO: (eval. ((lambda (x) x) 'a) '())
-perché newLISP tenta di valutare: ((lambda (x) x) 'a) prima di chiamare eval..
+perchè newLISP tenta di valutare: ((lambda (x) x) 'a) prima di chiamare eval..
 Bisogna invece scrivere: (eval. '((lambda (x) x) 'a) '())
 cioè con quote esterna.
 
@@ -8378,7 +8378,7 @@ Operazioni elementari:
 Operazioni elementari combinate:
 - Sommare o sottrarre ad una riga un'altra riga moltiplicata per uno scalare diverso da zero.
 - Sommare o sottrarre ad una riga la somma di due o più righe.
-E poiché risulta det(M) = det(M(Trasposta)) le stesse operazioni possono essere eseguite sulle colonne.
+E poichè risulta det(M) = det(M(Trasposta)) le stesse operazioni possono essere eseguite sulle colonne.
 
 Sulle matrici di Hadamard possiamo invece eseguire solo un numero limitato di queste operazioni per ottenere una matrice equivalente.
 Operazioni consentite:
@@ -8507,7 +8507,7 @@ Per esempio con b = 3 i codici possibili sono:
 quindi si possono distinguere al massimo 15 file diversi.
 
 Questo è anche collegato al principio fondamentale della teoria dell'informazione:
-non esiste una compressione lossless universale che accorci tutti i file, perché i codici corti disponibili sono troppo pochi rispetto ai file possibili.
+non esiste una compressione lossless universale che accorci tutti i file, perchè i codici corti disponibili sono troppo pochi rispetto ai file possibili.
 
 
 ----------------
@@ -9119,7 +9119,7 @@ Ad ogni iterazione:
 se 'sums' contiene m elementi:
 - map costa O(m)
 - append costa O(m)
-- unique costa circa O(m log m) perché internamente ordina la lista
+- unique costa circa O(m log m) perchè internamente ordina la lista
 quindi ogni passo costa circa:
   O(m log m)
 dove m cresce fino a K.
