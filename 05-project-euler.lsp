@@ -4,6 +4,9 @@
 
 ================
 
+  Problemi 1..105, 108..110, 112..125, 132, 133, 135, 145, 147,
+           173, 187, 188, 190, 191, 205, 206, 231, 469
+
                                 Intel i5     Intel i7     Intel i7
   Problema    Soluzione         Tempo (msec) Tempo (msec) Tempo (msec)
                                 Algorithm 1  Algorithm 1  Algorithm 2

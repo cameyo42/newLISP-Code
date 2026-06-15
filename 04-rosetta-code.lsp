@@ -10725,7 +10725,9 @@ Il Gioco della Vita (The Game of Life), noto anche semplicemente come Life, è u
 
 Regole del gioco
 ----------------
-L'universo del Gioco della Vita è una griglia ortogonale bidimensionale infinita di celle quadrate, ognuna delle quali si trova in uno dei due possibili stati, vivo o morto (o popolato e non popolato, rispettivamente). Ogni cella interagisce con i suoi otto vicini, che sono le celle adiacenti orizzontalmente, verticalmente o diagonalmente. Ad ogni passaggio nel tempo, si verificano le seguenti transizioni:
+L'universo del Gioco della Vita è una griglia ortogonale bidimensionale infinita di celle quadrate, ognuna delle quali si trova in uno dei due possibili stati, vivo o morto (o popolato e non popolato, rispettivamente).
+Ogni cella interagisce con i suoi otto vicini, che sono le celle adiacenti orizzontalmente, verticalmente o diagonalmente.
+Ad ogni passaggio nel tempo, si verificano le seguenti transizioni:
 
   - Qualsiasi cellula viva con meno di due vicini vivi muore, come per sottopopolazione.
   - Qualsiasi cellula viva con due o tre vicini vivi sopravvive alla generazione successiva.
@@ -10736,9 +10738,13 @@ Queste regole, che confrontano il comportamento dell'automa con la vita reale, p
 
   - Qualsiasi cellula viva con due o tre vicini vivi sopravvive.
   - Qualsiasi cellula morta con tre vicini vivi diventa una cellula viva.
-  - Tutte le altre cellule vive muoiono nella generazione successiva. Allo stesso modo, tutte le altre cellule morte rimangono morte.
+  - Tutte le altre cellule vive muoiono nella generazione successiva.
+  - Allo stesso modo, tutte le altre cellule morte rimangono morte.
 
-Il modello iniziale costituisce il seme del sistema. La prima generazione viene creata applicando le regole di cui sopra simultaneamente a ogni cellula del seme: nascite e morti avvengono simultaneamente e il momento discreto in cui ciò accade è talvolta chiamato passo (tick o step). Ogni generazione è una funzione pura della precedente. Le regole continuano ad essere applicate ripetutamente per creare nuove generazioni.
+Il modello iniziale costituisce il seme del sistema.
+La prima generazione viene creata applicando le regole di cui sopra simultaneamente a ogni cellula del seme: nascite e morti avvengono simultaneamente e il momento discreto in cui ciò accade è talvolta chiamato passo (tick o step).
+Ogni generazione è una funzione pura della precedente.
+Le regole continuano ad essere applicate ripetutamente per creare nuove generazioni.
 
 Implementazione
 ---------------
@@ -10772,7 +10778,8 @@ dove gli indici della matrice sono determinati da:
 riga    = i % 4
 colonna = i / 4
 
-Questo ci permette di calcolare più facilmente i vicini di una cella. Per esempio, nel nostro caso N = 4 e i vicini della cella i-esima sono i seguenti:
+Questo ci permette di calcolare più facilmente i vicini di una cella.
+Per esempio, nel nostro caso N = 4 e i vicini della cella i-esima sono i seguenti:
 
 sinistra: (i - 1)
 destra:   (i + 1)
@@ -10785,7 +10792,8 @@ basso-dx: (i + (N + 1)) = (i + 5)
 
 Per evitare il controllo degli indici quando visitiamo/sommiamo le celle vicine contorniamo la matrice con valori 0 che la delimitano (in questo modo la somma non viene modificata dai valori di contorno che valgono 0).
 
-Supponiamo di avere una matrice 10x10 di celle. Poichè la matrice viene contornata la matrice finale ha dimensioni 12x12.
+Supponiamo di avere una matrice 10x10 di celle.
+Poichè la matrice viene contornata la matrice finale ha dimensioni 12x12.
 
 Definiamo il vettore:
 
@@ -10847,7 +10855,8 @@ Scriviamo una funzione che data una generazione calcola la successiva:
     )
   temp-board))
 
-Adesso definiamo un "glider" nella matrice iniziale. Un "glider" è una configurazione che si muove indefinitamente nella matrice (a meno che non incroci altre celle vive).
+Adesso definiamo un "glider" nella matrice iniziale.
+Un "glider" è una configurazione che si muove indefinitamente nella matrice (a meno che non incroci altre celle vive).
 
 (setf (board 15) 1)
 (setf (board 27) 1)
@@ -11013,7 +11022,9 @@ Premi Invio per la prossima generazione
 
 ---------------------
 
-Adesso vediamo un altro metodo per simulare il gioco della vita. Questa volta utilizziamo una matrice n x m anche nel programma (e non un vettore come prima). Comunque i bordi della matrice (prima e ultima riga con prima e ultima colonna) hanno tutti valore 0 perchè rappresentano il limite/contorno della matrice (come nel caso precedente).
+Adesso vediamo un altro metodo per simulare il gioco della vita.
+Questa volta utilizziamo una matrice n x m anche nel programma (e non un vettore come prima).
+Comunque i bordi della matrice (prima e ultima riga con prima e ultima colonna) hanno tutti valore 0 perchè rappresentano il limite/contorno della matrice (come nel caso precedente).
 
 Funzione che stampa la matrice:
 

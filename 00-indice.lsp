@@ -3541,6 +3541,12 @@ NOTE LIBERE 37
   Indicizzazione mista di liste, vettori e stringhe
   Treni e biglietti
   yass - yet another sudoku solver
+  Funzioni locali
+  Numeri exponial
+  La sequenza tower
+  Numeri elevati alla somma e al prodotto delle cifre
+  Prodotto uguali delle cifre pari e delle cifre dispari di un numero
+  Somma di fattoriali
 
 PROBLEMI SUI DADI
 =================

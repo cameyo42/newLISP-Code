@@ -2070,5 +2070,271 @@ Vedi anche "Sudoku" su "Rosetta Code".
 Vedi anche "Sudoku test" su "Note libere 2".
 Vedi anche "Sudoku mania" su "Note libere 3".
 
+
+---------------
+Funzioni locali
+---------------
+
+In alcuni casi lo sviluppo di una funzione richiede di eseguire una funzione ausiliaria.
+Quando la funzione ausiliaria è utile solo per funzione principale, allora possiamo definirla come variabile locale.
+In questo modo non può essere usata da un'altra funzione.
+
+Esempio
+  func -> unione(a b) - unione(b a)
+  func-aux -> unione(x y)
+
+  a = 32
+  b = 258
+  unione(a b) = 32258
+  unione(b a) = 25832
+  unione(a b) - unione(b a) = 32258 - 25832
+
+Caso 1: func-aux -> funzione globale
+
+(define (func1 a b)
+  (define (func1-aux x y)
+    (int (string x y) 0 10))
+  (- (func1-aux a b) (func1-aux b a)))
+
+(func1 32 258)
+;-> 6426
+
+In questo caso la funzione 'func1-aux' può essere chiamata senza problemi.
+(func1-aux 36 23)
+;-> 3623
+
+Caso 2: func-aux -> funzione locale
+
+(define (func2 a b)
+  (local (func2-aux) ; definiamo 'func2-aux' come variabile locale
+    (define (func2-aux x y)
+      (int (string x y) 0 10))
+    (- (func2-aux a b) (func2-aux b a))))
+
+(func2 32 258)
+;-> 6426
+
+In questo caso la funzione 'func2-aux' non può essere chiamata esternamente.
+(func2-aux 36 23)
+;-> ERR: invalid function: (func2-aux 36 23)
+
+
+---------------
+Numeri exponial
+---------------
+
+I numeri exponial sono definiti nel modo seguente:
+
+  exponial(n) = n^(n-1)^(n-2)^...^2
+  
+                                  2  
+                              ...^
+                        (n-2)^
+                  (n-1)^
+  exponial(n) = n^
+
+Regola associativa delle potenze: a^b^c = a^(b^c)
+
+Sequenza OEIS A049384:
+a(0) = 1, a(n+1) = (n+1)^a(n).
+  1, 1, 2, 9, 262144
+
+a(5) ha 183231 cifre.
+
+(define (pow-i num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (pot out)
+        (setq pot (pow-i num (/ power 2)))
+        (if (odd? power)
+            (setq out (* num pot pot))
+            (setq out (* pot pot)))
+        out)))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (expo n)
+  (let (a (array (+ n 1) '(0)))
+    (setf (a 0) 1L)
+    (for (i 0 (- n 1))
+      (setf (a (+ i 1)) (pow-i (bigint (+ i 1)) (a i))))))
+      ;(setf (a (+ i 1)) (** (+ i 1) (a i))))))
+
+(map expo (sequence 1 4))
+;-> (1L 2L 9L 262144L)
+
+(**)
+(time (println (length (expo 5))))
+;-> 183231
+;-> 5527.543
+
+(pow-i)
+(time (println (length (expo 5))))
+;-> 183231
+;-> 239.801
+
+
+-----------------
+La sequenza tower
+-----------------
+
+La sequenza tower è definita nel modo seguente:
+
+  a(n) = n^((n-1)*(n-2)*...*3*2*1)
+
+Sequenza OEIS A067039:
+The tower function n^((n-1)!).
+  1, 2, 9, 4096, 59604644775390625
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+tower(n) = n^((n-1)*(n-2)...*2) = n^(fact (n-1))
+
+(define (tower n)
+  (cond ((= n 0) 1L)
+        (true (** n (fact-i (- n 1))))))
+
+(map tower (sequence 0 5))
+;-> (1L 1L 2L 9L 4096L 59604644775390625L)
+
+
+---------------------------------------------------
+Numeri elevati alla somma e al prodotto delle cifre
+---------------------------------------------------
+
+Sequenza OEIS A067040
+a(n) = n^(sum of digits of n).
+  1, 1, 4, 27, 256, 3125, 46656, 823543, 16777216, 387420489, 10, 121, 1728,
+  28561, 537824, 11390625, 268435456, 6975757441, 198359290368,
+  6131066257801, 400, 9261, 234256, 6436343, 191102976, 6103515625,
+  208827064576, 7625597484987, ...
+
+Sequenza OEIS A067041:
+a(n) = n^(product of digits of n).
+  1, 1, 4, 27, 256, 3125, 46656, 823543, 16777216, 387420489, 1, 11, 144,
+  2197, 38416, 759375, 16777216, 410338673, 11019960576, 322687697779, 1,
+  441, 234256, 148035889, 110075314176, 95367431640625, 95428956661682176, ...
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10)))
+    out))
+
+(define (digit-prod num)
+"Calculate the product of the digits of an integer"
+  (if (zero? num)
+      0
+      (let (out 1)
+        (while (!= num 0)
+          (setq out (* out (% num 10)))
+          (setq num (/ num 10)))
+    out)))
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (pow-sum n)
+  (** (bigint n) (bigint (digit-sum n))))
+
+(map pow-sum (sequence 0 20))
+;-> (1L 1L 4L 27L 256L 3125L 46656L 823543L 16777216L 387420489L 10L 121L 1728L
+;->  28561L 537824L 11390625L 268435456L 6975757441L 198359290368L
+;->  6131066257801L 400L)
+
+(define (pow-prod n)
+  (** (bigint n) (bigint (digit-prod n))))
+
+(map pow-prod (sequence 0 20))
+;-> (1L 1L 4L 27L 256L 3125L 46656L 823543L 16777216L 387420489L 1L 11L 144L
+;->  2197L 38416L 759375L 16777216L 410338673L 11019960576L 322687697779L 1L)
+
+
+-------------------------------------------------------------------
+Prodotto uguali delle cifre pari e delle cifre dispari di un numero
+-------------------------------------------------------------------
+
+Determinare la sequenza dei numeri per cui risulta:
+
+  prodotto delle cifre pari = prodotto delle cifre dispari
+
+Regola: quando esiste una sola cifra pari (o dispari), allora il prodotto vale quella cifra.
+
+Esempio:
+  numero = 482
+  indici = 123
+  cifre dispari --> 4 e 2 --> 4*2 = 8
+  cifre pari --> 8 --> 8
+
+Sequenza OEIS A067042:
+Numbers in which the product of digits in even positions = product of digits in odd positions.
+  11, 22, 33, 44, 55, 66, 77, 88, 99, 100, 111, 122, 133, 144, 155, 166,
+  177, 188, 199, 200, 221, 242, 263, 284, 300, 331, 362, 393, 400, 441,
+  482, 500, 551, 600, 661, 700, 771, 800, 881, 900, 991, 1000, 1001, 1002,
+  1003, 1004, 1005, 1006, 1007, 1008, 1009, ...
+
+(define (seq? num)
+  (let ((s (string num)) (l (length num)) (pari 1) (dispari 1))
+    (for (i 0 (- l 1))
+      ; quando l'indice è pari aggiorna 'dispari'
+      ; perchè l'indice del numero inizia da 1 (che è dispari)
+      (if (even? i)
+        (setq dispari (* dispari (int (s i))))
+        (setq pari (* pari (int (s i))))))
+    (= pari dispari)))
+
+(filter seq? (sequence 10 1009))
+;-> (11 22 33 44 55 66 77 88 99 100 111 122 133 144 155 166
+;->  177 188 199 200 221 242 263 284 300 331 362 393 400 441
+;->  482 500 551 600 661 700 771 800 881 900 991 1000 1001 1002
+;->  1003 1004 1005 1006 1007 1008 1009)
+
+
+-------------------
+Somma di fattoriali
+-------------------
+
+Sequenza OEIS A007489:
+a(n) = Sum[k=1..n]k!
+  0, 1, 3, 9, 33, 153, 873, 5913, 46233, 409113, 4037913, 43954713,
+  522956313, 6749977113, 93928268313, 1401602636313, 22324392524313,
+  378011820620313, 6780385526348313, 128425485935180313,
+  2561327494111820313, 53652269665821260313, 1177652997443428940313, ...
+
+(define (a n)
+  (if (zero? n) 0
+      ;else
+      (let ( (sum 0L) (val 1L))
+        (for (x 1 n)
+          (setq val (* val x))
+          (++ sum val))
+        sum)))
+
+(a 3)
+;-> 9L
+
+(map a (sequence 0 20))
+;-> (0 1L 3L 9L 33L 153L 873L 5913L 46233L 409113L 4037913L 43954713L
+;->  522956313L 6749977113L 93928268313L 1401602636313L 22324392524313L
+;->  378011820620313L 6780385526348313L 128425485935180313L
+;->  2561327494111820313L)
+
 ============================================================================
 
