@@ -2336,5 +2336,306 @@ a(n) = Sum[k=1..n]k!
 ;->  378011820620313L 6780385526348313L 128425485935180313L
 ;->  2561327494111820313L)
 
+
+-------------------
+Calcolo di punteggi
+-------------------
+
+In un gioco tutti i giocatori hanno un grado che determina la loro forza di gioco e viene aggiornato dopo ogni partita giocata.
+Ci sono 25 gradi regolari e un grado extra, "Leggenda", sopra a questo.
+I gradi sono numerati in ordine decrescente, 25 è il grado più basso, 1 il secondo grado più alto e Leggenda il grado più alto.
+Ogni grado ha un certo numero di "stelle" che è necessario guadagnare prima di avanzare al grado successivo.
+Se un giocatore vince una partita, guadagna una stella.
+Se prima della partita il giocatore si trovava nella posizione 6-25 e questa era la terza o più vittorie consecutive, guadagna una stella bonus aggiuntiva per quella
+vincere.
+Quando avrà tutte le stelle per il suo grado (vedi elenco sotto) e otterrà un'altra stella, guadagnerà invece un grado e avrà una stella sul nuovo grado.
+Ad esempio, se prima di una partita vincente il giocatore aveva tutte le stelle del suo grado attuale, dopo la partita avrà guadagnato un grado e avrà 1 o 2 stelle (a seconda se ha ottenuto una stella bonus) sul nuovo grado.
+Se d'altra parte avesse tutte le stelle tranne una in un grado e vincesse una partita che le dava anche una stella bonus, guadagnerebbe un grado e avrebbe 1 stella nel nuovo grado.
+Se un giocatore di rango 1-20 perde una partita, perde una stella.
+Se un giocatore ha zero stelle in un grado e perde una stella, perderà un grado e avrà tutte le stelle meno una nel grado inferiore.
+Tuttavia, non si può mai scendere al di sotto del grado 20 (perdere una partita al grado 20 senza stelle non avrà alcun effetto).
+Se un giocatore raggiunge il grado Leggenda, rimarrà leggenda, indipendentemente da quante perdite subirà in seguito.
+Il numero di stelle su ciascun grado è il seguente: 
+Grado 25-21: 2 stelle 
+Grado 20-16: 3 stelle 
+Grado 15-11: 4 stelle 
+Grado 10-1:  5 stelle 
+Grado 0: (Leggenda)
+Un giocatore inizia dal grado 25 senza stelle.
+Data una lista con lo storico delle partite di un giocatore (es. (W L W W L)), qual è il suo grado alla fine della sequenza delle partite?
+
+Logica generale
+---------------
+
+Caso WIN:
+controllo Leggenda
+Aggiornamento vittorie consecutive
+Aggiornamento numero di star
+Controllo numero di vittorie consecutive (solo se rank 6-25)
+Aggiornamento numero di star
+Controllo se passaggio di rank (con eventuale aggiornamento numero di star)
+
+Caso LOSE:
+controllo Leggenda
+Azzeramento vittorie consecutive
+Aggiornamento numero di star (solo se rank 1-20)
+Controllo se passaggio di rank (con eventuale aggiornamento numero di star)
+
+(define (win)
+  ; se Leggenda non succede nulla
+  (if (= rank 0)
+      nil
+      (begin
+        ; aggiornamento vittorie consecutive
+        (++ striscia)
+        ; aggiornamento star
+        (++ star)
+        ; controllo bonus per vittorie consecutive
+        (if (and (>= rank 6) (<= rank 25) (>= striscia 3)) (++ star))
+        ; controllo passaggio di rank superiore
+        (cond
+          ((and (>= rank 21) (<= rank 25) (> star 2)) (-- rank) (-- star 2))
+          ((and (>= rank 16) (<= rank 20) (> star 3)) (-- rank) (-- star 3))
+          ((and (>= rank 11) (<= rank 15) (> star 4)) (-- rank) (-- star 4))
+          ((and (>= rank 2) (<= rank 10) (> star 5))  (-- rank) (-- star 5))
+          ; passaggio a Leggenda
+          ((and (= rank 1) (> star 5)) (setq rank 0) (setq star 0))))))
+
+(define (lose)
+  ; se Leggenda non succede nulla
+  (if (= rank 0) nil
+      ;else
+      (begin
+        ; azzeramento vittorie consecutive
+        (setq striscia 0)
+        ; aggiornamento star
+        ; al grado 20 con 0 stelle non succede nulla
+        (if (not (and (= rank 20) (= star 0)))
+            (if (and (>= rank 1) (<= rank 20))
+                (-- star)))
+        ; controllo passaggio di rank inferiore
+        (cond
+          ((and (>= rank 17) (<= rank 20) (= star -1)) (++ rank) (setq star 2))
+          ((and (>= rank 11) (<= rank 15) (= star -1)) (++ rank) (setq star 3))
+          ((and (>= rank 1) (<= rank 10) (= star -1))  (++ rank) (setq star 4))))))
+
+(define (check lst)
+  (let ( (rank 25) (star 0) (striscia 0) )
+    (dolist (el lst)
+      (cond ((= el 'W) (win))
+            ((= el 'L) (lose))
+            (true (println "Error: " el))))
+      ;(println rank { } star { } striscia)
+    (list rank star striscia)))
+
+Proviamo:
+
+(check '(W W))
+;-> 25
+(check '(W W W))
+;-> 24
+(check '(W W W W))
+;-> 23
+(check '(W L W L W L W L))
+;-> 24
+(check '(W W W W W W W W W L L W W))
+;-> 19
+(check '(W W W W W W W W W L W W L))
+;-> 18
+
+
+--------------------------
+Lunghezze di sottostringhe
+--------------------------
+
+Abbiamo una lista L di interi che rappresentano lunghezze di stringhe e una stringa S costituita solo dai caratteri "x" e "_".
+Il carattere "_" non compare mai all'inizio o alla fine della stringa.
+Scrivere una funzione che determina se le sottostringhe di S delimitate da "_" hanno esattamente le stesse lunghezze degli interi della lista.
+La funzione deve essere la più corta possibile.
+
+Esempi:
+  L = (2 3 2)
+  S = xx_xxx_xx
+  Sottostringhe di S = (xx xxx xx)
+  Lunghezze delle sottostringhe di S = (2 3 2)
+  Quindi L = lunghezze.
+
+  L = (2 1)
+  S = xxxx
+  Sottostringhe di S = (xxxx)
+  Lunghezze delle sottostringhe di S = (4)
+  Quindi L != lunghezze.
+
+  L = (2 3)
+  S = xxx_xx
+  Sottostringhe di S = (xxx xx)
+  Lunghezze delle sottostringhe di S = (3 2)
+  Quindi L != lunghezze.
+
+(define (check lst str)
+  (= lst (map length (parse str "_"))))
+
+(check '(2 3 2) "xx_xxx_xx")
+;-> true
+
+(check '(2 3) "xxx_xx")
+;-> nil
+
+Versione code-golf (44 caratteri):
+(define(f l s)(= l(map length(parse s"_"))))
+(f '(2 3 2) "xx_xxx_xx")
+;-> true
+(f '(2 3) "xxx_xx")
+;-> nil
+
+
+------------------------
+Primi con cifre ripetute
+------------------------
+
+Consideriamo i numeri primi di 4 cifre che contengono cifre ripetute, è chiaro che non possono essere tutti uguali:
+1111 è divisibile per 11, 2222 è divisibile per 22 e così via.
+Esistono però nove numeri primi di 4 cifre che contengono tre uno:
+  1117, 1151, 1171, 1181, 1511, 1811, 2111, 4111, 8111
+Indichiamo con:
+
+- M(n, d) il numero massimo di cifre ripetute per un numero primo di n cifre
+  (dove d è la cifra ripetuta)
+
+- N(n, d) il numero di tali numeri primi
+
+- S(n, d) la somma di questi numeri primi
+
+Quindi M(4, 1) = 3 è il numero massimo di cifre ripetute per un numero primo di 4 cifre in cui la cifra ripetuta è 1.
+Ci sono N(4, 1) = 9 di questi numeri primi e la somma di questi numeri primi è S(4, 1) = 22275.
+Si scopre che per d = 0, è possibile avere solo M(4, 0) = 2 cifre ripetute, ma ci sono N(4, 0) = 13 casi del genere.
+Allo stesso modo otteniamo i seguenti risultati per i numeri primi di 4 cifre.
+
+  +---------+----------+---------+---------+
+  | Digit,d |  M(4, d) | N(4, d) | S(4, d) |
+  +---------+----------+---------+---------+
+  |   0     |   2      |  13     |  67061  |
+  |   1     |   3      |   9     |  22275  |
+  |   2     |   3      |   1     |   2221  |
+  |   3     |   3      |  12     |  46214  |
+  |   4     |   3      |   2     |   8888  |
+  |   5     |   3      |   1     |   5557  |
+  |   6     |   3      |   1     |   6661  |
+  |   7     |   3      |   9     |  57863  |
+  |   8     |   3      |   1     |   8887  |
+  |   9     |   3      |   7     |  48073  |
+  +---------+----------+---------+---------+
+
+Trovare i valori di M, N e S per tutti i primi con lunghezza da 1 a 8.
+
+(define (primes-range n1 n2)
+"Generate all prime numbers in the interval [n1..n2]"
+  (if (> n1 n2) (swap n1 n2))
+  (cond ((= n2 1) '())
+        ((= n2 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ n2 1))))
+            ; initialize lst
+            (if (> n1 2) (setq lst '()))
+            (for (x 3 n2 2)
+              (when (not (arr x))
+                ; push current primes (x) only if > n1
+                (if (>= x n1) (push x lst -1))
+                (for (y (* x x) n2 (* 2 x) (> y n2))
+                  (setf (arr y) true)))) lst))))
+
+(time (println (length (primes-range 1e6 1e7))))
+;-> 586081
+;-> 1654.352
+
+(define (calc num-digit)
+  (local (M N S primi cifre minimo massimo conta)
+    ; array dei valori per M, N e S
+    (setq M (array 10 '(0)))
+    (setq N (array 10 '(0)))
+    (setq S (array 10 '(0)))
+    (setq cifre '("0" "1" "2" "3" "4" "5" "6" "7" "8" "9"))
+    ; calcolo dei numeri primi con num-digit
+    (setq minimo (pow 10 (- num-digit 1)))
+    (setq massimo (- (pow 10 num-digit) 1))
+    (println "Primes: " (time (setq primi (primes-range minimo massimo))))
+    ; ciclo per ogni primo di lunghezza num-digit...
+    (dolist (p primi)
+      ; conteggio delle cifre del primo corrente
+      (setq conta (count cifre (explode (string p))))
+      ;(println conta)
+      ; ciclo per ogni conteggio...
+      (dolist (c conta)
+        (cond
+          ; se il conteggio della cifra corrente è uguale al massimo
+          ; allora aggiorna i valori di N e S (per la cifra corrente)
+          ((= c (M $idx))
+            (++ (N $idx))
+            (++ (S $idx) p))
+          ; se il conteggio della cifra corrente è maggiore del massimo
+          ; allora resetta i valori di M, N e S (per la cifra corrente)
+          ((> c (M $idx))
+            (setq (M $idx) c)
+            (setq (N $idx) 1)
+            (setq (S $idx) p)))))
+    (println "M: " M)
+    (println "N: " N)
+    (println "S: " S) '>))
+
+Proviamo:
+
+(calc 1)
+;-> Primes: 0
+;-> M: (0 0 1 1 0 1 0 1 0 0)
+;-> N: (4 4 1 1 4 1 4 1 4 4)
+;-> S: (17 17 2 3 17 5 17 7 17 17)
+
+(calc 2)
+;-> Primes: 0
+;-> M: (0 2 1 1 1 1 1 1 1 1)
+;-> N: (21 1 2 8 3 2 2 8 2 6)
+;-> S: (1043 11 52 356 131 112 128 488 172 372)
+
+(calc 3)
+;-> Primes: 0
+;-> M: (1 2 2 2 2 2 2 2 2 2)
+;-> N: (15 10 3 9 2 1 1 10 3 7)
+;-> S: (6883 3112 679 3489 892 557 661 7226 2651 5133)
+
+(calc 4)
+;-> Primes: 0
+;-> M: (2 3 3 3 3 3 3 3 3 3)
+;-> N: (13 9 1 12 2 1 1 9 1 7)
+;-> S: (67061 22275 2221 46214 8888 5557 6661 57863 8887 48073)
+
+(calc 5)
+;-> Primes: 10.112
+;-> M: (3 4 4 4 4 3 3 4 4 4)
+;-> N: (8 10 1 7 1 28 31 12 1 8)
+;-> S: (450046 115756 22229 226559 44449 1506848 1999373 907810 88883 683904)
+
+(calc 6)
+;-> Primes: 144.686
+;-> M: (4 5 4 5 5 5 5 5 5 5)
+;-> N: (9 13 33 14 2 1 1 11 1 10)
+;-> S: (4200049 3358141 10838231 5065904 888892 555557 666667 8510217 888887 8580230)
+
+(time (println (calc 7)))
+;-> Primes: 1639.361
+;-> M: (5 6 5 6 5 5 5 6 5 6)
+;-> N: (5 7 48 13 43 35 41 8 38 7)
+;-> S: (25000027 7847587 117535528 43755197 187966743 186146245
+;->     267152609 61765166 311771476 57829215)
+;-> 3730.04
+
+(time (println (calc 8)))
+;-> M: (6 7 7 7 6 7 7 7 7 7)
+;-> N: (3 16 1 11 34 2 1 4 1 13)
+;-> S: (90000007 288629940 22222223 415038501 1567796906 111111112
+;->     66666667 311100078 88888883 1099396937)
+;-> 37474.613
+
+Non provare "(time (println (calc 9)))" con meno di 64 Gb di RAM.
+
 ============================================================================
 

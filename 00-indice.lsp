@@ -3547,6 +3547,9 @@ NOTE LIBERE 37
   Numeri elevati alla somma e al prodotto delle cifre
   Prodotto uguali delle cifre pari e delle cifre dispari di un numero
   Somma di fattoriali
+  Calcolo di punteggi
+  Lunghezze di sottostringhe
+  Primi con cifre ripetute
 
 PROBLEMI SUI DADI
 =================
