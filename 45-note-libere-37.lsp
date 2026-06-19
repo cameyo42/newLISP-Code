@@ -2637,5 +2637,551 @@ Proviamo:
 
 Non provare "(time (println (calc 9)))" con meno di 64 Gb di RAM.
 
+
+----------------------------------
+Funzione booleane con due ingressi
+----------------------------------
+
+La seguente tabella mostra tutte le 16 possibili funzioni booleane con due ingressi (X e Y).
+Nella tabella il valore 1 rappresenta 'true' e il valore 0 rappresenta 'nil'.
+
+           Z        N     N     N     X
+           E  N     O     O  X  A  A  N                 O
+           R  O     T     T  O  N  N  O              O  N
+           O  R     X     Y  R  D  D  R  Y     X     R  E
+  +------+------------------------------------------------+
+  | X  Y | 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F |
+  |------|------------------------------------------------|
+  | 0  0 | 0  1  0  1  0  1  0  1  0  1  0  1  0  1  0  1 |
+  | 0  1 | 0  0  1  1  0  0  1  1  0  0  1  1  0  0  1  1 |
+  | 1  0 | 0  0  0  0  1  1  1  1  0  0  0  0  1  1  1  1 |
+  | 1  1 | 0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  1 |
+  +------+------------------------------------------------+
+
+Scrivere le 16 funzioni utilizzando solo gli operatori 'and', 'or' e 'not'.
+
+(define (f0 x y) nil)                                     ;zero
+(define (f1 x y) (not (or x y)))                          ;nor
+(define (f2 x y) (not (or x (not y))))
+(define (f3 x y) (not x))                                 ;not x
+(define (f4 x y) (and x (not y)))
+(define (f5 x y) (not y))                                 ;not y
+(define (f6 x y) (if (not (and x y)) (or x y) nil))       ;xor
+(define (f7 x y) (not (and x y)))                         ;nand
+(define (f8 x y) (and x y))                               ;and
+(define (f9 x y) (not (if (not (and x y)) (or x y) nil))) ;xnor
+(define (fA x y) y)                                       ;y
+(define (fB x y) (not (and x (not y))))
+(define (fC x y) x)                                       ;x
+(define (fD x y) (or x (not y)))
+(define (fE x y) (or x y))                                ;or
+(define (fF x y) true)                                    ;one
+
+Per verificare le funzioni scriviamo una funzione che stampa la tabella (con 0 e 1).
+
+(define (bool16)
+  (local (func xval yval xbool ybool x y xb yb out)
+    (setq func (list f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 fA fB fC fD fE fF))
+    (setq xval '(nil nil true true))
+    (setq yval '(nil true nil true))
+    (setq xbool'(0 0 1 1))
+    (setq ybool'(0 1 0 1))
+    (println " X  Y  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F")
+    (for (i 0 3)
+      (setq x (xval i))
+      (setq y (yval i))
+      (setq xb (xbool i))
+      (setq yb (ybool i))
+      (print (format "%2d %2d" xb yb))
+      (dolist (el func)
+        (if ((eval el) x y) (setq out 1) (setq out 0))
+        (print (format "%3d" out)))
+      (println)) '>))
+
+(bool16)
+;-> X  Y  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
+;-> 0  0  0  1  0  1  0  1  0  1  0  1  0  1  0  1  0  1
+;-> 0  1  0  0  1  1  0  0  1  1  0  0  1  1  0  0  1  1
+;-> 1  0  0  0  0  0  1  1  1  1  0  0  0  0  1  1  1  1
+;-> 1  1  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  1
+
+
+---------------------------
+Funzioni booleane con 0 e 1
+---------------------------
+
+Le funzioni booleane di newLISP accettano solo i parametri 'true' e 'nil'.
+Altri linguaggi utilizzano 1 per il valore 'true' e 0 per il valore 'nil.
+
+              N     N     X
+           N  O  X  A  A  N
+           O  T  O  N  N  O  O
+           R  X  R  D  D  R  R
+  +------+---------------------+
+  | X  Y | Z  Z  Z  Z  Z  Z  Z |
+  |------|---------------------|
+  | 0  0 | 1  1  0  1  0  1  0 |
+  | 0  1 | 0  1  1  1  0  0  1 |
+  | 1  0 | 0  0  1  1  0  0  1 |
+  | 1  1 | 0  0  0  0  1  1  1 |
+  +------+---------------------+
+
+Scriviamo le funzioni 'and' 'or' e 'not' che accettano come parametri 0 e 1.
+
+(define (and01 x y) (if (and (= x 1) (= y 1)) 1 0))
+(define (or01 x y) (if (or (= x 1) (= y 1)) 1 0))
+(define (not01 x) (if (zero? x) 1 0))
+
+Possiamo definire gli operatori 'nor', 'xor', 'nand' e 'xnor'.
+
+Con le funzioni 'and01', 'or01' e 'not01':
+
+(define (nand01 x y) (not01 (and01 x y)))
+(define (nor01 x y) (not01 (or01 x y)))
+(define (xor01 x y) (if (not01 (and01 x y)) (or01 x y) nil))
+(define (xnor01 x y) (not01 (if (not01 (and01 x y)) (or01 x y) nil)))
+
+Oppure in modo indipendente:
+
+(define (nand01 x y) (if (and (= x 1) (= y 1)) 0 1))
+(define (nor01 x y) (if (or (= x 1) (= y 1)) 0 1))
+(define (xor01 x y) (if (or (= x y 1) (= x y 0)) 0 1))
+(define (xnor01 x y) (if (or (= x y 1) (= x y 0)) 1 0))
+
+Funzione che verifica la correttezza delle funzioni booleane:
+
+(define (bool-check)
+  (local (func xbool ybool x y out)
+    (setq func (list nor01 not01 xor01 nand01 and01 xnor01 or01))
+    (setq xbool'(0 0 1 1))
+    (setq ybool'(0 1 0 1))
+    (for (i 0 3)
+      (setq x (xbool i))
+      (setq y (ybool i))
+      (print (format "%2d %2d" x y))
+      (dolist (el func)
+        (print (format "%3d" ((eval el) x y))))
+      (println)) '>))
+
+(bool-check)
+;->  0  0  1  1  0  1  0  1  0
+;->  0  1  0  1  1  1  0  0  1
+;->  1  0  0  0  1  1  0  0  1
+;->  1  1  0  0  0  0  1  1  1
+
+Per essere utilizzabili con newLISp occorre restituire 'true' e 'nil' invece di 0 e 1.
+
+(define (and01 x y)  (if (and (= x 1) (= y 1)) true nil))
+(define (or01 x y)   (if (or (= x 1) (= y 1)) true nil))
+(define (not01 x)    (if (zero? x) true nil))
+(define (nand01 x y) (if (and (= x 1) (= y 1)) nil true))
+(define (nor01 x y)  (if (or (= x 1) (= y 1)) nil true))
+(define (xor01 x y)  (if (or (= x y 1) (= x y 0)) nil true))
+(define (xnor01 x y) (if (or (= x y 1) (= x y 0)) true nil))
+
+
+-----------------------------------
+Mappe di Karnaugh (Quine-McCluskey)
+-----------------------------------
+
+La mappa di Karnaugh è un metodo di rappresentazione esatta di sintesi di reti combinatorie a uno o più livelli.
+Una tale mappa costituisce una rappresentazione visiva di una funzione booleana in grado di mettere in evidenza le coppie di mintermini o di maxtermini a distanza di Hamming unitaria (ovvero di termini che differiscono per una sola variabile binaria (o booleana)).
+Poiché derivano da una meno intuitiva visione delle funzioni booleane in spazi (0,1)^n con n numero delle variabili della funzione, le mappe di Karnaugh risultano applicabili efficacemente solo a funzioni con al più 5 - 6 variabili.
+La mappa di Karnaugh è stata inventata nel 1953 da Maurice Karnaugh, ingegnere delle telecomunicazioni impiegato presso i Bell Laboratories.
+Una mappa di Karnaugh è un metodo grafico che ha come obiettivo quello di ridurre la complessità delle funzioni booleane espresse in forme canoniche.
+Essa si costruisce a partire dalla tabella della verità di una funzione booleana, nel processo di sintesi di una rete combinatoria.
+Le mappe di Karnaugh permettono di costruire semplicemente la forma minima di una funzione come somma di prodotti logici (forma disgiuntiva) o come prodotto di somme logiche (forma congiuntiva) e quindi semplificazioni della funzione booleana spesso più immediate di quelle ottenibili con modifiche algebriche.
+
+Un risolutore di mappe di Karnaugh può essere visto come un problema di copertura ottimale dei mintermini.
+L'idea generale è:
+
+1. Costruire la mappa
+Data una funzione booleana di (n) variabili:
+- ogni cella rappresenta una combinazione delle variabili;
+- righe e colonne sono ordinate in codice Gray;
+- si inseriscono:
+  - 1 per i mintermini veri,
+  - 0 per quelli falsi,
+  - eventualmente X per i "don't care".
+
+2. Cercare tutti i gruppi validi
+Un gruppo valido deve:
+- contenere solo 1 e/o X;
+- avere dimensione potenza di due: 1, 2, 4, 8, 16, ...
+- essere rettangolare;
+- poter attraversare i bordi della mappa (top-bottom, left-right).
+Per esempio, in una mappa a 4 variabili:
+  gruppi 1×1
+  gruppi 1×2
+  gruppi 2×2
+  gruppi 1×4
+  gruppi 2×4
+  gruppi 4×4
+  ecc.
+Conviene generare tutti i rettangoli possibili con lati di lunghezza potenza di due.
+
+3. Eliminare i gruppi ridondanti
+Se un gruppo è completamente contenuto in un gruppo più grande, normalmente non serve.
+Ad esempio:
+- gruppo di 2 celle
+- gruppo di 4 celle che contiene le stesse celle
+si conserva solo quello di 4.
+In questo modo si ottengono i primi implicanti.
+
+4. Trovare gli implicanti essenziali
+Per ogni mintermine uguale a 1 si determina quali implicanti lo coprono.
+Se un mintermine è coperto da un solo implicante, quell'implicante è essenziale.
+Tutti gli implicanti essenziali entrano automaticamente nella soluzione.
+
+5. Coprire i mintermini rimanenti
+Dopo aver scelto gli implicanti essenziali alcuni mintermini potrebbero restare scoperti.
+Occorre scegliere il più piccolo insieme di implicanti che li copra tutti.
+Questa è una variante del problema del set cover.
+Per mappe fino a 6 variabili è spesso sufficiente:
+- provare tutte le combinazioni degli implicanti residui;
+- scegliere quella con:
+  1. minor numero di termini;
+  2. a parità, minor numero totale di letterali.
+Questo equivale sostanzialmente al metodo di **Petrick**.
+
+6. Convertire i gruppi in termini booleani
+Per ogni gruppo:
+- si osservano le variabili che non cambiano;
+- le variabili che cambiano vengono eliminate.
+Esempio:
+| A | B | C |
+| - | - | - |
+| 0 | 1 | 0 |
+| 0 | 1 | 1 |
+C cambia, quindi scompare.  _
+Il termine risultante è:    AB
+
+7. Rappresentazione interna
+Un modo molto comodo è rappresentare ogni implicante come:
+- mask = bit delle variabili significative;
+- value = valore delle variabili significative.
+Per esempio:
+  A = 1
+  B = qualsiasi
+  C = 0
+  D = qualsiasi
+può essere rappresentato come:
+  mask  = 1010
+  value = 1000
+Questa rappresentazione è la stessa usata nell'algoritmo di Quine-McCluskey e rende molto facile:
+- verificare se un mintermine appartiene a un gruppo;
+- confrontare implicanti;
+- generare l'espressione finale.
+
+8. Approccio alternativo
+Invece di lavorare direttamente sulla mappa, si può usare:
+1. Quine-McCluskey per generare tutti i primi implicanti;
+2. Metodo di Petrick per scegliere quelli ottimali.
+
+Il seguente programma implementa una versione semplificata dell'algoritmo di Quine-McCluskey, che ha lo stesso obiettivo delle mappe di Karnaugh: trovare una rappresentazione booleana equivalente ma più compatta.
+
+1) Rappresentazione dei mintermini
+----------------------------------
+Ogni mintermine viene rappresentato come una stringa binaria.
+Esempio:
+  10110 rappresenta: A=1 B=0 C=1 D=1 E=0
+  cioè:
+  A and (not B) and C and D and (not E)
+
+2) Fusione di due mintermini
+----------------------------
+Due mintermini possono essere fusi se differiscono in una sola posizione.
+Esempio:
+  10110
+  10111
+  differiscono solo nell'ultima posizione.
+  La fusione produce: 1011-
+  Il simbolo '-' significa: questa variabile può valere sia 0 che 1
+  Perciò 1011- copre contemporaneamente:
+  10110
+  10111
+  e corrisponde a: A and (not B) and C and D
+  La variabile E scompare.
+
+3) Fusioni successive
+---------------------
+Anche i termini contenenti '-' possono essere fusi.
+Ad esempio:
+  1011-
+  1111-
+  diventano: 1-11-
+  e così via.
+
+Ogni fusione elimina una variabile dalla formula.
+
+4) Primi implicanti
+-------------------
+Quando un termine non può più essere fuso con nessun altro viene chiamato 'primo implicante'.
+Ad esempio:
+  1--01
+  può rappresentare il gruppo:
+  10001
+  10101
+  11001
+  11101
+
+5) Tabella di copertura
+-----------------------
+Dopo aver trovato tutti i primi implicanti, il programma costruisce una tabella:
+implicante -> mintermini coperti
+Esempio:
+  1--01 -> (10001 10101 11001 11101)
+  
+6) Implicanti essenziali
+------------------------
+Un implicante è essenziale se copre almeno un mintermine che nessun altro implicante copre.
+Se un mintermine compare una sola volta nella tabella, l'implicante corrispondente deve necessariamente appartenere alla soluzione finale.
+
+7) Costruzione della formula
+----------------------------
+Ogni implicante viene convertito in una espressione booleana.
+Esempio:
+  1--01 significa: A = 1, D = 0, E = 1
+  quindi: A and (not D) and E
+Infine tutti gli implicanti vengono uniti tramite OR.
+
+; bitcount
+; Conta il numero di bit uguali a '1' presenti
+; in una stringa binaria.
+; Esempio:
+; "101101" -> 4
+; Questa funzione non viene utilizzata nella versione
+; finale del programma, ma è spesso impiegata nelle
+; implementazioni classiche di Quine-McCluskey per
+; raggruppare i mintermini in base al numero di 1.
+(define (bitcount s)
+  (length (find-all "1" s)))
+
+; diff?
+; Verifica se due termini differiscono in una sola posizione.
+; Restituisce:
+;   indice della posizione diversa
+; oppure:
+;   nil se le differenze sono 0 oppure > 1
+; Esempi:
+; "1010" "1011" -> 3
+; "1010" "1111" -> nil
+; La funzione è il cuore della fase di fusione.
+(define (diff1? a b)
+  (letn ((pos -1)
+         (cnt 0))
+    (for (i 0 (- (length a) 1))
+      (if (!= (a i) (b i))
+          (begin
+            (++ cnt)
+            (setq pos i))))
+    (if (= cnt 1) pos nil)))
+
+; merge-term
+; Tenta di fondere due termini.
+; Se differiscono in una sola posizione,
+; il bit differente viene sostituito con '-'.
+; Esempio: 1010 1011 -> 101-
+; Se la fusione non è possibile restituisce nil.
+(define (merge-term a b)
+  (let (p (diff1? a b))
+    (if p
+        (string (slice a 0 p) "-" (slice a (+ p 1)))
+        nil)))
+
+; qm-step
+; Esegue un singolo livello dell'algoritmo
+; di Quine-McCluskey.
+; Confronta tutti i termini due a due.
+; Output:
+; merged
+;   true se è stata effettuata almeno una fusione
+; used
+;   indici dei termini che hanno partecipato
+;   ad almeno una fusione
+; next
+;   nuovi termini ottenuti dalle fusioni
+; I termini che non compaiono in 'used'
+; diventeranno primi implicanti.
+(define (qm-step terms)
+  (letn ((used '())
+         (next '())
+         (merged nil)
+         (n (length terms)))
+    (if (< n 2)
+        (list nil '() '())
+        (begin
+          (for (i 0 (- n 2))
+            (for (j (+ i 1) (- n 1))
+              (let (m (merge-term (terms i) (terms j)))
+                (if m
+                    (begin
+                      (setq merged true)
+                      (push i used -1)
+                      (push j used -1)
+                      (if (not (ref m next))
+                          (push m next -1)))))))
+          (list merged used next)))))
+
+; covers?
+; Verifica se un implicante copre un mintermine.
+; Il simbolo '-' viene considerato un wildcard.
+; Esempio:
+; implicante = 1--01
+; mintermine = 10101
+; risultato = true
+(define (covers? implicant minterm)
+  (let (ok true)
+    (for (i 0 (- (length implicant) 1))
+      (if (and (!= (slice implicant i 1) "-")
+               (!= (slice implicant i 1) (slice minterm i 1)))
+          (setq ok nil)))
+    ok))
+
+; covered
+; Restituisce l'insieme degli implicanti che
+; coprono almeno uno dei mintermini indicati.
+; La funzione elimina automaticamente i duplicati.
+(define (covered implicants minterms)
+  (let (out '())
+    (dolist (m minterms)
+      (dolist (p implicants)
+        (if (covers? p m)
+            (push p out -1))))
+    (unique out)))
+
+; term->expr
+; Converte un implicante nella corrispondente
+; espressione booleana.
+; Esempio:
+; 1--01 -> (A and (not D) and E)
+(define (term->expr termine)
+  (let (vars "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        out '())
+    (for (i 0 (- (length termine) 1))
+      (let (b (slice termine i 1))
+        (cond
+          ((= b "1")
+            (push (slice vars i 1) out -1))
+          ((= b "0")
+            (push (string "(not " (slice vars i 1) ")") out -1)))))
+    (cond
+      ((= (length out) 0) "true")
+      ((= (length out) 1) (out 0))
+      (true (string "(" (join out " and ") ")")))))
+
+; solution->expr
+; Converte una lista di implicanti nella
+; formula booleana completa.
+; Esempio:
+; ("1--" "--0") -> ((A) or ((not C)))
+(define (solution->expr solution)
+  (string "(" (join (map term->expr solution) " or ") ")"))
+
+; quine
+; Funzione principale.
+; Fasi:
+; 1) genera tutti i primi implicanti
+; 2) costruisce la tabella di copertura
+; 3) individua gli implicanti essenziali
+; 4) costruisce la soluzione
+; 5) converte la soluzione in formula booleana
+; Input:
+;   lista di mintermini binari
+; Output:
+;   formula logica semplificata
+; Durante l'esecuzione stampa tutti i passaggi
+; intermedi per scopi didattici e di debug.
+(define (quine minterms)
+  (local (current primes step merged used next table essential remain best)
+    (setq current minterms)
+    (setq primes '())
+    (setq go true)
+    (while go
+      (println "Livello:")
+      (println current)
+      (setq step (qm-step current))
+      (setq merged (step 0))
+      (setq used (step 1))
+      (setq next (step 2))
+      (for (i 0 (- (length current) 1))
+        (if (not (ref i used))
+            (if (not (ref (current i) primes))
+                (push (current i) primes -1))))
+      (if merged
+          (setq current next)
+          (setq go nil)))
+    (println "Primi implicanti:")
+    (println primes)
+    (setq table '())
+    (dolist (p primes)
+      (let (lst '())
+        (dolist (m minterms)
+          (if (covers? p m)
+              (push m lst -1)))
+        (push (list p lst) table -1)))
+    (println "Copertura:")
+    (dolist (x table)
+      (println (x 0) " -> " (x 1)))
+    (setq essential '())
+    (dolist (m minterms)
+      (let (hit '())
+        (dolist (x table)
+          (if (ref m (x 1))
+              (push (x 0) hit -1)))
+        (if (= (length hit) 1)
+            (push (hit 0) essential))))
+    (setq essential (unique essential))
+    (println "Essenziali:")
+    (println essential)
+    (setq remain '())
+    (dolist (m minterms)
+      (let (found nil)
+        (dolist (e essential)
+          (if (covers? e m)
+              (setq found true)))
+        (if (not found)
+            (push m remain -1))))
+    (if (= (length remain) 0)
+        (setq best '())
+        (setq best primes))
+    (println "Soluzione:")
+    (println (setq solution (unique (append essential best))))
+    (println "Formula:")
+    (solution->expr solution)))
+
+L'algoritmo implementato è una versione didattica di Quine-McCluskey: genera i primi implicanti tramite fusioni successive, costruisce la tabella di copertura e produce una formula booleana leggibile usando 'and', 'or' e 'not'.
+
+Proviamo:
+
+(quine '("000" "010" "100" "101" "110" "111"))
+;-> ...
+;-> (A or (not C))
+
+(quine '("0000" "0001" "0010" "0011" "1000" "1001" "1010" "1011" "1110" "1111"))
+;-> ...
+;-> "((A and C) or (not B))"
+La variabile D è completamente eliminata perché in tutti i gruppi scelti può cambiare senza modificare l'uscita.
+Questo è proprio uno degli obiettivi della minimizzazione di Karnaugh/Quine-McCluskey: eliminare le variabili non necessarie.
+In generale, se una variabile non compare nella formula finale significa che la funzione è indipendente da quella variabile.
+
+(quine '("011" "010" "110" "111" "000" "001"))
+;-> "((not A) or B)"
+
+(quine '("01101" "11001" "11111" "11101" "10100" "00001" "10101" "10001"))
+;-> ...
+;-> (((not B) and (not C) and (not D) and E) or (A and (not B) and C and
+;->  (not D)) or (A and B and C and E) or (A and (not D) and E) or
+;->  (B and C and (not D) and E))
+La minimizzazione non sempre riduce drasticamente la formula.
+Se i mintermini sono scelti quasi casualmente, spesso la forma minimizzata resta abbastanza complessa.
+
+(quine '("00000" "00001" "00010" "00011"
+         "00100" "00101" "00110" "00111"
+         "10000" "10001" "10010" "10011"
+         "10100" "10101" "10110" "10111"))
+;-> ...
+;-> "((not B))"
+
 ============================================================================
 

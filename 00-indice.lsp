@@ -3550,6 +3550,9 @@ NOTE LIBERE 37
   Calcolo di punteggi
   Lunghezze di sottostringhe
   Primi con cifre ripetute
+  Funzioni booleane con 0 e 1
+  Funzione booleane con due ingressi
+  Mappe di Karnaugh (Quine-McCluskey)
 
 PROBLEMI SUI DADI
 =================
