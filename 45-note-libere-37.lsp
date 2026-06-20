@@ -1686,7 +1686,7 @@ Quindi, durante la scansione, per ogni posizione (r,c):
 - se grid(r,c) = 0 e cand(r,c) è vuota -> fallimento;
 - altrimenti confrontare il numero di candidati con il minimo corrente.
 
-La funzione potrebbe quindi restituire nil se trova una contraddizione, oppure (row col candidati) se esiste almeno una cella vuota, oppure un valore speciale (ad esempio `'solved`) se non esistono più celle vuote e il Sudoku è completato.
+La funzione potrebbe quindi restituire nil se trova una contraddizione, oppure (row col candidati) se esiste almeno una cella vuota, oppure un valore speciale (ad esempio 'solved') se non esistono più celle vuote e il Sudoku è completato.
 
 (define (best-cell grid cand)
   (local (best-r best-c best-list min-len found)
@@ -1745,7 +1745,6 @@ solve(grid)
       richiamare solve(copia)
       se trova una soluzione
           restituiscila
-
 7. nessun candidato funziona
       fallimento
 
@@ -2114,7 +2113,8 @@ Caso 2: func-aux -> funzione locale
 (func2 32 258)
 ;-> 6426
 
-In questo caso la funzione 'func2-aux' non può essere chiamata esternamente.
+In questo caso la funzione 'func2-aux' non può essere chiamata esternamente perchè quando termina 'func2' la funzione 'func2-aux' viene eliminata:
+
 (func2-aux 36 23)
 ;-> ERR: invalid function: (func2-aux 36 23)
 
@@ -3182,6 +3182,271 @@ Se i mintermini sono scelti quasi casualmente, spesso la forma minimizzata resta
          "10100" "10101" "10110" "10111"))
 ;-> ...
 ;-> "((not B))"
+
+
+----------------
+Catene non vuote
+----------------
+
+Abbiamo una lista di interi non negativi, per esempio, (1 2 4 7 14 28).
+Le 'catene non vuote' sono i seguenti sottoinsiemi dei numeri della lista:
+
+  (1) (2) (4) (7) (14) (28)
+  (1 2) (1 4) (1 7) (1 14) (1 28) (2 4) 
+  (2 14) (2 28) (4 28) (7 14) (7 28) (14 28)
+  (1 2 4) (1 2 14) (1 2 28) (1 4 28) (1 7 14) 
+  (1 7 28) (1 14 28) (2 4 28) (2 14 28) (7 14 28) 
+  (1 2 4 28) (1 2 14 28) (1 7 14 28)
+
+Queste catene sono quei sottoinsiemi non vuoti di (1 2 4 7 14 28) tali che tutte le coppie di elementi (a, b) soddisfano o a/b o b/a ovvero, uno è divisore dell'altro.
+Poiché 2 non divide 7 e 7 non divide 2, nessuna catena ha un sottoinsieme di (2 7).
+Analogamente, nessuna catena ha un sottoinsieme di (4 7) o (4 14).
+
+Un modo semplice è generare tutti i sottoinsiemi non vuoti della lista e verificare se formano una catena.
+Un sottoinsieme è una catena se, per ogni coppia di elementi (a b), 'a' divide 'b' oppure 'b' divide 'a'.
+
+Algoritmo
+Generazione di tutti i sottoinsiemi della lista.
+Per ogni sottoinsieme non vuoto S:
+1) Poniamo ok = true.
+2) Per ogni coppia (i,j) con (i < j):
+   - a = S[i]
+   - b = S[j]
+   - se (a % b != 0) e (b % a != 0) allora
+     - 'ok = nil'
+     - interrompiamo i cicli.
+3) Se (ok == true), aggiungiamo S all'output.
+
+Con una lista di 'n' elementi i sottoinsiemi sono (2^n - 1) e considereando che la verifica di una catena costa O(n^2), il costo totale è circa O(2^n*n^2) che va bene per liste di piccole dimensioni.
+
+Una versione più efficiente consiste nel costruire prima la matrice di compatibilità:
+  compat[i][j] = true, se a divide b oppure b divide a
+Poi ogni sottoinsieme è una catena se tutte le coppie di elementi sono compatibili.
+Nell' esempio (1 2 4 7 14 28) le sole coppie incompatibili sono:
+  (2 7)
+  (4 7)
+  (4 14)
+Perciò una catena è semplicemente un sottoinsieme che non contiene nessuna di queste coppie.
+
+Algoritmo
+1) Costruire il grafo delle incompatibilità.
+2) Generare ricorsivamente le catene aggiungendo un elemento solo se è compatibile con tutti quelli già scelti.
+In pratica si costruiscono direttamente le catene valide senza enumerare tutti i 2^n sottoinsiemi.
+
+(define (catene lst show)
+  ; Genera tutte le catene non vuote rispetto alla relazione di divisibilità.
+  ; Una catena è un insieme di numeri dove ogni coppia di elementi è confrontabile:
+  ; a divide b oppure b divide a.
+  ; L'algoritmo costruisce le catene progressivamente:
+  ; - parte dalla catena vuota
+  ; - prova ad aggiungere ogni elemento successivo
+  ; - aggiunge l'elemento solo se è compatibile con tutti gli elementi
+  ;   già presenti nella catena corrente.
+  (local (out)
+    ; Verifica se due numeri sono confrontabili secondo la divisibilità.
+    ; Restituisce true se:
+    ;   a divide b   oppure   b divide a
+    ; Esempi:
+    ;   2 e 14  -> true  (2 divide 14)
+    ;   7 e 4   -> nil   (nessuno divide l'altro)
+    (define (compatibile? a b)
+      (or (= 0 (% a b))
+          (= 0 (% b a))))
+    ; Procedura ricorsiva che estende una catena esistente.
+    ; chain : catena costruita fino ad ora
+    ; start : indice dal quale iniziare a provare nuovi elementi
+    ; Per esempio:
+    ; chain = (1 2)
+    ; start = 2
+    ; proverà ad aggiungere gli elementi dopo il 2: 4, 7, 14, 28
+    ; Quando trova un elemento compatibile:
+    ; 1) crea una nuova catena
+    ; 2) la salva in output
+    ; 3) continua ricorsivamente cercando estensioni più lunghe
+    (define (espandi chain start)
+      (if show (println "chain = " chain " start = " start))
+      ; Evita di accedere fuori dalla lista quando start
+      ; è uguale alla lunghezza della lista
+      (if (< start (length lst))
+        (for (i start (- (length lst) 1))
+          (let (x (lst i))
+            (if show (println "  provo: " x))
+            ; Supponiamo inizialmente che x possa essere aggiunto
+            (setq ok true)
+            ; Controlliamo x contro tutti gli elementi
+            ; della catena già costruita
+            (dolist (y chain)
+              ; Se troviamo una coppia incompatibile,
+              ; la nuova catena non è valida
+              (if (not (compatibile? x y))
+                (begin
+                  (if show (println "    incompatibile con " y))
+                  (setq ok nil))))
+            ; Se x è compatibile con tutta la catena:
+            ; possiamo creare una nuova catena valida
+            (if ok
+              (begin
+                ; Aggiunge x alla fine della catena corrente
+                (setq nuova (append chain (list x)))
+                (if show (println "    nuova catena: " nuova))
+                ; Salva la nuova catena trovata.
+                ; push con -1 mantiene l'ordine di generazione
+                (push nuova out -1)
+                ; Cerca ulteriori estensioni usando solo
+                ; gli elementi dopo x
+                (espandi nuova (+ i 1))))))))
+    ; Lista risultato
+    (setq out '())
+    ; Avvia la costruzione partendo dalla catena vuota.
+    ; La prima aggiunta creerà le catene di un solo elemento.
+    (espandi '() 0)
+    out))
+
+La caratteristica importante è questa parte:
+  (espandi nuova (+ i 1))
+che impone che gli elementi vengano aggiunti solo andando avanti nella lista.
+Quindi non genera duplicati tipo (1 2 4), (1 4 2), (2 1 4), ma considera ogni sottoinsieme una sola volta.
+
+Proviamo:
+
+(catene '(1 2 4 7 14 28))
+;-> ((1) (1 2) (1 2 4) (1 2 4 28) (1 2 14) (1 2 14 28) (1 2 28) (1 4) (1 4 28)
+;->  (1 7) (1 7 14) (1 7 14 28) (1 7 28) (1 14) (1 14 28) (1 28) (2) (2 4)
+;->  (2 4 28) (2 14) (2 14 28) (2 28) (4) (4 28) (7) (7 14) (7 14 28) (7 28)
+;->  (14) (14 28) (28))
+
+(catene '(1 2 3 4 5))
+;-> ((1) (1 2) (1 2 4) (1 3) (1 4) (1 5) (2) (2 4) (3) (4) (5))
+
+
+Sequenza OEIS A253249:
+Number of nonempty chains in the divides relation on the divisors of n.
+  1, 3, 3, 7, 3, 11, 3, 15, 7, 11, 3, 31, 3, 11, 11, 31, 3, 31, 3, 31, 11,
+  11, 3, 79, 7, 11, 15, 31, 3, 51, 3, 63, 11, 11, 11, 103, 3, 11, 11, 79,
+  3, 51, 3, 31, 31, 11, 3, 191, 7, 31, 11, 31, 3, 79, 11, 79, 11, 11, 3,
+  175, 3, 11, 31, 127, 11, 51, 3, 31, 11, 51, ...
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1))
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(map (fn(x) (length (catene (divisors x)))) (sequence 1 50))
+;-> (1 3 3 7 3 11 3 15 7 11 3 31 3 11 11 31 3 31 3 31 11
+;->  11 3 79 7 11 15 31 3 51 3 63 11 11 11 103 3 11 11 79
+;->  3 51 3 31 31 11 3 191 7 31)
+
+
+-------------
+Barcode EAN-8
+-------------
+
+Un codice a barre EAN-8 include 7 cifre di informazioni e un'ottava cifra di controllo.
+Il checksum viene calcolato moltiplicando le cifre alternativamente per 3 e 1, sommando i risultati e sottraendo il risultato dal multiplo di 10 successivo.
+Ad esempio, date le cifre 2103498:
+
+Cifre:            2   1   0   3   4   9   8
+Multiplicatore:   3   1   3   1   3   1   3
+Risultato:        6   1   0   3  12   9  24
+La somma di queste cifre risultanti è 55, quindi il checksum vale 60 - 55 = 5.
+
+Scrivere una funzione che prende le 8 cifre come lista e verifica il checksum.
+
+Per calcolare il multiplo di 10 successivo a un numero intero positivo usiamo la seguente formula:
+
+  x(succ) = ((x + 9)/10) * 10) (eseguendo una divisione intera)
+
+(define (check ean)
+  (let (res (apply + (map * (chop ean) '(3 1 3 1 3 1 3))))
+    (setq res (- (* (/ (+ res 9) 10) 10) res))
+    (= (ean -1) res)))
+
+Proviamo:
+
+(check '(2 1 0 3 4 9 8 5))
+;-> true
+(check '(2 1 0 3 4 9 8 4))
+;-> nil
+
+Versione code-golf (100 caratteri):
+
+(define(f e)(let(r(apply +(map *(chop e)'(3 1 3 1 3 1 3))))(setq r(-(*(/(+ r 9)10)10)r))(=(e -1)r)))
+
+(f '(2 1 0 3 4 9 8 5))
+;-> true
+(f '(2 1 0 3 4 9 8 4))
+;-> nil
+
+
+------------------
+Norma di Frobenius
+------------------
+
+La norma di Frobenius è una norma matriciale definita come la radice quadrata della somma dei quadrati assoluti dei suoi elementi.
+Viene definita come la radice quadrata della somma dei quadrati di tutti gli elementi di una matrice, misurandone la 'dimensione'.
+Per una matrice A di dimensioni m × n con elementi a(i, j), la formula è:
+
+  AF = sqrt(Somma[i=1,m]Somma[j=1,n] |(a(i, j)|^2))
+
+In sostanza, tratta una matrice come un vettore lungo e ne calcola la lunghezza euclidea standard.
+Viene spesso utilizzata per misurare le distanze tra matrici.
+
+(define (frobenius matrix)
+  (sqrt (apply add (map (fn(x) (mul x x)) (flat matrix)))))
+
+(frobenius '((1 2 3) (4 5 6) (7 8 9)))
+;-> 16.88194301613413
+
+(frobenius '((1 3) (-2 4)))
+;-> 5.477225575051661
+
+(frobenius '((2 0 -1) (3 5 -2)))
+;-> 6.557438524302
+
+La norma di Frobenius può essere calcolata anche con la formula seguente:
+
+  AF = sqrt(Traccia(AH*A)), dove AH è la trasposta coniugata di A.
+
+La matrice trasposta coniugata di una matrice M a valori complessi è la matrice ottenuta effettuando la trasposta di M e scambiando ogni valore con il suo complesso coniugato.
+Nel caso di matrici con valori reali, la matrice trasposta coniugata di M è uguale alla trasposta di M (perchè il coniugato di un numero reale è il numero reale stesso).
+
+(define (matrix-trace M)
+  (let ((n (length M)) (s 0))
+    (dotimes (i n)
+      (setf s (add s (M i i))))
+    s))
+
+(define (froben matrix)
+  (sqrt (matrix-trace (multiply (transpose matrix) matrix))))
+
+(froben '((1 2 3) (4 5 6) (7 8 9)))
+;-> 16.88194301613413
+
+(froben '((1 3) (-2 4)))
+;-> 5.477225575051661
+
+(froben '((2 0 -1) (3 5 -2)))
+;-> 6.557438524302
 
 ============================================================================
 

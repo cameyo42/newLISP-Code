@@ -1385,7 +1385,7 @@ https://www.ccs.neu.edu/home/jaa/CS7800.12F/Information/Handouts/dyn_prog.pdf
     ; minimum moneys needed for the exchange
     (println (C n))
     ; build solution from S
-    ; values of exhcange monetas
+    ; values of exchange moneta
     (while (> n 0)
       ;(print (d (S n)) { })
       (if (!= (d (S n)) 0)

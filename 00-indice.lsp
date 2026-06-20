@@ -3553,6 +3553,9 @@ NOTE LIBERE 37
   Funzioni booleane con 0 e 1
   Funzione booleane con due ingressi
   Mappe di Karnaugh (Quine-McCluskey)
+  Catene non vuote
+  Barcode EAN-8
+  Norma di Frobenius
 
 PROBLEMI SUI DADI
 =================
