@@ -263,7 +263,7 @@ Conversione da binario a decimale (big-integer):
             out -1))
     (bin-decL out)))
 
-; bitwise NOT su n bit 
+; bitwise NOT su n bit
 ; Osservazione: NOT non è ben definito senza specificare una larghezza in bit.
 ; La funzione 'notL' inverte solo la rappresentazione binaria minima di 'a'.
 (define (notL a)
@@ -340,7 +340,7 @@ Matematica con le frazioni (rationale.lsp)
 ;; - Checks denominator for 0 --> throwing error
 ;; - Checks division by 0 --> throwing error
 ;;
-;; List of functions: 
+;; List of functions:
 ;; (rat-big r):       "Convert fraction numbers to big integers"
 ;; (rat n d):         "Reduce a fraction to its lowest terms"
 ;; (+rat r1 r2):      "Add two fractions"
@@ -827,7 +827,7 @@ Numeri con 15 cifre:
   100000000000065 --> 3 * 5 * 11 * 31 * 15809 * 1236659
   100000000000075 --> 5 * 5 * 7 * 571428571429
 
-(setq big1 '(100000000000031 100000000000067 100000000000097 
+(setq big1 '(100000000000031 100000000000067 100000000000097
              100000000000073 100000000000039 100000000000045
              100000000000055 100000000000065 100000000000075))
 
@@ -1079,7 +1079,7 @@ Equazione di transizione di stato:
 
   V[i] = max(V[i], V[i - j] * j, (i - j) * j), dove j in [1, i)
 
-(define (max-prod2 n) 
+(define (max-prod2 n)
     ; (dp i) rappresenta il massimo prodotto che
     ; possiamo avere spezzando l'intero 'i'
     (let (dp (array (+ n 1) '(0)))
@@ -1093,7 +1093,7 @@ Equazione di transizione di stato:
           ; Per ogni suddivisione, abbiamo due possibilità:
           ; 1. Non suddividere ulteriormente (i-j): prodotto = (* j (- i j))
           ; 2. Suddividere ulteriormente (i-j): prodotto = (* j (dp (- i j)))
-          ; Prendere il valore massimo tra il valore corrente e 
+          ; Prendere il valore massimo tra il valore corrente e
           ; la somma dei due risultati.
           (setf (dp i) (max (dp i) (max (* j (- i j)) (* j (dp (- i j))))))))
       ; il prodotto massimo di n si trova in (dp n)
@@ -1175,7 +1175,7 @@ Versione ottimizzata
     ((= n 3) '(3L (3L) 3L))
     (true
       (let ((out '()) (num3 (/ n 3)) (resto (% n 3)))
-        (cond ((= resto 0) 
+        (cond ((= resto 0)
                 (setq out (dup 3L num3)))
               ((= resto 1)
                 (setq out (append (dup 3L (- num3 1)) '(2L 2L))))
@@ -1330,7 +1330,7 @@ Prima scriviamo una funzione che genera i biglietti dei passeggeri:
       ; stazione di arrivo
       (setq end (rand (+ num-fermate 1)))
       ; controllo sui valori di arrivo e partenza
-      ; deve essere: end > start e start != end e end > 0 
+      ; deve essere: end > start e start != end e end > 0
       (cond ((> start end) (swap start end))
             ((= start end)
               (if (zero? start)
@@ -1413,7 +1413,7 @@ Proviamo:
 ;-> scese: 0
 ;-> salite: 8
 ;-> passeggeri: 8
-;-> 
+;->
 ;-> Stazione: 1
 ;-> scese: 3
 ;-> salite: 5
@@ -1429,27 +1429,27 @@ Proviamo:
 ;-> scese: 0
 ;-> salite: 10
 ;-> passeggeri: 10
-;-> 
+;->
 ;-> Stazione: 1
 ;-> scese: 5
 ;-> salite: 4
 ;-> passeggeri: 9
-;-> 
+;->
 ;-> Stazione: 2
 ;-> scese: 2
 ;-> salite: 2
 ;-> passeggeri: 9
-;-> 
+;->
 ;-> Stazione: 3
 ;-> scese: 5
 ;-> salite: 2
 ;-> passeggeri: 6
-;-> 
+;->
 ;-> Stazione: 4
 ;-> scese: 5
 ;-> salite: 2
 ;-> passeggeri: 3
-;-> 
+;->
 ;-> Stazione: 5
 ;-> scese: 3
 ;-> salite: 0
@@ -1810,7 +1810,7 @@ return nil
 (define (sudoku grid) (solve grid))
 
 (setq sol (sudoku grid))
-;-> ((5 3 4 6 7 8 9 1 2) 
+;-> ((5 3 4 6 7 8 9 1 2)
 ;->  (6 7 2 1 9 5 3 4 8)
 ;->  (1 9 8 3 4 2 5 6 7)
 ;->  (8 5 9 7 6 1 4 2 3)
@@ -2126,8 +2126,8 @@ Numeri exponial
 I numeri exponial sono definiti nel modo seguente:
 
   exponial(n) = n^(n-1)^(n-2)^...^2
-  
-                                  2  
+
+                                  2
                               ...^
                         (n-2)^
                   (n-1)^
@@ -2355,11 +2355,11 @@ Se un giocatore di rango 1-20 perde una partita, perde una stella.
 Se un giocatore ha zero stelle in un grado e perde una stella, perderà un grado e avrà tutte le stelle meno una nel grado inferiore.
 Tuttavia, non si può mai scendere al di sotto del grado 20 (perdere una partita al grado 20 senza stelle non avrà alcun effetto).
 Se un giocatore raggiunge il grado Leggenda, rimarrà leggenda, indipendentemente da quante perdite subirà in seguito.
-Il numero di stelle su ciascun grado è il seguente: 
-Grado 25-21: 2 stelle 
-Grado 20-16: 3 stelle 
-Grado 15-11: 4 stelle 
-Grado 10-1:  5 stelle 
+Il numero di stelle su ciascun grado è il seguente:
+Grado 25-21: 2 stelle
+Grado 20-16: 3 stelle
+Grado 15-11: 4 stelle
+Grado 10-1:  5 stelle
 Grado 0: (Leggenda)
 Un giocatore inizia dal grado 25 senza stelle.
 Data una lista con lo storico delle partite di un giocatore (es. (W L W W L)), qual è il suo grado alla fine della sequenza delle partite?
@@ -2931,7 +2931,7 @@ Dopo aver trovato tutti i primi implicanti, il programma costruisce una tabella:
 implicante -> mintermini coperti
 Esempio:
   1--01 -> (10001 10101 11001 11101)
-  
+
 6) Implicanti essenziali
 ------------------------
 Un implicante è essenziale se copre almeno un mintermine che nessun altro implicante copre.
@@ -3192,10 +3192,10 @@ Abbiamo una lista di interi non negativi, per esempio, (1 2 4 7 14 28).
 Le 'catene non vuote' sono i seguenti sottoinsiemi dei numeri della lista:
 
   (1) (2) (4) (7) (14) (28)
-  (1 2) (1 4) (1 7) (1 14) (1 28) (2 4) 
+  (1 2) (1 4) (1 7) (1 14) (1 28) (2 4)
   (2 14) (2 28) (4 28) (7 14) (7 28) (14 28)
-  (1 2 4) (1 2 14) (1 2 28) (1 4 28) (1 7 14) 
-  (1 7 28) (1 14 28) (2 4 28) (2 14 28) (7 14 28) 
+  (1 2 4) (1 2 14) (1 2 28) (1 4 28) (1 7 14)
+  (1 7 28) (1 14 28) (2 4 28) (2 14 28) (7 14 28)
   (1 2 4 28) (1 2 14 28) (1 7 14 28)
 
 Queste catene sono quei sottoinsiemi non vuoti di (1 2 4 7 14 28) tali che tutte le coppie di elementi (a, b) soddisfano o a/b o b/a ovvero, uno è divisore dell'altro.
@@ -3447,6 +3447,446 @@ Nel caso di matrici con valori reali, la matrice trasposta coniugata di M è ugu
 
 (froben '((2 0 -1) (3 5 -2)))
 ;-> 6.557438524302
+
+
+---------------------
+Numeri di Wostenholme
+---------------------
+
+I numeri di Wostenholme sono i numeratori dei numeri armonici di ordine 2:
+
+  H2(k) = Sum[i=1,k]1/i = 1 + 1/4 + 1/9 + ... + 1/(k^2)
+
+Sequenza OEIS A007406:
+Wolstenholme numbers: numerator of Sum[k=1,n]1/k^2.
+  1, 5, 49, 205, 5269, 5369, 266681, 1077749, 9778141, 1968329, 239437889,
+  240505109, 40799043101, 40931552621, 205234915681, 822968714749,
+  238357395880861, 238820721143261, 86364397717734821, 17299975731542641,
+  353562301485889, 354019312583809, 187497409728228241, ...
+
+; Minimal rational
+(define (rat n d)
+  (cond
+    ((zero? d) (throw-error "rat: denominator is zero"))
+    ((zero? n) '(0L 1L))
+    (true (letn ((g (gcd n d)) (nn (/ n g)) (dd (/ d g)))
+            (if (< dd 0) (list (- nn) (- dd)) (list nn dd))))))
+(define (+rat r1 r2) (rat (+ (* (r1 0) (r2 1)) (* (r2 0) (r1 1))) (* (r1 1) (r2 1))))
+(define (-rat r1 r2) (rat (- (* (r1 0) (r2 1)) (* (r2 0) (r1 1))) (* (r1 1) (r2 1))))
+(define (*rat r1 r2) (rat (* (r1 0) (r2 0)) (* (r1 1) (r2 1))))
+(define (/rat r1 r2)
+  (if (zero? (r2 0))
+      (throw-error "/rat: division by zero")
+      (rat (* (r1 0) (r2 1)) (* (r1 1) (r2 0)))))
+(define (+r) (apply +rat (args) 2))
+(define (-r) (apply -rat (args) 2))
+(define (*r) (apply *rat (args) 2))
+(define (/r) (apply /rat (args) 2))
+
+(define (wostenholme limite)
+  (let ((h '(0L 1L)) (out '()))
+    (for (k 1 limite)
+      (setq h (+rat h (list 1L (* 1L k k))))
+      (push (h 0) out -1))
+    out))
+
+(wostenholme 20)
+;-> (1L 5L 49L 205L 5269L 5369L 266681L 1077749L 9778141L 1968329L 239437889L
+;->  240505109L 40799043101L 40931552621L 205234915681L 822968714749L
+;->  238357395880861L 238820721143261L 86364397717734821L 17299975731542641L)
+
+Vediamo i denominatori:
+
+Sequenza OEIS A007407:
+a(n) = denominator of Sum_{k=1..n} 1/k^2.
+  1, 4, 36, 144, 3600, 3600, 176400, 705600, 6350400, 1270080, 153679680,
+  153679680, 25971865920, 25971865920, 129859329600, 519437318400,
+  150117385017600, 150117385017600, 54192375991353600, 10838475198270720,
+  221193371393280,...
+
+(define (wostenholme-denom limite)
+  (let ((h '(0L 1L)) (out '()))
+    (for (k 1 limite)
+      (setq h (+rat h (list 1L (* 1L k k))))
+      (push (h 1) out -1))
+    out))
+
+(wostenholme-denom 20)
+;-> (1L 4L 36L 144L 3600L 3600L 176400L 705600L 6350400L 1270080L 153679680L
+;->  153679680L 25971865920L 25971865920L 129859329600L 519437318400L
+;->  150117385017600L 150117385017600L 54192375991353600L 10838475198270720L)
+
+Vediamo i numeratori e i denominatori dei numeri armonici di ordine 1:
+
+  H1(k) = Sum[i=1,k]1/i = 1 + 1/2 + 1/3 + ... + 1/k
+
+Sequenza OEIS A001008:
+a(n) = numerator of harmonic number H(n) = Sum[i=1,n]1/i.
+  1, 3, 11, 25, 137, 49, 363, 761, 7129, 7381, 83711, 86021, 1145993,
+  1171733, 1195757, 2436559, 42142223, 14274301, 275295799, 55835135,
+  18858053, 19093197, 444316699, 1347822955, 34052522467, 34395742267,
+  312536252003, 315404588903, 9227046511387, ...
+
+(define (harmo-numer limite)
+  (let ((h '(0L 1L)) (out '()))
+    (for (k 1 limite)
+      (setq h (+rat h (list 1L (bigint k))))
+      (push (h 0) out -1))
+    out))
+
+(harmo-numer 20)
+;-> (1L 3L 11L 25L 137L 49L 363L 761L 7129L 7381L 83711L 86021L 1145993L 1171733L
+;->  1195757L 2436559L 42142223L 14274301L 275295799L 55835135L)
+
+Sequenza OEIS A002805:
+a(n) = denominator of harmonic number H(n) = Sum_{i=1..n} 1/i.
+  1, 2, 6, 12, 60, 20, 140, 280, 2520, 2520, 27720, 27720, 360360, 360360,
+  360360, 720720, 12252240, 4084080, 77597520, 15519504, 5173168, 5173168,
+  118982864, 356948592, 8923714800, 8923714800, 80313433200, 80313433200,
+  2329089562800, 2329089562800, 72201776446800, ...
+
+(define (harmo-denom limite)
+  (let ((h '(0L 1L)) (out '()))
+    (for (k 1 limite)
+      (setq h (+rat h (list 1L (bigint k))))
+      (push (h 1) out -1))
+    out))
+
+(harmo-denom 20)
+;-> (1L 2L 6L 12L 60L 20L 140L 280L 2520L 2520L 27720L 27720L 360360L 360360L
+;->  360360L 720720L 12252240L 4084080L 77597520L 15519504L)
+
+
+---------------------------
+Numero armonico minore di N
+---------------------------
+
+La successione dei numeri armonici è costituita dalla somma dei reciproci dei primi k numeri naturali (escluso lo zero):
+
+  H(k) = Sum[i=1,k]1/i = 1 + 1/2 + 1/3 + ... + 1/k
+
+La successione è divergente.
+Generare la successione di numeri a(n) = il più piccolo k tale che il k-esimo numero armonico sia maggiore di n.
+
+Sequenza OEIS A002387:
+Least k such that H(k) > n, where H(k) is the harmonic number Sum[i=1,k]1/i.
+  1, 2, 4, 11, 31, 83, 227, 616, 1674, 4550, 12367, 33617, 91380, 248397,
+  675214, 1835421, 4989191, 13562027, 36865412, 100210581, 272400600,
+  740461601, 2012783315, 5471312310, 14872568831, 40427833596,
+  109894245429, 298723530401, 812014744422, ...
+
+(define (harmo limite show)
+  (let ((num 0) (h 0) (out '()))
+    (for (k 1 limite)
+      (inc h (div k))
+      (when (> h num)
+        (push k out -1)
+        (if show (println "num: " num { } "k: " k { } "h: " h))
+        (++ num)))
+    out))
+
+Proviamo:
+
+(harmo 1e7 true)
+;-> num: 0 k: 1 h: 1
+;-> num: 1 k: 2 h: 1.5
+;-> num: 2 k: 4 h: 2.083333333333333
+;-> num: 3 k: 11 h: 3.019877344877345
+;-> num: 4 k: 31 h: 4.02724519543652
+;-> num: 5 k: 83 h: 5.002068272680166
+;-> num: 6 k: 227 h: 6.004366708345567
+;-> num: 7 k: 616 h: 7.001274097134162
+;-> num: 8 k: 1674 h: 8.000485571995782
+;-> num: 9 k: 4550 h: 9.000208062931115
+;-> num: 10 k: 12367 h: 10.00004300827578
+;-> num: 11 k: 33617 h: 11.00001770863642
+;-> num: 12 k: 91380 h: 12.00000305166562
+;-> num: 13 k: 248397 h: 13.00000122948093
+;-> num: 14 k: 675214 h: 14.00000136205325
+;-> num: 15 k: 1835421 h: 15.00000037826723
+;-> num: 16 k: 4989191 h: 16.00000009545252
+;-> (1 2 4 11 31 83 227 616 1674 4550 12367 33617
+;->  91380 248397 675214 1835421 4989191)
+
+(time (println (harmo 1e9)))
+;-> (1 2 4 11 31 83 227 616 1674 4550 12367 33617 91380 248397 675214
+;->  1835421 4989191 13562027 36865412 100210581 272400600 740461601)
+;-> 78863.064
+
+
+------------------------------------------------------------
+Equazione diofantea del tipo a1*x1 + a2*x2 + ... + an*xn = b
+------------------------------------------------------------
+
+Risoluzione di una equazione diofantea lineare
+
+Consideriamo l'equazione:
+  a1*x1 + a2*x2 + ... + an*xn = b
+dove:
+- a1, a2, ..., an sono interi
+- b è un intero
+- x1, x2, ..., xn devono essere interi
+
+L'obiettivo è trovare tutte le soluzioni intere.
+1) Condizione di esistenza
+Calcoliamo: g = gcd(a1,a2,...,an)
+L'equazione ha soluzione se e solo se: g divide b
+cioè: b % g = 0
+Se questa condizione non è verificata non esiste nessuna soluzione intera.
+
+2) Identita' di Bezout
+L'algoritmo di Euclide esteso permette di trovare:
+  g = a*x + b*y
+cioè una combinazione lineare dei due numeri.
+Applicando Euclide esteso piu' volte otteniamo:
+  g = a1*u1 + a2*u2 + ... + an*un
+dove (u1,u2,...,un) sono i coefficienti di Bezout.
+
+3) Costruzione di una soluzione particolare
+
+Se:
+  g divide b
+poniamo:
+  k = b / g
+
+Moltiplicando tutta l'identita' di Bezout per k:
+  b = a1*(u1*k) + a2*(u2*k) + ... + an*(un*k)
+quindi:
+  x1 = u1*k
+  x2 = u2*k
+  ...
+  xn = un*k
+e' una soluzione particolare.
+
+4) Tutte le altre soluzioni
+Se abbiamo una soluzione particolare:
+  X0 = (x1,x2,...,xn)
+tutte le soluzioni sono:
+  X = X0 + H
+dove H soddisfa l'equazione omogenea:
+  a1*x1 + a2*x2 + ... + an*xn = 0
+Quindi bisogna aggiungere tutte le combinazioni intere dei vettori della soluzione omogenea.
+
+5) Segno dei coefficienti
+I coefficienti possono essere: positivi, negativi, zero.
+Non cambia il metodo.
+Si usa:
+  g = gcd(abs(a1),abs(a2),...,abs(an))
+ma i segni vengono mantenuti nei coefficienti di Bezout.
+
+6) Coefficienti zero
+Un coefficiente nullo significa che la relativa variabile non influenza l'equazione.
+Esempio:
+  3*x + 0*y + 5*z = 7
+la variabile y è libera.
+
+(define (egcd a b)
+  (letn ((old-r a) (r b) (old-s 1) (s 0) (old-t 0) (t 1) (q 0) (tmp 0))
+    ; Euclide esteso iterativo
+    ; Manteniamo due identita':
+    ; old-r = a*old-s + b*old-t
+    ; r     = a*s     + b*t
+    ; Ad ogni passo riduciamo il resto fino ad arrivare al gcd
+    (println "egcd: a=" a " b=" b)
+    (while (!= r 0)
+      ; Quoziente della divisione euclidea
+      (setq q (/ old-r r))
+      (println "  q=" q " old-r=" old-r " r=" r)
+      ; Aggiorna i resti:
+      ; nuovo resto = vecchio resto - quoziente * resto corrente
+      (setq tmp r)
+      (setq r (- old-r (* q r)))
+      (setq old-r tmp)
+      ; Aggiorna i coefficienti del primo numero
+      (setq tmp s)
+      (setq s (- old-s (* q s)))
+      (setq old-s tmp)
+      ; Aggiorna i coefficienti del secondo numero
+      (setq tmp t)
+      (setq t (- old-t (* q t)))
+      (setq old-t tmp))
+    ; Alla fine old-r contiene il gcd
+    ; e old-s, old-t sono i coefficienti di Bezout
+    ; Se il gcd e' negativo cambiamo tutti i segni
+    (if (< old-r 0)
+        (begin
+          (setq old-r (- old-r))
+          (setq old-s (- old-s))
+          (setq old-t (- old-t))))
+    (println "  risultato: "
+             (list old-r old-s old-t))
+    (list old-r old-s old-t)))
+
+(define (diofantea coeff b)
+  (letn ((n (length coeff))
+         (g 0)
+         (bez '())
+         (oldg 0)
+         (res '())
+         (scale 0)
+         (cleans '()))
+    ; Stampa i dati iniziali del problema
+    (println "Equazione diofantea:")
+    (println coeff " = " b)
+    ; Rimuove i coefficienti nulli perche' non contribuiscono alla somma
+    ; e aggiunge un coefficiente Bezout iniziale nullo associato
+    (dolist (a coeff)
+      (if (!= a 0)
+          (begin
+            (push a cleans -1)
+            (push 0 bez -1))))
+    ; Sostituisce la lista originale con quella senza zeri
+    (setq coeff cleans)
+    ; Se tutti i coefficienti erano zero bisogna trattare il caso separato
+    (if (= (length coeff) 0)
+        (if (= b 0)
+            (begin
+              (println "Tutti i coefficienti sono zero")
+              (println "Infinite soluzioni")
+              '())
+            (begin
+              (println "Tutti i coefficienti sono zero ma b non è zero")
+              nil))
+        (begin
+          ; Il primo coefficiente inizializza la combinazione di Bezout
+          ; iniziale: g = coeff[0]*1
+          (setq g (coeff 0))
+          (setq bez '(1))
+          (println "GCD iniziale = " g)
+          ; Combina progressivamente il gcd corrente con il coefficiente successivo
+          ; Se abbiamo:
+          ; g = a*u1 + b*u2
+          ; e calcoliamo:
+          ; g2 = gcd(g,c)
+          ; otteniamo i nuovi coefficienti di Bezout
+          (for (i 1 (- (length coeff) 1))
+            (setq oldg g)
+            (setq res (egcd g (coeff i)))
+            (setq g (res 0))
+            (println "Combino " oldg " con " (coeff i))
+            (println "Nuovo gcd = " g)
+            ; Moltiplica tutti i vecchi coefficienti Bezout
+            ; per il coefficiente restituito da Euclide esteso
+            (setq bez (map (fn (x) (* x (res 1))) bez))
+            ; Aggiunge il nuovo coefficiente Bezout
+            (push (res 2) bez -1)
+            (println "Coefficienti Bezout = " bez))
+          ; Se b non è divisibile per gcd non esistono soluzioni intere
+          (if (!= (% b g) 0)
+              (begin
+                (println "Nessuna soluzione")
+                (println b " non è divisibile per " g)
+                nil)
+              (begin
+                ; Moltiplicando i coefficienti Bezout per b/g
+                ; otteniamo una soluzione particolare
+                (setq scale (/ b g))
+                (println "Fattore di scala = " scale)
+                (setq bez (map (fn (x) (* x scale)) bez))
+                (println "Soluzione particolare:" bez)
+                bez))))))
+
+Esempio:
+(diofantea '(-6 15 9) 12)
+;-> (8 4 0)
+che soddisfa -6*x + 15*y + 9*z = 12.
+
+Adesso scriviamo la funzione che genera tutte le soluzioni in forma parametrica.
+Per parametrizzare tutte le soluzioni serve anche la lista dei coefficienti 'a1..an', perché la sola soluzione particolare non contiene l'informazione sull'equazione omogenea.
+
+Partiamo da A * X0 = b, dove X0 è la soluzione particolare trovata dalla funzione 'diofantea'.
+Le altre soluzioni sono:
+
+  X = X0 + t1V1 + t2V2 + ... + t(n-1)V(n-1)
+
+dove i vettori 'Vi' generano: a1x1 + ... + anxn=0
+Per una sola equazione possiamo costruire una base scegliendo le prime 'n-1' variabili come parametri.
+
+(define (param-diofantea coeff sol)
+  (letn ((n (length coeff))
+         (base '())
+         (v '())
+         (g 0))
+    ; costruisce n-1 vettori della soluzione omogenea
+    ; ogni vettore lascia libera una variabile e calcola l'ultima
+    (setq g (coeff (- n 1)))
+    (for (i 0 (- n 2))
+      (setq v (dup 0 n))
+      ; parametro i-esimo = 1
+      (setf (v i) 1)
+      ; calcolo dell'ultima componente:
+      ; a1*x1+...+an*xn=0
+      ; quindi xn=-(somma precedente)/an
+      (set 's 0)
+      (for (j 0 (- n 2))
+        (setq s (+ s (* (coeff j) (v j)))))
+      (setf (v (- n 1)) (/ (- s) g))
+      (push v base -1))
+    (println "Soluzione particolare:")
+    (println sol)
+    (println "Base soluzione omogenea:")
+    (dolist (b base)
+      (println b))
+    (list sol base)))
+
+Esempio:
+(setq s (diofantea '(1 1 1 1 1) 5))
+;-> (0 0 0 0 5)
+
+(param-diofantea '(1 1 1 1 1) s)
+;-> ...
+;-> Base soluzione omogenea:
+;-> (1 0 0 0 -1)
+;-> (0 1 0 0 -1)
+;-> (0 0 1 0 -1)
+;-> (0 0 0 1 -1)
+;-> ((0 0 0 0 5) ((1 0 0 0 -1) (0 1 0 0 -1) (0 0 1 0 -1) (0 0 0 1 -1)))
+
+Quindi la soluzione generale è:
+  (0 0 0 0 5)
+  +t1*(1 0 0 0 -1)
+  +t2*(0 1 0 0 -1)
+  +t3*(0 0 1 0 -1)
+  +t4*(0 0 0 1 -1)
+  x1=t1,  x2=t2,  x3=t3,  x4=t4,  x5=5-t1-t2-t3-t4
+che è esattamente: x1 + x2 + x3 + x4 + x5 = 5 con tutti i parametri interi.
+
+Vedi anche "Equazione diofantea lineare" su "Note libere 5".
+
+
+-----------------------
+Contare senza una cifra
+-----------------------
+
+Data una cifra 'x' (0..9) scrivere una funzione che genera la sequenza dei numeri naturali che non sono multipli di 'x' e non contengono 'x' come cifra.
+Esempio
+  x = 3
+  Numeri: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 ...
+  Dobbiamo eliminare i multipli di 3 e i numeri che contengono 3.
+  Sequenza: 1 2 4 5 7 8 10 11 14 16 17 19 20 22 25 ...
+
+(define (conta x limite)
+  (let ((out '()) (xs (string x)))
+    (for (num 1 limite)
+      (if-not (or (zero? (% num 3)) (find xs (string num)))
+        (push num out -1)))
+    out))
+
+Proviamo:
+(conta 3 25)
+;-> (1 2 4 5 7 8 10 11 14 16 17 19 20 22 25)
+
+(map conta (sequence 0 9) (dup 25 10))
+;-> ((1 2 4 5 7 8 11 13 14 16 17 19 22 23 25)
+;->  (2 4 5 7 8 20 22 23 25)
+;->  (1 4 5 7 8 10 11 13 14 16 17 19)
+;->  (1 2 4 5 7 8 10 11 14 16 17 19 20 22 25)
+;->  (1 2 5 7 8 10 11 13 16 17 19 20 22 23 25)
+;->  (1 2 4 7 8 10 11 13 14 16 17 19 20 22 23)
+;->  (1 2 4 5 7 8 10 11 13 14 17 19 20 22 23 25)
+;->  (1 2 4 5 8 10 11 13 14 16 19 20 22 23 25)
+;->  (1 2 4 5 7 10 11 13 14 16 17 19 20 22 23 25)
+;->  (1 2 4 5 7 8 10 11 13 14 16 17 20 22 23 25))
 
 ============================================================================
 

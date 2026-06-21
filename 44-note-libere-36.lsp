@@ -2716,8 +2716,8 @@ Scriviamo una versione piu' efficiente che evita il test di parita' dentro il ci
          ; y deve avere la stessa parita' di N:
          ; y == N (mod 2)
          ; quindi:
-         ; - se N e' pari -> y parte da 0
-         ; - se N e' dispari -> y parte da 1
+         ; - se N è pari -> y parte da 0
+         ; - se N è dispari -> y parte da 1
          y0 (% N 2)
         )
     ; ciclo sui soli valori validi di y:
@@ -2725,11 +2725,11 @@ Scriviamo una versione piu' efficiente che evita il test di parita' dentro il ci
     (for (y y0 ymax 2)
       ; calcolo di x:
       ; x = (N - 3y) / 2
-      ; qui e' garantito intero per costruzione (parita' gia' rispettata)
+      ; qui è garantito intero per costruzione (parita' gia' rispettata)
       (let (x (/ (- N (* 3 y)) 2))
         ; non serve controllare la parita' ne' x >= 0:
-        ; - la parita' e' gia' soddisfatta
-        ; - x >= 0 e' garantito da y <= ymax
+        ; - la parita' è gia' soddisfatta
+        ; - x >= 0 è garantito da y <= ymax
         ; aggiungiamo la soluzione
         (push (list x y) out -1)
       )
@@ -3382,7 +3382,7 @@ Le soluzioni "banali" esistono sempre:
   (+-R, +-1) e (+-1, +-R)
 
 Esistono ALTRE soluzioni se e solo se (R^2 + 1) ha almeno due fattori primi distinti p == 1 (mod 4).
-Se (R^2 + 1) e' primo, oppure ha al piu' un fattore p == 1 (mod 4), allora NON ci sono altre soluzioni.
+Se (R^2 + 1) è primo, oppure ha al piu' un fattore p == 1 (mod 4), allora NON ci sono altre soluzioni.
 
 ; Funzione che conta i fattori primi == 1 (mod 4)
 (define (conta-primi-1mod4 n)
@@ -3541,7 +3541,7 @@ Per ognuna delle 8 combinazioni (s1,s2,s3) in {-1,+1}^3:
 In totale si ottengono al piu' 16 soluzioni candidate (8 sistemi x 2 radici), che si riducono alle classiche 8 soluzioni di Apollonio dopo aver scartato i duplicati e le soluzioni con r < 0.
 
 ; Problema di Apollonio
-; Ogni cerchio e' rappresentato come lista (x y r)
+; Ogni cerchio è rappresentato come lista (x y r)
 ; Restituisce lista di soluzioni ((x y r) ...)
 ; Per ogni soluzione (xc yc rc) vale:
 ;   dist((xc,yc), (xi,yi)) = rc + ri  (tangenza esterna)
@@ -5075,10 +5075,10 @@ La stringa puo' iniziare indifferentemente con 0 o 1
 Algoritmo greedy
 ----------------
 Una volta scelto il bit corrente:
-se il bit corrente e' 0:
+se il bit corrente è 0:
 - usare prima una coppia 00 se disponibile
 - altrimenti usare una coppia 01
-se il bit corrente e' 1:
+se il bit corrente è 1:
 - usare prima una coppia 11 se disponibile
 - altrimenti usare una coppia 10
 
@@ -5532,7 +5532,7 @@ Con p ~= 0.25 e N = 10^7 si ottiene:
 
 quindi il risultato 0.2514447 è già molto accurato.
 
-Esiste anche un metodo per vedere se il solitario e' risolvibile senza effettuare tutto il processo.
+Esiste anche un metodo per vedere se il solitario è risolvibile senza effettuare tutto il processo.
 
 Il solitario è equivalente alla 'copertura totale di un grafo funzionale mediante 4 ingressi iniziali' che è un problema classico di teoria dei grafi e permutazioni.
 Formalmente il gioco è una permutazione su 36 posizioni con:
@@ -6340,8 +6340,8 @@ Per evitare di frenare dobbiamo avere:
 
   D + S[i] >= p(i + 1)
 dove:
-  D e' la nostra distanza dalla macchina immediatamente davanti
-  S[i] e' la distanza dell'auto considerata rispetto alla macchina davanti a noi
+  D è la nostra distanza dalla macchina immediatamente davanti
+  S[i] è la distanza dell'auto considerata rispetto alla macchina davanti a noi
 
 Quindi:
 
@@ -6375,13 +6375,13 @@ Calcoliamo:
 Quindi:
   M = -2
 Questo significa che siamo gia' troppo lontani e possiamo avvicinarci di 2 metri.
-La distanza finale minima e':
+La distanza finale minima è:
   D = 10
 infatti:
   D = max(10 - 12, 20 - 27, 30 - 35, 40 - 50) = -2
-ma la distanza reale dalla prima auto e':
+ma la distanza reale dalla prima auto è:
   12 + (-2) = 10
-quindi il valore finale corretto della distanza e' 10.
+quindi il valore finale corretto della distanza è 10.
 
 Esempio 2
 ---------
@@ -6609,7 +6609,7 @@ In questi casi spesso è vicino all'ottimo.
 
 ; ------------------------------------------------------------
 ; Distanza Manhattan tra due celle della griglia
-; La distanza e':
+; La distanza è:
 ; |x1 - x2| + |y1 - y2|
 ; ------------------------------------------------------------
 (define (manha a b)
@@ -6712,7 +6712,7 @@ Percorsi minimi tra due punti (manhattan)
 Scrivere una funzione che prende due punti P1 e P2 e restituisce una lista con tutti i percorsi minimi possibili da P1 a P2 (lista di punti per ogni percorso).
 Le connessioni possibili sono quelle della distanza di manhattan (solo movimenti orizzontali e verticali).
 
-Dati i punti P1 = (x1 y1) e P2 = (x2 y2), un percorso e' una lista di punti consecutivi che collega P1 a P2 usando solo mosse:
+Dati i punti P1 = (x1 y1) e P2 = (x2 y2), un percorso è una lista di punti consecutivi che collega P1 a P2 usando solo mosse:
 - destra  (x+1 y)
 - sinistra (x-1 y)
 - alto    (x y+1)
@@ -6725,7 +6725,7 @@ Se:
   dy = |y2 - y1|
 
 allora ogni percorso minimo contiene dx mosse orizzontali e dy mosse verticali in ordine arbitrario.
-Il numero totale dei percorsi e':
+Il numero totale dei percorsi è:
 
   binom((dx + dy) dx)
 
@@ -6741,7 +6741,7 @@ I percorsi minimi sono:
   3) U R R
 
 ; Funzione che genera tutti i percorsi minimi tra p1 e p2
-; Ogni percorso e' una lista di punti
+; Ogni percorso è una lista di punti
 (define (percorsi p1 p2)
   (local (x1 y1 x2 y2 sx sy)
     (setq x1 (p1 0))
@@ -8081,7 +8081,7 @@ La linea "(= (caar e) lambda)" è stata sostituita con: "(= (caar e) 'lambda.)".
 Infatti nel meta-circolare di John McCarthy (lambda (x) ...) non è una lambda di newLISP.
 È soltanto una LISTA DI DATI che rappresenta una funzione Lisp.
 Quindi (caar e) deve restituire il simbolo lambda e non una vera closure/function di newLISP.
-Ma 'lambda e' riservata in newlisp, quindi ridefiniamo il simbolo 'lambda' come 'lambda.'
+Ma 'lambda è riservata in newlisp, quindi ridefiniamo il simbolo 'lambda' come 'lambda.'
 In questo modo le espressioni da valutare diventano:
   '((lambda. (x) (cons x '(b))) '(a))
 invece di:
@@ -8566,9 +8566,9 @@ Esempio
 
 Specifiche:
 1) Tutti gli elementi sono centrati e inseriti nella pagina uno di seguito all'altro nell'ordine in cui si trovano nella lista.
-2) la matrice e' sempre bidimensionale (MxN) e i suoi elementi vanno inseriti in tabella cosi come sono.
+2) la matrice è sempre bidimensionale (MxN) e i suoi elementi vanno inseriti in tabella cosi come sono.
 3) se un testo contiene \n, allora inseriamo tutte le righe in una 'casella di testo'.
-La 'casella di testo' e' centrata nella pagina, ma le righe sono tutte allineate a sinistra nella 'casella di testo'.
+La 'casella di testo' è centrata nella pagina, ma le righe sono tutte allineate a sinistra nella 'casella di testo'.
 In pratica:
 - la 'casella' viene centrata nella pagina
 - il testo interno resta allineato a sinistra
@@ -9206,8 +9206,8 @@ Funzione      Complessita
   dove: K = numero di somme distinte,  S = somma totale degli elementi
 
 Conclusioni
-- calc-dp e' migliore quando S e' piccolo
-- calc-fast e' migliore quando ci sono molte collisioni tra somme
+- calc-dp è migliore quando S è piccolo
+- calc-fast è migliore quando ci sono molte collisioni tra somme
 - entrambi peggiorano fino a O(N*2^N) (calc) nel caso peggiore
 
 (= (calc (sequence 1 20))

@@ -3556,6 +3556,10 @@ NOTE LIBERE 37
   Catene non vuote
   Barcode EAN-8
   Norma di Frobenius
+  Numeri di Wostenholme
+  Numero armonico minore di N
+  Equazione diofantea del tipo a1*x1 + a2*x2 + ... + an*xn = b
+  Contare senza una cifra
 
 PROBLEMI SUI DADI
 =================

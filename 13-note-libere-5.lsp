@@ -8232,6 +8232,8 @@ y = 11 – 2k  (con k = 0 .. ∞)
 x = 11 + 2k  (con k = 0 .. ∞)
 y = -22 – 5k (con k = 0 .. ∞)
 
+Vedi anche "Equazione diofantea del tipo a1*x1 + a2*x2 + ... + an*xn = b" su "Note libere 37".
+
 
 ---------
 Cache LRU
