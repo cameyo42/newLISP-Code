@@ -3560,6 +3560,9 @@ NOTE LIBERE 37
   Numero armonico minore di N
   Equazione diofantea del tipo a1*x1 + a2*x2 + ... + an*xn = b
   Contare senza una cifra
+  Problema della moneta (Numeri di Frobenius)
+  Moltiplicazione inversa nelle matrici
+  Determinante esatto di una matrice di interi
 
 PROBLEMI SUI DADI
 =================

@@ -3449,9 +3449,9 @@ Nel caso di matrici con valori reali, la matrice trasposta coniugata di M è ugu
 ;-> 6.557438524302
 
 
----------------------
-Numeri di Wostenholme
----------------------
+---------------------------------------
+Numeri di Wostenholme (Numeri armonici)
+---------------------------------------
 
 I numeri di Wostenholme sono i numeratori dei numeri armonici di ordine 2:
 
@@ -3556,6 +3556,72 @@ a(n) = denominator of harmonic number H(n) = Sum_{i=1..n} 1/i.
 ;-> (1L 2L 6L 12L 60L 20L 140L 280L 2520L 2520L 27720L 27720L 360360L 360360L
 ;->  360360L 720720L 12252240L 4084080L 77597520L 15519504L)
 
+Adesso vediamo i numeri armonici alternati:
+
+  HA(k) = Sum[i=1,k](-1)^(i+1)*(1/i) = 1 - 1/2 + 1/3 - ... +- 1/k
+
+La serie dei numeri armonici è divergente.
+La serie dei numeri armonici alternati è convergente:
+
+  HA(k->inf) ~= ln(2) = 0.6931471805599453...
+
+(define (harmo-alt limite)
+  (let ((num 0) (h 0))
+    (for (k 1 limite)
+      (if (odd? k)
+        (inc h (div k))
+        (dec h (div k)))
+        (if show (println k { } h)))
+    h))
+
+(harmo-alt 1e5)
+;-> 0.6931421805849816
+(harmo-alt 1e7)
+;-> 0.6931471305601064
+(time (println (harmo-alt 1e9)))
+;-> 0.6931471800606472
+;-> 84751.41
+
+Sequenza OEIS A058313:
+Numerator of the n-th alternating harmonic number, Sum_{k=1..n} (-1)^(k+1)/k.
+  1, 1, 5, 7, 47, 37, 319, 533, 1879, 1627, 20417, 18107, 263111, 237371,
+  52279, 95549, 1768477, 1632341, 33464927, 155685007, 166770367, 156188887,
+  3825136961, 3602044091, 19081066231, 18051406831, 57128792093, 7751493599,
+  236266661971, ...
+
+(define (harmoalt-numer limite)
+  (let ((h '(0L 1L)) (out '()))
+    (for (k 1 limite)
+      (if (odd? k)
+        (setq h (+rat h (list 1L (bigint k))))
+        (setq h (-rat h (list 1L (bigint k)))))
+      (push (h 0) out -1))
+    out))
+
+(harmoalt-numer 20)
+;-> (1L 1L 5L 7L 47L 37L 319L 533L 1879L 1627L 20417L 18107L 263111L 237371L
+;->  52279L 95549L 1768477L 1632341L 33464927L 155685007L)
+
+Sequenza OEIS A058312:
+Denominator of the n-th alternating harmonic number, Sum_{k=1..n} (-1)^(k+1)/k.
+  1, 2, 6, 12, 60, 60, 420, 840, 2520, 2520, 27720, 27720, 360360, 360360,
+  72072, 144144, 2450448, 2450448, 46558512, 232792560, 232792560,
+  232792560, 5354228880, 5354228880, 26771144400, 26771144400, 80313433200,
+  11473347600, ...
+
+(define (harmoalt-denom limite)
+  (let ((h '(0L 1L)) (out '()))
+    (for (k 1 limite)
+      (if (odd? k)
+        (setq h (+rat h (list 1L (bigint k))))
+        (setq h (-rat h (list 1L (bigint k)))))
+      (push (h 1) out -1))
+    out))
+
+(harmoalt-denom 20)
+;-> (1L 2L 6L 12L 60L 60L 420L 840L 2520L 2520L 27720L 27720L 360360L 360360L
+;->  72072L 144144L 2450448L 2450448L 46558512L 232792560L)
+
 
 ---------------------------
 Numero armonico minore di N
@@ -3656,7 +3722,7 @@ quindi:
   x2 = u2*k
   ...
   xn = un*k
-e' una soluzione particolare.
+è una soluzione particolare.
 
 4) Tutte le altre soluzioni
 Se abbiamo una soluzione particolare:
@@ -3707,7 +3773,7 @@ la variabile y è libera.
       (setq old-t tmp))
     ; Alla fine old-r contiene il gcd
     ; e old-s, old-t sono i coefficienti di Bezout
-    ; Se il gcd e' negativo cambiamo tutti i segni
+    ; Se il gcd è negativo cambiamo tutti i segni
     (if (< old-r 0)
         (begin
           (setq old-r (- old-r))
@@ -3728,7 +3794,7 @@ la variabile y è libera.
     ; Stampa i dati iniziali del problema
     (println "Equazione diofantea:")
     (println coeff " = " b)
-    ; Rimuove i coefficienti nulli perche' non contribuiscono alla somma
+    ; Rimuove i coefficienti nulli perchè non contribuiscono alla somma
     ; e aggiunge un coefficiente Bezout iniziale nullo associato
     (dolist (a coeff)
       (if (!= a 0)
@@ -3887,6 +3953,276 @@ Proviamo:
 ;->  (1 2 4 5 8 10 11 13 14 16 19 20 22 23 25)
 ;->  (1 2 4 5 7 10 11 13 14 16 17 19 20 22 23 25)
 ;->  (1 2 4 5 7 8 10 11 13 14 16 17 20 22 23 25))
+
+
+-------------------------------------------
+Problema della moneta (Numeri di Frobenius)
+-------------------------------------------
+
+Siano n>=2 interi 0 < a1 < ... < an con MCD(a1,a2,...,an)=1.
+I valori a(i) rappresentano i tagli di n monete diverse, dove questi tagli hanno il massimo comune divisore pari a 1.
+Le somme di denaro che possono essere rappresentate utilizzando le monete date sono quindi definite da:
+
+  N = Sum[i=1,N]a(i)*x(i),
+
+dove x(i() sono interi non negativi che indicano il numero di ciascuna moneta utilizzata.
+Se a1 = 1, è ovviamente possibile rappresentare qualsiasi quantità di denaro N.
+Tuttavia, nel caso generale, solo alcune quantità N possono essere rappresentate.
+Ad esempio, se le monete consentite sono (2, 5, 10), è impossibile rappresentare N=1 e 3, sebbene tutte le altre quantità possano essere rappresentate.
+Determinare la funzione g(a1,a2,...,an) che fornisce il più grande N=g(a1,a2,...,an) per cui non esiste soluzione è detto problema della moneta, o talvolta problema del resto. Il più grande N di questo tipo per un dato problema è detto numero di Frobenius g(a1,a2,...).
+
+Solo il caso N = 2 ha una formula chiusa per determinare il numero di Frobenius:
+
+ g(a1,a2) = (a1 - 1)*(a2 - 1) - 1 = a1*a2 - (a1 + a2)
+
+Il numero totale di tali importi non rappresentabili è dato da:
+
+  (1/2)*(N+1) = (1/2)*(a1 - 1)*(a2 - 1)
+
+Vediamo tutti i casi con (1 <= a1,a2 <= limite).
+
+(define (print-matrix-int matrix)
+"Print a matrix of integer"
+  (let ( (row (length matrix))
+         (col (length (first matrix)))
+         (len-cols '()) (fmt "") )
+    ; calcola la larghezza di ogni colonna
+    ; (in base all'intero più grande/lungo di ogni colonna)
+    (setq len-cols (map (fn(col) (apply max (map length (flat col))))
+                           (transpose matrix)))
+    ; ciclo per ogni numero intero della matrice...
+    (for (i 0 (- row 1))
+      (for (j 0 (- col 1))
+        ; formattazione dell'intero corrente --> (larghezza-colonna + 2)
+        ; (uno spazio ed un eventuale segno -)
+        (setq fmt (string "%" (+ (len-cols j) 2) "d"))
+        ; stampa dell'intero corrente
+        (print (format fmt (matrix i j))))
+      (println))))
+
+(define (frob2 limite)
+  (setq g (array (+ limite 1) (+ limite 1) '(0)))
+  (for (a1 1 limite)
+    (for (a2 1 limite)
+      (cond ((or (= a1 1) (= a2 1)) ; caso a1==1 o a2==1
+              (setf (g a1 a2) 999)
+              (setf (g a2 a1) 999))
+            ((!= (gcd a1 a2) 1)     ; caso gcd != 1
+              (setf (g a1 a2) 0)) 
+            (true                   ; caso generale
+              (setq (g a1 a2) (- (* a1 a2) (+ a1 a2)))))))
+   (print-matrix-int (array-list g)))
+
+(frob2 10)
+;->  0    0    0    0    0    0    0    0    0    0    0
+;->  0  999  999  999  999  999  999  999  999  999  999
+;->  0  999    0    1    0    3    0    5    0    7    0
+;->  0  999    1    0    5    7    0   11   13    0   17
+;->  0  999    0    5    0   11    0   17    0   23    0
+;->  0  999    3    7   11    0   19   23   27   31    0
+;->  0  999    0    0    0   19    0   29    0    0    0
+;->  0  999    5   11   17   23   29    0   41   47   53
+;->  0  999    0   13    0   27    0   41    0   55    0
+;->  0  999    7    0   23   31    0   47   55    0   71
+;->  0  999    0   17    0    0    0   53    0   71    0
+
+Per N > 2 vedi " Computing the Continuous Discretely" di Beck e Robins, 2006:
+https://matthbeck.github.io/ccd.html
+
+
+-------------------------------------
+Moltiplicazione inversa nelle matrici
+-------------------------------------
+
+Sia A * B = C, dove:
+  A è una matrice (m*n)
+  B è una matrice (n*p)
+  C è una matrice (m*p)
+
+Caso 1: dati A e C, trovare B
+-----------------------------
+Se A è quadrata (n==m) e invertibile:
+
+  A(-1)*A*B = A(-1)*C  -->  B = A(-1)*C
+
+Se (A) non è invertibile oppure non è quadrata, la soluzione:
+- può non esistere;
+- può non essere unica;
+- può essere ottenuta con la pseudoinversa di Moore-Penrose:
+
+Caso 2: dati B e C, trovare A
+-----------------------------
+Se B è quadrata (n==p) e invertibile:
+
+  A*B*B(-1) = C*B(-1)  -->  A = C*B(-1)
+
+Caso generale
+-------------
+Se nessuna delle due matrici è invertibile, il problema diventa un sistema lineare.
+Per esempio, se A è nota, allora gli elementi di B sono le incognite e le equazioni derivano da: A*B=C.
+Si ottiene un sistema lineare con (n * p) incognite.
+
+Condizione di unicità (invertibilità di A e B)
+----------------------------------------------
+Per ricavare B occorre che A abbia rango massimo sulle colonne.
+Nel caso di una matrice quadrata: det(A) != 0
+Per ricavare A occorre che B abbia rango massimo sulle righe.
+Nel caso di una matrice quadrata: det(B) != 0
+Negli altri casi si deve risolvere un sistema lineare (eventualmente usando una pseudoinversa), e la soluzione può essere nulla, unica o infinita.
+
+Proviamo:
+
+(setq A '((1 2 3) (4 5 6) (7 8 8)))
+(det A)
+;-> 3
+(setq B '((1 4 5) (4 2 3) (8 2 3)))
+(det B)
+;-> 8
+(setq C (multiply A B))
+;-> ((33 14 20) (72 38 53) (103 60 83))
+(multiply (invert A) C)
+;-> ((0.9999999999999858 3.999999999999986 4.999999999999986)
+;->  (4.000000000000028  2.000000000000028 3.000000000000028)
+;->  (7.999999999999986  1.999999999999986 2.999999999999986))
+
+(multiply C (invert B))
+;-> ((1.000000000000004 1.999999999999986 3.000000000000007)
+;->  (4 5 6)
+;->  (7 8 8))
+
+
+--------------------------------------------
+Determinante esatto di una matrice di interi
+--------------------------------------------
+
+Algoritmo di Bareiss (Fraction-Free Gaussian Elimination)
+---------------------------------------------------------
+L'algoritmo di Bareiss permette di calcolare il determinante di una matrice di interi usando soltanto operazioni intere.
+L'idea è simile all'eliminazione di Gauss, ma evita la comparsa di frazioni durante i calcoli.
+Data una matrice quadrata:
+  A = [a(i,j)]
+al passo k (k = 0, 1, ..., n-2) si aggiorna ogni elemento del sottomatrice in basso a destra mediante:
+  a(i,j) = (a(k,k)*a(i,j) - a(i,k)*a(k,j))/d
+dove:
+  d = 1 al primo passo
+  d = pivot del passo precedente negli altri casi
+ovvero:
+  d = a(k-1,k-1)
+
+La proprietà fondamentale è che la divisione è sempre esatta quando la matrice iniziale contiene interi.
+
+Matrice:
+  | 2  3  1 |
+  | 4  1  5 |
+  | 6  2  3 |
+Passo k = 0
+  pivot = 2
+  d = 1
+Calcolo:
+  a(1,1) = (2*1 - 4*3)/1 = -10
+  a(1,2) = (2*5 - 4*1)/1 = 6
+  a(2,1) = (2*2 - 6*3)/1 = -14
+  a(2,2) = (2*3 - 6*1)/1 = 0
+Matrice:
+  | 2   3    1 |
+  | 4 -10    6 |
+  | 6 -14    0 |
+Passo k = 1
+  pivot = -10
+  d = 2
+a(2,2) = (-10*0 - (-14)*6)/2 = 42
+Matrice finale:
+  | 2   3    1 |
+  | 4 -10    6 |
+  | 6 -14   42 |
+Determinante = 42
+
+La complessità è come l'eliminazione di Gauss: O(n^3)
+
+Questo algoritmo ha i seguenti vantaggi:
+- nessuna perdita di precisione
+- molto efficiente con bigint
+- evita la crescita di numeratori e denominatori tipica dell'aritmetica razionale
+
+Pivoting
+--------
+L'algoritmo richiede che tutti i pivot siano diversi da zero.
+Quindi occorre aggiungere il pivoting: se il pivot è zero si scambia la riga corrente con una riga sottostante avente pivot non nullo e si cambia il segno del determinante.
+Questo permette di trattare qualsiasi matrice non singolare.
+
+La seguente funzione:
+- usa l'algoritmo di Bareiss;
+- scambia righe quando il pivot vale 0;
+- tiene conto dei cambi di segno del determinante;
+- lavora con interi/bigint;
+- restituisce il determinante come big-integer
+- restituisce 0 se la matrice è singolare.
+
+; Funzione che calcola il determinante di una matrice di interi
+; con il metodo di Bareiss (usa solo operazioni intere)
+(define (det-bareiss matrix)
+  (local (n m d pivot segno riga i j k tmp trovato)
+    (setq n (length matrix))
+    ; converte i valori della matrice in big integer
+    (setq m (map (fn (row) (map bigint row)) matrix))
+    (cond
+      ((= n 0) 1L)
+      ((= n 1) (bigint ((m 0) 0)))
+      (true
+        (setq d 1L)
+        (setq segno 1L)
+        (for (k 0 (- n 2))
+          ; cerca un pivot non nullo
+          (setq trovato nil)
+          (setq riga k)
+          (while (and (< riga n) (not trovato))
+            (if (!= ((m riga) k) 0)
+                (setq trovato true)
+                (++ riga)))
+          ; matrice singolare
+          (if (not trovato)
+              (begin
+                (setq segno 0L)
+                (setq k n)))
+          ; eventuale scambio di righe
+          (if (and (!= segno 0L) (!= riga k))
+              (begin
+                (setq tmp (m k))
+                (setf (m k) (m riga))
+                (setf (m riga) tmp)
+                (setq segno (- segno))))
+          (if (!= segno 0L)
+              (begin
+                (setq pivot ((m k) k))
+                (for (i (+ k 1) (- n 1))
+                  (for (j (+ k 1) (- n 1))
+                    (setf ((m i) j)
+                          (/ (- (* pivot ((m i) j))
+                                (* ((m i) k) ((m k) j)))
+                             d))))
+                (setq d pivot))))
+        (if (= segno 0L)
+            0L
+            (* segno ((m (- n 1)) (- n 1))))))))
+
+Proviamo:
+
+(setq K '((0 0 1) (0 2 3) (1 4 5)))
+(det K)
+;-> -2
+(det-bareiss K)
+;-> -2L
+
+(setq Q '((1 2 3) (4 5 6) (7 8 8)))
+(det Q)
+(det-bareiss Q)
+;-> 3L
+
+(setq T (explode (map bigint (rand 4 100)) 10))
+(det T)
+;-> 6692.999999999996
+(det-bareiss T)
+;-> 6693L
 
 ============================================================================
 
