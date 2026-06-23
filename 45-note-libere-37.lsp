@@ -4224,5 +4224,325 @@ Proviamo:
 (det-bareiss T)
 ;-> 6693L
 
+
+---------------------------------------------------
+Primi della sommatoria dei numeri naturali composti
+---------------------------------------------------
+
+Determinare la sequenza dei numeri primi che si ottengono sommando ripetutamente i numeri naturali composti.
+
+Esempi:
+1 + 4 = 5 --> numero primo
+1 + 4 + 6 = 11 --> numero primo
+1 + 4 + 6 + 8 = 19 --> numero primo
+1 + 4 + 6 + 8 + 9 = 28 --> numero composto
+Sequenza di primi (fino a k=9): 5 11 19
+
+Sequenza OEIS A128927:
+Primes which are the sum of the first k nonprimes for some k >= 2.
+  5, 11, 19, 79, 113, 251, 401, 709, 947, 1579, 1847, 2063, 5077, 7603,
+  9049, 10457, 11621, 17509, 18353, 19433, 21911, 22853, 24551, 27073,
+  30809, 33923, 34213, 37781, 39313, 39623, 45757, 46091, 47779, 51241,
+  53381, 56299, 58537, 67927, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (seq k)
+  (let ((out '()) (somma 0))
+    (for (i 1 k)
+      (unless (prime? i)
+        (++ somma i)
+        (if (prime? somma) (push somma out -1))))
+    out))
+
+(seq 500)
+;-> (5 11 19 79 113 251 401 709 947 1579 1847 2063 5077 7603
+;->  9049 10457 11621 17509 18353 19433 21911 22853 24551 27073
+;->  30809 33923 34213 37781 39313 39623 45757 46091 47779 51241
+;->  53381 56299 58537 67927 70381 80621 96827 99259 101723)
+
+
+---------------------------------------
+Il gioco dell'inversione (Reverse game)
+---------------------------------------
+
+Abbiamo una matrice NxN riempita con 0 e 1.
+L'obiettivo è rendere ogni cella uguale (tutti 0 o tutti 1).
+Possiamo eseguire le seguenti operazioni sulla matrice:
+1) Selezionare una cella.
+2) Tutte le celle nella stessa riga e nella stessa colonna (tranne la cella stessa) vengono trasformate nel loro opposto: da 0 a 1 e da 1 a 0.
+Il gioco termina quando i valori di tutte le celle della matrice sono uguali (tutti 0 o tutti 1).
+
+(define (print-grid grid ch0 ch1 coord)
+"Print a matrix with only digits (0..9)"
+  (local (row col)
+    (setq row (length grid))
+    (setq col (length (first grid)))
+    ; indici di colonna della griglia
+    (if coord
+        (println "  " (join (map (fn(x) (format "%2d" x)) (sequence 0 (- col 1))))))
+    (for (i 0 (- row 1))
+      ; indice di riga della griglia
+      (if coord (print (format "%2d" i)))
+      ; stampa della griglia
+      (for (j 0 (- col 1))
+        (if (and (!= ch0 "") (!= ch1 ""))
+            (begin
+              (cond ((= (grid i j) 0) (print ch0))
+                    ((= (grid i j) 1) (print ch1))
+                    (true
+                      (print (format "%2d" (grid i j))))))
+            ;else
+            (print (format "%2d" (grid i j)))))
+      (println))))
+
+; Funzione che inverte 0 in 1 e 1 in 0
+(define (flip x) (- 1 x))
+
+; Funzione che inverte i valori di una riga e di una colonna
+(define (flip-row-col row col)
+  ; flip dei valori della colonna
+  (for (r 0 (- N 1))
+    (setf (matrix r col) (flip (matrix r col))))
+  ; flip dei valori della riga
+  (for (c 0 (- N 1))
+    (setf (matrix row c) (flip (matrix row c)))))
+
+; Funzione di input per numeri in un intervallo
+(define (input-number str min-num max-num)
+  (print str)
+  (let (input (int (read-line)))
+    (while (or (< input min-num) (> input max-num))
+      (print str)
+      (setq input (int (read-line))))
+    input))
+
+; Funzione che verifica se una matrice è formata da tutti 0 o da tutti 1
+(define (end-game? matrix)
+  (or (for-all (fn(x) (= x 0)) (flat matrix))
+      (for-all (fn(x) (= x 1)) (flat matrix))))
+
+; Funzione che gestisce il gioco (interattivo)
+(define (start-game N level show-sol)
+  (local (sol mosse matrix r c)
+    ; Lista delle mosse di soluzione del gioco
+    (setq sol '())
+    ; Mosse effettuate
+    (setq mosse 0)
+    ; creazione matrice casuale
+    (setq matrix (explode (dup 0 (* N N)) N))
+    ; Partiamo da una matrice con tutti i valori a 0 e
+    ; applichiamo 'level' volte la funzione 'flip-row-col' con celle casuali.
+    ; In questo modo la matrice risultante è sicuramente risolvibile e
+    ; creiamo anche una lista di mosse che risolvono la matrice.
+    (for (i 1 level)
+      (setq r (rand N))
+      (setq c (rand N))
+      (push (list r c) sol)
+      (flip-row-col r c))
+    (println "--- REVERSE GAME ---")
+    (println "Scacchiera: Matrice casuale con 0 e 1")
+    (println "Obbiettivo: ottenere una matrice con tutti 0 o tutti 1")
+    (println "Azione: Selezionando una cella (riga e colonna) tutte le celle ")
+    (println "        nella stessa riga e nella stessa colonna (tranne la cella stessa)")
+    (println "        vengono trasformate nel loro opposto: da 0 a 1 e da 1 a 0.")
+    ; Mostra le mosse che risolvono il gioco
+    (if show-sol (println "Soluzione: " sol))
+    ; Ciclo del gioco
+    ; Finchè la matrice corrente non contiene tutti 0 o tutti 1...
+    (until (end-game? matrix)
+      ; Stampa situazione corrente
+      (println "\nMosse: " mosse)
+      (print-grid matrix "" "" true)
+      ; Input utente (riga e colonna)
+      (setq r (input-number "Riga: " 0 (- N 1)))
+      (setq c (input-number "Colonna: " 0 (- N 1)))
+      (++ mosse)
+      ; Applica la mossa corrente
+      (flip-row-col r c))
+    ; Matrice risolta
+    (println "\nMosse: " mosse)
+    (print-grid matrix "" "" true)
+    (println "\nBRAVO!!!") '>))
+
+Proviamo:
+
+(start-game 3 3 true)
+;-> --- REVERSE GAME ---
+;-> Scacchiera: Matrice casuale con 0 e 1
+;-> Obbiettivo: ottenere una matrice con tutti 0 o tutti 1
+;-> Azione: Selezionando una cella (riga e colonna) tutte le celle
+;->         nella stessa riga e nella stessa colonna (tranne la cella stessa)
+;->         vengono trasformate nel loro opposto: da 0 a 1 e da 1 a 0.
+;-> Soluzione: ((2 0) (1 2) (2 1))
+;-> 
+;-> Mosse: 0          Mosse: 1          Mosse: 2          Mosse: 3
+;->    0 1 2             0 1 2             0 1 2             0 1 2
+;->  0 1 1 1           0 0 1 1           0 0 1 0           0 0 0 0
+;->  1 0 0 0           1 1 0 0           1 0 1 0           1 0 0 0
+;->  2 1 1 1           2 1 0 0           2 1 0 1           2 0 0 0
+;-> Riga: 2           Riga: 1           Riga: 2
+;-> Colonna: 0        Colonna: 2        Colonna: 1
+;-> 
+;-> BRAVO!!!
+
+Se si sceglie la stessa cella due volte di seguito, la matrice non cambia.
+
+Adesso scriviamo un programma che risolve il problema utilizzando un algoritmo BFS (Best-First-Search).
+Il problema consiste nel trovare il numero minimo di mosse per trasformare una matrice binaria in una matrice con tutti gli elementi uguali.
+Una mossa consiste nello scegliere una cella (r,c) e invertire:
+- tutte le celle della riga r tranne (r,c)
+- tutte le celle della colonna c tranne (r,c)
+Ogni cella della matrice puo' essere vista come uno stato del problema.
+Uno stato è semplicemente una configurazione della matrice.
+L'algoritmo BFS (Breadth First Search) esplora gli stati a livelli:
+livello 0:
+- contiene solo la matrice iniziale
+livello 1:
+- contiene tutte le matrici ottenute con una sola mossa
+livello 2:
+- contiene tutte le matrici ottenute con due mosse
+e cosi' via.
+Quando BFS trova per la prima volta una matrice composta solo da 0 oppure solo da 1, il numero di mosse usate è sicuramente minimo.
+
+Per evitare di visitare piu' volte lo stesso stato, ogni matrice viene trasformata in una stringa.
+
+Esempio:
+matrice:
+  1 0 1
+  1 0 1
+  1 0 1
+diventa: "101101101"
+Questa stringa viene memorizzata negli stati gia' visitati.
+
+Per ogni stato:
+1. estraiamo la matrice dalla coda BFS
+2. controlliamo se è una soluzione
+3. proviamo tutte le n*n mosse possibili
+4. per ogni nuovo stato non visitato lo inseriamo in coda
+
+La BFS termina quando:
+- trova una soluzione
+- oppure esaurisce tutti gli stati possibili
+Il numero massimo di stati possibili per una matrice N*N vale: 2^(N*N)
+quindi BFS è adatta per matrici piccole.
+Per esempio:
+N=3 -> 512 stati
+N=4 -> 65536 stati
+N=5 -> 33554432 stati
+
+; Controlla se una matrice è composta solo da 0
+; oppure solo da 1.
+; In questo caso abbiamo raggiunto uno stato finale.
+(define (goal? matrix)
+  (apply = (flat matrix)))
+
+; Applica una mossa alla matrice.
+; La cella (r,c) scelta non viene modificata.
+; Vengono invertite tutte le altre celle della stessa
+; riga e della stessa colonna.
+(define (move matrix r c)
+  (letn ((n (length matrix))
+         (out matrix))
+    (for (i 0 (- n 1))
+      (if (!= i r)
+          (setf (out i c) (^ (out i c) 1)))
+      (if (!= i c)
+          (setf (out r i) (^ (out r i) 1))))
+    out))
+
+; Trasforma una matrice in una stringa.
+; Serve per memorizzare gli stati gia' visitati.
+; Esempio:
+; ((1 0)(0 1)) -> "1001"
+(define (encode matrix)
+  (join (map string (flat matrix)) ""))
+
+; Ricerca BFS della soluzione minima.
+; Restituisce la lista delle coordinate cliccate.
+; Se non esiste soluzione restituisce nil.
+(define (bfs matrix)
+  (letn ((n (length matrix))
+         (queue (list (list matrix '())))
+         (visited '())
+         (state nil)
+         (cur nil)
+         (path nil)
+         (next nil)
+         (key nil))
+    ; Inserisco lo stato iniziale tra quelli gia' visti.
+    (push (encode matrix) visited)
+    ; Finche' esistono stati da analizzare.
+    (while queue
+      ; Prendo il primo stato della coda.
+      (setq state (pop queue))
+      (setq cur (state 0))
+      (setq path (state 1))
+      ; Debug: mostra livello e stato corrente.
+      (println "livello=" (length path)
+               " coda=" (length queue)
+               " stato=" (encode cur))
+      ; Se lo stato corrente è finale,
+      ; abbiamo trovato il minimo.
+      (if (goal? cur)
+          (begin
+            (println "SOLUZIONE")
+            (println "mosse=" (length path))
+            (throw path)))
+      ; Provo tutte le possibili celle da cliccare.
+      (for (r 0 (- n 1))
+        (for (c 0 (- n 1))
+          ; Creo il nuovo stato.
+          (setq next (move cur r c))
+          ; Se è gia' soluzione termino subito.
+          (if (goal? next)
+              (begin
+                (println "SOLUZIONE")
+                (println "mosse=" (+ (length path) 1))
+                (throw (append path (list (list r c))))))
+          ; Codifico il nuovo stato.
+          (setq key (encode next))
+          ; Se non è stato visto, lo accodo.
+          (if (not (ref key visited))
+              (begin
+                (push key visited)
+                (push (list next
+                            (append path (list (list r c))))
+                      queue -1))))))
+    ; Nessuna soluzione trovata.
+    nil))
+
+Proviamo:
+
+(setq m '((1 0 1)
+          (1 0 1)
+          (1 0 1)))
+(catch (bfs m))
+;-> livello=0 coda=0 stato=101101101
+;-> livello=1 coda=8 stato=110001001
+;-> SOLUZIONE
+;-> mosse=2
+;-> ((0 0) (0 2))
+
+(setq m '((1 0) (0 1)))
+(catch (bfs m))
+;-> livello=0 coda=0 stato=1001
+;-> SOLUZIONE
+;-> mosse=1
+;-> ((0 0))
+
+(setq m '((1 0) (1 0)))
+(catch (bfs m))
+;-> livello=0 coda=0 stato=1010
+;-> livello=1 coda=1 stato=1100
+;-> livello=1 coda=1 stato=0011
+;-> livello=2 coda=0 stato=0101
+;-> nil
+
+Le soluzioni ottenute dal gioco interattivo non necessariamente saranno uguali a quelle trovate dalla BFS, perché possono esistere più soluzioni con lo stesso numero minimo di mosse.
+
 ============================================================================
 

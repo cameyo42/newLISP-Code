@@ -3563,6 +3563,8 @@ NOTE LIBERE 37
   Problema della moneta (Numeri di Frobenius)
   Moltiplicazione inversa nelle matrici
   Determinante esatto di una matrice di interi
+  Primi della sommatoria dei numeri naturali composti
+  Il gioco dell'inversione (Reverse game)
 
 PROBLEMI SUI DADI
 =================
