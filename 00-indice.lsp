@@ -3565,6 +3565,9 @@ NOTE LIBERE 37
   Determinante esatto di una matrice di interi
   Primi della sommatoria dei numeri naturali composti
   Il gioco dell'inversione (Reverse game)
+  Numeri con parentesi ben formate
+  Biquadratico più vicino
+  Numero più vicino
 
 PROBLEMI SUI DADI
 =================

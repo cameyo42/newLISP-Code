@@ -4544,5 +4544,351 @@ Proviamo:
 
 Le soluzioni ottenute dal gioco interattivo non necessariamente saranno uguali a quelle trovate dalla BFS, perché possono esistere più soluzioni con lo stesso numero minimo di mosse.
 
+
+--------------------------------
+Numeri con parentesi ben formate
+--------------------------------
+
+Dato un numero intero positivo, trasformarlo in binario, sostituire '1' con '(' e '0' con ')'.
+L'espressione di parentesi che otteniamo è ben formata (cioè le parentesi sono accoppiate correttamente)?
+
+Esempi:
+  N = 9
+  Binario = 1001
+  Espressione = ())( --> non è ben formata
+
+  N = 44
+  Binario = 101100
+  Espressione = ()(())  --> ben formata
+
+Sequenza OEIS A014486:
+List of totally balanced sequences of 2n binary digits written in base 10. Binary expansion of each term contains n 0's and n 1's and reading from left to right (the most significant to the least significant bit), the number of 0's never exceeds the number of 1's.
+  0, 2, 10, 12, 42, 44, 50, 52, 56, 170, 172, 178, 180, 184, 202, 204, 210,
+  212, 216, 226, 228, 232, 240, 682, 684, 690, 692, 696, 714, 716, 722, 724,
+  728, 738, 740, 744, 752, 810, 812, 818, 820, 824, 842, 844, 850, 852, 856,
+  866, 868, 872, 880, 906, 908, 914, ...
+
+Sequenza OEIS A063171:
+Dyck language interpreted as binary numbers in ascending order.
+  0, 10, 1010, 1100, 101010, 101100, 110010, 110100, 111000, 10101010,
+  10101100, 10110010, 10110100, 10111000, 11001010, 11001100, 11010010,
+  11010100, 11011000, 11100010, 11100100, 11101000, 11110000, 1010101010,
+  1010101100, 1010110010, 1010110100, 1010111000, ...
+
+(define (well-formed? num)
+  (if (zero? num) 0
+  ;else
+    (let ((bin (bits  num)) (opened 0) (stop nil))
+      (dolist (el (explode bin) stop)
+        (if (= el "0")
+            (-- opened)
+            (++ opened))
+        (if (< opened 0) (setq stop true)))
+      (and (not stop) (zero? opened)))))
+
+(filter well-formed? (sequence 0 914))
+;-> (0 2 10 12 42 44 50 52 56 170 172 178 180 184 202 204 210
+;->  212 216 226 228 232 240 682 684 690 692 696 714 716 722 724
+;->  728 738 740 744 752 810 812 818 820 824 842 844 850 852 856
+;->  866 868 872 880 906 908 914)
+
+(map sym (map bits (filter well-formed? (sequence 0 696))))
+;-> (0 10 1010 1100 101010 101100 110010 110100 111000 10101010
+;->  10101100 10110010 10110100 10111000 11001010 11001100 11010010
+;->  11010100 11011000 11100010 11100100 11101000 11110000 1010101010
+;->  1010101100 1010110010 1010110100 1010111000)
+
+
+-----------------------
+Biquadratico più vicino
+-----------------------
+
+Dato un numero intero positivo determinare il numero biquadratico più vicino.
+Un numero biquadratico è un numero che è la quarta potenza di un altro numero intero, ad esempio: 3^4 = 3*3*3*3 = 81
+I primi numeri biquadratici:  1, 16, 81, 256, 625, 1296, 2401, 4096, ...
+Esempio:
+  N = 10 --> il numero biquadratico più vicino è 16
+  N = 63 --> il numero biquadratico più vicino è 81
+
+Sequenza OEIS A000583:
+Fourth powers: a(n) = n^4.
+  0, 1, 16, 81, 256, 625, 1296, 2401, 4096, 6561, 10000, 14641, 20736, 28561,
+  38416, 50625, 65536, 83521, 104976, 130321, 160000, 194481, 234256, 279841,
+  331776, 390625, 456976, 531441, 614656, 707281, 810000, 923521, 1048576,
+  1185921, 1336336, 1500625, 1679616, 1874161, ...
+
+È interessante notare che non si verificherà mai un pareggio, poiché la sequenza alterna numeri pari e dispari.
+
+Metodo 1 (brute-force)
+----------------------
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+(define (biquad1 N)
+  (let ((sol nil) (k 1) (k 1) (found nil) (cur-pow 1) (prev-pow 1))
+    (until found
+      ; potenza corrente
+      (setq cur-pow (** k 4))
+      (cond ((= cur-pow N) ; N == potenza corrente
+              (setq found true)
+              (setq sol cur-pow))
+            ((> cur-pow N) ; N > potenza corrente
+              ; adesso la soluzione è la potenza corrente oppure
+              ; la potenza precedente
+              (setq found true)
+              (if (> (- cur-pow N) (- N prev-pow))
+                  (setq sol prev-pow)
+                  (setq sol cur-pow)))
+            (true (setq prev-pow cur-pow))) ; N < potenza corrente
+      ;(print k { } prev-pow { } cur-pow) (read-line)
+      (++ k))
+    sol))
+
+Proviamo:
+
+(biquad1 10)
+;-> 16L
+(biquad1 63)
+;-> 81L
+(biquad1 120)
+;-> 81L
+(biquad1 625)
+;-> 625L
+(biquad1 123456789)
+;-> 121550625L
+
+Metodo 2 (matematica)
+---------------------
+
+Il valore N per cui l'uscita passa da (k − 1)^4 a k^4 soddisfa sqrt(sqrt(N) − 3/4) + 1/2 = k, ovvero N = ((k − 1/2)^2 + 3/4)^2 = (k^2 − k + 1)^2 = ((k − 1)^4 + k^4 + 1)/2, che è esattamente il primo intero più vicino a k^4.
+Quindi dato N il numero quadratico più vicino vale:
+
+  (int (sqrt(sqrt(N) − 3/4) + 1/2))^4
+
+(define (f x) (/ (+ (** (- x 1) 4) (** x 4) 1) 2))
+
+(define (biquad2 N) (** (int (add (sqrt (sub (sqrt N) 0.75)) 0.5)) 4))
+
+Proviamo:
+
+(biquad2 10)
+;-> 16L
+(biquad2 63)
+;-> 81L
+(biquad2 120)
+;-> 81L
+(biquad2 625)
+;-> 625L
+(biquad2 123456789)
+;-> 121550625L
+
+Test di correttezza:
+(= (map biquad1 (sequence 1 1e4)) (map biquad2 (sequence 1 1e4)))
+;-> true
+
+Test di velocità:
+(time (map biquad1 (sequence 1 1e5)))
+;-> 1740.115
+(time (map biquad2 (sequence 1 1e5)))
+;-> 115.075
+
+
+-----------------
+Numero più vicino
+-----------------
+
+Data un intero N e una lista di interi trovare l'intero più vicino (o uguale) a N.
+Esempio:
+N = 11
+Lista = (8 3 15 22)
+Il numero della lista più vicino a 11 vale 8.
+
+Prima di scrivere una funzione dobbiamo analizzare quale 'lavoro' deve svolgere.
+Dobbiamo fare una sola ricerca su una lista?
+Dobbiamo fare molte ricerche sulla stessa lista?
+Dobbiamo fare poche ricerche su liste sempre diverse?
+ecc.
+Le risposte a queste domande ci aiutano a definire una funzione ottimizzata per quello che deve realmente fare.
+
+Metodo 1
+--------
+Attraversiamo tutta la lista una volta mantenendo il valore più vicino trovato.
+Complessità: O(n)
+
+(define (find-close1 N lst)
+  (let ((out (lst 0)) (diff (abs (- N (lst 0)))))
+    (dolist (el lst)
+      (if (< (abs (- N el)) diff)
+          (set 'out el 'diff (abs (- N el)))))
+    out))
+
+(find-close1 3 '(3 5 25 34 56 678))
+;-> 3
+(find-close1 -2 '(3 5 25 34 56 678))
+;-> 3
+(find-close1 678 '(3 5 25 34 56 678))
+;-> 678
+(find-close1 1000 '(3 5 25 34 56 678))
+;-> 678
+(find-close1 4 '(3 5 25 34 56 678))
+;-> 3
+(find-close1 0 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -3
+(find-close1 -15 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -20
+(find-close1 1 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -3
+
+Metodo 2
+--------
+Ordiniamo la lista e poi eseguiamo una ricerca lineare.
+Complessità: ordinamento = O(n*log(n)), ricerca = O(n) --> O(n*log(n))
+
+(define (find-close2 num lst sorted)
+  (let ((out nil) (found nil) (cur-num 1) (prev-num 1))
+    (if-not sorted (sort lst))
+    (cond
+      ((>= num (lst -1)) (setq out (lst -1)))
+      ((<= num (lst 0)) (setq out (lst 0)))
+      (true
+        (dolist (el lst found)
+          (setq cur-num el) ; numero corrente della lista
+          (cond ((= cur-num num)
+                  (setq found true)
+                  (setq out cur-num))
+                ((> cur-num num) ; num > numero corrente
+                  ; adesso la soluzione è il numero corrente oppure
+                  ; il numero precedente
+                  (setq found true)
+                  (if (>= (- cur-num num) (- num prev-num))
+                      (setq out prev-num)
+                      (setq out cur-num)))
+                (true (setq prev-num cur-num)))))) ; num < numero corrente
+    out))
+
+(find-close2 3 '(3 5 25 34 56 678))
+;-> 3
+(find-close2 -2 '(3 5 25 34 56 678))
+;-> 3
+(find-close2 678 '(3 5 25 34 56 678))
+;-> 678
+(find-close2 1000 '(3 5 25 34 56 678))
+;-> 678
+(find-close2 4 '(3 5 25 34 56 678))
+;-> 3
+(find-close2 0 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -3
+(find-close2 -15 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -20
+(find-close2 1 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -3
+
+Metodo 3
+--------
+Ordiniamo la lista e poi eseguiamo una ricerca binaria:
+1) trovare con ricerca binaria la posizione in cui `num` dovrebbe essere inserito;
+2) i soli candidati sono gli elementi immediatamente a sinistra e a destra;
+3) scegliere quello con distanza minima.
+Complessità: ordinamento = O(n*log(n)), ricerca = O(log(n)) --> O(n*log(n))
+
+(define (find-close3 num lst sorted vector)
+  (letn ((n (length lst))
+         (out nil)
+         (lo 0)
+         (hi (- (length lst) 1))
+         (mid 0)
+         (found nil))
+    (if-not vector (setq lst (array n lst)))
+    (if-not sorted (sort lst))
+    (cond
+      ((>= num (lst -1)) (setq out (lst -1)))
+      ((<= num (lst 0)) (setq out (lst 0)))
+      (true
+        (while (and (<= lo hi) (not found))
+          (setq mid (/ (+ lo hi) 2))
+          (cond
+            ((= (lst mid) num)
+              (setq out num)
+              (setq found true))
+            ((< (lst mid) num)
+              (setq lo (+ mid 1)))
+            (true
+              (setq hi (- mid 1)))))
+        (if (not found)
+          (letn ((left (lst hi))
+                 (right (lst lo)))
+            (if (>= (- right num) (- num left))
+                (setq out left)
+                (setq out right))))))
+    out))
+
+(find-close3 3 '(3 5 25 34 56 678))
+;-> 3
+(find-close3 -2 '(3 5 25 34 56 678))
+;-> 3
+(find-close3 678 '(3 5 25 34 56 678))
+;-> 678
+(find-close3 1000 '(3 5 25 34 56 678))
+;-> 678
+(find-close3 4 '(3 5 25 34 56 678))
+;-> 3
+(find-close3 0 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -3
+(find-close3 -15 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -20
+(find-close3 1 '(-25 -20 -10 -3 5 25 34 56 678))
+;-> -3
+
+Vediamo la velocità delle funzioni:
+
+(setq lst (rand 100 100))
+(time (find-close1 50 lst) 1e5)
+;-> 929.98
+(time (find-close2 50 lst) 1e5)
+;-> 1189.433
+(time (find-close3 50 lst) 1e5)
+;-> 900.162
+
+(silent (setq lst (rand 100000 100000)))
+(time (find-close1 50000 lst) 100)
+;-> 1158.9
+(time (find-close2 50000 lst) 100)
+;-> 3443.445
+(time (find-close3 50000 lst) 100)
+;-> 3242.479
+
+(time (find-close1 90000 lst) 100)
+;-> 1158.9
+(time (find-close2 90000 lst) 100)
+;-> 4339.817
+(time (find-close3 90000 lst) 100)
+;-> 3241.947
+
+Le funzioni 'find-close2' e 'find-close3' ordinano la lista ad ogni chiamata.
+Vediamo la loro velocità su una lista già ordinata:
+
+(silent (setq lst (sort (rand 100000 100000))))
+(time (find-close2 90000 lst true) 100)
+;-> 1379.925
+(time (find-close3 90000 lst true) 100)
+;-> 835.704
+L'ordinamento della lista è l'oprazione più gravosa in termini di tempo.
+
+Inoltre la funzione 'find-close3' trasforma la lista in vettore ad ogni chiamata (perchè il vettore è molto più veloce quandi si recupera un valore con un indice).
+Vediamo la sua velocità su un vettore già ordinata:
+
+(time (find-close1 90000 lst true true) 100)
+(time (find-close3 90000 lst true true) 100)
+;-> 678.183
+
+Conclusioni
+-----------
+Il calcolo della complessità teorica di una funzione è molto importante, comunque per ottenere una fuzione veramente efficiente bisogna considerare il tipo di operazioni che vogliamo effettuare e scegliere i tipi di dati e gli algoritmi di conseguenza.
+
 ============================================================================
 

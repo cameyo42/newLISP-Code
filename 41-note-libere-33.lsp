@@ -4214,6 +4214,22 @@ Proviamo:
 ;->  21 22 23 24 29 34 39 44 49 30 31 32 33 34 35 41 47 53
 ;->  59 42 43 44 45 46 47 48 55 62 69 56 57 58 59 60 61)
 
+Altra versione:
+
+(define (base-minima s)
+  (+ (int (apply max (map int (explode s)))) 1))
+(define (valore-base-minima s)
+  (int s 0 (base-minima s)))
+
+(map valore-base-minima (map string (sequence 1 75)))
+;-> (1 2 3 4 5 6 7 8 9 2 3 5 7 9 11 13 15 17 19 6 7 8
+;->  11 14 17 20 23 26 29 12 13 14 15 19 23 27 31 35 39 20
+;->  21 22 23 24 29 34 39 44 49 30 31 32 33 34 35 41 47 53
+;->  59 42 43 44 45 46 47 48 55 62 69 56 57 58 59 60 61)
+
+Versione code-golf (62 caratteri):
+(define(f s)(int s 0(+(int(apply max(map int(explode s))))1)))
+
 
 -----------------------------------
 Shift degli elementi di una matrice
