@@ -4890,5 +4890,230 @@ Conclusioni
 -----------
 Il calcolo della complessità teorica di una funzione è molto importante, comunque per ottenere una fuzione veramente efficiente bisogna considerare il tipo di operazioni che vogliamo effettuare e scegliere i tipi di dati e gli algoritmi di conseguenza.
 
+
+-----------------------
+Alfabeto semi-diagonale
+-----------------------
+
+Dato un carattere maiuscolo dell'alfabeto inglese, stampare un alfabeto semidiagonale da "A" fino al carattere dato.
+
+Esempio:
+Carattere = F
+Output =
+A 
+ B B 
+  C C C 
+   D D D D 
+    E E E E E 
+     F F F F F F 
+
+(char "A")
+;-> 65
+
+(define (prn ch)
+  (let (ord (- (char ch) 65))
+    (for (i 0 ord)
+      (println (dup " " i) (dup (string (char (+ 65 i)) " ") (+ i 1))))))
+
+(prn "F")
+;-> A
+;->  B B
+;->   C C C
+;->    D D D D
+;->     E E E E E
+;->      F F F F F F
+
+Versione code-golf (101 caratteri):
+(define(f c)(let(d(-(char c)65))(for(i 0 d)(println(dup" "i)(dup(string(char(+ 65 i))" ")(+ i 1))))))
+(f "F")
+
+
+--------------------
+Seqindignot sequence
+--------------------
+
+https://codegolf.stackexchange.com/questions/147409/seqindignot-sequence
+
+Generare la seguente sequenza (0-indexed):
+
+  1 0 3 2 5 4 7 6 9 8 22 20 30 24 23 26 25 28 27 32 11 33 10 14 13
+  16 15 18 17 31 12 29 19 21 50 40 41 42 44 45 35 36 37 51 38 39 52
+  53 55 56 34 ...
+
+Come funziona questa sequenza?
+Il numero all'indice 'i' deve essere il primo in ordine che non ha cifre in comune con 'i' e non è ancora comparso negli indici precedenti.
+
+Esempi:
+0: Il primo numero (0) contiene la stessa cifra, quindi cerchiamo il successivo (1), che non contiene la stessa cifra. Quindi n=0 restituisce 1.
+1: Il primo numero (0) non contiene la stessa cifra, quindi n=1 restituisce 0.
+2: Abbiamo già incontrato 0 e 1, e la cifra successiva (2) contiene la stessa cifra, quindi cerchiamo il successivo (3), che non contiene la stessa cifra. Quindi n=2 restituisce 3.
+...
+10: Abbiamo già incontrato i numeri da 0 a 9, quindi il successivo è 10. I numeri da 10 a 19 contengono la cifra corrispondente 1, il 20 contiene la cifra corrispondente 0, il 21 contiene di nuovo la cifra corrispondente 1, il 22 è valido, quindi n=10 restituisce 22.
+
+; Funzione che verifica se due numeri hanno almeno una cifra in comune
+(define (common-digit? num1 num2)
+  (intersect (explode (string num1)) (explode (string num2))))
+
+(define (seq limit)
+  (local (out curr trovato)
+    (setq out '())
+    ; ciclo per ogni indice...
+    (for (i 0 (- limit 1))
+      ; numero candidato corrente
+      ; (parte sempre da 0 per ogni numero della sequenza)
+      (setq curr 0)
+      (setq trovato nil)
+      (until trovato
+        ; se il candidato corrente non esiste nella sequenza e
+        ; non ha cifre in comune con l'indice corrente,
+        ; allora abbiamo trovato il numero relativo all'indice corrente
+        (when (and (not (ref curr out)) (null? (common-digit? i curr)))
+              (push curr out -1)
+              (setq trovato true))
+        ; prossimo candidato
+        (++ curr)))
+    out))
+
+(seq 51)
+;-> (1 0 3 2 5 4 7 6 9 8 22 20 30 24 23 26 25 28 27 32 11 33 10 14 13
+;->  16 15 18 17 31 12 29 19 21 50 40 41 42 44 45 35 36 37 51 38 39 52
+;->  53 55 56 34)
+
+
+----------------------------------------
+Oggetti con almeno un elemento in comune
+----------------------------------------
+
+Scriviamo una funzione che verifica se due oggetti hanno almeno un elemento in comune.
+I due oggetti evono essere dello stesso tipo: liste o stringhe o numeri interi o numeri floating.
+Per due liste: hanno almeno un elemento in comune?
+Per due interi: hanno almeno una cifra in comune?
+Per due float: hanno almeno una cifra in comune?
+
+Per gli interi prendiamo il valore assoluto per eliminare il segno "-" (che non deve essere confrontato).
+Per gli interi prendiamo il valore assoluto per eliminare il segno "-" e togliamo il carattere di separazione ".".
+
+(define (common? obj1 obj2)
+  (cond ((list? obj1)
+          (true? (intersect obj1 obj2)))
+        ((integer? obj1)
+          (true? (intersect (explode (string (abs obj1)))
+                            (explode (string (abs obj2))))))
+        ((float? obj1)
+          (true? (intersect (explode (replace "." (string (abs obj1)) ""))
+                            (explode (replace "." (string (abs obj2)) "")))))))
+
+Proviamo:
+
+(common? '(1 2 3) '(4 5 6))
+(common? '(1 2 3) '(4 5 1))
+
+(common? 123 456)
+;-> nil
+(common? -123 -456)
+;-> nil
+
+(common? 123 451)
+(common? 123 451)
+;-> true
+
+(common? -123.456 -789.789)
+;-> nil
+(common? -123.456 -789.781)
+;-> true
+
+
+--------------------------------------------
+Ricostruzione di una matrice dalle diagonali
+--------------------------------------------
+
+Date le diagonali di una matrice quadrata (da quella in alto a destra fino a quella in basso a sinistra), ricostruire la matrice.
+Esempio:
+Diagonali = ((5) (4 10) (3 9 15) (2 8 14 20) (1 7 13 19 25) (6 12 18 24) (11 17 23) (16 22) (21))
+Matrice =    1  2  3  4  5
+             6  7  8  9 10
+            11 12 13 14 15
+            16 17 18 19 20
+            21 22 23 24 25
+
+Il problema è invertire la trasformazione che estrae le diagonali secondarie (antidiagonali), ordinate dalla diagonale più in alto a destra fino a quella più in basso a sinistra.
+Per una matrice N*N, ogni elemento (r,c) appartiene all'antidiagonale di indice
+
+ (setq r (+ d c (- (- n 1))))
+
+  d = r - c + (N - 1)
+
+Infatti:
+
+  (0,N-1) --> d = 0
+  (N-1,0) --> d = 2N-2
+
+Le diagonali sono fornite proprio in quest'ordine.
+L'unica attenzione riguarda l'ordine degli elementi all'interno di ciascuna diagonale.
+
+Nel nostro caso:
+
+  ((5)
+   (4 10)
+   (3 9 15)
+   (2 8 14 20)
+   (1 7 13 19 25)
+   (6 12 18 24)
+   (11 17 23)
+   (16 22)
+   (21))
+
+gli elementi di ogni diagonale sono elencati dall'alto verso il basso (cioè con riga crescente).
+Quindi basta percorrere ogni diagonale assegnando:
+
+  c = max(0, N-1-d) + k
+  r = d + c - (N-1)
+  dove k è la posizione dell'elemento nella diagonale.
+
+Per N = 5 si ottiene:
+
+  +---+----------------+-------------------------------+
+  | d | diagonale      | coordinate                    |
+  +---+----------------+-------------------------------+
+  | 0 | (5)            | (0,4)                         |
+  | 1 | (4 10)         | (0,3) (1,4)                   |
+  | 2 | (3 9 15)       | (0,2) (1,3) (2,4)             |
+  | 3 | (2 8 14 20)    | (0,1) (1,2) (2,3) (3,4)       |
+  | 4 | (1 7 13 19 25) | (0,0) (1,1) (2,2) (3,3) (4,4) |
+  | 5 | (6 12 18 24)   | (1,0) (2,1) (3,2) (4,3)       |
+  | 6 | (11 17 23)     | (2,0) (3,1) (4,2)             |
+  | 7 | (16 22)        | (3,0) (4,1)                   |
+  | 8 | (21)           | (4,0)                         |
+  +---+----------------+-------------------------------+
+
+che ricostruisce:  1  2  3  4  5
+                   6  7  8  9 10
+                  11 12 13 14 15
+                  16 17 18 19 20
+                  21 22 23 24 25
+
+In pratica, ogni elemento delle diagonali viene copiato direttamente nella sua posizione (r,c) della matrice.
+
+(define (diag2matrix diags)
+  (local (n out d r c start)
+    (setq n (/ (+ (length diags) 1) 2))
+    (setq out (array-list (array n n '(0))))
+    (for (d 0 (- (length diags) 1))
+      (setq start (max 0 (- (- n 1) d)))
+      (for (k 0 (- (length (diags d)) 1))
+        (setq c (+ start k))
+        (setq r (+ d c (- (- n 1))))
+        (setf ((out r) c) ((diags d) k))))
+    out))
+
+(setq dia '((5) (4 10) (3 9 15) (2 8 14 20) (1 7 13 19 25) (6 12 18 24) (11 17 23) (16 22) (21)))
+
+(diag2matrix dia)
+;-> ((1 2 3 4 5)
+;->  (6 7 8 9 10)
+;->  (11 12 13 14 15)
+;->  (16 17 18 19 20)
+;->  (21 22 23 24 25))
+
 ============================================================================
 

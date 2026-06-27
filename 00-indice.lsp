@@ -3568,6 +3568,10 @@ NOTE LIBERE 37
   Numeri con parentesi ben formate
   Biquadratico più vicino
   Numero più vicino
+  Alfabeto semi-diagonale
+  Seqindignot sequence
+  Oggetti con almeno un elemento in comune
+  Ricostruzione di una matrice dalle diagonali
 
 PROBLEMI SUI DADI
 =================
