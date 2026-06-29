@@ -3572,6 +3572,10 @@ NOTE LIBERE 37
   Seqindignot sequence
   Oggetti con almeno un elemento in comune
   Ricostruzione di una matrice dalle diagonali
+  Sequenza minima
+  Media della somma delle lunghezze dei numeri binari
+  Numeri generati dal lancio ripetuto di un dado
+  Ricerca esponenziale
 
 PROBLEMI SUI DADI
 =================

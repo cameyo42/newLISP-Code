@@ -4791,7 +4791,7 @@ Complessità: ordinamento = O(n*log(n)), ricerca = O(n) --> O(n*log(n))
 Metodo 3
 --------
 Ordiniamo la lista e poi eseguiamo una ricerca binaria:
-1) trovare con ricerca binaria la posizione in cui `num` dovrebbe essere inserito;
+1) trovare con ricerca binaria la posizione in cui num dovrebbe essere inserito;
 2) i soli candidati sono gli elementi immediatamente a sinistra e a destra;
 3) scegliere quello con distanza minima.
 Complessità: ordinamento = O(n*log(n)), ricerca = O(log(n)) --> O(n*log(n))
@@ -5114,6 +5114,399 @@ In pratica, ogni elemento delle diagonali viene copiato direttamente nella sua p
 ;->  (11 12 13 14 15)
 ;->  (16 17 18 19 20)
 ;->  (21 22 23 24 25))
+
+
+---------------
+Sequenza minima
+---------------
+
+https://codegolf.stackexchange.com/questions/170787/compute-the-minimum-anan-1-such-that-a1a2-dotsan-is-prime
+
+Calcolare la sequenza dove i numeri sono i minimi per cui risulta:
+  a(1) = 2
+  a(n) > a(n−1) tale che a(1) + a(2) + ... + a(n) sia primo
+
+Sequenza OEIS A051935:
+a(n) = smallest number > a(n-1) such that a(1) + a(2) + ... + a(n) is a prime.
+  2, 3, 6, 8, 10, 12, 18, 20, 22, 26, 30, 34, 36, 42, 44, 46, 50, 52, 60,
+  66, 72, 74, 76, 78, 80, 82, 102, 108, 114, 116, 118, 126, 128, 132, 136,
+  138, 144, 146, 150, 154, 158, 162, 166, 170, 174, 186, 196, 198, 210,
+  222, 228, 236, 240, 244, 246, 254, 270, 280, 282, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+Prima versione
+--------------
+
+(define (seq1 limite)
+  (local (out somma cur-val trovato)
+    (setq out '(2))
+    (setq somma 2)
+    (setq cur-val 3)
+    (for (i 2 limite)
+      (setq trovato nil)
+      (until trovato
+        (when (prime? (+ somma cur-val))
+            (setq trovato true)
+            (push cur-val out -1)
+            (setq somma (apply + out)))
+      (++ cur-val)))
+    out))
+
+(seq 60)
+;-> (2 3 6 8 10 12 18 20 22 26 30 34 36 42 44 46 50 52 60
+;->  66 72 74 76 78 80 82 102 108 114 116 118 126 128 132 136
+;->  138 144 146 150 154 158 162 166 170 174 186 196 198 210
+;->  222 228 236 240 244 246 254 270 280 282 300)
+
+Seconda versione
+----------------
+
+1) Ricalcolo della 'somma'
+Quando troviamo un nuovo elemento calcoliamo:
+  (setq somma (apply + out))
+Questo ricalcola tutta la somma della lista ogni volta, con costo O(n).
+Però conosciamo già la somma precedente, quindi basta fare:
+(++ somma cur-val)
+Il costo diventa O(1).
+
+2) Variabile 'trovato'
+Può essere eliminata usando direttamente until sulla condizione:
+  (until (prime? (+ somma cur-val))
+    (++ cur-val))
+poi, una volta usciti dal ciclo:
+  (push cur-val out -1)
+  (++ somma cur-val)
+  (++ cur-val)
+
+(define (seq2 limite)
+  (local (out somma cur-val)
+    (setq out '(2))
+    (setq somma 2)
+    (setq cur-val 3)
+    (for (i 2 limite)
+      (until (prime? (+ somma cur-val))
+        (++ cur-val))
+      (push cur-val out -1)
+      (++ somma cur-val)
+      (++ cur-val))
+    out))
+
+(seq2 60)
+;-> (2 3 6 8 10 12 18 20 22 26 30 34 36 42 44 46 50 52 60
+;->  66 72 74 76 78 80 82 102 108 114 116 118 126 128 132 136
+;->  138 144 146 150 154 158 162 166 170 174 186 196 198 210
+;->  222 228 236 240 244 246 254 270 280 282 300)
+
+Test di velocità
+(time (seq1 10000))
+;-> 2030.871
+(time (seq2 10000))
+;-> 1340.855
+
+Terza versione
+--------------
+
+Sul sito di code-golf è presente la seguente soluzione in python:
+
+n=f=a=b=1
+while 1:
+ f*=n;n+=1;a+=1
+ if~f%n<a-b:print a;b=a;a=0
+
+Riscriviamola in forma leggibile:
+
+n = 1
+f = 1
+a = 1
+b = 1
+while True:
+    f *= n
+    n += 1
+    a += 1
+    if ~f % n < a - b:
+        print(a)
+        b = a
+        a = 0
+
+1) Cosa rappresentano le variabili
+  n = intero corrente.
+  f = (n-1)!.
+  a = contatore dei passi dall'ultima stampa.
+  b = ultimo valore stampato.
+Infatti, all'inizio di ogni iterazione vale
+  f = (n-1)!
+perché viene eseguito
+  f *= n
+  n += 1
+quindi, dopo l'incremento di n, f contiene proprio (n-1)!.
+
+2) La condizione if ~f % n < a - b:
+L'espressione
+  ~f % n
+usa il fatto che
+  ~x = -x - 1
+quindi equivale a
+  (-f - 1) % n
+Poiché f = (n-1)!, otteniamo
+  (-(n-1)!-1) mod n
+Per il Teorema di Wilson (n-1)! ≡ -1 (mod n) se e solo se n è primo.
+Di conseguenza
+  (-(n-1)!-1) mod n = 0
+quando n è primo.
+Se n è composto, il resto è positivo (salvo il caso particolare n=4, che qui non crea problemi).
+La condizione completa 'if ~f % n < a - b' diventa quindi:
+  resto < distanza
+dove:
+  distanza = a - b
+è la differenza fra il contatore corrente e l'ultimo valore stampato.
+Quando il resto è sufficientemente piccolo (in particolare 0 quando n è primo), viene stampato il valore di a.
+Il programma sfrutta contemporaneamente il teorema di Wilson (~f % n), il fatto che ~x = -x-1 e un aggiornamento molto compatto delle variabili a e b.
+
+Per convertirlo in newLISP dobbiamo fare le seguenti considerazioni:
+
+a) inizializzare f come 1L (bigint) per gestire il fattoriale
+
+b) l'operatore '~' in newLISP non supporta i bigint.
+Nel codice Python ~f serve solo perché ~f = -f - 1
+Quindi basta sostituire (% (~ f) n) con (% (- (- f) 1L) n)
+
+c) Python fa il modulo con resto sempre non negativo.
+In newLISP invece % segue la regola del resto con il segno del dividendo:
+(% -5 3)
+;-> -2
+Non 1 come Python.
+Bisogna quindi normalizzare il modulo:
+(mod (- (- f) 1L) n)
+con la funzione 'pmod' che simula la funzione 'mod' di python:
+
+(define (pmod a b)
+  (% (+ (% a b) b) b))
+
+(define (seq3 limite)
+  (local (out n f a b)
+    (setq out '())
+    (setq n 1L)
+    (setq f 1L)
+    (setq a 1)
+    (setq b 1)
+    (while (< (length out) limite)
+      (setq f (* f n))
+      (++ n)
+      (++ a)
+      (if (< (pmod (- (- f) 1L) n) (- a b))
+        (begin
+          (push a out -1)
+          (setq b a)
+          (setq a 0)))
+      )
+    out))
+
+(seq3 60)
+;-> (2 3 6 8 10 12 18 20 22 26 30 34 36 42 44 46 50 52 60
+;->  66 72 74 76 78 80 82 102 108 114 116 118 126 128 132 136
+;->  138 144 146 150 154 158 162 166 170 174 186 196 198 210
+;->  222 228 236 240 244 246 254 270 280 282 300)
+
+L'algoritmo è molto elegante, anche se è più lento di 'seq2' perché manipola fattoriali che crescono molto rapidamente.
+
+
+---------------------------------------------------
+Media della somma delle lunghezze dei numeri binari
+---------------------------------------------------
+
+https://codegolf.stackexchange.com/questions/80586/mean-bits-an-average-challenge
+
+Dato un intero N >= 1, calcolare il numero medio di bit della somma delle lunghezze di ciascun intero binario compreso tra 0 e N - 1.
+Il risultato può essere calcolato come la somma del numero di bit nella rappresentazione binaria di ciascun intero da 0 a N - 1, divisa per N.
+La rappresentazione binaria di un intero non ha zeri iniziali (ad eccezione dello zero).
+
+Esempio
+  N = 6
+  num  binario  lunghezza
+  0      0       1 bit
+  1      1       1 bit
+  2      10      2 bit
+  3      11      2 bit
+  4      100     3 bit
+  5      101     3 bit
+Numero medio di bit = (1 + 1 + 2 + 2 + 3 + 3) / 6 = 2
+
+Media dei primi numeri naturali:
+  1 --> 1
+  2 --> 1
+  3 --> 1.3333333
+  4 --> 1.5
+  5 --> 1.8
+  6 --> 2
+  7 --> 2.1428571
+  8 --> ...
+
+(define (bmean N)
+  (let (sum 0)
+    (for (num 0 (- N 1))
+      (++ sum (length (bits num))))
+    (div sum N)))
+
+(map bmean (sequence 1 8))
+;-> (1 1 1.333333333333333 1.5 1.8 2 2.142857142857143 2.25)
+
+Versione code-golf (64 caratteri):
+(define(f N s)(for(k 0(- N 1))(inc s(length(bits k))))(div s N))
+
+(map f (sequence 1 8))
+;-> (1 1 1.333333333333333 1.5 1.8 2 2.142857142857143 2.25)
+
+
+----------------------------------------------
+Numeri generati dal lancio ripetuto di un dado
+----------------------------------------------
+
+Determinare la sequenza dei numeri che possono essere generati lanciando successivamente un dado regolare con i numeri da 1 a 6 e concatenando i risultati.
+Esempio:
+Il numero 61 si può ottenere lanciando un dado due volte e combinando i risultati, mentre il 17 no.
+
+Sequenza OEIS A057436:
+Contains digits 1 through 6 only.
+  1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 31, 32,
+  33, 34, 35, 36, 41, 42, 43, 44, 45, 46, 51, 52, 53, 54, 55, 56, 61, 62,
+  63, 64, 65, 66, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125,
+  126, 131, 132, 133, 134, 135, 136, 141, 142, 143, ...
+
+Formula:
+  a(0) = 1
+  a(n+1) = 1 + (if a(n) mod 10 < 6 then a(n) else a(a(n)\10)*10)
+
+La sequenza è costituita da tutti gli interi positivi la cui rappresentazione decimale contiene solo le cifre da 1 a 6.
+Infatti ogni lancio del dado produce una cifra tra 1 e 6, e la concatenazione dei risultati genera un numero formato esclusivamente da tali cifre.
+Per esempio:
+  1, 2, 3, 4, 5, 6,
+  11, 12, 13, 14, 15, 16,
+  21, 22, 23, 24, 25, 26,
+  31, 32, 33, ...
+  ...
+  61, 62, 63, 64, 65, 66,
+  111, 112, 113, ...
+
+Non appartengono alla sequenza tutti i numeri che contengono almeno una cifra tra 0, 7, 8 e 9.
+Esempi:
+  6    -> sì
+  61   -> sì
+  123  -> sì
+  6661 -> sì
+  10   -> no (contiene 0)
+  17   -> no (contiene 7)
+  908  -> no (contiene 9,0,8)
+
+La lunghezza del numero corrisponde al numero di lanci del dado.
+Esistono esattamente (6^n) numeri di n cifre ottenibili, perché ogni posizione può assumere uno dei 6 valori:
+  +-------+----------+
+  | Cifre | Quantità |
+  +-------+----------+
+  |     1 |        6 |
+  |     2 |       36 |
+  |     3 |      216 |
+  |     4 |     1296 |
+  |     n |    (6^n) |
+  +-------+----------+
+
+Il numero totale dei valori ottenibili con al più (n) lanci vale:
+
+  6 + 6^2 + ... + 6^n = (6*(6^n - 1))/5
+
+Un intero positivo N appartiene alla sequenza se e solo se tutte le sue cifre sono comprese tra 1 e 6.
+Equivalentemente, dividendo ripetutamente il numero per 10, ogni resto deve appartenere all'insieme (1 2 3 4 5 6). Se compare un resto pari a 0, 7, 8 o 9, il numero non è ottenibile.
+
+(define (check? num)
+  (null? (intersect '("0" "7" "8" "9") (explode (string num)))))
+
+(filter check? (sequence 1 143))
+;-> (1 2 3 4 5 6 11 12 13 14 15 16 21 22 23 24 25 26 31 32
+;->  33 34 35 36 41 42 43 44 45 46 51 52 53 54 55 56 61 62
+;->  63 64 65 66 111 112 113 114 115 116 121 122 123 124 125
+;->  126 131 132 133 134 135 136 141 142 143)
+
+
+--------------------
+Ricerca esponenziale
+--------------------
+
+Data una lista ordinata e un elemento x da cercare, trovare la posizione di x nella lista.
+Esempi:
+  lista = 1 13 34 50 60
+  x = 50
+  output = 3 (indice dell'elemento 50)
+
+  lista = 1 13 34 50 60
+  x = 55
+  output = nil (elemento non presente nella lista)
+
+La ricerca esponenziale prevede due passaggi:
+1) Trovare l'intervallo di indici in cui è presente l'elemento
+2) Eseguire la ricerca binaria nell'intervallo trovato.
+
+Per trovare l'intervallo in cui l'elemento potrebbe essere presente iniziamo con una lista di dimensione 1, confrontiamo il suo ultimo elemento con x, poi proviamo con una lista di dimensione 2, poi 4 e così via finché l'ultimo elemento della lista creata non è maggiore dell'elemento da cercare.
+Una volta trovato un indice 'i' (dopo ripetuti raddoppi di i), sappiamo che l'elemento deve essere presente tra 'i/2' e 'i' (i/2 perché non siamo riusciti a trovare un valore maggiore nell'iterazione precedente).
+Complessità temporale: O(log(n)) (non esponenziale come il nome)
+
+Poichè la ricerca binaria utilizza molto l'indicizzazione, usiamo un vettore al posto di una lista.
+
+(define (exp-search x vec)
+  (local (out len i left right trovato mid)
+    (setq out nil)
+    (setq len (length vec))
+    (setq i 1)
+    ; ricerca dell'intervallo per la ricerca binaria
+    ; raddoppiando ripetutamente i
+    (while (and (< i len) (> x (vec i)))
+      (setq i (* i 2)))
+    ; indice sinistro dell'intervallo
+    (setq left (/ i 2))
+    ; indice destro dell'intervallo
+    (setq right (min i (- len 1)))
+    (setq trovato nil)
+    ; ricerca binaria
+    (while (and (<= left right) (not trovato))
+      ; indice di mezzo tra left e right
+      (setq mid (/ (+ left right) 2))
+      (cond ((= x (vec mid)) ; elemento trovato
+            (setq out mid) (setq trovato true))
+            ((> x (vec mid)) ; ricercare nella parte destra
+              (setq left (+ mid 1)))
+            (true            ; ricercare nella parte sinistra
+              (setq right (- mid 1)))))
+    out))
+
+Proviamo:
+
+(exp-search 50 '(1 13 34 50 60))
+;-> 3
+(exp-search 1 '(1 13 34 50 60))
+;-> 0
+(exp-search 60 '(1 13 34 50 60))
+;-> 4
+(exp-search 0 '(1 13 34 50 60))
+;-> nil
+(exp-search 61 '(1 13 34 50 60))
+;-> nil
+(exp-search 35 '(1 13 34 50 60))
+;-> nil
+
+(exp-search 50 '(1 13 34 50 60 77))
+;-> 3
+(exp-search 1 '(1 13 34 50 60 77))
+;-> 0
+(exp-search 60 '(1 13 34 50 60 77))
+;-> 4
+(exp-search 0 '(1 13 34 50 60 77))
+;-> nil
+(exp-search 61 '(1 13 34 50 60 77))
+;-> nil
+(exp-search 35 '(1 13 34 50 60 77))
+;-> nil
 
 ============================================================================
 
