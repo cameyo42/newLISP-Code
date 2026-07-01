@@ -7960,9 +7960,10 @@ b
 ;-> nil
 
 
-------------
-Quick Select
-------------
+-----------------------------
+Quick select (Top K Frequent)
+-----------------------------
+
 QuickSelect è un algoritmo di selezione per trovare l'elemento K-esimo più piccolo in un elenco non ordinato.
 
 Algoritmo

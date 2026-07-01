@@ -5646,5 +5646,147 @@ Esempio:
 (func 3)
 ;-> "Hello"
 
+
+----------------------
+Inversioni di elementi
+----------------------
+
+Dato un vettore di interi 'vec', trovare il conteggio delle inversioni nel vettore.
+Due elementi del vettore vec[i] e vec[j] formano un'inversione se risulta:
+
+  vec[i] > vec[j] e i < j.
+
+Il conteggio delle inversioni indica quanto il vettore è lontano (o vicino) dall'essere ordinato.
+Se l'array è ordinato in modo crescente, allora il conteggio delle inversioni è 0, ma se l'array è ordinato in ordine inverso, il conteggio delle inversioni è massimo.
+
+Metodo 1 (brute-force)
+----------------------
+Usiamo due cicli innestati verificando ogni possibile coppia di elementi e contando quante di queste coppie soddisfano la condizione di inversione.
+
+(define (inv-count vec)
+  (let ((len (length vec)) (inv 0))
+        (for (i 0 (- len 2))
+          (for (j (+ i 1) (- len 1))
+            ; Se l'elemento corrente è maggiore del successivo,
+            ; incrementa il contatore
+            (if (> (vec i) (vec j)) (++ inv))))
+        inv))
+
+Proviamo:
+
+(inv-count '(1 2 3 4 5 6))
+;-> 0
+(inv-count '(6 5 4 3 2 1))
+;-> 15
+(inv-count '(1 8 4 -6 9 0 -5 3 8 9 5 3 -3 2 6 5 4 3 2 -1))
+;-> 98
+
+Metodo 2 (merge-sort)
+---------------------
+Possiamo utilizzare l'algoritmo di merge sort per contare le inversioni in un array. Innanzitutto, dividiamo l'array in due metà: metà sinistra e metà destra.
+Successivamente, contiamo ricorsivamente le inversioni in entrambe le metà.
+Durante la fusione delle due metà, contiamo anche quanti elementi dell'array della metà sinistra sono maggiori degli elementi dell'array della metà destra, poiché queste rappresentano inversioni incrociate (ovvero, un elemento della metà sinistra dell'array è maggiore di un elemento della metà destra durante il processo di fusione nell'algoritmo di merge sort).
+Infine, sommiamo le inversioni della metà sinistra, della metà destra e le inversioni incrociate per ottenere il numero totale di inversioni nell'array.
+
+(define (extract obj start end)
+"Extract elements from a list/string (from start to (end -1) indexes)"
+  (if (nil? end)
+      (slice obj start)
+      (slice obj start (- end start))))
+
+; Questa funzione unisce due sotto-array ordinati arr[l..m] e arr[m+1..r]
+; e conta anche le inversioni nell'intero sotto-array arr[l..r].
+(define (count-merge l m r)
+  (letn ( ; Conta in due sotto-array
+          (n1 (+ (- m l) 1))
+          (n2 (- r m))
+          ; Imposta due liste per la metà sinistra e per la metà destra
+          (left (extract arr l (+ m 1)))
+          (right (extract arr (+ m 1) (+ r 1)))
+          ; Inizializza il conteggio delle inversioni
+          ; e unisce le due metà
+          (res 0)
+          (i 0)
+          (j 0)
+          (k l))
+      (while (and (< i n1) (< j n2))
+          ; Nessun incremento nel conteggio delle inversioni
+          ; se left[] ha un elemento minore o uguale
+          (if (<= (left i) (right j))
+            (begin (setf (arr k) (left i)) (++ i))
+          ;else
+            (begin (setf (arr k) (right j)) (++ j) (setq res (+ res (- n1 i)))))
+          (++ k))
+      ; Merge degli elementi rimanenti
+      (while (< i n1)
+          (setf (arr k) (left i))
+          (++ i)
+          (++ k))
+      (while (< j n2)
+          (setf (arr k) (right j))
+          (++ j)
+          (++ k))
+      res))
+
+; Funzione di base per contare le inversioni nell'array
+(define (count-inv-base l r)
+  (letn ((res 0)
+         (m (/ (+ l r) 2)))
+    (when (< l r)
+      ; Conta ricorsivamente le inversioni
+      ; nelle metà sinistra e destra
+      (setq res (+ res (count-inv-base l m)))
+      (setq res (+ res (count-inv-base (+ m 1) r)))
+      ; Conta le inversioni tali che l'elemento maggiore si trovi nella
+      ; metà sinistra e quello minore nella metà destra
+      (setq res (+ res (count-merge l m r))))
+    res))
+
+; Funzione main
+(define (conta-inv arr)
+  (setq len (length arr))
+  (count-inv-base 0 (- len 1)))
+
+Proviamo:
+
+(conta-inv '(1 2 3 4 5 6))
+;-> 0
+(conta-inv '(6 5 4 3 2 1))
+;-> 15
+(conta-inv '(1 8 4 -6 9 0 -5 3 8 9 5 3 -3 2 6 5 4 3 2 -1))
+;-> 98
+
+(setq t (rand 10 20))
+(inv-count t)
+;-> 104
+(conta-inv t)
+;-> 104
+
+
+-----------------------------------
+Ordinamento rigoroso di una matrice
+-----------------------------------
+
+Data una matrice MxN, ordinarla in ordine rigoroso.
+Per ordine rigoroso si intende che la matrice è ordinata in modo tale che tutti gli elementi di una riga siano ordinati in ordine crescente e che, per la riga 'i', dove 1 <= i <= m-1, il primo elemento sia maggiore o uguale all'ultimo elemento della riga 'i-1'.
+
+Esempio:
+matrice = 
+          | 5 4 7 |
+matrice = | 1 3 8 |
+          | 2 9 6 |
+
+          | 1 2 3 |
+output =  | 4 5 6 |
+          | 7 8 9 |
+
+(define (sort-matrix matrix)
+  (explode (sort (flat matrix)) 3))
+
+(setq m '((5 4 7) (1 3 8) (2 9 6)))
+
+(sort-matrix m)
+;-> ((1 2 3) (4 5 6) (7 8 9))
+
 ============================================================================
 

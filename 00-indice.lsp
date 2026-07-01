@@ -619,7 +619,7 @@ NOTE LIBERE 1
   Cifre crescenti e decrescenti
   Somma di numeri
   Operatori logici
-  Quick select
+  Quick select (Top K Frequent)
   Macchina di Turing
 
 NOTE LIBERE 2
@@ -3579,6 +3579,8 @@ NOTE LIBERE 37
   Sort string
   Ordinamento per frequenza (Frequency Sort)
   "Hello" in ritardo
+  Inversioni di elementi
+  Ordinamento rigoroso di una matrice
 
 PROBLEMI SUI DADI
 =================
