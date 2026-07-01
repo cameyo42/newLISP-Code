@@ -3576,6 +3576,9 @@ NOTE LIBERE 37
   Media della somma delle lunghezze dei numeri binari
   Numeri generati dal lancio ripetuto di un dado
   Ricerca esponenziale
+  Sort string
+  Ordinamento per frequenza (Frequency Sort)
+  "Hello" in ritardo
 
 PROBLEMI SUI DADI
 =================

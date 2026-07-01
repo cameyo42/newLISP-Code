@@ -5508,5 +5508,143 @@ Proviamo:
 (exp-search 35 '(1 13 34 50 60 77))
 ;-> nil
 
+(exp-search -77 '(-77 -60 -34 -1 0 1 13 50 77)
+;-> 0
+(exp-search -98 '(-77 -60 -34 -1 0 1 13 50 77))
+;-> nil
+(exp-search -1 '(-77 -60 -34 -1 0 1 13 50 77))
+;-> 3
+
+
+-----------
+Sort string
+-----------
+
+; Funzione che ordina i caratteri di una stringa
+(define (sort-str str)
+(join (sort (explode str))))
+
+(sort-str "sdgFfsdHjg")
+
+; Funzione che ordina i caratteri di ogni stringa di una lista
+(define (sort-str-lst lst) (map sort-str lst))
+
+(sort-str-lst '("cbaabc" "zyx" "9 8 7 6"))
+
+
+------------------------------------------
+Ordinamento per frequenza (Frequency Sort)
+------------------------------------------
+
+Data una lista di elementi, ordinare la lista in base alla frequenza degli elementi.
+Esempio
+  lista = ("c" "c" "b" "b" "a")
+  output = ("b" "b" "c" "c" "a")
+
+La funzione 'bayes-train' calcola le frequenze degli elementi di una lista:
+(bayes-train '("c" "c" "b" "b" "a") 'L)
+;-> 5 ; numero di elementi della lista
+
+Il risultato si trova nel contesto L (passato come parametro)
+(L)
+;-> (("a" (1)) ("b" (2)) ("c" (2)))
+
+Adesso basta ricostruire la lista ordinata:
+
+(setq lst (L))
+
+(define (comp x y) (>= (last x) (last y)))
+
+(sort lst comp)
+;-> (("b" (2)) ("c" (2)) ("a" (1)))
+
+(setq sol '())
+
+(dolist (el lst)
+  (extend sol (dup (el 0) (first (el 1)) true)))
+;-> ("b" "b" "c" "c" "a")
+
+La funzione 'bayes-train' agisce in modo incrementale, se la usiamo con un'altra lista e lo stesso contesto, allora il risultato viene 'aggiunto' ai dati già presenti nel contesto.
+
+Per eliminare un contesto usiamo 'delete':
+(delete 'L)
+;-> true
+(L)
+;-> ERR: invalid function : (L)
+
+Per passare il contesto come parametro ad una funzione abbiamo due metodi:
+
+1) Uso di 'eval' (il contesto va passato come parametro quotato)
+
+(define-macro (test ctx)
+  (bayes-train '("c" "c" "b" "b" "a") (eval ctx)))
+
+(test 'A)
+;-> (5)
+(A)
+;-> (("a" (1)) ("b" (2)) ("c" (2)))
+
+2) Uso di '(args)' (il contesto va passato come parametro non quotato)
+
+(define-macro (test)
+  (bayes-train '("c" "c" "b" "b" "a") (args 0)))
+
+(test B)
+;-> (5)
+(B)
+;-> (("a" (1)) ("b" (2)) ("c" (2)))
+
+; Funzione che ordina gli elementi di una lista
+; in base alla loro frequenza e al loro valore
+(define (sort-bayes lst)
+  (define (comp x y) (>= (last x) (last y)))
+  (let ((out '()))
+    (bayes-train lst (args 0))
+    (setq lst ((eval (args 0))))
+    (sort lst comp)
+    (setq out '())
+    (dolist (el lst)
+      (extend out (dup (el 0) (first (el 1)) true)))
+    out))
+
+Proviamo:
+
+(sort-bayes '("c" "c" "b" "b" "a") 'C1)
+;-> ("b" "b" "c" "c" "a")
+
+(sort-bayes (explode "cuccurella") 'C2)
+;-> ("c" "c" "c" "l" "l" "u" "u" "a" "e" "r")
+
+Se usiamo lo stesso contesto:
+(sort-bayes (explode "cuccurella") 'C2)
+;-> ("c" "c" "c" "c" "c" "c" "l" "l" "l" "l" "u" "u" "u" "u"
+;->  "a" "a" "e" "e" "r" "r")
+
+
+------------------
+"Hello" in ritardo
+------------------
+
+Scrivere una funzione che genera prende un intero N e stampa "Hello" l'N-esima volta che viene chiamata (sempre con lo stesso parametro N), altrimenti restituisce nil.
+
+Esempio:
+  (func 2)
+  ;-> nil
+  (func 2)
+  ;-> "Hello"
+
+;(setq idx 0)
+
+(define (func n)
+  (inc idx)
+  (when (= idx n) (setq idx 0) "Hello"))
+
+(func 3)
+;-> nil
+(func 3)
+;-> nil
+(func 3)
+;-> "Hello"
+
 ============================================================================
 
