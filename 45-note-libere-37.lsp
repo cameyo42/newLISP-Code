@@ -5788,5 +5788,272 @@ output =  | 4 5 6 |
 (sort-matrix m)
 ;-> ((1 2 3) (4 5 6) (7 8 9))
 
+
+--------------------------------------
+Ordinare numeri da 1 a N (Ciclyc Sort)
+--------------------------------------
+
+Data una lista composta da numeri interi distinti da 1 a N, ordinare la lista senza utilizzare spazio aggiuntivo.
+
+La funzione 'sort' è sicuramente il metodo più veloce, ma usa spazio aggiuntivo.
+Allora usiamo il metodo dell'ordinamento ciclico (Cyclic Sort, O(n) Tempo, O(1) Spazio).
+
+Algoritmo Cyclic Sort algorithm
+1) Attraversare la lista.
+2) Se un elemento si trova nella sua posizione corretta, non fare nulla.
+3) Altrimenti, scambia l'elemento con l'elemento nella sua posizione corretta.
+
+(define (ciclyc lst)
+    (let ((len (length lst)) (i 0))
+      (while (< i len)
+        ; se l'elemento corrente non si trova nella posizione corretta,
+        ; allora lo scambia
+        (if-not (= (lst (- (lst i) 1)) (lst i))
+            (swap (lst i) (lst (- (lst i) 1)))
+            ;else
+            ; 'i' viene incrementata solo quando (lst i) ha il valore corretto
+            (++ i)))
+      lst))
+
+Proviamo:
+
+(ciclyc '(6 5 4 3 2 1))
+;-> (1 2 3 4 5 6)
+(ciclyc (randomize (sequence 1 20)))
+;-> (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
+
+
+------------------------------------------
+Bilanciamento parentesi in una espressione
+------------------------------------------
+
+Data una stringa S, composta da diverse combinazioni di '(' , ')', '{', '}', '[', ']', determinare se l'espressione è bilanciata o meno.
+Un'espressione è bilanciata se:
+- Ogni parentesi aperta ha una parentesi chiusa corrispondente dello stesso tipo.
+- Le parentesi aperte devono essere chiuse nell'ordine corretto.
+
+Nel caso generale bisogna permettere qualsiasi annidamento, purché ogni parentesi venga chiusa con quella corrispondente.
+Esempio:
+  S = "( [ { } ] [ ] } ( { } ) )"
+
+La soluzione più semplice è utilizzare una pila (stack) delle parentesi aperte.
+
+(define (par-check1 s)
+  (local (out stack ch)
+    (setq out true)
+    (setq stack '())
+    (dostring (c s (= out nil))
+      (setq ch (char c))
+      (cond
+        ((= ch "(") (push "(" stack))
+        ((= ch "[") (push "[" stack))
+        ((= ch "{") (push "{" stack))
+        ((= ch ")")
+          (if (or (null? stack) (!= (first stack) "("))
+              (setq out nil)
+              (pop stack)))
+        ((= ch "]")
+          (if (or (null? stack) (!= (first stack) "["))
+              (setq out nil)
+              (pop stack)))
+        ((= ch "}")
+          (if (or (null? stack) (!= (first stack) "{"))
+              (setq out nil)
+              (pop stack)))))
+    ;(println stack)
+    (if (and out (null? stack))
+        true
+        nil)))
+
+Proviamo:
+
+(par-check1 "( [ { } ] )")
+;-> true
+(par-check1 "{ [ ( ) ] }")
+;-> true
+(par-check1 "{ [ ( ] ) }")
+;-> nil
+(par-check1 "{ ( [ ] ) }")
+;-> true
+(par-check1 "([{}])")
+;-> true
+(par-check1 "({[]})")
+;-> true
+(par-check1 "([)]")
+;-> nil
+(par-check1 "{[(])}")
+;-> nil
+(par-check1 "{")
+;-> nil
+(par-check1 "}")
+;-> nil
+(par-check1 "")
+;-> true
+(par-check1 "{ { ( [ ] ) } }")
+;-> true
+(par-check1 "")
+; true
+(par-check1 "()")
+; true
+(par-check1 "[]")
+; true
+(par-check1 "{}")
+; true
+(par-check1 "{[]()}")
+; true
+(par-check1 "([)]")
+; nil
+(par-check1 "{[(])}")
+; nil
+(par-check1 "{[()]}")
+; true
+(par-check1 "{([])}")
+; nil
+(par-check1 "{{{{}}}}")
+; true
+(par-check1 "(((( ))))")
+; true
+(par-check1 "((((}")
+; nil
+(par-check1 "}}")
+; nil
+(par-check1 "{{}}]")
+; nil
+
+Questa versione è facilmente estendibile: se vogliamo aggiungere altri tipi di delimitatori (es. '< >', ecc.), basta aggiungere i relativi casi senza modificare l'algoritmo, che rimane sempre basato sulla pila delle parentesi aperte.
+
+Un altro metodo impone il seguente ordine alle parentesi:
+
+  { ... [ ... ( ... ) ... ] ... }
+
+cioè:
+- "(" può comparire solo all'interno di "[".
+- "[" può comparire solo all'interno di "{".
+- "{" non può comparire all'interno di "(" o "[".
+
+Questo è diverso dalla funzione 'par-check1' che effettua il classico controllo delle parentesi bilanciate.
+
+(define (par-check2 s op)
+  (local (out p1o p2o p3o ch)
+    (set 'p1o 0 'p2o 0 'p3o 0)
+    (setq out true)
+    (dostring (c s (nil? out))
+      (setq ch (char c))
+      (cond 
+        ((= ch "(") (++ p1o))
+        ((= ch "[")
+          ; esiste una par "(" non chiusa
+          (if (> p1o 0) (setq out nil) (++ p2o)))
+        ((= ch "{")
+          ; esiste una par "(" o "[" non chiusa
+          (if (or (> p1o 0) (> p2o 0)) (setq out nil) (++ p3o)))
+        ((= ch ")")
+          ; nessuna par "(" da chiudere
+          (if (= p1o 0) (setq out nil) (-- p1o)))
+        ((= ch "]")
+          ; esiste una par ")" da chiudere OR
+          ; nessuna par "[" da chiudere
+          (if (or (> p1o 0) (= p2o 0)) (setq out nil) (-- p2o)))
+        ((= ch "}")
+          ; esiste una par ")" da chiudere OR
+          ; esiste una par "]" da chiudere OR
+          ; nessuna par "{" da chiudere
+          (if (or (> p1o 0) (> p2o 0) (= p3o 0)) (setq out nil) (-- p3o)))))
+    ; controllo accoppiamento parentesi ed errore
+    ;(println p1o { } p2o { } p3o)
+    (if (and (zero? p1o) (zero? p2o) (zero? p3o) (= out true))
+      true
+      nil)))
+
+Proviamo:
+
+(par-check2 "{ { ( [ [ ( ) ] ] ) } }")
+;-> nil
+(par-check2 "{ { ( [ [ ( ( ) ] ] ) } }")
+;-> nil
+(par-check2 "{ { [ [ [ ( ) ] ] ] } }")
+;-> true
+(par-check2 "{ { [ [ } } [ ( ) ] ] ]")
+;-> nil
+(par-check2 "{ { [ [ [ ( ) ] ] ] } { [ ( ) ] } }")
+;-> true
+(par-check2 "{ { [ [ [ ( [ ] ) ] ] ] } { [ ( ) ] } }")
+;-> nil
+(par-check2 "")
+; true
+(par-check2 "()")
+; true
+(par-check2 "[]")
+; true
+(par-check2 "{}")
+; true
+(par-check2 "{[]()}")
+; true
+(par-check2 "([)]")
+; nil
+(par-check2 "{[(])}")
+; nil
+(par-check2 "{[()]}")
+; true
+(par-check2 "{([])}")
+; nil
+(par-check2 "{{{{}}}}")
+; true
+(par-check2 "(((( ))))")
+; true
+(par-check2 "((((}")
+; nil
+(par-check2 "}}")
+; nil
+(par-check2 "{{}}]")
+; nil
+
+
+----------------------
+find-floor e find-ceil
+----------------------
+
+Data una lista di interi scrivere le seguenti funzioni:
+1) (find-floor x lst)
+Cerca su lst il numero più vicino o uguale a x e minore o uguale a x.
+2) (find-ceil x lst)
+Cerca su lst il numero più vicino o uguale a x e maggiore o uguale a x.
+
+Algoritmo:
+Attraversiamo tutta la lista una volta mantenendo il valore più vicino trovato (minore o maggiore di x).
+Tempo: O(n), Spazio: O(1)
+
+(define (find-floor x lst)
+  (let ((out nil) (diff 1e8))
+    (dolist (el lst)
+      (if (and (<= el x) (< (- x el) diff))
+          (set 'out el 'diff (- x el))))
+    out))
+
+(find-floor 4 '(-2 4 6 8))
+;-> 4
+(find-floor 1 '(-2 4 6 8))
+;-> -2
+(find-floor 9 '(-2 4 6 8))
+;-> 8
+(find-floor -3 '(-2 4 6 8))
+;-> nil
+
+(define (find-ceil x lst)
+  (let ((out nil) (diff 1e8))
+    (dolist (el lst)
+      (if (and (>= el x) (< (- el x) diff))
+          (set 'out el 'diff (- el x))))
+    out))
+
+(find-ceil 4 '(-2 4 6 8))
+;-> 4
+(find-ceil 1 '(-2 4 6 8))
+;-> 4
+(find-ceil 9 '(-2 4 6 8))
+;-> nil
+(find-ceil -3 '(-2 4 6 8))
+;-> -2
+
 ============================================================================
 

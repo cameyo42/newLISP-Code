@@ -4374,7 +4374,8 @@ a@
 
 Nota: la lista a@ (var-str"@") è una variabile/simbolo globale.
 
-L'implementazione può essere migliorata con delle macro per permettere la storicizzazione anche di stringhe e liste. Inoltre dovrebbe essere creato un contesto apposito, ma per le mie necessità è sufficiente.
+L'implementazione può essere migliorata con delle macro per permettere la storicizzazione anche di stringhe e liste.
+Inoltre dovrebbe essere creato un contesto apposito, ma per le mie necessità è sufficiente.
 
 
 ----------------
@@ -4427,7 +4428,7 @@ Vediamo se otteniamo la stessa sequenza OEIS:
 Secondi -> periodo
 ------------------
 
-Scrivere una funzione che accetta in ingresso un numero intero positivo che rappresenta una durata in secondi e   restituisce una stringa che mostra la stessa durata scomposta in settimane, giorni, ore, minuti e secondi.
+Scrivere una funzione che accetta in ingresso un numero intero positivo che rappresenta una durata in secondi e restituisce una stringa che mostra la stessa durata scomposta in settimane, giorni, ore, minuti e secondi.
 Per esempio:
 
   Secondi     Output
@@ -8645,7 +8646,15 @@ Funzione che calcola i numeri Armstrong fino ad un determinato limite:
 ;->  92727 93084 548834 1741725 4210818 9800817 9926315)
 ;-> 108572.944
 
-I numeri Armstrong vengono utilizzati nella sicurezza sulla trasmissione di dati. Il primo passo consiste nell'assegnare un colore univoco a ciascun destinatario (receiver). Ogni colore è rappresentato con un insieme di tre valori. Ad esempio il colore rosso viola è rappresentato in formato RGB come (238, 58,140). Poi si assegna una serie di tre valori chiave a ciascun destinatario. Il mittente (sender) è a conoscenza del destinatario richiesto a cui devono essere inviati i dati. Quindi il colore univoco del destinatario viene utilizzato come password. Il set di tre valori chiave viene aggiunto ai valori del colore originale e crittografato dal lato del mittente. Questo colore crittografato funge effettivamente da password. I dati effettivi vengono crittografati utilizzando i numeri Armstrong.
+I numeri Armstrong vengono utilizzati nella sicurezza sulla trasmissione di dati.
+Il primo passo consiste nell'assegnare un colore univoco a ciascun destinatario (receiver).
+Ogni colore è rappresentato con un insieme di tre valori.
+Ad esempio il colore rosso viola è rappresentato in formato RGB come (238, 58,140).
+Poi si assegna una serie di tre valori chiave a ciascun destinatario.
+Il mittente (sender) è a conoscenza del destinatario richiesto a cui devono essere inviati i dati.
+Quindi il colore univoco del destinatario viene utilizzato come password.
+Il set di tre valori chiave viene aggiunto ai valori del colore originale e crittografato dal lato del mittente. Questo colore crittografato funge effettivamente da password.
+I dati effettivi vengono crittografati utilizzando i numeri Armstrong.
 
 Ottimizziamo la funzione precalcolando le potenze:
 
@@ -8679,11 +8688,14 @@ Ottimizziamo la funzione precalcolando le potenze:
 Evoluzione dell'algoritmo per la moltiplicazione di due numeri interi
 ---------------------------------------------------------------------
 
-L'algoritmo standard per la moltiplicazione di interi è quello scolastico con riporto ed ha una complessità temporale O(N^2). Solo nel 1960 è stato sviluppato un nuovo algoritmo (karatsuba) con tempo O(N^1.58) e nel 1970 è stato dimostrato che l'agoritmo più veloce possibile ha complessità O(N*logN).
+L'algoritmo standard per la moltiplicazione di interi è quello scolastico con riporto ed ha una complessità temporale O(N^2).
+Solo nel 1960 è stato sviluppato un nuovo algoritmo (karatsuba) con tempo O(N^1.58) e nel 1970 è stato dimostrato che l'agoritmo più veloce possibile ha complessità O(N*logN).
 
-Ci sono voluti più di 60 anni per passare da O(N^2) a O(N*logN), ma è stato un viaggio interessante. Questo è un momento importante perché si tratta di uno dei pochi argomenti fondamentali che l'uomo sia riuscito a capire ed ottimizzare al limite.
+Ci sono voluti più di 60 anni per passare da O(N^2) a O(N*logN), ma è stato un viaggio interessante.
+Questo è un momento importante perché si tratta di uno dei pochi argomenti fondamentali che l'uomo sia riuscito a capire ed ottimizzare al limite.
 
-Nel 1971 è stato sviluppato l'algoritmo di Schonhage Strassen che funziona con tempo O(N*logN*loglogN) e ha mantenuto il record per 36 anni prima di essere battuto dall'algoritmo di Furer nel 2007. Da allora, i progressi sono stati costanti e un algoritmo con tempo O(N*logN), scoperto nel marzo 2019, è la possibile fine di questa ricerca umana.
+Nel 1971 è stato sviluppato l'algoritmo di Schonhage Strassen che funziona con tempo O(N*logN*loglogN) e ha mantenuto il record per 36 anni prima di essere battuto dall'algoritmo di Furer nel 2007.
+Da allora, i progressi sono stati costanti e un algoritmo con tempo O(N*logN), scoperto nel marzo 2019, è la possibile fine di questa ricerca umana.
 
 La tabella seguente gli algoritmi che hanno definito questa era:
 
@@ -8728,7 +8740,8 @@ L'algoritmo di Schonhage Strassen è uno dei più grandi progressi compiuti nell
 
 Ha una complessità temporale di O(N*logN*loglogN) e utilizza l'idea della Fast Fourier Transform.
 
-Sebbene questo fosse un passo importante, ci sono voluti diversi anni per migliorarlo. Questo ha dato la sensazione che il dominio stesse diventando troppo complicato da affrontare ma, come sappiamo, alla fine ce l'abbiamo fatta.
+Sebbene questo fosse un passo importante, ci sono voluti diversi anni per migliorarlo.
+Questo ha dato la sensazione che il dominio stesse diventando troppo complicato da affrontare ma, come sappiamo, alla fine ce l'hanno fatta.
 
 2007: la svolta
 ---------------

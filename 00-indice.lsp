@@ -3581,6 +3581,9 @@ NOTE LIBERE 37
   "Hello" in ritardo
   Inversioni di elementi
   Ordinamento rigoroso di una matrice
+  Ordinare numeri da 1 a N (Ciclyc Sort)
+  Bilanciamento parentesi in una espressione
+  find-floor e find-ceil
 
 PROBLEMI SUI DADI
 =================
