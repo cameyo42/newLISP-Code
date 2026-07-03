@@ -3584,6 +3584,8 @@ NOTE LIBERE 37
   Ordinare numeri da 1 a N (Ciclyc Sort)
   Bilanciamento parentesi in una espressione
   find-floor e find-ceil
+  Coppia con somma massima
+  Somma 2 e Somma 3 (sum2 and sum3)
 
 PROBLEMI SUI DADI
 =================

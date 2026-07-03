@@ -6015,9 +6015,11 @@ find-floor e find-ceil
 
 Data una lista di interi scrivere le seguenti funzioni:
 1) (find-floor x lst)
-Cerca su lst il numero più vicino o uguale a x e minore o uguale a x.
+Cerca su lst il numero più vicino a x che è minore o uguale a x.
+Se non esiste, restituisce nil.
 2) (find-ceil x lst)
-Cerca su lst il numero più vicino o uguale a x e maggiore o uguale a x.
+Cerca su lst il numero più vicino a x che è maggiore o uguale a x.
+Se non esiste, restituisce nil.
 
 Algoritmo:
 Attraversiamo tutta la lista una volta mantenendo il valore più vicino trovato (minore o maggiore di x).
@@ -6054,6 +6056,522 @@ Tempo: O(n), Spazio: O(1)
 ;-> nil
 (find-ceil -3 '(-2 4 6 8))
 ;-> -2
+
+
+------------------------
+Coppia con somma massima
+------------------------
+
+Data una lista di interi a1, a2, ..., an determinare la coppia di elementi a(i) e a(i+k) che hanno somma massima.
+Il valore di k può variare da 0 a n (lunghezza della lista).
+Con k = 0, la coppia è a(i) e a(i).
+La lista può anche essere vuota.
+
+(define (maxsum lst k)
+  (local (len max-val a b t1 t2)
+    (setq len (length lst))
+    (cond
+      ((or (= len 0) (= len 1)) nil)
+      ((>= k len) nil)
+      (true
+        ;(setq max-val (- 1e99)) ;(no 'numeri magici')
+        (setq max-val (+ (lst 0) (lst k)))
+        (setq a (lst 0))
+        (setq b (lst k))
+        (for (i 0 (- len k 1))
+          (setq t1 (lst i))
+          (setq t2 (lst (+ i k)))
+          (when (> (+ t1 t2) max-val)
+            (setq max-val (+ t1 t2))
+            (set 'a t1 'b t2)))
+        (list max-val (list a b))))))
+
+Proviamo:
+
+(maxsum '(1 4) 1)
+;-> (5 (1 4))
+(maxsum '(1 4) 2)
+;-> nil
+(maxsum '(1 4 5) 2)
+;-> (6 (1 5))
+(maxsum '(1 4 3) 2)
+;-> (4 (1 3))
+(maxsum '(1 4 3 5) 0)
+;-> (10 (5 5))
+(maxsum '(1 4 2 6 3 4 7 8 3 9 2 3 5) 1)
+;-> (15 (7 8))
+
+
+---------------------------------
+Somma 2 e Somma 3 (sum2 and sum3)
+---------------------------------
+
+Data una lista e un numero intero, trovare tutte le possibili coppie uniche nella lista la cui somma è uguale all'intero dato.
+
+Data una lista e un numero intero, trovare tutte le possibili terne uniche nella lista la cui somma è uguale all'intero dato.
+
+I numeri della lista possono essere usati più volte, ma solo per comporre coppie o terne diverse.
+
+Algoritmo (brute-force)
+-----------------------
+Uso di due/tre cicli innestati per generare e controllare tutte le triple possibili.
+
+; Funzione sum2 (elementi usati più volte in terne diverse)
+(define (sum2 x lst)
+  (let ((out '()) (len (length lst)))
+    (for (i 0 (- len 2))
+      (for (j (+ i 1) (- len 1))
+          ;(print (lst i) { } (lst j)) (read-line)
+          (when (= x (+ (lst i) (lst j)))
+              (setq cur (sort (list (lst i) (lst j))))
+              (if-not (find cur out) (push cur out -1)))))
+    out))
+
+(setq a '(12 3 6 1 6 9 0 -3))
+(sum2 9 a)
+;-> ((-3 12) (3 6) (0 9))
+
+; Funzione sum3 (elementi usati più volte in terne diverse)
+(define (sum3 x lst)
+  (let ((out '()) (len (length lst)))
+    (for (i 0 (- len 3))
+      (for (j (+ i 1) (- len 2))
+        (for (k (+ j 1) (- len 1))
+          ;(print (lst i) { } (lst j) { } (lst k)) (read-line)
+          (when (= x (+ (lst i) (lst j) (lst k)))
+              (setq cur (sort (list (lst i) (lst j) (lst k))))
+              (if-not (find cur out) (push cur out -1))))))
+    out))
+
+(setq a '(12 3 6 1 6 9))
+(sum3 24 a)
+;-> ((3 9 12) (6 6 12))
+
+Adesso vediamo i casi in cui ogni elemento della lista può essere usato SOLO una volta.
+
+In questo caso il problema diventa:
+1) generare tutte le terne valide (meglio memorizzando gli indici e non solo i valori);
+2) scegliere ricorsivamente un insieme di terne che non condividano alcun indice.
+Il backtracking è la scelta naturale.
+
+Algoritmo (backtracking)
+------------------------
+1) Generare tutte le terne (i j k) tali che: lst[i] + lst[j] + lst[k] = x
+2) Visitare una terna alla volta.
+3) Se nessuno dei tre indici è già stato usato:
+   - marcare i tre indici come usati;
+   - aggiungere la terna alla soluzione corrente;
+   - continuare ricorsivamente.
+4) Alla fine confrontare la soluzione corrente con la migliore trovata (ad esempio quella con il maggior numero di terne).
+5) Annullare le modifiche (backtracking) e provare la terna successiva.
+
+Per l'implementazione usiamo:
+- una lista 'triples' contenente gli indici delle terne
+- un vettore/lista used di booleani
+- una funzione ricorsiva (cerca pos) che verifica la terna corrente
+  (cioè decide se la terna corrente deve essere presa)
+La funzione restituisce una soluzione con il numero massimo di terne disgiunte.
+Se esistono più soluzioni ottimali, restituisce la prima trovata durante la ricerca.
+
+; Funzione sum3-back (elementi usati solo una volta)
+(define (sum3-back x lst)
+  (local (triples used cur best len)
+    ;---------------------------------------------------------------
+    ; Genera tutte le terne di indici (i j k) tali che:
+    ; lst[i] + lst[j] + lst[k] = x
+    ; Si memorizzano gli indici e non i valori per distinguere
+    ; elementi uguali presenti in posizioni diverse della lista.
+    ;---------------------------------------------------------------
+    (setq triples '())
+    (setq len (length lst))
+    (for (i 0 (- len 3))
+      (for (j (+ i 1) (- len 2))
+        (for (k (+ j 1) (- len 1))
+          (when (= (+ (lst i) (lst j) (lst k)) x)
+            (push (list i j k) triples -1)))))
+    ;---------------------------------------------------------------
+    ; 'used' è un vettore di valori booleani.
+    ; used[i] = true  -> l'elemento lst[i] è già stato usato
+    ; used[i] = nil   -> l'elemento lst[i] è ancora disponibile
+    ;---------------------------------------------------------------
+    (setq used (dup nil len))
+    ;---------------------------------------------------------------
+    ; 'cur'  contiene la soluzione corrente.
+    ; 'best' contiene la migliore soluzione trovata.
+    ; Una soluzione è migliore se contiene più terne.
+    ;---------------------------------------------------------------
+    (setq cur '())
+    (setq best '())
+    ;---------------------------------------------------------------
+    ; Ricerca con backtracking.
+    ; 'pos' è l'indice della terna corrente nella lista 'triples'.
+    ; Per ogni terna si considerano due possibilità:
+    ; 1) ignorarla;
+    ; 2) usarla, se nessuno dei tre elementi è già stato utilizzato.
+    ;---------------------------------------------------------------
+    (define (cerca pos)
+      (if (= pos (length triples))
+          ;---------------------------------------------------------
+          ; Sono state esaminate tutte le terne.
+          ; Se la soluzione corrente è migliore della precedente,
+          ; la si copia in 'best'.
+          ;---------------------------------------------------------
+          (if (> (length cur) (length best))
+              (setq best (copy cur)))
+          (begin
+            ;-------------------------------------------------------
+            ; Primo ramo: non utilizzare la terna corrente.
+            ;-------------------------------------------------------
+            (cerca (+ pos 1))
+            ;-------------------------------------------------------
+            ; Secondo ramo: utilizzare la terna corrente solo se
+            ; tutti e tre gli elementi della lista sono liberi.
+            ;-------------------------------------------------------
+            (let ((t (triples pos)))
+              (let ((i (t 0)) (j (t 1)) (k (t 2)))
+                (when (and (not (used i))
+                           (not (used j))
+                           (not (used k)))
+                  ;-------------------------------------------------
+                  ; Marca i tre elementi come utilizzati.
+                  ;-------------------------------------------------
+                  (setf (used i) true)
+                  (setf (used j) true)
+                  (setf (used k) true)
+                  ;-------------------------------------------------
+                  ; Inserisce la terna nella soluzione corrente.
+                  ;-------------------------------------------------
+                  (push t cur -1)
+                  ;-------------------------------------------------
+                  ; Continua la ricerca.
+                  ;-------------------------------------------------
+                  (cerca (+ pos 1))
+                  ;-------------------------------------------------
+                  ; Backtracking:
+                  ; rimuove la terna dalla soluzione corrente e
+                  ; rende nuovamente disponibili i tre elementi.
+                  ;-------------------------------------------------
+                  (pop cur -1)
+                  (setf (used i) nil)
+                  (setf (used j) nil)
+                  (setf (used k) nil)))))))
+    ; Avvia la ricerca.
+    (cerca 0)
+    ;---------------------------------------------------------------
+    ; Converte le terne di indici nelle corrispondenti terne di
+    ; valori e ordina i tre elementi di ciascuna terna.
+    ;---------------------------------------------------------------
+    (map (fn (t)
+           (sort (list (lst (t 0))
+                       (lst (t 1))
+                       (lst (t 2)))))
+         best)))
+
+(setq a '(12 3 6 1 6 9))
+(sum3-back 24 a)
+;-> ((6 6 12))
+
+Quando gli elementi da sommare sono due, l'algoritmo è identico, ma invece di generare tutte le terne si generano tutte le coppie (i j) con: lst[i] + lst[j] = x
+Il backtracking sceglie poi il massimo numero di coppie disgiunte.
+
+Lo schema è:
+genera tutte le coppie
+cerca(pos)
+    se pos = numero_coppie
+        aggiorna la soluzione migliore
+        termina
+    ; non usare la coppia
+    cerca(pos + 1)
+    ; usare la coppia
+    se i e j sono liberi
+        marca i e j
+        aggiungi la coppia
+        cerca(pos + 1)
+        rimuovi la coppia
+        smarca i e j
+
+; Funzione sum2-back (elementi usati solo una volta)
+(define (sum2-back x lst)
+  (local (pairs used cur best len)
+    ;---------------------------------------------------------------
+    ; Generazione di tutte le coppie di indici (i j) tali che:
+    ; lst[i] + lst[j] = x
+    ; Vengono salvati gli INDICI per distinguere valori uguali
+    ; presenti in posizioni diverse della lista.
+    ;---------------------------------------------------------------
+    (setq pairs '())
+    (setq len (length lst))
+    (for (i 0 (- len 2))
+      (for (j (+ i 1) (- len 1))
+        (when (= (+ (lst i) (lst j)) x)
+          (push (list i j) pairs -1))))
+    ;---------------------------------------------------------------
+    ; Struttura di controllo degli elementi già utilizzati.
+    ; used[i] = true  -> elemento lst[i] già assegnato a una coppia
+    ; used[i] = nil   -> elemento ancora disponibile
+    ;---------------------------------------------------------------
+    (setq used (dup nil len))
+    ;---------------------------------------------------------------
+    ; cur  -> soluzione corrente (insieme di coppie scelte)
+    ; best -> migliore soluzione trovata (massimo numero di coppie)
+    ;---------------------------------------------------------------
+    (setq cur '())
+    (setq best '())
+    ;---------------------------------------------------------------
+    ; Funzione di backtracking:
+    ; pos indica la coppia corrente nella lista 'pairs'.
+    ; Per ogni coppia ci sono due scelte:
+    ; 1) ignorarla
+    ; 2) usarla se entrambi gli elementi sono liberi
+    ;---------------------------------------------------------------
+    (define (cerca pos)
+      (if (= pos (length pairs))
+          ;---------------------------------------------------------
+          ; Caso base: tutte le coppie sono state considerate.
+          ; Se la soluzione corrente è migliore, aggiorna best.
+          ;---------------------------------------------------------
+          (if (> (length cur) (length best))
+              (setq best (copy cur)))
+          (begin
+            ;-------------------------------------------------------
+            ; Caso 1: non usare la coppia corrente
+            ;-------------------------------------------------------
+            (cerca (+ pos 1))
+            ;-------------------------------------------------------
+            ; Caso 2: usare la coppia corrente se possibile
+            ;-------------------------------------------------------
+            (let ((p (pairs pos)))
+              (let ((i (p 0)) (j (p 1)))
+                (when (and (not (used i))
+                           (not (used j)))
+                  ;-----------------------------------------------
+                  ; Marca i due elementi come utilizzati
+                  ;-----------------------------------------------
+                  (setf (used i) true)
+                  (setf (used j) true)
+                  ;-----------------------------------------------
+                  ; Aggiunge la coppia alla soluzione corrente
+                  ;-----------------------------------------------
+                  (push p cur -1)
+                  ;-----------------------------------------------
+                  ; Continua la ricerca
+                  ;-----------------------------------------------
+                  (cerca (+ pos 1))
+                  ;-----------------------------------------------
+                  ; Backtracking: rimuove la coppia e libera i nodi
+                  ;-----------------------------------------------
+                  (pop cur -1)
+                  (setf (used i) nil)
+                  (setf (used j) nil)))))))
+    ; Avvio della ricerca
+    (cerca 0)
+    ;---------------------------------------------------------------
+    ; Conversione finale:
+    ; da coppie di indici -> coppie di valori della lista
+    ; Restituisce la soluzione migliore trovata
+    ;---------------------------------------------------------------
+    (map (fn (p)
+           (list (lst (p 0))
+                 (lst (p 1))))
+         best)))
+
+(setq a '(12 3 6 1 6 9 0 -3))
+(sum2-back 9 a)
+;-> ((12 -3) (3 6) (9 0))
+
+Comunque in questo ultimo caso (sum2 con elementi usati solo una volta) esistono anche altri algoritmi.
+
+Algoritmo
+---------
+Scorriamo la lista una volta sola e usiamo una hash-table (lista):
+  - per ogni elemento v
+  - cerchiamo se esiste x - v ancora disponibile
+  - se sì -> formiamo la coppia e li rimuoviamo entrambi
+Questo evita completamente le coppie esplicite e il backtracking:
+
+(define (remove elt lst)
+"Remove an element from a list (first occurrence)"
+  (let ((elt-pos (ref elt lst)))
+    (if elt-pos (pop lst elt-pos))
+    lst))
+
+; Funzione sum2-1 (elementi usati solo una volta)
+(define (sum2-1 x lst)
+  (local (seen out u)
+    (setq seen '())
+    (setq out '())
+    (dolist (v lst)
+      (setq u (- x v))
+      (if (find u seen)
+          (begin
+            ; rimuove u per non riusarlo
+            (setq seen (remove u seen))
+            (push (list u v) out -1))
+          (push v seen -1)))
+    out))
+
+(setq a '(12 3 6 1 6 9 0 -3))
+(sum2-1 9 a)
+;-> ((3 6) (9 0) (12 -3))
+
+(setq t (rand 100 30))
+(sum2-back 100 t)
+;-> ((3 97) (86 14) (64 36) (92 8) (10 90))
+(sum2-1 100 t)
+;-> ((86 14) (8 92) (64 36) (90 10) (3 97))
+(time (sum2-back 100 t) 1e4)
+;-> 1217.884
+(time (sum2-1 100 t) 1e4)
+;-> 82.041
+
+(setq v (rand 100 100))
+(time (println (sum2-1 100 v)))
+;-> ((39 61) (35 65) (54 46) (4 96) (69 31) (60 40) (16 84) (6 94)
+;->  (38 62) (14 86) (72 28) (61 39) (99 1) (97 3) (7 93) (21 79)
+;->  (54 46) (19 81) (23 77) (38 62) (11 89) (4 96) (5 95))
+;-> 9.831
+
+Un altro metodo per risolvere i due problemi (sum2 e sum3) è utilizzare il "sort + two pointers"
+
+Algoritmo sum2
+--------------
+Dopo aver ordinato la lista: a1 <= a2 <= ... <= an
+puoi usare due puntatori:
+- i da sinistra
+- j da destra
+- se a[i] + a[j] == x -> coppia trovata
+- se troppo piccolo -> ++i
+- se troppo grande -> --j
+
+Questo algoritmo non garantisce sempre la soluzione massima se ci sono duplicati 'strategici'.
+Comunque funziona bene quasi sempre.
+
+; Funzione sum2-2 (elementi usati solo una volta)
+(define (sum2-2 x lst)
+  (local (a i j out s)
+    ;---------------------------------------------------------------
+    ; Crea una copia ordinata della lista.
+    ; L'algoritmo dei due puntatori richiede che i valori siano
+    ; ordinati in modo crescente.
+    ;---------------------------------------------------------------
+    (setq a (sort (copy lst)))
+    ;---------------------------------------------------------------
+    ; i punta all'inizio della lista.
+    ; j punta alla fine della lista.
+    ;---------------------------------------------------------------
+    (setq i 0)
+    (setq j (- (length a) 1))
+    (setq out '())
+    ;---------------------------------------------------------------
+    ; Finché i due puntatori non si incontrano si confronta
+    ; la somma degli elementi puntati.
+    ;---------------------------------------------------------------
+    (while (< i j)
+      (setq s (+ (a i) (a j)))
+      (cond
+        ;-----------------------------------------------------------
+        ; Coppia trovata.
+        ; La si aggiunge alla soluzione e si spostano entrambi
+        ; i puntatori per evitare di riutilizzare gli elementi.
+        ;-----------------------------------------------------------
+        ((= s x)
+         (push (list (a i) (a j)) out -1)
+         (++ i)
+         (-- j))
+        ;-----------------------------------------------------------
+        ; Somma troppo piccola.
+        ; Si aumenta il valore spostando il puntatore sinistro.
+        ;-----------------------------------------------------------
+        ((< s x)
+         (++ i))
+        ;-----------------------------------------------------------
+        ; Somma troppo grande.
+        ; Si diminuisce il valore spostando il puntatore destro.
+        ;-----------------------------------------------------------
+        (true
+         (-- j))))
+    out))
+
+(setq a '(12 3 6 1 6 9 0 -3))
+(sum2-2 9 a)
+;-> ((-3 12) (0 9) (3 6))
+
+(time (sum2-2 100 t) 1e4)
+;-> 88.462
+(time (println (sum2-1 100 v)))
+;-> ((39 61) (35 65) (54 46) (4 96) (69 31) (60 40) (16 84) (6 94)
+;->  (38 62) (14 86) (72 28) (61 39) (99 1) (97 3) (7 93) (21 79)
+;->  (54 46) (19 81) (23 77) (38 62) (11 89) (4 96) (5 95))
+;-> 11.848
+
+Algoritmo sum3
+--------------
+for i:
+   j = i+1
+   k = n-1
+   while j < k:
+       somma = a[i] + a[j] + a[k]
+
+; Funzione sum3-1 (elementi usati più volte in terne diverse)
+(define (sum3-1 x lst)
+  (local (a out n i j k s)
+    ;---------------------------------------------------------------
+    ; Crea una copia ordinata della lista.
+    ; Per ogni elemento a[i] si cercano gli altri due elementi
+    ; mediante la tecnica dei due puntatori.
+    ;---------------------------------------------------------------
+    (setq a (sort (copy lst)))
+    (setq out '())
+    (setq n (length a))
+    ;---------------------------------------------------------------
+    ; Il primo elemento della terna viene fissato con l'indice i.
+    ;---------------------------------------------------------------
+    (for (i 0 (- n 3))
+      ;-------------------------------------------------------------
+      ; j parte subito dopo i.
+      ; k parte dall'ultimo elemento della lista.
+      ;-------------------------------------------------------------
+      (setq j (+ i 1))
+      (setq k (- n 1))
+      ;-------------------------------------------------------------
+      ; Ricerca dei due elementi rimanenti.
+      ;-------------------------------------------------------------
+      (while (< j k)
+        (setq s (+ (a i) (a j) (a k)))
+        (cond
+          ;---------------------------------------------------------
+          ; Terna trovata.
+          ; Si salva la soluzione e si spostano entrambi i puntatori.
+          ;---------------------------------------------------------
+          ((= s x)
+           (push (list (a i) (a j) (a k)) out -1)
+           (++ j)
+           (-- k))
+          ;---------------------------------------------------------
+          ; Somma troppo piccola.
+          ; Si aumenta il valore spostando j verso destra.
+          ;---------------------------------------------------------
+          ((< s x)
+           (++ j))
+          ;---------------------------------------------------------
+          ; Somma troppo grande.
+          ; Si diminuisce il valore spostando k verso sinistra.
+          ;---------------------------------------------------------
+          (true
+           (-- k)))))
+    out))
+
+(setq a '(12 3 6 1 6 9))
+(sum3-1 24 a)
+;-> ((3 9 12) (6 6 12))
+
+(setq a '(12 3 6 1 6 9 0 -3))
+(sum3-1 9 a)
+;-> ((-3 0 12) (-3 3 9) (-3 6 6) (0 3 6))
+
+Questa versione trova triple corrette, ma non risolve il problema 'massimo insieme di triple disgiunte'.
+Per sum2 il "sorting + two pointers" è un'ottima soluzione pratica.
+Per sum3 il "sorting + two pointers " buono per trovare triple, non per ottimizzazione globale.
 
 ============================================================================
 
