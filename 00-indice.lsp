@@ -3586,6 +3586,8 @@ NOTE LIBERE 37
   find-floor e find-ceil
   Coppia con somma massima
   Somma 2 e Somma 3 (sum2 and sum3)
+  Disposizione di rettangoli
+  Disordinare una lista ordinata
 
 PROBLEMI SUI DADI
 =================

@@ -6573,5 +6573,314 @@ Questa versione trova triple corrette, ma non risolve il problema 'massimo insie
 Per sum2 il "sorting + two pointers" è un'ottima soluzione pratica.
 Per sum3 il "sorting + two pointers " buono per trovare triple, non per ottimizzazione globale.
 
+
+--------------------------
+Disposizione di rettangoli
+-------------------------- 
+
+Dobbiamo disporre tre rettangoli di dimensioni a1xb1, a2xb2 e a3xb3 in modo da minimizzare l'area del rettangolo che li racchiude.
+I rettangoli non possono essere ruotati.
+
+Vediamo in quanti modi possono essere disposti i rettangoli.
+Configurazioni con stessa area del rettangolo che li racchiude:
+
+1) Tutti in colonna
+  1   1   ... 
+  2   3   ...
+  3   2   ...
+
+2) a L (con 1 e 2 in colonna)
+  13   1 
+  2    23
+
+3) a L (con 1 e 3 in colonna)
+  12   1
+  3    32
+
+4) a L (con 2 e 3 in colonna)
+  21   2
+  3    31
+
+5) Tutti in riga
+  1 2 3   1 3 2   ...
+
+Attenzione: un rettangolo puo' avere un lato maggiore della somma degli altri due rettangoli.
+Quindi il massimo di un lato nelle posizioni a L vale:
+ max(lato3 (lato1+lato2))
+
+Esempi:
+
+ 12                      12
+ 3                        3                       1 2 3
+
++----+-------+         +----+-------+           +----+-------+----+----+
+|    |       |         | 1  |   2   |           | 1  |   2   |    3    |
+| 1  |   2   |   OR    |    |       |     OR    |    |       |---------+
+|    +-------+         |    +-------+-+         |    +-------+
+|    |                 |    |   3     |         |    |
++----+----+            +----+---------+         +----+
+|    3    |
++---------+
+
+Le configurazioni topologicamente distinte sono proprio queste.
+Per ogni configurazione bisogna calcolare larghezza e altezza del rettangolo contenitore usando i 'max' quando necessario.
+
+Le formule sono:
+1) Tutti in colonna
+  1
+  2
+  3
+  larghezza = max(b1, b2, b3)
+  altezza   = a1 + a2 + a3
+Le permutazioni dei tre rettangoli (123, 132, ..., 321) non cambiano il rettangolo contenitore, quindi basta considerare una sola disposizione.
+
+2) Tutti in riga
+  1 2 3
+  larghezza = b1 + b2 + b3
+  altezza   = max(a1, a2, a3)
+Anche qui l'ordine è irrilevante.
+
+3) Forma a L (1 e 2 impilati, 3 a destra)
+  13
+  2
+cioè
+  +----+------+
+  | 1  |      |
+  +----+  3   |
+  |    |      |
+  | 2  +------+
+  |    |
+  +----+
+  larghezza = max(b1, b2) + b3
+  altezza   = max(a3, a1 + a2)
+
+4) Forma a L (1 e 3 impilati, 2 a destra)
+  12
+  3
+  larghezza = max(b1, b3) + b2
+  altezza   = max(a2, a1 + a3)
+
+5) Forma a L (2 e 3 impilati, 1 a destra)
+  21
+  3
+  larghezza = max(b2, b3) + b1
+  altezza   = max(a1, a2 + a3)
+
+Un rettangolo può avere un lato maggiore della somma degli altri due.
+Per questo nelle configurazioni a L non vale mai semplicemente
+altezza = a1 + a2
+oppure
+larghezza = b1 + b3
+ma bisogna usare
+altezza = max(altezza rettangolo isolato,
+              somma delle altezze dei due impilati)
+
+larghezza = max(larghezza dei due impilati)
+            + larghezza del rettangolo isolato
+
+In altre parole, il lato del rettangolo contenitore è sempre il massimo fra il lato del rettangolo isolato e la somma dei lati dei due rettangoli sovrapposti.
+
+Quindi le configurazioni distinte da esaminare sono esattamente 5:
+1) tutti in colonna;
+2) tutti in riga;
+3) L con (1,2) impilati;
+4) L con (1,3) impilati;
+5) L con (2,3) impilati.
+Non esistono altre configurazioni topologicamente diverse per tre rettangoli senza rotazione.
+
+Una soluzione è rappresentare ogni rettangolo come (altezza larghezza) e valutare le cinque configurazioni. La funzione restituisce una lista del tipo:
+
+  (area-minima configurazione larghezza altezza)
+dove 'configurazione' vale:
+- "colonna"
+- "riga"
+- "L12"
+- "L13"
+- "L23"
+
+(define (min-area r1 r2 r3)
+  (local (a1 b1 a2 b2 a3 b3 area w h best)
+    (setq a1 (r1 0))
+    (setq b1 (r1 1))
+    (setq a2 (r2 0))
+    (setq b2 (r2 1))
+    (setq a3 (r3 0))
+    (setq b3 (r3 1))
+    (setq best '(1e99 "" 0 0))
+    ; tutti in colonna
+    (setq w (max b1 b2 b3))
+    (setq h (+ a1 a2 a3))
+    (setq area (* w h))
+    (if (< area (best 0))
+        (setq best (list area "colonna" w h)))
+    ; tutti in riga
+    (setq w (+ b1 b2 b3))
+    (setq h (max a1 a2 a3))
+    (setq area (* w h))
+    (if (< area (best 0))
+        (setq best (list area "riga" w h)))
+    ; L12
+    (setq w (+ (max b1 b2) b3))
+    (setq h (max (+ a1 a2) a3))
+    (setq area (* w h))
+    (if (< area (best 0))
+        (setq best (list area "L12" w h)))
+    ; L13
+    (setq w (+ (max b1 b3) b2))
+    (setq h (max (+ a1 a3) a2))
+    (setq area (* w h))
+    (if (< area (best 0))
+        (setq best (list area "L13" w h)))
+    ; L23
+    (setq w (+ (max b2 b3) b1))
+    (setq h (max (+ a2 a3) a1))
+    (setq area (* w h))
+    (if (< area (best 0))
+        (setq best (list area "L23" w h)))
+    best))
+
+Proviamo:
+
+(min-area '(2 3) '(3 5) '(1 4))
+;-> (27 "L13" 9 3)
+(min-area '(4 2) '(2 5) '(3 3))
+;-> (35 "L23" 7 5)
+
+La complessità è O(1), poiché vengono valutate sempre e soltanto cinque configurazioni.
+
+Se i rettangoli possono essere ruotati di 90 gradi, ogni rettangolo ha 2 orientamenti:
+- originale (a b)
+- ruotato (b a)
+Con tre rettangoli ci sono quindi 2^3 = 8 combinazioni di orientamenti:
+  000
+  001
+  010
+  011
+  100
+  101
+  110
+  111
+dove 0 = non ruotato e 1 = ruotato.
+Per ciascuna combinazione valgono esattamente le stesse 5 configurazioni topologiche:
+1) tutti in colonna
+2) tutti in riga
+3) L12
+4) L13
+5) L23
+e il numero totale di configurazioni da esaminare è 8 * 5 = 40.
+Non serve considerarne altre, perché la rotazione modifica solo le dimensioni (a b) dei rettangoli, non introduce nuove topologie di disposizione.
+Quindi:
+- senza rotazioni --> 5 configurazioni
+- con rotazioni -->40 configurazioni
+La complessità resta comunque O(1), dato che 40 è un numero costante.
+
+
+------------------------------
+Disordinare una lista ordinata
+------------------------------
+
+Data una lista di interi ordinati, cambiare una cifra di un numero per rendere la lista non ordinata. La lista contiene almeno 3 elementi.
+
+Algoritmo
+---------
+Determinare il tipo di ordinamento della lista (crescente, decrescente, ecc.)
+Provare tutti i modi possibili di cambiare una cifra e verificare se l'elenco risultante non è ordinato (È sufficiente provare a cambiare le cifre del numero con 0, 1 o 9).
+
+Attenzione agli zeri iniziali:
+cambiare 4 in 0 in 124 (diventa 120), cambiare 1 in 0 in 124 (diventa 24).
+
+(define (change-digit num digit pos)
+  (let (s (string num))
+    (setf (s pos) (string digit))
+    (int s 0 10)))
+
+(define (order-type lst)
+"Check the sort order of a list"
+  (cond ((apply =  lst) '= ) ;lista con elementi uguali
+        ((apply >  lst) '> ) ;lista strettamente decrescente
+        ((apply <  lst) '< ) ;lista strettamente crescente
+        ((apply >= lst) '>=) ;lista decrescente
+        ((apply <= lst) '<=) ;lista crescente
+        (true nil)))         ;lista non ordinata
+
+(setq order (order-type '(112 221 345)))
+;-> <
+(setq order (order-type '(112 221 345 345)))
+;-> <=
+(setq order (order-type '(1 1 1)))
+;-> =
+
+; Funzione che calcola il numero da modificare per rendere la lista non ordinata
+; Restituisce una lista del tipo:
+; (numero-origine indice-numero-origine vecchia-cifra nuova-cifra nuovo-numero)
+(define (unsort lst)
+  (local (len sol cifre order found cur)
+    (setq len (length lst))
+    (setq sol '(nil nil))
+    (setq cifre '(0 1 9))
+    (setq order (order-type lst))
+    ;(println order)
+    (if (= order '=) ; lista con elementi tutti uguali
+      (setq sol (list (lst 1) 1 
+                      ((string (lst 1)) -1)
+                      (+ (int ((string (lst 1)) -1) 0 10) 1)
+                      (+ (lst 1) 1)))
+      ;else
+      (begin
+        (setq found nil)
+        (dolist (el lst found)
+          (when (and (!= $idx 0) (!= $idx (- len 1)))
+            (for (i 0 2 1 found)
+              (for (k 0 (- (length el) 1) 1 found)
+                (setq cur (change-digit el (cifre i) k))
+                ;(println cur)
+                ; verifica se il numero corrente 'cur' è 'ordinato' correttamente
+                (cond 
+                  ((= order '>) ; strettamente decrescente
+                    (when (or (>= cur (lst (- $idx 1))) (<= cur (lst (+ $idx 1))))
+                          (setq found true)
+                          (setq sol (list el $idx ((string el) k) (cifre i) cur))))
+                  ((= order '<) ; strettamente crescente
+                    (when (or (<= cur (lst (- $idx 1))) (>= cur (lst (+ $idx 1))))
+                          (setq found true)
+                          (setq sol (list el $idx ((string el) k) (cifre i) cur))))
+                  ((= order '>=) ; decrescente (non crescente)
+                    (when (or (> cur (lst (- $idx 1))) (< cur (lst (+ $idx 1))))
+                          (setq found true)
+                          (setq sol (list el $idx ((string el) k) (cifre i) cur))))
+                  ((= order '<=) ; crescente (non decrescente)
+                    (when (or (< cur (lst (- $idx 1))) (> cur (lst (+ $idx 1))))
+                          (setq found true)
+                          (setq sol (list el $idx ((string el) k) (cifre i) cur))))
+                  (true 
+                    (setq found true)
+                    (println "Errore: lista non ordinata")))))))))
+    sol))
+
+Proviamo:
+
+(unsort '(123 456 789))
+;-> (456 1 "4" 0 56)
+(unsort '(123 123 456 789))
+;-> (123 1 "1" 0 23)
+(unsort '(789 456 123))
+;-> (456 1 "4" 0 56)
+(unsort '(789 456 55))
+;-> (456 1 "4" 9 956)
+(unsort '(1 2 3 4 5 6))
+;-> (2 1 "2" 0 0)
+(unsort '(4 3 2 1))
+;-> (3 1 "3" 0 0)
+(unsort '(55 55 55 55))
+;-> (55 1 "5" 6 56)
+(unsort '(99 99 99))
+;-> (99 1 "9" 10 100)
+
+Nota: la funzione non controlla il primo e l'ultimo elemento della lista.
+Questo è corretto perchè se una modifica su estremo rompe l'ordine, allora:
+il problema è già risolvibile localmente con quel vicino, ma la stessa 'forzatura' può essere ottenuta su un vicino interno equivalente (per monotonia della lista).
+In altre parole: gli estremi non hanno 'potere speciale', solo meno vincoli.
+Quindi escludere primo e ultimo elemento non perde alcuna soluzione valida ed è una semplificazione del dominio di ricerca.
+
 ============================================================================
 
