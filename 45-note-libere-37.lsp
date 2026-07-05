@@ -6882,5 +6882,188 @@ il problema è già risolvibile localmente con quel vicino, ma la stessa 'forzat
 In altre parole: gli estremi non hanno 'potere speciale', solo meno vincoli.
 Quindi escludere primo e ultimo elemento non perde alcuna soluzione valida ed è una semplificazione del dominio di ricerca.
 
+
+-------------------------------------
+Persone che si muovono in linea retta
+-------------------------------------
+
+Due persone si muovono in linea retta lungo due direzioni.
+Entrambe partono nello stesso momento e si muovono con velocità costante, ma diverse.
+Il primo si muove dal punto A al punto B, mentre il secondo si muove dal punto C al punto D.
+Dati i punti A,B,C e D, calcolare la distanza massima tra le due persone.
+
+Sia il tempo normalizzato nell'intervallo [0,1], dove:
+- la prima persona percorre il segmento AB;
+- la seconda persona percorre il segmento CD.
+Le posizioni al tempo t sono:
+  P(t) = A + t*(B - A)
+  Q(t) = C + t*(D - C)
+La distanza tra le due persone vale:
+  d(t) = |P(t) - Q(t)|
+Conviene lavorare con il quadrato della distanza:
+  d(t)^2 = |P(t) - Q(t)|^2
+Poniamo:
+  E = A - C
+  F = (B - A) - (D - C)
+Allora:
+  P(t) - Q(t) = E + t*F
+per cui:
+  d(t)^2 = |E + t*F|^2 = (E + t*F) . (E + t*F)
+  dove "." indica il prodotto scalare.
+Sviluppando:
+  d(t)^2 = (F.F)*t^2 + 2*(E.F)*t + (E.E)
+Questa è una parabola con coefficiente quadratico:
+  F.F >= 0
+Quindi:
+- se (F != 0), la parabola è convessa e il suo massimo nell'intervallo [0,1] si trova sempre a uno degli estremi;
+- se (F = 0), la distanza è costante.
+Ne segue che:
+  max d(t) = max(d(0), d(1))
+cioè:
+  max(|A - C|, |B - D|)
+
+Quindi non è necessario cercare un massimo interno: basta confrontare la distanza iniziale e quella finale.
+
+Esempio
+Prima persona:   A = (0,0), B = (10,0)
+Seconda persona: C = (3,4), D = (13,1)
+Distanza iniziale: sqrt(3^2 + 4^2) = 5
+Distanza finale:   sqrt(3^2 + 1^2) = sqrt(10) ~= 3.16
+La distanza massima è quindi: 5
+
+In generale, indipendentemente dalla dimensione dello spazio (2D, 3D, ...), la distanza massima tra due punti che si muovono linearmente con velocità costanti e sincronizzate è sempre il massimo tra la distanza iniziale e quella finale.
+
+(define (dist p1 p2)
+  (sqrt (+ (pow (- (p1 0) (p2 0)) 2)
+           (pow (- (p1 1) (p2 1)) 2))))
+
+(define (dist2d p1 p2)
+"Calculate 2D Cartesian distance of two points P1 = (x1 y1) and P2 = (x2 y2)"
+  (let ( (x1 (p1 0)) (y1 (p1 1))
+         (x2 (p2 0)) (y2 (p2 1)) )
+    (sqrt (add (mul (sub x1 x2) (sub x1 x2))
+               (mul (sub y1 y2) (sub y1 y2))))))
+
+(define (max-distance A B C D)
+  (max (dist2d A C)
+       (dist2d B D)))
+
+(max-distance '(0 0) '(10 0) '(3 4) '(13 1))
+;-> 5
+
+
+--------------------------
+Collina di altezza massima
+--------------------------
+
+Data una sequenza di interi h1, h2, ..., hn, una collina è definita come un intervallo in cui
+h(i) <= h(i+1) <= ... <= h(j) >= h(j+1) >= ... >= h(k).
+L'altezza di una collina è definita come: min(h(j) - h(i), h(j) - h(k)).
+Trovare la collina più alta.
+
+Soluzione
+1) Per ogni indice i, calcolare L(i), il minimo j tale che h(j) <= h(j+1) <= ... <= h(i).
+2) Analogamente, calcolare R(i), il massimo j tale che hi >= ... >= h(j).
+3) L'altezza della collina con la cima in i è min(h(i) - h(L(i)), h(i) - h(R(i))).
+Prendere il massimo tra questi valori.
+
+Algoritmo
+---------
+Data una sequenza di interi h[0..n-1], una collina e' un intervallo [i..k] con un punto j tale che:
+  h[i] <= h[i+1] <= ... <= h[j]
+  h[j] >= h[j+1] >= ... <= h[k]
+(con plateau ammessi sia in salita che in discesa)
+Per ogni possibile j (considerato come possibile cima):
+1) si verifica che j sia una cima valida:
+   h[j] >= h[j-1] e h[j] >= h[j+1]
+2) si estende la collina verso sinistra:
+   si parte da j e si va a sinistra finche' la sequenza e' non decrescente verso j
+   cioe' h[t-1] <= h[t]
+   questo produce l'indice i (inizio collina)
+3) si estende la collina verso destra:
+   si parte da j e si va a destra finche' la sequenza e' non crescente da j
+   cioe' h[t+1] <= h[t]
+   questo produce l'indice k (fine collina)
+4) si calcola l'altezza della collina:
+   min(h[j] - h[i], h[j] - h[k])
+5) si mantiene il massimo valore trovato su tutti i e j
+Output: valore massimo dell'altezza.
+
+(define (max-collina h)
+  (local (n best-val i j k val)
+    ; n = lunghezza della sequenza
+    (setq n (length h))
+    ; miglior valore trovato finora
+    (setq best-val 0)
+    ; si prova ogni indice come possibile cima j
+    (for (j 0 (- n 1))
+      ; j deve essere una cima "debole":
+      ; cioe' non deve essere strettamente minore dei vicini
+      ; (plateau incluso)
+      (if (and (> j 0)
+               (< j (- n 1))
+               (>= (h j) (h (- j 1)))
+               (>= (h j) (h (+ j 1))))
+        (begin
+          ; ----------------------------
+          ; espansione verso sinistra
+          ; ----------------------------
+          ; si cerca il massimo i tale che:
+          ; h[i] <= h[i+1] <= ... <= h[j]
+          ; quindi si scorre finche' la condizione resta valida
+          (setq i j)
+          (while (and (> i 0)
+                      (<= (h (- i 1)) (h i)))
+            (-- i))
+          ; ----------------------------
+          ; espansione verso destra
+          ; ----------------------------
+          ; si cerca il massimo k tale che:
+          ; h[j] >= h[j+1] >= ... >= h[k]
+          (setq k j)
+          (while (and (< k (- n 1))
+                      (<= (h (+ k 1)) (h k)))
+            (++ k))
+          ; ----------------------------
+          ; calcolo altezza collina
+          ; ----------------------------
+          ; limite sinistro e destro rispetto alla cima j
+          ; la collina e' limitata dal lato piu' basso
+          (setq val (min (- (h j) (h i))
+                         (- (h j) (h k))))
+          ; aggiornamento massimo globale
+          (if (> val best-val)
+              (setq best-val val)))))
+    ; risultato finale: massima altezza della collina
+    best-val))
+
+Proviamo:
+
+(max-collina '(1 2 4 5 3 2 3 4 2))
+;-> 3
+
+; collina piatta in cima
+(max-collina '(1 2 3 3 3 2 1))
+;-> 2
+(qui prende il primo picco valido)
+
+; nessuna collina vera
+(max-collina '(5 4 3 2))
+;-> 0
+Tutto decrescente -> nessuna salita -> altezza 0
+
+; collina multipla
+(max-collina '(1 3 2 4 3 2 5 4 3))
+;-> 2
+Picchi candidati:
+3 (indice 1) -> altezza 1
+4 (indice 3) -> altezza 1
+5 (indice 6) -> altezza 2 (massimo)
+
+; monotona crescente)
+(max-collina '(1 2 3 4 5))
+;-> 0
+Non esiste discesa -> altezza 0
+
 ============================================================================
 

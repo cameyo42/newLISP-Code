@@ -3588,6 +3588,8 @@ NOTE LIBERE 37
   Somma 2 e Somma 3 (sum2 and sum3)
   Disposizione di rettangoli
   Disordinare una lista ordinata
+  Persone che si muovono in linea retta
+  Collina di altezza massima
 
 PROBLEMI SUI DADI
 =================
