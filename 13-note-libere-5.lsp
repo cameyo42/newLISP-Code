@@ -4466,18 +4466,18 @@ Formula di Wan der Vael
 -----------------------
 Anche questa formula considera solo l'altezza.
 
-Peso ideale Uomini = (altezza in cm - 150) x 0.75 + 50
-Peso ideale Donne = (altezza in cm - 150) x 0.6 + 50
+Peso ideale Uomini = ((altezza in cm - 150) x 0.75) + 50
+Peso ideale Donne = ((altezza in cm - 150) x 0.6) + 50
 
 Formula di Berthean
 -------------------
 Questa formula tiene conto dell'età e dell'altezza.
-Peso ideale = 0.8 x (altezza in cm - 100) + età/2
+Peso ideale = (0.8 x (altezza in cm - 100)) + età/2
 
 Formula di Perrault
 -------------------
 Questa formula tiene conto dell'età e dell'altezza.
-Peso ideale = Altezza in cm - 100 + età/10 x 0.9
+Peso ideale = Altezza in cm - 100 + (età/10 x 0.9)
 
 Formula di Keys
 ---------------
@@ -4494,9 +4494,66 @@ Peso ideale = (2.37 x altezza in m)^3
 
 Buffon, Roher e Bardeen (confermata da Quételet e Martin)
 ---------------------------------------------------------
-Peso ideale Uomini = (1.40 x altezza in dm3)/100
+Peso ideale Uomini = (1.40 x (altezza in dm)^3)/100
+Peso ideale Donna = (1.35 x (altezza in dm)^3)/100
 
-Peso ideale Donna = (135 x altezza in dm3)/100
+(define (ideale alt eta)
+  (println "Lorenz:")
+  (println "Uomini = " (sub alt 100 (div (sub alt 150) 4)))
+  (println "Donne = " (sub alt 100 (div (sub alt 150) 2)))
+  (println "\nBroca:")
+  (println "Uomini = " (sub alt 100))
+  (println "Donne = " (sub alt 104))
+  (println "\nWan de Vael:")
+  (println "Uomini = " (add (mul (sub alt 150) 0.75) 50))
+  (println "Donne = " (add (mul (sub alt 150) 0.6) 50))
+  (println "\nBerthean:")
+  (println "Uomini/Donne = " (add (mul 0.8 (sub alt 100)) (div eta 2)))
+  (println "\nPerrault:")
+  (println "Uomini/Donne = " (add (sub alt 100) (mul (div eta 10) 0.9)))
+  (println "\nKeys:")
+  (println "Uomini = " (mul (div alt 100) (div alt 100) 22.1))
+  (println "Donne = " (mul (div alt 100) (div alt 100) 20.6))
+  (println "\nTravia:")
+  (println "Uomini/Donne = " (sub (mul 1.012 alt) 107.5))
+  (println "\nLivi:")
+  (println "Uomini/Donne = " (pow (mul 2.37 (div alt 100)) 3))
+  (println "\nBuffon-Roher-Bardeen:")
+  (println "Uomini = " (div (mul 1.40 (pow (div alt 10) 3)) 100))
+  (println "Donne = " (div (mul 1.40 (pow (div alt 10) 3)) 100)) '>)
+
+(ideale 179 63)
+;-> Lorenz:
+;-> Uomini = 71.75
+;-> Donne = 64.5
+;-> 
+;-> Broca:
+;-> Uomini = 79
+;-> Donne = 75
+;-> 
+;-> Wan de Vael:
+;-> Uomini = 71.75
+;-> Donne = 67.40000000000001
+;-> 
+;-> Berthean:
+;-> Uomini/Donne = 94.7
+;-> 
+;-> Perrault:
+;-> Uomini/Donne = 84.67
+;-> 
+;-> Keys:
+;-> Uomini = 70.81061
+;-> Donne = 66.00446000000001
+;-> 
+;-> Travia:
+;-> Uomini/Donne = 73.648
+;-> 
+;-> Livi:
+;-> Uomini/Donne = 76.34913674096701
+;-> 
+;-> Buffon-Roher-Bardeen:
+;-> Uomini = 80.29474599999998
+;-> Donne = 80.29474599999998
 
 Indice di massa corporea
 ------------------------

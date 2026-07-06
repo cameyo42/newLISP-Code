@@ -1117,7 +1117,7 @@ Metodo 3 (matematica)
 
 Per massimizzare il prodotto:
 - 3 è il 'miglior mattone' (3*3 > 2*2*2) perchè massimizza il prodotto locale
-- 4 è l’unico caso in cui 3+1 è peggio di 2+2
+- 4 è l'unico caso in cui 3+1 è peggio di 2+2
 - evitare 1 nei fattori finali
 
 Regola
@@ -7064,6 +7064,339 @@ Picchi candidati:
 (max-collina '(1 2 3 4 5))
 ;-> 0
 Non esiste discesa -> altezza 0
+
+
+-----------------------
+Correttezza di punteggi
+-----------------------
+
+Abbiamo una lista costituita da elementi del tipo (a b), dove 'a' e 'b' sono numeri interi.
+La lista viene costruita con i punteggi sequenziali di una partita di ping-pong.
+Per esempio:
+lista = (0 0) (1 0) (2 1) (2 2) (2 3) (2 4) (2 5) (3 5) ...
+La partita termina quando uno dei due giocatori ha raggiunto un punteggio N.
+Poichè i vari punteggi vengono scritti a mano, esiste la possibilità che il risultato finale sia sbagliato.
+
+Data una lista di punteggi di una partita, determinare se la partita è valida oppure no.
+In altre parole bisogna determinare se ogni coppia di punteggi è coerente con le 'regole'.
+
+Vediamo quali sono le 'regole':
+a) La prima coppia di punteggi deve essere sempre (0 0)
+b) Ogni conteggio successivo deve verificare tutte seguenti condizioni:
+   1) uno dei due valori è aumentato di 1 rispetto al precedente
+   2) l'altro valore è rimasto uguale al precedente
+   3) nessun valore uguale o maggiore di N (tranne per l'ultima coppia)
+c) l'ultima coppia di punteggi inoltre deve avere:
+   1) un valore a N
+   2) l'altro valore minore di N
+
+(define (valid? old-a old-b a b)
+  ; Verifica se il passaggio dal punteggio precedente (old-a old-b)
+  ; al nuovo punteggio (a b) rispetta le regole della partita.
+  ; Una transizione e' valida se:
+  ; 1) il punteggio del primo giocatore aumenta di 1 e quello del
+  ;    secondo rimane invariato;
+  ; oppure
+  ; 2) il punteggio del secondo giocatore aumenta di 1 e quello del
+  ;    primo rimane invariato.
+  (or (and (= a (+ old-a 1)) (= old-b b))
+      (and (= old-a a) (= (+ old-b 1) b))))
+
+(define (check lst N)
+  (local (len error old-a old-b a b)
+    ; Calcola il numero di punteggi presenti nella lista.
+    ; Questo permette di gestire separatamente i casi particolari
+    ; (lista vuota e lista con un solo elemento).
+    (setq len (length lst))
+    (cond
+      ; Una lista vuota non rappresenta una partita valida.
+      ; Viene stampata la lista (vuota) e la funzione restituisce nil.
+      ((= len 0)
+        (println lst)
+        (setq error true))
+      ; Se la lista contiene un solo elemento, l'unico caso valido
+      ; e' una partita terminata immediatamente con punteggio (0 0),
+      ; cioe' con N uguale a 0.
+      ((= len 1)
+        (when (not (and (= (lst 0) '(0 0)) (= N 0)))
+          (println (lst 0) { } N)
+          (setq error true)))
+      ; Caso generale: la lista contiene almeno due punteggi.
+      (true
+        ; La prima coppia deve essere obbligatoriamente (0 0).
+        ; Qualunque altro valore rende immediatamente non valida la partita.
+        (cond
+          ((!= (lst 0) '(0 0))
+            (println (lst 0))
+            (setq error true))
+          (true
+            ; All'inizio della scansione il punteggio precedente
+            ; coincide con quello iniziale della partita.
+            (setq error nil)
+            (setq old-a 0)
+            (setq old-b 0)
+            ; Controlla tutte le coppie di punteggi tranne l'ultima.
+            ; Per ogni coppia devono essere verificate contemporaneamente
+            ; le seguenti condizioni:
+            ; 1) il nuovo punteggio deve essere ottenuto aumentando di 1
+            ;    uno solo dei due giocatori;
+            ; 2) l'altro punteggio deve rimanere invariato;
+            ; 3) nessuno dei due punteggi puo' essere maggiore o uguale a N.
+            ; In caso di errore viene stampata la transizione errata e
+            ; la scansione termina.
+            (dolist (el (chop (rest lst)) error)
+              (setq a (el 0))
+              (setq b (el 1))
+              (when (not (and (valid? old-a old-b a b)
+                              (< a N)
+                              (< b N)))
+                (println (list old-a old-b) { } (list a b))
+                (setq error true))
+              ; Aggiorna il punteggio precedente per il controllo
+              ; della coppia successiva.
+              (setq old-a a)
+              (setq old-b b))
+            ; Controlla l'ultima coppia della lista.
+            ; Oltre alla validita' della transizione rispetto al punteggio
+            ; precedente, il risultato finale deve avere:
+            ; 1) uno dei due giocatori con punteggio esattamente uguale a N;
+            ; 2) l'altro giocatore con punteggio strettamente minore di N.
+            (setq a ((lst -1) 0))
+            (setq b ((lst -1) 1))
+            (when (not (and (valid? old-a old-b a b)
+                            (or (and (= a N) (< b N))
+                                (and (< a N) (= b N)))))
+              (println (lst -1))
+              (setq error true))))))
+    ; Restituisce true se non e' stato rilevato alcun errore,
+    ; altrimenti restituisce nil.
+    (not error)))
+
+Proviamo:
+
+(setq p '())
+(check p 3)
+;-> ()
+;-> nil
+
+(setq p '((0 0)))
+(check p 0)
+;-> true
+(check p 1)
+;-> (0 0) 1
+;-> nil
+
+(setq p '((0 0) (1 0) (1 1) (2 1) (3 1)))
+(check p 3)
+;-> true
+(check p 4)
+;-> (3 1)
+;-> nil
+
+(setq p '((0 0) (1 0) (1 1) (2 1) (3 1) (3 2) (3 3)))
+(check p 3)
+;-> (2 1) (3 1)
+;-> (3 3)
+;-> nil
+
+(setq p '((0 0) (1 0) (1 1) (2 1) (3 1) (3 2)))
+(check p 3)
+;-> (2 1) (3 1)
+;-> nil
+(check p 4)
+;-> (3 2)
+;-> nil
+
+(setq p '((0 0) (1 1) (1 1) (2 1) (3 1)))
+(check p 3)
+;-> (0 0) (1 1)
+;-> (3 1)
+;-> nil
+
+(setq p '((0 0) (1 0) (1 1) (1 2) (2 2)))
+(check p 2)
+;-> (1 1) (1 2)
+;-> (2 2)
+;-> nil
+
+(setq p '((0 0) (1 0) (1 1) (1 2) (1 3) (2 4)))
+(check p 4)
+;-> (2 4)
+;-> nil
+
+(setq p '((0 0) (1 0) (1 1) (1 2) (1 3) (1 4)))
+(check p 4)
+;-> true
+(check p 3)
+;-> (1 2) (1 3)
+;-> (1 4)
+;-> nil
+(check p 5)
+;-> (1 4)
+;-> nil
+
+Versione compatta equivalente (restituisce solo true o nil):
+
+(define (check2 lst N)
+  (local (i a b c d ok)
+    (cond
+      ((= (length lst) 1) (and (= (lst 0) '(0 0)) (or (= N 0))))
+      (true
+        (setq ok (= (lst 0) '(0 0)))
+        (setq i 1)
+        (while (and ok (< i (length lst)))
+          (setq a ((lst (- i 1)) 0))
+          (setq b ((lst (- i 1)) 1))
+          (setq c ((lst i) 0))
+          (setq d ((lst i) 1))
+          (setq ok (and (or (and (= c (+ a 1)) (= d b))
+                            (and (= c a) (= d (+ b 1))))
+                        (<= c N) (<= d N)))
+          (++ i))
+        (if ok (setq ok (let ((a ((lst -1) 0)) (b ((lst -1) 1)))
+                        (and (or (= a N) (= b N)) (< (if (= a N) b a) N)))))
+        ok))))
+
+
+-----------------------------------------------------
+Massimi dell'applicazione di una formula ad una lista
+-----------------------------------------------------
+
+Data una lista di interi determinare i valori massimi per ogni 'i' di:
+
+  |x(i) - x(j)| - |i - j|, per i >= j
+
+(define (massimi lst)
+  (setq out '())
+  (setq len (length lst))
+  (for (i 0 (- len 1))
+    (setq cur-max -1)
+    (for (j i 0 -1)
+      ;(println i { } j)
+      (setq cur (- (abs (- (lst i) (lst j))) (- i j)))
+      (if (> cur cur-max) (setq cur-max cur)))
+    (push (list i cur-max) out -1))
+  out)
+
+Proviamo:
+
+(massimi '(1 2 3 4))
+;-> ((0 0) (1 0) (2 0) (3 0))
+
+(massimi '(1 6 2 3 4 8 -4 -3))
+;-> ((0 0) (1 4) (2 3) (3 1) (4 0) (5 3) (6 11) (7 9))
+
+La funzione ha complessità temporale O(n) (due cicli 'for'.)
+
+Strategia O(n)
+--------------
+Per ogni indice 'i' vogliamo calcolare:
+  max su j <= i di ( |x(i) - x(j)| - (i - j) )
+Dato che (i >= j), la parte sugli indici diventa semplicemente (i - j) senza valore assoluto.
+Quindi il problema è:
+  |x(i) - x(j)| - (i - j)
+Eliminazione del valore assoluto
+Il valore assoluto si separa in due casi:
+Caso 1: x(i) >= x(j)
+  |x(i) - x(j)| = x(i) - x(j)
+Quindi:
+  (x(i) - x(j)) - (i - j) = (x(i) - i) - (x(j) - j)
+Caso 2: x(j) > x(i)
+  |x(i) - x(j)| = x(j) - x(i)
+Quindi:
+  (x(j) - x(i)) - (i - j) = (x(j) + j) - (x(i) + i)
+
+Per ogni 'i', il valore cercato è il massimo tra due forme:
+1) (x(i) - i) - min(x(j) - j)
+2) max(x(j) + j) - (x(i) + i)
+dove (j <= i).
+
+Non serve ricalcolare tutto ogni volta.
+Basta mantenere mentre scorriamo la lista:
+- bestMinA = minimo di (x(j) - j)
+- bestMaxB = massimo di (x(j) + j)
+per tutti i e j già visti.
+
+Per ogni elemento (per ogni i):
+1) trasformiamo il valore corrente:
+  a = x(i) - i
+  b = x(i) + i
+2) calcoliamo:
+  cur = max(a - bestMinA, bestMaxB - b)
+3) Dopo aver calcolato 'cur', aggiorniamo:
+- bestMinA
+- bestMaxB
+con il valore corrente.
+
+Il trucco è che ogni possibile coppia (i, j) viene 'compressa' in due sole statistiche:
+- la migliore differenza verso il basso (x(j)-j)
+- la migliore differenza verso l'alto (x(j)+j)
+Così ogni nuovo punto si confronta con tutti i precedenti in tempo costante.
+
+(define (massimi2 lst)
+  (local (len i x a b bestMinA bestMaxB cur out)
+    ; numero di elementi della lista
+    (setq len (length lst))
+    ; lista risultato (coppie (i valore))
+    (setq out '())
+    ; inizializzazione sul primo elemento (i = 0)
+    (setq x (lst 0))
+    ; trasformazione 1: x(j) - j (serve per il primo tipo di confronto)
+    (setq bestMinA (- x 0))
+    ; trasformazione 2: x(j) + j (serve per il secondo tipo di confronto)
+    (setq bestMaxB (+ x 0))
+    ; per i = 0 il valore è sempre 0 (solo confronto con se stesso)
+    (push (list 0 0) out -1)
+    ; scansione della lista a partire dal secondo elemento
+    (for (i 1 (- len 1))
+      ; valore corrente della lista
+      (setq x (lst i))
+      ; trasformazione del punto corrente nella forma x(i) - i
+      ; questa quantità serve per misurare quanto il punto corrente
+      ; si discosta verso il basso rispetto ai punti precedenti
+      (setq a (- x i))
+      ; trasformazione del punto corrente nella forma x(i) + i
+      ; questa quantità serve per misurare quanto il punto corrente
+      ; si discosta verso l'alto rispetto ai punti precedenti
+      (setq b (+ x i))
+      ; calcolo del valore massimo tra due possibili casi:
+      ; 1) caso in cui il punto j è "sotto" i:
+      ;    confronto tra (x(i)-i) e il minimo dei (x(j)-j)
+      ; 2) caso in cui il punto j è "sopra" i:
+      ;    confronto tra il massimo dei (x(j)+j) e (x(i)+i)
+      ; entrambi i casi rappresentano tutte le possibilità
+      ; della funzione |x(i)-x(j)| - (i-j)
+      (setq cur (max
+                  (- a bestMinA)
+                  (- bestMaxB b)))
+      ; aggiornamento delle strutture con il punto corrente
+      ; bestMinA tiene traccia del valore minimo di (x(j)-j)
+      ; visto fino all'indice corrente
+      (if (< a bestMinA) (setq bestMinA a))
+      ; bestMaxB tiene traccia del valore massimo di (x(j)+j)
+      ; visto fino all'indice corrente
+      (if (> b bestMaxB) (setq bestMaxB b))
+      ; salvataggio del risultato per l'indice i
+      (push (list i cur) out -1)
+    )
+    ; restituzione della lista finale dei risultati
+    out))
+
+Proviamo:
+
+(massimi2 '(1 2 3 4))
+;-> ((0 0) (1 0) (2 0) (3 0))
+(massimi2 '(1 6 2 3 4 8 -4 -3))
+;-> ((0 0) (1 4) (2 3) (3 1) (4 0) (5 3) (6 11) (7 9))
+
+(setq t (rand 100 1000))
+(= (massimi t) (massimi2 t))
+;-> true
+
+(time (massimi t) 10)
+;-> 5475.786
+(time (massimi2 t) 10)
+;-> 15.587
 
 ============================================================================
 

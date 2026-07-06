@@ -3590,6 +3590,8 @@ NOTE LIBERE 37
   Disordinare una lista ordinata
   Persone che si muovono in linea retta
   Collina di altezza massima
+  Correttezza di punteggi
+  Massimi dell'applicazione di una formula ad una lista
 
 PROBLEMI SUI DADI
 =================
