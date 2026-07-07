@@ -3592,6 +3592,8 @@ NOTE LIBERE 37
   Collina di altezza massima
   Correttezza di punteggi
   Massimi dell'applicazione di una formula ad una lista
+  Stessa combinazione di dadi
+  Connessione di punti con ostacolo
 
 PROBLEMI SUI DADI
 =================

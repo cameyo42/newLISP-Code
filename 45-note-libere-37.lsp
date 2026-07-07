@@ -3883,7 +3883,7 @@ Per una sola equazione possiamo costruire una base scegliendo le prime 'n-1' var
       ; calcolo dell'ultima componente:
       ; a1*x1+...+an*xn=0
       ; quindi xn=-(somma precedente)/an
-      (set 's 0)
+      (setq s 0)
       (for (j 0 (- n 2))
         (setq s (+ s (* (coeff j) (v j)))))
       (setf (v (- n 1)) (/ (- s) g))
@@ -6969,7 +6969,7 @@ Prendere il massimo tra questi valori.
 
 Algoritmo
 ---------
-Data una sequenza di interi h[0..n-1], una collina e' un intervallo [i..k] con un punto j tale che:
+Data una sequenza di interi h[0..n-1], una collina è un intervallo [i..k] con un punto j tale che:
   h[i] <= h[i+1] <= ... <= h[j]
   h[j] >= h[j+1] >= ... <= h[k]
 (con plateau ammessi sia in salita che in discesa)
@@ -6977,11 +6977,11 @@ Per ogni possibile j (considerato come possibile cima):
 1) si verifica che j sia una cima valida:
    h[j] >= h[j-1] e h[j] >= h[j+1]
 2) si estende la collina verso sinistra:
-   si parte da j e si va a sinistra finche' la sequenza e' non decrescente verso j
+   si parte da j e si va a sinistra finche' la sequenza è non decrescente verso j
    cioe' h[t-1] <= h[t]
    questo produce l'indice i (inizio collina)
 3) si estende la collina verso destra:
-   si parte da j e si va a destra finche' la sequenza e' non crescente da j
+   si parte da j e si va a destra finche' la sequenza è non crescente da j
    cioe' h[t+1] <= h[t]
    questo produce l'indice k (fine collina)
 4) si calcola l'altezza della collina:
@@ -7028,7 +7028,7 @@ Output: valore massimo dell'altezza.
           ; calcolo altezza collina
           ; ----------------------------
           ; limite sinistro e destro rispetto alla cima j
-          ; la collina e' limitata dal lato piu' basso
+          ; la collina è limitata dal lato piu' basso
           (setq val (min (- (h j) (h i))
                          (- (h j) (h k))))
           ; aggiornamento massimo globale
@@ -7093,7 +7093,7 @@ c) l'ultima coppia di punteggi inoltre deve avere:
 (define (valid? old-a old-b a b)
   ; Verifica se il passaggio dal punteggio precedente (old-a old-b)
   ; al nuovo punteggio (a b) rispetta le regole della partita.
-  ; Una transizione e' valida se:
+  ; Una transizione è valida se:
   ; 1) il punteggio del primo giocatore aumenta di 1 e quello del
   ;    secondo rimane invariato;
   ; oppure
@@ -7115,7 +7115,7 @@ c) l'ultima coppia di punteggi inoltre deve avere:
         (println lst)
         (setq error true))
       ; Se la lista contiene un solo elemento, l'unico caso valido
-      ; e' una partita terminata immediatamente con punteggio (0 0),
+      ; è una partita terminata immediatamente con punteggio (0 0),
       ; cioe' con N uguale a 0.
       ((= len 1)
         (when (not (and (= (lst 0) '(0 0)) (= N 0)))
@@ -7168,7 +7168,7 @@ c) l'ultima coppia di punteggi inoltre deve avere:
                                 (and (< a N) (= b N)))))
               (println (lst -1))
               (setq error true))))))
-    ; Restituisce true se non e' stato rilevato alcun errore,
+    ; Restituisce true se non è stato rilevato alcun errore,
     ; altrimenti restituisce nil.
     (not error)))
 
@@ -7397,6 +7397,233 @@ Proviamo:
 ;-> 5475.786
 (time (massimi2 t) 10)
 ;-> 15.587
+
+
+---------------------------
+Stessa combinazione di dadi
+---------------------------
+
+Abbiamo N dadi con il numero di facce non necessariamente uguale.
+Ogni dado ha un numero per ogni faccia.
+
+Quante volte bisogna lanciare i dadi per poter affermare con certezza che la somma dei punti apparirà almeno due volte?
+
+Esempio (con dadi standard):
+3 dadi con 6 facce numerate da 1 a 6
+La somma dei punti sarà minima se tutte le facce mostrano '1', e massima se mostrano '6'.
+L'insieme dei possibili valori della somma dei punti sul dado B = (3, ..., 18) contiene 16 elementi.
+Secondo il principio dei cassetti (pigeon principle), se il dado viene lanciato 17 volte, la somma dei punti si ripeterà almeno due volte.
+Pertanto, i tre dadi devono essere lanciati almeno 17 volte.
+
+Quindi con N dadi bisogna determinare quanti sono i risultati possibili.
+
+(define (cartesian)
+"Calculate the cartesian product of lists"
+  (let (out '(()) )
+    (dolist (lst (args))
+      (let (tmp '())
+        (dolist (parz out)
+          (dolist (el lst)
+            (push (append parz (list el)) tmp -1)))
+        (setq out tmp)))
+    out))
+
+(cartesian '(1 2 3) '(4 5) '(6 7))
+;-> ((1 4 6) (1 4 7) (1 5 6) (1 5 7) (2 4 6) (2 4 7) (2 5 6) (2 5 7)
+;->  (3 4 6) (3 4 7) (3 5 6) (3 5 7))
+
+(define (lanci lst)
+  (local (all somme))
+    ; calcola tutti le possibili combinazioni di lanci
+    (setq all (apply cartesian lst))
+    ; calcola la somma di ogni lancio
+    (setq somme (unique (sort (map (fn(x) (apply + x)) all))))
+    ;(println somme)
+    ; per il principio dei casetti...
+    (+ (length somme) 1))
+
+Proviamo:
+
+(lanci '((1 2 3 4 5 6) (1 2 3 4 5 6) (1 2 3 4 5 6)))
+;-> 17
+(lanci '((1 3 5) (2 6) (3 4)))
+;-> 11
+(lanci '((10 20 30) (1 2 3) (100 200 300)))
+;-> 28
+
+
+---------------------------------
+Connessione di punti con ostacolo
+---------------------------------
+
+In una griglia sono posizionati tre oggetti:
+1) Punto A
+2) Punto B
+3) Rettangolo (Xmin Ymin) (Xmax Ymax))
+
+Determinare il percorso minimo lineare (tratti orizzontali e verticali) per raggiungere B partendo da A.
+Il percorso non deve intersecare il rettangolo.
+Esempio:
+           A-----+
+                 |
+    +----------+ |
+    |          | |
+    |          | |
+    +----------+ |
+                 |
+      B----------+
+
+Il problema è:
+- muoversi da A a B su una griglia con passi N S E O
+- evitare le celle interne a un rettangolo ostacolo
+- trovare il cammino minimo
+
+La struttura è:
+1) Ogni cella (x y) è uno stato
+2) Da ogni stato si puo' andare a 4 vicini:
+   (x+1 y) (x-1 y) (x y+1) (x y-1)
+3) Le celle dentro il rettangolo sono bloccate:
+   se xmin <= x <= xmax e ymin <= y <= ymax -> non si entra
+4) Il costo di ogni passo è 1
+5) Serve una ricerca che:
+   - non esplori tutto lo spazio infinito
+   - scelga sempre il percorso piu promettente verso B
+
+Questo porta naturalmente all'algoritmo A*:
+  g(n) = distanza percorsa da A a n
+  h(n) = distanza Manhattan stimata da n a B
+  f(n) = g(n) + h(n)
+La ricerca espande sempre il nodo con f minimo.
+L'algoritmo funziona bene perchè h(n) guida verso B, g(n) garantisce ottimalita' ed evita esplorazioni inutili.
+
+(define (remove elt lst all)
+"Remove an element from a list (first or all occurrence)"
+  (cond (all
+          (while (setq idx (ref elt lst)) (pop lst idx))
+          lst)
+        (true
+          (let ((elt-pos (ref elt lst)))
+            (if elt-pos (pop lst elt-pos))
+            lst))))
+
+(define (between? x a b)
+  ; controlla se x è dentro intervallo chiuso
+  (and (>= x (min a b)) (<= x (max a b))))  indipendentemente dall'ordine
+
+(define (blocked? x y rx1 ry1 rx2 ry2)
+  ; true se la cella è dentro il rettangolo
+  (and (between? x rx1 rx2) (between? y ry1 ry2)))  ostacolo
+
+(define (h p b)
+  ; euristica Manhattan (stima distanza rimanente
+  (+ (abs (- (p 0) (b 0))) (abs (- (p 1) (b 1)))))  senza ostacoli)
+
+(define (neighbors p)
+  (letn (x (p 0) y (p 1))
+    ; 4 mosse possibili su griglia
+    (list (list (+ x 1) y) (list (- x 1) y) (list x (+ y 1)) (list x (- y 1)))))
+
+(define (in? x lst)
+  ; verifica appartenenza
+  (cond ((null? lst) nil) ((= x (lst 0)) true) (true (in? x (rest lst)))))  in lista
+
+(define (astar A B R)
+  (letn (rx1 (R 0 0) ry1 (R 0 1) rx2 (R 1 0) ry2 (R 1 1)
+         ; nodi da esplorare con (pos percorso g f)
+         opens (list (list A (list A) 0 (h A B)))
+         ; nodi gia' visitati
+         closed '()
+         ; risultato finale
+         found nil)
+    ; continua finche' esistono nodi e non trovato B
+    (while (and opens (not found))
+      ; inizializza nodo migliore
+      (setq best (opens 0))
+      (dolist (n opens)
+        ; selezione nodo con f minimo
+        (if (< (n 3) (best 3)) (setq best n)))
+      ; rimuove nodo scelto dalla opens list
+      (setq opens (remove best opens))
+      ; posizione corrente
+      (setq p (best 0))
+      ; percorso fino a p
+      (setq path (best 1))
+      ; costo reale accumulato
+      (setq g (best 2))
+      (if (= p B)
+        ; se raggiunto obiettivo termina
+        (setq found path)
+        (begin
+          ; marca nodo come visitato
+          (push p closed)
+          ; espande vicini
+          (dolist (nb (neighbors p))
+            ; evita rettangolo e evita cicli
+            (if (and (not (blocked? (nb 0) (nb 1) rx1 ry1 rx2 ry2))
+                    (not (in? nb closed)))
+              ; nuovo costo e valutazione
+              (letn (ng (+ g 1) nf (+ ng (h nb B)))
+              ; inserisce nuovo stato
+                (push (list nb (append path (list nb)) ng nf) opens)))))))
+    ; restituisce percorso finale
+    found))
+
+(astar '(2 2) '(10 10) '((4 4) (7 7)))
+;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (2 7) (2 8) (2 9) (2 10)
+;->  (3 10) (4 10) (5 10) (6 10) (7 10) (8 10) (9 10) (10 10))
+
+(astar '(5 2) '(7 7) '((4 3) (10 6)))
+;-> ((5 2) (4 2) (3 2) (3 3) (3 4) (3 5) (3 6) (3 7) (4 7) (5 7) (6 7) (7 7))
+
+(define (astar A B R)
+  (letn (
+    rx1 (R 0 0) ry1 (R 0 1)
+    rx2 (R 1 0) ry2 (R 1 1)
+    opened (list (list A (list A) 0 (h A B)))
+    closed '()
+    found nil)
+    (while (and opened (not found))
+      ; prendi nodo con f minimo
+      (set 'best (opened 0))
+      (dolist (n opened)
+        (if (< (n 3) (best 3))
+            (set 'best n)))
+      (set 'opened (remove best opened))
+      (set 'p (best 0))
+      (set 'path (best 1))
+      (set 'g (best 2))
+      (if (= p B)
+          (set 'found path)
+          (begin
+            (push p closed)
+            (dolist (nb (neighbors p))
+              (if (and
+                    (not (blocked? (nb 0) (nb 1) rx1 ry1 rx2 ry2))
+                    (not (in? nb closed)))
+                  (letn (
+                    ng (+ g 1)
+                    nf (+ ng (h nb B)))
+                    (push (list nb (append path (list nb)) ng nf) opened)))))))
+    found))
+
+(astar '(2 2) '(10 10) '((4 4) (7 7)))
+;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (2 7) (2 8) (2 9) (2 10)
+;->  (3 10) (4 10) (5 10) (6 10) (7 10) (8 10) (9 10) (10 10))
+
+
+(astar '(5 2) '(7 7) '((4 3) (10 6)))
+;-> ((5 2) (4 2) (3 2) (3 3) (3 4) (3 5) (3 6) (3 7) (4 7) (5 7) (6 7) (7 7))
+
+Per passare da un rettangolo a più rettangoli occorre cambiare solo la funzione che decide se una cella è 'bloccata'.
+Con un solo rettangolo abbiamo una coppia di coordinate: (xmin xmax ymin ymax).
+Con più rettangoli abbiamo una lista di rettangoli in cui ogni rettangolo è (xmin ymin xmax ymax).
+Una cella (x, y) è bloccata se appartiene ad almeno uno dei rettangoli.
+Nell'algoritmo l'unico punto che cambia è la funzione 'blocked':
+Per ogni cella (x,y):
+1) prendere la lista rettangoli
+2) per ogni rettangolo verificare se (x,y) è dentro
+3) se almeno uno è vero -> cella proibita
+Tutto il resto dell'algoritmo resta identico.
 
 ============================================================================
 
