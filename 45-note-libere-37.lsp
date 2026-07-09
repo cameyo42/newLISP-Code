@@ -7507,16 +7507,16 @@ L'algoritmo funziona bene perchè h(n) guida verso B, g(n) garantisce ottimalita
             lst))))
 
 (define (between? x a b)
-  ; controlla se x è dentro intervallo chiuso
-  (and (>= x (min a b)) (<= x (max a b))))  indipendentemente dall'ordine
+  ; controlla se x è dentro intervallo chiuso indipendentemente dall'ordine
+  (and (>= x (min a b)) (<= x (max a b))))
 
 (define (blocked? x y rx1 ry1 rx2 ry2)
-  ; true se la cella è dentro il rettangolo
-  (and (between? x rx1 rx2) (between? y ry1 ry2)))  ostacolo
+  ; true se la cella è dentro il rettangolo ostacolo
+  (and (between? x rx1 rx2) (between? y ry1 ry2)))
 
 (define (h p b)
-  ; euristica Manhattan (stima distanza rimanente
-  (+ (abs (- (p 0) (b 0))) (abs (- (p 1) (b 1)))))  senza ostacoli)
+  ; euristica Manhattan (stima distanza rimanente senza ostacoli)
+  (+ (abs (- (p 0) (b 0))) (abs (- (p 1) (b 1)))))
 
 (define (neighbors p)
   (letn (x (p 0) y (p 1))
@@ -7524,8 +7524,8 @@ L'algoritmo funziona bene perchè h(n) guida verso B, g(n) garantisce ottimalita
     (list (list (+ x 1) y) (list (- x 1) y) (list x (+ y 1)) (list x (- y 1)))))
 
 (define (in? x lst)
-  ; verifica appartenenza
-  (cond ((null? lst) nil) ((= x (lst 0)) true) (true (in? x (rest lst)))))  in lista
+  ; verifica appartenenza in lista
+  (cond ((null? lst) nil) ((= x (lst 0)) true) (true (in? x (rest lst)))))
 
 (define (astar A B R)
   (letn (rx1 (R 0 0) ry1 (R 0 1) rx2 (R 1 0) ry2 (R 1 1)
@@ -7575,45 +7575,6 @@ L'algoritmo funziona bene perchè h(n) guida verso B, g(n) garantisce ottimalita
 (astar '(5 2) '(7 7) '((4 3) (10 6)))
 ;-> ((5 2) (4 2) (3 2) (3 3) (3 4) (3 5) (3 6) (3 7) (4 7) (5 7) (6 7) (7 7))
 
-(define (astar A B R)
-  (letn (
-    rx1 (R 0 0) ry1 (R 0 1)
-    rx2 (R 1 0) ry2 (R 1 1)
-    opened (list (list A (list A) 0 (h A B)))
-    closed '()
-    found nil)
-    (while (and opened (not found))
-      ; prendi nodo con f minimo
-      (set 'best (opened 0))
-      (dolist (n opened)
-        (if (< (n 3) (best 3))
-            (set 'best n)))
-      (set 'opened (remove best opened))
-      (set 'p (best 0))
-      (set 'path (best 1))
-      (set 'g (best 2))
-      (if (= p B)
-          (set 'found path)
-          (begin
-            (push p closed)
-            (dolist (nb (neighbors p))
-              (if (and
-                    (not (blocked? (nb 0) (nb 1) rx1 ry1 rx2 ry2))
-                    (not (in? nb closed)))
-                  (letn (
-                    ng (+ g 1)
-                    nf (+ ng (h nb B)))
-                    (push (list nb (append path (list nb)) ng nf) opened)))))))
-    found))
-
-(astar '(2 2) '(10 10) '((4 4) (7 7)))
-;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (2 7) (2 8) (2 9) (2 10)
-;->  (3 10) (4 10) (5 10) (6 10) (7 10) (8 10) (9 10) (10 10))
-
-
-(astar '(5 2) '(7 7) '((4 3) (10 6)))
-;-> ((5 2) (4 2) (3 2) (3 3) (3 4) (3 5) (3 6) (3 7) (4 7) (5 7) (6 7) (7 7))
-
 Per passare da un rettangolo a più rettangoli occorre cambiare solo la funzione che decide se una cella è 'bloccata'.
 Con un solo rettangolo abbiamo una coppia di coordinate: (xmin xmax ymin ymax).
 Con più rettangoli abbiamo una lista di rettangoli in cui ogni rettangolo è (xmin ymin xmax ymax).
@@ -7624,6 +7585,1038 @@ Per ogni cella (x,y):
 2) per ogni rettangolo verificare se (x,y) è dentro
 3) se almeno uno è vero -> cella proibita
 Tutto il resto dell'algoritmo resta identico.
+
+
+-----------------------------------------
+Distanza di Manhattan (Manhattan library)
+-----------------------------------------
+
+-------------------------------------------------------------------------------
+Libreria per operare su griglie di Manhattan.
+
+Lista delle Funzioni:
+Distanza di Manhattan: (dist-manh p1 p2)
+Percorsi a L tra due punti: (pathL-manh p1 p2)
+Numero dei percorsi minimi di Manhattan: (count-paths-manh p1 p2)
+Compressione di un percorso di Manhattan: (pack-manh path)
+Espansione di un percorso di Manhattan: (unpack-manh path)
+Lunghezza di un percorso di Manhattan: (length-manh path)
+Verifica di un percorso Manhattan: (check-manh path)
+Trasformazione percorso espanso -> direzioni: (path-directions-manh path)
+Trasformazione direzioni -> percorso espanso: (directions-path-manh p dirs)
+Direzione finale di un percorso espanso: (last-direction-manh path)
+Collisione spaziale di percorsi espansi: (collision-space-manh path1 path2)
+Collisione temporale di percorsi espansi: (collision-time-manh path1 path2)
+Collisione edge di percorsi espansi: (collision-edge-manh path1 path2)
+Percorso minimo con ostacoli (A*): (astar-manh A B walls)
+Stampa di un percorso espanso e degli ostacoli: (print-grid-manh path walls)
+Distanza minima tra due percorsi: (dist-min-paths-manh path1 path2)
+Distanza massima tra due percorsi: (dist-max-paths-manh path1 path2)
+Generazione casuale di percorsi espansi: (random-path-manh start steps noloop)
+Generazione casuale di percorsi minimi espansi tra due punti: (random-minpath-manh A B)
+-------------------------------------------------------------------------------
+
+Dati due punti p1(x1,y1) e p2(x2,y2) calcolare la distanza di Manhattan:
+
+  distanza((x1,y1),(x2,y2)) = |x2-x1| + |y2-y1|
+
+(define (dist-manh p1 p2)
+"Calculate Manhattan distance of two points p1=(x1 y1) e p2=(x2 y2)"
+  (let ((x1 (p1 0)) (y1 (p1 1)) (x2 (p2 0)) (y2 (p2 1)))
+    (+ (abs (- x1 x2)) (abs (- y1 y2)))))
+
+(dist-manh '(2 5) '(6 9))
+;-> 8
+
+
+--------------------------
+Percorsi a L tra due punti
+--------------------------
+
+Dati due punti p1(x1,y1) e p2(x2,y2) calcolare i 'percorsi a L' tra i due punti secondo la distanza di Manhattan.
+
+Un 'percorso a L' è composto da due segmenti rettilinei:
+1) prima tutto in orizzontale e poi tutto in verticale
+   - partire da (x1,y1);
+   - avanzare lungo l'asse X fino a x2;
+   - quindi avanzare lungo l'asse Y fino a y2.
+2) prima tutto in verticale e poi tutto in orizzontale
+   - partire da (x1,y1);
+   - avanzare lungo l'asse Y fino a y2;
+   - quindi avanzare lungo l'asse X fino a x2.
+3) se x1 = x2 oppure y1 = y2, esiste un solo percorso (una linea retta).
+
+Questa definizione produce sempre al massimo due percorsi, entrambi minimi secondo la distanza di Manhattan.
+
+Esempio:
+  p1 = (2 2)
+  p2 = (4 3)
+  percorsi = (2 2) (3 2) (4 2) (4 3)
+            (2 2) (2 3) (3 3) (4 3)
+
+(define (pathL-manh p1 p2)
+  (local (x1 y1 x2 y2 sx sy path1 path2)
+    ; Estrae le coordinate dei due punti di partenza e arrivo.
+    ; I punti sono rappresentati come liste del tipo (x y).
+    (setq x1 (p1 0) y1 (p1 1))
+    (setq x2 (p2 0) y2 (p2 1))
+    ; Calcola la direzione del movimento lungo l'asse X.
+    ; sx vale:
+    ;  1  se bisogna aumentare la coordinata x (movimento verso destra)
+    ; -1  se bisogna diminuire la coordinata x (movimento verso sinistra)
+    ;  0  se le due coordinate x coincidono e non serve movimento.
+    (setq sx (cond ((< x1 x2) 1) ((> x1 x2) -1) (true 0)))
+    ; Calcola la direzione del movimento lungo l'asse Y.
+    ; sy vale:
+    ;  1  se bisogna aumentare la coordinata y (movimento verso l'alto)
+    ; -1  se bisogna diminuire la coordinata y (movimento verso il basso)
+    ;  0  se le due coordinate y coincidono e non serve movimento.
+    (setq sy (cond ((< y1 y2) 1) ((> y1 y2) -1) (true 0)))
+    ; Costruisce il primo percorso a L:
+    ; prima tutti gli spostamenti orizzontali,
+    ; poi tutti gli spostamenti verticali.
+    ; Il percorso iniziale contiene sempre il punto di partenza.
+    (setq path1 (list (list x1 y1)))
+    ; Se la coordinata x deve cambiare, aggiunge tutti i punti
+    ; intermedi lungo la direzione orizzontale fino a raggiungere x2.
+    (if (!= sx 0)
+        (for (x (+ x1 sx) x2 sx)
+          (push (list x y1) path1 -1)))
+    ; Se la coordinata y deve cambiare, aggiunge tutti i punti
+    ; intermedi lungo la direzione verticale fino a raggiungere y2.
+    ; Il valore x è già quello finale perché il tratto orizzontale
+    ; è stato completato prima.
+    (if (!= sy 0)
+        (for (y (+ y1 sy) y2 sy)
+          (push (list x2 y) path1 -1)))
+    ; Se i punti sono sulla stessa riga o sulla stessa colonna,
+    ; il percorso a L coincide con un unico percorso rettilineo.
+    ; Questo comprende anche il caso p1 = p2.
+    (if (or (= x1 x2) (= y1 y2))
+        (list path1)
+        (begin
+          ; Costruisce il secondo percorso a L:
+          ; prima tutti gli spostamenti verticali,
+          ; poi tutti gli spostamenti orizzontali.
+          (setq path2 (list (list x1 y1)))
+          ; Aggiunge il tratto verticale fino a raggiungere y2.
+          (for (y (+ y1 sy) y2 sy)
+            (push (list x1 y) path2 -1))
+          ; Aggiunge il tratto orizzontale fino a raggiungere x2.
+          (for (x (+ x1 sx) x2 sx)
+            (push (list x y2) path2 -1))
+          ; Restituisce i due possibili percorsi a L:
+          ; orizzontale->verticale e verticale->orizzontale.
+          (list path1 path2)))))
+
+Proviamo:
+
+(pathL-manh '(2 2) '(4 3))
+;-> (((2 2) (3 2) (4 2) (4 3)) ((2 2) (2 3) (3 3) (4 3)))
+(pathL-manh '(0 0) '(2 2))
+;-> (((0 0) (1 0) (2 0) (2 1) (2 2)) ((0 0) (0 1) (0 2) (1 2) (2 2)))
+(pathL-manh '(0 0) '(2 0))
+;-> (((0 0) (1 0) (2 0)))
+(pathL-manh '(0 0) '(0 0))
+;-> (((0 0)))
+(pathL-manh '(-2 -2) '(3 2))
+;-> (((-2 -2) (-1 -2) (0 -2) (1 -2) (2 -2) (3 -2) (3 -1) (3 0) (3 1) (3 2))
+;->  ((-2 -2) (-2 -1) (-2 0) (-2 1) (-2 2) (-1 2) (0 2) (1 2) (2 2) (3 2)))
+(pathL-manh '(2 2) '(-1 -1))
+;-> (((2 2) (1 2) (0 2) (-1 2) (-1 1) (-1 0) (-1 -1))
+;->  ((2 2) (2 1) (2 0) (2 -1) (1 -1) (0 -1) (-1 -1)))
+
+---------------------------------------
+Numero dei percorsi minimi di Manhattan
+---------------------------------------
+
+Dati due punti p1(x1,y1) e p2(x2,y2) calcolare il numero di tutti i percorsi minimi tra i due punti secondo la distanza di Manhattan.
+
+Siano:
+  dx = |x2 - x1|
+  dy = |y2 - y1|
+
+Ogni percorso minimo è costituito da 'dx' passi orizzontali e 'dy' passi verticali.
+Bisogna semplicemente scegliere in quali delle 'dx+dy' posizioni mettere i passi orizzontali (oppure quelli verticali).
+
+Quindi il numero dei percorsi è il coefficiente binomiale:
+
+  binomial(dx+dy, dx)
+
+equivalentemente:
+
+  (dx+dy)! / (dx! * dy!)
+
+Esempi:
+
+  A=(0,0)  B=(2,1)
+  R R U
+  Possibili percorsi:
+  R R U
+  R U R
+  U R R
+  Totale = binomial(3,2) = 3
+
+  A=(0,0)  B=(3,2)
+  R R R U U
+  Totale = binomial(5,3) = 10
+
+  A=(0,0)  B=(4,4)
+  Totale = binomial(8,4) = 70
+
+  A=(5,2)  B=(5,7)
+  dx=0
+  dy=5
+  Totale = 1
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+(define (count-paths-manh p1 p2)
+  (let ((dx (abs (- (p2 0) (p1 0))))
+        (dy (abs (- (p2 1) (p1 1)))))
+    (binomial (+ dx dy) dx)))
+
+
+----------------------------------------
+Compressione di un percorso di Manhattan
+----------------------------------------
+
+Dato un percorso di Manhattan qualsiasi costruire il percorso che contiene solo i punti di inizio, fine e cambio direzione.
+Esempio:
+percorso = (2 2) (2 3) (4 3) (6 3) (6 4) (7 4) (8 4) (8 7)
+output = (2 2) (2 3) (6 3) (6 4) (8 4 (8 7)
+
+Il cambio di direzione viene rilevato confrontando il vettore di spostamento corrente con quello precedente.
+
+(define (pack-manh path)
+  (local (out prev-dir dir p q)
+    (if (<= (length path) 1)
+        path
+        (begin
+          ; Il risultato inizia sempre dal punto iniziale.
+          (setq out (list (path 0)))
+          ; Calcola la direzione del primo segmento.
+          (setq p (path 0))
+          (setq q (path 1))
+          (setq prev-dir (list (- (q 0) (p 0)) (- (q 1) (p 1))))
+          ; Analizza tutti i segmenti successivi.
+          ; Se la nuova direzione è diversa dalla precedente,
+          ; il punto corrente è un punto di cambio direzione.
+          (for (i 1 (- (length path) 2))
+            (setq p (path i))
+            (setq q (path (+ i 1)))
+            (setq dir (list (- (q 0) (p 0)) (- (q 1) (p 1))))
+            (if (!= dir prev-dir)
+                (push p out -1))
+            (setq prev-dir dir))
+          ; L'ultimo punto viene sempre mantenuto.
+          (push (last path) out -1)
+          out))))
+
+Proviamo:
+
+(pack-manh '((2 2) (2 3) (4 3) (6 3) (6 4) (7 4) (8 4) (8 7)))
+;-> ((2 2) (2 3) (6 3) (6 4) (8 4) (8 7))
+(pack-manh '((-1 0) (-2 0) (-3 0) (-3 1) (-3 2) (-3 3) (-4 3) (-5 3) (-6 3)))
+;-> ((-1 0) (-3 0) (-3 3) (-6 3))
+
+
+--------------------------------------
+Espansione di un percorso di Manhattan
+--------------------------------------
+
+Dato un percorso di Manhattan qualsiasi costruire TUTTI i punti (uno per ogni step).
+
+Esempio:
+percorso = (1 1) (2 1) (4 1) (4 3)
+output = (1 1) (2 1) (3 1) (4 1) (4 2) (4 3)
+
+La funzione deve espandere ogni segmento rettilineo inserendo i punti intermedi mancanti.
+Per ogni coppia di punti consecutivi calcola la direzione dello spostamento e aggiunge un punto alla volta fino al punto finale del segmento.
+
+(define (unpack-manh path)
+  (local (out x1 y1 x2 y2 sx sy)
+    ; Il percorso vuoto o con un solo punto non necessita
+    ; di espansione.
+    (if (<= (length path) 1)
+        path
+        (begin
+          ; Il risultato inizia dal primo punto del percorso.
+          (setq out (list (path 0)))
+          ; Analizza ogni coppia di punti consecutivi.
+          (for (i 0 (- (length path) 2))
+            (setq x1 ((path i) 0))
+            (setq y1 ((path i) 1))
+            (setq x2 ((path (+ i 1)) 0))
+            (setq y2 ((path (+ i 1)) 1))
+            ; Determina la direzione dello spostamento.
+            ; Ogni segmento deve essere orizzontale o verticale.
+            (setq sx (cond ((< x1 x2) 1) ((> x1 x2) -1) (true 0)))
+            (setq sy (cond ((< y1 y2) 1) ((> y1 y2) -1) (true 0)))
+            ; Inserisce tutti i punti intermedi fino al punto finale
+            ; del segmento corrente.
+            (if (!= sx 0)
+                (for (x (+ x1 sx) x2 sx)
+                  (push (list x y1) out -1)))
+            (if (!= sy 0)
+                (for (y (+ y1 sy) y2 sy)
+                  (push (list x1 y) out -1))))
+          out))))
+
+Proviamo:
+
+(unpack-manh '((1 1) (2 1) (4 1) (4 3)))
+;-> ((1 1) (2 1) (3 1) (4 1) (4 2) (4 3))
+(unpack-manh '((2 2) (2 3) (6 3) (6 4) (8 4) (8 7)))
+;-> ((2 2) (2 3) (3 3) (4 3) (5 3) (6 3) (6 4) (7 4) (8 4) (8 5) (8 6) (8 7))
+(unpack-manh '((1 1) (2 1) (3 1) (4 1)))
+;-> ((1 1) (2 1) (3 1) (4 1))
+
+
+-------------------------------------
+Lunghezza di un percorso di Manhattan
+-------------------------------------
+
+Dato un percorso di Manhattan qualsiasi calcolare la sua lunghezza.
+
+Esempio:
+percorso = (1 1) (2 1) (4 1) (4 3) (4 5)
+lunghezza = 7
+
+La lunghezza di un percorso Manhattan è la somma delle distanze Manhattan tra ogni coppia di punti consecutivi:
+
+  distanza((x1,y1),(x2,y2)) = |x2-x1| + |y2-y1|
+
+La funzione gestisce qualsiasi percorso Manhattan, sia già 'compresso' (con soli cambi direzione) sia 'espanso' con tutti i singoli passi e anche percorsi mixed (alcuni segmenti con tutti i passi espliciti e altri compressi), perché non dipende dal numero di punti presenti: somma sempre la distanza Manhattan tra ogni coppia di punti consecutivi.
+
+(define (length-manh path)
+  (local (len out p1 p2)
+    (setq len (length path))
+    (setq out 0)
+    (when (> len 1)
+      (setq out 0)
+      (for (i 0 (- (length path) 2))
+        (setq p1 (path i))
+        (setq p2 (path (+ i 1)))
+        (setq out (+ out (abs (- (p2 0) (p1 0))) (abs (- (p2 1) (p1 1)))))))
+      out))
+
+Esempi:
+
+(length-manh '((1 1) (2 1) (4 1) (4 3) (4 5)))
+;-> 7
+(length-manh '((2 2) (2 3) (6 3) (6 4) (8 4) (8 7)))
+;-> 11
+(length-manh '((0 0)))
+;-> 0
+(length-manh '((1 1) (2 1) (3 1) (5 1) (5 2) (5 5)))
+;-> 8
+(length-manh '((2 3)))
+;-> 0
+
+
+---------------------------------
+Verifica di un percorso Manhattan
+---------------------------------
+
+Dato un percorso di Manhattan verificare se si tratta di un percorso valido.
+Il percorso può essere compresso o espanso o mixed.
+
+Per verificare se un percorso Manhattan è valido bisogna controllare che ogni coppia di punti consecutivi rispetti le regole:
+1) I due punti devono essere diversi.
+2) Lo spostamento deve essere solo orizzontale oppure solo verticale:
+   - x cambia e y resta uguale, oppure
+   - y cambia e x resta uguale.
+3. Non sono ammessi spostamenti diagonali.
+
+La verifica funziona ugualmente per percorsi:
+- espansi: (1 1) (2 1) (3 1) ...
+- compressi: (1 1) (5 1) (5 4)
+- mixed: una combinazione dei due.
+
+(define (check-manh path)
+  (local (ok p1 p2 dx dy)
+    (setq ok true)
+    (if (< (length path) 1)
+        nil
+        (begin
+          (for (i 0 (- (length path) 2) 1 (not ok))
+            (setq p1 (path i))
+            (setq p2 (path (+ i 1)))
+            (setq dx (abs (- (p2 0) (p1 0))))
+            (setq dy (abs (- (p2 1) (p1 1))))
+            ; Un passo valido deve avere una sola coordinata diversa.
+            ; dx e dy non possono essere entrambi zero
+            ; e non possono essere entrambi diversi da zero.
+            (if (or (and (= dx 0) (= dy 0))
+                    (and (!= dx 0) (!= dy 0)))
+                (setq ok nil)))
+          ok))))
+
+Proviamo:
+
+; percorso mixed
+(check-manh '((1 1) (2 1) (4 1) (4 3) (4 5)))
+;-> true
+; percorso compresso
+(check-manh '((1 1) (5 1) (5 4)))
+;-> true
+; percorso espanso
+(check-manh '((1 1) (2 1) (3 1) (3 2)))
+;-> true
+; percorso espanso, spostamento diagonale
+(check-manh '((1 1) (2 2) (3 2)))
+;-> nil
+; due punti consecutivi uguali
+(check-manh '((1 1) (1 1) (2 1)))
+;-> nil
+(check-manh '((-1 -1) (-1 -2) (-2 -2)))
+;-> true
+
+
+--------------------------------------------
+Trasformazione percorso espanso -> direzioni
+--------------------------------------------
+
+Dato un percorso di Manhattan già espanso trasformarlo in una lista di direzioni (U D R L).
+
+Esempio:
+percorso = (1 1) (1 2) (1 3) (2 3) (3 3) (3 2) (3 1)
+direzioni = U U R R D D
+
+In un percorso di Manhattan già espanso, ogni coppia di punti consecutivi corrisponde a un singolo passo.
+Quindi basta calcolare la differenza tra due punti consecutivi e trasformarla in una direzione:
+
+ (0 1)  -> U (Up)    (Sopra)
+ (0 -1) -> D (Down)  (Sotto)
+ (1 0)  -> R (Right) (Destra)
+ (-1 0) -> L (Left)  (Sinistra)
+
+(define (path-directions-manh path)
+  (local (out p1 p2 dx dy)
+    (setq out '())
+    (for (i 0 (- (length path) 2))
+      (setq p1 (path i))
+      (setq p2 (path (+ i 1)))
+      (setq dx (- (p2 0) (p1 0)))
+      (setq dy (- (p2 1) (p1 1)))
+      (cond
+        ((= dx 1) (push 'R out -1))
+        ((= dx -1) (push 'L out -1))
+        ((= dy 1) (push 'U out -1))
+        ((= dy -1) (push 'D out -1))))
+    out))
+
+Proviamo:
+
+(path-directions-manh '((1 1) (1 2) (1 3) (2 3) (3 3) (3 2) (3 1)))
+;-> (U U R R D D)
+
+--------------------------------------------
+Trasformazione direzioni -> percorso espanso
+--------------------------------------------
+
+Data una lista di direzioni e un punto iniziale p=(x y) generare il percorso di Manhattan.
+
+Esempio:
+direzioni = U U R R D D
+punto = (1 1)
+percorso = (1 1) (1 2) (1 3) (2 3) (3 3) (3 2) (3 1)
+
+La funzione deve fare l'operazione inversa di 'directions-manh': parte dal punto iniziale e applica una direzione alla volta aggiungendo il nuovo punto raggiunto.
+
+(define (directions-path-manh p dirs)
+  (local (out x y dir)
+    (setq x (p 0))
+    (setq y (p 1))
+    (setq out (list (list x y)))
+    (dolist (dir dirs)
+      (cond
+        ((= dir 'U) (++ y))
+        ((= dir 'D) (-- y))
+        ((= dir 'R) (++ x))
+        ((= dir 'L) (-- x)))
+      (push (list x y) out -1))
+    out))
+
+Proviamo:
+
+(path-directions-manh '(1 1) '(U U R R D D))
+;-> ((1 1) (1 2) (1 3) (2 3) (3 3) (3 2) (3 1))
+
+
+---------------------------------------
+Direzione finale di un percorso espanso
+---------------------------------------
+
+Dato un percorso espanso, calcolare la direzione finale (U D L R).
+
+Per un percorso Manhattan espanso basta considerare gli ultimi due punti.
+Se path = (p0 p1 ... p(n-1) p(n)) la direzione finale è la direzione del segmento:
+
+  p(n-1) -> p(n)
+
+Quindi:
+
+  dx = x_finale - x_precedente
+  dy = y_finale - y_precedente
+
+e:
+
+  dx =  1  -> R
+  dx = -1  -> L
+  dy =  1  -> U
+  dy = -1  -> D
+
+Esempi:
+  (setq p '((1 1) (1 2) (1 3) (2 3)))
+  ultimo passo: (1 3) -> (2 3)
+  dx = 1
+  dy = 0
+  direzione = R
+
+  (setq p '((3 5) (3 4) (3 3)))
+  ultimo passo: (3 4) -> (3 3)
+  dx = 0
+  dy = -1
+  direzione = D
+
+La funzione assume che il percorso sia valido (vedi 'check-manh' che verifica questo).
+Un caso particolare è un percorso con un solo punto per cui non esiste una direzione finale.
+In questo caso la funzione restituisce 'nil'.
+
+(define (last-direction-manh path)
+  (if (< (length path) 2)
+      nil
+      (letn (p1 (path (- (length path) 2))
+             p2 (path (- (length path) 1))
+             dx (- (p2 0) (p1 0))
+             dy (- (p2 1) (p1 1)))
+        (cond
+          ((= dx 1) "R")
+          ((= dx -1) "L")
+          ((= dy 1) "U")
+          ((= dy -1) "D")))))
+
+Proviamo:
+
+(last-direction-manh '((1 1) (1 2) (1 3) (2 3)))
+;-> "R"
+(last-direction-manh '((3 5) (3 4) (3 3)))
+;-> "D"
+
+Per un percorso compresso o mixed invece non basta sempre: gli ultimi due punti rappresentano l'ultimo tratto, ma se il percorso è compresso devi comunque guardare la direzione tra gli ultimi due punti della lista, perché il tratto finale è già rappresentato dal segmento finale.
+
+
+---------------------------------------
+Collisione spaziale di percorsi espansi
+---------------------------------------
+
+Dati due percorsi di Manhattan espansi calcolare i punti in comune.
+Collisione spaziale 'vertex': due percorsi visitano la stessa cella (stesso punto), indipendentemente dal tempo.
+
+(define (collision-space-manh path1 path2)
+    (intersect path1 path2))
+
+Proviamo:
+
+(collision-space-manh (unpack-manh '((0 0) (5 0)))
+                      (unpack-manh '((3 -2) (3 2))))
+;-> ((3 0))
+(collision-space-manh (unpack-manh '((0 0) (0 5) (5 5)))
+                      (unpack-manh '((2 2) (2 5) (4 5))))
+;-> ((2 5) (3 5) (4 5))
+(collision-space-manh (unpack-manh '((0 0) (2 0) (2 3)))
+                      (unpack-manh '((1 -1) (1 1) (2 1))))
+;-> ((1 0) (2 1))
+
+
+----------------------------------------
+Collisione temporale di percorsi espansi
+----------------------------------------
+
+Dati due percorsi di Manhattan espansi determinare se collidono temporalmente tra loro.
+
+Se consideriamo che ogni passo viene fatto in una unita di tempo, la collisione temporale si riduce a un confronto degli indici.
+Dati:
+  path1 = (p0 p1 p2 p3 ...)
+  path2 = (q0 q1 q2 q3 ...)
+al tempo t i due oggetti si trovano rispettivamente in:
+  path1[t]
+  path2[t]
+Quindi c'è collisione temporale se esiste un indice t tale che:
+  path1[t] = path2[t]
+
+Esempi:
+
+  path1 = (0 0) (1 0) (2 0) (3 0)
+  path2 = (3 0) (2 0) (1 0) (0 0)
+  Confronto:
+  t=0   (0 0) != (3 0)
+  t=1   (1 0) != (2 0)
+  t=2   (2 0) != (1 0)
+  t=3   (3 0) != (0 0)
+  Nessuna collisione temporale, anche se i percorsi si incrociano.
+
+  path1 = (0 0) (1 0) (2 0)
+  path2 = (2 0) (1 0) (0 0)
+  produce:
+  t=0   (0 0) != (2 0)
+  t=1   (1 0) = (1 0)  <-- collisione
+  t=2   (2 0) != (0 0)
+
+(define (collision-time-manh path1 path2)
+  (let (collide nil)
+    (for (i 0 (- (min (length path1) (length path2)) 1) 1 collide)
+      (if (= (path1 i) (path2 i)) (setq collide true)))
+    collide))
+
+(setq p1 '((0 0) (1 0) (2 0) (3 0)))
+(setq p2 '((3 0) (2 0) (1 0) (0 0)))
+(collision-time-manh p1 p2)
+;-> nil
+
+(setq p1 '((0 0) (1 0) (2 0)))
+(setq p2 '((2 0) (1 0) (0 0)))
+(collision-time-manh p1 p2)
+;-> true
+
+
+-----------------------------------
+Collisione edge di percorsi espansi
+-----------------------------------
+
+Dati due percorsi di Manhattan espansi determinare se collidono in modo 'edge' tra loro.
+La collisione 'edge' significa che lo stesso segmento viene percorso in direzioni opposte nello stesso intervallo di tempo.
+
+Esempio:
+  t=0
+  A=(0,0)
+  B=(1,0)
+
+  t=1
+  A=(1,0)
+  B=(0,0)
+Non occupano mai lo stesso punto nello stesso istante, ma si "attraversano".
+Nei problemi di robotica questa è considerata una collisione.
+
+Due percorsi hanno una edge collision se esiste un indice i tale che:
+  path1[i]   = path2[i+1]
+  path1[i+1] = path2[i]
+cioè:
+  A va da P a Q
+  B va da Q a P
+nello stesso intervallo di tempo.
+
+Esempio:
+(setq p1 '((0 0) (1 0) (2 0)))
+(setq p2 '((3 0) (2 0) (1 0)))
+  Confronto:
+  t=0:
+  A: (0 0)->(1 0)
+  B: (3 0)->(2 0)
+  t=1:
+  A: (1 0)->(2 0)
+  B: (2 0)->(1 0)
+  Edge collision al passo 1.
+
+(define (collision-edge-manh path1 path2)
+  (local (collide)
+    (setq collide nil)
+    (for (i 0 (- (min (length path1) (length path2)) 2) 1 collide)
+      (if (and (= (path1 i) (path2 (+ i 1)))
+               (= (path1 (+ i 1)) (path2 i)))
+          (setq collide true)))
+    collide))
+
+Esempi:
+
+(collision-edge-manh '((0 0) (1 0)) '((1 0) (0 0)))
+;-> true
+(collision-time-manh '((0 0) (1 0)) '((1 0) (0 0)))
+;-> nil
+
+
+---------------------------------
+Percorso minimo con ostacoli (A*)
+---------------------------------
+
+Dati due punti A(x1,y1), B(x2,y2) e una lista di celle che rappresentano gli ostacoli, determinare il percorso minimo da A a B (movimenti di Manhattan).
+
+Algoritmo A* (A-star)
+---------------------
+A* e' un algoritmo di ricerca del percorso minimo tra un nodo iniziale e un nodo finale in un grafo.
+
+Nel caso della griglia Manhattan:
+- ogni cella della griglia e' un nodo;
+- ogni movimento possibile (U,D,L,R) e' un arco;
+- ogni arco ha costo 1;
+- alcune celle possono essere bloccate (walls).
+
+L'algoritmo combina:
+1) costo reale del percorso fatto: g(n)
+   cioe' la distanza dal punto iniziale al nodo corrente.
+2) stima del costo rimanente: h(n)
+   cioe' una euristica che stima la distanza dal nodo corrente al
+   punto finale.
+3) valutazione totale: f(n) = g(n) + h(n)
+
+A* sceglie sempre da esplorare il nodo con valore f piu' piccolo.
+
+Euristica Manhattan
+-------------------
+Nel caso della griglia senza movimenti diagonali:
+        h(n) = |x2-x1| + |y2-y1|
+
+Esempio:
+    nodo corrente:
+        (3,4)
+    destinazione:
+        (8,10)
+    h = |8-3| + |10-4|
+    h = 5 + 6
+    h = 11
+Questa stima e' ottimistica perche' non considera gli ostacoli.
+Non sovrastima mai la distanza reale, quindi A* mantiene la proprieta' di trovare il percorso minimo.
+
+Strutture dati usate
+--------------------
+OPEN LIST
+Contiene i nodi ancora da esplorare.
+Ogni nodo ha la forma:
+    (posizione percorso g f)
+Esempio:
+    ((4 5)
+     ((2 2) (3 2) (4 2) (4 3) (4 4) (4 5))
+     5
+     12)
+Significato:
+    posizione corrente:
+        (4 5)
+    percorso costruito:
+        (2 2) ... (4 5)
+    costo reale:
+        g = 5
+    valutazione:
+        f = 12
+
+CLOSED LIST
+Contiene i nodi gia' completamente analizzati.
+Serve per evitare:
+- cicli;
+- ricerche ripetute sulla stessa cella.
+Esempio:
+    closed = ((2 2) (3 2) (4 2) (4 3))
+
+Ciclo principale
+----------------
+Finche' OPEN non e' vuota e il nodo finale non e' trovato:
+1) Cerca il nodo migliore in OPEN
+        nodo con f minimo
+        OPEN:
+        A   f=12
+        B   f=8
+        C   f=15
+        viene scelto: B
+2) Rimuove il nodo scelto da OPEN
+        OPEN prima: A B C
+        dopo: A C
+
+3) Controlla se e' arrivato alla destinazione
+        posizione corrente == B
+    Se si:
+        restituisce il percorso.
+
+4) Inserisce il nodo in CLOSED
+    Il nodo non verra' piu' analizzato.
+
+5) Genera i vicini
+Da una cella (x y) vengono creati:
+    (x+1,y)
+    (x-1,y)
+    (x,y+1)
+    (x,y-1)
+
+6) Filtra i vicini
+Un vicino viene scartato se:
+    - e' un muro (walls: ((4 4) (5 4) ...))
+    - e' gia' in CLOSED
+
+7) Calcola i nuovi valori
+Per ogni vicino:
+    nuovo costo: ng = g + 1
+perche' ogni movimento costa 1.
+Poi: nf = ng + h(vicino)
+
+8) Aggiorna OPEN
+Se il vicino non esiste in OPEN: viene inserito.
+Se esiste gia': confronto dei costi.
+Esempio:
+  OPEN contiene:
+      nodo X
+      g = 10
+  Trovo un nuovo percorso:
+      nodo X
+      g = 6
+  Il nuovo percorso e' migliore.
+  Sostituisco il vecchio nodo.
+  Se invece:
+      nuovo g >= vecchio g
+  non faccio nulla.
+
+Ricostruzione del percorso
+--------------------------
+Nella versione implementata il percorso viene salvato direttamente nel nodo.
+Esempio:
+partenza:
+    ((2 2))
+dopo un passo:
+    ((2 2) (3 2))
+dopo due passi:
+    ((2 2) (3 2) (4 2))
+Quando A* raggiunge B, il percorso contenuto nel nodo e' gia' il risultato finale.
+
+Esempio completo
+----------------
+Partenza: A = (2 2)
+Arrivo:   B = (6 4)
+Senza ostacoli:
+
+        (2,2)
+          |
+          |
+          +------+
+                 |
+                 |
+               (6,4)
+
+Distanza Manhattan:
+    h = |6-2| + |4-2|
+    h = 6
+
+Con ostacoli A* esplora varie alternative:
+    OPEN
+       nodo1  f=8
+       nodo2  f=6
+       nodo3  f=10
+sceglie sempre: f minimo
+fino a trovare: posizione = B
+e restituisce:  percorso minimo.
+
+Riassunto
+---------
+astar-manh esegue:
+    1) crea OPEN con il nodo iniziale
+    2) ripete:
+          - prende nodo con f minimo
+          - se e' il target termina
+          - sposta il nodo in CLOSED
+          - genera i 4 vicini
+          - elimina muri e nodi chiusi
+          - aggiorna OPEN
+    3) restituisce il percorso trovato
+       oppure nil se non esiste un cammino.
+
+La versione implementata mantiene OPEN senza duplicati, perche' quando trova un percorso migliore verso una cella sostituisce il nodo precedente. Questo evita esplosioni inutili della lista OPEN.
+
+La funzione implementa quindi un A* completo su griglia Manhattan
+con ostacoli e ricerca del percorso minimo.
+
+(define (remove-one el lst)
+  (let (idx (ref el lst))
+    (if idx (pop lst idx))
+    lst))
+
+(define (h p b)
+  ; euristica Manhattan (stima distanza rimanente senza ostacoli)
+  (+ (abs (- (p 0) (b 0))) (abs (- (p 1) (b 1)))))
+
+(define (neighbors p)
+  (letn (x (p 0) y (p 1))
+    ; 4 mosse possibili su griglia
+    (list (list (+ x 1) y) (list (- x 1) y) (list x (+ y 1)) (list x (- y 1)))))
+
+(define (update-open node opens)
+  ; Inserisce un nodo in opens.
+  ; Se esiste già un nodo con la stessa posizione:
+  ; - sostituisce il vecchio nodo solo se il nuovo ha costo g minore.
+  ; - mantiene il vecchio nodo se è già migliore.
+  (local (old out)
+    (setq old nil)
+    (dolist (n opens)
+      (if (= (n 0) (node 0))
+          (setq old n)))
+    ; Nessun nodo con la stessa posizione: aggiunge il nuovo nodo.
+    (if (nil? old)
+        (push node opens)
+        ; Esiste già un nodo: verifica se il nuovo percorso è migliore.
+        (if (< (node 2) (old 2))
+            (begin
+              (setq out '())
+              (dolist (n opens)
+                (if (= (n 0) (node 0))
+                    (push node out -1)
+                    (push n out -1)))
+              (setq opens out))))
+    opens))
+
+(define (astar-manh A B walls)
+  ; A -> cella di partenza (x1 y1)
+  ; B -> cella di arrivo (x2 y2)
+  ; walls -> lista delle celle bloccate
+  (local (opens closed found best p path g nb ng nf node)
+    ; opens contiene nodi del tipo:
+    ; (posizione percorso costo-g costo-f)
+    ; f = g + euristica Manhattan
+    (setq opens (list (list A (list A) 0 (h A B))))
+    ; closed contiene le celle gia' completamente esplorate
+    (setq closed '())
+    ; percorso finale trovato
+    (setq found nil)
+    ; continua finche' ci sono nodi da esplorare
+    ; e il punto finale non e' stato raggiunto
+    (while (and (not (null? opens))
+                (not found))
+      ; seleziona il nodo con valore f minimo
+      (setq best (opens 0))
+      (dolist (n opens)
+        (if (< (n 3) (best 3))
+            (setq best n)))
+      ; rimuove il nodo scelto dalla lista opens
+      (setq opens (remove-one best opens))
+      ; dati del nodo corrente
+      (setq p (best 0))
+      (setq path (best 1))
+      (setq g (best 2))
+      ; raggiunto il punto finale
+      (if (= p B)
+          (setq found path)
+          (begin
+            ; il nodo corrente viene chiuso
+            (push p closed)
+            ; genera le quattro celle adiacenti
+            (dolist (nb (neighbors p))
+              ; considera solo celle valide:
+              ; - non devono essere muri
+              ; - non devono essere gia' chiuse
+              (if (and (not (ref nb walls))
+                       (not (ref nb closed)))
+                  (begin
+                    (setq ng (+ g 1))
+                    (setq nf (+ ng (h nb B)))
+                    (setq node
+                      (list nb (append path (list nb)) ng nf))
+                    ; aggiorna opens:
+                    ; inserisce il nodo se nuovo,
+                    ; sostituisce il vecchio se il nuovo percorso
+                    ; ha costo g inferiore
+                    (setq opens (update-open node opens))))))))
+    ; restituisce il percorso minimo oppure nil
+    found))
+
+(astar-manh '(2 2) '(10 10) '((4 4) (7 7)))
+;-> ((2 2) (2 3) (2 4) (2 5) (2 6) (2 7) (2 8) (2 9)
+;->  (2 10) (3 10) (4 10) (5 10) (6 10) (7 10) (8 10) (9 10) (10 10))
+(astar-manh '(5 2) '(7 7) '((4 3) (10 6)))
+;-> ((5 2) (4 2) (3 2) (3 3) (3 4) (3 5) (3 6) (3 7) (4 7) (5 7) (6 7) (7 7))
+
+
+----------------------------------------------
+Stampa di un percorso espanso e degli ostacoli
+----------------------------------------------
+
+Dato un percorso espanso e una lista di ostacoli, stamparli insieme.
+Il percorso viene stampato considerando che l'origine si trova in basso a sinistra (0 0).
+
+Legenda di stampa:
+  "A"  punto iniziale
+  "B"  punto finale
+  "*"  percorso
+  "#"  ostacolo
+  " "  cella libera
+
+Se il percorso contiene un solo punto, 'B' sovrascrive 'A'.
+Se il percorso sovrascrive gli ostacoli nel caso (anomalo) di sovrapposizione viene stampato un messaggio di errore.
+
+(define (print-grid-manh path walls)
+  (local (points xmin xmax ymin ymax dx dy matrix)
+    ; Se il percorso e la lista degli ostacoli sono entrambe vuote,
+    ; non esiste nulla da stampare.
+    (if (and (null? path) (null? walls))
+        nil
+        (begin
+          (if (intersect path walls) (println "Errore: percorso sovrascrive ostacoli"))
+          ; Unisce percorso e ostacoli per determinare il rettangolo
+          ; minimo che contiene tutti i punti.
+          (setq points (append path walls))
+          ; Calcola i valori minimi e massimi delle coordinate x e y.
+          (setq xmin (apply min (map first points)))
+          (setq xmax (apply max (map first points)))
+          (setq ymin (apply min (map last points)))
+          (setq ymax (apply max (map last points)))
+          ; Calcola larghezza e altezza del rettangolo.
+          (setq dx (abs (- xmax xmin)))
+          (setq dy (abs (- ymax ymin)))
+          ; Crea una matrice di stringhe inizializzata con spazi.
+          ; La matrice e' indicizzata come (riga colonna), cioe' (y x).
+          (setq matrix (array (+ dy 1) (+ dx 1) '(" ")))
+          ; Inserisce gli ostacoli nella matrice.
+          (dolist (p walls)
+            (setf (matrix (- (p 1) ymin)
+                          (- (p 0) xmin))
+                  "#"))
+          ; Inserisce il percorso.
+          ; Il percorso sovrascrive gli ostacoli nel caso (anomalo)
+          ; di sovrapposizione.
+          (dolist (p path)
+            (setf (matrix (- (p 1) ymin)
+                          (- (p 0) xmin))
+                  "*"))
+          ; Evidenzia il punto iniziale con 'A'.
+          (if path
+              (setf (matrix (- ((path 0) 1) ymin)
+                            (- ((path 0) 0) xmin))
+                    "A"))
+          ; Evidenzia il punto finale con 'B'.
+          ; Se il percorso contiene un solo punto, 'B' sovrascrive 'A'.
+          (if path
+              (setf (matrix (- ((path -1) 1) ymin)
+                            (- ((path -1) 0) xmin))
+                    "B"))
+          ; Stampa la matrice dall'ultima riga alla prima in modo che
+          ; l'origine degli assi (0,0) risulti in basso a sinistra.
+          (for (i dy 0 -1)
+            (for (j 0 dx)
+              (print (matrix i j) " "))
+            (println))))))
+
+Proviamo:
+
+(setq path '((2 2) (2 3) (2 4) (3 4) (4 4) (5 4)))
+(setq walls '((3 2) (3 3) (4 3) (5 3) (5 2)))
+(setq walls '((2 2) (3 2) (3 3) (4 3) (5 3) (5 2)))
+(setq walls '())
+
+Ho aggiunto all'inizio:
+(if (intersect path walls) (println "Errore: percorso sovrascrive ostacoli"))
+
+(setq path '((2 2) (2 3) (2 4) (3 4) (4 4) (5 4)))
+(setq walls '((2 2) (3 2) (3 3) (4 3) (5 3) (5 2)))
+(print-grid-manh path walls)
+;-> Errore: percorso sovrascrive ostacoli
+;-> * * * B
+;-> * # # #
+;-> A #   #
 
 ============================================================================
 

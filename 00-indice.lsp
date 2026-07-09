@@ -3594,6 +3594,27 @@ NOTE LIBERE 37
   Massimi dell'applicazione di una formula ad una lista
   Stessa combinazione di dadi
   Connessione di punti con ostacolo
+  Distanza di Manhattan (Manhattan library)
+  Percorsi a L tra due punti
+  Numero dei percorsi minimi di Manhattan
+  Compressione di un percorso di Manhattan
+  Espansione di un percorso di Manhattan
+  Lunghezza di un percorso di Manhattan
+  Verifica di un percorso Manhattan
+  Trasformazione percorso espanso -> direzioni
+  Trasformazione direzioni -> percorso espanso
+  Direzione finale di un percorso espanso
+  Collisione spaziale di percorsi espansi
+  Collisione temporale di percorsi espansi
+  Collisione edge di percorsi espansi
+  Percorso minimo con ostacoli (A*)
+  Stampa di un percorso espanso e degli ostacoli
+
+NOTE LIBERE 38
+==============  
+  Distanza minima e massima tra due percorsi
+  Generazione casuale di percorsi espansi
+  Generazione casuale di percorsi minimi espansi tra due punti
 
 PROBLEMI SUI DADI
 =================
