@@ -185,7 +185,7 @@ FUNZIONI VARIE
   Stampo di un numero
   Conversione vettore <--> lista
   one?
-  Algoritmo Knuth-Morris-Pratt
+  Algoritmo KMP (Knuth-Morris-Pratt)
   Heap binario (Binary Heap)
   Flood Fill
   Poligoni convessi
@@ -3615,6 +3615,8 @@ NOTE LIBERE 38
   Distanza minima e massima tra due percorsi
   Generazione casuale di percorsi espansi
   Generazione casuale di percorsi minimi espansi tra due punti
+  Even and Odd kinds
+  Distanza dei numeri naturali dai numeri primi
 
 PROBLEMI SUI DADI
 =================

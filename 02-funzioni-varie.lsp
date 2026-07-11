@@ -7836,9 +7836,9 @@ La seguente funzione non serve a niente, è solo per estetica, ma a me piace.
 ;-> nil
 
 
-----------------------------
-Algoritmo Knuth-Morris-Pratt
-----------------------------
+----------------------------------
+Algoritmo KMP (Knuth-Morris-Pratt)
+----------------------------------
 
 L'algoritmo di Knuth-Morris-Pratt (algoritmo KMP) permette di trovare le occorrenze di una stringa (pattern di ricerca) S in un testo T. La caratteristica consiste nel pretrattamento della stringa da cercare in modo che, in caso di non-corrispondenza, non sia necessario riesaminare i caratteri precedenti. Questo permette all'algoritmo di minimizzare il numero di confronti necessari. La complessità temporale vale O(n+k), dove n è la lunghezza del testo e k è la lunghezza della stringa.
 
