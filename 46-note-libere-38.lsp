@@ -352,5 +352,283 @@ Proviamo:
 ;->  1 2 3 2 1 6 1 2 3 2 1 2 1 2 1 2 3 2 1 4 1 2 1 2
 ;->  1)
 
+
+---------------------
+Output = 2 * function
+---------------------
+
+Scrivere una funzione (più corta possibile) che restituisce un numero di caratteri pari al doppio della lunghezza della funzione stessa.
+
+Versione code-golf (21 caratteri):
+
+(define(f)(dup 1 10))
+(f)
+;-> (1 1 1 1 1 1 1 1 1 1)
+
+(length "(define(f)(dup 1 10))")
+;-> 21
+(length "(1 1 1 1 1 1 1 1 1 1)")
+;-> 21
+
+
+-------------------------------------
+Sequenze di primi sommati (p + p + 1)
+-------------------------------------
+
+Dato un numero primo P generare la seguente sequenza:
+
+  P(0) = P
+  P(1) = P(0) + P(0) + 1, se P(1) è primo
+  ...
+  P(n) = P(n-1) + P(n-1) + 1, se P(n) è primo 
+
+La sequenza si ferma al primo P(i) non primo.
+
+Esempio:
+  P = 2
+  P(0) = 2
+  P(1) = 2 + 2 + 1 = 5 (primo)
+  P(2) = 5 + 5 + 1 = 11 (primo)
+  P(3) = 11 + 11 + 1 = 23 (primo)
+  P(4) = 23 + 23 + 1 = 47 (primo)
+  P(5) = 47 + 47 + 1 = 95 (composto)
+  Sequenza finale: seq(2) = 2 5 11 23 47
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (create-seq num)
+  (let ((out (list num)) (stop nil))
+    (until stop
+      (setq num (+ num num 1))
+      (if (prime? num)
+          (push num out -1)
+          (setq stop true)))
+    out))
+
+(create-seq 2)
+;-> (2 5 11 23 47)
+
+(create-seq 41)
+;-> (41 83 167)
+
+(define (sequenze limite)
+  (map create-seq (primes-to limite)))
+
+(define (filtra seq op val)
+  (filter (fn(x) (op (length x) val)) seq))
+
+Primi fino a 1000: lunghezza massima sequenza = 6
+(silent (setq ss (sequenze 1000)))
+(filtra ss = 5)
+;-> ((2 5 11 23 47) (179 359 719 1439 2879))
+(filtra ss = 6)
+;-> ((89 179 359 719 1439 2879))
+(filtra ss = 7)
+;-> ()
+
+Primi fino a 1e7 (10 milioni): lunghezza massima sequenza = 7
+(silent (setq ss (sequenze 1e7)))
+(filtra ss = 7)
+;-> ((1122659 2245319 4490639 8981279 17962559 35925119 71850239)
+;->  (2164229 4328459 8656919 17313839 34627679 69255359 138510719)
+;->  (2329469 4658939 9317879 18635759 37271519 74543039 149086079))
+(filtra ss = 8)
+;-> ()
+
+
+------------------------------------------
+Ordinamento topologico (algoritmo di Kahn)
+------------------------------------------
+
+Dato un grafo aciclico diretto (DAG - Directed Acyclic Graph) con V vertici ed E archi, trovare un ordinamento topologico valido del grafo.
+Ordinamento topologico: è un ordinamento lineare dei vertici tale che per ogni arco diretto u -> v, il vertice u precede v nell'ordinamento.
+
+Esempio 1:
+
+  +---+       +---+       +---+       +---+
+  | 0 |------>| 1 |------>| 2 |------>| 3 |
+  +---+       +---+       +---+       +---+
+                ^           ^
+                |           |
+  +---+       +---+         |
+  | 4 |------>| 5 |---------+
+  +---+       +---+
+
+Input: adj = ((1) (2) (3) () (5) (1 2))
+Output: (0 4 5 1 2 3)
+Per ogni coppia di vertici (u -> v) del grafo, nell'ordinamento u viene prima di v.
+
+Esempio 2:
+
+              +---+       +---+
+              | 0 |------>| 1 |
+              +---+       +---+
+                            ^
+                            |
+  +---+       +---+       +---+
+  | 4 |<------| 3 |------>| 2 |
+  +---+       +---+       +---+
+
+Input: adj = ((1) (2) () (2 4) ())
+Output: (0 3 1 4 2)
+Per ogni coppia di vertici (u -> v) del grafo, nell'ordinamento u viene prima di v.
+
+La lista delle adiacenze 'adj'
+'adj' è una lista di liste che rappresenta il grafo tramite una lista di adiacenza (adjacency list).
+L'idea è molto semplice:
+- la lista principale ha un elemento per ogni vertice;
+- l'elemento in posizione 'i' contiene la lista di tutti i vertici raggiungibili con un arco uscente da 'i'.
+Nel primo esempio:
+    adj = ((1) (2) (3) () (5) (1 2))
+
+Ci sono 6 vertici (0 ... 5).
+Ogni elemento ha il seguente significato:
+
+adj[0] = (1)
+Dal vertice '0' parte un arco verso '1': 0 --> 1
+
+adj[1] = (2)
+Dal vertice '1' parte un arco verso '2': 1 --> 2
+
+adj[2] = (3)
+Dal vertice '2' parte un arco verso '3': 2 --> 3
+
+adj[3] = ()
+Il vertice '3' non ha archi uscenti: ()
+
+adj[4] = (5)
+Dal vertice '4' parte un arco verso '5': 4 --> 5
+
+adj[5] = (1 2)
+Dal vertice '5' partono due archi: 5 --> 1 e 5 --> 2
+
+Mettendo insieme tutte le liste si ottiene il grafo:
+
+  0 --> 1 --> 2 --> 3
+        ^      ^
+        |      |
+  4 --> 5 -----+
+
+La struttura è efficiente perchè per conoscere i vicini del vertice 'u' basta leggere adj[u].
+Ad esempio:
+adj[5] = (1 2), significa immediatamente che i vicini di '5' sono '1' e '2'.
+Non è necessario esaminare tutti gli altri vertici del grafo.
+
+Confronto con una matrice di adiacenza
+Lo stesso grafo può essere rappresentato anche con una matrice di adicenza 6*6, dove '1' indica la presenza di un arco e '0' la sua assenza:
+
+      0 1 2 3 4 5
+    +------------
+  0 | 0 1 0 0 0 0
+  1 | 0 0 1 0 0 0
+  2 | 0 0 0 1 0 0
+  3 | 0 0 0 0 0 0
+  4 | 0 0 0 0 0 1
+  5 | 0 1 1 0 0 0
+
+La lista di adiacenza è però molto più compatta quando il numero di archi è piccolo rispetto al numero massimo possibile (grafi sparsi), ed è per questo che algoritmi come quello di Kahn la utilizzano normalmente.
+
+Algoritmo di Kahn
+-----------------
+L'algoritmo di Kahn applica la ricerca in ampiezza (BFS) per generare un ordinamento topologico valido.
+Calcolare il grado di entrata di ogni vertice, che rappresenta il numero di archi entranti di ogni vertice.
+Tutti i vertici con grado di entrata pari a 0 vengono aggiunti a una coda, poiché possono comparire per primi nell'ordinamento.
+Rimuovere ripetutamente un vertice dalla coda, aggiungerlo alla lista dei risultati e ridurre il grado di entrata di tutti i suoi vertici adiacenti.
+Se uno qualsiasi di questi vertici ha ora un grado di entrata pari a 0, viene aggiunto alla coda.
+Questo processo continua finché la coda non è vuota e l'ordinamento risultante rappresenta un ordinamento topologico valido del grafo.
+
+(define (addEdge adj u v)
+  ; Aggiunge un arco orientato dal vertice u al vertice v.
+  ; La struttura dati "adj" è una lista di adiacenza:
+  ;   adj[i] contiene tutti i vertici raggiungibili con
+  ;   un arco uscente dal vertice i.
+  ; L'istruzione seguente inserisce il vertice v in fondo
+  ; alla lista dei vicini del vertice u.
+  ; La funzione restituisce la nuova lista di adiacenza,
+  ; poiché in newLISP i parametri vengono passati per valore
+  ; e quindi il chiamante deve riassegnare il risultato.
+  (push v (adj u) -1)
+  adj)
+
+; Sort topologico di un DAG (algoritmo di Kahn)
+(define (topo-sort adj)
+  (local (n indegree res queue top next-node)
+    ; Determina il numero di vertici del grafo.
+    ; La lista di adiacenza contiene una lista per ogni vertice,
+    ; quindi la sua lunghezza coincide con il numero di nodi.
+    (setq n (length adj))
+    ; Crea il vettore dei gradi entranti (indegree).
+    ; L'elemento indegree[i] rappresenta il numero di archi
+    ; che arrivano al vertice i. Inizialmente tutti i valori
+    ; sono posti a zero e verranno aggiornati analizzando il grafo.
+    (setq indegree (dup 0 n))
+    ; Lista che conterrà l'ordinamento topologico finale.
+    (setq res '())
+    ; Coda dei vertici con grado entrante uguale a zero.
+    ; I vertici vengono inseriti in fondo (push ... -1)
+    ; ed estratti dalla testa (pop), ottenendo una vera FIFO.
+    (setq queue '())
+    ; Calcola il grado entrante di ogni vertice.
+    ; Per ogni arco i -> next-node incrementa il numero
+    ; di archi entranti del nodo di destinazione.
+    (for (i 0 (- n 1))
+      (dolist (next-node (adj i))
+        (++ (indegree next-node))))
+    ; Inserisce nella coda tutti i vertici che non hanno
+    ; archi entranti. Essi possono comparire per primi
+    ; nell'ordinamento topologico.
+    (for (i 0 (- n 1))
+      (if (= (indegree i) 0)
+          (push i queue -1)))
+    ; Algoritmo di Kahn.
+    ; Finché esistono vertici con grado entrante zero:
+    ;   1) estrae il primo vertice dalla coda;
+    ;   2) lo aggiunge al risultato;
+    ;   3) elimina virtualmente tutti i suoi archi uscenti
+    ;      decrementando il grado entrante dei relativi vicini;
+    ;   4) quando un vicino raggiunge grado entrante zero,
+    ;      viene inserito nella coda.
+    (while queue
+      (setq top (pop queue))
+      (push top res -1)
+      (dolist (next-node (adj top))
+        (-- (indegree next-node))
+        (if (= (indegree next-node) 0)
+            (push next-node queue -1))))
+    ; Restituisce l'ordinamento topologico.
+    ; Se il grafo contiene un ciclo, il numero di elementi
+    ; della lista restituita sarà minore del numero di vertici.
+    res))
+
+Proviamo:
+
+(setq n 6)
+(setq adj (dup '() n))
+(push 1 (adj 0) -1)
+(push 2 (adj 1) -1)
+(push 3 (adj 2) -1)
+(push 5 (adj 4) -1)
+(push 1 (adj 5) -1)
+(push 2 (adj 5) -1)
+(topo-sort adj)
+;-> (0 4 5 1 2 3)
+
+Vedi anche "Sort topologico" su "Note libere 7".
+
 ============================================================================
 

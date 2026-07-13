@@ -3167,6 +3167,8 @@ Applichiamo la funzione agli esempi precedenti:
 (toposort dag3)
 ;-> (0 1 2 3 4 6 11 5 14 16 7 12 13 15 8 9 17 10 18)
 
+Vedi anche "Ordinamento topologico (algoritmo di Kahn)" su "Note libere 38".
+
 
 ----------------------------------------------------
 Creazione dinamica di variabili e funtori di default

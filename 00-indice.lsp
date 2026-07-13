@@ -3617,6 +3617,9 @@ NOTE LIBERE 38
   Generazione casuale di percorsi minimi espansi tra due punti
   Even and Odd kinds
   Distanza dei numeri naturali dai numeri primi
+  Output = 2 * function
+  Sequenze di primi sommati (p + p + 1)
+  Ordinamento topologico (algoritmo di Kahn)
 
 PROBLEMI SUI DADI
 =================
