@@ -451,9 +451,9 @@ Primi fino a 1e7 (10 milioni): lunghezza massima sequenza = 7
 ;-> ()
 
 
-------------------------------------------
-Ordinamento topologico (algoritmo di Kahn)
-------------------------------------------
+----------------------------------------------------
+Ordinamento topologico di un DAG (algoritmo di Kahn)
+----------------------------------------------------
 
 Dato un grafo aciclico diretto (DAG - Directed Acyclic Graph) con V vertici ed E archi, trovare un ordinamento topologico valido del grafo.
 Ordinamento topologico: è un ordinamento lineare dei vertici tale che per ogni arco diretto u -> v, il vertice u precede v nell'ordinamento.
@@ -775,6 +775,355 @@ Grafo:
 0 ---> 1 ---> 2
        ^      |
        |______|
+
+
+------------------------------
+Ricerca dei percorsi in un DAG
+------------------------------
+
+Dato un DAG (Directed Acyclic Graph) determinare tutti i percorsi
+
+Algoritmo: DFS (Depth First Search) con backtracking.
+
+Un percorso valido è una sequenza di vertici tale che ogni coppia consecutiva è collegata da un arco orientato.
+L'algoritmo si divide in due fasi.
+
+1) Ricerca delle sorgenti
+Per ogni vertice viene calcolato il grado entrante (indegree), cioè il numero di archi che arrivano al vertice.
+Tutti i vertici con grado entrante uguale a zero sono sorgenti.
+Poiche' un DAG puo' avere una o piu' sorgenti, la ricerca dei percorsi deve iniziare da ognuna di esse.
+
+2) DFS con backtracking
+Per ogni sorgente viene eseguita una visita DFS.
+Durante la visita viene mantenuta una lista chiamata "path", che contiene il percorso corrente.
+Ogni volta che si entra in un nodo:
+- il nodo viene aggiunto in fondo a "path";
+- se il nodo è un pozzo (non ha archi uscenti), una copia di "path" viene salvata nella lista dei risultati;
+- altrimenti si visitano ricorsivamente tutti i figli.
+Quando tutti i figli sono stati visitati, il nodo viene eliminato da "path".
+Questa operazione prende il nome di backtracking e permette di riutilizzare la stessa lista per esplorare gli altri rami del grafo.
+
+Ad esempio, nel grafo:
+
+          0
+         / \
+        1   2
+         \ /
+          3
+
+la visita procede cosi':
+
+  path = ()
+  entra in 0
+  path = (0)
+  
+  entra in 1
+  path = (0 1)
+  
+  entra in 3
+  path = (0 1 3)
+  
+  3 è un pozzo
+  salva (0 1 3)
+  
+  backtracking
+  path = (0 1)
+  
+  backtracking
+  path = (0)
+  
+  entra in 2
+  path = (0 2)
+  
+  entra in 3
+  path = (0 2 3)
+  
+  3 è un pozzo
+  salva (0 2 3)
+  
+  backtracking
+  path = (0 2)
+  
+  backtracking
+  path = (0)
+  
+  backtracking
+  path = ()
+
+Alla fine sono stati trovati tutti i percorsi:
+  (0 1 3)
+  (0 2 3)
+
+Poichè il grafo è aciclico, ogni visita termina sempre in un pozzo.
+Non è quindi necessario mantenere una lista dei nodi visitati o controllare la presenza di cicli.
+
+Complessità
+-----------
+  V = numero di vertici
+  E = numero di archi
+  P = numero di percorsi
+Il calcolo dei gradi entranti richiede O(V + E).
+La DFS visita ogni arco quando esplora un percorso, ma il tempo totale dipende dal numero dei percorsi presenti nel DAG.
+Nel caso peggiore il numero dei percorsi può crescere in modo esponenziale rispetto al numero dei vertici.
+Tempo  = O(somma delle lunghezze di tutti i percorsi)
+Spazio = O(profondita' massima della DFS)
+
+(define (dag-paths adj)
+; Scope dinamico: 'path' e 'out' sono locali a 'dag-paths',
+; ma sono visibili a 'dfs-paths' senza dover essere passati come parametri.
+  (local (n indegree sources path out)
+    ; Numero di vertici del DAG
+    (setq n (length adj))
+    ; Calcola il grado entrante di ogni vertice
+    (setq indegree (dup 0 n))
+    (for (i 0 (- n 1))
+      (dolist (v (adj i))
+        (++ (indegree v))))
+    ; Individua tutte le sorgenti (grado entrante = 0)
+    (setq sources '())
+    (for (i 0 (- n 1))
+      (if (= (indegree i) 0)
+          (push i sources -1)))
+    ; Variabili condivise dalla DFS
+    (setq path '())
+    (setq out '())
+    ; Avvia una DFS da ogni sorgente
+    (dolist (s sources)
+      (dfs-paths adj s))
+    ; Restituisce tutti i percorsi trovati
+    out))
+
+(define (dfs-paths adj node)
+  ; Aggiunge il nodo corrente al percorso
+  (push node path -1)
+  ; Se il nodo è un pozzo salva una copia del percorso
+  (if (null? (adj node))
+      ;(push (copy path) out -1)
+      (push path out -1)
+      ; Altrimenti visita ricorsivamente tutti i figli
+      (dolist (v (adj node))
+        (dfs-paths adj v)))
+  ; Backtracking: rimuove l'ultimo nodo del percorso
+  (pop path -1))
+
+Proviamo:
+
+Grafo:
+      0
+     / \
+    1   2
+     \ /
+      3
+(setq adj '((1 2) (3) (3) ()))
+(dag-paths adj)
+;-> ((0 1 3) (0 2 3))
+
+Grafo:
+0 ---> 2 ---> 4
+1 ---> 3 ---> 4
+(setq adj '((2) (3) (4) (4) ()))
+(dag-paths adj)
+;-> ((0 2 4) (1 3 4))
+
+Grafo:
+      0
+     / \
+    1   2
+   / \   \
+  3   4   |
+   \ /    |
+    5 <---+
+(setq adj '((1 2) (3 4) (4) (5) (5) ()))
+(dag-paths adj)
+;-> ((0 1 3 5) (0 1 4 5) (0 2 4 5))
+
+
+----------------------------------------------
+Numeri somma di tre cubi (teorema di Legendre)
+----------------------------------------------
+
+Dato un numero non negativo N determinare se può essere espresso come somma di 3 quadrati:
+
+  N = x^2 + y^2 + z^2
+
+Dato un numero non negativo N il teorema di Legendre (three-square theorem) afferma che N può essere espresso come somma di 3 quadrati N = x^2 + y^2 + z^2 se e solo se risulta: N = 4^a*(8*b+7).
+Per verificare questo bisogna controllare se, dopo aver tolto tutti i fattori '4', il numero rimanente è congruo a '7 mod 8'.
+
+In altre parole la condizione:
+
+ N = 4^a * (8*b + 7)
+
+significa:
+
+1) dividere N per 4 finché è possibile;
+2) chiamare il risultato M;
+3) controllare se M mod 8 = 7.
+Se è vero, N non è rappresentabile come somma di tre quadrati.
+Se è falso, N è rappresentabile.
+
+Esempi:
+
+  N = 28
+  28 / 4 = 7
+  M = 7
+  7 mod 8 = 7
+  quindi:
+  28 = 4^1 * (8*0 + 7)
+  NON rappresentabile
+
+  N = 12
+  12 / 4 = 3
+  M = 3
+  3 mod 8 = 3
+  quindi non è della forma proibita
+  rappresentabile: 12 = 2^2 + 2^2 + 2^2
+
+(define (legendre3? n)
+  (while (= (% n 4) 0)
+    (setq n (/ n 4)))
+  (!= (% n 8) 7))
+
+Proviamo:
+
+(legendre3? 28)
+;-> nil
+; 28 = 4 * 7 = 4^1 * (8*0+7)
+(legendre3? 12)
+;-> true
+; 12 = 2^2 + 2^2 + 2^2
+(legendre3? 7)
+;-> nil
+(legendre3? 100)
+;-> true
+; 100 = 10^2 + 0^2 + 0^2
+(legendre3? 1145141919810)
+;-> true
+; 1145141919810 = 1070113^2 + 295^2 + 4^2
+(legendre3? 245657627368729)
+;-> true
+; Rappresentabile come somma di 2 quadrati
+; 245657627368729 = 15384573^2 + 2995420^2 (+ 0^2).
+(legendre3? 12345678987654321)
+;-> True
+; numero quadrato
+; 12345678987654321 = 111111111^2 (+ 0^2 + 0^2)
+
+; big-integer (works well)
+(legendre3? 199070263454016156300L)
+;-> true
+; 199070263454016156300 = 1234567890^2 + 9876543210^2 + 9999999990^2
+(legendre3? 185724285729475816451975L)
+;-> nil
+
+La complessità è O(log N), perché il ciclo elimina al massimo un fattore 4 ad ogni iterazione.
+
+Un altro metodo è il seguente:
+
+(define (legendre3 n)
+  ; La funzione verifica il teorema dei tre quadrati di Legendre.
+  ; Restituisce true se n può essere scritto come:
+  ;     n = x^2 + y^2 + z^2
+  ; e nil se n è della forma proibita:
+  ;     n = 4^a * (8*b + 7)
+  ; Il metodo evita di dividere ripetutamente n per 4.
+  ; Usa il fatto che:
+  ;     c = n & (-n)
+  ; estrae il massimo divisore di 2 contenuto in n, cioè
+  ; la massima potenza di 2 che divide n.
+  ; Esempio:
+  ;     n = 40 = 101000 (binario)
+  ;     c = 8  = 001000
+  ; quindi:
+  ;     c = 2^k
+  ; Se k è pari, allora c è una potenza di 4:
+  ;     c = 4^a
+  ; Se k è dispari, allora c contiene un fattore 2 aggiuntivo:
+  ;     c = 2 * 4^a
+  ; Per distinguere i due casi si usa la proprietà:
+  ;     4^a mod 3 = 1
+  ; mentre:
+  ;     2 * 4^a mod 3 = 2
+  ; Quindi:
+  ;     c mod 3 = 1
+  ; indica che c è esattamente una potenza di 4.
+  ; Solo in questo caso bisogna controllare la condizione
+  ; proibita di Legendre.
+  ; Dopo aver eliminato la potenza di 4 rimane:
+  ;     m = n / c
+  ; Il teorema dice che il numero non è rappresentabile
+  ; se e solo se:
+  ;     m = 8*b + 7
+  ; cioè:
+  ;     m mod 8 = 7
+  ; Se c contiene un fattore 2 dispari, il numero è sempre
+  ; rappresentabile perché dopo la divisione per 4 rimarrebbe
+  ; un numero pari e quindi non può essere congruo a 7 modulo 8.
+  ; Caso particolare:
+  ; n = 0 è rappresentabile come:
+  ;     0 = 0^2 + 0^2 + 0^2
+  ; e viene gestito prima per evitare la divisione per zero.
+  (if (zero? n)
+      true
+      ;else
+      (let ((c (& n (- n))))
+        (not (and (= (% c 3) 1)
+                  (= (% (/ n c) 8) 7))))))
+
+Proviamo:
+
+(legendre3 28)
+;-> nil
+(legendre3 12)
+;-> true
+(legendre3 7)
+;-> nil
+(legendre3 100)
+;-> true
+(legendre3 1145141919810)
+;-> true
+(legendre3 245657627368729)
+;-> true
+(legendre3 12345678987654321)
+;-> True
+
+; big-integer don't works
+(legendre3 199070263454016156300L)
+;-> ERR: bigint type not applicable
+(legendre3 185724285729475816451975L)
+;-> ERR: bigint type not applicable
+
+Test di velocità:
+(time (legendre3 12345678987654321) 1e6)
+;-> 313.336
+(time (legendre3? 12345678987654321) 1e6)
+;-> 146.635
+
+Sequenza OEIS A000378:
+Sums of three squares: numbers of the form x^2 + y^2 + z^2.
+  0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22,
+  24, 25, 26, 27, 29, 30, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44,
+  45, 46, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 61, 62, 64, 65, 66,
+  67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 80, 81, 82, 83, ...
+
+(filter legendre3 (sequence 1 83))
+;-> (1 2 3 4 5 6 8 9 10 11 12 13 14 16 17 18 19 20 21 22
+;->  24 25 26 27 29 30 32 33 34 35 36 37 38 40 41 42 43 44
+;->  45 46 48 49 50 51 52 53 54 56 57 58 59 61 62 64 65 66
+;->  67 68 69 70 72 73 74 75 76 77 78 80 81 82 83)
+
+Sequenza OEIS A004215:
+Numbers that are the sum of 4 but no fewer nonzero squares.
+  7, 15, 23, 28, 31, 39, 47, 55, 60, 63, 71, 79, 87, 92, 95, 103, 111, 112,
+  119, 124, 127, 135, 143, 151, 156, 159, 167, 175, 183, 188, 191, 199, 207,
+  215, 220, 223, 231, 239, 240, 247, 252, 255, 263, 271, 279, 284, 287, 295,
+  303, 311, 316, 319, 327, 335, 343, ...
+
+(clean legendre3 (sequence 1 343))
+;-> (7 15 23 28 31 39 47 55 60 63 71 79 87 92 95 103 111 112
+;->  119 124 127 135 143 151 156 159 167 175 183 188 191 199 207
+;->  215 220 223 231 239 240 247 252 255 263 271 279 284 287 295
+;->  303 311 316 319 327 335 343)
+
 
 ============================================================================
 

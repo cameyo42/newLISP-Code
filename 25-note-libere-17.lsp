@@ -2033,7 +2033,8 @@ http://bitsavers.trailing-edge.com/pdf/xerox/parc/techReports/VLSI-81-1_The_Opti
 Congettura di Legendre
 ----------------------
 
-La Congettura di Legendre è un'affermazione non dimostrata che riguarda la distribuzione dei numeri primi. Essa afferma che esiste almeno un numero primo nell'intervallo (n^2,(n-1)^2) per tutti gli n naturali.
+La Congettura di Legendre è un'affermazione non dimostrata che riguarda la distribuzione dei numeri primi.
+Essa afferma che esiste almeno un numero primo nell'intervallo (n^2,(n-1)^2) per tutti gli n naturali.
 
 Scrivere una funzione che verifica (o falsifica) la congettura di Legendre fino ad un dato limite.
 

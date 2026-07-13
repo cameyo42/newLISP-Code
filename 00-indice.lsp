@@ -3619,8 +3619,10 @@ NOTE LIBERE 38
   Distanza dei numeri naturali dai numeri primi
   Output = 2 * function
   Sequenze di primi sommati (p + p + 1)
-  Ordinamento topologico (algoritmo di Kahn)
+  Ordinamento topologico di un DAG (algoritmo di Kahn)
   Ricerca cicli in un grafo orientato
+  Ricerca dei percorsi in un DAG
+  Numeri somma di tre cubi (teorema di Legendre)
 
 PROBLEMI SUI DADI
 =================
