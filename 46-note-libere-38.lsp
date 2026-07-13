@@ -630,5 +630,151 @@ Proviamo:
 
 Vedi anche "Sort topologico" su "Note libere 7".
 
+
+-----------------------------------
+Ricerca cicli in un grafo orientato
+-----------------------------------
+
+Dato un grafo rappresentato con una lista di adiacenza:
+adj = ((1) (2) (3) () (5) (1 2))
+il vertice 'i' ha come vicini tutti i nodi presenti in adj[i].
+Per verificare se un grafo orientato contiene cicli si può usare una visita DFS (Depth First Search) con tre stati per ogni vertice.
+Gli stati possibili sono:
+  0 = nodo non ancora visitato
+  1 = nodo attualmente nella pila DFS (in elaborazione)
+  2 = nodo completamente visitato
+
+Strategia:
+Se durante una DFS troviamo un arco verso un nodo con stato '1', significa che stiamo tornando indietro verso un nodo già presente nel percorso corrente.
+Quindi esiste un ciclo.
+
+Esempio:
+
+          +---+
+          | 1 |
+          v   |
+  0 ----> 1 --+
+          |
+          v
+          2
+
+  Lista: adj = ((1) (2) (1))
+  Visita da '0':
+  DFS(0)
+  stato: 0 = 1
+  vai a 1
+  stato: 0 = 1, 1 = 1
+  vai a 2
+  stato: 0 = 1, 1 = 1, 2 = 1
+  da 2 trovi arco verso 1
+  1 ha stato = 1
+  ciclo trovato
+  Il percorso corrente è:  0 -> 1 -> 2
+                                ^    |
+                                |____|
+
+Esempio:
+  Caso senza ciclo: 0 ---> 1 ---> 2 ---> 3
+  Lista: adj = ((1) (2) (3) ())
+  DFS:
+  visita 0  --> stato[0] = 1
+  visita 1  --> stato[1] = 1
+  visita 2  --> stato[2] = 1
+  visita 3  --> stato[3] = 1
+  3 terminato  --> stato[3] = 2
+  2 terminato  --> stato[2] = 2
+  1 terminato  --> stato[1] = 2
+  0 terminato  --> stato[0] = 2
+  Durante la visita non è mai stato trovato un arco verso un nodo con stato '1'.
+  Quindi non esistono cicli.
+
+Pseudocodice:
+ciclo(adj):
+  stato = [0,0,...,0]
+  per ogni nodo v:
+      se stato[v] == 0:
+          se DFS(v):
+              ritorna true
+  ritorna nil
+DFS(v):
+  stato[v] = 1
+  per ogni nodo u in adj[v]:
+      se stato[u] == 1:
+          ritorna true
+      se stato[u] == 0:
+          se DFS(u):
+              ritorna true
+  stato[v] = 2
+  ritorna nil
+
+Complessità: Tempo: O(V + E), Spazio: O(V)
+dove: V = numero di vertici, E = numero di archi
+
+Per un grafo orientato questa è la tecnica standard per il rilevamento dei cicli.
+Un'altra possibilità equivalente è usare l'algoritmo di Kahn: se l'ordinamento topologico non riesce a estrarre tutti i vertici, allora il grafo contiene almeno un ciclo.
+
+(define (has-cycle adj)
+  (local (n state cycle)
+    ; Numero dei vertici del grafo
+    (setq n (length adj))
+    ; Stato dei vertici:
+    ; 0 = mai visitato
+    ; 1 = nodo attualmente nel percorso DFS
+    ; 2 = nodo completamente analizzato
+    (setq state (dup 0 n))
+    ; Variabile che indica se è stato trovato un ciclo
+    (setq cycle nil)
+    ; Avvia una DFS da ogni componente non ancora visitata
+    (for (i 0 (- n 1))
+      (if (and (= (state i) 0) (not cycle))
+          (setq cycle (dfs-cycle adj state i))))
+    cycle))
+
+(define (dfs-cycle adj state v)
+  (local (cycle)
+    ; Il nodo corrente entra nella pila della DFS
+    (setf (state v) 1)
+    (setq cycle nil)
+    ; Esamina tutti gli archi uscenti da v
+    (dolist (u (adj v))
+      (if (not cycle)
+          (cond
+            ; Troviamo un arco verso un nodo già
+            ; presente nel percorso corrente:
+            ; quindi esiste un ciclo orientato
+            ((= (state u) 1)
+              (setq cycle true))
+            ; Continua la visita se il nodo non è stato visitato
+            ((= (state u) 0)
+              (if (dfs-cycle adj state u)
+                  (setq cycle true))))))
+    ; La visita del nodo è terminata
+    ; quindi viene marcato come completato
+    (setf (state v) 2)
+    cycle))
+
+Proviamo:
+(setq adj1 '((1) (2) (3) ()))
+(has-cycle adj1)
+;-> nil
+Grafo:
+0 ---> 1 ---> 2 ---> 3
+
+(setq adj2 '((1) (2) (3) (1)))
+(has-cycle adj2)
+;-> true
+Grafo:
+0 ---> 1 ---> 2 ---> 3
+              ^      |
+              |______|
+
+(setq adj3 '((1) (2) (1) ()))
+(has-cycle adj3)
+;-> true
+Grafo:
+0 ---> 1 ---> 2
+       ^      |
+       |______|
+
 ============================================================================
 

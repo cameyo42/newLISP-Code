@@ -3620,6 +3620,7 @@ NOTE LIBERE 38
   Output = 2 * function
   Sequenze di primi sommati (p + p + 1)
   Ordinamento topologico (algoritmo di Kahn)
+  Ricerca cicli in un grafo orientato
 
 PROBLEMI SUI DADI
 =================
