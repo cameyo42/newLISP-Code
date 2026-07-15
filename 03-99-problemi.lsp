@@ -541,18 +541,18 @@ Esempio: (elimina-duplicati '(1 1 1 2 2 3 4 4 5 5 5 6 6 6)) ==> (1 2 3 4 5 6)
     )
 )
 
-(elimina-duplicati '(1 1 1 2 2 3 4 4 5 5 5 6 6 6))
+(elimina-duplicati '(1 1 1 2 2 3 2 4 4 5 5 5 6 6 6))
+;-> (1 2 3 2 4 5 6)
+
+(elimina-duplicati '(a a b b c c c a))
+;-> (a b c a)
+
+La funzione predefinita 'unique' eleimina TUTTI i duplicati (non solo quelli consecutivi):
+
+(unique '(1 1 1 2 2 3 2 4 4 5 5 5 6 6 6))
 ;-> (1 2 3 4 5 6)
 
-(elimina-duplicati '(a a b b c c c))
-;-> (a b c)
-
-Funzione predefinita newLISP: (unique lst)
-
-(unique '(1 1 1 2 2 3 4 4 5 5 5 6 6 6))
-;-> (1 2 3 4 5 6)
-
-(unique '(a a b b c c c))
+(unique '(a a b b c c c a))
 ;-> (a b c)
 
 

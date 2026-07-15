@@ -1226,5 +1226,391 @@ Proviamo:
 ;->  (2 11 22 "b" "e" "be")
 ;->  (3 12 77 "c" "r" "cr"))
 
+
+----------------------------------------
+Stringhe conformi a pattern di caratteri
+----------------------------------------
+
+Data una stringa e un pattern di caratteri, verificare se i caratteri nella stringa seguono lo stesso ordine determinato dai caratteri del pattern.
+Nel pattern non ci sono caratteri duplicati.
+
+Esempi:
+
+  stringa = "newlisp"
+  pattern = "ew"
+  output  = true (perchè nella stringa il carattere 'e' precede sempre 'w')
+
+  stringa = "newlisp is not new"
+  pattern = "ew"
+  output  = nil (perchè nella stringa la seconda 'e' precede la prima 'w')
+  Ovvero, la 'e' di "new" si trova dopo la 'w' di "newlisp".
+
+
+Metodo 1
+--------
+Per ogni coppia (x, y) di caratteri consecutivi del pattern, cerchiamo l'ultima occorrenza di x e la prima occorrenza di y nella stringa di input.
+Se l'ultima occorrenza di x è successiva alla prima occorrenza di y per una qualsiasi coppia, restituiamo nil.
+Controllare ogni coppia di caratteri consecutivi nella stringa del pattern è sufficiente.
+Infatti, presi tre caratteri consecutivi nel pattern (x, y e z) se (x, y) e (y, z) restituiscono true, ciò implica che anche (x, z) è true.
+
+; funzione che cerca una sottostringa in una stringa
+; partendo dal fondo della stringa (da destra).
+; Restituisce l'indice dell'inizio della sottostringa nella stringa (o nil)
+(define (find-rev findThis inThis)
+  (- (length inThis) (find (reverse findThis) (reverse inThis)) (length findThis)))
+
+(define (check-pattern1 str pat)
+  (local (len-s len-p out x y ultimo primo)
+    ; numero di caratteri della stringa
+    (setq len-s (length str))
+    ; numero di caratteri del pattern
+    (setq len-p (length pat))
+    ; se il pattern è più lungo della stringa...
+    (if (> len-p len-s)
+        ; allora il risultato vale nil
+        (setq out true)
+        ;else
+        (begin
+          (setq out nil)
+          ; Ciclo per ogni coppia di caratteri del pattern...
+          (for (i 0 (- len-p 2) 1 out)
+            ; x e y sono una coppia di caratteri adiacenti del pattern
+            (setq x (pat i))
+            (setq y (pat (+ i 1)))
+            ; trova l'indice dell'ultima occorrenza del carattere x nella stringa
+            (setq ultimo (find-rev x str))
+            ; trova l'indice della prima occorrenza del carattere y nella stringa
+            (setq primo (find y str))
+            ;(print (list x y primo ultimo)) (read-line)
+            ; restituisce nil se x o y non sono presenti nella stringa
+            ; OPPURE l'ultima occorrenza di x è successiva alla
+            ; prima occorrenza di y nella stringa
+            (when (or (nil? primo) (nil? ultimo) (> ultimo primo))
+                ;(println (list x y primo ultimo))
+                (setq out true)))))
+    ; restituisce la negazione di 'out' dall'uscita del 'for'
+    (not out)))
+
+Proviamo:
+
+(check-pattern1 "newlisp" "ew")
+;-> true
+(check-pattern1 "newlisp is not new" "ew")
+;-> ("e" "w" 2 16)
+;-> nil
+(check-pattern1 "engineers rock" "er")
+;-> true
+(check-pattern1 "engineers rock" "egr")
+;-> ("e" "g" 2 6)
+;-> nil
+(check-pattern1 "engineers rock" "gsr")
+;-> ("s" "r" 7 8)
+;-> nil
+(check-pattern1 "bfbaeadeacc" "bac")
+;-> true
+
+Metodo 2
+--------
+Riduzione della stringa al pattern.
+Per ogni carattere del pattern, manteniamo nella stringa solo i caratteri corrispondenti.
+Nella nuova stringa, eliminiamo i caratteri ripetuti consecutivamente.
+Se la stringa finale è uguale al pattern restituiamo true, altrimenti nil.
+
+Esempio
+  stringa = "bfbaeadeacc"
+  pattern = "bac"
+  1) Rimozione dei caratteri extra dalla stringa
+     (cio quei caratteri che non sono presenti nel pattern)
+     str = "bbaaacc"   ('f', 'e' e 'd' sono stati rimossi)
+  2) Rimozione dei caratteri ripetuti consecutivi
+     str = "bac"
+  3) Se la stringa finale è uguale al pattern restituiamo true, altrimenti nil.
+
+Nella funzione i passi 1) e 2) vengono raggruppati ed effettuati con un solo ciclo.
+
+(define (check-pattern2 str pat)
+  (local (new-str ch)
+    (setq new-str "")
+    ; Ciclo per ogni carattere della stringa...
+    (dostring (c str)
+      (setq ch (char c))
+      ; se il carattere corrente si trova in pat 
+      ; ed è diverso dall'ultimo carattere di 'new-str',
+      ; allora lo aggiunge a 'new-str'
+      (if (and (find ch pat) (!= ch (new-str -1))) (extend new-str ch)))
+    ;(println new-str)
+    ; verifica se 'new-str' e 'pat' sono uguali
+    (= new-str pat)))
+
+Proviamo:
+
+(check-pattern2 "newlisp" "ew")
+;-> ew
+;-> true
+(check-pattern2 "newlisp is not new" "ew")
+;-> ewew
+;-> nil
+(check-pattern2 "engineers rock" "er")
+;-> er
+;-> true
+(check-pattern2 "engineers rock" "egr")
+;-> eger
+;-> nil
+(check-pattern2 "engineers rock" "gsr")
+;-> grsr
+;-> nil
+(check-pattern2 "bfbaeadeacc" "bac")
+;-> bac
+;-> true
+
+Metodo 3
+--------
+Assegniamo un'ordine numerico crescente ai caratteri del pattern.
+Ad esempio, il pattern "ew" viene ordinato come segue:
+  "e" => 1
+  "w" => 2
+Questo significa che tutte le "e" devono venire prima di tutte le "w".
+  (tenendo traccia dell'ordine corrente
+Attraversiamo la stringa (tenendo traccia dell'ordine corrente 'cur-ord'):
+  Se il carattere corrente si trova nel pattern:
+    - calcolare il suo ordine 'ord'
+    - se 'ord' > 'cur-ord', allora restituiamo nil
+    Altrimenti, aggiorniamo 'cur-ord' con 'ord'.
+Se tutti i caratteri rispettano l'ordine, restituiamo true.
+
+(define (check-pattern3 str pat)
+  (local (cur-ord out ch ord)
+    (setq out nil)
+    ; ordine corrente
+    (setq cur-ord 0)
+    ; Ciclo per ogni carattere...
+    (dostring (c str out)
+      ; carattere corrente
+      (setq ch (char c))
+      ; ordine/indice del carattere corrente nel pattern
+      (setq ord (find ch pat))
+      ; se il carattere corrente esiste nel pattern
+      (if ord
+        ; se l'ordine del carattere corrente è minore dell'ordine corrente
+        (if (< ord cur-ord)
+            (begin 
+              ; esce dal ciclo con risultato 'nil'
+              (setq out true)
+              ;(println (list ch ord cur-ord)))
+            ; altrimenti aggiorna l'ordine corrente con 
+            ; l'ordine del carattere corrente
+            (setq cur-ord ord))))
+    (not out)))
+
+Proviamo:
+
+(check-pattern3 "newlisp" "ew")
+;-> true
+(check-pattern "newlisp is not new" "ew")
+;-> ("e" "w" 2 16)
+;-> nil
+(check-pattern3 "engineers rock" "er")
+;-> true
+(check-pattern3 "engineers rock" "egr")
+;-> ("e" 0 1)
+;-> nil
+(check-pattern3 "engineers rock" "gsr")
+;-> ("s" 1 2)
+;-> nil
+(check-pattern3 "bfbaeadeacc" "bac")
+;-> true
+
+Test di velocità
+
+(setq t "bdjjdbsdgfjbdfjghjdfgbdsgfhasdhadskfsdkladskglhsdgadfkghgfcsdkjsdkc")
+(= (check-pattern1 t "bac") (check-pattern2 t "bac") (check-pattern3 t "bac"))
+;-> true
+
+(time (check-pattern1 t "bac") 1e5)
+;-> 196.054
+(time (check-pattern2 t "bac") 1e5)
+;-> 1452.137
+(time (check-pattern3 t "bac") 1e5)
+;-> 1382.842
+
+
+------------------------------------------
+Rettangolo massimo in una matrice booleana
+------------------------------------------
+
+Data una matrice booleana MxN, determinare il rettangolo di 0/1 più grande.
+
+Esempio:
+matrice = 1 0 0 0 1 0 0
+          0 1 0 0 1 1 0
+          1 1 0 0 0 0 0
+          1 0 1 0 0 0 0
+          1 0 0 1 0 1 1
+rettangolo massimo di 0 = 0 0 0 0 (ultimi 4 elementi della riga 2)
+                          0 0 0 0 (ultimi 4 elementi della riga 3)
+rettangolo massimo di 1 = 1 1 (primi 2 elementi della riga 2)
+                          1 1 (primi 2 elementi della riga 3)
+                          1 1 (primi 2 elementi della riga 4)
+
+Il metodo è lo stesso per il problema del 'massimo rettangolo in un istogramma'.
+
+Metodo (con 0)
+--------------
+Si elaborano le righe una alla volta.
+Per ogni colonna si mantiene l'altezza consecutiva di zeri terminante nella riga corrente.
+Esempio:
+  0 0 1 0
+  0 0 0 0
+  1 0 0 0
+le altezze diventano
+  riga 0 -> 1 1 0 1
+  riga 1 -> 2 2 1 2
+  riga 2 -> 0 3 2 3
+Ogni vettore di altezze è un istogramma.
+A questo punto basta trovare il rettangolo massimo dell'istogramma mediante una pila monotona in O(N).
+Il massimo tra tutti gli istogrammi è il rettangolo cercato.
+
+Esempio:
+  1 0 0 0 1 0 0
+  0 1 0 0 1 1 0
+  1 1 0 0 0 0 0
+  1 0 1 0 0 0 0
+  1 0 0 1 0 1 1
+  Altezze
+  0 1 1 1 0 1 1
+  1 0 2 2 0 0 2
+  0 0 3 3 1 1 3
+  0 1 0 4 2 2 4
+  0 2 1 0 3 0 0
+  Alla terza riga (indice 2) l'istogramma è
+  0 0 3 3 1 1 3
+  Il massimo rettangolo dell'istogramma è quello formato dalle colonne 3..6 (indici 3..6) con altezza 2:
+  0 0 0 0
+  0 0 0 0
+  area = 2 × 4 = 8
+
+Durante il calcolo si possono ricavare:
+- area massima
+- larghezza
+- altezza
+- riga superiore
+- riga inferiore
+- colonna sinistra
+- colonna destra
+quindi è possibile ricostruire il rettangolo massimo.
+
+L'algoritmo visita ongi cella della mtrice una sola volta.
+Tempo: O(M*N)
+Memoria: O(N)
+
+Algoritmo
+1) aggiornare il vettore delle altezze degli zeri;
+2) per ogni riga risolvere il problema del massimo rettangolo nell'istogramma tramite una pila monotona.
+Quando un elemento viene estratto dalla pila si conoscono:
+- altezza h
+- larghezza w
+- area a = h*w
+e anche le coordinate del rettangolo.
+Se la riga corrente è 'r', allora:
+  riga-bassa = r
+  riga-alta  = r - h + 1
+  colonna-destra  = i - 1
+  colonna-sinistra = stack-top + 1
+dove 'i' è la colonna corrente (quella che ha provocato l'estrazione dalla pila).
+Quindi, quando si trova un rettangolo più grande, basta memorizzare:
+  area
+  (riga-alta colonna-sinistra)
+  (riga-bassa colonna-destra)
+
+La funzione restituisce: (area (x1 y1) (x2 y2))
+  x1 = colonna-sinistra
+  y1 = riga-bassa
+  x2 = colonna-destra
+  y2 = riga-alta
+
+(define (max-rect value matrix)
+  (local (rows cols h stack best-area best-top best-left best-bottom best-right)
+    ; numero di righe della matrice
+    (setq rows (length matrix))
+    ; numero di colonne della matrice
+    (setq cols (length (matrix 0)))
+    ; vettore delle altezze degli zeri consecutivi
+    (setq h (dup 0 cols))
+    ; inizializza il rettangolo massimo
+    (setq best-area 0)
+    (setq best-top 0)
+    (setq best-left 0)
+    (setq best-bottom 0)
+    (setq best-right 0)
+    ; analizza ogni riga della matrice
+    (for (r 0 (- rows 1))
+      ; aggiorna le altezze degli zeri consecutivi
+      ; se l'elemento corrente vale 0 incrementa l'altezza,
+      ; altrimenti la azzera
+      (for (c 0 (- cols 1))
+        (if (= ((matrix r) c) value)
+            (++ (h c))
+            (setf (h c) 0)))
+      ; crea una pila monotona di indici di colonne
+      ; le altezze corrispondenti risultano sempre crescenti
+      (setq stack '())
+      ; visita tutte le colonne più una colonna fittizia finale
+      ; di altezza zero per svuotare completamente la pila
+      (for (i 0 cols)
+        ; altezza corrente dell'istogramma
+        (let (curr (if (= i cols) 0 (h i)))
+          ; estrae tutti gli elementi più alti dell'altezza corrente
+          ; ogni estrazione individua il rettangolo massimo avente
+          ; come altezza quella della barra estratta
+          (while (and stack (> (h (last stack)) curr))
+            (letn ((idx (pop stack -1))
+                   (height (h idx))
+                   (left (if stack (+ (last stack) 1) 0))
+                   (right (- i 1))
+                   (width (+ (- right left) 1))
+                   (area (* height width)))
+              ; se il rettangolo trovato è il più grande,
+              ; memorizza area e coordinate
+              (if (> area best-area)
+                  (begin
+                    (setq best-area area)
+                    (setq best-top (+ (- r height) 1))
+                    (setq best-bottom r)
+                    (setq best-left left)
+                    (setq best-right right)))))
+          ; inserisce la colonna corrente nella pila
+          (push i stack -1))))
+    ; restituisce:
+    ; area massima
+    ; coordinata (riga colonna) dell'angolo superiore sinistro
+    ; coordinata (riga colonna) dell'angolo inferiore destro
+    (list best-area
+          (list best-top best-left)
+          (list best-bottom best-right))))
+
+Proviamo:
+
+(setq mt '((1 0 0 0 1 0 0)
+           (0 1 0 0 1 1 0)
+           (1 1 0 0 0 0 0)
+           (1 1 1 0 0 0 0)
+           (1 1 0 1 0 1 1)))
+
+(max-rect 0 mt)
+;-> (8 (2 3) (3 6))
+(max-rect 1 mt)
+;-> (6 (2 0) (4 1))
+
+(setq mt '((0 0 0 0 0 0 0)
+           (0 0 0 0 0 1 0)
+           (1 1 1 1 0 0 0)
+           (1 1 1 1 0 0 0)
+           (1 1 1 1 0 1 1)))
+
+(max-rect 0 mt)
+;-> (10 (0 0) (1 4))
+(max-rect 1 mt)
+;-> (12 (2 0) (4 3))
+
 ============================================================================
 

@@ -3624,6 +3624,8 @@ NOTE LIBERE 38
   Ricerca dei percorsi in un DAG
   Numeri somma di tre cubi (teorema di Legendre)
   Gestione tabelle di dati
+  Stringhe conformi a pattern di caratteri
+  Rettangolo massimo in una matrice booleana
 
 PROBLEMI SUI DADI
 =================
