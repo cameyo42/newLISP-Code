@@ -2475,12 +2475,12 @@ offset  descrizione
 2       cella->successivo: puntatore alla linked list
 3       cella->aux:
           lunghezza della stringa + 1 o
-          low (little endian) o high (big endian) word di numero intero a 64 bit o
-          low word di double float IEEE 754
+          low (little endian) o high (big endian) word di numero intero a 64 bit
+          o low word di double float IEEE 754
 4       cella->contenuto:
           indirizzo della stringa/simbolo o
-          high (little endian) o low (big endian) word di numero intero a 64 bit o
-          high di double float IEEE 754
+          high (little endian) o low (big endian) word di numero intero a 64 bit
+          o high di double float IEEE 754
 
 Questa funzione è utile per modificare i bit di tipo nelle celle o per hackerare altre parti dei nuovi interni di LISP.
 
@@ -2561,7 +2561,9 @@ valore descrizione
 
 I numeri da 0 a 9 indicano il valore dell'indice int-idx (opzionale) nella lista restituita.
 
-Si consiglia di utilizzare gli indici da 0 a 5 (includendo) "Numero massimo di chiamate allo stack costante") e utilizzare gli offset negativi da -1 a -4 per accedere alle ultime quattro voci nella lista delle informazioni di sistema. Le future nuove voci verranno inserite dopo l'indice 5. In questo modo i programmi scritti precedentemente non dovranno essere modificati.
+Si consiglia di utilizzare gli indici da 0 a 5 (includendo) "Numero massimo di chiamate allo stack costante") e utilizzare gli offset negativi da -1 a -4 per accedere alle ultime quattro voci nella lista delle informazioni di sistema.
+Le future nuove voci verranno inserite dopo l'indice 5.
+In questo modo i programmi scritti precedentemente non dovranno essere modificati.
 
 Quando si usa int-idx, verrà restituito un solo elemento della lista.
 
@@ -2569,7 +2571,9 @@ Quando si usa int-idx, verrà restituito un solo elemento della lista.
 (sys-info 3) → 1
 (sys-info -2) → 10406 ;; versione 10.4.6
 
-Il numero relativo al massimo di celle Lisp può essere modificato tramite l'opzione della riga di comando -m. Per ogni megabyte di memoria di celle Lisp, è possibile allocare 64k celle Lisp. La profondità massima dello stack di chiamata può essere modificata utilizzando l'opzione della riga di comando -s.
+Il numero relativo al massimo di celle Lisp può essere modificato tramite l'opzione della riga di comando -m.
+Per ogni megabyte di memoria di celle Lisp, è possibile allocare 64k celle Lisp.
+La profondità massima dello stack di chiamata può essere modificata utilizzando l'opzione della riga di comando -s.
 
 (bits (sys-info -1))
 ;-> "10110000110"

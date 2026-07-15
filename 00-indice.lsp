@@ -3623,6 +3623,7 @@ NOTE LIBERE 38
   Ricerca cicli in un grafo orientato
   Ricerca dei percorsi in un DAG
   Numeri somma di tre cubi (teorema di Legendre)
+  Gestione tabelle di dati
 
 PROBLEMI SUI DADI
 =================

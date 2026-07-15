@@ -1125,5 +1125,106 @@ Numbers that are the sum of 4 but no fewer nonzero squares.
 ;->  303 311 316 319 327 335 343)
 
 
+------------------------
+Gestione tabelle di dati
+------------------------
+
+Data una lista di liste che rappresenta una tabella scrivere una funzione che calcola una nuova colonna utilizzando una funzione che agisce sulle colonne predefinite di ogni riga.
+
+Esempio:
+
+          | 1 10 20 "a" |
+Tabella = | 2 11 22 "b" |
+          | 3 12 77 "c" |  
+
+(setq t '((1 10 20 "a") (2 11 22 "b") (3 12 77 "c")))
+
+Funzione = f(x y) (x + y)
+
+(define (f x y) (+ x y))
+
+Lista degli indici delle colonne = (1 2)
+
+(setq cc '(1 2))
+
+Funzione da definire:
+
+  (calc table func cols)
+  dove: 'table' è la tabella da utilizzare
+        'func' è la funzione che opera con le colonne
+        'cols' è una lista degli indici delle colonne da utilizzare
+
+L'esecuzione della funzione 'calc':
+
+  (calc t f cc)
+
+genera una nuova tabella con una colonna in più:
+
+          | 1 10 20 "a" 30|
+Tabella = | 2 11 22 "b" 33|
+          | 3 12 77 "c" 89|
+
+Come si è formata la nuova colonna:
+
+  riga 0: (col 1) + (col 2) = 30
+  riga 1: (col 1) + (col 2) = 33
+  riga 2: (col 1) + (col 2) = 89
+
+(define (calc table func cols)
+  (local (col-values new-value)
+    ; Ciclo per ogni riga della tabella...
+    (dolist (el table)
+      ; estrae dalla riga corrente i valori delle colonne
+      ; i cui indici sono specificati in 'cols'
+      (setq col-values (select el cols))
+      ; calcola il nuovo valore applicando la funzione 'func' ai
+      ; valori della colonna
+      (setq new-value (apply func col-values))
+      ; inserisce il nuovo valore in fondo alla riga corrente
+      (push new-value (table $idx) -1))
+    table))
+
+(setq t (calc t f '(1 2)))
+;-> ((1 10 20 "a" 30) (2 11 22 "b" 33) (3 12 77 "c" 89))
+
+; Add a row to a matrix/table
+(define (add-row matrix values row)
+  (push values matrix row))
+
+; Add a column to a matrix/table
+(define (add-col matrix values col)
+  (dolist (row matrix)
+    (push (values $idx) (matrix $idx) col))
+  matrix)
+
+; Remove a row from a matrix/table
+(define (remove-row matrix row)
+  (pop matrix row)
+  matrix)
+
+; Remove a column from a matrix/table
+(define (remove-col matrix col)
+  (setq matrix (transpose matrix))
+  (pop matrix col)
+  (transpose matrix))
+
+Proviamo:
+
+(setq t (remove-col t -1))
+;-> ((1 10 20 "a") (2 11 22 "b") (3 12 77 "c"))
+
+(setq t (add-row t '(0 5 6 "k") 0))
+;-> ((0 5 6 "k") (1 10 20 "a") (2 11 22 "b") (3 12 77 "c"))
+
+(setq t (add-col t '("q" "w" "e" "r") -1))
+;-> ((0 5 6 "k" "q") (1 10 20 "a" "w") (2 11 22 "b" "e") (3 12 77 "c" "r"))
+
+(define (g x y) (string x y))
+(calc t g '(3 4))
+;-> ((0 5 6 "k" "q" "kq")
+;->  (1 10 20 "a" "w" "aw")
+;->  (2 11 22 "b" "e" "be")
+;->  (3 12 77 "c" "r" "cr"))
+
 ============================================================================
 
