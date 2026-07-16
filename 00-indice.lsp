@@ -3626,6 +3626,8 @@ NOTE LIBERE 38
   Gestione tabelle di dati
   Stringhe conformi a pattern di caratteri
   Rettangolo massimo in una matrice booleana
+  Somma X nel lancio di dadi
+  Coppie di elementi in una matrice
 
 PROBLEMI SUI DADI
 =================
@@ -3673,7 +3675,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (410 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (413 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

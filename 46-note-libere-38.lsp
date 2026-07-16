@@ -1612,5 +1612,154 @@ Proviamo:
 (max-rect 1 mt)
 ;-> (12 (2 0) (4 3))
 
+
+--------------------------
+Somma X nel lancio di dadi
+--------------------------
+
+Dati N dadi, ciascuno con M facce, numerate da 1 a M, trovare il numero di modi per ottenere una data somma x.
+x è la somma dei valori su ciascuna faccia quando tutti i dadi vengono lanciati.
+Abbiamo N dadi con il numero di facce non necessariamente uguale.
+Ogni dado ha un numero per ogni faccia.
+VOgliamo trovare in quanti e quali modi possiamo ottenere una data somma x.
+x è la somma dei valori su ciascuna faccia quando tutti i dadi vengono lanciati.
+
+Un dado viene rappresentato con una lista che contiene i valori delle facce.
+
+(define (cartesian)
+"Calculate the cartesian product of lists"
+  (let (out '(()) )
+    (dolist (lst (args))
+      (let (tmp '())
+        (dolist (parz out)
+          (dolist (el lst)
+            (push (append parz (list el)) tmp -1)))
+        (setq out tmp)))
+    out))
+
+(cartesian '(1 2 3) '(4 5) '(6 7))
+;-> ((1 4 6) (1 4 7) (1 5 6) (1 5 7) (2 4 6) (2 4 7) (2 5 6) (2 5 7)
+;->  (3 4 6) (3 4 7) (3 5 6) (3 5 7))
+
+(define (modi x lst)
+  (local (all somme))
+    ; calcola tutti le possibili combinazioni di lanci
+    (setq all (apply cartesian lst))
+    ; calcola la somma di ogni lancio
+    (setq somme (sort (map (fn(x) (apply + x)) all)))
+    ;(println somme)
+    ; conta quante volte x compare nella lista delle somme
+    (first (count (list x) somme)))
+
+Proviamo:
+
+(modi 12 (dup '(1 2 3 4 5 6) 3))
+;-> 25
+(modi 2 (dup '(1 2 3 4 5 6) 3))
+;-> 0
+(modi 6 '((1 4 5) (1 2 3) (1 1 2)))
+;-> 3
+(modi 6 '((1 4 5) (1 2 3) (1 1 2)))
+
+
+---------------------------------
+Coppie di elementi in una matrice
+---------------------------------
+
+Data una matrice MxN trovare per ogni elemento il numero di coppie di elementi uguali.
+Le coppie devono essere univoche, cioè ogni elemento può essere usato solo una volta.
+
+Esempio:
+
+          | 1 3 5 |
+matrice = | 3 1 6 |
+          | 3 1 1 |
+
+Coppie: (1 2) --> il numero 1 compare 4 volte --> 2 coppie
+        (3 1) --> il numero 3 compare 3 volte --> 1 coppia
+
+(setq mt '((1 2 3 4 5 6)
+           (1 2 3 4 5 6)
+           (1 2 3 4 5 6)
+           (7 8 9 1 2 3)))
+
+Metodo 1 (Lista associativa)
+----------------------------
+
+(define (find-pair1 matrix)
+  (let ((alst '()) (lst (flat matrix)))
+    (dolist (el lst)
+      (if (lookup el alst)
+          ; se elemento esiste, allora aumenta il numero di occorrenze
+          (++ (lookup el alst))
+          ;else
+          ; altrimenti inserisce l'elemento nella lista associativa 'alst'
+          ; con numero di occorrenze pari a 1
+          (push (list el 1) alst -1)))
+    (setq alst (filter (fn(x) (!= (x 1) 1)) alst))
+    (map (fn(x) (list (x 0) (/ (x 1) 2))) alst)))
+
+(find-pair1 mt)
+;-> ((1 1) (2 1) (3 1) (4 1) (5 1) (6 1))
+
+Metodo 2 (primitive di newLISP)
+-------------------------------
+
+(define (find-pair2 matrix)
+  (letn ((lst (flat matrix))
+         (unici (unique lst))
+         (conteggio (map (fn(x y) (list x y)) unici (count unici lst))))
+    (setq conteggio (filter (fn(x) (!= (x 1) 1)) conteggio))
+    (map (fn(x) (list (x 0) (/ (x 1) 2))) conteggio)))
+
+(find-pair2 mt)
+;-> ((1 1) (2 1) (3 1) (4 1) (5 1) (6 1))
+
+Metodo 3 (ciclo for)
+--------------------
+
+(define (find-pair3 matrix)
+  (local (lst out val conta)
+    (setq lst (sort (flat matrix)))
+    (setq out '())
+    (setq val (lst 0))
+    (setq conta 0)
+    (dolist (el lst)
+      (if (= el val)
+          (++ conta)
+          (begin
+            (if (>= conta 2)
+                (push (list val (/ conta 2)) out -1))
+            (setq val el)
+            (setq conta 1))))
+    (if (>= conta 2)
+        (push (list val (/ conta 2)) out -1))
+    out))
+
+(setq mt '((1 2 3 4 5 6)
+           (1 2 3 4 5 6)
+           (1 2 3 4 5 6)
+           (7 8 9 1 2 3)))
+
+(find-pair3 mt)
+;-> ((1 2) (2 2) (3 2) (4 1) (5 1) (6 1))
+
+Test di velocità
+
+(setq t (map list (rand 1000 100) (rand 1000 100)))
+(length t)
+;-> 100
+(= (length (find-pair1 t)) (length (find-pair2 t)) (length (find-pair3 t)))
+;-> true
+(= (sort (find-pair1 t)) (sort (find-pair2 t)) (sort (find-pair3 t)))
+;-> true
+
+(time (find-pair1 t) 1e4)
+;-> 1485.159
+(time (find-pair2 t) 1e4)
+;-> 1344.292
+(time (find-pair3 t) 1e4)
+;-> 407.933
+
 ============================================================================
 

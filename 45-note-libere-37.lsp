@@ -5688,8 +5688,8 @@ Successivamente, contiamo ricorsivamente le inversioni in entrambe le metà.
 Durante la fusione delle due metà, contiamo anche quanti elementi dell'array della metà sinistra sono maggiori degli elementi dell'array della metà destra, poiché queste rappresentano inversioni incrociate (ovvero, un elemento della metà sinistra dell'array è maggiore di un elemento della metà destra durante il processo di fusione nell'algoritmo di merge sort).
 Infine, sommiamo le inversioni della metà sinistra, della metà destra e le inversioni incrociate per ottenere il numero totale di inversioni nell'array.
 
+; Extract elements from a list/string (from start to (end -1) indexes)"
 (define (extract obj start end)
-"Extract elements from a list/string (from start to (end -1) indexes)"
   (if (nil? end)
       (slice obj start)
       (slice obj start (- end start))))
@@ -7405,6 +7405,7 @@ Stessa combinazione di dadi
 
 Abbiamo N dadi con il numero di facce non necessariamente uguale.
 Ogni dado ha un numero per ogni faccia.
+Un dado viene rappresentato con una lista che contiene i valori delle facce.
 
 Quante volte bisogna lanciare i dadi per poter affermare con certezza che la somma dei punti apparirà almeno due volte?
 
@@ -7436,7 +7437,7 @@ Quindi con N dadi bisogna determinare quanti sono i risultati possibili.
   (local (all somme))
     ; calcola tutti le possibili combinazioni di lanci
     (setq all (apply cartesian lst))
-    ; calcola la somma di ogni lancio
+    ; calcola la somma di ogni lancio (univoca)
     (setq somme (unique (sort (map (fn(x) (apply + x)) all))))
     ;(println somme)
     ; per il principio dei casetti...
