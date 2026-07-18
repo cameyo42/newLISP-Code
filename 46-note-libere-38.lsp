@@ -1662,9 +1662,9 @@ Proviamo:
 (modi 6 '((1 4 5) (1 2 3) (1 1 2)))
 
 
----------------------------------
-Coppie di elementi in una matrice
----------------------------------
+----------------------------------------
+Coppie di elementi uguali in una matrice
+----------------------------------------
 
 Data una matrice MxN trovare per ogni elemento il numero di coppie di elementi uguali.
 Le coppie devono essere univoche, cioè ogni elemento può essere usato solo una volta.
@@ -1760,6 +1760,607 @@ Test di velocità
 ;-> 1344.292
 (time (find-pair3 t) 1e4)
 ;-> 407.933
+
+
+-------------------------------------
+Sottoliste con elementi tutti diversi
+-------------------------------------
+
+Data una lista dividerla in sottoliste consecutive in cui ognuma ha tutti elementi diversi.
+
+Esempio:
+lista = (1 4 5 5 5 6 2 3 3 8)
+sottoliste consecutive con elementi diversi = (1 4 5) (5) (5 6 2 3) (3 8)
+
+(define (break-unique lst)
+  (local (len out palo cur)
+    (setq len (length lst))
+    (cond 
+      ((= len 0) '())
+      ((= len 1) (list lst))
+      (true
+        (setq out '()) ; lista soluzione
+        (setq palo (lst 0)) ; palo
+        (setq cur (list palo)) ; sottolista corrente
+        (dolist (el (rest lst))
+          (cond ((= palo el) ; elemento uguale al precedente
+                  ; inserisce la sottolista corrente nella lista soluzione
+                  (push cur out -1)
+                   ; aggiorna il valore del palo con elemento corrente
+                  (setq palo el)
+                  ; initializza una nuova sottolista (sottolista corrente)
+                  (setq cur (list palo)))
+                (true ; elemento diverso dal precedente
+                  ; aggiunge l'elemento corrente alla sottolista corrente
+                  (push el cur -1)
+                  ; aggiorna il valore del palo con l'elemento corrente                  
+                  (setq palo el))))
+        (push cur out -1)
+        out))))
+
+Proviamo:
+
+(break-unique '())
+;-> ()
+(break-unique '(2))
+;-> ((2))
+(break-unique '(1 2))
+;-> ((1 2))
+
+(setq L '(1 1 1 1 1))
+(break-unique L)
+;-> ((1) (1) (1) (1) (1))
+
+(setq L '(1 4 5 5 5 6 2 3 3 8))
+(break-unique L)
+;-> ((1 4 5) (5) (5 6 2 3) (3 8))
+
+(setq L '(1 4 5 5 5 6 2 3 3 8 8))
+(break-unique L)
+;-> ((1 4 5) (5) (5 6 2 3) (3 8) (8))
+
+
+----------------------------------
+Aggiungere 1 ad una lista di cifre
+----------------------------------
+
+Data una lista di cifre che rappresentano un numero intero, scrivere una funzione che aggiunge 1 al numero rappresentato dalla lista e restituisce una lista con le cifre del nuovo numero.
+
+Esempi:
+  lista = (2 5 1)
+  output --> 251 + 1 = 252 --> (2 5 2)
+
+  lista = (9 9 9)
+  output --> 999 + 1 = 1000 --> (1 0 0 0)
+
+Metodo 1 (somma con riporto - carry)
+------------------------------------
+
+(define (add-one1 lst)
+  (let ((carry 1) (sum 0) (out '()))
+    (for (i (- (length lst) 1) 0 -1)
+      (setq sum (+ carry (lst i)))
+      (setq carry (/ sum 10))
+      (push (% sum 10) out)
+    )
+    (if (> carry 0) (push carry out))
+    out))
+
+
+(add-one1 '(1 2 3 4))
+;-> (1 2 3 5)
+
+(add-one1 '(9 8 8 9))
+;-> (9 8 9 0)
+
+(add-one1 '(9 9 9 9))
+;-> (1 0 0 0 0)
+
+(add-one1 '(0))
+;-> (1)
+
+(add-one1 '(0 1))
+;-> (0 2)
+
+Metodo 2 (controllo cifre con valore 9)
+---------------------------------------
+
+(define (add-one2 lst)
+    ; inizializza l'indice corrente alla fine della lista
+    (let (idx (- (length lst) 1))
+      ; finchè l'indice corrente è valido e il valore relativo vale 9
+      (while (and (>= idx 0) (= (lst idx) 9))
+        ; inserisce uno 0 all'indice corrente
+        (setf (lst idx) 0)
+        (-- idx))
+      ; se (indice < 0), allora le cifre della lista erano tutti 9
+      (if (< idx 0)
+        ; inserisce un 1 all'inizio della lista
+        (push 1 lst)
+        ; altrimenti
+        ; incrementa il valore della lista relativo all'indice corrente
+        (++ (lst idx)))
+      lst))
+
+(add-one2 '(1 2 3 4))
+;-> (1 2 3 5)
+
+(add-one2 '(9 8 8 9))
+;-> (9 8 9 0)
+
+(add-one2 '(9 9 9 9))
+;-> (1 0 0 0 0)
+
+(add-one2 '(0))
+;-> (1)
+
+(add-one2 '(0 1))
+;-> (0 2)
+
+Test di velocità
+
+(setq t (rand 10 10))
+(= (add-one1 t) (add-one2 t))
+;-> true
+(time (add-one1 t) 1e5)
+;-> 193.823
+(time (add-one2 t) 1e5)
+;-> 51.09
+
+(setq t (rand 10 100))
+(= (add-one1 t) (add-one2 t))
+;-> true
+(time (add-one1 t) 1e4)
+;-> 197.784
+(time (add-one2 t) 1e4)
+;-> 16.083
+
+(setq t (rand 10 1000))
+(= (add-one1 t) (add-one2 t))
+;-> true
+(time (add-one1 t) 1e3)
+;-> 615.413
+(time (add-one2 t) 1e3)
+;-> 17.047
+
+
+--------------------------
+Abaco giapponese (Soroban)
+--------------------------
+
+"The Japanese Abacus: Its Use and Theory" by Takashi Kojima
+"Advanced Abacus: Japanese Theory and Practice" by Takashi Kojima
+
+Rappresentazione grafica delle cifre (in colonna) in un soroban:
+
++---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+
+| ■ |   | ■ |   | ■ |   | ■ |   | ■ |   |   |   |   |   |   |   |   |   |   |
+|   |   |   |   |   |   |   |   |   |   | ■ |   | ■ |   | ■ |   | ■ |   | ■ |
++---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+
+|   |   | ■ |   | ■ |   | ■ |   | ■ |   |   |   | ■ |   | ■ |   | ■ |   | ■ |
+| ■ |   |   |   | ■ |   | ■ |   | ■ |   | ■ |   |   |   | ■ |   | ■ |   | ■ |
+| ■ |   | ■ |   |   |   | ■ |   | ■ |   | ■ |   | ■ |   |   |   | ■ |   | ■ |
+| ■ |   | ■ |   | ■ |   |   |   | ■ |   | ■ |   | ■ |   | ■ |   |   |   | ■ |
+| ■ |   | ■ |   | ■ |   | ■ |   |   |   | ■ |   | ■ |   | ■ |   | ■ |   |   |
++---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+   +---+
+  0       1       2       3       4       5       6       7       8       9
+
+Rappresentazione grafica di un soroban con tutte le cifre a 0:
+
+Colonna:   0   1   2   3   4   5   6   7   8   9   10  11
+         +---+---+---+---+---+---+---+---+---+---+---+---+
+         | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+         |   |   |   |   |   |   |   |   |   |   |   |   |
+         +---+---+---+---+---+---+---+---+---+---+---+---+
+         |   |   |   |   |   |   |   |   |   |   |   |   |
+         | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+         | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+         | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+         | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+         +---+---+---+---+---+---+---+---+---+---+---+---+
+ Valore:   0   0   0   0   0   0   0   0   0   0   0   0
+
+Rappresentazione di un soroban (matrice 7 x 12) con tutte cifre a 0:
+
+  1 1 1 1 1 1 1 1 1 1 1 1
+  0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0
+  1 1 1 1 1 1 1 1 1 1 1 1
+  1 1 1 1 1 1 1 1 1 1 1 1
+  1 1 1 1 1 1 1 1 1 1 1 1
+  1 1 1 1 1 1 1 1 1 1 1 1
+
+; Crea un nuovo soroban
+(define (new-soroban num-cifre)
+  ; lista delle rappresentazioni delle cifre (per righe)
+  ; (Variabile globale)
+  (setq DIGITS '((1 0 0 1 1 1 1)   ; 0
+                 (1 0 1 0 1 1 1)   ; 1
+                 (1 0 1 1 0 1 1)   ; 2
+                 (1 0 1 1 1 0 1)   ; 3
+                 (1 0 1 1 1 1 0)   ; 4
+                 (0 1 0 1 1 1 1)   ; 5
+                 (0 1 1 0 1 1 1)   ; 6
+                 (0 1 1 1 0 1 1)   ; 7
+                 (0 1 1 1 1 0 1)   ; 8
+                 (0 1 1 1 1 1 0))) ; 9
+  ; crea un soroban con tutti i valori a 0
+  (transpose (dup '(1 0 0 1 1 1 1) num-cifre)))
+
+; Stampa un soroban
+(define (print-soroban matrix ch0 ch1)
+  (letn ( (row (length matrix))
+          (col (length (first matrix)))
+          (line (string (dup "+---" col) "+")) )
+    (setq ch0 (or ch0 "0"))
+    (setq ch1 (or ch1 "1"))
+    ; stampa del soroban
+    (println line)
+    (for (i 0 (- row 1))
+      (if (= i 2) (println line))
+      (for (j 0 (- col 1))
+        ;(print "| " (matrix i j) " "))
+        (if (= (matrix i j) 0)
+          (print "| " ch0 " ")
+          (print "| " ch1 " ")))
+        (println "|"))
+    (println line)
+    ; stampa delle cifre rappresentate nel soroban
+    (setq tr (transpose matrix))
+    (for (i 0 (- col 1))
+      (print "  " (find (tr i) DIGITS) " "))
+    (println) '>))
+
+; Scrive una cifra in un sokoban in una data posizione (colonna)
+(define (write-digit digit matrix pos)
+    (if (>= pos (length (matrix 0)))
+        (println "Error: overflow")
+        ;else
+        (for (i 0 6) 
+          (setf (matrix i pos) (DIGITS digit i))))
+  matrix)
+
+; Scrive un numero in un sokoban partendo da una data posizione (colonna)
+; (se start-pos == nil, inserisce il numero tutto a destra)
+; (se il numero ha troppe cifre, il sokoban non viene modificato)
+(define (write-number num matrix start-pos)
+  (let ((len (length num)) (str (string num)))
+    (setq start-pos (or start-pos (- (length (matrix 0)) len)))
+    (if (> (+ len start-pos) (length (matrix 0)))
+        (println "Error: overflow")
+        ;else
+        (for (i 0 (- len 1))
+          (setq matrix (write-digit (int (str i)) matrix start-pos))
+          (++ start-pos)))
+    matrix))
+
+Proviamo:
+
+(setq abaco (new-soroban 10))
+(print-soroban abaco)
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+;-> | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+;-> | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+;-> | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+;-> | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+;-> | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;->   0   0   0   0   0   0   0   0   0   0
+(print-soroban abaco " " "■")
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> |   |   |   |   |   |   |   |   |   |   |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   |   |   |   |   |   |   |   |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;->   0   0   0   0   0   0   0   0   0   0
+(for (k 0 7) (setq abaco (write-digit k abaco k)))
+(print-soroban abaco " " "■")
+(setq abaco (write-digit 8 abaco 8))
+(setq abaco (write-digit 9 abaco 9))
+(print-soroban abaco " " "■")
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | ■ | ■ | ■ | ■ | ■ |   |   |   |   |   |
+;-> |   |   |   |   |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> |   | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ |
+;-> | ■ |   | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ |
+;-> | ■ | ■ |   | ■ | ■ | ■ | ■ |   | ■ | ■ |
+;-> | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ |   | ■ |
+;-> | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ |   |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;->   0   1   2   3   4   5   6   7   8   9
+(setq abaco (write-number 6666 abaco))
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | ■ | ■ | ■ | ■ | ■ |   |   |   |   |   |
+;-> |   |   |   |   |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> |   | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ |
+;-> | ■ |   | ■ | ■ | ■ | ■ |   |   |   |   |
+;-> | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;->   0   1   2   3   4   5   6   6   6   6
+(print-soroban abaco " " "■")
+(setq abaco (write-number 6666 abaco 0))
+(print-soroban abaco " " "■")
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   |   | ■ |   |   |   |   |   |
+;-> | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | ■ | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ |
+;-> |   |   |   |   | ■ | ■ |   |   |   |   |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;->   6   6   6   6   4   5   6   6   6   6
+(setq abaco (write-number 6666 abaco 8))
+;-> Error: overflow
+(print-soroban abaco " " "■")
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> |   |   |   |   | ■ |   |   |   |   |   |
+;-> | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;-> | ■ | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ |
+;-> |   |   |   |   | ■ | ■ |   |   |   |   |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
+;-> | ■ | ■ | ■ | ■ |   | ■ | ■ | ■ | ■ | ■ |
+;-> +---+---+---+---+---+---+---+---+---+---+
+;->   6   6   6   6   4   5   6   6   6   6
+
+
+----------------
+Flash calculator
+----------------
+
+'Flash calculator' è un gioco per esercitare il calcolo mentale nella somma di numeri.
+Il gioco consiste nel presentare un elenco di numeri visualizzandoli uno alla volta per poco tempo.
+Alla fine dell'elenco il giocatore deve calcolare la somma di tutti i numeri visualizzati.
+
+La funzione del gioco utilizza 3 parametri:
+1) numeri --> numero di numeri visualizzati
+2) cifre  --> numero di cifre dei numeri visualizzati
+3) tempo  --> tempo di visualizzazione di ogni numero (msec)
+
+(define (flash numeri cifre tempo)
+  (local (min-val max-val nums somma res)
+    ; clear screen of REPL (ANSI sequence)
+    (print "\027[H\027[2J")
+    ; valore minimo dei numeri
+    (setq min-val (pow 10 (- cifre 1)))
+    ; valore minimo dei numeri
+    (setq max-val (- (pow 10 cifre) 1))
+    ; crea la lista dei numeri da visualizzare (numeri random)
+    (setq nums (collect (+ min-val (rand (+ (- max-val min-val) 1))) numeri))
+    ; somma dei numeri
+    (setq somma (apply + nums))
+    ;(println somma { } nums)
+    (println "*************************************")
+    (println "******    FLASH CALCULATOR     ******")
+    (println "*************************************\n")
+    (println "--- Press a key to start the game ---")
+    (read-key)
+    ; ciclo di visualizzazione dei numeri
+    (dolist (el nums)
+      (print "\027[H\027[2J")
+      (print el)
+      (sleep tempo))
+    (print "\027[H\027[2J")
+    ; input utente della somma dei numeri
+    (print "Somma totale = ")
+    (setq start (time-of-day))
+    (setq res (int (read-line)))
+    (setq elapsed (- (time-of-day) start))
+    ; controllo del risultato
+    (if (= res somma)
+        (println "BRAVO !!!")
+        (println "Errore: Somma totale = " somma))
+    (println "Tempo di risposta = " elapsed " (millisec)") '>))
+
+Proviamo:
+
+; 5 numeri da 1 cifra con 1 secondo di tempo per ogni numero
+(flash 5 1 1000)
+
+; 3 numeri da 2 cifre con 1 secondo di tempo per ogni numero
+(flash 3 2 1000)
+
+
+-------------------
+Sempre 123 (DENEAT)
+-------------------
+
+Iniziare con un numero intero positivo qualsiasi, poi scrivere il numero di cifre pari seguito dal numero di cifre dispari e infine il numero totale di cifre.
+Dopo un numero finito di ripetizioni il risultato sarà 123.
+Gli eventuali zeri iniziali vengono omessi.
+
+Esempio:
+  N = 3454
+  numero di cifre pari = 2 (4 4)
+  numero di cifre dispari = 2 (3 5)
+  lunghezza numero = 4
+  N --> 224
+  numero di cifre pari = 3 (2 2 4)
+  numero di cifre dispari = 0
+  lunghezza numero = 3
+  N --> 303
+  numero di cifre pari = 1 (0)
+  numero di cifre dispari = 2 (3 3)
+  lunghezza numero = 3
+  N --> 123
+  
+DENEAT(n): concatenate number of even digits in n, number of odd digits and total number of digits.
+(Digits: Even, Not Even, And Total). Leading zeros are then omitted.
+
+Sequenza OEIS A073053:
+Apply DENEAT operator (or the Sisyphus function) to n.
+  101, 11, 101, 11, 101, 11, 101, 11, 101, 11, 112, 22, 112, 22, 112, 22, 112,
+  22, 112, 22, 202, 112, 202, 112, 202, 112, 202, 112, 202, 112, 112, 22, 112,
+  22, 112, 22, 112, 22, 112, 22, 202, 112, 202, 112, 202, 112, 202, 112, 202,
+  112, 112, 22, 112, 22, ...
+
+Sequenza OEIS A073054:
+Number of applications of DENEAT operator x -> A073053(x) needed to transform n to 123.
+  2, 5, 2, 5, 2, 5, 2, 5, 2, 5, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 3, 2, 3, 2,
+  3, 2, 3, 2, 3, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 3, 2, 3, 2, 3, 2, 3, 2,
+  3, 2, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 2, 4,
+  2, 4, 2, 4, 2, 4, 2, 4, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 2, 4, 2, 4, 2, 4,
+  2, 4, 2, 4,...
+
+(define (deneat num)
+  (let ( (str (string num)) (len (length num)) (pari 0) (dispari 0) )
+    (for (i 0 (- len 1))
+      (if (even? (int (str i)))
+        (++ pari)
+        (++ dispari)))
+    (if (zero? pari)
+        (setq str (string dispari len))
+        (setq str (string pari dispari len)))
+    (int str)))
+
+(map deneat (sequence 0 53))
+;-> (101 11 101 11 101 11 101 11 101 11 112 22 112 22 112 22 112
+;->  22 112 22 202 112 202 112 202 112 202 112 202 112 112 22 112
+;->  22 112 22 112 22 112 22 202 112 202 112 202 112 202 112 202
+;->  112 112 22 112 22)
+
+(define (seq-deneat num show)
+  (if (= num 123) 0
+      ;else
+      (let (conta 0)
+        (while (!= num 123)
+          (setq num (deneat num))
+          (if show (println num))
+          (++ conta))
+        conta)))
+
+Proviamo:
+
+(seq-deneat 3454 true)
+;-> 224
+;-> 303
+;-> 123
+;-> 3
+
+(seq-deneat 123456789 true)
+;-> 459
+;-> 123
+;-> 2
+
+(map seq-deneat (sequence 0 72))
+;-> (2 5 2 5 2 5 2 5 2 5 2 4 2 4 2 4 2 4 2 4 3 2 3 2
+;->  3 2 3 2 3 2 2 4 2 4 2 4 2 4 2 4 3 2 3 2 3 2 3 2
+;->  3 2 2 4 2 4 2 4 2 4 2 4 3 2 3 2 3 2 3 2 3 2 2 4
+;->  2)
+
+Generalizziamo la funzionde 'deneat' inserendo un parametro che specifica l'ordine di costruzione del numero.
+Usiamo una lista i cui elementi determina l'ordine di inserimento.
+Gli elementi della lista sono E (Even), O (Odd) e L (Length).
+Esempi:
+  (E O L) --> Even + Odd + Length
+  (L O E) --> Length + Odd + Even
+
+(define (make num order)
+  (let ( (str (string num)) (len (length num)) (pari 0) (dispari 0) )
+    (for (i 0 (- len 1))
+      (if (even? (int (str i)))
+        (++ pari)
+        (++ dispari)))
+    (setq str "")
+    (dolist (el order)
+      (cond ((= el 'E) (extend str (string pari)))
+            ((= el 'O) (extend str (string dispari)))
+            ((= el 'L) (extend str (string len)))))
+    (int str 0 10)))
+
+; Even - Odd - Length (deneat)
+(map (fn(x) (make x '(E O L))) (sequence 0 25))
+;-> (101 11 101 11 101 11 101 11 101 11 112 22 112 22 112 22 112 22
+;->  112 22 202 112 202 112 202 112)
+
+; Odd - Even - Length
+(map (fn(x) (make x '(O E L))) (sequence 0 25))
+;-> (11 101 11 101 11 101 11 101 11 101 112 202 112 202 112 202 112
+;->  202 112 202 22 112 22 112 22 112)
+
+; Length - Even - Odd
+(map (fn(x) (make x '(L E O))) (sequence 0 25))
+;-> (110 101 110 101 110 101 110 101 110 101 211 202 211 202 211 202
+;->  211 202 211 202 220 211 220 211 220 211)
+
+; Length - Odd- Even
+(map (fn(x) (make x '(L O E))) (sequence 0 25))
+;-> (101 110 101 110 101 110 101 110 101 110 211 220 211 220 211 220 211
+;->  220 211 220 202 211 202 211 202 211)
+
+Adesso la sequenza che generiamo applicando ripetutamente 'make' dipende dall'ordine predefinito quindi non è detto che finisca sempre a 123 come 'deneat'.
+Anzi, la sequenza potrebbe anche entrare in un ciclo.
+
+; Genera i numeri sequenziali della sequenza scelta
+; (fino alla prima ripetizione di un numero)
+(define (seq-make num order)
+  (let (conta 0)
+    (setq out '())
+    ; ciclo finchè 'make' genera numeri nuovi...
+    (until (find num out)
+      ;(println num)
+      (push num out -1)
+      (setq num (make num order))
+      (++ conta))
+    (push num out -1)
+    (list conta out)))
+
+Numero con 2 cifre pari e 2 cifre dispari:
+; Termina a 123
+(seq-make 3454 '(E O L))
+;-> (4 (3454 224 303 123 123))
+; Oscilla tra 33 e 202
+(seq-make 3454 '(O E L))
+;-> (4 (3454 224 33 202 33))
+; Termina a 312
+(seq-make 3454 '(L E O))
+;-> (4 (3454 422 330 312 312))
+; Termina a 321
+(seq-make 3454 '(L O E))
+;-> (4 (3454 422 303 321 321))
+
+Numero con 1 cifra pari e 3 cifre dispari:
+; Termina a 123
+(seq-make 3451 '(E O L))
+;-> (3 (3451 134 123 123))
+; Termina a 213
+(seq-make 3451 '(O E L))
+;-> (3 (3451 314 213 213))
+; Termina a 312
+(seq-make 3451 '(L E O))
+;-> (3 (3451 413 312 312))
+; Termina a 321
+(seq-make 3451 '(L O E))
+;-> (3 (3451 431 321 321))
+
+Numero con 3 cifre pari e 1 cifra dispari:
+; Termina a 123
+(seq-make 3428 '(E O L))
+;-> (3 (3428 314 123 123))
+; Termina a 213
+(seq-make 3428 '(O E L))
+;-> (3 (3428 134 213 213))
+; Termina a 312
+(seq-make 3428 '(L E O))
+;-> (3 (3428 431 312 312))
+; Termina a 321
+(seq-make 3428 '(L O E))
+;-> (3 (3428 413 321 321))
 
 ============================================================================
 

@@ -3627,7 +3627,12 @@ NOTE LIBERE 38
   Stringhe conformi a pattern di caratteri
   Rettangolo massimo in una matrice booleana
   Somma X nel lancio di dadi
-  Coppie di elementi in una matrice
+  Coppie di elementi uguali in una matrice
+  Sottoliste con elementi tutti diversi
+  Aggiungere 1 ad una lista di cifre
+  Abaco giapponese (Soroban)
+  Flash calculator
+  Sempre 123 (DENEAT)
 
 PROBLEMI SUI DADI
 =================
