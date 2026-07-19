@@ -3633,6 +3633,7 @@ NOTE LIBERE 38
   Abaco giapponese (Soroban)
   Flash calculator
   Sempre 123 (DENEAT)
+  Sprite collision
 
 PROBLEMI SUI DADI
 =================

@@ -2362,5 +2362,113 @@ Numero con 3 cifre pari e 1 cifra dispari:
 (seq-make 3428 '(L O E))
 ;-> (3 (3428 413 321 321))
 
+
+----------------
+Sprite collision
+----------------
+
+Uno sprite è una bitmap o un oggetto bidimensionale integrato in una scena grafica più ampia, comunemente utilizzato nei videogiochi 2D per rappresentare personaggi, oggetti ed elementi in movimento.
+
+Per determinare se due sprite sono in collisione in genere gli sprite vengono rappresentati come due circonferenze (bounding sphere) o due rettangoli (bounding box) che racchiudono la forma dello sprite.
+
+Affinchè esista una collisione, i due sprite devono essere sovrapposti (anche parzialmente).
+Se gli sprite sono a contatto, allora non c'è collisione.
+
+Caso 1 (sprite come circonferenza)
+----------------------------------
+Sprite 1: raggio = R1,  centro = C(x1,y1) --> (R1 (x1 y1))
+Sprite 2: raggio = R2,  centro = C(x2,y2) --> (R2 (x2 y2))
+
+Se (dist (R1 + R2))^2 >  (dist(C1,C2))^2 --> collidono
+Se (dist (R1 + R2))^2 <= (dist(C1,C2))^2 --> non collidono
+
+(define (collide? s1 s2)
+  (let ( (x1 (s1 1 0)) (y1 (s1 1 1))
+         (x2 (s2 1 0)) (y2 (s2 1 1))
+         (r1 (s1 0)) (r2 (s2 0)) )
+    (println r1 { } x1 { } y1)
+    (println r2 { } x2 { } y2)
+    (> (mul (add r1 r2) (add r1 r2))
+       (add (mul (sub x1 x2) (sub x1 x2)) (mul (sub y1 y2) (sub y1 y2))))))
+
+(collide? '(3 (0 0)) '(2 (7 0)))
+;-> nil
+(collide? '(3 (0 0)) '(3 (5 0)))
+;-> true
+(collide? '(3 (0 0)) '(3 (6 6)))
+;-> nil
+(collide? '(3 (0 0)) '(3 (6 6)))
+;-> nil
+(collide? '(3 (0 0)) '(6 (6 6)))
+;-> true
+
+Caso 2: (sprite come rettangoli)
+--------------------------------
+Un bounding box allineato agli assi (o AABB) è un rettangolo in cui ogni lato è parallelo all'asse x o all'asse y.
+
+                               x2max
+           x1max               y2max
+           y1max      +---------+
+   +--------+         |         |
+   |        |         |         |
+   +--------+         |         |
+  x1min               +---------+
+  y1min              x2min
+                     y2min
+
+Sprite 1: ((x1min y1min) (x1max y1max))
+Sprite 2: ((x2min y2min) (x2max y2max))
+
+Piuttosto che cercare di testare i casi in cui i due rettangoli si intersecano, è più semplice testare i quattro casi in cui i due rettangoli non possono assolutamente intersecarsi.
+
+                              |
+Caso 1: x1max < x2min         |        Caso 2: x2max < x1min
+                              |
+           x1max              |
+  +---------+                 |                x2max +---------+
+  |         |   +-----+       |           +-----+    |         |
+  |         |   |     |       |           |     |    |         |
+  |         |   |     |       |           |     |    |         |
+  +---------+   |     |       |           |     |    +---------+
+                +-----+       |           +-----+   x1min
+               x2min          |
+------------------------------+------------------------------------
+                              |
+Caso 3: y1max < y2min         |         Caso 4: y2max < y1min
+                              |
+          +-----+             |           +---------+
+          |     |             |           |         |
+          |     |             |           |         |
+          |     |             |           |         |
+          +-----+             |           +---------+
+         y2min                |          y1min
+                              |
+           y1max              |                       y2max
+  +---------+                 |                  +-----+
+  |         |                 |                  |     |
+  |         |                 |                  |     |
+  |         |                 |                  |     |
+  +---------+                 |                  +-----+
+
+Se uno qualsiasi dei quattro casi è vero, significa che i rettangoli non si intersecano.
+
+(define (collide? s1 s2)
+  (let ( (x1min (s1 0 0)) (y1min (s1 0 1))
+         (x1max (s1 1 0)) (y1max (s1 1 1))
+         (x2min (s2 0 0)) (y2min (s2 0 1))
+         (x2max (s2 1 0)) (y2max (s2 1 1)) )
+    (not (or (< x1max x2min) (< x2max x1min)
+             (< y1max y2min) (< y2max y1min)))))
+
+Proviamo:
+
+(collide? '((0 0) (5 5)) '((6 6) (7 7)))
+;-> nil
+(collide? '((0 0) (5 5)) '((3 3) (7 7)))
+;-> true
+
+Questo metodo di intersezione dei rettangoli è un'applicazione particolare di un algoritmo noto come teorema dell'asse di separazione (separating axis theorem).
+Nella sua forma generale, questo teorema può essere utilizzato su qualsiasi tipo di poligono convesso.
+
 ============================================================================
 
