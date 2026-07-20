@@ -3634,6 +3634,7 @@ NOTE LIBERE 38
   Flash calculator
   Sempre 123 (DENEAT)
   Sprite collision
+  Punti a distanza fissa lungo una polilinea
 
 PROBLEMI SUI DADI
 =================

@@ -2470,5 +2470,216 @@ Proviamo:
 Questo metodo di intersezione dei rettangoli è un'applicazione particolare di un algoritmo noto come teorema dell'asse di separazione (separating axis theorem).
 Nella sua forma generale, questo teorema può essere utilizzato su qualsiasi tipo di poligono convesso.
 
+
+------------------------------------------
+Punti a distanza fissa lungo una polilinea
+------------------------------------------
+
+Abbiamo una polilinea composta da N punti 2D in sequenza.
+Data una lunghezza L, inserire punti nella polilinea a distanza L, 2L, 3L, ecc. fino al termine della polilinea.
+Cioè, partendo dall'inizio della polilinea inserire un punto dopo ogni distanza percorsa L.
+
+Il problema può essere visto come una "parametrizzazione per lunghezza d'arco" della polilinea.
+Supponiamo di avere la polilinea:
+  P0 ----- P1 -------- P2 --- P3
+e di voler inserire un punto ogni distanza L percorsa a partire da P0.
+
+L'algoritmo è il seguente:
+1) Il primo punto da inserire si trova alla distanza L dall'inizio della polilinea.
+2) Si percorrono i segmenti della polilinea mantenendo la lunghezza cumulativa percorsa.
+3) Per ogni segmento si conoscono:
+   - la distanza totale percorsa fino al suo inizio;
+   - la sua lunghezza.
+4) Se la distanza da inserire (L, 2L, 3L, ...) cade all'interno del segmento corrente, allora si calcola il punto tramite interpolazione lineare.
+5) Se nello stesso segmento entrano più punti (ad esempio un segmento lungo 100 e L=10), si continua ad inserirli tutti.
+6) Terminato un segmento si passa al successivo aggiornando la distanza cumulativa.
+7) L'algoritmo termina quando la prossima distanza da inserire supera la lunghezza totale della polilinea.
+
+La formula per il punto da inserire in un segmento è la seguente.
+Se il segmento va da:
+  A = (x1,y1)
+  B = (x2,y2)
+e la distanza del punto dall'inizio del segmento è 'd', con lunghezza del segmento 'len', allora:
+  t = d / len
+  x = x1 + t*(x2 - x1)
+  y = y1 + t*(y2 - y1)
+Per esempio, con la polilinea ((0 0) (10 0) (10 10)) e L = 4 le distanze cumulative sono:
+  0
+  10
+  20
+I punti da inserire sono alle distanze:
+  4
+  8
+  12
+  16
+  20 (facoltativo)
+ottenendo:
+  4  -> (4 0)
+  8  -> (8 0)
+  12 -> (10 2)
+  16 -> (10 6)
+  20 -> (10 10)
+
+Bisogna decidere se includere o meno l'ultimo punto della polilinea quando la lunghezza totale è un multiplo esatto di L.
+In genere entrambe le convenzioni sono accettabili:
+- includerlo (<= lunghezza totale);
+- non includerlo (< lunghezza totale).
+
+In questo modo ogni segmento viene visitato una sola volta e ogni nuovo punto viene calcolato con una semplice interpolazione lineare.
+
+La complessità dell'algoritmo è lineare: O(N + K)
+dove N = numero dei punti della polilinea;
+     K = numero dei punti generati (lunghezza_totale / L).
+
+La funzione seguente restituisce tutti i punti posti alle distanze L, 2L, 3L, ... dall'inizio della polilinea.
+Se la lunghezza totale della polilinea è un multiplo di L, viene restituito anche l'ultimo punto della polilinea.
+'target' rappresenta la distanza del prossimo punto da inserire all'interno del segmento corrente.
+Se il segmento è sufficientemente lungo, vengono inseriti uno o più punti tramite interpolazione lineare.
+Terminato il segmento, la sua lunghezza viene sottratta da 'target', in modo che 'target' rappresenti la distanza mancante da percorrere nel segmento successivo.
+Ogni segmento viene visitato una sola volta e può generare zero, uno o più punti.
+
+(define (polyline-L poly L)
+  (local (out target p1 p2 dx dy seg-len t)
+    ; Lista dei punti generati.
+    (setq out '())
+    ; Distanza del prossimo punto da inserire nel segmento corrente.
+    ; Inizialmente vale L, cioè il primo punto da generare si trova
+    ; ad una distanza L dall'inizio della polilinea.
+    (setq target L)
+    ; Scorre tutti i segmenti della polilinea.
+    (for (i 0 (- (length poly) 2))
+      ; Estremi del segmento corrente.
+      (setq p1 (poly i))
+      (setq p2 (poly (+ i 1)))
+      ; Componenti del vettore che rappresenta il segmento.
+      (setq dx (sub (p2 0) (p1 0)))
+      (setq dy (sub (p2 1) (p1 1)))
+      ; Lunghezza del segmento corrente.
+      (setq seg-len (sqrt (add (mul dx dx) (mul dy dy))))
+      ; Se il prossimo punto da inserire cade all'interno del segmento,
+      ; oppure se nello stesso segmento possono essere inseriti più punti,
+      ; vengono calcolate le loro coordinate mediante interpolazione lineare.
+      (while (and (> seg-len 0) (<= target seg-len))
+        ; Parametro normalizzato nel range [0,1] che rappresenta
+        ; la posizione del punto lungo il segmento.
+        (setq t (div target seg-len))
+        ; Calcola le coordinate del nuovo punto e lo aggiunge in coda
+        ; alla lista dei punti generati.
+        (push (list (add (p1 0) (mul t dx))
+                    (add (p1 1) (mul t dy)))
+              out -1)
+        ; La distanza del punto successivo è incrementata di L.
+        (setq target (add target L)))
+      ; Terminato il segmento, la sua lunghezza viene sottratta da target.
+      ; In questo modo target rappresenta la distanza che manca ancora
+      ; da percorrere nel segmento successivo per raggiungere il prossimo punto.
+      (setq target (sub target seg-len)))
+    ; Restituisce la lista dei punti generati.
+    out))
+
+Proviamo:
+
+(setq p '((0 0) (10 0) (10 10)))
+(polyline-L p 4)
+;-> ((4 0) (8 0) (10 2) (10 6) (10 10))
+(polyline-L p 3)
+;-> ((3 0) (6 0) (9 0) (10 2) (10 5) (10 8))
+
+(setq p '((2 2) (4 2) (4 4) (6 6) (7 6) (8 6) (10 3) (12 5) (14 3)))
+(polyline-L p 1.5)
+;-> ((3.5 2) (4 3) (4.353553390593274 4.353553390593274)
+;->  (5.414213562373095 5.414213562373095) (6.67157287525381 6)
+;->  (8.095171507570216 5.857242738644677) (8.927221801908059 4.609167297137912)
+;->  (9.759272096245903 3.361091855631146) (10.75379110210271 3.753791102102714)
+;->  (11.81445127388254 4.814451273882535) (12.87511144566236 4.124888554337644)
+;->  (13.93577161744218 3.064228382557823))
+
+Se invece vogliamo una nuova polilinea con i punti della polilinea data più tutti i punti a distanza L, bisogna mantenere l'ordinamento dei punti lungo la polilinea.
+In questo caso l'algoritmo è praticamente lo stesso, ma bisogna mantenere l'ordinamento dei punti lungo la polilinea.
+1) Inserire sempre il primo punto della polilinea nell'output.
+2) Per ogni segmento:
+   - inserire tutti i punti a distanza L, 2L, ... che cadono all'interno del segmento;
+   - inserire il punto finale del segmento (cioè il punto successivo della polilinea originale).
+3) Continuare fino all'ultimo segmento.
+In questo modo i punti originali e quelli generati risultano automaticamente ordinati lungo il percorso.
+
+Se un punto generato coincide esattamente con un vertice della polilinea, la soluzione più naturale è non duplicare mai un punto.
+Quindi, quando un punto generato coincide con il vertice finale di un segmento, si evita di inserirlo nel 'while' e si lascia che venga inserito una sola volta come punto originale della polilinea.
+In pratica la condizione del ciclo diventerebbe:
+  (< target seg-len)
+anziché:
+  (<= target seg-len)
+e il punto finale di ogni segmento viene sempre aggiunto successivamente.
+Questo approccio ha anche il vantaggio di conservare integralmente tutti i vertici originali della polilinea senza mai produrre duplicati.
+
+(define (polyline-L+ poly L)
+  (local (out target p1 p2 dx dy seg-len t)
+    ; La nuova polilinea contiene inizialmente il primo punto
+    ; della polilinea originale.
+    (setq out (list (poly 0)))
+    ; Distanza del prossimo punto da inserire.
+    (setq target L)
+    ; Scorre tutti i segmenti della polilinea.
+    (for (i 0 (- (length poly) 2))
+      ; Estremi del segmento corrente.
+      (setq p1 (poly i))
+      (setq p2 (poly (+ i 1)))
+      ; Componenti del vettore che rappresenta il segmento.
+      (setq dx (sub (p2 0) (p1 0)))
+      (setq dy (sub (p2 1) (p1 1)))
+      ; Lunghezza del segmento corrente.
+      (setq seg-len (sqrt (add (mul dx dx) (mul dy dy))))
+      ; Inserisce tutti i punti intermedi che distano L, 2L, 3L, ...
+      ; dall'inizio della polilinea e che cadono strettamente
+      ; all'interno del segmento corrente.
+      ; L'uso dell'operatore '<' evita di duplicare i vertici della
+      ; polilinea originale quando la distanza è un multiplo esatto di L.
+      (while (and (> seg-len 0) (< target seg-len))
+        ; Parametro normalizzato nel range [0,1] che rappresenta
+        ; la posizione del punto lungo il segmento.
+        (setq t (div target seg-len))
+        ; Calcola il punto mediante interpolazione lineare e lo
+        ; aggiunge in coda alla nuova polilinea.
+        (push (list (add (p1 0) (mul t dx))
+                    (add (p1 1) (mul t dy)))
+              out -1)
+        ; Aggiorna la distanza del punto successivo da inserire.
+        (setq target (add target L)))
+      ; Se il prossimo punto da inserire coincide con il vertice finale
+      ; del segmento, non viene generato nel ciclo precedente. In questo
+      ; modo il vertice originale verrà inserito una sola volta.
+      (if (= target seg-len)
+          (setq target (add L (sub target seg-len)))
+          (setq target (sub target seg-len)))
+      ; Inserisce sempre il punto finale del segmento corrente.
+      (push p2 out -1))
+    ; Restituisce la nuova polilinea.
+    out))
+
+Proviamo:
+
+(setq p '((0 0) (10 0) (10 10)))
+(polyline-L+ p 4)
+;-> ((0 0) (4 0) (8 0) (10 0) (10 2) (10 6) (10 10))
+(polyline-L+ p 5)
+;-> ((0 0) (5 0) (10 0) (10 5) (10 10))
+(polyline-L+ p 10)
+;-> ((0 0) (10 0) (10 10))
+
+(setq p '((2 2) (4 2) (4 4) (6 6) (7 6) (8 6) (10 3) (12 5) (14 3)))
+(polyline-L+ p 1.5)
+;-> ((2 2) (3.5 2) (4 2) (4 3) (4 4) 
+;->  (4.353553390593274 4.353553390593274)
+;->  (5.414213562373095 5.414213562373095)
+;->  (6 6) (6.67157287525381 6)
+;->  (7 6) (8 6) (8.095171507570216 5.857242738644677)
+;->  (8.927221801908059 4.609167297137912)
+;->  (9.759272096245903 3.361091855631146)
+;->  (10 3) (10.75379110210271 3.753791102102714)
+;->  (11.81445127388254 4.814451273882535)
+;->  (12 5) (12.87511144566236 4.124888554337644)
+;->  (13.93577161744218 3.064228382557823)
+;->  (14 3))
+
 ============================================================================
 

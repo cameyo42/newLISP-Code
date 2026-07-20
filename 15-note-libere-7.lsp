@@ -4089,7 +4089,7 @@ float InvSqrt (float x)
     return x;
 }
 
-Il codice è stato attribuito a John Carmack, ma la costante era stata già usata da Cleve Moler e Gregory Walsh che avevano preso l'idea da un articolo non pubblicato di William Kahan K.C. Ng alla fine degli anni '80.
+Il codice è stato attribuito a John Carmack, ma la costante era stata già usata da Cleve Moler e Gregory Walsh che avevano preso l'idea da un articolo non pubblicato di William Kahan alla fine degli anni '80.
 
 Potete trovare un'ottima spiegazione del codice (che è abbastanza complicato) su youtube al seguente indirizzo:
 
