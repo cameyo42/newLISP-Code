@@ -2962,5 +2962,212 @@ che, arrotondato a una cifra decimale, diventa 137.5 gradi.
 (au2)
 ;-> 137.5077640500379
 
+
+---------------------------------------------------------
+Strategie di scommessa in giochi con probabilità a favore
+---------------------------------------------------------
+
+Qual è la migliore strategia di scommessa quando le probabilità sono a tuo favore?
+
+Immagina una scommessa con una probabilità di vincita del 55% e una probabilità di perdita del 45%.
+Per semplicità, supponiamo che la scommessa sia a quota fissa (cioè alla pari) e che venga effettuata N volte.
+Il vantaggio, ovvero il margine di profitto, è del 10%.
+A lungo termine, le nostre vincite saranno di 10 euro (in media) per ogni 100 euro scommessi.
+Per massimizzare il profitto totale, dobbiamo massimizzare il totale delle scommesse.
+La difficoltà sta nel fatto che massimizzare il guadagno richiede anche la minimizzazione del rischio di perdere tutto.
+
+Vediamo quattro strategie di scommessa:
+
+Strategia 1: Punta tutto.
+Metti tutto il tuo capitale sulla prima scommessa.
+Se vinci, raddoppi i tuoi soldi. Se perdi, sei in bancarotta.
+Se vinci, punta di nuovo tutto sulla scommessa successiva.
+L'unico modo per evitare di perdere tutto è vincere tutte le N partite.
+La probabilità che ciò accada è praticamente nulla.
+In altre parole, è quasi certo che sarai in bancarotta entro la N-esima partita.
+
+Strategia 2: Scommessa fissa.
+Punta un importo fisso su ogni scommessa.
+Se vinci, il tuo patrimonio aumenta di quell'importo fisso.
+Se perdi, il tuo patrimonio diminuisce di quell'importo.
+Poiché vinci più di quanto perdi, il tuo patrimonio aumenterà complessivamente, ma solo con incrementi a scatti dello stesso importo fisso. Il guadagno non cresce molto velocemente.
+
+Strategia 3: Martingale.
+Questa strategia offre un tasso di rendimento più elevato rispetto alla puntata fissa, poiché le perdite vengono compensate raddoppiando la puntata dopo una perdita, ma comporta un rischio molto più alto.
+Con solo poche scommesse perdenti, si potrebbe andare in bancarotta.
+
+Strategia 4: Scommesse proporzionali.
+In questo caso, scommetti una frazione del tuo capitale in relazione al vantaggio che hai.
+Esistono diverse varianti delle scommesse proporzionali, ma il sistema in cui la ricchezza cresce più velocemente è chiamato strategia di Kelly (John Kelly Jr. era un matematico texano che delineò questa famosa formula strategica per il gioco d'azzardo in un articolo del 1956).
+Kelly ti dice di scommettere la frazione del tuo capitale determinata da (vantaggio/quota).
+In questo caso, il vantaggio è del 10% e la quota è pari (o 1 a 1), quindi (vantaggio/quota) è uguale al 10%.
+Quindi, scommetti il 10% del capitale a ogni puntata.
+Se vinci, il capitale aumenterà del 10%, quindi la puntata successiva sarà del 10% maggiore della prima.
+Se perdi, il capitale si riduce del 10%, quindi la seconda puntata sarà del 10% inferiore alla prima.
+Questa è una strategia molto sicura perché se hai una serie di perdite, il valore assoluto della puntata si riduce, il che significa che le perdite sono limitate.
+Offre inoltre grandi potenziali ricompense poiché, come l'interesse composto, con una serie vincente il proprio patrimonio cresce esponenzialmente.
+Con questa strategia otteniamo basso rischio e alto rendimento.
+Il guadagno parte lentamente, ma alla fine supera di gran lunga gli altri.
+
+Esempio di gioco:
+Generazione di un numero random tra 0 e 1.
+Scommessa = X
+Se (numero <= 0.55), allora guadagniamo il valore della scommessa
+Se (numero > 0.55), allora perdiamo il valore della scommessa
+
+; Punta tutto
+(define (bet1 capitale N p)
+  (let (stop nil)
+    (for (i 1 N 1 stop)
+      (if (<= (random) p)
+        (setq capitale (* capitale 2))
+        (setq stop true)))
+    (if stop 0 capitale)))
+
+(bet1 10 2 0.55)
+;-> 0
+(bet1 10 2 0.55)
+;-> 40
+
+; Scommessa fissa
+(define (bet2 capitale N p scommessa)
+  (let (stop nil)
+    (for (i 1 N 1 stop)
+      (if (<= (random) p)
+        (inc capitale scommessa)
+        (dec capitale scommessa))
+      ;(print cur { } capitale) (read-line)
+      (if (> scommessa capitale)
+        (setq stop true)))
+    capitale))
+
+(bet2 1000 1000 0.55 10)
+;-> 1580
+(bet2 1000 1000 0.55 10)
+;-> 2320
+
+; Martingale
+(define (bet3 capitale N p)
+  (let ( (stop nil) (base 1) (scommessa 1) )
+    (for (i 1 N 1 stop)
+      (if (<= (random) p)
+        (begin
+          (inc capitale scommessa)
+          (setq scommessa base))
+        (begin
+          (dec capitale scommessa)
+          (setq scommessa (* scommessa 2))))
+      ;(print scommessa { } capitale) (read-line)
+      (if (<= capitale 0)
+        (setq stop true)))
+    capitale))
+
+(bet3 1000 1000 0.55)
+;-> 1549
+(bet3 1000 1000 0.55)
+;-> -685
+
+; Scommessa proporzionale
+(define (bet4 capitale N p)
+  (let ( (stop nil) (scommessa 0) (vantaggio 0) )
+    (setq vantaggio (sub p (sub 1 p)))
+    (for (i 1 N 1 stop)
+      (setq scommessa (mul capitale vantaggio))
+      (if (<= (random) p)
+        (inc capitale scommessa)
+        (dec capitale scommessa))
+      ;(print scommessa { } capitale) (read-line)
+      (if (> scommessa capitale)
+        (setq stop true)))
+    capitale))
+
+(bet4 1000 1000 0.55)
+;-> 81970.1174881316
+
+(bet4 1000 1000 0.55)
+;-> 11019.29476046493
+
+Sono equivalenti questi due giochi?
+
+Gioco 1
+-------
+Lancio di una moneta (Testa o Croce)
+Scommessa = X
+Se esce Testa (1), allora guadagniamo il 55% della scommessa
+Se esce Croce (0), allora perdiamo il 45% della scommessa
+
+Gioco 2 (gioco con cui abbiamo simulato le scommesse)
+-------
+Generazione di un numero random tra 0 e 1.
+Scommessa = X
+Se (numero <= 0.55), allora guadagniamo il valore della scommessa
+Se (numero > 0.55), allora perdiamo il valore della scommessa
+
+I due giochi non sono equivalenti ne dal punto di vista del valore atteso (expected value), ne dal punto di vista della distribuzione delle vincite e delle perdite.
+
+Calcoliamo il valore atteso nei due casi:
+
+Gioco 1
+- Probabilità di vincere = 0.5
+- Vincita = +0.55 X
+- Probabilità di perdere = 0.5
+- Perdita = -0.45 X
+Valore atteso:
+ (E1 = 0.5 * 0.55X + 0.5 * (-0.45X))
+ (E1 = 0.275X - 0.225X = 0.05X)
+Quindi il guadagno medio è il 5% della scommessa.
+
+Gioco 2
+- Probabilità di vincere = 0.55
+- Vincita = +X
+- Probabilità di perdere = 0.45
+- Perdita = -X
+Valore atteso:
+(E2 = 0.55 * X + 0.45 * (-X))
+(E2 = 0.55X - 0.45X = 0.10X)
+Quindi il guadagno medio è il 10% della scommessa.
+
+Per renderli equivalenti basta imporre che abbiano lo stesso valore atteso.
+Supponiamo nel Gioco 2 di vincere (+X) con probabilità (p) e perdere (-X) con probabilità (1-p).
+Allora:
+  (pX-(1-p)X=0.05X)
+da cui:
+  (2p-1=0.05)
+  (p=0.525)
+Quindi il gioco equivalente è:
+Genera un numero casuale tra 0 e 1.
+Se numero <= 0.525, vinci X.
+Altrimenti perdi X.
+Infatti:
+  52.5% × X − 47.5% × X = 5% × X.
+
+In generale esiste una semplice relazione.
+Se un gioco ha:
+- probabilità p di vincere
+- vincita +aX
+- probabilità q=1−p di perdere
+- perdita −bX
+il valore atteso è:
+  E = (pa − qb)X
+Se vogliamo trasformarlo in un gioco "tutto o niente" che paga ±X, la probabilità di vincita equivalente è:
+  (P=(1+pa-qb)/2=(1+E/X)/2)
+Nel nostro caso caso:
+  (p=0.5, a=0.55, q=0.5, b=0.45)
+per cui:
+  (P=(1+0.05)/2=0.525).
+
+Quindi:
+Gioco 1 -> rendimento medio +5%.
+Gioco 2 (0.55) -> rendimento medio +10% (non equivalente).
+Gioco 2 (0.525) -> rendimento medio +5% (equivalente in valore atteso).
+
+Naturalmente, anche con lo stesso valore atteso, due giochi possono avere volatilità diversa.
+Ad esempio, il Gioco 1 oscilla tra +55% e -45%, mentre il Gioco 2 equivalente oscilla tra +100% e -100%.
+Quindi il rischio percepito e la probabilità di rovina su più giocate non sono gli stessi.
+Se si considera soltanto il guadagno medio per giocata, allora sono equivalenti.
+Quello che probabilmente trae in inganno è il fatto che nel Gioco 1 compaiono i numeri 55% e 45%, mentre nel Gioco 2 compare le probabilità 45% e 55%. Sono due cose completamente diverse:
+nel Gioco 1 il 55% è l'entità della vincita;
+nel Gioco 2 il 55% è la probabilità di vincere.
+
 ============================================================================
 
