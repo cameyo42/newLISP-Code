@@ -3635,6 +3635,10 @@ NOTE LIBERE 38
   Sempre 123 (DENEAT)
   Sprite collision
   Punti a distanza fissa lungo una polilinea
+  Frequenza dei numeri della sequenza di Recaman
+  Sovrapposizione di blocchi/mattoni
+  Angolo aureo
+  Strategie di scommessa in giochi con probabilità a favore
 
 PROBLEMI SUI DADI
 =================

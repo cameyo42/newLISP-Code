@@ -2681,5 +2681,286 @@ Proviamo:
 ;->  (13.93577161744218 3.064228382557823)
 ;->  (14 3))
 
+
+----------------------------------------------
+Frequenza dei numeri della sequenza di Recaman
+----------------------------------------------
+
+La sequenza di Recaman è una sequenza definita da una relazione di ricorrenza, poiché i suoi elementi sono correlati agli elementi precedenti in modo diretto.
+
+La successione di Recaman a(0), a(1), ... a(n) è definita come:
+
+       = 0           se n = 0
+  a(n) = a(n-1) - n, se a(n-1) - n > 0 e non si trova nella sequenza
+       = a(n-1) + n, altrimenti
+
+Sequenza OEIS A005132:
+Recamán's sequence (or Recaman's sequence): a(0) = 0; for n > 0, a(n) = a(n-1) - n if nonnegative and not already in the sequence, otherwise a(n) = a(n-1) + n.
+  0, 1, 3, 6, 2, 7, 13, 20, 12, 21, 11, 22, 10, 23, 9, 24, 8, 25, 43, 62,
+  42, 63, 41, 18, 42, 17, 43, 16, 44, 15, 45, 14, 46, 79, 113, 78, 114, 77,
+  39, 78, 38, 79, 37, 80, 36, 81, 35, 82, 34, 83, 33, 84, 32, 85, 31, 86,
+  30, 87, 29, 88, 28, 89, 27, 90, 26, 91, 157, 224, 156, 225, 155, ...
+
+(define (recaman num)
+  (local (curr prev out)
+    (setq out '(0))
+    (setq prev 0)
+    (for (i 1 num)
+      (setq curr (- prev i))
+      (if (or (< curr 0) (find curr out))
+          (setq curr (+ prev i))
+      )
+      (push curr out -1)
+      (setq prev curr)
+    )
+    out))
+
+(recaman 50)
+;-> (0 1 3 6 2 7 13 20 12 21 11 22 10 23 9 24 8 25 43 62 42 63
+;->  41 18 42 17 43 16 44 15 45 14 46 79 113 78 114 77 39 78 38
+;->  79 37 80 36 81 35 82 34 83 33)
+
+Adesso calcoliamo la sequenza dei numeri di Recaman in base alla loro frequenza.
+Esempio:
+  Il primo numero di Recaman che ha frequenza 1 è il numero 0
+  Il primo numero di Recaman che ha frequenza 2 è il numero 
+  Il primo numero di Recaman che ha frequenza 3 è il numero 
+  ...
+
+Usiamo un vettore per memorizzare le frequenze.
+La grandezza del vettore dipende dal numero di elementi della sequenza di Recaman che vogliamo considerare.
+Per esempio con 100.000 numeri di Recaman:
+(silent (setq rr (recaman 1e5)))
+(apply max rr)
+;-> 592216
+Abbiamo bisogno di un vettore con almeno 592216 celle.
+
+Questo metodo non è un buon esempio di programmazione.
+Viene usato solo per velocizzare i calcoli.
+
+(define (freq-rec num)
+  (local (curr prev arr)
+    (setq arr (array 600000 '(0)))
+    (setf (arr 0) 1)
+    (println 0 { } 1)
+    (setq prev 0)
+    (setq cima 2)
+    (for (i 1 (- num 1))
+      (setq curr (- prev i))
+      (if (or (< curr 0) (> (arr curr) 0))
+          (setq curr (+ prev i))
+      )
+      (++ (arr curr) 1)
+      (when (= (arr curr) cima)
+        (println curr { } cima)
+        (++ cima))
+      (setq prev curr)) '>))
+
+Proviamo:
+
+(freq-rec 1e5)
+;-> 0 1
+;-> 42 2
+;-> 261 3
+;-> 494 4
+;-> 494 5
+;-> 5447 6
+;-> 10023 7
+;-> 18519 8
+;-> 34292 9
+;-> 34292 10
+;-> 62267 11
+;-> 62267 12
+;-> 113406 13
+;-> 113406 14
+
+(length (ref-all 5447 rr))
+;-> 6
+(length (ref-all 113406 rr))
+;-> 14
+
+Questa sequenza non si trova in OEIS (luglio 2026):
+
+   freq: 1 2  3   4   5   6    7     8     9     10    11    12    13     14
+recaman: 0 42 261 494 494 5447 10023 18519 34292 34292 62267 62267 113406 113406
+
+
+----------------------------------
+Sovrapposizione di blocchi/mattoni
+----------------------------------
+
+Supponiamo di avere due blocchi (es. mattoni) e di volerli posizionare uno sopra l'altro in modo che quello superiore abbia la massima sporgenza possibile, senza però ribaltarsi.
+Il modo per farlo è posizionare il blocco superiore esattamente a metà della larghezza di quello sottostante, come mostrato di seguito.
+
+  +-----------+
+  |           |
+  +-----+-----+-----+
+    1/2 |           |
+        +-----------+
+
+In questo modo, il baricentro del blocco superiore cade sul bordo del blocco inferiore.
+Se avessimo tre blocchi, quali sarebbero le loro posizioni affinché la sporgenza combinata fosse la più ampia possibile senza ribaltarsi?
+La soluzione è posizionare il blocco superiore a metà della lunghezza di quello centrale, e quello centrale a un quarto della lunghezza di quello inferiore, come mostrato nella figura sottostante.
+
+  +-----------+
+  |           |
+  +-----+-----+-----+
+    1/2 |           |
+        +--+--------+--+
+       1/4 |           |
+           +-----------+
+
+Proseguendo con un numero sempre maggiore di blocchi, lo schema generale è che, per garantire la massima sporgenza combinata, il blocco superiore deve trovarsi a metà della lunghezza del secondo, che a sua volta deve trovarsi a un quarto della lunghezza del terzo, che a sua volta deve trovarsi a un sesto della lunghezza del quarto, che a sua volta deve trovarsi a un ottavo della lunghezza del quinto, e così via.
+Questo ci dà una torre pendente di mattoni che assomiglia alla figura sottostante.
+
+  +-----------+
+  |           |
+  +-----+-----+-----+
+    1/2 |           |
+        +--+--------+--+
+       1/4 |           |
+           +-+---------+-+
+         1/6 |           |
+             ++----------++
+         1/8  |           |
+              +-----------+
+
+Lo sbalzo totale di questa torre, che è la somma di tutti gli sbalzi individuali, è dato dalla seguente serie:
+
+1/2 + 1/4 + 1/6 + 1/8 + ...
+
+Che può essere riscritta come:
+
+ (1/2)*(1 + 1/2 + 1/3 + 1/4 + ...)
+
+che è la metà della serie armonica (per un numero infinito di termini).
+Ora, poiché la serie armonica tende all'infinito, anche che la serie armonica divisa per due tende all'infinito, perché infinito diviso due è infinito.
+Questo significa che è teoricamente possibile creare uno sbalzo autoportante (in equilibrio) di qualsiasi lunghezza desiderata.
+Vediamo quanti blocchi servono per arrivare ad una determinata lunghezza.
+
+Consideriamo il blocco di lunghezza unitaria.
+
+Formula della serie armonica (infinita):
+
+  Sum[k=1,inf](1/k) = 1 + 1/2 + 1/3 + ...
+
+Formula della serie armonica (finita):
+
+  Sum[k=1,n](1/k) = 1 + 1/2 + 1/3 + ... + 1/n
+
+(define (harmonic n)
+  (let (h 0)
+    (for (i 1 n) (inc h (div i)))))
+
+(map harmonic (sequence 1 10))
+;-> (1 1.5 1.833333333333333 2.083333333333333 2.283333333333333 2.45
+;->  2.592857142857143 2.717857142857143 2.828968253968254 2.928968253968254)
+
+(define (blocchi len)
+  (let ((b 0) (h 0) (stop nil))
+    (for (i 1 1e7 1 stop) 
+      (inc h (div i))
+      (when (>= h len)
+          (setq stop true)
+          (setq b i)))
+    (list b h)))
+
+(map blocchi (sequence 1 15))
+;-> ((1 1) (4 2.083333333333333) (11 3.019877344877345) (31 4.02724519543652)
+;->  (83 5.002068272680166) (227 6.004366708345567) (616 7.001274097134162)
+;->  (1674 8.000485571995782) (4550 9.000208062931115)
+;->  (12367 10.00004300827578) (33617 11.00001770863642)
+;->  (91380 12.00000305166562) (248397 13.00000122948093)
+;->  (675214 14.00000136205325) (1835421 15.00000037826723))
+
+Per avere una lunghezza pari a 15 blocchi occorrono 1835421 blocchi.
+
+
+------------
+Angolo aureo
+------------
+
+L'angolo di 137.5 gradi è noto come 'angolo aureo'.
+È l'angolo che otteniamo quando dividiamo un giro completo di un cerchio secondo la sezione aurea.
+In altre parole, quando dividiamo 360 gradi in due angoli in modo tale che il rapporto tra l'angolo maggiore e quello minore sia 'phi' (la sezione aurea = 1,618...).
+I due angoli sono 222.5 gradi e 137.5 gradi, arrotondati a una cifra decimale.
+L'angolo minore è noto come angolo aureo.
+
+Ricaviamo il valore dell'angolo aureo matematicamente.
+Sia 'phi' il numero aureo:
+
+ phi = (1 + sqrt(5))/2 = 1.618033988749...
+
+Vogliamo dividere un angolo giro (360 gradi) in due parti A e B, con (A > B), in modo che il loro rapporto sia uguale al numero aureo:
+
+  A/B = phi
+
+Poiché la somma dei due angoli deve essere 360 gradi:
+
+  A + B = 360
+
+Dalla prima equazione ricaviamo A:
+
+  A = phi * B
+
+Sostituendo nella seconda equazione otteniamo:
+
+  phi*B + B = 360
+
+Raccogliendo B:
+
+  B*(phi + 1) = 360
+
+Da cui:
+
+  B = 360/(phi + 1)
+
+Una proprietà fondamentale del numero aureo è:
+
+  phi + 1 = phi^2
+
+quindi:
+
+  B = 360/phi^2
+
+Sostituendo il valore numerico di 'phi':
+
+  B = 360/2.618033988749... = 137.507764050037...
+
+Questo è l'angolo aureo.
+
+L'angolo maggiore vale invece:
+
+  A = 360 - B
+  A = 222.492235949963...
+
+Possiamo anche esprimere l'angolo aureo direttamente in funzione della radice quadrata di 5.
+Poiché:
+
+  phi = (1 + sqrt(5))/2
+
+si ha:
+
+  phi^2 = ((1 + sqrt(5))/2)^2 = (3 + sqrt(5))/2
+
+Pertanto:
+
+  angolo aureo = 360/((3 + sqrt(5))/2) = 720/(3 + sqrt(5))
+
+Razionalizzando il denominatore:
+
+  angolo aureo = 720*(3 - sqrt(5))/(9 - 5) = 180*(3 - sqrt(5)) =
+               = 137.507764050037... gradi
+
+che, arrotondato a una cifra decimale, diventa 137.5 gradi.
+
+(define (au1) (mul 180 (sub 3 (sqrt 5))))
+(au1)
+;-> 137.5077640500379
+
+(define (au2) (div 360 (add 1 (div (add 1 (sqrt 5)) 2))))
+(au2)
+;-> 137.5077640500379
+
 ============================================================================
 

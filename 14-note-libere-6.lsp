@@ -456,8 +456,9 @@ La successione di Recaman a(0), a(1), ... a(n) è definita come:
   a(n) = a(n-1) - n, se a(n-1) - n > 0 e non si trova nella sequenza
        = a(n-1) + n, altrimenti
 
-I primi termini della sequenza sono:
 
+Sequenza OEIS A005132:
+Recamán's sequence (or Recaman's sequence): a(0) = 0; for n > 0, a(n) = a(n-1) - n if nonnegative and not already in the sequence, otherwise a(n) = a(n-1) + n.
   0, 1, 3, 6, 2, 7, 13, 20, 12, 21, 11, 22, 10, 23, 9, 24, 8, 25, 43, 62,
   42, 63, 41, 18, 42, 17, 43, 16, 44, 15, 45, 14, 46, 79, 113, 78, 114, 77,
   39, 78, 38, 79, 37, 80, 36, 81, 35, 82, 34, 83, 33, 84, 32, 85, 31, 86,
