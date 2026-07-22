@@ -3639,6 +3639,9 @@ NOTE LIBERE 38
   Sovrapposizione di blocchi/mattoni
   Angolo aureo
   Strategie di scommessa in giochi con probabilità a favore
+  Righelli sparsi (Sparse ruler)
+  Numeri di picco (Peak numbers)
+  Il paradosso di Achille e la tartaruga
 
 PROBLEMI SUI DADI
 =================

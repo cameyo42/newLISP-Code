@@ -791,7 +791,7 @@ L'algoritmo si divide in due fasi.
 1) Ricerca delle sorgenti
 Per ogni vertice viene calcolato il grado entrante (indegree), cioè il numero di archi che arrivano al vertice.
 Tutti i vertici con grado entrante uguale a zero sono sorgenti.
-Poiche' un DAG puo' avere una o piu' sorgenti, la ricerca dei percorsi deve iniziare da ognuna di esse.
+Poiche' un DAG può avere una o piu' sorgenti, la ricerca dei percorsi deve iniziare da ognuna di esse.
 
 2) DFS con backtracking
 Per ogni sorgente viene eseguita una visita DFS.
@@ -3168,6 +3168,351 @@ Se si considera soltanto il guadagno medio per giocata, allora sono equivalenti.
 Quello che probabilmente trae in inganno è il fatto che nel Gioco 1 compaiono i numeri 55% e 45%, mentre nel Gioco 2 compare le probabilità 45% e 55%. Sono due cose completamente diverse:
 nel Gioco 1 il 55% è l'entità della vincita;
 nel Gioco 2 il 55% è la probabilità di vincere.
+
+
+------------------------------
+Righelli sparsi (Sparse ruler)
+------------------------------
+
+Un righello sparso è un righello in cui alcuni dei segni di distanza (mark) possono mancare.
+Più astrattamente, un righello sparso di lunghezza L con M segni è una sequenza di numeri interi:
+a1, a1, a2,...am, dove 0 = a1 < a2  < ... < am = L
+I segni a1 e am corrispondono alle estremità del righello.
+Per misurare la distanza K, con (0 <= K <= L) ci devono essere segni a(i) e a(j) in modo tale che K = a(j) - a(i).
+Un righello sparso 'completo' permette di misurare qualsiasi distanza intera fino alla sua lunghezza massima.
+Un righello sparso completo si dice 'minimale' se non esiste un righello sparso completo di lunghezza
+L con (m-1) segni)
+In altre parole, se uno qualsiasi dei segni viene rimosso non è più possibile misurare tutte le distanze.
+
+Data una lunghezza L, determinare i relativi righelli sparsi minimali.
+
+Algoritmo (brute-force)
+-----------------------
+Un righello sparso di lunghezza N deve contenere obbligatoriamente i segni: 0 e N mentre tutti gli altri segni possibili appartengono all'insieme: 1, 2, ..., N-1.
+L'algoritmo prova ad aggiungere progressivamente segni interni fino a trovare almeno un righello completo.
+Poiché la ricerca parte dal minor numero possibile di segni aggiuntivi, il primo livello che produce una soluzione corrisponde automaticamente ai righelli minimali.
+
+1) Costruzione della base
+Si fissano i due estremi del righello:
+  base = (0 N)
+e si genera la lista di tutti i segni interni possibili:
+  altri = (1 2 ... N-1)
+
+2) Ricerca per numero crescente di segni
+Si prova ad aggiungere:
+  1 segno
+  2 segni
+  3 segni
+  ...
+fino a trovare almeno una soluzione completa.
+La variabile 'num-to-add' indica quanti segni interni vengono aggiunti alla base.
+
+3) Generazione delle combinazioni
+Per ogni valore di 'num-to-add' si generano tutte le combinazioni possibili dei segni interni.
+Ad esempio, con N = 7 e num-to-add = 2 si generano:
+  (1 2)
+  (1 3)
+  (1 4)
+  ...
+  (5 6)
+Ogni combinazione rappresenta un possibile insieme di segni del righello.
+
+4) Costruzione del righello candidato
+Per ogni combinazione 'el'si costruisce il righello candidato:
+  new-base = el unione (0 N)
+Ad esempio:
+  el = (2 4 6)
+  new-base = (0 2 4 6 7)
+
+5) Calcolo delle distanze misurabili
+Per il righello candidato vengono considerate tutte le coppie di segni:
+(ai, aj) con (i < j) e si calcolano tutte le differenze (aj - ai)
+Ad esempio (0 2 4 6 7) produce:
+  2 4 6 7
+  2 4 5
+  2 3
+  1
+Le differenze duplicate vengono eliminate.
+Il risultato è l'insieme delle distanze misurabili dal righello.
+
+6) Verifica della completezza
+Il righello è completo se le differenze ottenute coincidono con:
+  (1 2 ... N)
+cioè se ogni distanza intera da 1 a N può essere misurata.
+La verifica viene effettuata confrontando sort(values) con (1 2 ... N).
+
+7) Raccolta delle soluzioni minimali
+Quando un righello risulta completo viene inserito nell'output.
+Inoltre viene impostato:
+  stop = true
+Questo non interrompe immediatamente l'esame delle combinazioni correnti, ma impedisce di passare a valori maggiori di 'num-to-add'
+In questo modo vengono raccolte tutte le soluzioni con lo stesso numero minimo di segni.
+
+Perché produce righelli minimali
+--------------------------------
+Supponiamo che il primo livello che produce una soluzione sia:
+  num-to-add = k
+Significa che:
+  num-to-add < k
+non produce alcun righello completo.
+Quindi non esiste alcun righello completo con meno segni.
+Tutte le soluzioni trovate al livello k sono pertanto minimali.
+
+Complessità
+-----------
+Per una lunghezza N vengono esaminate combinazioni di (N-1) possibili segni interni.
+Se il primo livello valido utilizza k segni aggiuntivi, il numero di candidati da controllare è:
+  C(N-1,1) +
+  C(N-1,2) +
+  ...
+  C(N-1,k)
+Per ogni candidato vengono calcolate tutte le differenze tra coppie di segni, cioè circa:
+  m(m-1)/2
+dove m è il numero totale di segni del righello.
+Si tratta quindi di un algoritmo di ricerca esaustiva, semplice da implementare e corretto, ma con crescita combinatoria all'aumentare di N.
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+; Genera una lista con le sottrazioni uniche tra tutte le coppie della lista
+(define (all-couples-sub lst all)
+  (let (out '())
+      (for (i 0 (- (length lst) 2))
+        (for (j (+ i 1) (- (length lst) 1))
+            (push (abs (- (lst i) (lst j))) out -1)))
+    (unique out)))
+
+(define (ruler N)
+  (cond 
+    ((= N 1) '(0 1))
+    ((= N 2) '(0 1 2))
+    ((= N 3) '(0 1 3) '(0 2 3))
+    (true
+      (local (out base marks altri num-to-add stop combina new-base values)
+        (setq out '())
+        ; segni (mark) presenti in ogni 'minimal sparse ruler' (0 e N)
+        (setq base (list 0 N))
+        ; Tutti i segni da 1 a N
+        (setq marks (sequence 1 N))
+        ; segni possibili da aggiungere
+        (setq altri (sequence 1 (- N 1)))
+        ; Partiamo aggiungendo un segno alla volta
+        (setq num-to-add 1)
+        (setq stop nil)
+        ; Ciclo fino a che non vengono trovati tutti i 'minimal sparse ruler'
+        (until stop
+          ; combinazioni di 'num-to-add' elementi
+          ; dei segni possibili da aggiungere
+          (setq combina (comb num-to-add altri))
+          ; Ciclo per ogni combinazione ...
+          (dolist (el combina)
+            ; base da provare
+            ; ('el' deve contenere 0 e N perchè sono sempre nella soluzione)
+            (setq new-base (append el base))
+            ; calcola tutte le sottrazioni uniche 
+            ; delle coppie di segni di 'new-base'
+            (setq values (all-couples-sub new-base))
+            ; quando le sottrazioni coprono tutti i numeri da 1 a N, allora
+            ; abbiamo trovato un 'minimal sparse ruler' per N
+            (when (= (sort values) marks)
+                  (push (sort new-base) out -1)
+                  ; stop del calcolo per basi con più segni
+                  (setq stop true)))
+          ; aumento dei numeri da aggiungere
+          ; (solo se non abbiamo trovato nessun 'minimal sparse ruler')
+          (++ num-to-add))
+        out))))
+
+Proviamo:
+
+(ruler 4)
+;-> ((0 1 2 4) (0 1 3 4) (0 2 3 4))
+
+(ruler 7)
+;-> ((0 1 2 3 7) (0 1 2 4 7) (0 1 2 5 7) (0 1 3 5 7) (0 1 3 6 7) (0 1 4 5 7)
+;->  (0 1 4 6 7) (0 2 3 6 7) (0 2 4 6 7) (0 2 5 6 7) (0 3 5 6 7) (0 4 5 6 7))
+Verifica del primo ruler (0 1 2 3 7):
+(sort (unique (all-couples-sub '(0 1 2 3 7))))
+;-> (1 2 3 4 5 6 7)
+
+(length (ruler 21))
+;-> 66
+
+La funzione è lenta perchè ha una crescita esponenziale:
+
+(time (println (length (ruler 25))))
+;-> 460
+;-> 5985.499
+(time (println (length (ruler 28))))
+;-> 12
+;-> 15047.538
+(time (println (length (ruler 31))))
+;-> 890
+;-> 127297.742
+
+(map (fn(x) (length (ruler x))) (sequence 1 20))
+;-> (2 3 3 3 4 2 12 8 4 38 30 14 6 130 80 32 12 500 326 150)
+
+
+------------------------------
+Numeri di picco (Peak numbers)
+------------------------------
+
+Data una lista/vettore di interi, trovare tutti gli elementi di picco e il loro indice.
+Un elemento è considerato un picco se è maggiore degli elementi adiacenti (se presenti):
+
+  a(i) picco, se e solo se risulta a(i-1) < a(i) > a(i+1)
+
+(define (peaks lst)
+  (setq out '())
+  (setq len (length lst))
+  ; ciclo dal secondo al penultimo elemento della lista/vettore
+  ; (il primo e l'ultimo elemento non sono mai punti di picco perchè
+  ;  non hanno due numeri adiacenti)
+  (for (i 1 (- len 2))
+    (if (and (> (lst i) (lst (- i 1))) (> (lst i) (lst (+ i 1))))
+        (push (list (lst i) i) out -1)))
+  out)
+
+Proviamo:
+
+(setq V '(1 2 4 7 4 6 9 6 4 3 8 0 7))
+(peaks V)
+;-> ((7 3) (9 6) (8 10))
+
+(setq V '(0 11 3 16 11 9 7 17 16 14 3 17 14 10 6 0 1 7 2 3))
+(peaks V)
+;-> ((11 1) (16 3) (17 7) (17 11) (7 17))
+
+
+--------------------------------------
+Il paradosso di Achille e la tartaruga
+--------------------------------------
+
+Il paradosso di Achille e la tartaruga fu proposto dal filosofo greco Zenone di Elea (V secolo a.C.) per sostenere l'idea che il movimento fosse un'illusione.
+La storia è questa.
+Achille, il piu' veloce degli eroi greci, sfida una tartaruga in una gara di corsa.
+Poiche' Achille è molto piu' veloce, concede alla tartaruga un vantaggio iniziale di una certa distanza D.
+La gara inizia.
+- Quando Achille raggiunge il punto da cui la tartaruga è partita, la tartaruga è gia' avanzata un pò.
+- Quando Achille raggiunge questa nuova posizione della tartaruga, essa è avanzata ancora.
+- Quando Achille raggiunge la posizione successiva, la tartaruga è andata ancora avanti.
+E cosi' via all'infinito.
+
+Zenone conclude:
+"Achille deve sempre raggiungere una posizione dove la tartaruga è stata, ma quando ci arriva la tartaruga è gia' andata oltre. Quindi Achille non la raggiungera' mai."
+A prima vista il ragionamento sembra corretto, ma contiene un errore sottile.
+
+Dove sta l'errore?
+
+Zenone divide il percorso in un numero infinito di tappe e osserva correttamente che:
+- le tappe sono infinite,
+- Achille deve completarle tutte.
+
+Da qui conclude che serva un tempo infinito.
+Ma questo non è vero.
+Un numero infinito di intervalli di tempo può avere una somma finita.
+
+Analisi matematica
+------------------
+Supponiamo:
+Velocita' di Achille = 10 m/s
+Velocita' della tartaruga = 1 m/s
+Vantaggio iniziale della tartaruga = 100 m
+
+1) Prima tappa
+Achille percorre 100 m.
+Tempo impiegato: t1 = 100/10 = 10 s
+In questi 10 secondi la tartaruga percorre: 1 * 10 = 10 m
+Ora la tartaruga è a 110 m.
+
+2) Seconda tappa
+Achille deve recuperare questi 10 m.
+Tempo: t2 = 10/10 = 1 s
+Nel frattempo la tartaruga percorre: 1 * 1 = 1 m
+
+3) Terza tappa
+Achille recupera 1 m.
+Tempo: t3 = 1/10 = 0.1 s
+La tartaruga avanza: 0.1 m
+
+4) Quarta tappa
+Tempo: t4 = 0.01 s
+La tartaruga avanza: 0.01 m
+E cosi' via.
+
+I tempi formano la serie:
+  10 + 1 + 0.1 + 0.01 + 0.001 + ...
+che è una progressione geometrica di ragione 0.1.
+
+Somma della serie
+-----------------
+Per una serie geometrica infinita
+  a + ar + ar^2 + ar^3 + ...
+con |r| < 1, la somma vale
+  S = a / (1 - r)
+Nel nostro caso:
+  a = 10
+  r = 0.1
+quindi
+  S = 10 / (1 - 0.1) = 10 / 0.9 = 100/9 = 11.111111...
+Dopo circa 11.11 secondi Achille raggiunge la tartaruga.
+
+Formula generale
+----------------
+Sia:
+  vA = velocita' di Achille
+  vT = velocita' della tartaruga
+  D  = vantaggio iniziale
+con vA > vT
+Le posizioni sono:
+  Achille:   xA(t) = vA * t
+  Tartaruga: xT(t) = D + vT * t
+
+Achille raggiunge la tartaruga quando: xA(t) = xT(t), quindi:
+  vA * t = D + vT * t
+  (vA - vT) * t = D
+  t = D / (vA - vT)
+Poiche' vA > vT, il denominatore è positivo e il tempo è finito.
+
+Esempio numerico
+----------------
+  vA = 10
+  vT = 1
+  D = 100
+allora
+  t = 100 / (10 - 1)
+  = 100 / 9
+  = 11.111111...
+esattamente lo stesso risultato ottenuto con la somma infinita.
+
+(define (corsa va vt vantaggio)
+  (let (t (div vantaggio (sub va vt)))
+    ; 'tempo' in cui Achille raggiunge la tartaruga e
+    ; 'distanza' a cui Achille raggiunge la tartaruga
+    (list t (mul va t))))
+
+(corsa 10 1 100)
+;-> (11.11111111111111 111.1111111111111)
+(corsa 10 9 100)
+;-> (100 1000)
+
+Conclusione
+-----------
+Zenone aveva individuato un fatto sorprendente:
+- Achille deve attraversare un numero infinito di "punti di recupero".
+Ma aveva tratto una conclusione errata:
+- infinito numero di passi non implica infinito tempo.
+La matematica moderna mostra che una somma infinita può convergere a un valore finito.
+Per questo motivo Achille raggiunge e supera la tartaruga dopo un tempo finito:
+  t = D / (vA - vT)
+e il paradosso scompare.
 
 ============================================================================
 
