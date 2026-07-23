@@ -3642,6 +3642,8 @@ NOTE LIBERE 38
   Righelli sparsi (Sparse ruler)
   Numeri di picco (Peak numbers)
   Il paradosso di Achille e la tartaruga
+  Slot machine
+  Prodotti di tutti gli elementi di una lista tranne l'elemento stesso
 
 PROBLEMI SUI DADI
 =================

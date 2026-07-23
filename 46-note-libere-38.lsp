@@ -3514,5 +3514,369 @@ Per questo motivo Achille raggiunge e supera la tartaruga dopo un tempo finito:
   t = D / (vA - vT)
 e il paradosso scompare.
 
+
+------------
+Slot machine
+------------
+
+Simulazione di una semplice slot machine
+
+Le slot machine classiche, sia meccaniche che le prime elettroniche, hanno tradizionalmente 3 rulli — è il formato "old school" che si vede ancora oggi nelle slot in stile Las Vegas retrò o nei fruit machine.
+Le slot machine moderne (soprattutto quelle online o nei casinò più recenti) usano invece più spesso 5 rulli, perché permettono molte più combinazioni vincenti e linee di pagamento (paylines), oltre a spazio per bonus, giri gratuiti, simboli speciali, ecc.
+Quindi, in sintesi:
+3 rulli -> stile classico/tradizionale, meccanica semplice
+5 rulli -> stile moderno, più linee di pagamento e più varietà
+Per una simulazione semplice usiamo 3 rulli (stile "arcade").
+
+Per una slot a 3 rulli il numero tipico di simboli (escluso il Jolly) è tra 5 e 7:
+Troppo pochi (3-4): le combinazioni vincenti diventano troppo frequenti, il gioco perde tensione
+Troppo tanti (10+): le vincite diventano rarissime, serve bilanciare bene le probabilità per ogni simbolo
+5-7 simboli: è lo standard delle slot classiche a frutta (ciliegia, limone, arancia, prugna, campana, stella, "BAR")
+
+Usiamo la seguente struttura (6 simboli + 1 Jolly = 7 totali), tipica delle slot da bar/fruit machine:
+
+  +-----------+-------------------------------+
+  | Simbolo   | Valore/rarità                 |
+  +-----------+-------------------------------+
+  | Ciliegia  | comune, pagamento basso       |
+  | Limone    | comune, pagamento basso       |
+  | Arancia   | medio                         |
+  | Uva       | medio                         |
+  | Campana   | raro, pagamento alto          |
+  | Stella    | molto raro, jackpot           |
+  | Jolly     | sostituisce qualsiasi simbolo |
+  +-----------+-------------------------------+
+
+La "rarità" non è una proprietà del simbolo in sé, ma dipende da quante volte quel simbolo compare nella tabella (o pool) di estrazione di ogni rullo.
+In pratica, nella simulazione, ogni rullo non è altro che una lista di simboli da cui si estrae casualmente uno alla volta.
+Se un simbolo compare più volte in quella lista rispetto agli altri, ha più probabilità di uscire.
+
+Esempio:
+Supponiamo che ogni rullo sia rappresentato da questa lista di 20 posizioni:
+
+  +---------+------------------+-------------+
+  | Simbolo | Occorrenze su 21 | Probabilità |
+  +---------+------------------+-------------+
+  | Ciliegia| 5                | ~25%        |
+  | Limone  | 5                | ~25%        |
+  | Arancia | 4                | ~20%        |
+  | Uva     | 3                | ~15%        |
+  | Campana | 2                | ~10%        |
+  | Stella  | 1                |  ~5%        |
+  | Jolly   | 1                |  ~5%        |
+  +---------+------------------+-------------+
+
+Il numero 21 non è un valore fisso o "magico", è semplicemente la somma di tutti i pesi dei singoli simboli:
+  5 (Ciliegia) + 5 (Limone) + 4 (Arancia) + 3 (Uva) + 2 (Campana) + 1 (Stella) + 1 (Jolly) = 21
+
+Il "pool" di ogni rullo, nel codice, viene costruito ripetendo ogni simbolo tante volte quanto il suo peso — quindi il rullo finisce per contenere 21 elementi totali (5 ciliegie, 5 limoni, 4 arance, ecc.).
+Quando si estrae casualmente una posizione su 21, la probabilità di ciascun simbolo è automaticamente:
+  probabilità simbolo = peso simbolo / 21
+Esempio: Ciliegia ha probabilità 5/21 ~ 23,8%, mentre Stella ha probabilità 1/21 ~ 4,8%.
+
+Quindi:
+- Ciliegia/Limone -> comuni, escono spesso, pagano poco
+- Campana -> rara, esce raramente (10%), paga di più
+- Stella -> rarissima, esce quasi mai (5%)
+- Jolly -> rarissimo, esce quasi mai (5%), è il jackpot
+
+Questo si chiama solitamente 'peso' (weight) o 'frequenza' nella tabella di estrazione, ed è il meccanismo standard per bilanciare probabilità e pagamenti in qualsiasi slot machine reale o simulata.
+
+Con questo schema di pesi/probabilità come base passiamo alla tabella dei pagamenti.
+I pagamenti sono espressi come 'moltiplicatore della puntata' (es. x5 = vinci 5 volte la puntata), e crescono in proporzione inversa alla probabilità di uscita.
+Con soli 3 rulli di solito si paga solo il tris completo (nessun premio per 2 simboli uguali + 1 diverso), per mantenere il gioco semplice e simile a una slot da bar classica.
+
+ +--------------+-------------+-----------+
+ | Combinazione | Probabilità | Pagamento |
+ +--------------+-------------+-----------+
+ | 3 ciliege    | ~25%        |  x2       |
+ | 3 limoni     | ~25%        |  x2       |
+ | 3 arance     | ~20%        |  x5       |
+ | 3 uve        | ~15%        | x10       |
+ | 3 campane    | ~10%        | x20       |
+ | 3 stelle     |  ~5%        | x50       |
+ | 3 Jolly      |  ~5%        | x100      | (Jackpot)
+ +--------------+-------------+-----------+
+
+Regola del Jolly
+Il Jolly sostituisce qualsiasi simbolo per completare una combinazione.
+Esempio: Ciliegia-Jolly-Ciliegia -> conta come tris di ciliegie e paga x2.
+Ma tre Jolly insieme restano il premio massimo assoluto, il Jackpot.
+
+; ================================================================
+; Simulazione Slot Machine - 3 rulli
+; Simboli: Ciliegia, Limone, Arancia, Uva, Campana, Stella, Jolly
+; ================================================================
+; --------------------------------------
+; Inizializzazione seed (random number)
+; --------------------------------------
+(seed (time-of-day))
+; -------------------------------------------------------------------
+; Definizione simboli, peso (frequenza) e pagamento (moltiplicatore)
+; -------------------------------------------------------------------
+(setq simboli '(
+    ("Ciliegia" 5 2)
+    ("Limone"   5 2)
+    ("Arancia"  4 5)
+    ("Uva"      3 10)
+    ("Campana"  2 20)
+    ("Stella"   1 50)
+    ("Jolly"    1 100)
+))
+; ---------------------------------------------------------------
+; Costruisce il "pool" pesato per un rullo: ogni simbolo compare
+; tante volte quanto il suo peso, cosi' la probabilita' di
+; estrazione riflette la tabella sopra.
+; ---------------------------------------------------------------
+(define (costruisci-rullo)
+  (let (pool '())
+    (dolist (s simboli)
+      (dotimes (i (s 1))
+        (push (s 0) pool -1)))
+    pool))
+(setq rullo-pesato (costruisci-rullo))
+; -------------------------------------------
+; Estrae un simbolo casuale dal rullo pesato
+; -------------------------------------------
+(define (gira-rullo)
+  (rullo-pesato (rand (length rullo-pesato))))
+; ------------------------------------------
+; Cerca il pagamento associato a un simbolo
+; ------------------------------------------
+(define (pagamento-di nome)
+  (let (trovato (assoc nome simboli))
+    (if trovato (trovato 2) 0)))
+; --------------------------------------------------------------
+; Valuta lo spin: tre simboli sui tre rulli.
+; Il Jolly sostituisce qualsiasi simbolo (ma 3 Jolly = jackpot)
+; --------------------------------------------------------------
+(define (valuta-spin r1 r2 r3)
+  (let (non-jolly (filter (fn (x) (!= x "Jolly")) (list r1 r2 r3)))
+    (cond
+      ; tre jolly: jackpot massimo
+      ((and (= r1 "Jolly") (= r2 "Jolly") (= r3 "Jolly"))
+        (list true "Jolly" (pagamento-di "Jolly")))
+      ; nessun simbolo diverso dal jolly tra quelli non-jolly -> vittoria
+      ((and (> (length non-jolly) 0)
+            (= (length (unique non-jolly)) 1))
+        (list true (non-jolly 0) (pagamento-di (non-jolly 0))))
+      ; altrimenti nessuna vincita
+      (true (list nil nil 0)))))
+; ------------------------------------------------------
+; Esegue un singolo giro completo e stampa il risultato
+; ------------------------------------------------------
+(define (gira-slot puntata show)
+  (let (r1 (gira-rullo) r2 (gira-rullo) r3 (gira-rullo))
+    (let (esito (valuta-spin r1 r2 r3))
+      (if show (println "[ " r1 " | " r2 " | " r3 " ]"))
+      (if (esito 0)
+        (let (vincita (* puntata (esito 2)))
+          (if show
+            (println ">> VINCITA! Combinazione: " (esito 1)
+                      "  Moltiplicatore: x" (esito 2)
+                      "  Vinci: " vincita))
+          vincita)
+        (begin
+          (if show (println ">> Nessuna vincita."))
+          0)))))
+; ------------------------------------------------------------
+; Simulazione di N giri con puntata fissa, e riepilogo finale
+; ------------------------------------------------------------
+(define (simula n-giri puntata show)
+  (let (totale-speso 0 totale-vinto 0)
+    (dotimes (i n-giri)
+      (if show (println "\nGiro " (+ i 1) ":"))
+      (setq totale-speso (+ totale-speso puntata))
+      (setq totale-vinto (+ totale-vinto (gira-slot puntata show))))
+    (println "\n============================================")
+    (println "Giri totali: " n-giri)
+    (println "Puntato in totale: " totale-speso)
+    (println "Vinto in totale: " totale-vinto)
+    (println "Bilancio netto: " (- totale-vinto totale-speso))
+    (println "============================================") '>))
+
+; ----------------------------------------------------------
+; Avvio simulazione: 20 giri, puntata 1 a giro
+; (simula n-giri puntata show)
+; Se show vale true, allora stampa solo il risultato finale
+; altrimenti stampa anche i risultati di ogni giro
+; ----------------------------------------------------------
+(simula 20 1 true)
+;-> ...
+;-> ...
+;-> Giro 10:
+;-> [ Uva | Uva | Uva ]
+;-> >> VINCITA! Combinazione: Uva  Moltiplicatore: x10  Vinci: 10
+;-> ...
+;-> ...
+;-> Giro 20:
+;-> [ Campana | Arancia | Ciliegia ]
+;-> >> Nessuna vincita.
+;-> ============================================
+;-> Giri totali: 20
+;-> Puntato in totale: 20
+;-> Vinto in totale: 10
+;-> Bilancio netto: -10
+;-> ============================================
+
+Come funziona:
+Ogni rullo è un "pool" pesato: i simboli comuni (Ciliegia, Limone) compaiono più volte, quelli rari (Stella, Jolly) compaiono una sola volta, riflettendo esattamente le probabilità concordate.
+Il Jolly sostituisce qualsiasi simbolo (es. Ciliegia-Jolly-Ciliegia vince come tris di Ciliegie), ma tre Jolly insieme danno il Jackpot massimo (x100).
+Il pagamento è un moltiplicatore della puntata, secondo la tabella.
+La funzione simula esegue N giri con puntata fissa e stampa un riepilogo (totale puntato, totale vinto, bilancio netto) — utile per verificare se il gioco è bilanciato nel lungo periodo (RTP - Return To Player).
+
+Calcolo del valore RTP (Return To Player)
+(simula 100000 1)
+;-> ============================================
+;-> Giri totali: 100000
+;-> Puntato in totale: 100000
+;-> Vinto in totale: 32209
+;-> Bilancio netto: -67791
+;-> ============================================
+Risultato su 100000 giri:
+- Puntato in totale: 100000
+- Vinto in totale: 32209
+- Bilancio netto: -67791
+- RTP (Return to Player) ~ 32.21%
+
+Questo significa che, con la tabella dei pesi/pagamenti attuale, il giocatore recupera solo circa il 323% di ciò che punta — un RTP molto basso rispetto alle slot reali (che di solito stanno tra 85% e 97%).
+La tabella pagamenti/pesi che abbiamo scelto è quindi molto "punitiva" per il giocatore.
+
+Vediamo un'altra simulazione con una tabella con pesi e pagamenti diversi.
+
+  +--------------+------+-----------+
+  | Combinazione | Peso | Pagamento |
+  +--------------+------+-----------+
+  | 3 ciliege    | 5    | x   5     |
+  | 3 limoni     | 5    | x   5     |
+  | 3 arance     | 4    | x  14     |
+  | 3 uve        | 3    | x  28     |
+  | 3 campane    | 2    | x  55     |
+  | 3 stelle     | 1    | x 140     |
+  | 3 Jolly      | 1    | x 280     |
+  +--------------+------+-----------+
+
+(setq simboli '(
+    ("Ciliegia" 5 5)
+    ("Limone"   5 5)
+    ("Arancia"  4 14)
+    ("Uva"      3 28)
+    ("Campana"  2 55)
+    ("Stella"   1 140)
+    ("Jolly"    1 280)))
+
+Dobbiamo ricostruire il 'Rullo pesato':
+
+(setq rullo-pesato (costruisci-rullo))
+
+(simula 100000 1)
+;-> ============================================
+;-> Giri totali: 100000
+;-> Puntato in totale: 100000
+;-> Vinto in totale: 91630
+;-> Bilancio netto: -8370
+;-> ============================================
+RTP = Vinto / Puntato = 91.63%
+
+In questo caso possiamo anche ricavare la formula matematica per il calcolo dell'RTP teorico.
+
+Specifiche:
+- N simboli normali, ciascuno con peso w(i) e pagamento m(i) (per i = 1,...,N)
+- Il Jolly ha peso w(J) e pagamento m(J) (il jackpot, tris di Jolly)
+- Peso totale: W = Sum[i=1,N] w(i) + w(J)
+
+Probabilità di ogni simbolo su un singolo rullo
+  p(i) = w(i)/W 
+  p(J) = w(J)/W
+
+Probabilità di vincita come simbolo 'X'
+Un tris vincente per il simbolo 'X' si ha quando ogni rullo mostra 'X' oppure il Jolly, escludendo il caso in cui escano tre Jolly (quello è il jackpot, non una vincita del simbolo 'X'):
+  P(vincita come X) = (p(i) + p(J))^3 - p(J)^3
+
+Probabilità del Jackpot (tre Jolly)
+  P(Jackpot) = p(J)^3
+
+Formula RTP
+  RTP = Sum[i=1,N] m(i)*((p(i) + p(J))^3 - p(J)^3) + p(J)^3
+
+Questo è il valore atteso di vincita per 1 unità puntata — cioè la percentuale che il giocatore recupera in media nel lungo periodo.
+
+;; ============================================================
+;; Calcola l'RTP teorico (matematico) di una slot a 3 rulli,
+;; dati pesi e pagamenti dei simboli.
+;; lista-simboli: lista di liste (nome peso pagamento)
+;; Il simbolo con nome "Jolly" e' trattato come wildcard:
+;; sostituisce qualsiasi simbolo, tranne nel caso di tris di
+;; Jolly che paga come jackpot a se stante.
+;; ============================================================
+(define (calcola-rtp lista-simboli)
+  (let (peso-totale 0 wild nil rtp 0)
+    ;; somma dei pesi (interi)
+    (dolist (s lista-simboli)
+      (setq peso-totale (+ peso-totale (s 1))))
+    ;; individua il jolly nella lista
+    (setq wild (assoc "Jolly" lista-simboli))
+    (let (pw (div (float (wild 1)) (float peso-totale))
+          pagamento-jolly (wild 2))
+      ;; contributo di ogni simbolo normale:
+      ;; P(vincita come simbolo i) = (p_i + p_jolly)^3 - p_jolly^3
+      (dolist (s lista-simboli)
+        (if (!= (s 0) "Jolly")
+          (let (p (div (float (s 1)) (float peso-totale)))
+            (setq rtp (add rtp
+                           (mul (s 2)
+                                (sub (pow (add p pw) 3) (pow pw 3))))))))
+      ;; contributo del jackpot: P(tre jolly) = p_jolly^3
+      (setq rtp (add rtp (mul pagamento-jolly (pow pw 3)))))
+    rtp))
+
+(setq simboli '(
+    ("Ciliegia" 5 5)
+    ("Limone"   5 5)
+    ("Arancia"  4 14)
+    ("Uva"      3 28)
+    ("Campana"  2 55)
+    ("Stella"   1 140)
+    ("Jolly"    1 280)))
+
+(calcola-rtp simboli)
+;-> 0.9005506964690638
+
+; Funzione che simula lo spinning della slot machine nel terminale
+(define (spinning simboli rolls pause)
+  (let ((cur " ") (len (length simboli)))
+    (for (i 0 (- (length simboli) 1))
+      (for (k 1 rolls) (print "\r" cur (simboli (rand len))) (sleep pause))
+      (setq cur (string cur (simboli i))))
+    (println "\r" cur) '>))
+
+(spinning '("!" "@" "#" "$") 10 100)
+;->  !@#$
+
+
+--------------------------------------------------------------------
+Prodotti di tutti gli elementi di una lista tranne l'elemento stesso
+--------------------------------------------------------------------
+
+Data una lista di numeri L, determinare per ogni elemento 'i-esimo' della lista il prodotto di tutti gli altri elementi.
+
+Algoritmo
+---------
+Calcolare il prodotto di tutti i numeri della lista (T)
+Attraversare la lista e per ogni elemento i-esimo calcolare:
+  prod(i) = T / L(i)
+
+(define (prod-all lst)
+  (let (T (apply mul lst))
+    (map (fn(x) (div T x)) lst)))
+
+Proviamo:
+
+(prod-all '(1 2 3 4 5))
+;-> (120 60 40 30 24)
+
+(prod-all '(1 2 1 2))
+;-> (4 2 4 2)
+
 ============================================================================
 
