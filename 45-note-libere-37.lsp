@@ -4026,7 +4026,7 @@ Vediamo tutti i casi con (1 <= a1,a2 <= limite).
 ;->  0  999    7    0   23   31    0   47   55    0   71
 ;->  0  999    0   17    0    0    0   53    0   71    0
 
-Per N > 2 vedi " Computing the Continuous Discretely" di Beck e Robins, 2006:
+Per N > 2 vedi "Computing the Continuous Discretely" di Beck e Robins, 2006:
 https://matthbeck.github.io/ccd.html
 
 

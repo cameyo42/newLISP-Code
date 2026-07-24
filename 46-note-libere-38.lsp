@@ -4380,5 +4380,143 @@ Dato che ogni volta che si lancia una moneta le probabilità di ottenere testa e
 Quindi possiamo concludere che gli indicatori identificano correttamente il modo con cui sono state create le due liste.
 La vera casualità non ha memoria di ciò che è accaduto prima.
 
+
+----------------------------------------
+Ricostruzione di una sequenza aritmetica
+----------------------------------------
+
+Data una sequenza aritmetica finita di numeri interi positivi, con alcuni termini consecutivi rimossi dal centro, ricostruire l'intera sequenza.
+
+Una sequenza aritmetica: un elenco di numeri interi positivi in cui la differenza tra due elementi consecutivi qualsiasi è la stessa.
+Esempio:
+2 5 8 11 14 17
+Ora supponiamo che uno o più numeri interi vengano rimossi dalla sequenza, con le seguenti condizioni:
+- I numeri rimossi saranno termini consecutivi della sequenza.
+- Il primo e l'ultimo numero della sequenza non verranno rimossi.
+- Almeno tre numeri interi rimarranno nella sequenza.
+Per la sequenza sopra riportata, le possibili rimozioni includono:
+  2 5 8 14 17 (rimosso 11)
+  2 5 17 (rimosso 8 11 14)
+  2 14 17 (rimosso 5 8 11)
+
+Una 'progressione aritmetica' è una successione di numeri tali che la differenza tra ciascun termine (o elemento) della successione e il suo precedente sia una costante.
+Tale costante viene detta 'ragione' della progressione.
+Per esempio, la successione 3, 5, 7, 9, 11, ... è una progressione aritmetica di ragione 2.
+
+Se il primo termine di una progressione aritmetica è a(1) e la 'ragione' d, allora l'n-esimo termine della successione è dato da:
+
+  a(n) = a(1) + (n -1)*d
+
+Tale proprietà può essere estesa a un qualsiasi termine della progressione:
+
+  a(r) = a(s) + (r − s)*d
+
+La somma dei numeri di una progressione aritmetica finita si chiama 'serie aritmetica'.
+La somma S dei primi n valori di una progressione aritmetica è uguale a:
+
+  S(n) = 1/2*n*(a(1) + a(n))
+
+Nel nostro problema, le condizioni poste generano due casi possibili:
+A) i primi due numeri della sequenza sono corretti
+B) gli ultimi due numeri della sequenza sono corretti
+
+Algoritmo
+---------
+1) Calcolare la 'ragione' per ognuno dei due casi
+2) Per verificare il caso A dobbiamo andare in avanti con passo 'ragione'.
+   Se arriviamo esattamente all'ultimo numero della sequenza data, allora abbiamo trovato la soluzione.
+3) Per verificare il caso B dobbiamo andare indietro con passo 'ragione'.
+   Se arriviamo esattamente al primo numero della sequenza data, allora abbiamo trovato la soluzione.
+4) Uno dei due casi produce la soluzione.
+
+Algoritmo ottimizzato
+---------------------
+1) Calcolare le ragioni tra i primi due numeri (r1) e tra gli ultimi due numeri (r2)
+2) Calcolare la distanza il primo e l'ultimo numero
+3) Se (% distanza r1) == 0, allora costruire la sequenza dal primo all'ultimo numero con ragione r1
+   altrimenti costruire la sequenza dall'ultimo al primo numero con ragione r2
+
+(define (build lst)
+  (local (r1 r2 delta)
+    (setq r1 (- (lst 1) (lst 0)))
+    (setq r2 (- (lst -1) (lst -2)))
+    (setq delta (- (lst -1) (lst 0)))
+    (if (zero? (% delta r1))
+        (sequence (lst 0) (lst -1) r1)
+        (sequence (lst 0) (lst -1) r2))))
+
+(setq s1 '(2 5 8 14 17))
+(setq s2 '(2 5 17))
+(setq s3 '(2 14 17))
+
+(build s1)
+;-> (2 5 8 11 14 17)
+(build s2)
+;-> (2 5 8 11 14 17)
+(build s3)
+;-> (2 5 8 11 14 17)
+
+Versione code-golf (127 caratteri):
+
+(define(f L)(let((a(-(L 1)(L 0)))(b(-(L -1)(L -2))))
+(if(zero?(%(-(L -1)(L 0))a))(sequence(L 0)(L -1)a)(sequence(L 0)(L -1)b))))
+
+(f s1)
+;-> (2 5 8 11 14 17)
+(f s2)
+;-> (2 5 8 11 14 17)
+(f s3)
+;-> (2 5 8 11 14 17)
+
+
+------------------
+Numeri di McNugget
+------------------ 
+
+I numeri Chicken McNugget sono numeri che possono essere espressi come somma di 6, 9 o 20.
+(le dimensioni iniziali delle famose confezioni di Chicken McNugget vendute da McDonald).
+In tale somma, un numero può comparire più di una volta, quindi 6 + 6 = 12 è un numero di McNugget, e il numero deve "contenere" almeno uno dei valori 6, 9 o 20.
+
+Algoritmo ricorsivo
+-------------------
+Se N < 0  --> non mcNugget
+Se N = 0  --> mcNugget
+Per tutti gli altri N:
+Se (N-6) oppure (N-9) oppure (N-20) sono McNugget --> N è McNugget)
+
+(define (nug N)
+  (cond ((< N 0) nil)
+        ((= N 0) true)
+        ((or (nug (- N 6)) (nug (- N 9)) (nug (- N 20))))))
+
+Proviamo:
+
+(map nug '(0 6 9 20))
+;-> (true true true true)
+(filter nug (sequence 1 10))
+;-> (6 9)
+
+https://mathworld.wolfram.com/McNuggetNumber.html
+Tutti gli interi sono numeri McNugget tranne 1, 2, 3, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 22, 23, 25, 28, 31, 34, 37 e 43.
+
+(setq none '(1 2 3 4 5 7 8 10 11 13 14 16 17 19 22 23 25 28 31 34 37 43))
+(filter nug none)
+;-> ()
+
+Versione code-golf (41 caratteri):
+(define(f n)(=(&(>> 8953174650303 n)1)0))
+
+(clean f (sequence 1 50))
+;-> (1 2 3 4 5 7 8 10 11 13 14 16 17 19 22 23 25 28 31 34 37 43)
+
+Come funziona?
+Costruiamo un numero binario dove solo le posizioni che sono numeri di McNugget valgono 1:
+(setq binario "10000010010010010010110010110110110110111111")
+Calcoliamo il valore intero:
+(setq intero (int "10000010010010010010110010110110110110111111" 0 2))
+;-> 8953174650303
+Quindi la funzione si posiziona sull'indice 'n': (>> 8953174650303 n)
+e verifica se il valore è 0: (= (& (>> 8953174650303 n) 1) 0)
+
 ============================================================================
 
