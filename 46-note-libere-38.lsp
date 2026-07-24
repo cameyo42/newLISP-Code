@@ -3878,5 +3878,507 @@ Proviamo:
 (prod-all '(1 2 1 2))
 ;-> (4 2 4 2)
 
+
+------------------------------------------
+Espansione degli 1 in una matrice booleana
+------------------------------------------
+
+Data una matrice booleana A (MxN) in cui ogni cella contiene 0 o 1, modificarla in modo tale che se una cella della matrice A[i][j] è 1, tutte le celle nella sua i-esima riga e j-esima colonna diventano 1.
+
+Algoritmo
+---------
+Creare due liste temporanee row-lst[] e col-lst[].
+Inizializzare tutti i valori di row-lst[] e col-lst[] a nil.
+Attraversare la matrice di input A[][].
+  Se mat[i][j] uguale a 1, impostare row-lst[i] e col-lst[j] a true.
+Attraversare nuovamente la matrice A[][].
+  Per ogni elemento A[i][j], controllare i valori di row-lst[i] e col-lst[j].
+  Se uno dei due valori (row-lst[i] o col-lst[j]) è true, impostare A[i][j] a 1.
+
+(define (modify matrix)
+  (letn ( (rows (length matrix)) (cols (length (matrix 0)))
+          (row-lst (dup 'nil rows))   ; lista di appoggio per le righe
+          (col-lst (dup 'nil cols)) ) ; lista di appoggio per le colonne
+  ; Primo ciclo
+  ; Identificazione delle righe e delle colonne
+  ; che devono essere modificate
+  (for (r 0 (- rows 1))
+    (for (c 0 (- cols 1))
+      (when (= (matrix r c) 1)
+          (setf (row-lst r) true)
+          (setf (col-lst c) true))))
+  ; (println row-lst { } col-lst)
+  ; Secondo ciclo
+  ; Aggiornamento della matrice
+  (for (r 0 (- rows 1))
+    (for (c 0 (- cols 1))
+      (if (or (row-lst r) (col-lst c))
+          (setf (matrix r c) 1))))
+  matrix))
+
+Proviamo:
+
+(setq m0 '((1 0 0)
+           (0 0 0)
+           (0 0 1)))
+(modify m0)
+;-> ((1 1 1) (1 0 1) (1 1 1))
+
+(setq m1 '((1 0 0)
+           (0 1 0)
+           (0 0 1)))
+(modify m1)
+;-> ((1 1 1) (1 1 1) (1 1 1))
+
+(setq m2 '((0 0 0 0)
+           (0 0 0 0)
+           (0 0 0 0)))
+(modify m2)
+;-> ((0 0 0 0) (0 0 0 0) (0 0 0 0))
+
+(setq m3 '((1 0 1 0 1)
+           (0 0 0 0 0)
+           (1 0 1 0 0)))
+(modify m3)
+;-> ((1 1 1 1 1) (1 0 1 0 1) (1 1 1 1 1))
+
+(setq m4 '((1 0 1 0 1)
+           (0 0 0 0 0)
+           (1 0 1 0 1)))
+(modify m4)
+;-> ((1 1 1 1 1) (1 0 1 0 1) (1 1 1 1 1))
+
+Le ultime due matrici m3 e m4 sono diverse, ma producono la stessa matrice di output.
+Come verificare se due matrici diverse produrranno la stessa matrice se applichiamo la funzione 'modify'?
+
+Le due matrici devono avere le stesse dimensioni.
+Ogni riga viene modificata completamente se contiene almeno un 1.
+Ogni colonna viene modificata completamente se contiene almeno un 1.
+Possiamo calcolare un doppio-codice del tipo 'row-code' e 'col-code' per ognuna delle due matrici.
+Se entrambi i doppi-codici sono uguali, allora le due matrici produrranno lo stesso risultato.
+
+Algoritmo
+---------
+Per la matrice 1:
+Attraversiamo la matrice per righe
+  per ogni riga 'i' che contiene almeno un 1 poniamo (row-code1[i] = true)
+Attraversiamo la matrice per colonne
+  per ogni colonna 'j' che contiene almeno un 1 poniamo (col-code1[j] = true)
+Per la matrice 2:
+Attraversiamo la matrice per righe
+  per ogni riga 'i' che contiene almeno un 1 poniamo (row-code2[i] = true)
+Attraversiamo la matrice per colonne
+  per ogni colonna 'j' che contiene almeno un 1 poniamo (col-code2[j] = true)
+Se risulta (row-code1 == row-code2) e (col-code1 == col-code2)),
+allora le due matrici producono lo stesso risultato.
+
+(define (check m1 m2)
+  (letn ( (rows1 (length m1)) (cols1 (length (m1 0)))
+          (rows2 (length m2)) (cols2 (length (m2 0)))
+          (row-code1 (dup 'nil rows1))
+          (col-code1 (dup 'nil cols1))
+          (row-code2 (dup 'nil rows2))
+          (col-code2 (dup 'nil cols2)) )
+  (if (or (!= rows1 rows2) (!= cols1 cols2))
+      nil
+      ;else
+      (begin
+        ; creazione dei codici delle righe
+        ; matrice 1
+        (dolist (r m1) (if (find 1 r) (setf (row-code1 $idx) true)))
+        ; matrice 2
+        (dolist (r m2) (if (find 1 r) (setf (row-code2 $idx) true)))
+        ; creazione dei codici delle colonne
+        ; matrice 1
+        (setq mt1 (transpose m1))
+        (dolist (c mt1) (if (find 1 c) (setf (col-code1 $idx) true)))
+        ; matrice 2
+        (setq mt2 (transpose m2))
+        (dolist (c mt2) (if (find 1 c) (setf (col-code2 $idx) true)))
+        ;(println row-code1 { } row-code2)
+        ;(println col-code1 { } col-code2)
+        (and (= row-code1 row-code2) (= col-code1 col-code2))))))
+
+Proviamo:
+
+(check m0 m1)
+;-> nil
+(check m1 m4)
+;-> nil
+(check m3 m4)
+;-> true
+
+
+---------------------------------
+Liste casuali e liste artificiali
+---------------------------------
+
+Abbiamo due liste L1 e L2 di N elementi ognuna.
+Gli elementi di L1 rappresentano il risultato del lancio di una moneta N volte (Testa = 1, Croce = 0)
+Gli elementi di L2 rappresentano il risultato di una persona che ha cercato di creare una sequenza casuale di 0 e 1 lunga N).
+Vogliamo vedere quali metodi esistono per determinare se una sequenza del genere è casuale o meno.
+
+In generale, una singola sequenza non può essere dimostrata "casuale".
+Si può però verificare se presenta caratteristiche statistiche compatibili con una sequenza generata da una moneta equa.
+
+Nel nostro caso abbiamo:
+  L1 = sequenza realmente casuale (moneta)
+  L2 = sequenza prodotta da una persona
+e vogliamo determinare se L2 'sembra' artificiale.
+
+I test più comuni sono:
+
+1. Frequenza di 0 e 1
+---------------------
+In una moneta equa ci si aspetta circa il 50% di 0 e il 50% di 1.
+Esempio:
+L = (1 0 1 1 0 1 0 0 1 0)
+numero di 1 = 5
+numero di 0 = 5
+Questo test da solo è molto debole.
+Infatti una persona tende spesso a produrre circa il 50%-50%, mentre una vera moneta può tranquillamente dare 60%-40% su sequenze corte.
+
+2. Test delle run
+-----------------
+Una "run" è una sequenza consecutiva uguale.
+Esempio:
+1 1 1 0 0 1 0 0 0
+ha run 111, 00, 1, 000 quindi 4 run.
+Gli esseri umani tendono a evitare lunghe serie uguali.
+Perciò producono: 10101010010101 con troppe run.
+Una moneta vera genera meno alternanze.
+
+3. Distribuzione delle lunghezze delle run
+------------------------------------------
+Si contano tutte le run di lunghezza 1, 2, 3, ...
+Per una moneta equa:
+P(run >= k) = 1 / 2^(k-1)
+Quindi:
+k = 1 -> 1
+k = 2 -> 1/2
+k = 3 -> 1/4
+k = 4 -> 1/8
+k = 5 -> 1/16
+Le persone producono pochissime run lunghe.
+Questa è spesso la differenza più evidente.
+
+4. Massima run
+--------------
+Si considera la lunghezza della run più lunga.
+Per una sequenza casuale di lunghezza N:
+max-run ~ log2(N)
+Esempi:
+  N = 100  -> circa 6-7
+  N = 1000 -> circa 10
+Le sequenze umane tendono ad avere massime run molto più corte.
+
+5. Numero di cambiamenti
+------------------------
+Si conta quante volte cambia il simbolo:
+  0 -> 1
+  1 -> 0
+Esempi:
+  01010101 ha 7 cambiamenti.
+  00001111 ha 1 cambiamento.
+Per una moneta equa il numero atteso è: (N - 1)/2
+Le persone tendono ad avere troppi cambiamenti.
+
+6. Entropia dei blocchi
+-----------------------
+Si considerano blocchi di lunghezza k.
+Per k = 2: 00, 01, 10, 11
+In una sequenza casuale ciascuno dovrebbe comparire circa il 25%.
+Per k = 3: 000, 001, 010, 011, 100, 101, 110, 111
+circa il 12.5% ciascuno.
+La distribuzione può essere confrontata con quella teorica.
+
+7. Test chi-quadro
+------------------
+Confronta le frequenze osservate con quelle attese.
+Per esempio sui blocchi 00, 01, 10, 11 si può calcolare:
+  chi-quadro = Somma((Osservato - Atteso)^2 / Atteso)
+Valori troppo grandi indicano non casualità.
+
+8. Autocorrelazione
+-------------------
+Si verifica se un bit dipende dai precedenti.
+Per una sequenza casuale corr(X(i), X(i+k)) ≈ 0 per ogni k > 0.
+Le sequenze umane spesso mostrano dipendenze.
+
+9. Complessità di Kolmogorov
+----------------------------
+Una sequenza è poco casuale se può essere descritta in modo compatto.
+Esempio:
+  0101010101010101
+può essere descritta come "01 ripetuto 8 volte" quindi non sembra casuale.
+Una sequenza realmente casuale non è facilmente comprimibile.
+Poiché la complessità di Kolmogorov è non calcolabile, in pratica si usa la compressione.
+
+10. Compressione
+----------------
+Se una sequenza si comprime molto, probabilmente contiene struttura.
+Esempio:
+  00000000000000000000
+si comprime molto.
+Una sequenza casuale si comprime poco o nulla.
+
+11. Test NIST
+-------------
+Il NIST ha definito una batteria di test per generatori casuali.
+Comprende:
+- Frequency Test
+- Runs Test
+- Longest Run Test
+- Serial Test
+- Approximate Entropy Test
+- Linear Complexity Test
+- Random Excursions Test
+È probabilmente l'insieme di test più usato.
+
+Nel caso specifico di una sequenza creata da una persona, gli studi mostrano che il test più efficace è quasi sempre quello delle run.
+Le persone tendono a credere erroneamente che una sequenza casuale debba "alternare spesso" 0 e 1, quindi producono:
+  101001101010011010...
+mentre una moneta vera genera regolarmente cose come:
+  1111110000111111000
+che agli esseri umani sembrano "non casuali" ma in realtà sono perfettamente normali.
+
+Per distinguere L1 e L2, calcoliamo:
+1) numero totale di run;
+2) distribuzione delle lunghezze delle run;
+3) lunghezza della run massima;
+4) numero di cambiamenti 0 <-> 1.
+Molto spesso questi quattro indicatori sono sufficienti per identificare la sequenza umana con alta probabilità.
+
+(define (random-indicators lst)
+  ; lista delle lunghezze delle run
+  (local (runs len max-run changes curr counter)
+    ; caso lista vuota
+    (if (null? lst) '(0 () 0 0)
+      (begin
+        ; inizializzazione
+        (setq runs '())
+        (setq changes 0)
+        (setq curr (first lst))
+        (setq counter 1)
+        ; ciclo per ogni elemento della sequenza...
+        (dolist (x (rest lst))
+          ; stessa run
+          (if (= x curr)
+              (++ counter)
+            ; nuova run
+            (begin
+              (push counter runs -1)
+              (setq curr x)
+              (setq counter 1)
+              (++ changes))))
+        ; ultima run
+        (push counter runs -1)
+        ; lunghezza massima run
+        (setq max-run (apply max runs))
+        ; output: (num-run distribuzione-run max-run cambiamenti)
+        (list (length runs) runs max-run changes)))))
+
+Esempio:
+
+(setq s '(1 1 1 0 0 1 0 0 0))
+(random-indicators s)
+;-> (4 (3 2 1 3) 3 3)
+Interpretazione: 111 00 1 000
+numero run       = 4
+lunghezze run    = (3 2 1 3)
+run massima      = 3
+cambiamenti      = 3
+
+Calcoliamo anche la distribuzione statistica delle run (quante run di lunghezza 1, quante di lunghezza 2, ecc.):
+
+(define (run-distribution runs)
+  (let (out '())
+    (dolist (r runs)
+      (if (lookup r out)
+          (++ (lookup r out))
+          (push (list r 1) out -1)))
+    out))
+
+Esempio:
+
+(run-distribution '(3 2 1 3))
+;-> ((3 2) (2 1) (1 1))
+cioè:
+lunghezza 1 -> 1 run
+lunghezza 2 -> 1 run
+lunghezza 3 -> 2 run
+
+Questa distribuzione è spesso il test più utile per distinguere una sequenza umana da una realmente casuale.
+Le sequenze umane tendono ad avere troppe run di lunghezza 1 e 2 e troppo poche run lunghe.
+
+Proviamo con le seguenti sequenze di 30 elementi ognuna (la prima è stata creata da un umano, la seconda con valori casuali):
+
+; umana
+(setq L1 '(1 0 0 1 0 1 0 0 0 1 1 0 1 1 0 1 1 1 1 0 1 0 0 1 0 1 0 0 1 1))
+; casuale
+(setq L2 '(0 0 1 1 0 0 0 0 0 1 1 0 0 0 1 0 0 1 0 1 1 1 1 0 1 1 0 1 0 1))
+
+(num-run distribuzione-run max-run cambiamenti)
+(setq ind1 (random-indicators L1))
+;-> (19 (1 2 1 1 1 3 2 1 2 1 4 1 1 2 1 1 1 2 2) 4 18)
+(setq ind2 (random-indicators L2))
+;-> (16 (2 2 5 2 3 1 2 1 1 4 1 2 1 1 1 1) 5 15)
+
+(run-distribution (ind1 1))
+;-> ((1 16) (0 14))
+(run-distribution (ind2 1))
+;-> ((2 5) (5 1) (3 1) (1 8) (4 1))
+
+Vediamo altre funzioni per aiutarci a stabilire se una sequenza binaria è casuale o umana.
+
+; Calcola la lunghezza massima della sottosequenza tutti 1 o tutti 0
+(define (max-len-seq lst)
+  (let ( (max-len 1) (current-len 1) (prev (lst 0)) )
+    (dolist (current (rest lst))
+      (if (= current prev)
+          (++ current-len)
+          (begin
+            (setq max-len (max max-len current-len))
+            (setq current-len 1)
+            (setq prev current))))
+    (max max-len current-len)))
+
+Proviamo:
+
+(max-len-seq L1)
+;-> 4
+(max-len-seq L2)
+;-> 5
+
+; Calcola la lunghezza media e massima della sottosequenza massima di 1 o 0
+; in base alla lunghezza di una lista con valori casuali
+; La media viene calcolata con una simulazione
+; Valore medio approssimato: log2(N)
+(define (len-media-max N iter)
+  (local (totale massima media current)
+    (setq totale 0)
+    (setq massima 0)
+    (for (i 1 iter)
+      (setq current (max-len-seq (rand 2 N)))
+      (setq massima (max current massima))
+      (++ totale current))
+    (list N (div totale iter) massima)))
+
+Proviamo:
+
+(len-media-max (length L1) 1e6)
+;-> (30 5.242903 22)
+
+Valore medio simulato: 5.242903
+Valore medio approssimato: log2(N)
+(log 30 2)
+;-> 4.906890595608519
+
+; Calcola il numero di alternanze/cambiamenti tra i simboli 1 e 0
+; (quante volte 1 passa a 0 + quante volte 0 passa a 1)
+(define (alternate lst)
+  (let ( (change 0) (prev (lst 0)) )
+    (dolist (current (rest lst))
+      (when (!= current prev)
+            (++ change)
+            (setq prev current)))
+    change))
+
+(alternate L1)
+;-> 18
+(alternate L2)
+;-> 15
+
+Lanciando N volte una moneta (Testa o Croce) calcoliamo quali sono le probabilita di avere almeno una sequenza uguale (tutti 1 o tutti 0) lunga K.
+
+Abbiamo una sequenza di N lanci di una moneta equa.
+Vogliamo calcolare la probabilita che esista almeno una sequenza consecutiva di lunghezza almeno K composta tutta da Teste (1) oppure tutta da Croci (0).
+
+Definiamo:
+A(N,K) = numero di sequenze binarie di lunghezza N che non contengono alcuna run di K simboli uguali consecutivi.
+Poiche il numero totale di sequenze di lunghezza N vale: 2^N
+la probabilita cercata vale:
+
+  P(N,K) = 1 - A(N,K)/2^N
+
+Per N < K: A(N,K) = 2^N, perche non e possibile avere una run lunga K.
+
+Per N = K: A(N,K) = 2^K - 2, perche le uniche sequenze proibite sono:
+  000...000
+  111...111
+Per N > K il conteggio si ottiene considerando la lunghezza dell'ultima run:
+A(N,K) = A(N-1,K) + A(N-2,K) + ... A(N-K+1,K)
+Questa è una generalizzazione della successione di Fibonacci.
+
+Esempio
+  N = 10
+  K = 3
+  A(10,3) = 178
+Numero totale di sequenze:
+  2^10 = 1024
+Quindi:
+  P(10,3) = 1 - 178/1024 = 0.826171875 ~ 82.6171875%
+
+; Calcola la probabilità di avere una lunghezza di
+; almeno K simboli uguali (1 o 0) con una lista di N simboli
+(define (run-prob N K)
+  (local (a i sum total)
+    (cond
+      ((< N K) 0)
+      (true
+        (setq a (array (+ N 1) '(0)))
+        (for (i 0 (- K 1))
+          (setf (a i) (pow 2 i)))
+        (for (i K N)
+          (if (= i K)
+              (setf (a i) (- (pow 2 K) 2))
+              (begin
+                (setq sum 0)
+                (for (j 1 (- K 1))
+                  (setq sum (+ sum (a (- i j)))))
+                (setf (a i) sum))))
+        (setq total (pow 2 N))
+        (sub 1 (div (a N) total))))))
+
+Proviamo:
+
+(run-prob (length L1) 4)
+;-> 0.899793267250061
+(run-prob (length L1) 5)
+;-> 0.6254928689450026
+
+Utilizzando questa funzione possiamo creare una tabella con le probabilità teoriche al variare di N e K.
+
+(define (table-run-prob K-lst N-lst)
+  (setq len-N (length N-lst))
+  (setq len-K (length K-lst))
+  (setq out (array len-N len-K '(0)))
+  (println out)
+  (dolist (N-el N-lst)
+    (setq row $idx)
+    (dolist (K-el K-lst)
+      (setq col $idx)
+      (setf (out row col) (run-prob N-el K-el))))
+  out)
+
+(table-run-prob (sequence 2 5) (sequence 10 30 10))
+;-> ((0.998046875 0.826171875 0.46484375 0.216796875)
+;->  (0.999998092 0.979122161 0.76841926 0.458402633)
+;->  (0.999999998 0.997492378 0.89979326 0.625492868))
+
+   \ K  2           3           4          5
+  N \
+  10    0.998046875 0.826171875 0.46484375 0.216796875
+  20    0.999998092 0.979122161 0.76841926 0.458402633
+  30    0.999999998 0.997492378 0.89979326 0.625492868
+
+Adesso possiamo analizzare le due liste L1 e L2
+Per quanto riguarda il numero massimo di sequenze di teste o croci, L2 presenta una sequenza massima di 5 croci, mentre L1 presenta una sequenza massima di 4 teste.
+La probabilità di una sequenza di almeno 5 su 30 lanci è di quasi due terzi (0.625492868), quindi è molto più probabile che 30 lanci diano una sequenza di 5.
+Esaminiamo la frequenza con cui entrambe le liste si alternano tra teste e croci.
+Dato che ogni volta che si lancia una moneta le probabilità di ottenere testa e croce sono uguali, ci si aspetterebbe che ogni risultato sia seguito da un risultato diverso circa la metà delle volte, e che l'altra metà delle volte sia seguita dallo stesso risultato: L2 si alterna 15 volte, mentre L1 si alterna 19 volte (questa è una prova dell'interferenza umana).
+Quindi possiamo concludere che gli indicatori identificano correttamente il modo con cui sono state create le due liste.
+La vera casualità non ha memoria di ciò che è accaduto prima.
+
 ============================================================================
 

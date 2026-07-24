@@ -3644,6 +3644,8 @@ NOTE LIBERE 38
   Il paradosso di Achille e la tartaruga
   Slot machine
   Prodotti di tutti gli elementi di una lista tranne l'elemento stesso
+  Espansione degli 1 in una matrice booleana
+  Liste casuali e liste artificiali
 
 PROBLEMI SUI DADI
 =================

@@ -3254,7 +3254,7 @@ Costruiamo la lista casuale con "(rand 2 N)" e poi cerchiamo la sottosequenza di
 Funzione che prende una lista di 0 e 1 e restituisce la lunghezza massima delle sottosequenze di 0 o 1 consecutivi:
 
 (define (subseq2 lst)
-  (local (max-len current-len prev current)
+  (local (max-len current-len prev)
     (setq max-len 1)
     (setq current-len 1)
     (setq prev (lst 0))
