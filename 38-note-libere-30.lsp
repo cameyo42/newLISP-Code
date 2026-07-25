@@ -2623,7 +2623,7 @@ Questo significa che il periodo del valore nil è maggiore di 250.
 ;->  76 18 56 60 40 48 88 30 120 48 32 24 112 300 72 84 108
 ;->  72 20 48 72 42 58 120 60 30 48 96 140 120 136)
 
-Potremmo scrivere: fibo-max = limite^2 (vedi Nota al termine.)
+Potremmo scrivere: fibo-max = limite^2 (vedi Nota al termine)
 
 Vediamo la funzione "find-repeat" che trova il periodo della successione di Fibonacci modulo n.
 

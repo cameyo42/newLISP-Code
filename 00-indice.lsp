@@ -3648,6 +3648,10 @@ NOTE LIBERE 38
   Liste casuali e liste artificiali
   Ricostruzione di una sequenza aritmetica
   Numeri di McNugget
+  Stringa binaria da lista di interi
+  Sequenze di ricorrenza binarie
+  Controesempio della congettura jacobiana
+  Numeri in Toki Pona
 
 PROBLEMI SUI DADI
 =================

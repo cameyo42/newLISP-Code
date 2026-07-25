@@ -4518,5 +4518,313 @@ Calcoliamo il valore intero:
 Quindi la funzione si posiziona sull'indice 'n': (>> 8953174650303 n)
 e verifica se il valore è 0: (= (& (>> 8953174650303 n) 1) 0)
 
+
+----------------------------------
+Stringa binaria da lista di interi
+----------------------------------
+
+Data una lista di numeri interi positivi costruire una stringa binaria che ha "1" solo negli indici contenuti nella lista.
+
+Esempio:
+  lista = (2 0 5)
+  stringa = 101001
+  indici  = 0 2  5
+
+(define (build lst)
+  (local (len bin)
+    (setq len (+ (apply max lst) 1))
+    (setq bin (dup "0" len))
+    (dolist (el lst)
+      (setf (bin el) "1"))
+    bin))
+
+Proviamo:
+
+(build '(2 0 5))
+;-> "101001"
+
+(build (sequence 0 10 2))
+;-> "10101010101"
+
+
+------------------------------
+Sequenze di ricorrenza binarie
+------------------------------
+
+Una sequenza di ricorrenza binaria è una sequenza definita ricorsivamente della seguente forma:
+
+  F(0) = a(0)
+  ...
+  F(y-1) = a(y-1)
+  F(n) = k1*F(n - x) + k2*F(n - y), n > y
+
+Sequenza di Fibonacci: (x=1, y=2, a=[1,1], k1=1, k2=1)
+Sequenza di Lucas:     (x=1, y=2, a=[2,1], k1=1, k2=1)
+
+; calcola una sequenza generica (0..N)
+(define (generic x y a k1 k2 N)
+  (if (< N (- (length a) 1))
+      ; 'n' è indice dalla lista 'a'
+      (slice a 0 (+ N 1))
+      ;else
+      ; vettore per contenere i valori della sequenza
+      (let (seq (array (+ N 1) '(0)))
+        ; inizializza i primi valori di 'seq' con i valori di 'a'
+        (dolist (el a) (setf (seq $idx) el))
+        (for (i y N)
+        ; calcola il valore i-esimo della sequenza utilizzando
+        ; i valori precedenti contenuti nel vettore 'seq'
+          (setf (seq i) (+ (* k1 (seq (- i x))) (* k2 (seq (- i y))))))
+        seq)))
+
+Proviamo:
+
+(generic 1 2 '(1 1) 1 1 6)
+;-> (1 1 2 3 5 8 13)
+(generic 1 2 '(2 1) 1 1 8)
+;-> (2 1 3 4 7 11 18 29 47)
+(generic 3 5 '(2 3 5 7 11) 2 3 8)
+;-> (2 3 5 7 11 16 23 37 53)
+(generic 1 3 '(-5 2 3) 1 2 10)
+;-> (-5 2 3 -7 -3 3 -11 -17 -11 -33 -67)
+(generic 5 7 '(-5 2 3 -7 -8 1 -9) -10 -7 10)
+;-> (-5 2 3 -7 -8 1 -9 5 56 59 39)
+
+Versione code-golf (177 caratteri):
+
+(define(f x y a k q n)
+(if(< n(-(length a)1))(slice a 0(+ n 1))
+(let(s(array(+ n 1)'(0)))
+(dolist(el a)(setf(s $idx)el))
+(for(i y n)(setf(s i)(+(* k(s(- i x)))(* q(s(- i y))))))s)))
+
+(f 5 7 '(-5 2 3 -7 -8 1 -9) -10 -7 10)
+;-> (-5 2 3 -7 -8 1 -9 5 56 59 39)
+
+
+----------------------------------------
+Controesempio della congettura jacobiana
+----------------------------------------
+
+https://en.wikipedia.org/wiki/Jacobian_conjecture
+https://temperaturezero.com/2026/07/21/fable-5-disproved-jacobian-conjecture-87-years/
+https://terrytao.wordpress.com/2026/07/21/a-digestion-of-the-jacobian-conjecture-counterexample/
+
+  f(x,y,z) = z(1 + xy)^3 + y^2(1 + xy)(4 + 3xy),
+             y + 3xz(1 + xy)^2 + 3xy^2(4 + 3xy),
+             2x - 3x^2y - x^3z
+
+z(1 + xy)^3 + y^2(1 + xy)(4 + 3xy),
+(add (mul z (pow (add 1 (mul x y)) 3))
+     (mul y y (add 1 (mul x y)) (add 4 (mul 3 x y))))
+
+y + 3xz(1 + xy)^2 + 3xy^2(4 + 3xy),
+(add y (mul 3 x z (pow (add 1 (mul x y)) 2))
+       (mul 3 x y y (add 4 (mul 3 x y))))
+
+2x - 3x^2y - x^3z
+(sub (mul 2 x) (mul 3 x x y) (mul x x x z))
+
+(define (f x y z)
+  (list (add (mul z (pow (add 1 (mul x y)) 3))
+             (mul y y (add 1 (mul x y)) (add 4 (mul 3 x y))))
+        (add y (mul 3 x z (pow (add 1 (mul x y)) 2))
+               (mul 3 x y y (add 4 (mul 3 x y))))             
+        (sub (mul 2 x) (mul 3 x x y) (mul x x x z))))
+
+Proviamo:
+
+(setq x 0 y 0 z -0.25)
+(f x y z)
+;-> (-0.25 0 0)
+
+(setq x 1 y -1.5 z 6.5)
+(f x y z)
+;-> (-0.25 0 0)
+
+(setq x 7 y 20 z 2026)
+(f x y z)
+;-> (5703239346 849418646 -697844)
+
+(setq x 1 y 1 z 1)
+;-> 1
+
+
+-------------------
+Numeri in Toki Pona
+-------------------
+
+Il 'Toki Pona' è una lingua artificiale composta da circa 137 parole, progettata per costringere chi la parla ad esprimere idee in modo semplice e diretto, riducendole a forme più essenziali.
+Tuttavia, il Toki Pona possiede anche un sistema numerico additivo di base, in grado di esprimere quantità esatte.
+
+  +--------+--------+
+  | Parola | Numero |
+  +--------+--------+
+  | ala    |    0   |
+  | wan    |    1   |
+  | tu     |    2   |
+  | luka   |    5   |
+  | mute   |   20   |
+  | ale    |  100   |
+  +--------+--------+
+
+La quantità espressa da una serie di queste parole è la somma di tutti i loro valori.
+Una quantità deve essere espressa con il minor numero di parole possibile, ordinate dalla più grande alla più piccola.
+
+Riformuliamo il problema:
+Abbiamo una lista di interi positivi e un numero N.
+Dobbiamo determinare i numeri della lista che devono essere sommati per arrivare a N.
+Se questo non è possibile, resitutire nil.
+I numeri della lista possono essere usati più di una volta nella somma.
+La somma deve usare il minor numero di numeri.
+I numeri della somma devono essere ordinati dal più grande al più piccolo.
+
+Esempio:
+ lista = (1 2 5 10 20)
+ N = 6
+ 6 = 1 + 1 + 1 + 1 + 1 + 1
+ 6 = 1 + 1 + 1 + 1 + 2
+ ...
+ 6 = 2 + 2 + 2
+ 6 = 1 + 5 (soluzione)
+
+Questo è il classico problema del 'coin change (minimum coins)' con monete illimitate.
+La soluzione più efficiente usa la programmazione dinamica:
+- dp[i] = numero minimo di elementi necessari per ottenere la somma 'i'
+- prev[i] = ultimo numero usato per ottenere la soluzione ottima di 'i'
+Complessità temporale: O(N * M) dove N è la somma richiesta e M è la lunghezza della lista.
+
+(define (min-sum nums target)
+  (local (inf dp prev i num out)
+    ; valore "infinito"
+    (setq inf (+ target 1))
+    ; tabelle DP
+    (setq dp (dup inf (+ target 1)))
+    (setq prev (dup nil (+ target 1)))
+    ; somma 0 -> 0 elementi
+    (setf (dp 0) 0)
+    ; costruzione tabella
+    (for (i 1 target)
+      (dolist (num nums)
+        (when (and (>= i num)
+                   (< (+ (dp (- i num)) 1) (dp i)))
+          (setf (dp i) (+ (dp (- i num)) 1))
+          (setf (prev i) num))))
+    ; nessuna soluzione
+    (if (= (dp target) inf)
+        nil
+        (begin
+          ; ricostruzione soluzione
+          (setq out '())
+          (setq i target)
+          (while (> i 0)
+            (push (prev i) out -1)
+            (setq i (- i (prev i))))
+          out))))
+
+Proviamo:
+
+(min-sum '(1 2 5 10 20) 6)
+;-> (1 5)
+
+(min-sum '(1 2 5 10 20) 23)
+;-> (1 2 20)
+
+(min-sum '(4 7) 15)
+;-> (4 4 7)
+
+(min-sum '(4 7) 13)
+;-> nil
+
+(min-sum '(0 1 3) 0)
+;-> ERR: invalid list index
+;-> called from user function (min-sum '(0 1 3) 0)
+
+Questa funzione trova la prima soluzione minima (se vogliamo anche tutte le soluzioni minime (non solo una), il problema diventa leggermente più complesso perché bisogna memorizzare più predecessori invece di uno solo.
+
+Con i numeri della tabella (0 1 2 5 20 100) è possibile costruire qualunque numero positivo N.
+
+(define (tokipona num)
+    (if (zero? num)
+        '("ala")
+        ;else
+        (letn ( (table '((0 "ala") (1 "wan") (2 "tu")
+                         (5 "luka") (20 "mute") (100 "ale")))
+                (numeri '(0 1 2 5 20 100))
+                (somma (sort (min-sum numeri num) >)) )
+                ;(println somma)
+          (map (fn(x) (lookup x table)) somma))))
+
+Proviamo:
+
+(tokipona 120)
+;-> ("ale" "mute")
+
+(map tokipona (sequence 0 10))
+;-> (("ala") ("wan") ("tu") ("tu" "wan") ("tu" "tu") ("luka") ("luka" "wan")
+;->  ("luka" "tu") ("luka" "tu" "wan") ("luka" "tu" "tu") ("luka" "luka"))
+
+Poichè la tabella Parole/Numeri è sempre la stessa possiamo usare un metodo diverso.
+In pratica la funzione esprime il numero in un sistema con pesi:
+  100 -> ale
+   20 -> mute
+    5 -> luka
+    2 -> tu
+    1 -> wan
+usando sempre il numero minimo di parole perché i pesi vengono considerati dal più grande al più piccolo (algoritmo greedy).
+
+Esempio:
+  N = 243
+  243 = 2*100 + 2*20 + 0*5 + 1*2 + 1*1
+  Output = ale ale mute mute tu wan
+
+(define (toki n)
+  (let (out "")
+    ; aggiunge una parola "ale" per ogni gruppo completo di 100
+    ; esempio: 243/100 = 2 --> "ale ale "
+    (extend out (dup "ale " (/ n 100)))
+    ; aggiunge una parola "mute" per ogni gruppo completo di 20
+    ; rimasto dopo aver considerato i gruppi di 100
+    ; esempio: 243/20 = 12, 12 mod 5 = 2 --> "mute mute "
+    (extend out (dup "mute " (% (/ n 20) 5)))
+    ; aggiunge una parola "luka" per ogni gruppo completo di 5
+    ; rimasto dopo aver considerato i gruppi di 20
+    ; esempio: 243/5 = 48, 48 mod 4 = 0 --> nessun "luka"
+    (extend out (dup "luka " (% (/ n 5) 4)))
+    ; aggiunge una parola "tu" per ogni gruppo completo di 2
+    ; presente nel resto della divisione per 5
+    ; esempio: 243 mod 5 = 3, 3/2 = 1 --> "tu "
+    (extend out (dup "tu " (/ (% n 5) 2)))
+    ; aggiunge una parola "wan" se nel resto finale è presente una unità
+    ; esempio: 243 mod 5 = 3, 3 mod 2 = 1 --> "wan "
+    (extend out (dup "wan " (% (% n 5) 2)))
+    ; se non è stata aggiunta alcuna parola allora n vale 0
+    ; e la rappresentazione è "ala"
+    ; altrimenti elimina lo spazio finale e restituisce la stringa
+    (if (= out "")
+        "ala"
+        (trim out))))
+
+Proviamo:
+
+(toki 120)
+;-> ("ale" "mute")
+
+(map toki (sequence 0 10))
+;-> ("ala" "wan" "tu" "tu wan" "tu tu" "luka" "luka wan"
+;->  "luka tu" "luka tu wan" "luka tu tu" "luka luka")
+
+Test di velocità:
+
+(time (tokipona 123) 1e3)
+;-> 235.7
+(time (toki 123) 1e3)
+;-> 2.005
+
+(time (tokipona 12345))
+;-> 1829.105
+(time (toki 12345))
+;-> 0
+
 ============================================================================
 
