@@ -3652,6 +3652,8 @@ NOTE LIBERE 38
   Sequenze di ricorrenza binarie
   Controesempio della congettura jacobiana
   Numeri in Toki Pona
+  Quanto è pari un numero?
+  Sequenze di sblocco Android (griglia 3x3)
 
 PROBLEMI SUI DADI
 =================

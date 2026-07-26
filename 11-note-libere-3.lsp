@@ -5039,6 +5039,72 @@ Verifichiamo che i numeri siano tutti diversi:
 
 Probabilmente qualcuno di questi 5 quadrati magici sono trasposti e/o simmetrici tra loro, ma sicuramente almeno uno (qmagic 0) è un quadrato magico con una somma pandigitale (minore di quella del quadrato magico di Kurchan), tutti i numeri sono pandigitali e diversi tra loro. Quindi abbiamo trovato un quadrato magico con le stesse proprietà di quelle di Kurchan, ma con una somma minore.
 
+Il quadrato magico upside-down
+------------------------------
+
+Questo quadrato magico usa solo le cifre 1, 6, 8 e 9.
+
+  18 99 86 61
+  66 81 98 19
+  91 16 69 88
+  89 68 11 96
+
+Le somme verticali, orizzontali e diagonali valgono 264.
+
+  18 99 | 86 61
+  66 81 | 98 19
+  ------+------
+  91 16 | 69 88
+  89 68 | 11 96
+
+Anche le somme dei 4 quadranti valgono 264.
+
+Ma la particolarità di questo quadrato magico è un'altra...
+...se capovolgiamo tutti i numeri rimane un quadrato magico:
+
+  18 66 89 91
+  99 81 68 16
+  61 19 96 88
+  86 98 11 69
+
+(define (check qm)
+  (local (ok row col)
+    (setq dim (length qm))
+    (setq ok true)
+    ; controllo diagonali
+    (setq srow 0 scol 0)
+    (for (i 0 (- dim 1))
+      (setq srow (+ srow (qm i i)))
+      (setq scol (+ scol (qm i (- dim i 1)))))
+    ; diagonali ok?
+    (if (!= srow scol) (setq ok nil))
+    ;controllo righe e colonne
+    (for (i 0 (- dim 1) 1 ok)
+      (setq srow 0 scol 0)
+      (for (j 0 (- dim 1) 1 ok )
+        (setq srow (+ srow (qm i j)))
+        (setq scol (+ scol (qm j i)))))
+    ;righe e colonne ok?
+    (if (!= srow scol) (setq ok nil))
+    ; risultato finale
+    (if ok srow nil)))
+
+Proviamo:
+
+(setq q '((18 99 86 61)
+          (66 81 98 19)
+          (91 16 69 88)
+          (89 68 11 96)))
+(check q)
+;-> 264
+
+(setq p '((18 66 89 91)
+          (99 81 68 16)
+          (61 19 96 88)
+          (86 98 11 69)))
+(check q)
+;-> 264
+
 
 --------------
 Serie infinite

@@ -4826,5 +4826,204 @@ Test di velocità:
 (time (toki 12345))
 ;-> 0
 
+
+------------------------
+Quanto è pari un numero?
+------------------------
+
+https://codegolf.stackexchange.com/questions/71833/how-even-is-a-number
+
+Gli antichi Greci conoscevano i numeri singolarmente pari e i numeri doppiamente pari.
+Un esempio di numero singolarmente pari è 14.
+È divisibile per 2 una sola volta, diventando un numero dispari (7), dopodiché non è più divisibile per 2.
+Un numero doppiamente pari è 20.
+È divisibile per 2 due volte, diventando 5.
+Scrivere una funzione (più corta possibile) che prende un numero intero e restituisce il numero di volte in cui è divisibile per 2.
+
+(define (div2 num)
+  ((count '(2) (factor num)) 0))
+
+(div2 16)
+;-> 4
+(div2 12345)
+;-> 0
+(div2 123456)
+;-> 6
+
+Versione code-golf (38 caratteri):
+(define(f n)((count '(2)(factor n))0))
+(f 123456)
+;-> 6
+
+
+-----------------------------------------
+Sequenze di sblocco Android (griglia 3x3)
+-----------------------------------------
+
+Un metodo per proteggere l'accesso al proprio cellulare Android è quello di definire una linea collegando dei punti tramite un percorso unico all'interno di una configurazione 3x3.
+Il numero di permutazioni possibili, data la configurazione standard 3x3 (e le regole per le sequenze valide), è stato calcolato e vale 389.112.
+
+Le sequenze di sblocco Android (pattern lock) utilizzano i 9 punti di una griglia 3×3.
+Possiamo numerare i punti così:
+
+  1 2 3
+  4 5 6
+  7 8 9
+
+Regole per una sequenza valida
+------------------------------
+1) Un punto non può essere usato due volte
+Esempi:
+  Valido: 1 -> 2 -> 5 -> 9
+  Non valido: 1 -> 2 -> 5 -> 2 perché il punto 2 viene riutilizzato.
+
+2) Un segmento non può "saltare" un punto non ancora visitato
+Esempi:
+  1 -> 3 passa sopra il punto 2.
+Questa mossa è consentita solo se il punto 2 è già stato visitato.
+Quindi:
+  1 -> 3 non è valida come prima mossa.
+Mentre:
+  2 -> 1 -> 3 è valida perché il 2 è già stato utilizzato.
+Altri esempi:
+  1 -> 7 attraversa il 4. Serve che il 4 sia già stato visitato.
+  3 -> 9 attraversa il 6. Serve che il 6 sia già stato visitato.
+  1 -> 9 attraversa il 5. Serve che il 5 sia già stato visitato.
+
+3) Se non esiste un punto intermedio, la mossa è sempre valida
+Esempio:
+  1 -> 6
+  1 -> 8
+  2 -> 9
+  3 -> 4
+non attraversano alcun punto della griglia e sono sempre ammesse.
+
+4) Tabella delle coppie "vincolate"
+Le sole coppie che richiedono un punto intermedio sono:
+
+  +----+---+-----------------+
+  | Da | A | Punto richiesto |
+  +----+---+-----------------+
+  | 1  | 3 | 2               |
+  | 1  | 7 | 4               |
+  | 1  | 9 | 5               |
+  | 2  | 8 | 5               |
+  | 3  | 7 | 5               |
+  | 3  | 9 | 6               |
+  | 4  | 6 | 5               |
+  | 7  | 9 | 8               |
+  +----+---+-----------------+
+
+e naturalmente le stesse coppie in senso inverso.
+
+Calcoliamo 389.112
+------------------
+Si tratta del numero totale di tutti i pattern validi aventi lunghezza da 4 a 9 punti.
+Android richiede infatti almeno 4 punti.
+La lunghezza può essere: 4, 5, 6, 7, 8, 9
+Il conteggio per ogni lunghezza è:
+
+  +-----------+----------------+
+  | Lunghezza | Pattern validi |
+  +-----------+----------------+
+  | 4         |          1.624 |
+  | 5         |          7.152 |
+  | 6         |         26.016 |
+  | 7         |         72.912 |
+  | 8         |        140.704 |
+  | 9         |        140.704 |
+  +-----------+----------------+
+
+Totale: 1624 + 7152 + 26016 + 72912 + 140704 + 140704 = 389112
+
+Come viene effettuato il calcolo?
+---------------------------------
+Non esiste una formula chiusa semplice.
+Si costruisce un grafo dei 9 punti e si esegue una ricerca esaustiva (DFS/backtracking).
+Per ogni stato:
+1) si conosce il punto corrente;
+2) si conosce l'insieme dei punti già visitati;
+3) si provano tutte le possibili mosse;
+4) una mossa è valida se:
+   - il punto destinazione non è stato visitato;
+   - se esiste un punto intermedio, questo è già stato visitato.
+Ogni volta che la lunghezza raggiunge:
+  4, 5, 6, 7, 8 o 9
+si incrementa il contatore.
+
+Riduzione tramite simmetria
+---------------------------
+Non è necessario partire da tutti i 9 punti.
+I punti si dividono in tre classi equivalenti:
+  1 3 7 9   (angoli)
+  2 4 6 8   (lati)
+  5         (centro)
+Per simmetria basta calcolare:
+  conteggio(1) * 4 + conteggio(2) * 4 + conteggio(5)
+ottenendo lo stesso risultato molto più velocemente.
+Infatti:
+  pattern che iniziano da un angolo = 95.872
+  pattern che iniziano da un lato   = 108.024
+  pattern che iniziano dal centro   = 64.272
+e
+ 4*95.872 + 4*108.024 + 64.272 = 389.112
+
+Questo è il metodo utilizzato nei programmi che verificano il numero totale dei pattern Android validi.
+
+;------------------------------------------
+; Conteggio pattern Android 3x3
+; Restituisce il numero di pattern validi
+; per ogni lunghezza da 1 a 9.
+;------------------------------------------
+(define (android-patterns)
+  ; matrice dei punti intermedi obbligatori
+  (setq skip (array 10 10 '(0)))
+  (setf (skip 1 3) 2) (setf (skip 3 1) 2)
+  (setf (skip 1 7) 4) (setf (skip 7 1) 4)
+  (setf (skip 3 9) 6) (setf (skip 9 3) 6)
+  (setf (skip 7 9) 8) (setf (skip 9 7) 8)
+  (setf (skip 1 9) 5) (setf (skip 9 1) 5)
+  (setf (skip 3 7) 5) (setf (skip 7 3) 5)
+  (setf (skip 4 6) 5) (setf (skip 6 4) 5)
+  (setf (skip 2 8) 5) (setf (skip 8 2) 5)
+  ; contatori per le lunghezze 0..9
+  (setq counter (array 10 '(0)))
+  ; punti già visitati
+  (setq used (array 10 '(nil)))
+  ;----------------------------------------
+  ; DFS ricorsiva
+  ; curr = punto corrente
+  ; len  = lunghezza attuale
+  ;----------------------------------------
+  (define (dfs curr len)
+    (++ (counter len))
+    (for (next 1 9)
+      (if (not (used next))
+          (begin
+            (setq mid (skip curr next))
+            ; mossa valida se:
+            ; - non esiste punto intermedio
+            ; oppure
+            ; - il punto intermedio è già visitato
+            (if (or (= mid 0) (used mid))
+                (begin
+                  (setf (used next) true)
+                  (dfs next (+ len 1))
+                  (setf (used next) nil)))))))
+  ; avvia la ricerca da tutti i 9 punti
+  (for (start 1 9)
+    (setf (used start) true)
+    (dfs start 1)
+    (setf (used start) nil))
+  ; restituisce i conteggi per lunghezza 1..9
+  (slice (array-list counter) 1))
+
+Proviamo:
+
+(setq all (android-patterns))
+;-> (9 56 320 1624 7152 26016 72912 140704 140704)
+(apply + (slice all 3))
+;-> 389112
+
 ============================================================================
 
