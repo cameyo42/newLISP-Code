@@ -5025,5 +5025,291 @@ Proviamo:
 (apply + (slice all 3))
 ;-> 389112
 
+
+-------------------------------------------------
+Numero e quadrato con la stessa somma delle cifre
+-------------------------------------------------
+
+Determinare la sequenza dei numeri che hanno la stessa somma delle cifre del loro quadrato.
+Esempio:
+  N = 55 --> Somma cifre = 10
+  N^2 = 55*55 = 3025 --> Somma delle cifre = 10
+
+Sequenza OEIS A058369:
+Numbers k such that k and k^2 have same digit sum.
+  0, 1, 9, 10, 18, 19, 45, 46, 55, 90, 99, 100, 145, 180, 189, 190, 198, 199,
+  289, 351, 361, 369, 379, 388, 450, 451, 459, 460, 468, 495, 496, 550, 558,
+  559, 568, 585, 595, 639, 729, 739, 775, 838, 855, 900, 954, 955, 990, 999,
+  1000, 1098, 1099, 1179, 1188, 1189, ...
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10)))
+    out))
+
+(define (seq limite)
+  (let (out '())
+    (for (i 0 limite)
+      (if (= (digit-sum i) (digit-sum (* i i)))
+          (push i out -1)))))
+
+(seq 1189)
+;-> (0 1 9 10 18 19 45 46 55 90 99 100 145 180 189 190 198 199
+;->  289 351 361 369 379 388 450 451 459 460 468 495 496 550 558
+;->  559 568 585 595 639 729 739 775 838 855 900 954 955 990 999
+;->  1000 1098 1099 1179 1188 1189)
+
+
+--------------------------------------------------------------
+Numero di fattori primi dispari = numero di fattori primi pari
+--------------------------------------------------------------
+
+Determinare la sequenza dei numeri per cui risulta:
+
+  numero di fattori primi dispari = numero di fattori primi pari
+  
+Sequenza OEIS A072978:
+Numbers of the form m * 2^bigomega(m), where m>1 is odd and bigomega(m) = A001222(m), the number of prime factors of m.
+(number of odd prime factors) = (number of even prime factors).
+  1, 6, 10, 14, 22, 26, 34, 36, 38, 46, 58, 60, 62, 74, 82, 84, 86, 94, 100,
+  106, 118, 122, 132, 134, 140, 142, 146, 156, 158, 166, 178, 194, 196, 202,
+  204, 206, 214, 216, 218, 220, 226, 228, 254, 260, 262, 274, 276, 278, 298,
+  302, 308, 314, 326, 334, 340, 346, ...
+
+(define (eqfactor? num)
+  (if (= num 1) true
+    ;else
+    (let (f (factor num))
+      (= (length (filter even? f)) (length (filter odd? f))))))
+
+(filter eqfactor? (sequence 1 346))
+;-> (1 6 10 14 22 26 34 36 38 46 58 60 62 74 82 84 86 94 100
+;->  106 118 122 132 134 140 142 146 156 158 166 178 194 196 202
+;->  204 206 214 216 218 220 226 228 254 260 262 274 276 278 298
+;->  302 308 314 326 334 340 346)
+
+
+-----------------
+Substring Sum Set
+-----------------
+
+Introduzione
+------------
+Osserviamo questa lista:
+
+  (3 2 4 1 1 5 1 2).
+
+Ogni elemento rappresenta la lunghezza della sottostringa da sommare.
+
+Analizziamo il primo elemento della lista precedente:
+
+  (3 2 4 1 1 5 1 2)
+  ^
+
+L'elemento al primo indice è 3, quindi ora consideriamo una sottostringa di lunghezza tre con lo stesso indice della posizione iniziale: (3, 2, 4)
+La somma di questi elementi dà come risultato 9, quindi il primo elemento della somma della sottostringa è 9.
+
+Ripetiamo questo procedimento per tutti gli elementi della lista:
+
+  3 -> (3 2 4)
+  2 -> (2 4)
+  4 -> (4 1 1 5)
+  1 -> (1)
+  1 -> (1)
+  5 -> (5 1 2)
+  1 -> (1)
+  2 -> (2)
+
+Come si può notare, il numero 5 rappresenta un caso particolare.
+Quel numero supera la lunghezza della lista:
+
+  (3 2 4 1 1 5 1 2)
+  ^ ^ ^ ^ ^
+
+Ignoreremo tutto ciò che supera la lunghezza della lista, quindi useremo solo (5, 1, 2).
+
+L'ultimo passaggio è sommare tutto:
+
+  (3 2 4) -> 9
+  (2 4) -> 6
+  (4 1 1 5) -> 11
+  (1) -> 1
+  (1) -> 1
+  (5 1 2) -> 8
+  (1) -> 1
+  (2) -> 2
+
+E questo è la lista che deve essere restituita: 
+
+  (9 6 11 1 1 8 1 2)
+
+Compito
+-------
+Data una lista non vuota con numeri interi positivi (diversi da zero), stampare la somma delle sottostringhe. 
+
+Casi di test
+------------
+  (1 2 3 4 5) -> (1 5 12 9 5)
+  (3 3 3 3 3 3 3 3) -> (9 9 9 9 9 9 6 3)
+  (5 1 2 4 1) -> (13 1 6 5 1)
+  (1) -> (1)
+
+Implementazione
+---------------
+
+(define (sub-len lst)
+  (let (out '())
+    (dolist (el lst)
+      (push (apply + (slice lst $idx el)) out -1))))
+
+Proviamo:
+
+(setq L '(3 2 4 1 1 5 1 2))
+(sub-len L)
+;-> (9 6 11 1 1 8 1 2)
+(sub-len '(1 2 3 4 5))
+;-> (1 5 12 9 5)
+(sub-len '(3 3 3 3 3 3 3 3))
+;-> (9 9 9 9 9 9 6 3)
+(sub-len '(5 1 2 4 1))
+;-> (13 1 6 5 1)
+(sub-len '(1))
+;-> (1)
+
+Versione code-golf (51 caratteri):
+
+(define(f l)(map(fn(x)(apply +(slice l $idx x)))l))
+
+(f L)
+;-> (9 6 11 1 1 8 1 2)
+(f '(1 2 3 4 5))
+;-> (1 5 12 9 5)
+(f '(3 3 3 3 3 3 3 3))
+;-> (9 9 9 9 9 9 6 3)
+(f '(5 1 2 4 1))
+;-> (13 1 6 5 1)
+(f '(1))
+;-> (1)
+
+
+----------------------------
+Numero di partizioni binarie
+----------------------------
+
+Ogni intero positivo può essere espresso come somma di potenze di 2 (rappresentazione binaria).
+Tuttavia, non esiste un solo modo per farlo.
+Il metodo standard utilizzato nelle rappresentazioni binarie rappresenta il numero come somma di potenze di 2 uniche.
+Ad esempio, 5 = 2^0 + 2^2.
+Tuttavia, poiché 2^0 = 1, possiamo scrivere qualsiasi numero aggiungendo semplicemente 2^0.
+Ad esempio, 5 = 2^0 + 2^0 + 2^0 + 2^0 + 2^0.
+Quanti modi ci sono per scrivere un dato numero come somma di potenze di 2?
+I modi equivalenti per associatività o commutatività non contano.
+Per esempio, 2^0 + 2^2 e 2^2 + 2^0 sono equivalenti (perché hanno solo un ordine diverso).
+
+Sequenza OEIS A018819:
+Binary partition function: number of partitions of n into powers of 2.
+  1, 1, 2, 2, 4, 4, 6, 6, 10, 10, 14, 14, 20, 20, 26, 26, 36, 36, 46, 46, 60,
+  60, 74, 74, 94, 94, 114, 114, 140, 140, 166, 166, 202, 202, 238, 238, 284,
+  284, 330, 330, 390, 390, 450, 450, 524, 524, 598, 598, 692, 692, 786, 786,
+  900, 900, 1014, 1014, 1154, 1154, 1294, 1294, ...
+
+Formula:
+   a(2m+1) = a(2m),
+   a(2m) = a(2m-1) + a(m).
+Proof: If n is odd there is a part of size 1.
+Removing it gives a partition of n - 1.
+If n is even either there is a part of size 1, whose removal gives a partition of n - 1, or else all parts have even sizes and dividing each part by 2 gives a partition of n/2.
+
+Formula:
+  a(n) = 1, if n = 0,
+  Sum[i=0..floor(n/2)]a(i), if n > 0. 
+
+(define (seq limite)
+  (if (= limite 0) '(1)
+    ;else
+    (let ((out '(1)) (res 0))
+      (for (n 1 limite)
+        (setq res 0)
+        (for (i 0 (/ n 2)) (++ res (out i)))
+        (push res out -1))
+      out)))
+
+(seq 59)
+;-> (1 1 2 2 4 4 6 6 10 10 14 14 20 20 26 26 36 36 46 46 60
+;->  60 74 74 94 94 114 114 140 140 166 166 202 202 238 238 284
+;->  284 330 330 390 390 450 450 524 524 598 598 692 692 786 786
+;->  900 900 1014 1014 1154 1154 1294 1294)
+
+
+------------
+Parole prime
+------------
+
+Una parola è 'prima' se la somma dei valori ASCII dei suoi caratteri è un numero primo.
+Regole:
+1) caratteri ASCII consentiti: da 32 (" ") a 126 ("~").
+2) Il carattere spazio " " (codice 32) vale 0.
+   Il carattere "!" (codice 33) vale 1.
+   ecc.
+
+Esempio:
+  parola = "casa"
+  "c" = 99 - 32  = 67
+  "a" = 97 - 32  = 65
+  "s" = 115 - 32 = 83
+  "a" = 97 - 32  = 65
+  numero = 67 + 65 + 83 + 65 = 280
+  280 non è primo, quindi "casa" non è prima.
+
+Scrivere una funzione (la più corta possibile) per determinare se una parola è prima o no.
+
+(define (prima? str)
+  (let (num (- (apply + (map char (explode str)))
+               (* 32 (length str))))
+  (if (< num 2) nil
+      (= 1 (length (factor num))))))
+
+Proviamo:
+
+(prima? "casa")
+;-> nil
+(prima? "#")
+;-> true
+(prima? "zodiaco")
+;-> true
+(prima? "aeroplano")
+;-> true
+
+Versione code-golf (107 caratteri):
+
+(define(f s)(let(n(-(apply +(map char(explode s)))(* 32(length s))))
+(if(< n 2)nil(= 1(length(factor n))))))
+
+Usiamo il file "60000_parole_italiane.txt" (che si trova nella cartella "data".
+
+(define (list-lines file)
+  (let (lst '())
+    ; apertura file di input
+    (setq file (open file "read"))
+    ; lettura file di input su lista
+    (while (read-line file)
+      (push (current-line) lst -1))
+    ; chiusura file di input
+    (close file)
+    lst))
+
+Caricamento in una lista delle 60000 parole:
+(silent (setq parole (list-lines "60000_parole_italiane.txt")))
+
+Creazione di una lista con tutte le parole prime:
+(setq prime-words (filter prima? parole))
+
+Numero di parole prime nel file "60000_parole_italiane.txt":
+(length prime-words)
+;-> 9422
+
 ============================================================================
 

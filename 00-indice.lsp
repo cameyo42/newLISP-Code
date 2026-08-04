@@ -3654,6 +3654,11 @@ NOTE LIBERE 38
   Numeri in Toki Pona
   Quanto è pari un numero?
   Sequenze di sblocco Android (griglia 3x3)
+  Numero e quadrato con la stessa somma delle cifre
+  Numero di fattori primi dispari = numero di fattori primi pari
+  Substring Sum Set
+  Numero di partizioni binarie
+  Parole prime
 
 PROBLEMI SUI DADI
 =================
