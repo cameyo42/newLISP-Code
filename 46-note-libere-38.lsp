@@ -5311,5 +5311,344 @@ Numero di parole prime nel file "60000_parole_italiane.txt":
 (length prime-words)
 ;-> 9422
 
+
+----------------------
+Partizioni di Goldbach
+----------------------
+
+La congettura di Goldbach afferma che ogni numero pari maggiore di due può essere espresso come somma di due numeri primi.
+Esempi:
+  4 = 2 + 2
+  6 = 3 + 3
+  8 = 5 + 3
+  10 = 5 + 5 = 3 + 7
+Poiché 10 può essere espresso come somma di due numeri primi in due modi, diciamo che la "partizione di Goldbach" di 10 è 2.
+La partizione di Goldbach di un numero è il numero totale di modi distinti di scrivere n = p + q, dove p e q sono numeri primi e p >= q.
+Tecnicamente, il termine "partizione di Goldbach" si usa solo per riferirsi ai numeri pari.
+Tuttavia, poiché anche il numero dispari p + 2 può essere espresso come somma di due numeri primi se p > 2 è primo, estenderemo questo concetto a tutti gli interi positivi.
+Scrivere una funzione che calcola la partizione di Goldbach di un dato intero positivo N.
+
+Sequenza OEIS A061358:
+Number of ways of writing n = p+q with p, q primes and p >= q.
+  0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 0, 1, 1, 2, 1, 2, 0, 2, 1, 2, 1, 3, 0, 3,
+  1, 3, 0, 2, 0, 3, 1, 2, 1, 4, 0, 4, 0, 2, 1, 3, 0, 4, 1, 3, 1, 4, 0, 5, 1,
+  4, 0, 3, 0, 5, 1, 3, 0, 4, 0, 6, 1, 3, 1, 5, 0, 6, 0, 2, 1, 5, 0, 6, 1, 5,
+  1, 5, 0, 7, 0, 4, 1, 5, 0, 8, 1, 5, 0, 4, 0, 9, 1, 4, 0, 5, 0, 7, 0, 3, 1,
+  6, 0, 8, 1, 5, 1, ...
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+; Funzione sum2 (elementi usati più volte in coppie diverse)
+(define (sum2 x lst)
+  (let ((out '()) (len (length lst)))
+    (for (i 0 (- len 2))
+      (for (j 0 (- len 1))
+      ;(for (j (+ i 1) (- len 1))
+          ;(print (lst i) { } (lst j)) (read-line)
+          (when (= x (+ (lst i) (lst j)))
+              (setq cur (sort (list (lst i) (lst j))))
+              (if-not (find cur out) (push cur out -1)))))
+    out))
+
+(define (gold num)
+  (if (< num 2) 
+      '()
+      (let (primi (primes-to num))
+        (sum2 num primi))))
+
+Proviamo:
+
+(gold 10)
+;-> ((3 7) (5 5))
+(gold 90)
+;-> ((7 83) (11 79) (17 73) (19 71) (23 67) (29 61) (31 59) (37 53) (43 47))
+
+(map length (map gold (sequence 0 105)))
+;-> (0 0 0 0 1 1 1 1 1 1 2 0 1 1 2 1 2 0 2 1 2 1 3 0 3
+;->  1 3 0 2 0 3 1 2 1 4 0 4 0 2 1 3 0 4 1 3 1 4 0 5 1
+;->  4 0 3 0 5 1 3 0 4 0 6 1 3 1 5 0 6 0 2 1 5 0 6 1 5
+;->  1 5 0 7 0 4 1 5 0 8 1 5 0 4 0 9 1 4 0 5 0 7 0 3 1
+;->  6 0 8 1 5 1)
+
+
+--------------------------------
+Partizioni ordinate di una lista
+--------------------------------
+
+Scrivere una funzione che genera tutti i raggruppamenti di una lista di elementi in base ai gruppi definiti in un'altra lista.
+Gli elementi della lista sono tutti diversi.
+
+Esempio:
+  lista di elementi: (A B C D)
+  lista dei gruppi: (1 2 1)
+
+(groups '(1 2 1) '(A B C D))
+;-> (((A) (B C) (D)) 
+;->  ((A) (B D) (C))
+;->  ((A) (C D) (B))
+;->  ((B) (A C) (D))
+;->  ((B) (A D) (C))
+;->  ((B) (C D) (A))
+;->  ((C) (A B) (D))
+;->  ((C) (A D) (B))
+;->  ((C) (B D) (A))
+;->  ((D) (A B) (C))
+;->  ((D) (A C) (B))
+;->  ((D) (B C) (A)))
+
+Il problema può essere visto come la generazione di tutte le 'partizioni ordinate' di una lista, con dimensioni dei gruppi fissate.
+
+gruppi = (1 2 1) significa:
+- primo gruppo: 1 elemento
+- secondo gruppo: 2 elementi
+- terzo gruppo: 1 elemento
+La somma deve essere uguale al numero degli elementi.
+
+Algoritmo ricorsivo
+-------------------
+Supponiamo di avere ancora da distribuire gli elementi 'E' e le dimensioni dei gruppi 'G'.
+1) Prendere la prima dimensione 'k'.
+2) Generare tutte le combinazioni di 'k' elementi prese da 'E'.
+3) Ogni combinazione costituisce il primo gruppo.
+4) Togliere tali elementi dalla lista.
+5) Ripetere ricorsivamente con le dimensioni rimanenti.
+6) Anteporre il gruppo corrente ad ogni soluzione ricorsiva.
+
+In pratica:
+groups((1 2 1), (A B C D))
+    scegli 1 elemento
+        (A)
+            rimane (B C D)
+            groups((2 1), (B C D))
+        (B)
+            rimane (A C D)
+            ...
+        (C)
+            ...
+        (D)
+            ...
+
+Pseudocodice
+------------
+groups(sizes, items)
+    se sizes è vuota
+        restituisci una lista contenente la lista vuota
+    k = primo elemento di sizes
+    risultato = []
+    per ogni combinazione C di k elementi di items
+        resto = items - C
+        per ogni soluzione S di groups(resto_sizes, resto)
+            aggiungi (C + S) al risultato
+    restituisci risultato
+
+Complessità
+-----------
+Se le dimensioni dei gruppi sono g1,g2,...,gm con g1+g2+...+gm=n il numero delle soluzioni è
+
+  n! / (g1! g2! ... gm!)
+
+poiché i gruppi sono ordinati.
+
+Implementazione
+---------------
+Servono due funzioni ausiliarie:
+1. tutte le combinazioni di 'k' elementi
+2. la lista rimanente dopo aver tolto una combinazione.
+E poi la funzione ricorsiva.
+
+(groups sizes items)
+    se sizes è vuota
+        -> (())
+    k = primo sizes
+    per ogni comb in (combinations items k)
+        rest = remove-items items comb
+        per ogni sol in (groups (resto sizes) rest)
+            aggiungi (cons comb sol)
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+La funzione 'remove-items' rimuove una sola occorrenza per ogni elemento presente in items.
+È diversa da 'difference', che considera gli elementi come insiemi e quindi non gestisce correttamente i duplicati.
+
+(define (remove-items lst items)
+  ; Rimuove da lst gli elementi presenti in items.
+  ; A differenza di difference, ogni elemento viene rimosso
+  ; una sola volta.
+  ; Esempio:
+  ;   lst   = (A A B C)
+  ;   items = (A B)
+  ; risultato:
+  ;   (A C)
+  ; perché viene eliminata una sola A e una sola B.
+  ; La funzione è utile in groups per eliminare gli elementi
+  ; già assegnati ad un gruppo mantenendo correttamente
+  ; l'indipendenza degli elementi.
+  (let (result lst)
+    ; Scorriamo tutti gli elementi che devono essere rimossi
+    (dolist (item items)
+      ; Cerchiamo la prima posizione dell'elemento nella lista
+      ; find restituisce l'indice della prima occorrenza
+      ; oppure nil se l'elemento non è presente.
+      (let (pos (find item result))
+        ; Se l'elemento è presente, eliminiamo solo quella
+        ; occorrenza.
+        ; pop con indice elimina l'elemento in quella posizione
+        ; senza modificare le altre occorrenze uguali.
+        (if pos
+            (pop result pos))))
+    ; Restituiamo la lista privata degli elementi richiesti
+    result))
+
+(define (groups sizes items)
+  ; Genera tutti i raggruppamenti possibili degli elementi di items.
+  ; sizes contiene la dimensione dei gruppi da creare.
+  ; Esempio:
+  ;   sizes = (1 2 1)
+  ;   items = (A B C D)
+  ; significa creare:
+  ;   - un gruppo con 1 elemento
+  ;   - un gruppo con 2 elementi
+  ;   - un gruppo con 1 elemento
+  ; Il risultato contiene tutte le possibili suddivisioni:
+  ;   (((A) (B C) (D))
+  ;    ((A) (B D) (C))
+  ;    ...)
+  ; Gli elementi di items devono essere univoci.
+  ; Se la lista contiene duplicati, è consigliabile sostituirli
+  ; prima con indici univoci e riconvertire il risultato alla fine.
+  ; Esempio:
+  ;   (A A B) -> (0 1 2)
+  ; La funzione comb genera tutte le combinazioni possibili
+  ; per costruire il gruppo corrente.
+  ; remove-items elimina gli elementi già utilizzati,
+  ; lasciando disponibili solo quelli per i gruppi successivi.
+  (if (!= (apply + sizes) (length items))
+      ; La somma delle dimensioni richieste deve essere uguale
+      ; al numero degli elementi disponibili.
+      ; Se non coincide non esistono soluzioni.
+      nil
+      (if (null? sizes)
+          ; Caso base della ricorsione:
+          ; abbiamo creato tutti i gruppi richiesti.
+          ; Restituiamo una soluzione vuota.
+          ; Questa rappresenta una suddivisione valida con zero gruppi
+          ; e permette ai livelli precedenti della ricorsione
+          ; di aggiungere i gruppi già creati.
+          '(())
+          (let (out '())
+            ; Generiamo tutte le possibili scelte per il primo gruppo.
+            ; La dimensione del gruppo corrente è data dal primo
+            ; elemento di sizes.
+            (dolist (c (comb (first sizes) items))
+              ; c è un possibile primo gruppo.
+              ; Rimuoviamo gli elementi utilizzati per ottenere
+              ; la lista degli elementi ancora disponibili.
+              (dolist (g (groups (rest sizes)
+                                 (remove-items items c)))
+                ; g contiene tutti i gruppi generati ricorsivamente
+                ; per le dimensioni rimanenti.
+                ; Aggiungiamo il gruppo corrente davanti alla soluzione
+                ; parziale ottenuta.
+                ; push con indice -1 aggiunge in fondo alla lista
+                ; mantenendo l'ordine di generazione.
+                (push (cons c g) out -1)))
+            ; Restituisce tutti i raggruppamenti trovati.
+            out))))
+
+Proviamo:
+
+(groups '(1 2 1) '(A B C D))
+;-> (((A) (B C) (D)) 
+;->  ((A) (B D) (C))
+;->  ((A) (C D) (B))
+;->  ((B) (A C) (D))
+;->  ((B) (A D) (C))
+;->  ((B) (C D) (A))
+;->  ((C) (A B) (D))
+;->  ((C) (A D) (B))
+;->  ((C) (B D) (A))
+;->  ((D) (A B) (C))
+;->  ((D) (A C) (B))
+;->  ((D) (B C) (A)))
+
+Gestione degli elementi uguali
+------------------------------
+Per gestire gli elementi uguali convertiamo la lista in codici univoci, applichiamo 'groups' e poi riconvertiamo il risultato con gli elementi della lista.
+In questo modo 'groups' rimane completamente indipendente dal contenuto degli elementi e lavora solo su elementi distinti.
+La gestione dei duplicati diventa un semplice pre/post-processing.
+
+Esempio:
+(setq lst '(A A B C B A))
+
+si costruiscono due strutture:
+  indici -> (0 1 2 3 4 5)
+  valori -> #(A A B C B A)
+
+'groups' viene eseguita sugli indici:
+(groups '(2 2 2) '(0 1 2 3 4 5))
+
+e alla fine ogni indice viene sostituito con il valore corrispondente:
+(0 4) -> (A B)
+(1 5) -> (A A)
+(2 3) -> (B C)
+
+La conversione finale è la seguente:
+
+(define (decode-group sol values)
+  (map (fn (grp)
+         (map (fn (idx) (values idx)) grp))
+       sol))
+
+oppure, per tutte le soluzioni:
+
+(define (decode-groups sols values)
+  (map (fn (sol)
+         (map (fn (grp)
+                (map (fn (idx) (values idx)) grp))
+              sol))
+       sols))
+
+dove 'values' può essere un vettore o una lista.
+
+Esempio:
+
+(setq values '(A A B))
+(setq idx (sequence 0 (- (length values) 1)))
+;-> (0 1 2)
+
+(setq sol (groups '(2 1) idx))
+;-> (((0 1) (2))
+;->  ((0 2) (1))
+;->  ((1 2) (0)))
+
+Poi:
+(decode-groups sol values)
+;-> (((A A) (B))
+;->  ((A B) (A))
+;->  ((A B) (A)))
+
+Quindi i passi sono:
+1) lista originale -> 
+2) -> sostituzione con indici univoci -> 
+3) -> 'groups' -> 
+4) -> riconversione degli indici nei valori
+
 ============================================================================
 

@@ -3659,6 +3659,8 @@ NOTE LIBERE 38
   Substring Sum Set
   Numero di partizioni binarie
   Parole prime
+  Partizioni di Goldbach
+  Partizioni ordinate di una lista
 
 PROBLEMI SUI DADI
 =================

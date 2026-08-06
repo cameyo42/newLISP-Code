@@ -6116,7 +6116,7 @@ Algoritmo (brute-force)
 -----------------------
 Uso di due/tre cicli innestati per generare e controllare tutte le triple possibili.
 
-; Funzione sum2 (elementi usati più volte in terne diverse)
+; Funzione sum2 (elementi usati più volte in coppie diverse)
 (define (sum2 x lst)
   (let ((out '()) (len (length lst)))
     (for (i 0 (- len 2))
@@ -6130,6 +6130,11 @@ Uso di due/tre cicli innestati per generare e controllare tutte le triple possib
 (setq a '(12 3 6 1 6 9 0 -3))
 (sum2 9 a)
 ;-> ((-3 12) (3 6) (0 9))
+
+Nota:
+se al posto di: (for (j (+ i 1) (- len 1))
+usiamo:         (for (j 0 (- len 1))
+Consideriamo anche le coppie formate dallo stesso numero.
 
 ; Funzione sum3 (elementi usati più volte in terne diverse)
 (define (sum3 x lst)
