@@ -5650,5 +5650,99 @@ Quindi i passi sono:
 3) -> 'groups' -> 
 4) -> riconversione degli indici nei valori
 
+
+----------------------
+Inventare una sequenza
+----------------------
+
+Per inventare una sequenza occorre solo un pò di fantasia matematica.
+Il problema è che molto spesso la nostra 'nuova' sequenza si trova già in OEIS (https://oeis.org/).
+
+Definiamo una sequenza elencando le operazioni da svolgere:
+
+1) Prendere N numeri naturali (N = 5): 1, 2, 3, 4, 5,...
+2) Convertirli in base 2:  1, 10, 11, 100, 101,...
+3) Concatenare i numeri precedenti in una stringa: "11011100101..."
+4) Prendere la sottostringa (da sinistra) che contiene N bit a 1:  "110111"
+5) Convertire la sottostringa in decimale:  "110111" --> 55
+
+; Funzione che prende una stringa binaria (1 e 0) ed restiruisce la prima sottostringa (da sinistra) che ha N bit a 1
+(define (N1 str N)
+  (let ((out "") (ones 0))
+    (for (i 0 (- (length str) 1) 1 (= ones N))
+      (if (= (str i) "1") (++ ones))
+      (if (= ones N)
+          (setq out (slice str 0 (+ i 1)))))
+    out))
+
+; Funzione che calcola il valore della sequenza per un dato numero
+(define (seq num)
+  (int (N1 (join (map bits (sequence 1 num))) num) 0 2))
+
+Proviamo:
+
+(seq 5)
+;-> 55
+(seq 10)
+;-> 28253
+(map seq (sequence 1 37))
+;-> (1 3 13 27 55 441 1765 3531 7063 28253 56507 113015 226031 3616497
+;->  28931977 57863955 231455821 925823285 3703293141 7406586283 14813172567
+;->  29626345135 237010761081 474021522163 1896086088653 3792172177307
+;->  7584344354615 15168688709231 60674754836925 121349509673851
+;->  242699019347703 485398038695407 970796077390815 31065474476506081
+;->  497047591624097297 994095183248194595 7952761465985556761)
+
+Per N > 37 occorrono i big-integer.
+
+Questa sequenza non si trova in OEIS (agosto 2026).
+
+
+--------------------------------
+Operatori di confronto per tempi
+--------------------------------
+
+Dati due tempi come liste T1 = (h1 m1 s1) e T2 = (h2 m2 s2) determinare se:
+
+1) T1 > T2
+2) T1 < T2
+3) T1 = T2
+4) T1 >= T2
+5) T1 <= T2
+
+1) T1 > T2
+Un metodo semplice è confrontare le componenti in ordine di importanza:
+- confrontare le ore;
+- se uguali, confrontare i minuti;
+- se uguali, confrontare i secondi.
+
+(define (time> t1 t2)
+  (or (> (t1 0) (t2 0))
+      (and (= (t1 0) (t2 0))
+           (or (> (t1 1) (t2 1))
+               (and (= (t1 1) (t2 1))
+                    (> (t1 2) (t2 2)))))))
+
+Oppure possiamo convertire i tempi in secondi e poi confrontarli.
+Che è molto più comodo per definire anche tutti gli altri operatori.
+
+(define (time-sec t)
+  (+ (* (t 0) 3600) (* (t 1) 60) (t 2)))
+
+(define (time> t1 t2)
+  (> (time-sec t1) (time-sec t2)))
+
+(define (time< t1 t2)
+  (< (time-sec t1) (time-sec t2)))
+
+(define (time= t1 t2)
+  (= (time-sec t1) (time-sec t2)))
+
+(define (time>= t1 t2)
+  (>= (time-sec t1) (time-sec t2)))
+
+(define (time<= t1 t2)
+  (<= (time-sec t1) (time-sec t2)))
+
 ============================================================================
 

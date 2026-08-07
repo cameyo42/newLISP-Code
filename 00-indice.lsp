@@ -3661,6 +3661,8 @@ NOTE LIBERE 38
   Parole prime
   Partizioni di Goldbach
   Partizioni ordinate di una lista
+  Inventare una sequenza
+  Operatori di confronto per tempi
 
 PROBLEMI SUI DADI
 =================
