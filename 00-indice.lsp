@@ -3667,6 +3667,7 @@ NOTE LIBERE 38
   Nessun vicino uguale
   Sequenza più lunga di numeri consecutivi
   Polka-dot array of natural number
+  Parole palindrome in codice Morse
 
 PROBLEMI SUI DADI
 =================

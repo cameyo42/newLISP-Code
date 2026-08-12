@@ -5288,7 +5288,7 @@ Versione code-golf (107 caratteri):
 (define(f s)(let(n(-(apply +(map char(explode s)))(* 32(length s))))
 (if(< n 2)nil(= 1(length(factor n))))))
 
-Usiamo il file "60000_parole_italiane.txt" (che si trova nella cartella "data".
+Usiamo il file "60000_parole_italiane.txt" (si trova nella cartella "data").
 
 (define (list-lines file)
   (let (lst '())
@@ -6036,8 +6036,8 @@ T(n,k) = 2*n + (n + k - 1)*(2n + 2k - 1), k>=1, n>=1.
         (push (func i j) out)))
     (sort out)))
 
-Il punto importante è che non dobbiamo scegliere arbitrariamente n e k** e poi fare sort.
-I valori sono già ordinati per **antidiagonali**, perché T(n,k) cresce passando da un'antidiagonale alla successiva.
+Il punto importante è che non dobbiamo scegliere arbitrariamente n e k e poi fare sort.
+I valori sono già ordinati per antidiagonali, perché T(n,k) cresce passando da un'antidiagonale alla successiva.
 
 Per esempio per A185868:
 
@@ -6203,6 +6203,79 @@ e analogamente:
 ;-> 76
 (polka-term T4 20)
 ;-> 88
+
+
+---------------------------------
+Parole palindrome in codice Morse
+---------------------------------
+
+Data una parola formata solo da caratteri ASCII maiuscoli determinare se è palindroma quando i suoi caratteri sono convertiti (e uniti) in caratteri Morse.
+
+Codice Morse
+------------
+  A: .-
+  B: -...
+  C: -.-.
+  D: -..
+  E: .
+  F: ..-.
+  G: --.
+  H: ....
+  I: ..
+  J: .---
+  K: -.-
+  L: .-..
+  M: --
+  N: -.
+  O: ---
+  P: .--.
+  Q: --.-
+  R: .-.
+  S: ...
+  T: -
+  U: ..-
+  V: ...-
+  W: .--
+  X: -..-
+  Y: -.--
+  Z: --..
+
+(setq morse '(("A" ".-")  ("B" "-...") ("C" "-.-.") ("D" "-..")  ("E" ".")
+("F" "..-.") ("G" "--.")  ("H" "....") ("I" "..")   ("J" ".---") ("K" "-.-")
+("L" ".-..") ("M" "--")   ("N" "-.")   ("O" "---")  ("P" ".--.") ("Q" "--.-")
+("R" ".-.")  ("S" "...")  ("T" "-")    ("U" "..-")  ("V" "...-") ("W" ".--")
+("X" "-..-") ("Y" "-.--") ("Z" "--..")))
+
+(define (pali-morse str)
+  (let (m "")
+    (dolist (el (explode str))
+      (extend m (lookup el morse)))
+    (println str { } m)
+    (= m (reverse (copy m)))))
+
+Proviamo:
+
+(pali-morse "ARTE")
+;-> .-.-.-.
+;-> true
+(pali-morse "INFINITI")
+;-> ..-...-...-...-..
+;-> true
+(pali-morse "OGGETTO")
+;-> -----.--..-----
+;-> nil
+
+Tre parole palindrome sia in caratteri ASCII che in codice Morse:
+
+(pali-morse "OSSO")
+;-> ---......---
+;-> true
+(pali-morse "OTTO")
+;-> --------
+;-> true
+(pali-morse "ESSE")
+;-> ........
+;-> true
 
 ============================================================================
 
