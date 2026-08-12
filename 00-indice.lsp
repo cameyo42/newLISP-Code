@@ -3663,6 +3663,10 @@ NOTE LIBERE 38
   Partizioni ordinate di una lista
   Inventare una sequenza
   Operatori di confronto per tempi
+  Numeri naturali divisibili
+  Nessun vicino uguale
+  Sequenza più lunga di numeri consecutivi
+  Polka-dot array of natural number
 
 PROBLEMI SUI DADI
 =================
@@ -3710,7 +3714,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (413 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (419 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

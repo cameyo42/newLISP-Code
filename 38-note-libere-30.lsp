@@ -7565,6 +7565,54 @@ Esempio:
 ;->        Differenza: 0.09090909090909083
 ;-> ERRATO
 
+Il problema delle due torri, dei due uccelli e della fontana
+------------------------------------------------------------
+Due torri, una alta 30 passi e l'altra 40 passi, distano fra loro 50 passi.
+Fra esse si trova una fontana.
+Due uccelli partono contemporaneamente dalla sommità delle due torri e volando con la stessa velocità raggiungono il centro della fontana nello stesso istante.
+Qual è la distanza della fontana da ciascuna torre?
+
+La seguente figura illustra il problema (ma le proporzioni non sono precise):
+
+    U1
+    |\
+    | \           U2
+    |  \d1       /|
+    |   \       / |
+ T1 |    \   d2/  | T2
+    |     \   /   |
+    |      \ /    |
+    +-------F-----+
+        x      y 
+
+Le distanze percorse dagli uccelli, d1 e d2, sono uguali:
+
+  d1 = d2
+
+Inoltre risulta: 
+
+  x + y = 50
+
+d1 è l'ipotenusa del triangolo retto U1-T1-x:
+  
+  d1^2 = 40^2 + x^2
+  
+d2 è l'ipotenusa del triangolo retto U2-T2-y
+  
+  d2^2 = 30^2 + y^2
+
+Quindi:
+
+  40^2 + x^2 = 30^2 + y^2
+
+Sostituiamo la x con: x = 50 - y
+
+  40^2 + (50 - y)^2 = 30^2 + y^2 
+  40^2 + 50^2 - 100y + y^2 = 30^2 + y^2
+  y = (40^2 + 50^2 - 30^2)/100 = 32
+  x = 50 - 32 = 18
+
+
 
 ---------
 Countdown

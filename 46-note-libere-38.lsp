@@ -5744,5 +5744,465 @@ Che è molto più comodo per definire anche tutti gli altri operatori.
 (define (time<= t1 t2)
   (<= (time-sec t1) (time-sec t2)))
 
+
+--------------------------
+Numeri naturali divisibili
+--------------------------
+
+Scrivere una funzione che stampa i numeri naturali da 1 a N con le seguenti regole:
+1) I numeri devono essere stampati di seguito separati da uno spazio in una linea unica
+2) se il numero è divisibile per 2 racchiudere il numero con () --> (num)
+3) se il numero è divisibile per 3 racchiudere il numero con [] --> [num]
+4) se il numero è divisibile per 5 racchiudere il numero con {} --> {num}
+5) se il numero è divisibile SOLO per 2, 3, 5 e loro prodotti, allora racchiudere il numero SOLO con !! --> !num!
+
+Esempi:
+  N = 2  --> (2)
+  N = 10 --> {(10)}
+  N = 60 --> !60!
+  N = 210 --> {[(210)]}
+
+(define (run N)
+  (print 1 " ")
+  (for (num 2 N)
+    (setq s (string num))
+    (if (zero? (% num 2)) (setq s (string "(" s ")")))
+    (if (zero? (% num 3)) (setq s (string "[" s "]")))
+    (if (zero? (% num 5)) (setq s (string "{" s "}")))
+    (if (= (unique (factor num)) '(2 3 5))
+        (print "!" num "! ")
+        (print s " ")))
+  (println) '>)
+
+(run 210)
+;-> 1 (2) [3] (4) {5} [(6)] 7 (8) [9] {(10)} 11 [(12)] 13 (14)
+;-> {[15]} (16) 17 [(18)] 19 {(20)} [21] (22) 23 [(24)] {25}
+;-> ...
+;-> {(190)} 191 [(192)] 193 (194) {[195]} (196) 197 [(198)] 199
+;-> {(200)} [201] (202) 203 [(204)] {205} (206) [207] (208) 209 {[(210)]
+
+
+--------------------
+Nessun vicino uguale
+--------------------
+
+Abbiamo una lista di numeri interi.
+Il problema è quello di riordinare i numeri della lista in modo che non ci siano due numeri uguali adiacenti.
+Esempio:
+  lista = (1 3 4 4 8 2 3)
+  possibile ordinamento = (1 3 4 8 4 2 3) (i due 4 non sono piu' vicini)
+
+Ragioniamo su un algoritmo.
+Supponiamo che:
+
+  N = numero totale di elementi
+  M = numero massimo di occorrenze dello stesso valore
+
+Per poter separare gli M elementi uguali servono almeno M-1 elementi diversi che facciano da separatori:
+
+  X _ X _ X ... X _ X
+
+Quindi deve essere:
+
+  M <= (N - M) + 1  -->  M <= (N + 1) / 2  -->  2*M <= N + 1
+
+Esempi:
+  (1 1 1 2 2 3)
+  N = 6, M = 3
+  2*M = 6 <= 7
+  quindi è possibile, ad esempio: (1 2 1 3 1 2)
+
+  (1 1 1 1 2 3)
+  N = 6, M = 4
+  2*M = 8 > 7
+  quindi è impossibile.
+
+Casi limite
+-----------
+Se N è dispari, la frequenza massima può essere esattamente (N+1)/2:
+Se N è pari, invece, la frequenza massima consentita è N/2:
+
+Quindi la condizione di possibilità è anche sufficiente:
+  
+  2 * frequenza_massima <= N + 1
+
+Questo ci permette di separare il problema in due parti:
+1) verificare se l'ordinamento è possibile;
+2) trovare effettivamente un ordinamento valido.
+Per il secondo punto, una strategia naturale è partire dal valore con più occorrenze e distribuirlo nelle posizioni alternate, riempiendo poi gli spazi con gli altri valori.
+
+; Funzione che riordina una lista di interi
+; in modo che non ci siano elementi uguali adiacenti.
+; Restituisce nil se il riordinamento è impossibile.
+(define (no-adjacent lst)
+  (let ((n (length lst))
+        (freq '())
+        (max-freq 0)
+        (result '())
+        (items '())
+        (pos 0))
+    ; Calcola la frequenza di ogni valore.
+    (dolist (x lst)
+      (if (lookup x freq)
+          (setf (lookup x freq) (+ (lookup x freq) 1))
+          (push (list x 1) freq -1)))
+    ; Trova la frequenza massima.
+    (dolist (p freq)
+      (if (> (last p) max-freq)
+          (setq max-freq (last p))))
+    ; Controlla se il problema ha soluzione.
+    (if (> (* 2 max-freq) (+ n 1))
+        nil
+        (begin
+          ; Ordina le coppie per frequenza decrescente.
+          (setq freq
+            (sort freq (fn (a b) (> (last a) (last b)))))
+          ; Espande le coppie nella lista degli elementi.
+          (dolist (p freq)
+            (dotimes (i (last p))
+              (push (first p) items -1)))
+          ; Inserisce gli elementi nelle posizioni alternate:
+          ; 0, 2, 4, ... poi 1, 3, 5, ...
+          (setq result (dup nil n))
+          (dolist (x items)
+            (while (and (< pos n) (result pos))
+              (setq pos (+ pos 2)))
+            (if (>= pos n)
+                (setq pos 1))
+            (setf (result pos) x)
+            (setq pos (+ pos 2)))
+          result))))
+
+Proviamo:
+
+(no-adjacent '(1 4 4 4 2 3))
+;-> (4 3 4 2 4 1)
+(no-adjacent '(1 4 2 2 3 6 4 8 2))
+;-> (2 8 2 6 2 3 4 1 4)
+(no-adjacent '())
+;-> ()
+(no-adjacent '(1 2))
+;-> (2 1)
+(no-adjacent '(1 1))
+;-> nil
+(no-adjacent '(5))
+;-> (5)
+
+Funzione che verifica se una lista può essere riordinata o meno.
+Versione code-golf (65 caratteri):
+(define(f l)(<=(* 2(apply max(count(unique l)l)))(+(length l)1)))
+
+(f '(1 4 4 4 2 3))
+;-> true
+(f '(1 4 4 4 4 3 1 4 2 4))
+;-> nil
+(f '(1 4 2 2 3 6 4 8 2))
+;-> true
+(f '(1))
+;-> true
+
+
+----------------------------------------
+Sequenza più lunga di numeri consecutivi
+----------------------------------------
+
+Data una lista di numeri interi, scrivere una funzione che restituisce la sequenza più lunga di numeri consecutivi.
+
+Esempio:               _ _ _
+  lista = (2 4 2 6 7 5 2 3 4 6 7 9)
+  sequenza = 2 3 4
+
+(define (seq lst)
+  (let ( (max-seq '()) ; sequenza massima
+         (cur-seq (list (lst 0))) ) ; sequenza corrente = primo elemento
+    ; ciclo per ogni elemento della lista (partendo dal secondo)
+    (dolist (el (rest lst))
+      (if (= (- el 1) (last cur-seq))
+          ; il numero corrente è consecutivo al precedente
+          (push el cur-seq -1)
+          ; il numero corrente NON è consecutivo al precedente
+          (begin
+            ; controllo tra sequenza corrente e sequenza massima
+            (if (> (length cur-seq) (length max-seq))
+                (setq max-seq cur-seq))
+          (setq cur-seq (list el)))))
+    ; controllo tra ultima sequenza e sequenza massima
+    (if (> (length cur-seq) (length max-seq))
+        (setq max-seq cur-seq))
+    max-seq))
+
+Proviamo:
+
+(seq '(2 4 2 6 7 5 2 3 4 6 7 9))
+;-> (2 3 4)
+(seq '(2 4 5 6 9))
+;-> (4 5 6)
+(seq '(2 7 8 1 2 3))
+;-> (1 2 3)
+
+Nel caso di più sequenze della stessa lunghezza, restituisce la prima.
+
+
+---------------------------------
+Polka-dot array of natural number
+---------------------------------
+
+Supponiamo di selezionare, a partire da una matrice triangolare infinita di numeri interi positivi, un numero ogni due su ogni seconda riga, come mostrato di seguito:
+
+               1
+               -
+             2   3
+           4   5   6
+           -       -
+         7   8   9  10
+      11  12  13  14  15
+      --      --      --
+    16  17  18  19  20  21
+  22  23  24  25  26  27  28
+  --      --      --      --
+
+Sequenza OEIS A185868:
+(Odd,odd)-polka dot array in the natural number array A000027, by antidiagonals.
+  1, 4, 6, 11, 13, 15, 22, 24, 26, 28, 37, 39, 41, 43, 45, 56, 58, 60, 62,
+  64, 66, 79, 81, 83, 85, 87, 89, 91, 106, 108, 110, 112, 114, 116, 118,
+  120, 137, 139, 141, 143, 145, 147, 149, 151, 153, 172, 174, 176, 178,
+  180, 182, 184, 186, 188, 190, 211, 213, 215, 217, 219, 221, 223, 225,
+  227, 229, 231, 254, 256, 258, 260, 262, 264, 266, 268, 270, 272, 274,
+  276, 301, 303, 305, 307, 309, 311, 313, 315, 317, 319, 321, 323, 325,
+  352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374, 376, 378, ...
+
+T(n, k) =  2*n - 1 + (n + k - 2)*(2*n + 2*k - 3), k>=1, n>=1.
+
+(define (T1 n k)
+  (+ (* 2 n) -1 (* (+ n k -2) (+ (* 2 n) (* 2 k) -3))))
+
+(setq out '())
+(for (n 1 10)
+(for (k 1 15)
+  (push (T4 n k) out)))
+(sort out)
+
+Sequenza OEIS A185869:
+(Odd,even)-polka dot array in the natural number array A000027, by antidiagonals.
+  2, 7, 9, 16, 18, 20, 29, 31, 33, 35, 46, 48, 50, 52, 54, 67, 69, 71, 73,
+  75, 77, 92, 94, 96, 98, 100, 102, 104, 121, 123, 125, 127, 129, 131,
+  133, 135, 154, 156, 158, 160, 162, 164, 166, 168, 170, 191, 193, 195,
+  197, 199, 201, 203, 205, 207, 209, 232, 234, 236, 238, 240, 242, 244,
+  246, 248, 250, 252, 277, 279, 281, 283, 285, 287, 289, 291, 293, 295,
+  297, 299, 326, 328, 330, 332, 334, 336, 338, 340, 342, 344, 346, 348,
+  350, 379, 381, 383, 385, 387, 389, 391, 393, 395, 397, 399, 401, 403,
+  405, ...
+
+T(n,k) = 2n - 1 + (n + k - 1) * (2n + 2k - 3), k>=1, n>=1.
+
+(define (T2 n k)
+  (+ (* 2 n) -1 (* (+ n k -1) (+ (* 2 n) (* 2 k) -3))))
+
+Sequenza OEIS A185870:
+(Even,odd)-polka dot array in the natural number array A000027, by antidiagonals.
+  3, 8, 10, 17, 19, 21, 30, 32, 34, 36, 47, 49, 51, 53, 55, 68, 70, 72, 74,
+  76, 78, 93, 95, 97, 99, 101, 103, 105, 122, 124, 126, 128, 130, 132, 134,
+  136, 155, 157, 159, 161, 163, 165, 167, 169, 171, 192, 194, 196, 198, 200,
+  202, 204, 206, 208, 210, 233, 235, 237, 239, 241, 243, 245, 247, 249, 251,
+  253, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296, 298, 300, 327, 329,
+  331, 333, 335, 337, 339, 341, 343, 345, 347, 349, 351, 380, 382, 384, 386,
+  388, 390, 392, 394, 396, 398, 400, 402, 404, 406, ...
+
+T(n,k) = 2*n + (n + k - 1)*(2n + 2k - 3), k>=1, n>=1.
+
+(define (T3 n k)
+  (+ (* 2 n) (* (+ n k -1) (+ (* 2 n) (* 2 k) -3))))
+
+Sequenza OEIS A185871:
+(Even,even)-polka dot array in the natural number array A000027, by antidiagonals.
+  5, 12, 14, 23, 25, 27, 38, 40, 42, 44, 57, 59, 61, 63, 65, 80, 82, 84, 86,
+  88, 90, 107, 109, 111, 113, 115, 117, 119, 138, 140, 142, 144, 146, 148,
+  150, 152, 173, 175, 177, 179, 181, 183, 185, 187, 189, 212, 214, 216,
+  218, 220, 222, 224, 226, 228, 230, 255, 257, 259, 261, 263, 265, 267,
+  269, 271, 273, 275, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320,
+  322, 324, 353, 355, 357, 359, 361, 363, 365, 367, 369, 371, 373, 375,
+  377, 408, 410, 412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432,
+  434, ...
+
+T(n,k) = 2*n + (n + k - 1)*(2n + 2k - 1), k>=1, n>=1.
+
+(define (T4 n k)
+  (+ (* 2 n) (* (+ n k -1) (+ (* 2 n) (* 2 k) -1))))
+
+(define (polka func n k)
+  (let (out '())
+    (for (i 1 n)
+      (for (j 1 k)
+        (push (func i j) out)))
+    (sort out)))
+
+Il punto importante è che non dobbiamo scegliere arbitrariamente n e k** e poi fare sort.
+I valori sono già ordinati per **antidiagonali**, perché T(n,k) cresce passando da un'antidiagonale alla successiva.
+
+Per esempio per A185868:
+
+        k   1   2   3   4
+          +---+---+---+---+
+  n = 1   | 1 | 4 |11 |22 | ...
+  n = 2   | 6 |13 |24 |37 | ...
+  n = 3   |15 |26 |41 |56 | ...
+  n = 4   |28 |43 |60 |...
+
+La sequenza OEIS viene letta per antidiagonali:
+  n+k=2     (1,1)              -> 1
+  n+k=3     (1,2) (2,1)        -> 4  6
+  n+k=4     (1,3) (2,2) (3,1)  -> 11 13 15
+  n+k=5     (1,4) (2,3) ...    -> 22 24 26 28
+  ...
+Quindi per ogni valore s = n + k, bisogna prendere:
+  n = 1 ... s-1
+  k = s - n
+
+(define (polka-seq func N)
+  (let (out '() s 2)
+    (while (< (length out) N)
+      (for (n 1 (- s 1))
+        (let (k (- s n))
+          (push (func n k) out -1)))
+      (++ s))
+    ; l'algoritmo aggiunge tutta l'antidiagonale, quindi può superare N
+    ; quindi operiamo uno slice dell'output
+    (slice out 0 N)))
+
+(polka-seq T1 20)
+;-> (1 4 6 11 13 15 22 24 26 28 37 39 41 43 45 56 58 60 62 64)
+
+Quanti valori ci sono dopo una certa antidiagonale?
+
+L'antidiagonale s = n + k contiene s - 1 elementi.
+Quindi fino a s abbiamo:
+  1 + 2 + 3 + ... + (s-1)
+elementi, cioè:
+  s * (s - 1) / 2
+Ad esempio:
+  s = 2  -> 1 termine
+  s = 3  -> 3 termini
+  s = 4  -> 6 termini
+  s = 5  -> 10 termini
+  s = 6  -> 15 termini
+  s = 7  -> 21 termini
+Questo permette anche di sapere esattamente quale antidiagonale contiene il termine N.
+
+Per esempio il termine 20 si trova nella diagonale:
+  s = 7
+  7 * 6 / 2 = 21
+quindi nella settima antidiagonale.
+
+In particolare, il termine N della sequenza corrisponde a:
+  s = il minimo intero tale che s*(s-1)/2 >= N
+e poi:
+  posizione = N - (s-1)*(s-2)/2
+che ci dice quale coppia (n,k) prendere nella diagonale.
+
+Per esempio N=20:
+  s = 7
+  termini precedenti = 6*5/2 = 15
+  posizione = 20 - 15 = 5
+La settima antidiagonale è:
+  (n,k)
+  (1,6)
+  (2,5)
+  (3,4)
+  (4,3)
+  (5,2)  <-- quinto
+  (6,1)
+quindi:
+  n = 5
+  k = 2
+e infatti:
+(T1 5 2)
+;-> 64
+
+Questa tecnica vale identicamente per T1, T2, T3 e T4: cambia soltanto la funzione passata a polka-seq.
+
+(polka-seq T1 20)
+;-> (1 4 6 11 13 15 22 24 26 28 37 39 41 43 45 56 58 60 62 64)
+
+(polka-seq T2 20)
+;-> (2 7 9 16 18 20 29 31 33 35 46 48 50 52 54 67 69 71 73 75)
+
+(polka-seq T3 20)
+;-> (3 8 10 17 19 21 30 32 34 36 47 49 51 53 55 68 70 72 74 76)
+
+(polka-seq T4 20)
+;-> (5 12 14 23 25 27 38 40 42 44 57 59 61 63 65 80 82 84 86 88)
+
+La cosa interessante è che possiamo costruire direttamente una funzione che, dato il numero del termine N, restituisce la coppia (n k), senza generare tutti i termini precedenti.
+
+(define (polka-index N)
+  (let (s 2 prev 0 pos 0)
+    (while (< (* s (- s 1)) (* 2 N))
+      (++ s))
+    (setq prev (/ (* (- s 1) (- s 2)) 2))
+    (setq pos (- N prev))
+    (list pos (- s pos))))
+
+Ma possiamo renderla ancora più interessante, restituendo direttamente (n k) e quindi usarla per calcolare l'N-esimo termine:
+
+(polka-index 20)
+;-> (5 2)
+(apply T1 (polka-index 20))
+;-> 64
+
+Questa è probabilmente la strada migliore se il vogliamo calcolare direttamente il termine N-esimo di una delle quattro sequenze, invece di generare l'intera sequenza fino a N.
+
+Possiamo anche verificare alcuni valori:
+
+(map (fn (n) (list n (polka-index n))) (sequence 1 10))
+;-> ((1 (1 1))
+;->  (2 (1 2))
+;->  (3 (2 1))
+;->  (4 (1 3))
+;->  (5 (2 2))
+;->  (6 (3 1))
+;->  (7 (1 4))
+;->  (8 (2 3))
+;->  (9 (3 2))
+;->  (10 (4 1)))
+
+Questa corrisponde esattamente alla scansione per antidiagonali:
+   N   (n,k)
+   1   (1,1)
+   2   (1,2)
+   3   (2,1)
+   4   (1,3)
+   5   (2,2)
+   6   (3,1)
+   7   (1,4)
+   8   (2,3)
+   9   (3,2)
+  10   (4,1)
+...
+
+Quindi possiamo definire direttamente il termine N-esimo:
+
+(define (polka-term func N)
+  (apply func (polka-index N)))
+
+Per esempio:
+
+(polka-term T1 20)
+;-> 64
+
+(polka-term T1 19)
+;-> 62
+
+(polka-term T1 21)
+;-> 66
+
+e analogamente:
+
+(polka-term T2 20)
+;-> 75
+(polka-term T3 20)
+;-> 76
+(polka-term T4 20)
+;-> 88
+
 ============================================================================
 
