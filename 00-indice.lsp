@@ -3668,6 +3668,7 @@ NOTE LIBERE 38
   Sequenza più lunga di numeri consecutivi
   Polka-dot array of natural number
   Parole palindrome in codice Morse
+  Lista dei vicini
 
 PROBLEMI SUI DADI
 =================

@@ -3149,6 +3149,10 @@ Numeri che sono divisibili dal doppio della somma delle loro cifre
 ------------------------------------------------------------------
 
 Generare la sequenza dei numeri che sono divisibili dal doppio della somma delle loro cifre.
+Esempio:
+  N = 10
+  Doppio Somma cifre = 2 * (1 + 0) = 2
+  10 è divisibile per 2
 
 Sequenza OEIS A134516:
 Numbers that are divisible by 2*(sum of their digits)
@@ -3167,6 +3171,16 @@ Numbers that are divisible by 2*(sum of their digits)
     out))
 
 (define (div-2digit? num) (zero? (% num (* 2 (digit-sum num)))))
+
+(filter div-2digit? (sequence 1 400))
+;-> (10 12 18 20 24 30 36 40 48 50 54 60 70 72 80 90 100 102
+;->  108 112 120 126 132 140 144 162 180 192 200 204 210 216 224
+;->  230 234 240 252 264 270 280 288 300 306 308 312 320 322 324
+;->  336 342 360 364 392 396 400)
+
+I numeri cercati sono tutti pari (perchè devono essere divisibili per 2).
+
+(define (div-2digit? num) (and (even? num) (zero? (% num (* 2 (digit-sum num))))))
 
 (filter div-2digit? (sequence 1 400))
 ;-> (10 12 18 20 24 30 36 40 48 50 54 60 70 72 80 90 100 102

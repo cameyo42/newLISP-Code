@@ -6277,5 +6277,159 @@ Tre parole palindrome sia in caratteri ASCII che in codice Morse:
 ;-> ........
 ;-> true
 
+
+----------------
+Lista dei vicini
+----------------
+
+Data una lista di numeri interi, determinare, per ogni numero, la lista di tutti i suoi vicini.
+Se esistono numeri con più di una occorrenza, la lista dei vicini deve essere unificata.
+
+Esempio:
+  lista = (4 3 8 5 3 6 6)
+  Vicini di ogni numero:
+  4 -> (3)
+  3 -> (4 8)
+  8 -> (3 5)
+  5 -> (8 3)
+  3 -> (5 6)
+  6 -> (3 6)
+  6 -> (6)
+  Unione delle liste dei numeri con occorrrenze multiple:
+  3 -> (4 8) e 3 -> (5 6)  --> 3 -> (4 8 5 6)
+  6 -> (3 6) e 6 -> (6)    --> 6 -> (3 6 6)
+  Output: (4 (3)) (3 (4 8 5 6)) (8 (3 5)) (5 (8 3)) (6 (3 6 6))
+
+Usiamo una lista associata di questo tipo:
+
+  (numero (lista-vicini))
+
+(define (vicini lst)
+  (local (out len el)
+    ;'out': lista associativa che conterra' il risultato.
+    ; Ogni elemento avra' la forma:
+    ;   (numero (lista-dei-vicini))
+    ; Esempio:
+    ;   ((4 (3)) (3 (4 8 5 6)) ...)
+    (setq out '())
+    ; Lunghezza della lista di input.
+    (setq len (length lst))
+    ; Esaminiamo tutti gli elementi della lista.
+    (for (i 0 (- len 1))
+      ; Numero corrente.
+      (setq el (lst i))
+      ; -------------------------------------------------------
+      ; Se il numero non e' ancora presente in 'out',
+      ; creiamo una nuova coppia:
+      ;   (numero ())
+      ; La lista dei vicini verra' riempita nei passi successivi.
+      ; -------------------------------------------------------
+      (if (not (lookup el out))
+          (push (list el '()) out -1))
+      ; -------------------------------------------------------
+      ; Visto che l'elemento non e' il primo della lista,
+      ; esiste un vicino a sinistra.
+      ; Esempio:
+      ;   ... 8 5 ...
+      ;       ^
+      ;       i
+      ; Il vicino sinistro di 5 e' 8.
+      ; 'lookup' restituisce la lista dei vicini associata
+      ; a 'el' e la rende disponibile tramite $it.
+      ; -------------------------------------------------------
+      (if (> i 0)
+          (setf (lookup el out)
+                (append $it (list (lst (- i 1))))))
+      ; -------------------------------------------------------
+      ; Se l'elemento non e' l'ultimo della lista,
+      ; esiste un vicino a destra.
+      ; Esempio:
+      ;   ... 5 3 ...
+      ;       ^
+      ;       i
+      ; Il vicino destro di 5 e' 3.
+      ; -------------------------------------------------------
+      (if (< i (- len 1))
+          (setf (lookup el out)
+                (append $it (list (lst (+ i 1)))))))
+    ; Restituisce la lista associativa completa.
+    out))
+
+; versione senza commenti
+(define (vicini lst)
+  (local (out len el)
+    (setq out '())
+    (setq len (length lst))
+    (for (i 0 (- len 1))
+      (setq el (lst i))
+      (if (not (lookup el out))
+          (push (list el '()) out -1))
+      (if (> i 0)
+          (setf (lookup el out)
+                (append $it (list (lst (- i 1))))))
+      (if (< i (- len 1))
+          (setf (lookup el out)
+                (append $it (list (lst (+ i 1)))))))
+    out))
+
+Proviamo:
+
+(setq L '(4 3 8 5 3 6 6))
+(vicini L)
+;-> ((4 (3)) (3 (4 8 5 6)) (8 (3 5)) (5 (8 3)) (6 (3 6 6)))
+
+(setq A '(1 1 1 1 1))
+(vicini A)
+;-> ((1 (1 1 1 1 1 1 1 1)))
+
+(setq B '(1 2))
+(vicini B)
+;-> ((1 (2)) (2 (1)))
+
+(setq C '(1))
+(vicini C)
+;-> ((1 ()))
+
+Complessità O(N*M) nel caso peggiore, dove M è il numero di valori distinti
+(perché lookup su una lista associativa è lineare).
+
+Non è possibile risalire alla lista di partenza dall'output della funzione
+In generale **no**: dall'output di `vicini2` non possiamo ricostruire univocamente la lista originale.
+Il motivo fondamentale è che l'output conserva le adiacenze, ma non conserva l'ordine globale con cui sono comparsi gli elementi.
+Per esempio:
+  L1 = '(1 2 3)
+  L2 = '(3 2 1)
+producono entrambe: ((1 (2)) (2 (1 3)) (3 (2)))
+Quindi abbiamo perso l'informazione che distingue 1 2 3 da 3 2 1.
+Se consideriamo l'output come un grafo non orientato, ogni numero è un vertice e i vicini sono i vertici adiacenti.
+Per esempio:
+  (4 3 8 5 3 6 6)
+diventa:
+  4 -- 3 -- 8 -- 5 -- 3 -- 6
+                      |    |
+                      +----+
+Abbiamo un problema: il numero 3 compare due volte e 6 compare due volte.
+L'output unifica le occorrenze solo per chiave, quindi non sappiamo più quali due occorrenze di 3 e 6 fossero coinvolte in ciascuna adiacenza.
+In particolare:
+  3 -> (4 8 5 6)
+  6 -> (3 6 6)
+non ci dice più che:
+  prima occorrenza di 3 -> 4,8
+  seconda occorrenza di 3 -> 5,6
+Questa informazione è stata definitivamente persa.
+
+Possiamo distinguere tre casi:
+
+1) Tutti gli elementi distinti
+Possiamo ricostruire la sequenza, ma generalmente abbiamo almeno le due orientazioni:
+1 2 3 4 oppure 4 3 2 1
+
+2) Elementi ripetuti
+L'output di 'vicini' può corrispondere a più sequenze diverse, anche non ottenibili semplicemente invertendo la sequenza.
+
+3) Se vogliamo ricostruire sempre la lista originale, dobbiamo modificare l'informazione memorizzata: invece di unificare immediatamente le occorrenze, dobbiamo conservare anche le singole occorrenze/posizioni.
+
+La funzione 'vicini' calcola una relazione di adiacenza per valore, non una rappresentazione reversibile della sequenza originale.
+
 ============================================================================
 
