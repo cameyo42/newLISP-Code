@@ -6029,6 +6029,8 @@ T(n,k) = 2*n + (n + k - 1)*(2n + 2k - 1), k>=1, n>=1.
 (define (T4 n k)
   (+ (* 2 n) (* (+ n k -1) (+ (* 2 n) (* 2 k) -1))))
 
+Primo tentativo:
+
 (define (polka func n k)
   (let (out '())
     (for (i 1 n)
@@ -6393,8 +6395,7 @@ Proviamo:
 Complessità O(N*M) nel caso peggiore, dove M è il numero di valori distinti
 (perché lookup su una lista associativa è lineare).
 
-Non è possibile risalire alla lista di partenza dall'output della funzione
-In generale **no**: dall'output di `vicini2` non possiamo ricostruire univocamente la lista originale.
+Non è possibile risalire univicamente alla lista di partenza dall'output della funzione.
 Il motivo fondamentale è che l'output conserva le adiacenze, ma non conserva l'ordine globale con cui sono comparsi gli elementi.
 Per esempio:
   L1 = '(1 2 3)
@@ -6430,6 +6431,319 @@ L'output di 'vicini' può corrispondere a più sequenze diverse, anche non otten
 3) Se vogliamo ricostruire sempre la lista originale, dobbiamo modificare l'informazione memorizzata: invece di unificare immediatamente le occorrenze, dobbiamo conservare anche le singole occorrenze/posizioni.
 
 La funzione 'vicini' calcola una relazione di adiacenza per valore, non una rappresentazione reversibile della sequenza originale.
+
+
+----------------------------------
+Lista di numeri e dei loro opposti
+----------------------------------
+
+https://codegolf.stackexchange.com/questions/203797/generate-list-of-numbers-and-their-negative-counterparts
+
+Dati due numeri interi 1<=a<=b, generare tutti gli interi x tali che a<=|x|<=b.
+Il risultato deve essere un elenco ordinato di tutti i valori di x (-b, 1-b, 2-b, ..., -a, a, a+1, a+2, ..., b).
+
+Versione code-golf (57 caratteri):
+(define(f a b)(extend(sequence(- b)(- a))(sequence a b)))
+
+(f 6 9)
+;-> (-9 -8 -7 -6 6 7 8 9)
+(f 6 6)
+;-> (-6 6)
+
+
+-------------------------------------
+Legge di gravità per stringhe/matrici
+-------------------------------------
+
+Supponiamo di avere le seguenti stringhe:
+
+  s1 = "0 00 00"
+  s2 = "0 000"
+  s3 = "00"
+
+Situazione di partenza:
+0 00 00
+0 000
+00
+
+Situazione dopo l'applicazione della legge di gravità:
+0
+0 00 
+0000000
+Il carattere vuoto è un spazio " ".
+
+Scrivere una funzione che prende N stringhe e applica la legge di gravità.
+
+Algoritmo
+Costruiamo una seconda matrice (out) già "stabilizzata" dal basso verso l'alto.
+
+1) Costruiamo grid
+Le stringhe vengono trasformate in liste di caratteri:
+"A BC DE" diventa: (A " " B C " " D E)
+Tutte le righe vengono portate alla stessa lunghezza aggiungendo spazi a destra.
+Quindi, ad esempio:
+A BC DE
+F GHK
+XY
+diventa la matrice:
+A   B C   D E
+F   G H K
+X Y
+grid rappresenta quindi la situazione iniziale.
+
+2) Creiamo out
+Creiamo una matrice delle stesse dimensioni, inizialmente completamente vuota:
+Poi copiamo direttamente l'ultima riga di grid:
+(setf (out -1) (grid -1))
+Perché l'ultima riga è già nella posizione finale: non può cadere ulteriormente.
+
+3) Procediamo dal basso verso l'alto
+Questo è il punto fondamentale:
+(for (row (- rows 2) 0)
+Partiamo dalla penultima riga e risaliamo fino alla prima.
+Perché quando dobbiamo far cadere un carattere, le righe inferiori sono già state sistemate in out.
+Quindi out ci dice già dove sono gli ostacoli.
+
+4) Esaminiamo ogni colonna
+Per ogni carattere:
+(setq cur (grid row col))
+controlliamo se è diverso da spazio:
+(when (!= cur " ")
+Se è uno spazio, non c'è nulla da far cadere.
+Se invece troviamo, ad esempio, "B", dobbiamo trovare dove cadrà.
+
+5) last-space cerca il punto di caduta
+Supponiamo di avere:
+riga 0:   B
+riga 1:   F
+riga 2:   X
+e stiamo considerando B.
+Chiamiamo:
+(last-space out 1 col rows)
+La funzione parte dalla riga sottostante e scende:
+(while (and (< row row-max)
+            (= (matrix row col) " "))
+  (++ row))
+(-- row)
+In pratica:
+        B       <- carattere corrente
+        F       <- prima cella non vuota sotto B
+Quando trova F, fa (-- row), ottenendo la posizione immediatamente sopra F.
+Quella è la posizione finale di B.
+
+6) Se sotto è tutto vuoto last-space continua fino all'ultima riga e quando raggiunge row-max, torna indietro di una posizione:
+(-- row)
+ottenendo quindi l'ultima riga disponibile.
+Il carattere cade fino in fondo.
+
+7) Inseriamo direttamente il carattere
+Una volta trovata la posizione:
+(setf (out r col) cur)
+Non spostiamo il carattere passo per passo.
+Gli diciamo direttamente:
+"La posizione finale di questo carattere è (r,col)."
+
+La proprietà fondamentale è questa:
+Quando elaboriamo la riga row, tutte le righe inferiori sono già state sistemate in out.
+Quindi last-space non deve conoscere il futuro: guarda semplicemente out e trova il primo ostacolo già presente.
+In altre parole:
+grid = situazione originale
+out  = situazione già sottoposta alla gravità
+e il passaggio grid ---> out avviene dal basso verso l'alto.
+È proprio questa scelta dell'ordine di elaborazione che rende l'algoritmo semplice e corretto.
+
+(define (print-matrix-chars matrix)
+"Print a matrix of chars"
+  (local (rows cols)
+    (setq space (or space 0))
+    (setq rows (length matrix))
+    (setq cols (length (matrix 0)))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        (print (matrix r c)))
+      (println))))
+
+(define (last-space matrix row col row-max)
+  ; Cerca verso il basso la prima posizione occupata.
+  ; Restituisce la riga immediatamente precedente.
+  (while (and (< row row-max)
+              (= (matrix row col) " "))
+    (++ row))
+  (-- row))
+
+(define (gravita strs)
+  (letn (
+         ; Numero di righe
+         (rows (length strs))
+         ; Larghezza massima delle righe
+         (cols (apply max (map length strs)))
+         ; Griglia di partenza
+         (grid '())
+         ; Griglia risultante
+         (out nil)
+         ; Carattere corrente
+         (cur nil)
+         ; Riga destinazione
+         (r nil)
+        )
+    ; Trasforma ogni stringa in una lista di caratteri.
+    ; Le righe piu' corte vengono completate con spazi.
+    (dolist (s strs)
+      (push (explode
+              (string s (dup " " (- cols (length s)))))
+            grid -1))
+    ; Crea la matrice risultato inizialmente vuota.
+    (setq out (array-list (array rows cols '(" "))))
+    ; L'ultima riga non puo' scendere:
+    ; viene quindi copiata direttamente.
+    (setf (out -1) (grid -1))
+    ; Esamina le righe dal basso verso l'alto,
+    ; partendo dalla penultima.
+    (for (row (- rows 2) 0)
+      ; Esamina tutte le colonne.
+      (for (col 0 (- cols 1))
+        ; Legge il carattere corrente.
+        (setq cur (grid row col))
+        ; Se non e' uno spazio, deve cadere.
+        (when (!= cur " ")
+          ; Cerca la posizione piu' bassa disponibile
+          ; nella stessa colonna.
+          (setq r (last-space out (+ row 1) col rows))
+          ; Inserisce il carattere nella posizione trovata.
+          (setf (out r col) cur))))
+    ; Visualizza il risultato.
+    (print-matrix-chars out)))
+
+Proviamo:
+
+(setq s1 "A BC DE")
+(setq s2 "F GHK")
+(setq s3 "XY")
+(setq m (list s1 s2 s3))
+(gravita m)
+;-> A
+;-> F BC
+;-> XYGHKDE
+
+(setq s1 "0 00 00")
+(setq s2 "0 000")
+(setq s3 "00")
+(setq m (list s1 s2 s3))
+(gravita m)
+;-> 0
+;-> 0 00
+;-> 0000000
+
+(setq s1 "Questa mi sembra una bella idea")
+(setq s2 "speriamo sia corretta")
+(setq s3 "comunque fatemi sapere cosa ne pensate")
+(setq s4 "la ricerca del vuoto...")
+(setq m (list s1 s2 s3 s4))
+(gravita m)
+;-> Qu sta m   e b   una
+;-> speriamo ssamcrarettab
+;-> coeunqueifitemorsapereella  de
+;-> lamricercaadelivuoto...cosaineapensate
+
+
+------------
+Amici binari
+------------
+
+Dato un numero intero positivo N applicare le seguenti trasformazioni:
+1) Convertire ogni cifra in binario a 8 bit (con 0 iniziali)
+2) Unire tutti i numeri binari
+3) Convertire il numero binario unito in decimale
+
+Il numero iniziale N e numero finale ottenuto dalle trasformazioni sono 'amici binari'.
+
+Esempi:
+  N = 342
+  cifra  binario
+  3      00000011
+  4      00000100
+  2      00000010
+  unione = 000000110000010000000010
+  decimale(unione) = 197634
+
+  N = 101
+  cifra  binario
+  1      00000001
+  0      00000000
+  1      00000001
+  unione = 000000010000000000000001
+  decimale(unione) = 65537
+
+  N = 1234567890
+  cifra  binario
+  1      00000001
+  2      00000010
+  3      00000011
+  4      00000100
+  5      00000101
+  6      00000110
+  7      00000111
+  8      00001000
+  9      00001001
+  0      00000000
+  unione = 0000000100000010000000110000010000000101
+           0000011000000111000010000000100100000000
+  decimale(unione) = 4759477275222530853120L
+
+  N = 123456789012345678901234567890L
+  unione =
+  000000010000001000000011000001000000010100000110000001110000100000001001
+  000000000000000100000010000000110000010000000101000001100000011100001000
+  000010010000000000000001000000100000001100000100000001010000011000000111
+  000010000000100100000000
+  decimale(unione) =
+  6955983830576953300613150202558055003872856768199530775539713487407360L
+
+La funzione deve gestire anche i big-integer.
+
+; Converte una cifra (0..9) in binario a 8 bit (con gli 0 iniziali)
+(define (bits8 digit)
+  (let (b (bits digit))
+    (string (dup "0" (- 8 (length b))) b)))
+
+(bits8 1)
+;-> "00000001"
+(bits8 5)
+;-> "00000101"
+
+(define (binary-bigint bin)
+"Convert a binary string to big integer"
+  (let (num 0L)
+    ; remove left padded 0
+    (while (= (bin 0) "0") (pop bin))
+    (if (= bin "") 0L
+        ; else, build big integer number
+        (dolist (el (explode bin))
+          (setq num (+ (* num 2) (int el)))))))
+
+(define (fx num)
+  (let ( (str (string num)) (bin "") )
+    ; rimuove "L" se 'num' è big-integer
+    (if (= (str -1) "L") (pop str -1))
+    ; converte ogni cifra in binario (8 bit)
+    ; e unisce tutti i binari risultanti
+    (dolist (ch (explode str))
+      (extend bin (bits8 (int ch))))
+    ;(println bin)
+    ; (println (int bin 0 2)) ; solo per int64
+    ; converte l'unione dei binari in intero decimale (big-integer)
+    (binary-bigint bin)))
+
+Proviamo:
+
+(fx 342)
+;-> 197634L
+(fx 101)
+;-> 65537L
+(fx 1234567890)
+;-> 4759477275222530853120L
+(fx 123456789012345678901234567890L)
+;-> 6955983830576953300613150202558055003872856768199530775539713487407360L
 
 ============================================================================
 

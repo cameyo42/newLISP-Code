@@ -3669,6 +3669,9 @@ NOTE LIBERE 38
   Polka-dot array of natural number
   Parole palindrome in codice Morse
   Lista dei vicini
+  Lista di numeri e dei loro opposti
+  Legge di gravità per stringhe/matrici
+  Amici binari
 
 PROBLEMI SUI DADI
 =================
