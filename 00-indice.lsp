@@ -3672,6 +3672,8 @@ NOTE LIBERE 38
   Lista di numeri e dei loro opposti
   Legge di gravità per stringhe/matrici
   Amici binari
+  Matematica Vedica
+  Sequenza N
 
 PROBLEMI SUI DADI
 =================

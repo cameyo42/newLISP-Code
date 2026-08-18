@@ -6745,5 +6745,548 @@ Proviamo:
 (fx 123456789012345678901234567890L)
 ;-> 6955983830576953300613150202558055003872856768199530775539713487407360L
 
+
+-----------------
+Matematica Vedica
+-----------------
+
+La matematica vedica si basa sul seguente elenco di 16 aforismi, o sutra, che Bharati Krishna Tirtha
+(https://en.wikipedia.org/wiki/Bharati_Krishna_Tirtha)
+affermò non essere in realtà scritti in alcun passo dei Veda, ma essere rilevabili solo "sulla base di una rivelazione intuitiva":
+
+   1. By one more than the one before
+   2. All from 9 and the last from 10
+   3. Vertically and Cross-wise
+   4. Transpose and Apply
+   5. If the Samuccaya is the Same it is Zero
+   6. If One is in Ratio the Other is Zero
+   7. By Addition and by Subtraction
+   8. By the Completion or Non-Completion
+   9. Differential Calculus
+  10. By the Deficiency
+  11. Specific and General
+  12. The Remainders by the Last Digit
+  13. The Ultimate and Twice the Penultimate
+  14. By One Less than the One Before
+
+Esempio (sottrazione):
+"All from 9 and the last from 10"
+Questo va applicato ogni volta che si sottrae un numero da una potenza di dieci, come 1000.
+Se voglio calcolare 1000 – 456, ad esempio, allora sottraggo 4 da 9, 5 da 9 e 6 da 10.
+In altre parole, le prime due cifre sono 9 e l'ultima è 10.
+
+Esempio (moltiplicazione):
+"All from 9 and the last from 10"
+  9 x 8
+Innanzitutto, disegnamo un 9 seguito dalla differenza tra 9 e 10, che è -1.
+Sotto disegnamo un 8 e accanto ad esso la differenza tra 8 e 10, che è -2.
+
+  9 -1
+  8 -2
+
+Il primo numero della risposta può essere ricavato in quattro modi diversi.
+Si possono sommare i numeri della prima colonna e sottrarre dieci (9 + 8 – 10 = 7).
+Oppure sommare i numeri della seconda colonna e aggiungere dieci (–1 – 2 + 10 = 7) oppure sommare uno dei numeri sulla diagonale principale (9 – 2 = 7 e 8 – 1 = 7).
+La risposta è sempre 7.
+
+  9 -1
+  8 -2
+  ----
+  7
+
+La seconda parte della risposta si calcola moltiplicando i due numeri nella seconda colonna (–1 x –2 = 2).
+La risposta completa è 72.
+
+  9 -1
+  8 -2
+  ----
+  7  2
+
+Il metodo funziona anche quando si moltiplicano numeri a due cifre, in questo caso utilizzando l'esempio 77 x 97.
+
+  77
+  97
+
+Quindi, invece di scrivere la differenza di 77 da 10, scrisse la differenza di ciascun numero da 100.
+(Quando si sottrae un numero da 100, o da qualsiasi potenza di 10 maggiore, tutte le cifre del numero vengono sottratte da 9 tranne l'ultima, che viene sottratta da 10, come ho mostrato in precedenza):
+
+  77 -23
+  97  -3
+  ------
+
+Come prima, per ottenere la prima parte della risposta ci sono quattro opzioni. Ha scelto di mostrare le due addizioni diagonali: 77 – 3 = 97 – 23 = 74.
+
+  77 -23
+  97  -3
+  ------
+  74
+
+La seconda parte si ottiene moltiplicando entrambe le cifre nella colonna di destra: -23 x –3 = 69.
+
+  77 -23
+  97  -3
+  ------
+  74  69
+
+La risposta è 7469.
+
+Passiamo ora a un esempio con tre cifre: 888 x 997. Questa volta la differenza viene calcolata a partire da 1000.
+
+ 888 -112
+ 997   -3
+ --------
+ 885  336
+
+L'addizione diagonale dà 885 come prima parte, e la moltiplicazione della colonna di destra dà 336 come seconda, per un risultato di 885336.
+
+Consideriamo l'esempio di 57 x 43.
+Il metodo standard per moltiplicare questi numeri consiste nello scrivere due righe intermedie e poi sommarle:
+
+     57 x
+     43 =
+   ------
+    171
+   2280
+   ------
+   2451
+
+Utilizzando il terzo sutra, Vertically and Cross-wise, possiamo trovare la risposta in modo abbastanza semplice come segue.
+Passo 1: Scrivi i numeri uno sopra l'altro:
+
+       5  7
+       4  3
+
+Passo 2: Moltiplica le cifre nella colonna di destra: 7 x 3 = 21.
+L'ultima cifra di questo numero è l'ultima cifra del risultato.
+Scrivila sotto la colonna di destra.
+
+       5  7
+          |
+       4  3
+       ----
+          1
+         (2)
+
+Passo 3: Calcola la somma dei prodotti incrociati: (5 x 3) + (7 x 4) = 15 + 28 = 43.
+Aggiungi il 2 riportato dal passaggio precedente per ottenere 45.
+L'ultima cifra di questo numero, il 5, è scritta sotto la colonna di sinistra, con il 4 riportato.
+
+       5  7
+        \/
+        /\
+       4  3
+       ----
+       5  1
+      (4)
+
+Passo 4: Moltiplica le cifre nella colonna di sinistra, 5 x 4 = 20.
+Aggiungi il 4 che è stato riportato per ottenere 24, per dare il risultato finale:
+I numeri sono stati moltiplicati verticalmente e orizzontalmente, come indicato nel sutra.
+
+       5  7
+       |
+       4  3
+ ----------
+ 2  4  5  1
+
+Questo metodo può essere generalizzato alle moltiplicazioni di numeri di qualsiasi dimensione.
+L'unica cosa che cambia è che è necessario moltiplicare verticalmente e in croce un numero maggiore di numeri.
+
+Per esempio, 376 x 852:
+
+           3  7  6
+
+           8  5  2
+           -------
+
+Passo 1: Iniziamo dalla colonna di destra: 6 x 2 = 12
+
+           3  7  6
+                 |
+           8  5  2
+           -------
+                 2
+                (1)
+
+Passo 2: Quindi la somma dei prodotti incrociati tra le unità e la colonna delle decine, (7 x 2) (6 x 5) = 44, più l'1 riportato sopra.
+Questo è 45.
+
+           3  7  6
+               \/
+               /\
+           8  5  2
+           -------
+              5  2
+             (4)
+
+Passo 3: Ora passiamo ai prodotti incrociati tra le unità e la colonna delle centinaia e li aggiungiamo al prodotto verticale della colonna delle decine, (3 x 2) + (8 x 6) + (7 x 5) = 89, più il 4 riportato sopra.
+Questo è 93.
+
+           3  7  6
+            \ | /
+            / | \
+           8  5  2
+           -------
+           3  5  2
+          (9)
+
+Passo 4: Spostandoci verso sinistra, moltiplichiamo in croce le prime due colonne: (3 x 5) (7 x 8) = 71, più il 9 riportato sopra.
+Questo è 80.
+
+           3  7  6
+            \/
+            /\
+           8  5  2
+        ----------
+        0  3  5  2
+       (8)
+
+Passo 5: Infine, calcoliamo il prodotto verticale della colonna di sinistra, 3 x 8 = 24, più l'8 riportato sopra.
+Il risultato è 32.
+
+           3  7  6
+           |
+           8  5  2
+  ----------------
+  3  2  0  3  5  2
+
+La risposta finale è: 320352.
+'Vertically and Cross-wise' o 'cross-multiplication', è più veloce, occupa meno spazio ed è meno laboriosa della moltiplicazione lunga.
+
+
+----------
+Sequenza N
+----------
+
+Dato un numero intero positivo N, trovare il più piccolo intero positivo che termina con N, è divisibile per N e la cui somma delle cifre è N.
+
+Sequenza OEIS A187924:
+a(n) is the smallest multiple of n such that a(n) ends with n and S(a(n))=n where S(m) is the sum of the base ten digits of m, or 0 if no such a(n) exists.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 910, 0, 912, 11713, 6314, 915, 3616, 15317,
+  918, 17119, 9920, 18921, 9922, 82823, 19824, 9925, 46826, 18927, 18928,
+  78329, 99930, 585931, 388832, 1098933, 198934, 289835, 99936, 99937,
+  478838, 198939, 1999840, ...
+
+It can be proved that a(11)=0.
+Conjecture: 11 is the only n for which a(n)=0.
+
+(define (digit-sum num)
+"Calculate the sum of the digits of an integer"
+  (let (out 0)
+    (while (!= num 0)
+      (setq out (+ out (% num 10)))
+      (setq num (/ num 10)))
+    out))
+
+Algoritmo 1
+-----------
+Partiamo da N e continuiamo con N + 1, N + 2, N + 3, ...
+
+(define (trova1 N)
+  (if (= N 11) 0
+  ;else
+  (let ( (found nil) (cur N) (strN (string N)) )
+    (until found
+      (when (and (zero? (% cur N)) ; divisibile per N
+                 (ends-with (string cur) strN) ; termina per N
+                 (= (digit-sum cur) N)) ; la somma delle cifre vale N
+            (setq found true))
+      (++ cur))
+    (-- cur))))
+
+Proviamo:
+
+(trova1 2)
+;-> 2
+(trova1 10)
+;-> 910
+
+(map trova1 (sequence 1 40))
+;-> (1 2 3 4 5 6 7 8 9 910 0 912 11713 6314 915 3616 15317
+;->  918 17119 9920 18921 9922 82823 19824 9925 46826 18927 18928
+;->  78329 99930 585931 388832 1098933 198934 289835 99936 99937
+;->  478838 198939 1999840)
+
+Algoritmo 2
+-----------
+Partiamo da N e continuiamo con 1N, 2N, 3N, ...
+(dove 1N rappresenta l'unione di 1 e N)
+In questo modo evitiamo il controllo:
+(ends-with (string cur) strN) ; termina per N
+
+(define (trova2 N)
+  (cond
+    ((< N 10) N)
+    ((= N 11) 0)
+    (true
+      (let ( (found nil) (cur N) (strN (string N)) (ante 0))
+        (until found
+          (when (and (zero? (% cur N)) ; divisibile per N
+                    ;(ends-with (string cur) strN) ; termina per N
+                    (= (digit-sum cur) N)) ; la somma delle cifre vale N
+                (setq found true))
+          (when (not found)
+            (++ ante)
+            (setq cur (int (string ante N) 0 10))))
+        cur))))
+
+Proviamo:
+
+(trova2 2)
+;-> 2
+(trova2 10)
+;-> 910
+
+(= (map trova2 (sequence 1 40)) (map trova (sequence 1 40)))
+;-> true
+
+(time (map trova1 (sequence 1 50)))
+;-> 4270.237
+(time (map trova2 (sequence 1 50)))
+;-> 477.176
+
+(time (map trova2 (sequence 1 60)))
+;-> 4865.968
+(time (map trova2 (sequence 1 72)))
+;-> 100989.567
+
+Per N = 142, a(N) = 2989999999999998142
+Per N = 143, a(N) = 12999699999999999143 (overflow: a(N) > 9223372036854775807)
+
+Algoritmo 3
+-----------
+Invece di cercare tutti i multipli di N, possiamo eliminare quasi completamente quella ricerca.
+
+1) Approccio matematico
+Supponiamo che N abbia 'd' cifre.
+Un numero che termina con N ha necessariamente la forma:
+  k * 10^d + N
+dove (k > 0).
+Per esempio, per N = 142:
+  k = 2989999999999998
+  k * 1000 + 142 = 2989999999999998142
+La condizione di divisibilità è:
+  k * 10^d + N ≡ 0 (mod N)
+e quindi:
+  k * 10^d ≡ 0 (mod N)
+Se poniamo
+  g = gcd(N, 10^d)
+  q = N / g
+allora necessariamente:
+  k = q * t
+Quindi non dobbiamo più provare N, 2N, 3N, ...
+Inoltre, poiché stiamo concatenando 'k' e N, non c'è alcun riporto tra le due parti:
+  S(kN) = S(k) + S(N)
+Pertanto dobbiamo semplicemente trovare il più piccolo multiplo di 'q' la cui somma delle cifre sia:
+  target = N - S(N)
+Questo è un problema molto più piccolo.
+
+2) Ricerca con BFS sulle cifre
+Possiamo costruire 'k' cifra per cifra.
+Uno stato è:
+  (remainder, digit-sum)
+dove 'remainder' è il resto di 'k' modulo 'q'.
+Se abbiamo un numero con resto 'r' e aggiungiamo la cifra 'd':
+  new-remainder = (r * 10 + d) % q
+  new-sum       = sum + d
+Facciamo una BFS partendo dalle cifre '1..9' e poi aggiungendo '0..9'.
+Questo ha due vantaggi importanti:
+a) la BFS trova prima il numero con meno cifre;
+b) provando le cifre in ordine '0..9', tra i numeri con la stessa lunghezza trova quello lessicograficamente più piccolo, quindi numericamente più piccolo.
+Non dobbiamo nemmeno costruire realmente i giganteschi interi durante la ricerca: lavoriamo solo con resto, somma e stringhe di cifre.
+Questo algoritmo permette di gestire anche i numeri big-integer.
+
+L'algoritmo di 'trova2' fa:
+  N
+  2N
+  3N
+  4N
+  5N
+  ...
+e per ogni candidato calcola anche la somma delle cifre.
+Per N = 142 il 'k' trovato è:
+  2989999999999998
+quindi la ricerca sequenziale dovrebbe arrivare a circa 3*10^15 candidati.
+
+L'algoritmo con BFS invece esplora stati del tipo:
+  (remainder, sum)
+e ce ne sono al massimo:
+  q * (target + 1)
+Per N = 142:
+  q      = 142 / gcd(142,1000)
+         = 71
+  target = 142 - S(142)
+         = 142 - 7
+         = 135
+quindi al massimo:
+  71 * 136 = 9656
+stati.
+
+Inoltre la BFS può dimostrare che N=11 non ha soluzione: esaurisce tutti gli stati raggiungibili senza trovare (0,9), restituendo 0.
+La parte matematica fondamentale, quindi, è trasformare il problema da ricerca di un multiplo gigantesco a ricerca di un cammino in un grafo finito di stati (resto, somma).
+
+Ulteriore ottimizzazione:
+Non è necessario considerare 'target' come dimensione massima della somma in modo indiscriminato.
+Possiamo sfruttare il fatto che per un numero con 'L' cifre la somma massima è 9L.
+Quindi la BFS può essere organizzata per numero di cifre, evitando di esplorare stati che non possono più raggiungere 'target'.
+Per N = 142 il target = 135 e servono almeno:
+  ceil(135 / 9) = 15 cifre per 'k'.
+Questo permette di ridurre ulteriormente la ricerca, soprattutto per i valori grandi di N.
+
+(define (smallest-k q target)
+  ; Cerca il piu' piccolo numero k tale che:
+  ;   k % q = 0
+  ;   digit-sum(k) = target
+  ;
+  ; Ogni stato e':
+  ;   (resto somma)
+  ;
+  ; Quando aggiungiamo una cifra d:
+  ;   nuovo-resto = (resto * 10 + d) % q
+  ;   nuova-somma = somma + d
+  ;
+  ; La BFS garantisce il minimo numero di cifre.
+  ; Le cifre vengono provate in ordine crescente,
+  ; quindi otteniamo anche il minimo numerico.
+  (letn ((width (+ target 1))
+         (states (* q width))
+         (prev (array states))
+         (dig (array states))
+         (queue (array states))
+         (head 0)
+         (tail 0)
+         (answer -1)
+         (i 0)
+         (r 0)
+         (s 0)
+         (d 0)
+         (nr 0)
+         (ns 0)
+         (idx 0)
+         (pidx 0)
+         (out "")
+         (k 0))
+    ; Inizializza prev.
+    ; -2 significa "stato non ancora visitato".
+    (for (i 0 (- states 1))
+      (setf (prev i) -2))
+    ; ----------------------------------------------------------
+    ; Stati iniziali: numeri da 1 a 9.
+    ; Non possiamo iniziare con zero perche' k non deve avere
+    ; zeri iniziali.
+    ; ----------------------------------------------------------
+    (for (d 1 9)
+      (when (<= d target)
+        (setq r (% d q))
+        (setq idx (+ (* r width) d))
+        (when (= (prev idx) -2)
+          (setf (prev idx) -1)
+          (setf (dig idx) d)
+          (setf (queue tail) idx)
+          (++ tail)
+          ; Abbiamo gia' trovato k.
+          (when (and (= r 0) (= d target))
+            (setq answer idx)))))
+    ; ----------------------------------------------------------
+    ; BFS.
+    ; Ogni stato genera al massimo 10 stati aggiungendo
+    ; una cifra da 0 a 9.
+    ; ----------------------------------------------------------
+    (until (or (!= answer -1) (>= head tail))
+      (setq idx (queue head))
+      (++ head)
+      ; Decodifica dello stato:
+      ; idx = resto * width + somma
+      (setq r (/ idx width))
+      (setq s (% idx width))
+      ; Prova le cifre in ordine crescente.
+      (for (d 0 9)
+        (setq ns (+ s d))
+        (when (<= ns target)
+          (setq nr (% (+ (* r 10) d) q))
+          (setq pidx (+ (* nr width) ns))
+          ; Se lo stato non e' mai stato visitato...
+          (when (= (prev pidx) -2)
+            (setf (prev pidx) idx)
+            (setf (dig pidx) d)
+            (setf (queue tail) pidx)
+            (++ tail)
+            ; Stato obiettivo:
+            ; resto = 0
+            ; somma = target
+            (when (and (= nr 0) (= ns target))
+              (setq answer pidx))))))
+    ; ----------------------------------------------------------
+    ; Nessuna soluzione.
+    ; ----------------------------------------------------------
+    (if (= answer -1)
+        0
+        ; ------------------------------------------------------
+        ; Ricostruisce k andando all'indietro dagli stati.
+        ; Poiche' percorriamo le cifre al contrario, ogni nuova
+        ; cifra viene aggiunta davanti alla stringa gia' costruita.
+        ; ------------------------------------------------------
+        (begin
+          (while (!= answer -1)
+            (setq out (string (dig answer) out))
+            (setq answer (prev answer)))
+          (setq k (bigint out))
+          k))))
+
+(define (trova3 N)
+  ; Trova il piu' piccolo numero che:
+  ;   1) termina con N
+  ;   2) e' divisibile per N
+  ;   3) ha somma delle cifre uguale a N
+  (cond
+    ; Per N < 10 la risposta e' N.
+    ((< N 10) N)
+    ; Caso noto senza soluzione. 
+    ; L'algoritmo BFS restituisce 0 per N = 11
+    ; ((= N 11) 0)
+    (true
+      (letn ((d (length (string N)))
+             (p10 (bigint (string (pow 10 d))))
+             (g (gcd N p10))
+             (q (/ N g))
+             (target (- N (digit-sum N)))
+             (k 0))
+        ; S(kN) = S(k) + S(N).
+        ; Quindi S(k) deve essere target.
+        (if (<= target 0)
+            0
+            (begin
+              ; k deve essere multiplo di q.
+              (setq k (smallest-k q target))
+              ; Nessuna soluzione.
+              (if (= k 0)
+                  0
+                  (begin
+                    ; Costruisce k concatenato con N.
+                    (setq k (string k))
+                    (pop k -1) ; toglie la "L"
+                    (bigint (string k N))))))))))
+
+Proviamo:
+
+(trova3 10)
+;-> 910L
+(trova3 11)
+;-> 0
+(trova3 143)
+;-> 12999699999999999143L
+
+(= (map trova3 (sequence 1 40)) (map trova2 (sequence 1 40)))
+;-> true
+
+(time (map trova3 (sequence 1 50)))
+;-> 23.945
+(time (map trova3 (sequence 1 60)))
+;-> 49.898
+(time (map trova3 (sequence 1 72)))
+;-> 96.774
+(time (map trova3 (sequence 1 200)))
+;-> 3026.779
+
 ============================================================================
 
