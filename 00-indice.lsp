@@ -3674,6 +3674,10 @@ NOTE LIBERE 38
   Amici binari
   Matematica Vedica
   Sequenza N
+  Prodotto massimo di concatenazioni
+  Somma dei moduli
+  Indici di elementi di una lista in un'altra lista
+  Partizioni eque
 
 PROBLEMI SUI DADI
 =================
@@ -3721,7 +3725,7 @@ BIBLIOGRAFIA/WEB
 
 YO LIBRARY
 ==========
-"yo.zip" Libreria per matematica ricreativa e problem solving (419 funzioni)
+"yo.zip" Libreria per matematica ricreativa e problem solving (420 funzioni)
 
 DOCUMENTAZIONE EXTRA
 ====================

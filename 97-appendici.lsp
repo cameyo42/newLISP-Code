@@ -7333,6 +7333,13 @@ Mi sono divertito anche a programmare diversi giochi (carte, dadi, griglie, ecc.
 Ogni tanto ho preso qualche pausa.
 Ci sono degli errori? Sicuramente si (anche se mi sono impegnato abbastanza).
 Fatemi sapere cosa ne pensate.
+Dal 2025 ho iniziato ad utilizzare l'Intelligenza Artificiale (ChatGPT e Claude) per alcuni degli articoli.
+Se usate nella veste di 'collaboratore' sono una marcia in più per imparare.
+In genere scrivo la soluzione (codice) di un problema e poi la sottopongo all'AI.
+Quando non trovo la soluzione di problema, allora inizio a discutere con l'AI sui possibili metodi di soluzione.
+Non fatevi scrivere il codice completo dall'AI.
+Invece fate scrivere i commenti delle funzioni finali all'AI (sono fenomenali).
+Ad oggi (2026) le due AI sono molto brave a trovare algoritmi per la soluzione dei problemi, ma hanno difficoltà con la sintassi di newLISP (lo confondono con il LISP).
 
 
 ============================================================================

@@ -7288,5 +7288,409 @@ Proviamo:
 (time (map trova3 (sequence 1 200)))
 ;-> 3026.779
 
+
+----------------------------------
+Prodotto massimo di concatenazioni
+----------------------------------
+
+https://codegolf.stackexchange.com/questions/49943/maximum-concatenated-product
+Ci viene data una lista di numeri interi p1, ..., pk (non necessariamente distinti), ciascuno con un valore compreso tra 1 e 9, inclusi.
+Utilizzando ciascuno dei numeri p1, ..., pk esattamente una volta, possiamo formare delle concatenazioni di cifre per ottenere una nuova lista di numeri e calcoliamo il loro prodotto.
+L'obiettivo è massimizzare questo prodotto scegliendo le migliori concatenazioni di cifre.
+
+Ad esempio, ci viene data la lista: 2 3 2 (separati da spazi). Possiamo formare le seguenti concatenazioni:
+2 3 2 (il prodotto di queste concatenazioni è 12)
+23 2 (il prodotto è 46)
+32 2 (il prodotto è 64)
+22 3 (il prodotto è 66)
+Poiché il prodotto massimo di concatenazioni che possiamo formare è 66, visualizziamo questo valore.
+
+Regole:
+Deve essere presente almeno una moltiplicazione (ovvero, non è possibile semplicemente concatenare tutte le cifre e visualizzare il risultato).
+Non è consentito utilizzare operatori diversi dalla moltiplicazione, né inserire parentesi, ecc.
+Si supponga che l'elenco di numeri interi fornito sia separato da spazi e che tutti i numeri interi abbiano valori compresi tra 1 e 9.
+
+Casi di test:
+Input: 1 2 3   --> Output: 63 (ovvero, 21*3)
+Input: 2 5 9   --> Output: 468 (52*9)
+Input: 1 2 3 4 --> Output: 1312 (41*32)
+
+Idea
+----
+Per ogni coppia di numeri a, b, il prodotto a*b è minore della semplice concatenazione ab (=a*10^(cifre di b)+b).
+Quindi è meglio evitare i prodotti e preferire la concatenazione, ma poiché è richiesto almeno un prodotto, dobbiamo costruire due numeri e moltiplicarli.
+Proviamo tutti i possibili raggruppamenti di cifre, costruendo una coppia di numeri da moltiplicare.
+Ogni numero è costruito prendendo le cifre in ordine decrescente.
+Quindi per massimizzare il prodotto, dobbiamo dividere le cifre in due gruppi non vuoti, costruire un numero concatenando le cifre di ciascun gruppo in ordine decrescente, e poi moltiplicare i due numeri.
+
+Vediamo prima la funzione e poi la spiegazione dettagliata dell'algortimo.
+
+(define (max-prod L)
+  (local (m r a b k ai bi sol-a sol-b)
+    ; Ordina le cifre in ordine decrescente.
+    (sort L >)
+    ; 2^(N-1): numero di possibili maschere necessarie.
+    (setq m (<< 1 (- (length L) 1)))
+    ; Massimo prodotto trovato.
+    (setq r 0)
+    ; Prova tutte le maschere da 2^(N-1)-1 fino a 1.
+    (for (i (- m 1) 1 -1)
+      ; Inizializza le due concatenazioni.
+      (setq a "")
+      (setq b "")
+      ; Copia la maschera corrente.
+      (setq k i)
+      ; Assegna ogni cifra a uno dei due gruppi.
+      (dolist (v L)
+        (if (= (& k 1) 1)
+            (setq a (string a v))
+            (setq b (string b v)))
+        ; Passa al bit successivo.
+        (setq k (/ k 2)))
+      ; Converte le due stringhe in numeri.
+      (setq ai (int a 0 10))
+      (setq bi (int b 0 10))
+      ; Aggiorna il massimo.
+      (when (< r (* ai bi))
+        (setq sol-a ai)
+        (setq sol-b bi)
+        (setq r (* ai bi))))
+    (list sol-a sol-b r)))
+
+Algoritmo
+---------
+  1) Ordinamento delle cifre
+  L = (1 2 3 4)
+  Per prima cosa ordiniao le cifre in ordine decrescente:
+  (sort L >)
+  (4 3 2 1)
+  Questo è importante perché, una volta deciso quali cifre appartengono al primo numero e quali al secondo, non dobbiamo provare tutti gli ordini possibili.
+  Per esempio, se decidiamo che il primo gruppo contiene 4 e 1, il numero migliore è necessariamente 41 e non 14.
+  Analogamente, il gruppo 3 2 diventa 32.
+  Quindi la scelta da esplorare è soltanto 'quale cifra va nel gruppo A e quale nel gruppo B?'
+
+2) Perché bastano due gruppi?
+  Supponiamo di avere: a * b * c
+  Se concatenassimo a e b, otteniamo: ab * c
+  e vale: ab > a*b
+  perché: ab = a * 10 + b
+  mentre a*b è molto più piccolo per cifre da 1 a 9.
+  Quindi, quando possiamo scegliere tra a * b e ab conviene concatenare.
+  Questo significa che una soluzione con tre o più numeri può essere migliorata concatenando due di questi numeri.
+  Di conseguenza, nella soluzione ottimale rimangono esattamente due numeri.
+  Il vincolo del problema richiede infatti almeno una moltiplicazione, quindi non possiamo concatenare tutte le cifre in un unico numero.
+
+3) Rappresentare la divisione con una bitmap
+  Con N cifre, assegniamo ad ogni cifra un bit:
+    0 -> gruppo B
+    1 -> gruppo A
+  Per esempio:
+  L = (4 3 2 1)
+  e la bitmap 0110 significa:
+    cifra:    4 3 2 1
+    bit:      0 1 1 0
+              | | | |
+              B A A B
+  Quindi A = 32, B = 41 e otteniamo 32 * 41 = 1312.
+
+4) Perché usiamo N-1 bit?
+  Questo è un dettaglio molto importante.
+  Abbiamo N cifre, ma non vogliamo permettere che tutte finiscano nello stesso gruppo.
+  Quindi dobbiamo escludere 0000 e 1111
+  Per esempio con 4 cifre abbiamo:
+  0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 
+  In realtà alcune di queste rappresentano la stessa divisione, scambiando A e B.
+  Per esempio
+  0110 significa A = 32 e B = 41 mentre
+  1001 significa A = 41 e B = 32.
+  Il prodotto è identico 32 * 41 = 41 * 32.
+  Per questo possiamo eliminare metà delle maschere e considerare soltanto quelle da:
+  0001 a 0111.
+  Con N = 4 sono quindi sufficienti 2^(N-1) - 1 = 7 maschere.
+
+5) Calcolo di m
+  Nel codice usiamo (setq m (<< 1 (- (length L) 1)))
+  (dove << è lo shift a sinistra).
+  Se N = 4 abbiamo 1 << 3, cioè 1000 in binario, ovvero 8
+  Quindi m = 8 e il ciclo:
+  (for (i (- m 1) 1 -1)
+  prova 7 6 5 4 3 2 1
+  cioè 0111 0110 0101 0100 0011 0010 0001
+
+6) Come viene analizzata una bitmap
+  Parte centrale dell'algoritmo:
+  (setq k i)
+  (dolist (v L)
+    (if (= (& k 1) 1)
+        (setq a (string a v))
+        (setq b (string b v)))
+    (setq k (/ k 2)))
+  Supponiamo i = 6, in binario 0110 e L = (4 3 2 1).
+  All'inizio:
+  k = 6
+  a) Prima cifra: 4
+    Controlliamo l'ultimo bit (& 6 1) che dà 0, quindi 4 va in B:
+    A = ""
+    B = "4"
+    Poi (setq k (/ k 2)) diventa k = 3.
+  b) Seconda cifra: 3
+  Ora k = 3 e (& 3 1) dà 1, quindi 3 va in A:
+  A = "3"
+  B = "4"
+  Poi k = 3 / 2 = 1.
+  c) Terza cifra: 2
+  Ora k = 1 e 1 & 1 = 1, quindi 2 va in A:
+  A = "32"
+  B = "4"
+  Poi k = 1 / 2 = 0
+  d) Quarta cifra: 1
+  Ora k = 0 quindi 0 & 1 = 0 e 1 va in B:
+  A = "32"
+  B = "41"
+  Alla fine:
+  32 * 41 = 1312
+
+7) Perché funziona (& k 1)?
+  L'operatore (& k 1) controlla l'ultimo bit di k.
+  Per esempio:
+  k     binario    k & 1
+  -----------------------
+  7       111        1
+  6       110        0
+  3       011        1
+  1       001        1
+  0       000        0
+  Dopo ogni cifra facciamo (setq k (/ k 2)) che, essendo una divisione intera in questo contesto, equivale a spostare i bit verso destra.
+  Quindi possiamo leggere la bitmap un bit alla volta, partendo dal bit meno significativo.
+
+8) Conversione delle concatenazioni
+  Alla fine abbiamo due stringhe a = "32" e b = "41".
+  Le convertiamo in numeri:
+  (setq ai (int a 0 10))
+  (setq bi (int b 0 10))
+  Il parametro 10 è importante perché specifica la base decimale.
+  Otteniamo ai = 32 e bi = 41 e calcoliamo il prodotto (* ai bi) ottenendo 1312.
+
+9) Aggiornamento del massimo
+  La variabile r contiene il massimo prodotto trovato finora.
+  Inizialmente (setq r 0) e per ogni partizione calcoliamo (* ai bi) e controlliamo:
+  (when (< r (* ai bi))
+    (setq r (* ai bi)))
+  Quindi, per 1 2 3 4, abbiamo:
+  321 * 4  = 1284
+  32  * 41 = 1312   <-- nuovo massimo
+  31  * 42 = 1302
+  3   * 421 = 1263
+  21  * 43 = 903
+  2   * 431 = 862
+  1   * 432 = 432
+  Il risultato finale è: 1312
+  Per completezza memorizziamo anche i valori a e b del prodotto massimo.
+
+10) Complessità
+  Con N cifre, proviamo 2^(N-1) - 1 partizioni.
+  Per ogni partizione esaminiamo tutte le N cifre.
+  Quindi la complessità è O(N * 2^N) e la memoria aggiuntiva è essenzialmente O(N) per le due stringhe costruite.
+
+Il punto interessante è che abbiamo eliminato completamente la necessità di provare le permutazioni delle cifre: l'ordinamento decrescente è determinato a priori, mentre la bitmap determina soltanto la divisione in due gruppi.
+
+Proviamo:
+
+(setq L1 '(1 2 3))
+(max-prod L1)
+;-> (3 21 63)
+
+(setq L2 '(2 5 9))
+(max-prod L2)
+;-> (9 52 468)
+
+(setq L3 '(1 2 3 4))
+(max-prod L3)
+;-> (34 41 1312)
+
+
+----------------
+Somma dei moduli
+----------------
+
+Per un intero N prendiamo tutti gli interi positivi M minori di N e calcoliamo la somma di N modulo ogni M.
+In altre parole:
+
+  a(n) = Sum[m=1,n-1](n mod m)
+
+Esempio:
+  N = 14
+  14 % 1  = 0 +
+  14 % 2  = 0 +
+  14 % 3  = 2 +
+  14 % 4  = 2 +
+  14 % 5  = 4 +
+  14 % 6  = 2 +
+  14 % 7  = 0 +
+  14 % 8  = 6 +
+  14 % 9  = 5 +
+  14 % 10 = 4 +
+  14 % 11 = 3 +
+  14 % 12 = 2 +
+  14 % 13 = 1 =
+  = 0 + 0 + 2 + 2 + 4 + 2 + 0 + 6 + 5 + 4 + 3 + 2 + 1 = 31
+
+Sequenza OEIS A004125:
+Sum of remainders of n mod k, for k = 1, 2, 3, ..., n.
+  0, 0, 1, 1, 4, 3, 8, 8, 12, 13, 22, 17, 28, 31, 36, 36, 51, 47, 64, 61,
+  70, 77, 98, 85, 103, 112, 125, 124, 151, 138, 167, 167, 184, 197, 218,
+  198, 233, 248, 269, 258, 297, 284, 325, 328, 339, 358, 403, 374, 414,
+  420, 449, 454, 505, 492, 529, 520, 553, 578, 635, 586, 645, 672, ...
+
+(define (sum-rem N)
+  (if (= N 1) 0
+      (apply + (map (fn(x) (% N x)) (sequence 1 (- N 1))))))
+
+(sum-rem 14)
+;-> 31
+
+(map sum-rem (sequence 1 62))
+;-> (0 0 1 1 4 3 8 8 12 13 22 17 28 31 36 36 51 47 64 61
+;->  70 77 98 85 103 112 125 124 151 138 167 167 184 197 218
+;->  198 233 248 269 258 297 284 325 328 339 358 403 374 414
+;->  420 449 454 505 492 529 520 553 578 635 586 645 672)
+
+(sum-rem 1e6)
+;-> 177531881563
+
+
+-------------------------------------------------
+Indici di elementi di una lista in un'altra lista
+-------------------------------------------------
+
+Date due liste L e K trovare gli indici degli elementi di L in K.
+
+Esempio:
+  L = (1 2 3 4 5 4))
+  K = (0 4 3 2 1 6))
+  1 di L si trova all'indice 4 di K
+  2 di L si trova all'indice 3 di K
+  3 di L si trova all'indice 2 di K
+  4 di L si trova all'indice 1 di K
+  5 di L non si trova in K -> nil
+  4 di L si trova all'indice 1 di K
+  output = (4 3 2 1 nil 1)
+
+(setq L '(1 2 3 4 5 4))
+(setq K '(0 4 3 2 1 6))
+
+(define (find-index L K) (map (fn(x) (find x K)) L))
+(find-index L K)
+;-> (4 3 2 1 nil 1)
+
+(select K (clean nil? (find-index L K)))
+;-> (1 2 3 4 4)
+
+Versione code-golf (39 caratteri):
+(define(f L K)(map(fn(x)(find x K)) L))
+(f L K)
+;-> (4 3 2 1 nil 1)
+
+
+---------------
+Partizioni eque
+---------------
+
+Data una lista di numeri interi, suddividere la lista in due sottoliste in modo tale che il valore assoluto della differenza tra le somme delle due sottoliste sia minimo.
+
+Esempi:
+ (1 2 3)        -->  0 --> (1 2) (3)
+ (2 3 5 7 11)   -->  0 --> (2 5 7) (3 11)
+ (13 17 19 23)  -->  0 --> (13 23) (17 19)
+ (1 2 3 4)      -->  0 --> (1 4) (2 3)
+ (2 2 2 3 3)    -->  0 --> (2 2 2) (3 3)
+ (1 2 3 4 5)    -->  1 --> (1 2 4) (3 5)
+ (1 2 3 4 5 6)  -->  1 --> (1 2 3 4) (5 6)
+ (1 1 2 5)      -->  1 --> (1 1 2) (5)
+ (1 3 9 27)     --> 14 --> (1 3 9) (27)
+
+La lista contiene almeno 3 elementi
+La lista può contenere elementi duplicati
+Le sottoliste non devono essere contigue
+Ogni elemento della lista deve essere presente (esattamente) in una delle due sottoliste
+
+Algoritmo brute-force
+---------------------
+Calcoliamo tutte le partizioni possibili di due sottoliste e verifichiamo quale ha la differenza minima.
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+(define (group-all lst)
+"Generate all partitions of a set into two disjoint, complementary sublists of size (k, N-k), with 1 ≤ k ≤ floor(N/2)"
+; The elements must be unique. Otherwise use the values of indexes.
+  (sort lst) ; ordina la lista per avere ordine coerente nelle partizioni
+  (letn ((N (length lst))
+         (out '())    ; lista finale di partizioni
+         (visti '())) ; lista delle partizioni già viste (come chiavi stringa)
+    ; prova tutti i valori di k da 1 a floor(N/2)
+    (for (k 1 (/ N 2))
+      ; per ogni combinazione c di k elementi da lst
+      (dolist (c (comb k lst))
+        (letn (
+          (resto (difference lst c)) ; ottiene il complemento di c
+          ; converte le due sottoliste in stringhe
+          (k1 (join (map string c)))
+          (k2 (join (map string resto)))
+          ; ordina le due rappresentazioni per ottenere una chiave canonica
+          (chiave (sort (list k1 k2))))
+          ; se la chiave non è già stata vista, la aggiunge
+          (unless (ref chiave visti)
+            (push chiave visti -1)
+            (push (list c resto) out -1)))))
+    out)) ; restituisce la lista delle partizioni uniche
+
+(define (min-diff lst)
+  (letn ( (diff 0)
+          (diff-min 999999999)
+          (L1 '())
+          (L2 '())
+          (len (length lst))
+          ; use indexes instead of elements values
+          (indexes (sequence 0 (- len 1)))
+          (all (group-all indexes)) )
+    (dolist (el all)
+      ; decode indexes
+      (setq a (select lst (el 0)))
+      (setq b (select lst (el 1)))
+      (setq diff (abs (- (apply + a) (apply + b))))
+      (when (< diff diff-min)
+        (setq diff-min diff)
+        (setq L1 a)
+        (setq L2 b)))
+    (list L1 L2 diff-min)))
+
+Proviamo:
+
+(min-diff '(1 2 3)))
+;-> ((3) (1 2) 0)
+(min-diff '(2 3 5 7 11))
+;-> ((3 11) (2 5 7) 0)
+(min-diff '(13 17 19 23))
+;-> ((13 23) (17 19) 0)
+(min-diff '(1 2 3 4))
+;-> ((1 4) (2 3) 0)
+(min-diff '(2 2 2 3 3))
+;-> ((3 3) (2 2 2) 0)
+(min-diff '(1 2 3 4 5))
+;-> ((2 5) (1 3 4) 1)
+(min-diff '(1 2 3 4 5 6))
+;-> ((4 6) (1 2 3 5) 1)
+(min-diff '(1 1 2 5))
+;-> ((5) (1 1 2) 1)
+(min-diff '(1 3 9 27))
+;-> ((27) (1 3 9) 14)
+
 ============================================================================
 
