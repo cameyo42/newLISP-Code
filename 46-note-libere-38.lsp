@@ -7692,5 +7692,194 @@ Proviamo:
 (min-diff '(1 3 9 27))
 ;-> ((27) (1 3 9) 14)
 
+
+----------------------------------
+Famiglie di set (insiemi) laminari
+----------------------------------
+
+Una famiglia di set (insiemi) si dice 'laminare' se per ogni coppia di set A e B appartenenti alla famiglia si verifica una delle seguenti condizioni:
+1) A contiene B
+2) B contiene A
+3) A intersezione B = Insieme vuoto
+
+In altri termini:
+una famiglia 'laminare' è una lista di set che soddisfa la seguente condizione: se due elementi della lista hanno almeno un elemento in comune, uno di essi deve essere completamente contenuto nell'altro.
+
+Esempi:
+
+laminari:
+  (())
+  ((1 2 3) (1 2) (1) ())
+  ((1 2 3 4) (1 2 3) (1 2) (3) (4))
+  ((1 2 3 4) (1 2) (3 4) (1) (3))
+  ((1 2 3 4) (1 3) (2 4) (1) (2) (3) (4) ())
+  ((1 2 3) (4 5) (7 8) (3) (5) (7))
+
+non laminari:
+  ((1 2) (2 3))
+  ((1 2 3 4) (1 2 3) (1 2) (3 4))
+  ((1 2 3 4) (1 2) (3 4) (2 3) (1) (2) (3) (4))
+  ((1 2 3 4 5) (1 2 3) (4 5 6))
+
+Scrivere una funzione che verifica se una lista di set è 'laminare'.
+
+; Genera tutte le coppie di elementi di una lista
+(define (coppie lst all)
+  (let (out '())
+      (for (i 0 (- (length lst) 2))
+        (for (j (+ i 1) (- (length lst) 1))
+            (push (list (lst i) (lst j)) out -1)))
+    out))
+
+(coppie '((1 2 3) (4 5) (7 8)))
+;-> (((1 2 3) (4 5)) ((1 2 3) (7 8)) ((4 5) (7 8)))
+
+; Restituisce true se l'insieme A è sottoinsieme dell'insieme B (nil altrimenti)
+(define (subset? A B)
+  (if (or (= A (intersect A B)) (= A '())) ;() is always a subset
+    true nil))
+
+(define (laminar? lst)
+  (if (= lst '(()))
+      true
+      ;else
+      (local (all stop A B)
+        (setq all (coppie lst))
+        (setq stop nil)
+        (dolist (el all stop)
+          (setq A (el 0))
+          (setq B (el 1))
+          (if-not (or (subset? A B)
+                      (subset? B A)
+                      (= '() (intersect A B)))
+                  (setq stop true)))
+        (not stop))))
+
+Proviamo:
+
+(laminar? '(()))
+;-> true
+(laminar? '((1 2 3) (1 2) (1) ()))
+;-> true
+(laminar? '((1 2 3 4) (1 2 3) (1 2) (3) (4)))
+;-> true
+(laminar? '((1 2 3 4) (1 2) (3 4) (1) (3)))
+;-> true
+(laminar? '((1 2 3 4) (1 3) (2 4) (1) (2) (3) (4) ()))
+;-> true
+(laminar? '((1 2 3) (4 5) (7 8) (3) (5) (7)))
+;-> true
+
+non laminari:
+(laminar? '((1 2) (2 3)))
+;-> nil
+(laminar? '((1 2 3 4) (1 2 3) (1 2) (3 4)))
+;-> nil
+(laminar? '((1 2 3 4) (1 2) (3 4) (2 3) (1) (2) (3) (4)))
+;-> nil
+(laminar? '((1 2 3 4 5) (1 2 3) (4 5 6)))
+;-> nil
+
+
+---------------------------
+Funzioni per insiemi (sets)
+---------------------------
+
+; s-set?
+; Check wheter a list is a set
+(define (s-set? lst)
+  (= (unique lst) lst))
+
+; s-unique
+; Convert a list in a set (remove duplicates)
+(define (s-unique lst)
+  (unique lst))
+
+; s-cardinality
+; Calculate the number of elements of a set
+(define (s-cardinality s)
+  (length s))
+
+; s-intersect
+; Calculate the intersection of two sets
+(define (s-intersect s1 s2)
+  (intersect s1 s2)
+
+; s-intersects
+; Calculate the intersection of N sets
+(define (s-intersects)
+  (let (tmp (intersect (args 0)))
+    (doargs (arg)
+      (setq tmp (intersect tmp arg)))
+    tmp))
+
+; s-difference
+; Calculate the difference of two sets
+(define (s-difference s1 s2)
+  (difference s1 s2)
+
+; s-union
+; Calculate the union of two sets
+(define (s-union s1 s2)
+  (union s1 s2))
+
+; s-belongs?
+; Check whether an element belongs to a set
+(define (s-belongs? x s)
+  (if (or (intersect (list x) s) (= x '())) ;() is always a subset
+    true nil))
+
+; s-subset?
+; Check whether the set s1 is a subset of a set s2
+(define (s-subset? s1 s2)
+  (if (or (= s1 (intersect s1 s2)) (= s1 '())) ;() is always a subset
+    true nil))
+
+; s-disjoint?
+(define (s-disjoint? A B)
+  (if (= (intersect A B) '())))
+
+; s-complement
+; Calculate the complement of a set with respect to the universal set U.
+(define (s-complement s U)
+  (difference U s))
+
+; s-equivalent?
+; Check whether two sets are equipotent
+; that is, whether they have the same number of elements
+(define (s-equivalent? s1 s2)
+  (= (length s1) (length s2)))
+
+; s-equal?
+; Checks whether two sets have the same elements, even in different orders
+(define (s-equal? A B)
+  (= (sort A) (sort B)))
+
+; s-idem?
+; Check whether two sets have the same elements in the same order
+(define (s-idem? s1 s2)
+  (= s1 s2))
+
+; s-cartesian
+; Calculate the cartesian product of N sets
+(define (s-cartesian)
+  (let (out '(()) )
+    (dolist (lst (args))
+      (let (tmp '())
+        (dolist (parz out)
+          (dolist (el lst)
+            (push (append parz (list el)) tmp -1)))
+        (setq out tmp)))
+    out))
+
+; s-powerset
+; Generate all subsets of a set
+(define (s-powerset s)
+  (if (empty? s)
+      (list '())
+      (let ((element (first s))
+            (p (powerset (rest s))))
+         (extend (map (fn (subset) (cons element subset)) p) p))))
+
 ============================================================================
 

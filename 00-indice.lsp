@@ -3678,6 +3678,8 @@ NOTE LIBERE 38
   Somma dei moduli
   Indici di elementi di una lista in un'altra lista
   Partizioni eque
+  Famiglie di set (insiemi) laminari
+  Funzioni per insiemi (sets)
 
 PROBLEMI SUI DADI
 =================

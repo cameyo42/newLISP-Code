@@ -791,7 +791,6 @@ Ritorna una lista che contiene una copia di ogni elemento che si trova sia nella
 (setq a1 '(1 2 3 4 5))
 (setq b1 '(4 5))
 (setq c1 '(5 6 7 8))
-
 (intersects a1 b1 c1)
 ;-> (5)
 
@@ -945,7 +944,7 @@ a
 (equal? '(a b c) '(b a c))
 (equal? A B)
 (sort B)
-B
+
 
 ;------------------------------------------------------
 ; disjoint?
