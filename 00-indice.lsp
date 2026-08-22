@@ -3680,6 +3680,8 @@ NOTE LIBERE 38
   Partizioni eque
   Famiglie di set (insiemi) laminari
   Funzioni per insiemi (sets)
+  Permutazione palindroma
+  Numero euleriano
 
 PROBLEMI SUI DADI
 =================

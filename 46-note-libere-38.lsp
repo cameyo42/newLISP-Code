@@ -7881,5 +7881,186 @@ Funzioni per insiemi (sets)
             (p (powerset (rest s))))
          (extend (map (fn (subset) (cons element subset)) p) p))))
 
+
+-----------------------
+Permutazione palindroma
+-----------------------
+
+Data una stringa di caratteri ASCII, determinare se esiste una qualunque permutazione di caratteri palindroma e restituire la stringa palindroma.
+
+Invece di calcolare tutte le permutazioni...
+Una stringa può essere riordinata in modo da formare un palindromo se e solo se al massimo un carattere compare un numero dispari di volte.
+Quindi una permutazione di una stringa può essere palindroma solo se risulta vera una delle seguenti condizioni:
+
+1) Frequenze tutte pari
+Il numero di occorrenze di ogni carattere è un numero pari.
+
+2) Una sola frequenza è dispari, mentre tutte le altre sono pari
+Il numero di occorrenze di un carattere è dispari e tutti gli altri hanno occorrenze pari.
+
+Possiamo fare tutto facendo la scansione delle frequenze dei caratteri, contando le occorrenze e poi costruendo il palindromo alternando le coppie a sinistra e a destra (più un eventuale centro per la frequenza dispari).
+
+(define (palindroma str)
+  (let ( (lst (explode str)) ; Lista dei caratteri
+         (unici '()) (freq '())
+         (ch "") (sx "") (centro "") (dx "")
+         (dispari 0) (coppie 0) )
+    ; Caratteri distinti
+    (setq unici (unique lst))
+    ; Frequenze dei caratteri ((carattere frequenza) ...)
+    (setq freq (map list unici (count unici lst)))
+    ; Conta le frequenze dispari e costruisce le due metà
+    (dolist (x freq)
+      ; carattere corrente
+      (setq ch (x 0))
+      ; Numero di coppie da inserire
+      (setq coppie (/ (x 1) 2))
+      ; Una frequenza dispari può fornire una coppia più il carattere centrale
+      (when (odd? (x 1))
+            (++ dispari)
+            (setq centro ch))
+      ; Costruisce le due metà (sx e dx)
+      (if-not (zero? coppie)
+        (for (i 1 coppie)
+          ; Coppia: una copia a sinistra...
+          (push ch sx -1)
+          ; ...e una copia a destra (in ordine inverso)
+          (push ch dx))))
+    ; Più di una frequenza dispari -> impossibile
+    (if (> dispari 1)
+        nil
+        ; sx + centro + dx
+        (string sx centro dx))))
+
+Proviamo:
+
+(palindroma "aabbc")
+;-> "abcba"
+
+(palindroma "aabbcc")
+;-> "abccba"
+
+(palindroma "aaaabbbcccc")
+;-> "abcbbbcba"
+
+(palindroma "aabbcd")
+;-> nil
+(palindroma "aabbc")
+;-> abcba
+
+
+----------------
+Numero euleriano
+----------------
+
+Il numero euleriano A(n, m) è il numero di permutazioni di (1 2 ... n) in cui esattamente m elementi sono maggiori dell'elemento precedente.
+Queste permutazioni sono anche chiamate 'rises' (incrementi).
+Il valore di m è compreso nell'intervallo (0..n).
+Nota: per m = n, risulta sempre A(n n) = 0.
+
+Esempio
+  n = 3
+  Ci sono 3! = 6 permutazioni di (1 2 3)
+  1 2 3
+  < < 2 elementi sono maggiori del precedente
+  1 3 2
+  < > 1 ...
+  2 1 3
+  > < 1 ...
+  2 3 1
+  < > 1 ...
+  3 1 2
+  > < 1 ...
+  3 2 1
+  > > 0 ...
+  Quindi gli output per A(3, m) per m in (0 1 2 3) saranno:
+  A(3, 0) = 1
+  A(3, 1) = 4
+  A(3, 2) = 1
+  A(3, 3) = 0
+
+Sequenza OEIS A008292:
+Triangle of Eulerian numbers T(n,k) (n >= 1, 1 <= k <= n) read by rows.
+  1, 1, 1, 1, 4, 1, 1, 11, 11, 1, 1, 26, 66, 26, 1, 1, 57, 302, 302, 57,
+  1, 1, 120, 1191, 2416, 1191, 120, 1, 1, 247, 4293, 15619, 15619, 4293,
+  247, 1, 1, 502, 14608, 88234, 156190, 88234, 14608, 502, 1, 1, 1013,
+  47840, 455192, 1310354, 1310354, 455192, 47840, 1013, 1, ...
+
+Formula ricorsiva
+  A(0, m) = 0
+  A(n, 0) = 1
+  A(n, m) = (n - m)A(n - 1, m - 1) + (m + 1)A(n - 1, m)
+
+(define (A n m)
+  (cond ((zero? n) 0)
+        ((zero? m) 1)
+        (true
+          (+ (* (- n m) (A (- n 1) (- m 1)))
+             (* (+ m 1) (A (- n 1) m))))))
+
+(define (f n)
+  (let (out '())
+    (for (m 0 (- n 1))
+      (push (A n m) out -1))
+    out))
+
+(f 3)
+;-> (1 4 1)
+
+(flat (map f (sequence 1 12)))
+;-> (1 1 1 1 4 1 1 11 11 1 1 26 66 26 1 1 57 302 302 57
+;->  1 1 120 1191 2416 1191 120 1 1 247 4293 15619 15619 4293
+;->  247 1 1 502 14608 88234 156190 88234 14608 502 1 1 1013
+;->  47840 455192 1310354 1310354 455192 47840 1013 1 1 2036
+;->  152637 2203488 9738114 15724248 9738114 2203488 152637
+;->  2036 1 1 4083 478271 10187685 66318474 162512286 162512286
+;->  66318474 10187685 478271 4083 1)
+
+Vediamo l'approccio brute-force:
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i))))
+    out))
+
+; Calcola quanti elementi di una lista sono maggiori dell'elemento precedente
+(define (greater lst)
+  (first (count '(true) (map > (rest lst) (chop lst)))))
+
+; Calcola il numero euleriano di un numero n
+; m = (0 1 2 ... n)
+(define (euler n)
+  (let ( (freq (array n) '(0))
+         (permute (perm (sequence 1 n))) )
+  (dolist (p permute)
+    (++ (freq (greater p))))
+  (array-list freq)))
+
+(euler 3)
+;-> (1 4 1)
+
+(time (println (flat (map euler (sequence 1 10)))))
+;-> (1 1 1 1 4 1 1 11 11 1 1 26 66 26 1 1 57 302 302 57
+;->  1 1 120 1191 2416 1191 120 1 1 247 4293 15619 15619 4293
+;->  247 1 1 502 14608 88234 156190 88234 14608 502 1 1 1013
+;->  47840 455192 1310354 1310354 455192 47840 1013 1)
+;-> 9422.687
+
 ============================================================================
 
