@@ -11774,7 +11774,13 @@ NUMERI DI BELL
 
 I numeri Bell o esponenziali rappresentano il numero di modi diversi per partizionare un insieme che ha esattamente n elementi. Ogni elemento della sequenza B(n) è il numero di partizioni di un insieme di dimensione n dove l'ordine degli elementi e l'ordine delle partizioni non sono significativi. Per esempio, (a b) è lo stesso di (b a) e (a) (b) è lo stesso di (b) (a).
 
-I primi numeri di Bell hanno i seguenti valori (OEIS A000110):
+I primi numeri di Bell hanno i seguenti valori
+Sequenza OEIS A000110:
+  1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597,
+  27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159,
+  5832742205057, 51724158235372, 474869816156751, 4506715738447323,
+  44152005855084346, 445958869294805289, 4638590332229999353,
+  49631246523618756274, ...
 
 B(0) = 1 C'è solo un modo per partizionare un insieme con zero elementi ()
 B(1) = 1 C'è solo un modo per partizionare un insieme con un elemento (a)
@@ -11782,7 +11788,6 @@ B(2) = 2 Due elementi possono essere partizionati in due modi (a) (b), (a b)
 B(3) = 5 Tre elementi possono essere partizionati in cinque modi (a) (b) (c), (a b) (c), (a) (b c), (a c) (b), (a b c)
 ecc.
 
-1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597, 27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159, 5832742205057, 51724158235372, 474869816156751, 4506715738447323, 44152005855084346, 445958869294805289, 4638590332229999353, 49631246523618756274
 
 I numeri di Bell possono essere calcolati creando il cosiddetto triangolo di Bell, chiamato anche matrice di Aitken o triangolo di Peirce:
 

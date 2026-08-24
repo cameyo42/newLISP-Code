@@ -5105,6 +5105,13 @@ Proviamo:
 (check q)
 ;-> 264
 
+Vedi anche "Quadrati magici" su "Problemi vari".
+Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
+Vedi anche "Il quadrato magico SATOR" su "Note libere 13"
+Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
+Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+Vedi anche "Il quadrato 'quasi' magico di Franklin" su "Note libere 38".
+
 
 --------------
 Serie infinite

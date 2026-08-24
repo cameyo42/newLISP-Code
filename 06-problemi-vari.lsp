@@ -1248,6 +1248,13 @@ Il quadrato magico di Dürer ha la proprietà aggiuntiva che le somme in ciascun
 Inoltre, qualsiasi coppia di numeri posizionata simmetricamente attorno al centro del quadrato somma a 17, una proprietà che rende il quadrato ancora più magico.
 Infine, al centro della riga inferiore compaiono i numeri 15 e 14, che indicano la data dell'incisione, 1514.
 
+Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
+Vedi anche "Quadrati magici curiosi" su "Note libere 3".
+Vedi anche "Il quadrato magico SATOR" su "Note libere 13"
+Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
+Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+Vedi anche "Il quadrato 'quasi' magico di Franklin" su "Note libere 38".
+
 
 -------------------
 Quadrati magici 3x3
@@ -1383,6 +1390,13 @@ Rendiamo il risultato più leggibile:
 
 Il quarto quadrato magico è lo Shu (simbolo divinatorio e matematico cinese).
 Ogni altro quadrato magico di ordine tre è ottenuto dallo Shu per rotazione e/o riflessione.
+
+Vedi anche "Quadrati magici" su "Problemi vari".
+Vedi anche "Quadrati magici curiosi" su "Note libere 3".
+Vedi anche "Il quadrato magico SATOR" su "Note libere 13"
+Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
+Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+Vedi anche "Il quadrato 'quasi' magico di Franklin" su "Note libere 38".
 
 
 -------------------

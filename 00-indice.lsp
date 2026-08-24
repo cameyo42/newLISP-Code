@@ -3682,6 +3682,10 @@ NOTE LIBERE 38
   Funzioni per insiemi (sets)
   Permutazione palindroma
   Numero euleriano
+  Problema con le percentuali
+  Sovrapposizione di lancette di un orologio
+  Galton machine
+  Il quadrato 'quasi' magico di Franklin
 
 PROBLEMI SUI DADI
 =================

@@ -8062,5 +8062,451 @@ Vediamo l'approccio brute-force:
 ;->  47840 455192 1310354 1310354 455192 47840 1013 1)
 ;-> 9422.687
 
+
+---------------------------
+Problema con le percentuali
+---------------------------
+
+In un villaggio il 90% delle persone beve tè, l'80% beve caffè, il 70% granita e il 60% frappè.
+Nessuno beve tutte e quattro le bevande.
+Quante persone in percentuale bevono frappè o granita?
+
+Supponiamo che nel villaggio ci siano 100 persone.
+Quindi risulta:
+  90/100 bevono tè
+  80/100 bevono caffè
+  70/100 bevono granita
+  60/100 bevono frappè
+
+Il numero totale delle 'bevute' vale:
+  90 + 80 + 70 + 60 = 300 bevute
+
+La media delle 'bevute' per ogni persona vale:
+
+  300/100 = 3 bevute
+
+Poichè il testo ci dice che nessuna persona beve tutte e 4 le bevande, risulta che ogni persona può fare 0, 1, 2 o 3 'bevute'.
+Se la media delle 'bevute' deve valere 3 (l'abbiamo appena calcolata) e abbiamo a disposizione solo persone che possono fare 0, 1 , 2, o 3 'bevute', non possiamo avere nessun valore a 0 o a 1 o a 2 (cioè nessuna persona può fare 0 o 1 o 2 'bevute').
+Questo vuol dire che tutte le persone fanno esattamente 3 'bevute' diverse.
+
+Adesso torniamo alla domanda del problema:
+quante persone in percentuale bevono frappè o granita?
+
+Poichè ogni persona beve 3 bibite diverse, allora sicuramente tutti bevono o il frappè o la granita o entrambe.
+Quindi le persone che bevono frappè o granita sono il 100%.
+
+Come calcolare le percentuali delle 3 'bevute' (X, Y, Z, W)?
+
+A questo punto possiamo determinare direttamente le percentuali delle quattro combinazioni:
+  Il X% beve caffè, granita e frappè.
+  Il Y% beve tè, granita e frappè.
+  Il Z% beve tè, caffè e frappè.
+  Il W% beve tè, caffè e granita.
+
+Su 100 persone:
+- 90 bevono tè      -> 10 non bevono tè
+- 80 bevono caffè   -> 20 non bevono caffè
+- 70 bevono granita -> 30 non bevono granita
+- 60 bevono frappè  -> 40 non bevono frappè
+
+Dato che ciascuno beve esattamente 3 bevande, ogni persona non beve esattamente una delle quattro bevande.
+
+  +--------------------------+-----------------+-------------+
+  | Bevande bevute           | Bevanda esclusa | Percentuale |
+  +--------------------------+-----------------+-------------+
+  | Caffè + granita + frappè | tè              | 10%         |
+  | Tè + granita + frappè    | caffè           | 20%         |
+  | Tè + caffè + frappè      | granita         | 30%         |
+  | Tè + caffè + granita     | frappè          | 40%         |
+  +--------------------------+-----------------+-------------+
+
+Pertanto:
+
+- X = 10%
+- Y = 20%
+- Z = 30%
+- W = 40%
+
+e infatti 10 + 20 + 30 + 40 = 100%
+
+Frappè o granita
+Ogni persona beve 3 delle 4 bevande, quindi **non è possibile che una persona non beva né frappè né granita**, perché in quel caso potrebbe bere soltanto tè e caffè, cioè al massimo 2 bevande.
+Perciò:
+  (frappè Unione granita) = 100%
+Quindi il 100% beve granita O frappè e il 30% beve granita E frappè.
+
+
+------------------------------------------
+Sovrapposizione di lancette di un orologio
+------------------------------------------
+
+Le due lancette di un orologio, quella dei minuti e quella delle ore, si trovano sovrapposte a mezzanotte.
+Dopo quanto tempo torneranno a sovrapporsi?
+Quante volte si sovrappongono in 24 ore?
+
+Le velocità delle due lancette, avendo lo stesso verso di percorrenza, devono sottrarsi.
+La velocità della lancetta dei minuti è 1 giro ogni 60 minuti, quella della lancetta delle ore è 1 giro ogni 720 minuti.
+1/60 - 1/720 = (12-1)/720 = 11/720.
+La velocità relativa è quindi, in termini di giri al minuto, 1/65.4545... ovvero dopo 65.45 minuti (65 minuti e 27 secondi) le due lancette torneranno a toccarsi.
+Possiamo ragionare anche in un altro modo, quante volte si sovrappongono in dodici ore.
+Sono 11 volte e dato che la velocità angolare di entrambe le lancette è costante ovviamente si sovrapporranno dopo intervalli costanti pari a 720 minuti (12 ore) diviso 11 ciascuno, che fa 65.4545 (periodico) minuti.
+Quindi in 24 ore le lancette si sovrappongono 22 volte.
+
+
+--------------
+Galton machine
+--------------
+
+Lo scienziato Francis Galton inventò una semplice macchina che spiega la matematica alla base della curva a campana (curva normale), e la chiamò 'quincunx'.
+
+  +-+         +-+ 
+  |  \       /  |
+  |   \  o  /   |
+  |    \   /    |
+  |     \ /     |
+  |. . . . . . .| riga 1
+  |. . . . . . .| riga 2
+  |. . . . . . .| riga 3 
+  |. . . . . . .| riga 4
+  |. . . . . . .| riga 5
+  |. . . . . . .| riga 6
+  |. . . . . . .| riga 7
+  |. . . . . . .| riga 8
+  |             |
+  | | | | | | | |
+  | | | |o| | | |
+  | | |o|o|o| | |
+  | |o|o|o|o|o| |
+  |o|o|o|o|o|o|o|
+  +-------------+
+
+Una pallina (o) viene lasciata cadere nella parte superiore del quinconce, poi rimbalza tra i birilli (puntini) finché non cade dal basso in una griglia di colonne.
+Dopo che molte palline sono state lasciate cadere, la forma che assumono nelle colonne in cui sono cadute ricorda una curva a campana.
+
+Utilizzando la probabilità, possiamo capire come funziona.
+Innanzitutto, immaginiamo un quinconce con un solo birillo e supponiamo che quando una palla colpisce il birillo, il risultato sia casuale, con una probabilità del 50% che rimbalzi a sinistra e una probabilità del 50% che rimbalzi a destra.
+In altre parole, ha una probabilità di 1/2 di finire una posizione a sinistra e una probabilità di 1/2 di finire una posizione a destra.
+Ora, aggiungiamo una seconda fila di birilli.
+La palla cadrà o a sinistra e poi di nuovo a sinistra, che chiamerò LL, LR, RL o RR.
+Poiché muoversi a sinistra e poi a destra equivale a rimanere nella stessa posizione, LL e RR si annullano a vicenda (così come RL e LL), quindi ora c'è 1/4 di probabilità che la palla finisca una posizione a sinistra, 2/4 di probabilità che sia al centro e 2/4 di probabilità che sia a destra.
+Ripetendo questo procedimento per una terza fila di birilli, le opzioni ugualmente probabili per la caduta della pallina sono LLL, LLR, LRL, LRR, RRR, RRL, RLR, RLL.
+Questo ci dà una probabilità di 1/8 di cadere all'estrema sinistra, 3/8 di cadere alla sinistra, 3/8 di cadere alla destra e 1/8 di cadere all'estrema destra.
+In altre parole, se ci sono due file di birilli nel quincunx e introduciamo molte palline nella macchina, la legge dei grandi numeri dice che le palline cadranno lungo il fondo in modo da approssimare il rapporto 1:2:1.
+Se ci sono tre file, cadranno nel rapporto 1:3:3:1.
+Se ci sono quattro file, cadranno nel rapporto 1:4:6:4:1.
+Se continuassi a calcolare le probabilità, un quincunx di dieci file produrrebbe palline che cadono nel rapporto 1:10:45:120:210:252:210:120:45:10:1.
+
+Scriviamo un programma che simula il 'quincunx'.
+I parametri del programma son il numero di palline e il numero di righe del 'quincunx'.
+
+Non è necessario simulare realmente la posizione della pallina nel 'quincunx':
+basta contare quante volte, nelle 'righe' scelte casuali, viene scelta la direzione destra.
+La colonna finale è proprio quel numero.
+
+Algoritmo
+Per ogni pallina generiamo casualmente righe scelte tra sinistra e destra.
+Il numero di passi a destra determina la colonna in cui la pallina finirà.
+
+Versione 1:
+
+(define (quincunx1 balls rows)
+  ; Crea il vettore per le colonne di uscita: rows + 1
+  (let (cols (array (+ rows 1) '(0)))
+    ; Simula ogni pallina
+    (for (b 1 balls)
+      (let ((pos 0))
+        ; Ogni riga comporta uno spostamento
+        ; casuale a sinistra oppure a destra.
+        ; Consideriamo sinistra = 0 e destra = 1.
+        (for (r 1 rows)
+          (when (= (rand 2) 1)
+            (++ pos)))
+        ; pos è il numero di volte che la pallina
+        ; ha scelto destra: determina la colonna finale.
+        (++ (cols pos))))
+    cols))
+
+Proviamo:
+
+(quincunx1 10000 10)
+;-> (10 102 439 1201 2076 2484 2067 1207 354 51 9)
+
+Aumentando le palline (con 10 righe) il risultato normalizzato tende a:
+  1 : 10 : 45 : 120 : 210 : 252 : 210 : 120 : 45 : 10 : 1
+cioè ai coefficienti del binomio (1 + 1)^10.
+
+(time (quincunx2 1e6 100))
+;-> 7641.146
+
+Versione 2 (leggermente più lenta):
+
+(define (quincunx2 balls rows)
+  ; Crea il vettore per le colonne di uscita: rows + 1
+  (let ((cols (array (+ rows 1) '(0))))
+    ; Simula ogni pallina
+    (for (b 1 balls)
+        ; Ogni riga comporta uno spostamento
+        ; casuale a sinistra oppure a destra.
+        ; Consideriamo sinistra = 0 e destra = 1.
+        ; 'moves' contiene tutta la sequenza dei rows movimenti.
+        (setq moves (rand 2 rows))
+        ; Contiamo il numero di volte che la pallina
+        ; ha scelto destra: determina la colonna finale.
+        (++ (cols (first (count '(1) moves))))
+    cols)))
+
+(quincunx2 10000 10)
+;-> (10 127 437 1176 2071 2423 2043 1185 426 93 9)
+
+(time (quincunx2 1e6 100))
+;-> 9407.446
+
+
+--------------------------------------
+Il quadrato 'quasi' magico di Franklin
+--------------------------------------
+
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |200|217|232|249|  8| 25| 40| 57| 72| 89|104|121|136|153|168|185|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 58| 39| 26|  7|250|231|218|199|186|167|154|135|122|103| 90| 71|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |198|219|230|251|  6| 27| 38| 59| 70| 91|102|123|134|155|166|187|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 60| 37| 28|  5|252|229|220|197|188|165|156|133|124|101| 92| 69|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |201|216|233|248|  9| 24| 41| 56| 73| 88|105|120|137|152|169|184|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 55| 42| 23| 10|247|234|215|202|183|170|151|138|119|106| 87| 74|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |203|214|235|246| 11| 22| 43| 54| 75| 86|107|118|139|150|171|182|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 53| 44| 21| 12|245|236|213|204|181|172|149|140|117|108| 85| 76|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |205|212|237|244| 13| 20| 45| 52| 77| 84|109|116|141|148|173|180|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 51| 46| 19| 14|243|238|211|206|179|174|147|142|115|110| 83| 78|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |207|210|239|242| 15| 18| 47| 50| 79| 82|111|114|143|146|175|178|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 49| 48| 17| 16|241|240|209|208|177|176|145|144|113|112| 81| 80|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |196|221|228|253|  4| 29| 36| 61| 68| 93|100|125|132|157|164|189|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 62| 35| 30|  3|254|227|222|195|190|163|158|131|126| 99| 94| 67|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  |194|223|226|255|  2| 31| 34| 63| 66| 95| 98|127|130|159|162|191|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  | 64| 33| 32|  1|256|225|224|193|192|161|160|129|128| 97| 96| 65|
+  +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Nel quadrato magico 16x16 di Franklin, la somma di ogni riga e di ogni colonna è 2056.
+Il quadrato contiene i numeri da 1 a 256, ciascuno una sola volta, e la somma magica è:
+  16*(256+1)/2) = 2056
+Non è un vero quadrato magico, poiché la somma delle diagonali non è 2056, ma ha tante proprietà nascoste.
+Ad esempio, la somma di ogni sotto-quadrato 2x2 (e ce ne sono 225) è 514, il che significa che la somma di ogni sotto-quadrato 4x4 è 2056.
+
+Verifichiamo il quadrato di Franklin e alcune proprietà.
+
+(setq franklin
+   '((200 217 232 249   8  25  40  57  72  89 104 121 136 153 168 185)
+     ( 58  39  26   7 250 231 218 199 186 167 154 135 122 103  90  71)
+     (198 219 230 251   6  27  38  59  70  91 102 123 134 155 166 187)
+     ( 60  37  28   5 252 229 220 197 188 165 156 133 124 101  92  69)
+     (201 216 233 248   9  24  41  56  73  88 105 120 137 152 169 184)
+     ( 55  42  23  10 247 234 215 202 183 170 151 138 119 106  87  74)
+     (203 214 235 246  11  22  43  54  75  86 107 118 139 150 171 182)
+     ( 53  44  21  12 245 236 213 204 181 172 149 140 117 108  85  76)
+     (205 212 237 244  13  20  45  52  77  84 109 116 141 148 173 180)
+     ( 51  46  19  14 243 238 211 206 179 174 147 142 115 110  83  78)
+     (207 210 239 242  15  18  47  50  79  82 111 114 143 146 175 178)
+     ( 49  48  17  16 241 240 209 208 177 176 145 144 113 112  81  80)
+     (196 221 228 253   4  29  36  61  68  93 100 125 132 157 164 189)
+     ( 62  35  30   3 254 227 222 195 190 163 158 131 126  99  94  67)
+     (194 223 226 255   2  31  34  63  66  95  98 127 130 159 162 191)
+     ( 64  33  32   1 256 225 224 193 192 161 160 129 128  97  96  65)))
+
+; Calcola e verifica le somme delle righe di una matrice quadrata
+(define (check-rows qm show)
+  (let (rows-sums (map (fn(x) (apply + x)) qm)) ; lista con somme di ogni riga
+    (if show (println " rows: " rows-sums))
+    ; somme righe tutte uguali?
+    (if (apply = rows-sums) (rows-sums 0) nil)))
+
+(check-rows franklin true)
+;-> rows: (2056 2056 2056 2056 2056 2056 2056 2056
+;->        2056 2056 2056 2056 2056 2056 2056 2056)
+;-> 2056
+
+; Calcola e verifica le somme delle colonne di una matrice quadrata
+(define (check-cols qm show)
+  (letn ( (qm (transpose qm)) ; matrice trasposta
+          ; lista con somme di ogni colonna
+          (cols-sums (map (fn(x) (apply + x)) qm)) )
+    (if show (println " cols: " cols-sums))
+    ; somme colonne tutte uguali?
+    (if (apply = cols-sums) (cols-sums 0) nil)))
+
+(check-cols franklin true)
+;-> cols: (2056 2056 2056 2056 2056 2056 2056 2056
+;->        2056 2056 2056 2056 2056 2056 2056 2056)
+;-> 2056
+
+; Calcola e verifica le somme delle diagonali di una matrice quadrata
+(define (check-diags qm show)
+  (let ( (dim (length qm))
+         (diag1 0)
+         (diag2 0))
+    (for (i 0 (- dim 1))
+      (setq diag1 (+ diag1 (qm i i)))
+      (setq diag2 (+ diag2 (qm i (- dim i 1)))))
+    (if show (println "diags: " (list diag1 diag2)))
+    ; somme diagonali uguali?
+    (if (= diag1 diag2) diag1 nil)))
+
+(check-diags franklin true)
+;-> diags: (1928 2184)
+;-> nil
+
+; Calcola e verifica se una matrice quadrata è un 'quadrato magico'
+; somme(righe) = somme(colonne) = somme(diagonali)
+(define (check-qm qm show)
+  (= (check-rows qm show)
+     (check-cols qm show)
+     (check-diags qm show)))
+
+(check-qm franklin)
+;-> nil
+
+Proprietà 1
+-----------
+Ogni blocco 2x2 del quadrato ha somma 514.
+La proprietà vale per tutti i 2x2, anche quelli che attraversano il bordo del quadrato considerando il quadrato 'avvolto' su sé stesso.
+
+Esempio:
+
+  Nell'angolo superiore sinistro:
+
+  200 217
+   58  39
+
+La somma di questi elementi vale:
+
+  200 + 217 + 58 + 39 = 514
+
+(define (p1-cell qm row col show)
+  (local (len r1 c1 r2 c2)
+    (setq len (length qm))
+    (setq r1 row c1 col)
+    (setq r2 (% (+ row 1) len))
+    (setq c2 (% (+ col 1) len))
+    (if show (println (qm r1 c1) { } (qm r1 c2) { } (qm r2 c1) { } (qm r2 c2)))
+    (+ (qm r1 c1) (qm r1 c2) (qm r2 c1) (qm r2 c2))))
+
+(p1-cell franklin 3 4 true)
+;-> 252 229 9 24
+;-> 514
+
+(p1-cell franklin 15 15 true)
+;-> 65 64 185 200
+;-> 514
+
+(define (p1 qm show)
+  (let ((out '()) (rows (length qm)) (cols (length (qm 0))))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1))
+        (push (p1-cell qm r c show) out -1)))
+    (if show (println out))
+    (if (apply = out) (out 0) nil)))
+
+(p1 franklin)
+;-> 514
+
+Proprietà 2
+-----------
+Dividendo il quadrato in blocchi 4x4, ogni blocco somma a 2056.
+
+Esempio:
+
+  +--------+--------+--------+--------+
+  |  4x4   |  4x4   |  4x4   |  4x4   |
+  +--------+--------+--------+--------+
+  |  4x4   |  4x4   |  4x4   |  4x4   |
+  +--------+--------+--------+--------+
+  |  4x4   |  4x4   |  4x4   |  4x4   |
+  +--------+--------+--------+--------+
+  |  4x4   |  4x4   |  4x4   |  4x4   |
+  +--------+--------+--------+--------+
+
+Prendendo il primo blocco in alto a sinistra:
+
+  200 217 232 249
+   58  39  26   7
+  198 219 230 251
+   60  37  28   5
+
+La somma di questi elementi vale:
+
+  200+217+232+249+58+39+26+7+198+219+230+251+60+37+28+5 = 2056
+
+; Extract a submatrix from a matrix
+(define (extract-matrix matrix ri cj rows cols)
+  (local (sub-mat ic jc)
+    ; create the result array (empty)
+    (setq sub-mat (array rows cols '(0)))
+    ; index for rows of sub-mat
+    (setq ic 0)
+    (for (rr ri (+ rows ri -1))
+      ; index for cols of sub-mat
+      (setq jc 0)
+      (for (cc cj (+ cols cj -1))
+        (setf (sub-mat ic jc) (matrix rr cc))
+        (++ jc))
+      (++ ic))
+    ; return a list
+    (array-list sub-mat)))
+
+(define (p2 qm show)
+  (let ((out '()) (rows (length qm)) (cols (length (qm 0))))
+    (for (r 0 (- rows 1) 4)
+      (for (c 0 (- cols 1) 4)
+        (push (apply + (flat (extract-matrix qm r c 4 4))) out -1)))
+    (if show (println out))
+    (if (apply = out) (out 0) nil)))
+
+(p2 franklin true)
+;-> (2056 2056 2056 2056 2056 2056 2056 2056
+;->  2056 2056 2056 2056 2056 2056 2056 2056)
+;-> 2056
+
+Proprietà 3
+-----------
+Ogni metà di una riga, cioè ogni gruppo di 8 celle consecutive, ha somma 1028.
+
+Esempio:
+Nella prima riga: 200 217 232 249 8 25 40 57, la somma vale: 1028.
+E le altre 8 celle: 72 89 104 121 136 153 168 185 sommano anch'esse a 1028.
+
+(define (p3 qm show)
+  (let ((out '()) (rows (length qm)) (cols (length (qm 0))))
+    (for (r 0 (- rows 1))
+      (for (c 0 (- cols 1) 8)
+        (push (apply + (flat (extract-matrix qm r c 1 8))) out -1)))
+    (if show (println out))
+    (if (apply = out) (out 0) nil)))
+
+(p3 franklin true)
+;-> (1028 1028 1028 1028 1028 1028 1028 1028 1028 1028 1028 1028
+;->  1028 1028 1028 1028 1028 1028 1028 1028 1028 1028 1028 1028
+;->  1028 1028 1028 1028 1028 1028 1028 1028)
+;-> 1028
+
+Vedi anche "Quadrati magici" su "Problemi vari".
+Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
+Vedi anche "Quadrati magici curiosi" su "Note libere 3".
+Vedi anche "Il quadrato magico SATOR" su "Note libere 13".
+Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
+Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+
 ============================================================================
 

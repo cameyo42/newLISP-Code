@@ -864,6 +864,13 @@ Divisori di 98596: (1 2 4 157 314 628 24649 49298 98596)
 ;-> 24649 314 4
 ;-> 628 1 49298
 
+Vedi anche "Quadrati magici" su "Problemi vari".
+Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
+Vedi anche "Quadrati magici curiosi" su "Note libere 3".
+Vedi anche "Il quadrato magico SATOR" su "Note libere 13".
+Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+Vedi anche "Il quadrato 'quasi' magico di Franklin" su "Note libere 38".
+
 
 ---------------------------------
 The Curious Case of Steve Ballmer

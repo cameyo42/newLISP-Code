@@ -2271,6 +2271,13 @@ Questo perchè per ogni somma abbiamo N numeri da modificare per ottenere il ris
 Nel 2025 ancora non è stato scoperto nessun quadrato multimagico 3x3 (e non si sa neanche se esiste).
 Invece è stato dimostrato che esistono quadrati multimagici per ogni dimensione maggiore di 3.
 
+Vedi anche "Quadrati magici" su "Problemi vari".
+Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
+Vedi anche "Quadrati magici curiosi" su "Note libere 3".
+Vedi anche "Il quadrato magico SATOR" su "Note libere 13".
+Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
+Vedi anche "Il quadrato 'quasi' magico di Franklin" su "Note libere 38".
+
 
 ------------
 Gara di moto

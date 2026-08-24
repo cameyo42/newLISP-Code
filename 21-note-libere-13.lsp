@@ -1645,6 +1645,13 @@ P (Pe) = 17,   N (Nun) = 14.
 I simboli numerici nella Bibbia:
 1, 3, 4, 7, 12, 40, 666, 1000
 
+Vedi anche "Quadrati magici" su "Problemi vari".
+Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
+Vedi anche "Quadrati magici curiosi" su "Note libere 3".
+Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
+Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+Vedi anche "Il quadrato 'quasi' magico di Franklin" su "Note libere 38".
+
 
 ----------------------------------------
 Alberi binari completi con vettori/liste
