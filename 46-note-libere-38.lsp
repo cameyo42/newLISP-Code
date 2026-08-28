@@ -8878,5 +8878,166 @@ con n = N diventa:
   ---------*N - 1 = N
       N
 
+
+------------------------------------
+Numeri quadrati uguali a numeri cubi
+------------------------------------
+
+Determinare, fino ad un dato limite, le coppie di numeri interi positivi x e y per cui risulta che il quadrato di x è uguale al cubo di y:
+
+  x^2 = y^3
+
+Per calcolare la radice cubica intera troncata verso zero:
+  (cbrt  27)  ->  3
+  (cbrt  28)  ->  3
+  (cbrt -27)  -> -3
+  (cbrt -28)  -> -3
+possiamo usare la ricerca binaria sul valore assoluto:
+
+; cbrt-int: restituisce l'intero più vicino a zero la cui terza potenza non supera il valore assoluto di x.
+(define (cbrt x)
+  (let ((sign (if (< x 0) -1 1))
+        (n (bigint (format "%.0f" (abs x))))
+        (lo 0L)
+        (hi 1000000000L)
+        (mid 0L))
+    (while (<= lo hi)
+      (setq mid (/ (+ lo hi) 2))
+      (if (<= (* mid mid mid) n)
+          (setq lo (+ mid 1))
+          (setq hi (- mid 1))))
+    (* sign hi)))
+
+(define (xy limite)
+  (letn ( (seq (map bigint (sequence 1 limite)))
+          (quad (map (fn(x) (* x x)) seq))
+          (cubi (map (fn(x) (* x x x)) seq))
+          (equal (intersect quad cubi))
+          (out '()) )
+      (dolist (el equal) 
+        (push (list (sqrt el) (cbrt-int el) el) out -1))
+    out))
+
+Proviamo:
+
+(xy 10000)
+;-> ((1 1 1L) (8 4 64L) (27 9 729L) (64 16 4096L) (125 25 15625L)
+;->  (216 36 46656L) (343 49 117649L) (512 64 262144L) (729 81 531441L)
+;->  (1000 100 1000000L) (1331 121 1771561L) (1728 144 2985984L)
+;->  (2197 3810778 4826809L) (2744 6658042 7529536L) (3375 225 11390625L)
+;->  (4096 16374406 16777216L) (4913 7403677 24137569L)
+;->  (5832 32868772 34012224L) (6859 28545978 47045881L)
+;->  (8000 15902255 64000000L) (9261 10992186 85766121L))
+
+(time (println (length (xy 1e6))))
+;-> 100
+;-> 1117.824
+
+
+---------------------------------------
+Somma ripetuta delle cifre di un numero
+---------------------------------------
+
+Dato un intero positivo n, indichiamo con SB(n) la somma delle cifre di n in base B.
+Applicando iterativamente la funzione SB, si ottiene infine un intero a una cifra (nell'intervallo da 0 a B−1) che indicheremo con RB(n).
+Diremo che n si "riduce" a RB(n) tramite l'iterazione della funzione somma di cifre.
+
+Proposizione: Per ogni base B, l'intero positivo n si riduce al residuo di n modulo B−1.
+In altre parole, RB(n) = n mod B−1.
+
+Dimostrazione: La rappresentazione in base B di n è della forma:
+
+n = d0 + d1*B + d2*B^2 + d3*B^3 + ...
+
+Valutando questa espressione modulo B−1, possiamo sostituire ogni B con 1 e otteniamo:
+
+n = d0 + d1 + d2 + d3 + ... = SB(n) mod (B−1)
+
+Pertanto, SB(n) = n mod B−1, il che significa che la funzione somma di cifre è la funzione identità modulo B−1, e lo sono anche le iterazioni di questa funzione. Quindi abbiamo RB(n) = n mod (B−1), che doveva essere dimostrato.
+
+Esempi:
+  12345 --> 1+2+3+4+5=15 --> 1+5=6 --> 6
+  16547 --> 1+6+5+4+7=23 --> 2+3=5 --> 5
+
+; Calcola la somma ripetuta delle cifre di un numero N in base B
+(define (digit-root N B) (% N (- B 1)))
+
+(digit-root 12345 10)
+;-> 6
+(digit-root 16547 10)
+;-> 5
+
+Se vogliamo includere anche i numeri negativi:
+
+(define (digit-root N B)
+    (+ 1 (% (- (abs N) 1) (- B 1))))
+
+(digit-root 12345 10)
+;-> 6
+(digit-root 16547 10)
+;-> 5
+(digit-root -12345 10)
+;-> 6
+(digit-root -16547 10)
+;-> 5
+
+
+--------------------
+Paradosso di Dodgson
+--------------------
+
+In un sacchetto ci sono due biglie, di cui non si sa nulla se non che ciascuna è nera o bianca (in modo indipendente e casuale).
+Determinare i loro colori delle due biglie senza estrarle dal sacchetto.
+
+Questo problema è irrisolvibile, eppure Dodgson dichiara che la risposta è "Una è nera e l'altra è bianca".
+Seguiamo il suo ragionamento:
+Innanzitutto, il contenuto del sacchetto è costituito da NN, NB o BB, con probabilità rispettivamente di 1/4, 1/2 e 1/4.
+Ora, consideriamo l'aggiunta di una biglia nera al sacchetto (senza guardare), in modo che il contenuto sia costituito da NNN, NNB o NBB, con probabilità rispettivamente di 1/4, 1/2 e 1/4.
+Se, dopo aver aggiunto una biglia nera, ne estraiamo una a caso, la probabilità di estrarre una biglia nera è:
+
+  (1/4)*1 + (1/2)*(2/3) + (1/4)*(1/3) = 2/3
+
+Quindi, poiché la probabilità di estrarre una biglia nera è 2/3, il contenuto del sacchetto deve essere per forza NNB (ovvero, due biglie nere e una bianca), e poiché abbiamo appena aggiunto una biglia nera, il contenuto originale doveva essere NB (una biglia nera e una bianca).
+
+Dov'è l'errore?
+---------------
+La probabilità di un particolare risultato (ad esempio, pescare il nero) eseguendo una determinata operazione su un sistema può dipendere dallo stato del sistema, ma anche dalla nostra conoscenza dello stato del sistema stesso.
+È possibile che lo stato effettivo del sistema a 3 biglie sia (ad esempio) BWW, e se sappiamo che questo è lo stato del sistema, allora la probabilità di pescare il nero è 1/3.
+D'altra parte, se non conosciamo lo stato del sistema, ma sappiamo che si trova nello stato BBB, BBW o BWW con probabilità rispettivamente di 1/4, 1/2 e 1/4, allora la probabilità complessiva di pescare il nero è 2/3.
+Il problema chiede di determinare il colore delle biglie in uno stato particolare (che non conosciamo), non di determinare il colore in base al calcolo delle probabilità di tutti gli stati possibili.
+
+"poiche' la probabilita' di estrarre una biglia nera e' 2/3, il contenuto del sacchetto deve essere per forza NNB"
+Questa conclusione non segue dal calcolo precedente.
+Il valore 2/3 e' una 'probabilita' marginale', cioe' la probabilita' di ottenere N quando non conosciamo quale sia lo stato effettivo del sacchetto. Non e' la probabilita' condizionata a uno stato particolare.
+Il punto fondamentale è che dopo l'aggiunta della biglia nera, gli stati possibili sono:
+
++-------+-----------------------+-----------------------+
+| Stato | Probabilita' iniziale | P(N estratto | stato) |
++-------+-----------------------+-----------------------+
+| NNN   | 1/4                   | 1                     |
+| NNB   | 1/2                   | 2/3                   |
+| NBB   | 1/4                   | 1/3                   |
++-------+-----------------------+-----------------------+
+
+Quindi la probabilita' di estrarre N vale:
+
+  P(N)= (1/4)(1) + (1/2)(2/3) + (1/4)(1/3) = 2/3.
+
+Ma questo significa soltanto:
+
+  P(estrarre N) = 2/3
+
+Non significa:
+
+  P(stato = NNB) = 1
+
+Anzi, prima di effettuare l'estrazione, le probabilita' degli stati continuano a essere:
+
+  P(NNN)=1/4, P(NNB)=1/2, P(NBB)=1/4.
+
+Il fatto che la probabilita' dell'evento "estraggo N" sia 2/3 non ci dice quale dei tre stati sia realmente presente.
+
+In termini probabilistici, il ragionamento confonde 'la probabilita' di un risultato dato un insieme di stati possibili' con 'la probabilita' di uno stato dato un risultato'. Sono due probabilita' condizionate diverse.
+
 ============================================================================
 

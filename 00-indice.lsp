@@ -3689,6 +3689,9 @@ NOTE LIBERE 38
   Numero additivo e sottrattivo di una lista di interi
   Media dei lanci
   Quante facce?
+  Numeri quadrati uguali a numeri cubi
+  Somma ripetuta delle cifre di un numero
+  Paradosso di Dodgson
 
 PROBLEMI SUI DADI
 =================
