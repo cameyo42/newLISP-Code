@@ -1383,13 +1383,41 @@ Rendiamo il risultato più leggibile:
   (println)
 )
 
-                          Lo Shu
-2 7 6    2 9 4    4 3 8    4 9 2    6 1 8    6 7 2    8 1 6    8 3 4
-9 5 1    7 5 3    9 5 1    3 5 7    7 5 3    1 5 9    3 5 7    1 5 9
-4 3 8    6 1 8    2 7 6    8 1 6    2 9 4    8 3 4    4 9 2    6 7 2
+Lo Shu
+------
+Il quadrato Lo Shu è un quadrato magico normale di ordine 3 (matrice 3x3) contenente tutti gli interi da 1 a 9 senza ripetizioni disposti in modo tale che sommando i numeri sulle diverse righe, colonne o diagonali si ottenga sempre lo stesso valore, che deve essere 
+(1 + 2 + 4 + 5 + 6 + 7 + 8 + 9)/3 = 15
 
-Il quarto quadrato magico è lo Shu (simbolo divinatorio e matematico cinese).
-Ogni altro quadrato magico di ordine tre è ottenuto dallo Shu per rotazione e/o riflessione.
+  4 9 2
+  3 5 7
+  8 1 6
+
+Questa configurazione, originaria della Cina, è stata considerata un simbolo dell'armonia universale: i numeri da 1 (l'inizio di tutte le cose) a 9 (il completamento) sono considerati benauguranti, soprattutto il 5 centrale.
+La somma magica 15 si interpreta come la durata di ciascuno dei 24 cicli dell'anno solare cinese
+L'alternarsi dei numeri pari e dispari sulle caselle periferiche si interpreta come alternarsi armonioso di yang e yin.
+
+Ecco le principali proprietà matematiche e le simmetrie che rendono il quadrato Lo Shu un oggetto geometrico e aritmetico perfetto:
+
+La Costante Magica e il Centro
+Il numero 5 centrale: Il numero 5 occupa sempre la casella centrale. È la media aritmetica dei numeri da 1 a 9 ed agisce come il "perno" geometrico del quadrato.
+Coppie complementari: Qualsiasi linea retta che attraversa il centro unisce due numeri che sommano sempre a 10 (es. 1+9, 2+8, 3+7, 4+6). Moltiplicando questa somma per 3 e aggiungendo il centro, si ottiene la costante magica (10 \times 1.5 = 15).
+
+Simmetrie Geometriche
+Unicità fondamentale: Il Lo Shu è l'unico quadrato magico 3x3 possibile utilizzando i numeri da 1 a 9.
+ Rotazioni e riflessioni: Esistono altre 7 varianti apparenti, ma sono semplici rotazioni (di 90°, 180° o 270°) o riflessioni speculari della stessa identica struttura. I numeri d'angolo saranno sempre pari (2, 4, 6, 8) e quelli mediani sempre dispari (1, 3, 7, 9).
+  2 7 6    2 9 4    4 3 8    6 1 8    6 7 2    8 1 6    8 3 4
+  9 5 1    7 5 3    9 5 1    7 5 3    1 5 9    3 5 7    1 5 9
+  4 3 8    6 1 8    2 7 6    2 9 4    8 3 4    4 9 2    6 7 2
+
+Proprietà dei Quadrati (Algebra)
+Se eleviamo al quadrato i numeri delle righe o delle colonne, emergono simmetrie sorprendenti:
+Somma dei quadrati delle righe: La somma dei quadrati dei numeri della prima riga è uguale a quella della terza riga (4^2 + 9^2 + 2^2 = 8^2 + 1^2 + 6^2 = 101).
+Somma dei quadrati delle colonne: La somma dei quadrati della prima colonna è uguale a quella della terza colonna (4^2 + 3^2 + 8^2 = 2^2 + 7^2 + 6^2 = 89).
+
+La Proprietà dei Numeri a Tre Cifre
+Se consideriamo le righe e le colonne come numeri a tre cifre, la simmetria si mantiene anche invertendo l'ordine di lettura:
+Righe speculari: 492^2 + 357^2 + 816^2 = 294^2 + 753^2 + 618^2
+Colonne speculari: 438^2 + 951^2 + 276^2 = 834^2 + 159^2 + 672^2
 
 Vedi anche "Quadrati magici" su "Problemi vari".
 Vedi anche "Quadrati magici curiosi" su "Note libere 3".

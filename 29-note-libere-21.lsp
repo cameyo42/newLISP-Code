@@ -5271,6 +5271,49 @@ Proviamo:
 (time (map seq-mat (sequence 1 1000)))
 ;-> 0.964
 
+Un modo interessante di calcolare la sequenza.
+
+Data una lista di numeri interi applicare i seguenti passi:
+1) costruire una nuova lista con tutte le somme delle coppie di due numeri adiacenti.
+   a(n-1) = a(n) + a(n-1)
+2) se la nuova lista contiene un solo elemento --> stop e restituire l'elemento.
+   altrimenti applicare il passo 1) alla nuova lista.
+
+Esempio:
+  lista = (7 3 2 9 3)
+  7+3=10 3+2=5 2+9=11 9+3=12
+  (10 5 11 12)
+  10+5=15 5+11=16 11+12=23
+  (15 16 23)
+  15+16=31 16+23=39
+  (31 39)
+  31+39=70
+  (70)
+  70
+
+(define (calc func lst)
+  (let (len (length lst))
+    (for (k 1 (- len 1))
+      (setq lst (map func (rest lst) (chop lst))))
+    (lst 0)))
+
+Proviamo:
+
+(calc + (sequence 1 10))
+;-> 2816
+
+Adesso passiamo a 'calc' le sequenze (1 2) (1 2 3) (1 2 3 4) ... (1 2 3 4 ... limite)
+
+(define (seq limite)
+  (let (out '(1))
+    (for (i 2 20)
+      (push (calc + (sequence 1 i)) out -1))
+  out))
+
+(seq 20)
+;-> (1 3 8 20 48 112 256 576 1280 2816 6144 13312 28672 61440 131072
+;->  278528 589824 1245184 2621440 5505024)
+
 
 ----------------------------------
 Un altro bug della versione 10.7.6
@@ -5299,9 +5342,9 @@ Workaround:
 
 Workaround (by vashushpanov):
 
-In file nl-liststr.c replace string:
+In file "nl-liststr.c" replace the string:
   if (length <= 1 || count == 0 || length == labs(count))
-to
+with
   if (length <= 1 || count == 0 || length == labs(count) || count % length == 0)
 
 and recompile NewLisp.

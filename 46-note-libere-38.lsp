@@ -260,10 +260,10 @@ Esempio:
   E(14)=6 (1 4 6 9 10 14)
   O(14)=8 (2 3 5 7 8 11 12 13)
 
- n    =   1     2     3     4     5     6     7     8     9     10         
+ n    =   1     2     3     4     5     6     7     8     9     10
 (E O) = (1 0) (1 1) (1 2) (2 2) (2 3) (3 3) (3 4) (3 5) (4 5) (5 5)
-       
- n    =   11    12    13    14    15    16    17    18     19     20  
+
+ n    =   11    12    13    14    15    16    17    18     19     20
 (E O) =  (5 6) (5 7) (5 8) (6 8) (7 8) (8 8) (8 9) (8 10) (8 11) (8 12) ...
 
 Polya ("Problema di Polya") ha dimostrato che se E(n) <= O(n) è vero per ogni n >= 2, ciò implicherebbe l'ipotesi di Riemann. Ma il controesempio più piccolo è n = 906150257.
@@ -317,7 +317,7 @@ Distance from n to closest prime that is different from n.
 
 (define (closest N)
   (local (succ prec found dist-sx dist-dx)
-    (cond ((= N 0) 2) ; perchè 2 è il primo più vicino 0 --> abs(2 - 0) = 2 
+    (cond ((= N 0) 2) ; perchè 2 è il primo più vicino 0 --> abs(2 - 0) = 2
           ((= N 1) 1) ; perchè 2 è il primo più vicino 1 --> abs(2 - 1) = 1
           ((= N 2) 1) ; perchè 3 è il primo più vicino 2 --> abs(3 - 2) = 1
           ((= N 3) 1) ; perchè 2 è il primo più vicino 3 --> abs(2 - 3) = 1
@@ -332,7 +332,7 @@ Distance from n to closest prime that is different from n.
             ; cerca il primo numero primo maggiore di N
             (setq succ (+ N 1))
             (setq found nil)
-            (until found              
+            (until found
               (if (prime? succ)
                   (setq found true)
                   (++ succ)))
@@ -380,7 +380,7 @@ Dato un numero primo P generare la seguente sequenza:
   P(0) = P
   P(1) = P(0) + P(0) + 1, se P(1) è primo
   ...
-  P(n) = P(n-1) + P(n-1) + 1, se P(n) è primo 
+  P(n) = P(n-1) + P(n-1) + 1, se P(n) è primo
 
 La sequenza si ferma al primo P(i) non primo.
 
@@ -816,37 +816,37 @@ la visita procede cosi':
   path = ()
   entra in 0
   path = (0)
-  
+
   entra in 1
   path = (0 1)
-  
+
   entra in 3
   path = (0 1 3)
-  
+
   3 è un pozzo
   salva (0 1 3)
-  
+
   backtracking
   path = (0 1)
-  
+
   backtracking
   path = (0)
-  
+
   entra in 2
   path = (0 2)
-  
+
   entra in 3
   path = (0 2 3)
-  
+
   3 è un pozzo
   salva (0 2 3)
-  
+
   backtracking
   path = (0 2)
-  
+
   backtracking
   path = (0)
-  
+
   backtracking
   path = ()
 
@@ -1135,7 +1135,7 @@ Esempio:
 
           | 1 10 20 "a" |
 Tabella = | 2 11 22 "b" |
-          | 3 12 77 "c" |  
+          | 3 12 77 "c" |
 
 (setq t '((1 10 20 "a") (2 11 22 "b") (3 12 77 "c")))
 
@@ -1334,7 +1334,7 @@ Nella funzione i passi 1) e 2) vengono raggruppati ed effettuati con un solo cic
     ; Ciclo per ogni carattere della stringa...
     (dostring (c str)
       (setq ch (char c))
-      ; se il carattere corrente si trova in pat 
+      ; se il carattere corrente si trova in pat
       ; ed è diverso dall'ultimo carattere di 'new-str',
       ; allora lo aggiunge a 'new-str'
       (if (and (find ch pat) (!= ch (new-str -1))) (extend new-str ch)))
@@ -1393,11 +1393,11 @@ Se tutti i caratteri rispettano l'ordine, restituiamo true.
       (if ord
         ; se l'ordine del carattere corrente è minore dell'ordine corrente
         (if (< ord cur-ord)
-            (begin 
+            (begin
               ; esce dal ciclo con risultato 'nil'
               (setq out true)
               ;(println (list ch ord cur-ord)))
-            ; altrimenti aggiorna l'ordine corrente con 
+            ; altrimenti aggiorna l'ordine corrente con
             ; l'ordine del carattere corrente
             (setq cur-ord ord))))
     (not out)))
@@ -1775,7 +1775,7 @@ sottoliste consecutive con elementi diversi = (1 4 5) (5) (5 6 2 3) (3 8)
 (define (break-unique lst)
   (local (len out palo cur)
     (setq len (length lst))
-    (cond 
+    (cond
       ((= len 0) '())
       ((= len 1) (list lst))
       (true
@@ -1793,7 +1793,7 @@ sottoliste consecutive con elementi diversi = (1 4 5) (5) (5 6 2 3) (3 8)
                 (true ; elemento diverso dal precedente
                   ; aggiunge l'elemento corrente alla sottolista corrente
                   (push el cur -1)
-                  ; aggiorna il valore del palo con l'elemento corrente                  
+                  ; aggiorna il valore del palo con l'elemento corrente
                   (setq palo el))))
         (push cur out -1)
         out))))
@@ -2016,7 +2016,7 @@ Rappresentazione di un soroban (matrice 7 x 12) con tutte cifre a 0:
     (if (>= pos (length (matrix 0)))
         (println "Error: overflow")
         ;else
-        (for (i 0 6) 
+        (for (i 0 6)
           (setf (matrix i pos) (DIGITS digit i))))
   matrix)
 
@@ -2198,7 +2198,7 @@ Esempio:
   numero di cifre dispari = 2 (3 3)
   lunghezza numero = 3
   N --> 123
-  
+
 DENEAT(n): concatenate number of even digits in n, number of odd digits and total number of digits.
 (Digits: Even, Not Even, And Total). Leading zeros are then omitted.
 
@@ -2668,7 +2668,7 @@ Proviamo:
 
 (setq p '((2 2) (4 2) (4 4) (6 6) (7 6) (8 6) (10 3) (12 5) (14 3)))
 (polyline-L+ p 1.5)
-;-> ((2 2) (3.5 2) (4 2) (4 3) (4 4) 
+;-> ((2 2) (3.5 2) (4 2) (4 3) (4 4)
 ;->  (4.353553390593274 4.353553390593274)
 ;->  (5.414213562373095 5.414213562373095)
 ;->  (6 6) (6.67157287525381 6)
@@ -2723,8 +2723,8 @@ Recamán's sequence (or Recaman's sequence): a(0) = 0; for n > 0, a(n) = a(n-1) 
 Adesso calcoliamo la sequenza dei numeri di Recaman in base alla loro frequenza.
 Esempio:
   Il primo numero di Recaman che ha frequenza 1 è il numero 0
-  Il primo numero di Recaman che ha frequenza 2 è il numero 
-  Il primo numero di Recaman che ha frequenza 3 è il numero 
+  Il primo numero di Recaman che ha frequenza 2 è il numero
+  Il primo numero di Recaman che ha frequenza 3 è il numero
   ...
 
 Usiamo un vettore per memorizzare le frequenze.
@@ -2858,7 +2858,7 @@ Formula della serie armonica (finita):
 
 (define (blocchi len)
   (let ((b 0) (h 0) (stop nil))
-    (for (i 1 1e7 1 stop) 
+    (for (i 1 1e7 1 stop)
       (inc h (div i))
       (when (>= h len)
           (setq stop true)
@@ -3289,7 +3289,7 @@ Si tratta quindi di un algoritmo di ricerca esaustiva, semplice da implementare 
     (unique out)))
 
 (define (ruler N)
-  (cond 
+  (cond
     ((= N 1) '(0 1))
     ((= N 2) '(0 1 2))
     ((= N 3) '(0 1 3) '(0 2 3))
@@ -3315,7 +3315,7 @@ Si tratta quindi di un algoritmo di ricerca esaustiva, semplice da implementare 
             ; base da provare
             ; ('el' deve contenere 0 e N perchè sono sempre nella soluzione)
             (setq new-base (append el base))
-            ; calcola tutte le sottrazioni uniche 
+            ; calcola tutte le sottrazioni uniche
             ; delle coppie di segni di 'new-base'
             (setq values (all-couples-sub new-base))
             ; quando le sottrazioni coprono tutti i numeri da 1 a N, allora
@@ -3786,7 +3786,7 @@ Specifiche:
 - Peso totale: W = Sum[i=1,N] w(i) + w(J)
 
 Probabilità di ogni simbolo su un singolo rullo
-  p(i) = w(i)/W 
+  p(i) = w(i)/W
   p(J) = w(J)/W
 
 Probabilità di vincita come simbolo 'X'
@@ -4471,7 +4471,7 @@ Versione code-golf (127 caratteri):
 
 ------------------
 Numeri di McNugget
------------------- 
+------------------
 
 I numeri Chicken McNugget sono numeri che possono essere espressi come somma di 6, 9 o 20.
 (le dimensioni iniziali delle famose confezioni di Chicken McNugget vendute da McDonald).
@@ -4629,7 +4629,7 @@ y + 3xz(1 + xy)^2 + 3xy^2(4 + 3xy),
   (list (add (mul z (pow (add 1 (mul x y)) 3))
              (mul y y (add 1 (mul x y)) (add 4 (mul 3 x y))))
         (add y (mul 3 x z (pow (add 1 (mul x y)) 2))
-               (mul 3 x y y (add 4 (mul 3 x y))))             
+               (mul 3 x y y (add 4 (mul 3 x y))))
         (sub (mul 2 x) (mul 3 x x y) (mul x x x z))))
 
 Proviamo:
@@ -5070,7 +5070,7 @@ Numero di fattori primi dispari = numero di fattori primi pari
 Determinare la sequenza dei numeri per cui risulta:
 
   numero di fattori primi dispari = numero di fattori primi pari
-  
+
 Sequenza OEIS A072978:
 Numbers of the form m * 2^bigomega(m), where m>1 is odd and bigomega(m) = A001222(m), the number of prime factors of m.
 (number of odd prime factors) = (number of even prime factors).
@@ -5142,13 +5142,13 @@ L'ultimo passaggio è sommare tutto:
   (1) -> 1
   (2) -> 2
 
-E questo è la lista che deve essere restituita: 
+E questo è la lista che deve essere restituita:
 
   (9 6 11 1 1 8 1 2)
 
 Compito
 -------
-Data una lista non vuota con numeri interi positivi (diversi da zero), stampare la somma delle sottostringhe. 
+Data una lista non vuota con numeri interi positivi (diversi da zero), stampare la somma delle sottostringhe.
 
 Casi di test
 ------------
@@ -5225,7 +5225,7 @@ If n is even either there is a part of size 1, whose removal gives a partition o
 
 Formula:
   a(n) = 1, if n = 0,
-  Sum[i=0..floor(n/2)]a(i), if n > 0. 
+  Sum[i=0..floor(n/2)]a(i), if n > 0.
 
 (define (seq limite)
   (if (= limite 0) '(1)
@@ -5361,7 +5361,7 @@ Number of ways of writing n = p+q with p, q primes and p >= q.
     out))
 
 (define (gold num)
-  (if (< num 2) 
+  (if (< num 2)
       '()
       (let (primi (primes-to num))
         (sum2 num primi))))
@@ -5393,7 +5393,7 @@ Esempio:
   lista dei gruppi: (1 2 1)
 
 (groups '(1 2 1) '(A B C D))
-;-> (((A) (B C) (D)) 
+;-> (((A) (B C) (D))
 ;->  ((A) (B D) (C))
 ;->  ((A) (C D) (B))
 ;->  ((B) (A C) (D))
@@ -5575,7 +5575,7 @@ La funzione 'remove-items' rimuove una sola occorrenza per ogni elemento present
 Proviamo:
 
 (groups '(1 2 1) '(A B C D))
-;-> (((A) (B C) (D)) 
+;-> (((A) (B C) (D))
 ;->  ((A) (B D) (C))
 ;->  ((A) (C D) (B))
 ;->  ((B) (A C) (D))
@@ -5645,9 +5645,9 @@ Poi:
 ;->  ((A B) (A)))
 
 Quindi i passi sono:
-1) lista originale -> 
-2) -> sostituzione con indici univoci -> 
-3) -> 'groups' -> 
+1) lista originale ->
+2) -> sostituzione con indici univoci ->
+3) -> 'groups' ->
 4) -> riconversione degli indici nei valori
 
 
@@ -5823,7 +5823,7 @@ Se N è dispari, la frequenza massima può essere esattamente (N+1)/2:
 Se N è pari, invece, la frequenza massima consentita è N/2:
 
 Quindi la condizione di possibilità è anche sufficiente:
-  
+
   2 * frequenza_massima <= N + 1
 
 Questo ci permette di separare il problema in due parti:
@@ -6468,7 +6468,7 @@ Situazione di partenza:
 
 Situazione dopo l'applicazione della legge di gravità:
 0
-0 00 
+0 00
 0000000
 Il carattere vuoto è un spazio " ".
 
@@ -7241,7 +7241,7 @@ Questo permette di ridurre ulteriormente la ricerca, soprattutto per i valori gr
   (cond
     ; Per N < 10 la risposta e' N.
     ((< N 10) N)
-    ; Caso noto senza soluzione. 
+    ; Caso noto senza soluzione.
     ; L'algoritmo BFS restituisce 0 per N = 11
     ; ((= N 11) 0)
     (true
@@ -7398,7 +7398,7 @@ Algoritmo
   Abbiamo N cifre, ma non vogliamo permettere che tutte finiscano nello stesso gruppo.
   Quindi dobbiamo escludere 0000 e 1111
   Per esempio con 4 cifre abbiamo:
-  0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 
+  0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110
   In realtà alcune di queste rappresentano la stessa divisione, scambiando A e B.
   Per esempio
   0110 significa A = 32 e B = 41 mentre
@@ -8159,14 +8159,14 @@ Galton machine
 
 Lo scienziato Francis Galton inventò una semplice macchina che spiega la matematica alla base della curva a campana (curva normale), e la chiamò 'quincunx'.
 
-  +-+         +-+ 
+  +-+         +-+
   |  \       /  |
   |   \  o  /   |
   |    \   /    |
   |     \ /     |
   |. . . . . . .| riga 1
   |. . . . . . .| riga 2
-  |. . . . . . .| riga 3 
+  |. . . . . . .| riga 3
   |. . . . . . .| riga 4
   |. . . . . . .| riga 5
   |. . . . . . .| riga 6
@@ -8501,12 +8501,382 @@ E le altre 8 celle: 72 89 104 121 136 153 168 185 sommano anch'esse a 1028.
 ;->  1028 1028 1028 1028 1028 1028 1028 1028)
 ;-> 1028
 
+In gioventù Franklin creò anche un quadrato magico 8x8:
+
+  52 61  4 13 20 29 36 45
+  14  3 62 51 46 35 30 19
+  53 60  5 12 21 28 37 44
+  11  6 59 54 43 38 27 22
+  55 58  7 10 23 26 39 42
+   9  8 57 56 41 40 25 24
+  50 63  2 15 18 31 34 47
+  16  1 64 49 48 33 32 17
+
+Come spiegato da Franklin, ogni riga e colonna del quadrato hanno la somma comune di 260.
+Inoltre, egli notò che la metà di ogni riga o colonna somma a metà di 260.
+In aggiunta, ciascuna delle "righe curve" (come le chiamava Franklin) ha la somma di 260.
+Le "righe curve" sono sequenze di 8 numeri con una qualsiasi delle forme e orientamenti mostrati di seguito.
+
+      # . . . . . . .   # . . . . . . #
+      . # . . . . . .   . # . . . . # .
+      . . # . . . . .   . . # . . # . .
+      . . . # . . . .   . . . # # . . .
+      . . . # . . . .   . . . . . . . .
+      . . # . . . . .   . . . . . . . .
+      . # . . . . . .   . . . . . . . .
+      # . . . . . . .   . . . . . . . .
+
+      . . . . . . . .   . . . . . . . #
+      . . . . . . . .   . . . . . . # .
+      . . . . . . . .   . . . . . # . .
+      . . . . . . . .   . . . . # . . .
+      . . . # # . . .   . . . . # . . .
+      . . # . . # . .   . . . . . # . .
+      . # . . . . # .   . . . . . . # .
+      # . . . . . . #   . . . . . . . #
+
+Questo vale anche per il motivo che "si avvolge".
+
+Ad esempio, se spostiamo la prima "riga piegata" a sinistra, avvolgendo le estremità, otteniamo i seguenti motivi:
+
+  . . . . . . . #    . . . . . . # .    . . . . . # . .
+  # . . . . . . .    . . . . . . . #    . . . . . . # .
+  . # . . . . . .    # . . . . . . .    . . . . . . . #
+  . . # . . . . .    . # . . . . . .    # . . . . . . .
+  . . # . . . . .    . # . . . . . .    # . . . . . . .
+  . # . . . . . .    # . . . . . . .    . . . . . . . #
+  # . . . . . . .    . . . . . . . #    . . . . . . # .
+  . . . . . . . #    . . . . . . # .    . . . . . # . .
+
+Inoltre, Franklin notò che anche le "righe piegate accorciate" più gli "angoli" sommano a 260.
+Un esempio di questo schema è mostrato di seguito:
+
+         # . # . . # . #
+         . # . . . . # .
+         # . . . . . . #
+         . . . . . . . .
+         . . . . . . . .
+         . . . . . . . .
+         . . . . . . . .
+         . . . . . . . .
+
+
+Come per i modelli precedenti, questo schema può essere ruotato in una qualsiasi delle quattro direzioni e traslato parallelamente in una qualsiasi delle otto posizioni (con avvolgimento), e la somma dei numeri evidenziati è sempre 260.
+
+Infine, Franklin osservò che anche le seguenti due serie di otto numeri sommano a 260:
+
+    . # . . . . # .    # . . . . . . #
+    # . . . . . . #    . . . . . . . .
+    . . . . . . . .    . . . . . . . .
+    . . . . . . . .    . . . # # . . .
+    . . . . . . . .    . . . # # . . .
+    . . . . . . . .    . . . . . . . .
+    # . . . . . . #    . . . . . . . .
+    . # . . . . # .    # . . . . . . #
+
+Questi motivi possono anche essere traslati (con avvolgimento), e poiché sono simmetrici tra orizzontale e verticale, possono essere traslati in entrambe le direzioni.
+
 Vedi anche "Quadrati magici" su "Problemi vari".
 Vedi anche "Quadrati magici" 3x3 su "Problemi vari".
 Vedi anche "Quadrati magici curiosi" su "Note libere 3".
 Vedi anche "Il quadrato magico SATOR" su "Note libere 13".
 Vedi anche "Quadrato magico di prodotti" su "Note libere 29".
 Vedi anche "Multimagic Square - Quadrati magici di potenze dei numeri" su "Note libere 31".
+
+
+----------------------------------------------------
+Numero additivo e sottrattivo di una lista di interi
+----------------------------------------------------
+
+Data una lista di numeri interi applicare i seguenti passi:
+
+Numero additivo
+1) costruire una nuova lista con tutte le somme delle coppie di due numeri adiacenti.
+   a(n) = a(n+1) + a(n)
+2) se la nuova lista contiene un solo elemento --> stop e restituire l'elemento.
+   altrimenti applicare il passo 1) alla nuova lista.
+
+Esempio:
+  lista = (7 3 2 9 3)
+  7 + 3 = 10, 3 + 2 = 5, 2 + 9 = 11,  9 + 3 = 12
+  (10 5 11 12)
+  10 + 5 = 15, 5 + 11 = 16, 11 + 12 = 23
+  (15 16 23)
+  15 + 16 = 31, 16 + 23 = 39
+  (31 39)
+  31 + 39 = 70
+  (70)
+  70
+
+Numero sottrattivo
+1) costruire una nuova lista con tutte le differenze delle coppie di due numeri adiacenti.
+   a(n) = a(n+1) - a(n)
+2) se la nuova lista contiene un solo elemento --> stop e restituire l'elemento.
+   altrimenti applicare il passo 1) alla nuova lista
+Esempio:
+  lista = (7 3 2 9 3)
+  3 - 7 = -4, 2 - 3 = -1, 9 - 2 = 7, 3 - 9 = -6
+  (-4 -1 7 -6)
+  -1 - -4 = 3, 7 - -1 = 8, -6 - 7 = -13
+  (3 8 -13)
+  8 - 3 = 5, -13 - 8 = -21
+  (5 -21)
+  -21 - 5 = -26
+  (-26)
+  -26
+
+(define (number func lst show)
+  (let (len (length lst))
+    (for (k 1 (- len 1))
+      (setq lst (map func (rest lst) (chop lst)))
+      (if show (println lst)))
+    (lst 0)))
+
+Proviamo:
+
+(calc + '(7 3 2 9 3))
+;-> 70
+(calc - '(7 3 2 9 3))
+;-> -26
+
+Consideriamo un numero intero N > 1 e calcoliamo i numeri additivi della sequenza (1 2 ... N):
+
+(define (num-add N) 
+  (if (= N 1) 1
+      (number + (sequence 1 N))))
+(map num-add (sequence 1 20))
+;-> (1 3 8 20 48 112 256 576 1280 2816 6144 13312 28672 61440
+;->  131072 278528 589824 1245184 2621440 5505024)
+
+Questa è la sequenza OEIS A001792: a(n) = (n+2)*2^(n-1).
+
+
+---------------
+Media dei lanci
+---------------
+
+Abbiamo un dado equo con 6 facce numerate da 1 a 6.
+Possiamo lanciare il dado quante volte vogliamo.
+Al termine dei lanci riceviamo un premio proporzionale alla media dei lanci.
+A quale valore medio ci fermiamo?
+
+Scriviamo una funzione che calcola il valore medio di N lanci, il valore massimo della media durante i lanci e quanti lanci sono stati effettuati per ottenere la media massima.
+
+(define (medie limite)
+  (setq stop nil)
+  (setq somma 0)
+  (setq media 0)
+  (setq media-max 0)
+  (for (k 1 limite)
+    (setq somma (+ somma (rand 6) 1))
+    (setq media (div somma k))
+    (when (> media media-max)
+      (setq media-max media)
+      (setq num-lanci k)))
+  (list media (list media-max num-lanci)))
+
+Vediamo i risultati di 10 prove ognuna con 1e7 lanci (10 milioni):
+
+;-> (3.5011677 (6 1))
+;-> (3.4998732 (4.071428571428571 14))
+;-> (3.4994312 (3.559157212317666 617))
+;-> (3.500501 (3.509593415723336 77032))
+;-> (3.500177 (4.571428571428571 7))
+;-> (3.4998346 (3.506143220647037 13755))
+;-> (3.4999763 (3.666666666666667 3))
+;-> (3.5010569 (6 1))
+;-> (3.4995757 (3.517149517149517 15015))
+;-> (3.5006728 (5 1))
+;-> (3.5006728 (5 1))
+
+La media vale 3.5, quindi in teoria dovremmo fermarci appena la media supera il valore di 3.5.
+Inoltre notiamo che la media di un unico lancio vale il numero uscito, quindi se al primo tiro esce un valore superiore a 3 potremmo pensare di terminare i lanci.
+Però la media supera 3.5 anche in altre prove in cui sono stati effettuati pochi lanci:
+  (3.500177 (4.571428571428571 7))
+  (3.4998732 (4.071428571428571 14))
+
+Scriviamo una funzione che calcola anche la media delle medie:
+
+(define (test numero-lanci prove show)
+  (let (out '())
+    (for (k 1 prove)
+      (push (medie numero-lanci) out -1))
+      (if show (println out))
+      (div (apply + (map (fn(x) (x 1 0)) out)) prove)))
+
+Proviamo:
+
+(test 1 100000)
+;-> Media delle medie: 3.49869
+(test 10 100000)
+;-> Media delle medie: 4.20624
+(test 100 100000)
+;-> Media delle medie: 4.2728
+(test 1000 100000)
+;-> Media delle medie: 4.27519
+
+(test 1e6 20)
+;-> Media delle medie: 4.15
+(test 1e6 50)
+;-> Media delle medie: 4.38
+
+Scriviamo una funzione che usa la seguente strategia:
+- se al primo lancio superiamo la media di 3.5, allora ci fermiamo
+- se negli x lanci successivi al primo otteniamo o superiamo la media di 4.0, allora ci fermiamo.
+- se nei lanci successivi a 'x' lanci superiamo la media di 3.5, allora ci fermiamo.
+- se superiamo il 'limite ' dei lanci, allora ci fermiamo (e prendiamo l'ultima media).
+
+Poichè non conosciamo il valore ottimale di 'x' lo mettiamo come parametro della funzione.
+
+(define (lanci x limite)
+  (let ((continua true)
+        (conta 0)
+        (somma 0)
+        (media 0)
+        (media-max 99)
+        (num-lanci 0))
+  ; primo lancio
+  (setq conta 1)
+  (setq somma (+ somma (rand 6) 1))
+  (setq media (div somma conta))
+  (when (> media 3.5)
+    (setq media-max media)
+    (setq num-lanci 1)
+    (setq continua nil))
+  ; da 2 a x lanci
+  (when continua
+    (for (k 2 x 1 (not continua))
+      (setq somma (+ somma (rand 6) 1))
+      (setq media (div somma k))
+      (when (>= media 4.0)
+        (setq media-max media)
+        (setq num-lanci k)
+        (setq continua nil))))
+  (if continua (setq conta x))
+  ; da (x + 1) a 'stop' lanci
+  (while (and continua (< conta limite))
+    (++ conta)
+    (setq somma (+ somma (rand 6) 1))
+    (setq media (div somma conta))
+    (when (> media 3.5)
+      (setq media-max media)
+      (setq num-lanci conta)
+      (setq continua nil)))
+  (when (= media-max 99) (setq media-max media) (setq num-lanci limite))
+  (list media-max num-lanci)))
+
+Proviamo:
+
+(lanci 20 200)
+
+Calcoliamo la media delle medie:
+
+(define (med-med x prove limite show)
+  (let (out '())
+    (for (k 1 prove)
+      (push (lanci x limite) out -1))
+      (if show (println out))
+      (div (apply + (map (fn(x) (x 0)) out)) prove)))
+
+Proviamo:
+
+(med-med 10 1000 1000)
+;-> 4.171
+(med-med 20 1000 1000)
+;-> 4.309
+(med-med 50 1000 1000)
+;-> 4.258
+(med-med 50 1000 20)
+;-> 4.241
+
+I risultati della strategia sono maggiori della media matematica (4.3 > 3.5).
+
+
+-------------
+Quante facce?
+-------------
+
+Supponiamo di avere un dado equo, ma di non sapere quante facce abbia.
+Lanciamo il dado 'n' volte.
+Qual è la migliore stima del numero di facce 'N' in base ai risultati dei lanci?
+
+La formula per la stima N è la seguente:
+
+          (n + 1)
+     N = --------- * max(lanci) - 1
+             n
+dove:
+  n = numero di lanci
+  max(lanci) = valore massimo dei lanci
+
+Per la dimostrazione della formula:
+Vedi anche "Quanti sono?" su "Note libere 6".
+
+Comunque non dobbiamo usare tutti i valori dei lanci.
+I valori ripetuti non hanno importanza per il calcolo della stima N (cioè del numero di facce del dado).
+Ci interessano solo quali valori sono usciti, non le eventuali successive occorrenze.
+In altre parole, prendiamo solo i valori univoci tra tutti i lanci.
+
+Esempio:
+  lanci = (1 4 2 7 8 3 3 4)
+  lanci univoci = (1 4 2 7 8 3)
+
+(define (dice-lst n s)
+"Roll N dice with S sides and return the list of numbers"
+  (map (curry + 1) (rand s n)))
+
+(define (stima lst)
+  (let (n (length lst))
+    (sub (div (mul (add n 1) (apply max lst)) n) 1)))
+
+Proviamo:
+
+(stima '(1 4 2 7 8 3))
+;-> 8.333333333333334
+
+Dado con 6 facce:
+(stima (unique (dice-lst 6 6)))
+;-> 5.25
+(stima (unique (dice-lst 12 6)))
+;-> 6.2
+(stima (unique (dice-lst 30 6)))
+;-> 6
+
+Dado con 12 facce:
+(stima (unique (dice-lst 6 12)))
+;-> 11.5
+(stima (unique (dice-lst 12 12)))
+;-> 12.3333333333333
+(stima (unique (dice-lst 30 12)))
+;-> 12.09090909090909
+(stima (unique (dice-lst 60 12)))
+;-> 12
+
+Dado con 100 facce:
+(stima (unique (dice-lst 10 100)))
+;-> 107.8888888888889
+(stima (unique (dice-lst 50 100)))
+;-> 101.6315789473684
+(stima (unique (dice-lst 100 100)))
+;-> 100.4705882352941
+(stima (unique (dice-lst 500 100)))
+;-> 100
+
+Aumentando il numero di lanci, la stima si avvicina al risultato reale.
+Quando il numero di lanci è molto superiore al numero delle facce, allora la stima è quasi sempre corretta.
+Più precisamente, quando la lista è composta da tutti i numeri da 1 a N, allora la stima vale N.
+Se il numero n di campioni osservati vale N (cioè abbiamo visto tutti i campioni), allora la stima per N dovrebbe essere esatta (perchè in questo caso abbiamo sicuramente osservato il valore massimo N).
+Infatti, la formula:
+
+       (n + 1)
+  N = --------- * max(lanci) - 1
+          n
+
+con n = N diventa:
+
+   (N + 1)
+  ---------*N - 1 = N
+      N
 
 ============================================================================
 

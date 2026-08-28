@@ -2833,6 +2833,8 @@ Sequenza OEIS A002110:
   614889782588491410, 32589158477190044730, 1922760350154212639070,
   117288381359406970983270, 7858321551080267055879090, ...
 
+a(n) è il numero più piccolo N con n fattori primi distinti
+
 (define (primes-to num)
 "Generates all prime numbers less than or equal to a given number"
   (cond ((= num 1) '())

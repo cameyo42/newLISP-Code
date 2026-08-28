@@ -3686,6 +3686,9 @@ NOTE LIBERE 38
   Sovrapposizione di lancette di un orologio
   Galton machine
   Il quadrato 'quasi' magico di Franklin
+  Numero additivo e sottrattivo di una lista di interi
+  Media dei lanci
+  Quante facce?
 
 PROBLEMI SUI DADI
 =================

@@ -5954,18 +5954,18 @@ Si può dimostrare, infatti, che se si osserva un gran numero di tali campioni, 
 Se poniamo E[max(X(i))] = max(X(i)), cioè supponiamo che il valore atteso sia uguale al valore massimo osservato, allora possiamo stimare il numero N:
 
                                n*(N + 1)              (n + 1)
-  E[max(X(i))] = max(X(i)) = -------------  ==>  N = ---------*max(X(i)) - 1
+  E[max(X(i))] = max(X(i)) = -------------  ==>  N = --------- * max(X(i)) - 1
                                 (n + 1)                  n
 
 La formula può essere riscritta nel modo seguente:
 
      (n + 1)             (n + 1)*max         n*max     max
 N = ---------*max - 1 = ------------- - 1 = ------- + ----- - 1 =
-        n                    n                 n        k
+        n                    n                 n        n
 
-           max               max - k
+           max               max - n
   = max + ----- - 1 = max + ---------
-            k                   k
+            n                   n
 
 Scriviamo una funzione per calcolare questo valore e facciamo alcune prove.
 
@@ -6171,9 +6171,9 @@ Le formule:
   N = ---------*max - 1
           n
 e
-             max - k
+             max - n
   N = max + ---------
-                k
+                n
 
 sono equivalenti alla seguente formula:
 
@@ -6212,6 +6212,8 @@ Esempio:
 ;-> 109
 (stima1 t)
 ;-> 109
+
+Vedi anche "Quante facce?" su "Note libere 38".
 
 
 -----------------------------
