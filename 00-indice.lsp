@@ -3693,6 +3693,10 @@ NOTE LIBERE 38
   Somma ripetuta delle cifre di un numero
   Paradosso di Dodgson
 
+NOTE LIBERE 39
+==============
+  Analisi di lanci di dadi
+
 PROBLEMI SUI DADI
 =================
   Problemi 1,..,80
