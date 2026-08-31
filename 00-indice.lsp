@@ -3696,6 +3696,7 @@ NOTE LIBERE 38
 NOTE LIBERE 39
 ==============
   Analisi di lanci di dadi
+  Istogramma di intervalli
 
 PROBLEMI SUI DADI
 =================

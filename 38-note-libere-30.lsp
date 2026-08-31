@@ -3626,8 +3626,8 @@ La complessità temporale della funzione Sweep-Line vale O(n^2*log(n)) nel caso 
     (time (setq result-sweep-small (count-intersecting-pairs small-test))))
   (println "Brute force: "
     (time (setq result-brute-small (count-intersecting-pairs-bruteforce small-test))))
-  (println "Sweep line: " result-sweep-small)
-  (println "Brute force: " result-brute-small)
+  (println "Sweep line result: " result-sweep-small)
+  (println "Brute force result: " result-brute-small)
   (println "Risultati corrispondenti: " (= result-sweep-small result-brute-small))
   ; Dataset grande
   (setq large-test (random-intervals 1000 10000))
@@ -3637,7 +3637,7 @@ La complessità temporale della funzione Sweep-Line vale O(n^2*log(n)) nel caso 
   (println "Brute force: "
     (time (setq result-brute (count-intersecting-pairs-bruteforce large-test))))
   (println "Sweep line result: " result-sweep)
-  (println "Brute force: " result-brute)
+  (println "Brute force result: " result-brute)
   (println "Risultati corrispondenti: " (= result-sweep result-brute)))
 
 ; Esempio di utilizzo
@@ -3697,6 +3697,8 @@ La complessità temporale della funzione Sweep-Line vale O(n^2*log(n)) nel caso 
 ;-> Esempio pratico:
 ;-> Intervalli: ((1 5) (2 7) (3 4) (6 9) (8 10))
 ;-> Numero di coppie intersecanti: 5
+
+Vedi anche "Istogramma di intervalli" su "Note libere 39".
 
 
 ------------
