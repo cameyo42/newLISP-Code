@@ -664,5 +664,416 @@ Questo è il principio del 'separation of concerns': la logica "cosa significa i
 
 Vedi anche "Intersezione di intervalli" su "Note libere 30".
 
+
+----------------------------------------
+Problemi su strutture grafiche numeriche
+----------------------------------------
+
+
+Problema 1
+----------
+
+          +---+                          +---+
+          | a |                          | 0 |
+          +---+                          +---+
+      +---+   +---+                  +---+   +---+
+      | b |   | c |                  | 1 |   | 2 |
+      +---+   +---+                  +---+   +---+
+  +---+   +---+   +---+          +---+   +---+   +---+
+  | d |   | e |   | f |          | 3 |   | 4 |   | 5 |
+  +---+   +---+   +---+          +---+   +---+   +---+
+
+Inserire i numeri da 1 a 6 nei quadrati in modo che risulti:
+  1) a + c + e + d = 14
+  2) a + b + e + f = 14
+  3) d + b + c + f = 14
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i))))
+    out))
+
+(define (solve lst test)
+  (let ((out '()) (permute (perm lst)))
+    (dolist (p permute)
+      (if (test p) (push p out -1)))
+    out))
+
+(define (check1? lst)
+  (and (= (apply + (select lst '(0 2 3 4))) 14)
+       (= (apply + (select lst '(0 1 4 5))) 14)
+       (= (apply + (select lst '(1 2 3 5))) 14)))
+
+(setq sol (solve (sequence 1 6) check1?))
+;-> ((2 1 3 4 5 6) (2 1 4 3 5 6) (5 1 3 4 2 6)
+;->  (5 1 4 3 2 6) (4 1 2 5 3 6) (4 1 5 2 3 6)
+;->  ...
+;->  (2 6 4 3 5 1) (2 6 3 4 5 1) (5 6 3 4 2 1)
+;->  (5 6 4 3 2 1) (4 6 2 5 3 1) (4 6 5 2 3 1))
+(length sol)
+;-> 48
+
+Problema 2
+----------
+
+        +---+                      +---+
+        | a |                      | 0 |
+        +---+                      +---+
+       /  |  \                    /  |  \
+  +---+ +---+ +---+          +---+ +---+ +---+
+  | b |-| c |-| d |          | 1 |-| 2 |-| 3 |
+  +---+ +---+ +---+          +---+ +---+ +---+
+    |  X  |  X  |              |  X  |  X  |
+  +---+ +---+ +---+          +---+ +---+ +---+
+  | e |-| f |-| g |          | 4 |-| 5 |-| 6 |
+  +---+ +---+ +---+          +---+ +---+ +---+
+       \  |  /                    \  |  /
+        +---+                      +---+
+        | h |                      | 7 |
+        +---+                      +---+
+
+Inserire i numeri da 1 a 8 nei quadrati in modo che nessun numero è connesso da una linea con un numero che è +1 o -1 del numero stesso.
+Per esempio, il 4 non può essere connesso con il 3 o il 5.
+
+(define (collide? x y)
+  (or (= x (+ y 1)) (= x (- y 1))))
+
+(define (check2? lst)
+  (let ((stop nil)
+        (coppie '((0 1) (0 2) (0 3)   ;((a b) (a c) (a d)
+                  (1 2) (2 3)         ; (b c) (c d)
+                  (1 4) (1 5)         ; (b e) (b f)
+                  (2 4) (2 5) (2 6)   ; (c e) (c f) (c g)
+                  (3 5) (3 6)         ; (d f) (d g)
+                  (4 7) (4 5)         ; (e h) (e f)
+                  (5 7) (5 6)         ; (f h) (f g)
+                  (6 7))))            ; (g h)))
+    (dolist (c coppie stop)
+      (if (collide? (lst (c 0)) (lst (c 1)))
+          (setq stop true)))
+    (not stop)))
+
+(setq sol (solve (sequence 1 8) check2?))
+;-> ((2 5 8 6 3 1 4 7) (2 6 8 5 4 1 3 7) (7 4 1 3 6 8 5 2) (7 3 1 4 5 8 6 2))
+
+Problema 3
+----------
+
+  +---+         +---+          +---+         +---+
+  | a |         | b |          | 0 |         | 1 |
+  +---+         +---+          +---+         +---+
+    |             |              |             |
+  +---+  +---+  +---+          +---+  +---+  +---+
+  | c |--| d |--| e |          | 2 |--| 3 |--| 4 |
+  +---+  +---+  +---+          +---+  +---+  +---+
+    |             |              |             |
+  +---+         +---+          +---+         +---+
+  | f |         | g |          | 5 |         | 6 |
+  +---+         +---+          +---+         +---+
+
+Inserire 7 cifre diverse da 1 a 9 nei quadrati in modo che risulti:
+
+  a * c * f = c * d * e = b * e * g
+
+(define (comb k lst (r '()))
+"Generate all combinations of k elements without repetition from a list of items"
+  (if (= (length r) k)
+    (list r)
+    (let (rlst '())
+      (dolist (x lst)
+        (extend rlst (comb k ((+ 1 $idx) lst) (append r (list x)))))
+      rlst)))
+
+(define (check3? lst)
+  (= (* (lst 0) (lst 2) (lst 5))
+     (* (lst 1) (lst 4) (lst 6))
+     (* (lst 2) (lst 3) (lst 4))))
+
+(define (solve3 lst test)
+  (let ((out '())
+        (combine (comb 7 lst)))
+    (dolist (c combine)
+      (setq permute (perm c))
+      (dolist (p permute)
+        (if (test p) (push p out -1)))
+      out)))
+
+(setq sol (solve3 (sequence 1 9) check3?))
+;-> ((8 6 9 2 4 1 3) (1 6 9 2 4 8 3) (8 3 9 2 4 1 6) (1 3 9 2 4 8 6)
+;->  (6 1 4 2 9 3 8) (3 1 4 2 9 6 8) (3 8 4 2 9 6 1) (6 8 4 2 9 3 1))
+
+Problema 4
+----------
+
+Nella figura seguente i numeri sono disposti in modo che la differenza assoluta tra due numeri adiacenti si trova sotto ai numeri nella riga successiva:
+
+  +---+   +---+   +---+
+  | 2 |   | 6 |   | 5 |
+  +---+   +---+   +---+
+      +---+   +---+
+      | 4 |   | 1 |
+      +---+   +---+
+          +---+
+          | 3 |
+          +---+
+
+  6 - 2 = 4
+  6 - 5 = 1
+  4 - 1 = 3
+
+Usare i numeri da 1 a 10 per riempire con lo stesso criterio la figura seguente:
+
+  +---+   +---+   +---+   +---+          +---+   +---+   +---+   +---+
+  | a |   | b |   | c |   | d |          | 0 |   | 1 |   | 2 |   | 3 |
+  +---+   +---+   +---+   +---+          +---+   +---+   +---+   +---+
+      +---+   +---+   +---+                  +---+   +---+   +---+
+      | e |   | f |   | g |                  | 4 |   | 5 |   | 6 |
+      +---+   +---+   +---+                  +---+   +---+   +---+
+          +---+   +---+                          +---+   +---+
+          | h |   | i |                          | 7 |   | 8 |
+          +---+   +---+                          +---+   +---+
+              +---+                                  +---+
+              | l |                                  | 9 |
+              +---+                                  +---+
+
+(define (check4? lst)
+  (and (= (abs (- (lst 0) (lst 1))) (lst 4))
+       (= (abs (- (lst 1) (lst 2))) (lst 5))
+       (= (abs (- (lst 2) (lst 3))) (lst 6))
+       (= (abs (- (lst 4) (lst 5))) (lst 7))
+       (= (abs (- (lst 5) (lst 6))) (lst 8))
+       (= (abs (- (lst 7) (lst 8))) (lst 9))))
+
+(setq sol (solve (sequence 1 10) check4?))
+;-> ((8 1 10 6 7 9 4 2 5 3) (8 10 1 6 2 9 5 7 4 3) (6 10 1 8 4 9 7 5 2 3)
+;->  (6 1 10 8 5 9 2 4 7 3) (8 3 10 9 5 7 1 2 6 4) (9 3 10 8 6 7 2 1 5 4)
+;->  (9 10 3 8 1 7 5 6 2 4) (8 10 3 9 2 7 6 5 1 4))
+
+
+----------------------------------
+Analisi delle funzioni rand e seed
+----------------------------------
+
+Vogliamo verificare la correttezza delle funzioni "rand" e "seed".
+Per fare questo scriviamo due funzioni che effettuano lo stesso compito in due modi diversi.
+
+Algoritmo Funzione 1
+--------------------
+1) Impostare il contatore a 0
+2) Generare due numeri casuali compresi tra 0 e il valore massimo:
+   Se i due numeri sono uguali, allora aumentare il contatore di 1
+3) Ripetere il passo 2) per un dato numero di volte
+4) Restituire il valore del contatore
+
+Algoritmo Funzione 2
+--------------------
+1) Impostare il contatore a 0
+2) Generare due liste di una data lunghezza con numeri casuali
+   compresi tra 0 e il valore massimo
+3) Attraversare le due liste:
+   Se lista1(i) = lista2(i), allora incremetare il contatore di 1 
+4) Restituire il valore del contatore
+
+Le due funzioni dovrebbero restituire risultati simili perchè calcolano la stessa cosa.
+
+; Funzione 1
+; Genera 2 numeri casuali (0..max-val) e conta quante volte sono uguali
+; in un dato numero di iterazioni (iter)
+(define (test1 max-val iter)
+  (let (conta 0)
+    (for (i 1 iter)
+      ; numeri casuali uguali?
+      (if (= (rand max-val) (rand max-val))
+          (++ conta)))
+    conta))
+
+; Funzione 2
+; Genera due liste di una data lunghezza (iter) con numeri casuali (0..max-val)
+; e conta quanti numeri sono uguali nelle stesse posizioni
+(define (test2 max-val iter)
+  (let ((conta 0)
+        (num1 (rand max-val iter))
+        (num2 (rand max-val iter)))
+    (length (filter true? (map (fn(x y) (= x y)) num1 num2)))))
+
+Ci aspettiamo il seguente risultato da entrambe le funzioni:
+
+                                   Numero di iterazioni
+  Numero di coppie uguali =  --------------------------------
+                               Numero di elementi possibili    
+
+cioè:
+                                iter
+  Numero di coppie uguali =  -----------
+                               max-val
+
+Inizializziamo il generatore random interno:
+(seed (time-of-day))
+
+100 elementi:
+(map (curry test1 1e2) '(1e4 1e5 1e6 1e7))
+;-> (96 978 10008 99725)
+(map (curry test2 1e2) '(1e4 1e5 1e6 1e7))
+;-> (96 978 10008 99725)
+
+1000 elementi:
+(map (curry test1 1e3) '(1e4 1e5 1e6 1e7))
+;-> (9 97 977 10040)
+(map (curry test2 1e3) '(1e4 1e5 1e6 1e7))
+;-> (10 100 955 9953)
+
+10000 elementi:
+(map (curry test1 1e4) '(1e4 1e5 1e6 1e7))
+;-> (3 8 117 998)
+(map (curry test2 1e4) '(1e4 1e5 1e6 1e7))
+;-> (2 7 92 1032)
+
+Per adesso i risultati delle funzioni sono simili e confermano i valori teorici.
+
+100000 elementi:
+(map (curry test1 1e5) '(1e4 1e5 1e6 1e7))
+;-> (0 1 41 322)
+(map (curry test2 1e5) '(1e4 1e5 1e6 1e7))
+;-> (1 7 33 279)
+
+1 milione di elementi:
+(map (curry test1 1e6) '(1e4 1e5 1e6 1e7))
+;-> (1 2 31 285)
+(map (curry test2 1e6) '(1e4 1e5 1e6 1e7))
+;-> (0 4 33 323)
+
+10 milione di elementi:
+(map (curry test1 1e7) '(1e4 1e5 1e6 1e7))
+;-> (1 1 35 327)
+(map (curry test2 1e7) '(1e4 1e5 1e6 1e7))
+;-> (2 3 32 295)
+
+Negli ultimi tre risultati c'è qualcosa che non torna.
+I valori 285, 323, 327 e 295 sono evidentemente errati.
+Qual'è il problema?
+
+Vediamo la definizione della funzione "seed" dal manuale di riferimento:
+
+*******************
+>>> funzione SEED
+*******************
+
+sintassi: (seed int-seed)
+sintassi: (seed int-seed true [int-pre-N])
+sintassi: (seed)
+
+Il parametro "int-seed" inizializza il generatore di numeri casuali interno che genera i numeri per le funzioni "amb", "normal", "rand" e "random".
+Si noti che la prima sintassi utilizza un generatore di numeri casuali basato sulla funzione "rand()" della libreria C.
+Tutte le funzioni di randomizzazione in newLISP si basano su questa funzione.
+
+Utilizzando la seconda sintassi, tutte le funzioni di randomizzazione si basano su un generatore di numeri casuali indipendente dalla piattaforma e dal compilatore utilizzati per compilare newLISP.
+Quando si utilizza la seconda sintassi per l'inizializzazione, tutte le funzioni di randomizzazione chiamate successivamente, come "amb", "normal", "rand", "random" e "randomize", si basano su questo generatore di numeri casuali indipendente dalla piattaforma.
+
+Il parametro opzionale "int-pre-N" specifica il numero di numeri casuali da precaricare durante la procedura di inizializzazione.
+Se questo parametro viene omesso, "seed" assume il valore 50.
+Si noti che il valore massimo per "int-seed" è limitato a 16 o 32 bit, a seconda del sistema operativo utilizzato.
+Internamente, solo i 32 bit meno significativi vengono passati alla funzione di seeding del sistema operativo.
+
+(seed 12345)
+(seed (ora del giorno))
+
+Dopo aver utilizzato lo stesso seed, il generatore di numeri casuali avvia la stessa sequenza di numeri.
+Questo facilita il debug quando si utilizzano dati casuali.
+Utilizzando il seed, è possibile generare ripetutamente le stesse sequenze casuali.
+Il secondo esempio è utile per garantire un seed diverso ogni volta che il programma viene avviato.
+
+L'esempio seguente mostra l'utilizzo dello stato interno del seed nel generatore di numeri casuali integrato:
+
+(seed 123 true) ; use the true parameter
+;-> 123
+(random)
+;-> 0.2788576787704871
+(random)
+;-> 0.7610070955758016
+(random)
+;-> 0.2462553424976092
+(random)
+;-> 0.8135413573186572
+(set 'state (seed)) ; save current state
+;-> 1747066761
+(random)
+;-> 0.1895924546707387
+(random)
+;-> 0.4803856511043318
+(seed state true 0) ; seed with saved state
+;-> 1747066761
+(random)            ; produces old sequence
+;-> 0.1895924546707387       
+(random)
+;-> 0.4803856511043318      
+
+Nell'ultima parte della sintassi, "seed" restituisce lo stato corrente del seed.
+---------------------
+
+Quindi utilizzando (seed (time-of-day) newLISP usa il generatore rand() del compilatore C usato per generare l'eseguibile di newLISP.
+Mentre utilizzando (seed (time-of-day) true) newLISP usa un generatore proprio.
+Proviamo ad utilizzare il generatore proprio:
+
+(seed (time-of-day) true)
+
+(map (curry test1 1e5) '(1e4 1e5 1e6 1e7))
+;-> (0 0 8 96)
+(map (curry test2 1e5) '(1e4 1e5 1e6 1e7))
+;-> (0 1 11 94)
+
+(map (curry test1 1e6) '(1e4 1e5 1e6 1e7))
+;-> (0 0 4 11)
+(map (curry test2 1e6) '(1e4 1e5 1e6 1e7))
+;-> (0 0 2 12)
+
+(map (curry test1 1e7) '(1e4 1e5 1e6 1e7))
+;-> (0 0 0 1)
+(map (curry test2 1e7) '(1e4 1e5 1e6 1e7))
+;-> (0 0 0 1)
+
+In questo caso i risultati sono corretti.
+
+(seed (time-of-day) true)
+;-> 76533017
+(map (curry test 1e5) '(1e4 1e5 1e6 1e7))
+;-> (0 3 11 102)
+(map (curry test 1e6) '(1e4 1e5 1e6 1e7))
+;-> (0 0 0 11)
+(map (curry test 1e7) '(1e4 1e5 1e6 1e7))
+;-> (0 0 0 1)
+
+Per compilare newLISP ho usato TDM-gcc, vediamo che limiti ha la funzione rand() in questo compilatore.
+Per il runtime Microsoft/MinGW utilizzato da queste versioni, RAND_MAX è:
+  0x7fff = 32767
+e quindi rand() restituisce valori nell'intervallo (0...32767)
+La definizione presente negli header MinGW è proprio:
+#define RAND_MAX 0x7fff
+Microsoft documenta anch'essa RAND_MAX = 32767 per il proprio CRT.
+Ma questo NON spiega direttamente il nostro problema.
+Infatti newLISP fa qualcosa in più quando chiamiamo "rand" con un numero maggiore di RAND_MAX:
+costruisce il risultato usando il generatore C sottostante.
+Non basta quindi guardare RAND_MAX: dobbiamo vedere il codice sorgente di newLISP, precisamente l'implementazione di "rand", perché è lì che probabilmente avviene la trasformazione da rand() del C a (rand n).
+Il problema quindi è nella struttura della sequenza generata dal rand() sottostante e nel modo in cui newLISP combina quei valori.
+
+La morale finale è quella di utilizzare SEMPRE "seed" con il parametro 'true':
+
+  (seed (time-of-day) true)
+
 ============================================================================
 

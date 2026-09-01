@@ -3697,6 +3697,8 @@ NOTE LIBERE 39
 ==============
   Analisi di lanci di dadi
   Istogramma di intervalli
+  Problemi su strutture grafiche numeriche
+  Analisi delle funzioni rand e seed
 
 PROBLEMI SUI DADI
 =================

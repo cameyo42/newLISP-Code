@@ -1128,11 +1128,14 @@ Autore: Richard A. Proctor (1886)
 
 Uno sceicco lascia in eredità 35 cammelli ai suoi tre figli.
 L'eredità dovrà essere divisa nel modo seguente:
-1/2 al figlio maggiore, 1/3 al secondogenito e 1/9 al terzo figlio, senza uccidere animali. Il notaio dovrà ricevere un cammello come ricompensa per il suo lavoro. Come dividere i cammelli?
+1/2 al figlio maggiore, 1/3 al secondogenito e 1/9 al terzo figlio, senza uccidere animali.
+Il notaio dovrà ricevere un cammello come ricompensa per il suo lavoro. Come dividere i cammelli?
 
 Nota: 1/2 + 1/3 + 1/9 = 17/18 = 34/36
 
-Il notaio presta un cammello e, dei 36 cammelli totali, il primo figlio ne prende 18 (la metà), il secondo 12 (la terza parte) ed il terzo 4 (la nona parte). In totale i cammelli "spartiti" sono 34. I due cammelli rimasti vengono presi dal notaio (uno già gli apparteneva) che quindi ottiene un cammello come ricompensa.
+Il notaio presta un cammello e, dei 36 cammelli totali, il primo figlio ne prende 18 (la metà), il secondo 12 (la terza parte) ed il terzo 4 (la nona parte).
+In totale i cammelli "spartiti" sono 34.
+I due cammelli rimasti vengono presi dal notaio (uno già gli apparteneva) che quindi ottiene un cammello come ricompensa.
 Da notare che tutti i figli hanno avuto di più della parte stabilita nel testamento.
 
 Vedi anche "Divisione incongrue" su "Note libere 9".
@@ -1144,7 +1147,8 @@ Sequenza di Farey
 
 La sequenza di Farey F(n) per ogni intero positivo n è l'insieme dei numeri razionali a/b irriducibili (ridotti ai minimi termini) con 0<=a<=b<=n e (a,b)=1 disposti in ordine crescente.
 
-Un termine a/b può essere valutato ricorsivamente utilizzando i due termini precedenti. Di seguito è riportata la formula per calcolare a(n+2)/b(n+2) da a(n+1)/b(n+1) e a(n)/b(n):
+Un termine a/b può essere valutato ricorsivamente utilizzando i due termini precedenti.
+Di seguito è riportata la formula per calcolare a(n+2)/b(n+2) da a(n+1)/b(n+1) e a(n)/b(n):
 
 a(n+2) = floor((b(n) + n)/b(n+1))*a(n+1) - a(n)
 b(n+2) = floor((b(n) + n)/b(n+1))*b(n+1) - b(n)
@@ -1279,7 +1283,8 @@ Quindi la funzione generica per calcolare la distanza di Chebyshev tra due punti
 Anti-primi (numeri altamente composti)
 --------------------------------------
 
-Gli anti-primi (o numeri altamente composti) sono i numeri naturali con più fattori di quelli più piccoli di se stesso. In altre parole, i numeri altamente composti sono quei numeri n dove d(n), il numero di divisori di n, aumenta a record (cioè è maggiore del precedente).
+Gli anti-primi (o numeri altamente composti) sono i numeri naturali con più fattori di quelli più piccoli di se stesso.
+In altre parole, i numeri altamente composti sono quei numeri n dove d(n), il numero di divisori di n, aumenta a record (cioè è maggiore del precedente).
 
 Sequenza OEIS A002182:
   1, 2, 4, 6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840, 1260,
@@ -1487,7 +1492,9 @@ Prima di tutto vediamo la definizione del manuale:
 ******************
 sintassi: (curry func exp)
 
-Trasforma "func" da una funzione f(x, y) che prende due argomenti, in una funzione fx(y) che prende un singolo argomento. "curry" funziona come una macro, nel senso che non valuta i suoi argomenti. Questi ultimi vengono valutati durante l'applicazione della funzione "func".
+Trasforma "func" da una funzione f(x, y) che prende due argomenti, in una funzione fx(y) che prende un singolo argomento.
+"curry" funziona come una macro, nel senso che non valuta i suoi argomenti.
+Questi ultimi vengono valutati durante l'applicazione della funzione "func".
 
 Vediamo alcuni esempi:
 
@@ -1666,7 +1673,8 @@ Come funziona?
 Per prima cosa definiamo una funzione chiamata "sottrai" che accetta due argomenti e sottrae il secondo dal primo.
 Quindi applichiamo "curry" a questa funzione per ottenere una nuova funzione "fun", a cui passiamo "10" come primo argomento fisso. 
 La funzione restituita viene associata alla variabile "fun".
-Quando chiamiamo "fun" passando 4, otteniamo 6 come previsto. Questo è esattamente lo stesso che chiamare "sottrai" con gli argomenti 10 e 4.
+Quando chiamiamo "fun" passando 4, otteniamo 6 come previsto.
+Questo è esattamente lo stesso che chiamare "sottrai" con gli argomenti 10 e 4.
 
 Altri esempi:
 
