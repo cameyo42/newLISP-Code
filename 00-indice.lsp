@@ -3699,6 +3699,8 @@ NOTE LIBERE 39
   Istogramma di intervalli
   Problemi su strutture grafiche numeriche
   Analisi delle funzioni rand e seed
+  Catturare il topo
+  I salti del canguro
 
 PROBLEMI SUI DADI
 =================

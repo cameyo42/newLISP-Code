@@ -1075,5 +1075,317 @@ La morale finale è quella di utilizzare SEMPRE "seed" con il parametro 'true':
 
   (seed (time-of-day) true)
 
+
+-----------------
+Catturare il topo
+-----------------
+
+In una parete ci sono sette buchi allineati.
+Dentro un buco si trova un topo.
+Dobbiamo scoprire dove si trova il topo.
+Ogni giorno possiamo controllare solo un buco.
+Se troviamo il topo, abbiamo terminato.
+Se il topo non c'è, dobbiamo aspettare il giorno successivo prima di poter controllare di nuovo un buco.
+Il topo non sta fermo e ogni notte si sposta in un altro buco.
+Il buco in cui si sposta è o quello immediatamente a sinistra o quello immediatamente a destra da dove si trovava prima.
+Il topo può anche ritornare nei buchi in cui era già stato.
+Quanti giorni occorrono per essere sicuri di trovare il topo?
+   
+  +------+  +------+  +------+  +------+  +------+  +------+  +------+  
+  | 1    |  | 2    |  | 3    |  | 4    |  | 5    |  | 6    |  | 7    |
+  |      |  |      |  |      |  |      |  |      |  |      |  |      |
+  +------+  +------+  +------+  +------+  +------+  +------+  +------+
+
+Immaginiamo che ci siano solo tre buchi.
+Se controlliamo il buco centrale per due giorni consecutivi, prendiamo sicuramente il topo.
+Questo perché se il topo non si trova nel buco centrale il primo giorno, deve per forza essere dietro una delle buche laterali.
+E se il primo giorno si trova in un buco laterale, il secondo giorno non avrà altra scelta che spostarsi nel buco centrale.
+
+Adeso immaginiamo che ci siano quattro buchi.
+Nella tabella seguente, ogni riga mostra le possibili posizioni del topo (T) in ogni giorno.
+La X indica il buco controllato ogni giorno.
+
+           Buco 1 Buco 2 Buco 3 Buco 4
+          +------+------+------+------+
+giorno 1  | T    | T    | T    | T    |
+          |      |    X |      |      |
+          +------+------+------+------+
+giorno 2  |      | T    | T    | T    |
+          |      |      |    X |      |
+          +------+------+------+------+
+giorno 3  | T    |      | T    |      |
+          |      |      |    X |      |
+          +------+------+------+------+
+giorno 4  |      | T    |      |      |
+          |      |    X |      |      |
+          +------+------+------+------+
+
+Il primo giorno il topo potrebbe trovarsi dietro qualsiasi buco, quindi ci sono T in ogni cella.
+Controlliamo il secondo buco. Se il topo è lì, gioco finito.
+Ma se il topo non c'è, posso eliminare la possibilità che il topo si trovi nel primo buco il secondo giorno, poiché l'unico modo in cui il topo potrebbe trovarsi lì è se si trovava nel secondo buco il primo giorno.
+Il secondo giorno, quindi, il topo può trovarsi solo in tre possibili buchi.
+
+Il secondo giorno controlliamo il terzo buco. Se il topo è lì, gioco finito.
+Altrimenti, posso eliminare la possibilità che il topo si trovi nel quarto buco il terzo giorno.
+Posso anche eliminare la possibilità che il topo si trovi nel secondo buco il terzo giorno, poiché per arrivarci avrebbe dovuto spostarsi dal buco 1 o dal buco 3, entrambi noti per non nascondere un topo.
+Abbiamo ridotto le possibilità a due.
+
+Il terzo giorno controlliamo il terzo buco. Se il topo è lì, è finita.
+Se il topo non c'è, deve essere stato nel buco 1, il che significa che controllando il secondo buco il quarto giorno posso garantire la cattura del topo.
+Quindi possiamo catturare il topo in 4 giorni controllando i buchi 2, 3, 3, 2 in quest'ordine.
+
+Con un ragionamento analogo possiamo risolvere il caso con 5 buchi:
+
+           Buco 1 Buco 2 Buco 3 Buco 4 Buco 5
+          +------+------+------+------+------+
+giorno 1  | T    | T    | T    | T    | T    |
+          |      |    X |      |      |      |
+          +------+------+------+------+------+
+giorno 2  |      | T    | T    | T    | T    |
+          |      |      |    X |      |      |
+          +------+------+------+------+------+
+giorno 3  | T    |      | T    | T    | T    |
+          |      |      |      |    X |      |
+          +------+------+------+------+------+
+giorno 4  |      | T    |      | T    |      |
+          |      |      |      |    X |      |
+          +------+------+------+------+------+
+giorno 5  |T     |      | T    |      |      |
+          |      |      |    X |      |      |
+          +------+------+------+------+------+
+giorno 6  |      | T    |      |      |      |
+          |      |    X |      |      |      |
+          +------+------+------+------+------+
+
+In questo caso possiamo catturare il topo in 6 giorni controllando i buchi 2, 3, 4, 4, 3, 2 in quest'ordine.
+
+Mettiamo insieme i tre risultati (3 buchi, 4 buchi e 5 buchi):
+
+  +-------+--------------+--------+
+  | Buchi | Sequenza     | Giorni |
+  +-------+--------------+--------+
+  |  3    | 2 2          | 2      |
+  |  4    | 2 3 3 2      | 4      |
+  |  5    | 2 3 4 4 3 2  | 6      |
+  +-------+--------------+--------+
+
+Quindi se i buchi sono N, possiamo catture il topo in:
+
+  giorni = (N - 2)*2
+
+La sequenza di apertura dei buchi per catturare sicuramente il topo vale:
+ 
+  sequenza = 2 3 ... (N - 2) (N - 1) (N - 1) (N - 2) ... 3 2
+
+Per 7 buchi la sequenza di cattura vale: 2, 3, 4, 5, 6, 6, 5, 4, 3, 2 e quindi occorrono 10 giorni per catturare sicuramente il topo.
+
+(define (topo N)
+  (local (sequenza T cattura giorni teorico)
+    ; valore massimo di giorni per la cattura
+    (setq teorico (* (- N 2) 2))
+    ; sequenza di cattura
+    (setq sequenza (append (sequence 2 (- N 1)) (sequence (- N 1) 2)))
+    ;(println sequenza)
+    ; posizione iniziale del topo
+    (setq T (+ 1 (rand N)))
+    (setq cattura nil)
+    (setq giorni 0)
+    ; Controllo dei buchi della sequenza
+    (dolist (buco sequenza cattura)
+      (++ giorni)
+      ;(println giorni { } T { } buco)
+      (if (= buco T) ; abbiamo trovato il topo
+        (setq cattura true)
+        ;else
+        ; Spostamento del topo
+        (cond ((= T 1) (setq T 2)) ; spostamento a sinistra
+              ((= T N) (setq T (- N 1))) ; spostamento a destra
+              (true ; spostamento a sinistra o a destra
+                (if (zero? (rand 2))
+                    (-- T)
+                    (++ T))))))
+    ;(if (> giorni teorico) nil giorni)))
+    giorni))
+
+Proviamo:
+
+(seed (time-of-day) true) ; per il 'rand' delle funzione 'topo'
+
+(collect (topo 7) 10)
+;-> (5 1 10 5 8 10 1 5 10 6)
+
+Con 100 buchi e 10000 prove:
+(find (* (- 100 2) 2) (collect (topo 100) 10000) <)
+;-> nil
+
+Vediamo quanti giorni occorrono in media per catturare un topo avendo N buchi:
+
+(define (media N iter)
+  (div (apply + (collect (topo N) iter)) iter))
+
+(println "Buchi  Media-giorni  Buchi/Media-giorni")
+(for (i 3 20)
+  (setq m (media i 1e6))
+  (println i { } m { } (div i m)))
+;-> Buchi  Media-giorni  Buchi/Media-giorni
+;-> 3 1.666501 1.800178937786416
+;-> 4 2.43733 1.641140100027489
+;-> 5 3.546799 1.409721836506664
+;-> 6 4.359293 1.376369975590079
+;-> 7 5.52161 1.267746182725691
+;-> 8 6.336201 1.262586208991792
+;-> 9 7.50471 1.199246872963779
+;-> 10 8.3347 1.199803232269908
+;-> 11 9.506385 1.157117032394543
+;-> 12 10.333099 1.161316658245508
+;-> 13 11.498897 1.130543216449369
+;-> 14 12.354373 1.133201984430938
+;-> 15 13.492459 1.1117321164363
+;-> 16 14.344023 1.115447179637121
+;-> 17 15.485385 1.097809321498949
+;-> 18 16.322269 1.102787853821059
+;-> 19 17.51138 1.085008720043766
+;-> 20 18.333053 1.090925772155898
+
+Media giorni di cattura con 1000 buchi:
+(time (println (media 1000 1e4)))
+;-> 999.20442
+;-> 21720.845
+
+Media giorni di cattura con 10000 buchi:
+(time (println (media 10000 1e4)))
+;-> 10019.4476
+;-> 22288.166
+
+All'aumentare del numero di buchi N, il numero medio di giorni per catturare il topo vale ~N.
+
+
+-------------------
+I salti del canguro
+-------------------
+
+Un canguro si trova all'inizio di una linea orizzontale (nel punto 0).
+La linea è lunga da 0 a N.
+Il canguro può fare salti di lunghezza compresa tra 1 e M (con M <= N).
+Quanti modi ha il canguro di raggiungere la fine della linea (il punto N).
+
+Esempio:
+  N = 6
+  M = 2
+  C
+  0--1--2--3--4--5--6
+
+Se il canguro può saltare di lunghezza da 1 a M, il numero di modi per arrivare a N soddisfa la ricorrenza:
+
+  f(0) = 1
+  f(N) = f(N-1) + f(N-2) + ... + f(N-M)
+dove i termini con indice negativo valgono 0.
+Questa è la M-step Fibonacci (o Fibonacci generalizzata).
+
+Esempio:
+N = 6
+M = 2, Il canguro può saltare solo di 1 oppure  di 2.
+f(6) = 13, quindi ci sono 13 modi.
+Le sequenze dei salti sono:
+6 = 1+1+1+1+1+1
+  = 1+1+1+1+2
+  = 1+1+1+2+1
+  = 1+1+2+1+1
+  = 1+2+1+1+1
+  = 2+1+1+1+1
+  = 1+1+2+2
+  = 1+2+1+2
+  = 1+2+2+1
+  = 2+1+1+2
+  = 2+1+2+1
+  = 2+2+1+1
+  = 2+2+2
+
+Possiamo quindi definire il caso generale:
+
+            | 1,  per N = 0
+  f(N, M) = |
+            | Sum[k=1,min(N,M)]f(N - k, M),  per N > 0
+
+e il caso in cui il salto può arrivare fino a N, è semplicemente M = N, da cui:
+
+  f(N,N)=2^(N-1), per (N > 0).
+
+Infatti in questo caso il canguro può scegliere ognuno dei punti interni come punto di arrivo di un salto oppure può oltrepassarlo.
+Quindi il numero di modi per raggiungere la fine vale: 2^(N-1).
+Per N = 6 abbiamo 5 punti interni (1 2 3 4 5), quindi abbiamo:
+  2^(6-1) = 2^5 = 32 modi
+
+Scriviamo una funzione iterativa per calcolare il numero di modi dato N e M.
+
+(define (kangaroo1 N M)
+  ; f[i] = numero di modi per raggiungere il punto i
+  (let (f (array (+ N 1) '(0L)))
+    ; Esiste un modo per raggiungere il punto 0: non fare salti
+    (setf (f 0) 1L)
+    ; Calcola f[1], f[2], ..., f[N]
+    (for (i 1 N)
+      (for (k 1 (min M i))
+        (setf (f i)
+          (+ (f i) (f (- i k))))))
+    (f N)))
+
+Proviamo:
+
+(kangaroo1 6 2)
+;-> 13L
+(kangaroo1 6 6)
+;-> 32L
+(kangaroo1 6 1)
+;-> 1L
+(kangaroo1 100 100)
+;-> 633825300114114700748351602688L
+(time (println (kangaroo1 1000 1000)))
+;-> 535754303593133660474212524530000905280702405852766803721875194185175525
+;-> 562468061246599189407847929063797336458776573412593572642846157021799228
+;-> 878734928740196728388741211549271053730253118557093897709107652323749179
+;-> 097063369938377958277197303853145728559823884327108383021491582631219341
+;-> 8602834034688L
+;-> 93.721
+
+Si può anche ottimizzare evitando il ciclo interno, perché la somma degli ultimi M termini può essere mantenuta con una 'sliding window' (finestra scorrevole), portando il calcolo da O(N*M) a O(N).
+Eliminiamo il ciclo interno mantenendo la somma degli ultimi 'M' valori.
+La differenza è che la versione precedente calcola ogni volta:
+  f(i-1) + f(i-2) + ... + f(i-M)
+da zero, quindi richiede O(N*M) operazioni.
+Questa invece mantiene tale somma in 'sum': a ogni passo aggiunge il nuovo termine ed elimina quello che esce dalla finestra.
+La complessità diventa quindi O(N), mentre la memoria rimane O(N).
+
+(define (kangaroo2 N M)
+  ; f[i] = numero di modi per raggiungere il punto i
+  (let ( (f (array (+ N 1) '(0L)))
+         (sum 1L))
+    (setf (f 0) 1L)
+    (for (i 1 N)
+      ; La somma corrente degli ultimi M valori e' f[i]
+      (setf (f i) sum)
+      ; Aggiunge f[i] alla finestra
+      (setq sum (+ sum (f i)))
+      ; Se la finestra supera M elementi, elimina il piu' vecchio
+      (if (>= i M)
+        (setq sum (- sum (f (- i M))))))
+    (f N)))
+
+(kangaroo2 6 2)
+;-> 13L
+(kangaroo2 6 6)
+;-> 32L
+(kangaroo2 6 1)
+;-> 1L
+(kangaroo2 100 100)
+;-> 633825300114114700748351602688L
+(time (println (kangaroo2 1000 1000)))
+;-> 535754303593133660474212524530000905280702405852766803721875194185175525
+;-> 562468061246599189407847929063797336458776573412593572642846157021799228
+;-> 878734928740196728388741211549271053730253118557093897709107652323749179
+;-> 097063369938377958277197303853145728559823884327108383021491582631219341
+;-> 8602834034688L
+;-> 15.585
+
 ============================================================================
 
