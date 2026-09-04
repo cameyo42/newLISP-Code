@@ -3701,6 +3701,9 @@ NOTE LIBERE 39
   Analisi delle funzioni rand e seed
   Catturare il topo
   I salti del canguro
+  Eventi statisticamente indipendenti
+  Non c'è più nessuno
+  Paradosso di Bertrand
 
 PROBLEMI SUI DADI
 =================

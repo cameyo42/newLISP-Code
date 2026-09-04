@@ -653,7 +653,7 @@ Le funzioni che usano "Sweep-line" 'contano' gli eventi.
 Le funzioni che usano "Brute-Force" 'contano' ed 'elencano' gli eventi.
 Qui sta il punto cruciale: 'contare' le intersezioni e 'elencarle' sono due problemi con costi intrinsecamente diversi.
 - Contare puo essere fatto in O(n log n) perché un singolo numero ('active') riassume in O(1) l'informazione "quante coppie si formano ora", indipendentemente da quante siano.
-- Elencare le coppie non può scendere sotto il costo proporzionale al **numero di coppie stesse**: se, nel caso peggiore, tutti gli `n` intervalli si sovrappongono a vicenda, ci sono O(n^2) coppie da restituire, e nessun algoritmo — per quanto elegante — può enumerarle in meno tempo di quello necessario a scriverle tutte.
+- Elencare le coppie non può scendere sotto il costo proporzionale al **numero di coppie stesse**: se, nel caso peggiore, tutti gli n intervalli si sovrappongono a vicenda, ci sono O(n^2) coppie da restituire, e nessun algoritmo — per quanto elegante — può enumerarle in meno tempo di quello necessario a scriverle tutte.
 Anche 'coverage-per-point' funziona con il 'diff array' proprio perché non ha mai bisogno di sapere quali intervalli coprono un punto, solo quanti.
 Il trucco diff[L] += 1 / diff[R+1] -= 1 seguito dalla somma prefissa produce un numero aggregato — l'informazione su quale intervallo abbia contribuito a quel numero va persa nel momento stesso in cui si fa +1, perché un +1 è indistinguibile da un altro +1 proveniente da un intervallo diverso.
 È esattamente l'analogo del contatore active nello sweep-line: un numero riassuntivo, non una lista di riferimenti.
@@ -668,7 +668,6 @@ Vedi anche "Intersezione di intervalli" su "Note libere 30".
 ----------------------------------------
 Problemi su strutture grafiche numeriche
 ----------------------------------------
-
 
 Problema 1
 ----------
@@ -1386,6 +1385,469 @@ La complessità diventa quindi O(N), mentre la memoria rimane O(N).
 ;-> 097063369938377958277197303853145728559823884327108383021491582631219341
 ;-> 8602834034688L
 ;-> 15.585
+
+
+-----------------------------------
+Eventi statisticamente indipendenti
+-----------------------------------
+
+Si dice che due eventi A e B sono statisticamente indipendenti se e solo se:
+
+  P(A and B) = P(A)P(B)
+
+Intuitivamente, e' chiaro che se A e B sono eventi indipendenti, allora A e not(B) (la negazione di B) devono essere anch'essi indipendenti.
+
+Partendo da:
+
+  P(A) = P(A and (B or not(B))) =  P(A and B) + P(A and not(B))
+
+Poichè, per ipotesi:
+
+  P(A and B) = P(A)P(B)
+
+ne consegue:
+
+  P(A and not(B)) = P(A) - P(A)P(B) = P(A)(1 - P(B)) = P(A)P(not(B))
+
+Quindi A e not(B) sono indipendenti.
+
+Analogamente, anche not(A) e B sono statisticamente indipendenti:
+
+  P(not(A) and B) = P(B) - P(A and B) = P(B) - P(A)P(B)= P(B)(1 - P(A)) =
+                  = P(B)P(not(A))
+
+quindi:
+
+  P(not(A) and B) = P(not(A))P(B)
+
+Anzi, si può completare il risultato: se A e B sono indipendenti, allora tutte e quattro le combinazioni sono indipendenti a coppie:
+
+- A and B
+- A and not(B)
+- not(A) and B
+- not(A) and not(B)
+
+L'ultima si ottiene, ad esempio, da:
+
+  P(not(A) and not(B)) = 1 - P(A or B) = 1 - P(A) - P(B) + P(A)P(B)
+
+e quindi:
+
+  P(not(A) and not(B)) = (1 - P(A))(1 - P(B)) = P(not(A))P(not(B))
+
+E questo si estende naturalmente anche alla quarta combinazione.
+
+
+-------------------
+Non c'è più nessuno
+-------------------
+
+Supponiamo di avere N oggetti, ciascuno con una probabilità di 1/m di scomparire ogni secondo.
+1) Qual è la media del numero di secondi necessari affinché tutti gli oggetti siano scomparsi?
+2) Qual è la probabilità che dopo k secondi siano scomparsi tutti gli N oggetti?
+
+Nota: "1/m per secondo" deve essere applicato in modo discontinuo su una sequenza di intervalli discreti di 1 secondo.
+In altre parole, al termine di ogni secondo viene applicata la regola "1/m per secondo" ad ogni oggetto presente.
+
+1) Calcolo della media
+----------------------
+Per calcolare la media scriviamo una funzione che simula tante volte questo processo.
+
+(define (media N m iter)
+  (let ((sec 0) (tot-sec 0) (prob (div m)))
+    ; Ciclo di 'iter' simulazioni...
+    (for (prove 1 iter)
+      ; Inizio di una simulazione...
+      ; all'inizio il numero degli oggetti vale N
+      (setq oggetti N)
+      ; e i secondi valgono 0
+      (setq sec 0)
+      ; Finchè ci sono oggetti...
+      (while (> oggetti 0)
+        (++ sec)
+        ; Ciclo per la scomparsa degli oggetti
+        (for (t 1 oggetti)
+          (if (> prob (random)) (-- oggetti))))
+      ; ... prova finita.
+      ; Aggiorna i secondi totali
+      (++ tot-sec sec))
+    (div tot-sec iter)))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(media 100 5 1e5)
+;-> 23.75195
+(media 100 1 1e5)
+;-> 1
+(media 100 2 1e5)
+;-> 7.9837
+(media 10 10 1e5)
+;-> 28.30796
+(media 10 100 1e5)
+;-> 292.13475
+
+Esiste anche una formula esatta per la media del tempo di scomparsa T.
+Per una variabile casuale intera positiva vale:
+
+  E(T) = Sum[k=0,infinito] P(T > k)
+
+Poiche:
+
+  P(T > k) = 1 - P(T <= k)
+
+si ottiene:
+
+  E(T) = Sum[k=0,infinito] (1 - (1 - q^k)^N)
+
+e quindi:
+
+  E(T) =  Sum[k=0,infinito] (1 - (1 - ((m-1)/m)^k)^N)
+
+Questa formula fornisce la media teorica e puo essere confrontata con la funzione di simulazione.
+
+(define (media-teorica N m iter)
+  (let (media 0)
+    (for (k 0 iter)
+      (setq media (add media (sub 1 (pow (sub 1 (pow (div (sub m 1) m) k)) N)))))
+    media))
+
+Proviamo:
+(media-teorica 100 5 1e5)
+;-> 23.74681796578223
+(media-teorica 100 1 1e5)
+;-> 1
+(media-teorica 100 2 1e5)
+;-> 7.983801535156916
+(media-teorica 10 10 1e5)
+;-> 28.29948670221649
+(media-teorica 10 100 1e5)
+;-> 291.9298881810799
+
+I valori teorici sono molto simili a quelli della simulazione.
+
+2) Calcolo della probabilità
+----------------------------
+Adesso calcoliamo la probabilità che dopo k secondi siano scomparsi tutti gli N oggetti.
+Ogni singolo oggetto ha una probabilità di 1.0 di essere presente all'inizio del primo intervallo di 1 secondo e una probabilità di (m-1)/m di essere presente alla fine del primo intervallo.
+In generale, ogni oggetto ha una probabilità di [(m-1)/m]^k di essere presente alla fine del k-esimo intervallo, quindi la sua probabilità di NON essere presente alla fine del k-esimo intervallo è semplicemente il complemento di questo valore, ovvero 1 - [(m-1)/m]^k.
+Ne consegue che la probabilità che TUTTI gli n oggetti siano scomparsi alla fine del k-esimo intervallo è il prodotto delle loro singole probabilità di scomparire, quindi è data da (1 - ((m-1)/m)^k)^N.
+Questa è la probabilità cumulativa, che tende a 1.0 all'aumentare di k.
+
+(define (prob N m k)
+  (pow (sub 1 (pow (div (sub m 1) m) k)) N))
+
+Proviamo:
+(prob 100 1 1)
+;-> 1
+
+(prob 100 5 25)
+;-> 0.6848847213284477
+cioè, con 100 oggetti e m = 5, dopo 25 secondi c'e circa il 68.49% di probabilita che siano gia scomparsi tutti.
+
+Quindi i risultati della simulazione sono coerenti con la formula teorica.
+
+Possiamo inoltre calcolare la probabilita che T sia esattamente uguale a k, anziche essere minore o uguale a k.
+Basta fare la differenza tra due probabilita cumulative:
+
+  P(T = k) = P(T <= k) - P(T <= k-1)
+
+quindi:
+
+  P(T = k) = (1 - q^k)^N - (1 - q^(k-1))^N
+  P(T = k) = (1 - ((m-1)/m)^k)^N  - (1 - ((m-1)/m)^(k-1))^N
+
+(define (prob-exact N m k)
+  (let (q (div (sub m 1) m))
+    (sub (pow (sub 1 (pow q k)) N)
+         (pow (sub 1 (pow q (sub k 1))) N))))
+
+Questa è la distribuzione di probabilita del numero di secondi necessari affinche scompaia l'ultimo dei N oggetti.
+
+(prob-exact 100 5 25)
+;-> 0.06197595190287508
+cioè con 100 oggetti e m=5, la probabilità che l'ultimo oggetto scompaia esattamente dopo 25 secondi vale circa il 6.2%.
+
+(prob-exact 10 1 2)
+;-> 0
+cioè con 10 oggetti e m=1, la probabilità che l'ultimo oggetto scompaia esattamente dopo 2 secondi vale circa lo 0%.
+Questo perchè la probabilità di scomparsa vale 1/m = 1, quindi dopo 1 secondo sono scomparsi tutti gli oggetti e nei successivi secondi non può più scomparire alcun oggetto.
+
+L'espressione (prob 100 5 25) calcola la probabilita che entro il secondo 25 siano scomparsi tutti gli oggetti (cioè gli oggetti possono essere scomparsi tutti anche prima del 25 secondo). 
+Mentre (prob-exact 100 5 25) calcola la probabilitè che esattamente al secondo 25 scompaia l'ultimo oggetto.
+
+Una verifica interessante e che sommando (prob-exact) per tutti i possibili secondi si deve ottenere 1:
+
+  P(T=1) + P(T=2) + P(T=3) + ... = 1
+
+(setq tot 0)
+(for (i 1 100) (setq tot (add tot (prob-exact 100 5 i))))
+;-> 0.9999999796296392
+
+Quindi (prob-exact) descrive la distribuzione del tempo di completamento, mentre (prob) descrive la sua distribuzione cumulativa.
+
+
+------------------
+Monete con memoria
+------------------
+
+Una moneta "equa" ha due caratteristiche:
+1) la probabilità delle due facce è la stessa (1/2 = 0.5)
+2) non ha memoria, vale a dire che la probabilità di un risultato particolare al lancio successivo è indipendente dal lancio precedente.
+Comunque possiamo pensare ad una moneta che ha il seguente comportamento:
+1) al primo lancio esce Testa o Croce con entrambe le probabilità pari a 1/2.
+2) ad ogni lancio seguente, c'è una probabilità di 2/3 che il risultato sia uguale a quello del lancio precedente e una probabilità di 1/3 che il risultato sia diverso.
+
+Supponiamo di lanciare questa questa moneta 4 volte e vediamo tutti i possibili risultati:
+
+                                    +-----+
+                                    |  T  |
+                                    |  1  |
+                                    +-----+
+                                      | |
+                   ___________________| |___________________
+                   |                                       |
+                   |                                       |
+                +-----+                                 +-----+
+                |  T  |                                 |  C  |
+                | 2/3 |                                 | 1/3 |
+                +-----+                                 +-----+
+          2/3     | |     1/3                     1/3     | |     2/3
+         _________| |_________                   _________| |_________
+         |                   |                   |                   |
+         |                   |                   |                   |
+      +-----+             +-----+             +-----+             +-----+
+      |  T  |             |  C  |             |  T  |             |  C  |
+      | 4/9 |             | 2/9 |             | 1/9 |             | 2/9 |
+      +-----+             +-----+             +-----+             +-----+
+    2/3 | | 1/3             | |                 | |                 | |
+    ____| |____         ____| |____         ____| |____         ____| |____
+    |         |         |         |         |         |         |         |
+    |         |         |         |         |         |         |         |
+ +-----+   +-----+   +-----+   +-----+   +-----+   +-----+   +-----+   +-----+
+ |  T  |   |  C  |   |  T  |   |  C  |   |  T  |   |  C  |   |  T  |   |  C  |
+ | 8/27|   | 4/27|   | 2/27|   | 4/27|   | 1/17|   | 1/27|   | 2/27|   | 4/27|
+ +-----+   +-----+   +-----+   +-----+   +-----+   +-----+   +-----+   +-----+
+
+
+Pertanto, i risultati del terzo lancio dopo una testa hanno le probabilità a priori:
+
+  P(T) = 8/27 + 2/27 + 2/27 + 2/27 = 14/27
+  P(C) = 4/27 + 4/27 + 1/27 + 4/27 = 13/27
+
+Quindi le probabilità di Testa e Croce al k-esimo lancio dopo una Testa iniziale valgono:
+
+  P(Tk-T) = (1/2)*(1 + 1/3^k)
+  P(Ck-T) = (1/2)*(1 - 1/3^k)
+
+(define (TkT k) (mul 0.5 (add 1 (div (pow 3 k)))))
+(define (CkT k) (mul 0.5 (sub 1 (div (pow 3 k)))))
+
+(TkT 3)
+;-> 0.5185185185185185
+(div 14 27)
+;-> 0.5185185185185185
+
+(CkT 3)
+;-> 0.4814814814814815
+(div 13 27)
+;-> 0.4814814814814815
+
+Analogamente le probabilità di Testa e Croce al k-esimo lancio dopo una Croce iniziale valgono:
+
+  P(Ck-C) = (1/2)*(1 + 1/3^k)
+  P(Tk-C) = (1/2)*(1 - 1/3^k)
+
+(define (CkC k) (mul 0.5 (add 1 (div (pow 3 k)))))
+(define (TkC k) (mul 0.5 (sub 1 (div (pow 3 k)))))
+
+(CkC 3)
+;-> 0.5185185185185185
+(div 14 27)
+;-> 0.5185185185185185
+
+(TkC 3)
+;-> 0.4814814814814815
+(div 13 27)
+;-> 0.4814814814814815
+
+La somma delle probabilità di Testa o Croce al k-esimo lancio dopo una Testa o una Croce valgono:
+
+ P(Tk) = P(TkT) + P(TkC) = 1
+ P(Ck) = P(CkT) + P(CkC) = 1
+
+Quindi le probabilità complessive convergono a 1/2.
+
+Una moneta del genere tratta le due facce allo stesso modo e non favorisce un risultato rispetto a un altro poichè le frazioni asintotiche di Testa e Croce sono entrambe pari a 1/2.
+Però esistono correlazioni tra i lanci consecutivi.
+Anche se la memoria esplicita della moneta si estende solo a un lancio precedente, le correlazioni si propagano per un numero infinito di lanci, sebbene il loro peso diminuisce con l'aumentare dei lanci.
+
+Verifichiamo con una simulazione che questa moneta non favorisce alcun risultato.
+
+; Imposta la probabilità delle due facce della moneta
+; in base al risultato del lancio precedente 'prev'
+(define (set-prob prev)
+  (if (= prev 'T)
+    (begin
+      (setq pT (div 2 3))
+      (setq pC (sub 1 pT)))
+    ;else
+    (begin
+      (setq pC (div 2 3))
+      (setq pT (sub 1 pC)))))
+
+; Calcola il risultato della moneta al termine di un dato numero di lanci
+; Il lancio 0 vale Testa o Croce con probabilità al 50% (1/2)
+(define (moneta lanci)
+  (local (prev pT pC)
+    ; lancio iniziale:
+    ; P(T) = 1/2
+    ; P(C) = 1/2
+    (if (zero? (rand 2))
+        (setq prev 'T)
+        (setq prev 'C))
+    ; ciclo di k lanci...
+    (for (k 1 lanci)
+      ; imposta le probabilità correnti (pT e pC) in base
+      ; al risultato del lancio precedente
+      (set-prob prev)
+      ;(print prev { } pT { } pC) (read-line)
+      ; calcola il risultato del lancio corrente
+      (if (>= pT pC)
+          (if (> pT (random))
+              (setq prev 'T)
+              (setq prev 'C))
+          (if (> pC (random))
+              (setq prev 'C)
+              (setq prev 'T))))
+    prev))
+
+(seed (time-of-day) true)
+(count '(T) (collect (moneta 1000) 1e5))
+;-> (49838)
+(count '(C) (collect (moneta 1000) 1e5))
+;-> (50186)
+
+Scriviamo una funzione che calcola la probabilita di ottenere T o C al k-esimo lancio dopo una prima Testa o una prima Croce.
+
+(define (moneta-fissa init lanci)
+  (local (prev pT pC)
+    ; lancio iniziale:
+    (setq prev init)
+    ; ciclo di k lanci...
+    (for (k 1 lanci)
+      ; imposta le probabilità correnti (pT e pC) in base
+      ; al risultato del lancio precedente
+      (set-prob prev)
+      ;(print prev { } pT { } pC) (read-line)
+      ; calcola il risultato del lancio corrente
+      (if (>= pT pC)
+          (if (> pT (random))
+              (setq prev 'T)
+              (setq prev 'C))
+          (if (> pC (random))
+              (setq prev 'C)
+              (setq prev 'T))))
+    prev))
+
+(seed (time-of-day) true)
+
+prima Testa
+Testa
+(dolist (lanci '(1 2 3 4 100 1000))
+  (println (count '(T) (collect (moneta-fissa 'T lanci) 1e5))))
+;-> (66737)
+;-> (55592)
+;-> (51803)
+;-> (50567)
+;-> (49741)
+;-> (49863)
+;-> Croce
+(dolist (lanci '(1 2 3 4 100 1000))
+  (println (count '(C) (collect (moneta-fissa 'T lanci) 1e5))))
+
+prima Croce
+Testa
+(dolist (lanci '(1 2 3 4 100 1000))
+  (println (count '(T) (collect (moneta-fissa 'C lanci) 1e5))))
+;-> (33284)
+;-> (44435)
+;-> (48004)
+;-> (49743)
+;-> (49971)
+;-> (50093)
+Croce
+(dolist (lanci '(1 2 3 4 100 1000))
+  (println (count '(C) (collect (moneta-fissa 'C lanci) 1e5))))
+;-> (66495)
+;-> (55603)
+;-> (51641)
+;-> (50182)
+;-> (49988)
+;-> (49847)
+;-> ()
+
+
+---------------------
+Paradosso di Bertrand
+---------------------
+
+Il paradosso della scatola di Bertrand è un paradosso veritiero nella teoria elementare della probabilità.
+Fu formulato per la prima volta da Joseph Bertrand nel 1889.
+Un paradosso veritiero è un paradosso la cui soluzione corretta sembra essere controintuitiva.
+
+Ci sono tre scatole:
+1) una scatola contenente due monete d'oro,
+2) una scatola contenente due monete d'argento,
+3) una scatola contenente una moneta d'oro e una d'argento.
+Una moneta estratta a caso da una delle tre scatole risulta essere d'oro.
+Qual è la probabilità che anche l'altra moneta estratta dalla stessa scatola sia d'oro?
+
+Potrebbe sembrare intuitivo che la probabilità che la moneta rimanente sia d'oro sia 1/2, ma la probabilità corretta vale 2/3.
+L'attenzione deve essere posta all'inizio, cioè all'azione in cui si estrae casualmente una moneta d'oro da una delle tre scatole.
+La moneta è d'oro deve essere stata estratta dalla scatola 1 o dalla scatola 3.
+La probabilità di scegliere la moneta d'oro della scatola 1 vale 2/3, mentre la probabilità di scegliere la moneta d'oro della scatola 3 vale 1/3.
+Quindi abbiamo 2/3 di probabilità di scegliere all'inizio la scatola 1.
+Questo significa che 2/3 delle volte la moneta della scatola scelta è d'oro (perchè 2/3 delle volte scegliamo la scatola 1).
+Alternativamente possiamo notare che:
+All'inizio tutte e 3 le monete d'oro hanno la stessa probabilità di essere scelte, ma poichè nella scatola 1 ci sono 2 monete d'oro, allora la probabilità di scegliere la scatola 1 vale 2/3.
+
+Scriviamo una funzione per simulare il processo.
+
+(define (paradox iter)
+  (let ((conta1 0) (conta3 0))
+    (for (prove 1 iter)
+      (setq gold-selected (rand 3))
+      (cond ((= gold-selected 0) (setq box 1))
+            ((= gold-selected 1) (setq box 1))
+            ((= gold-selected 2) (setq box 3)))
+      (if (= box 1) (++ conta1) (++ conta3)))
+    (list (div conta1 iter) (div conta3 iter))))
+
+(paradox 1e7)
+;-> (0.666874 0.333126)
+
+Anche se simuliamo prima la scelta della scatola e poi l'estrazione della moneta d'oro, il risultato è lo stesso.
+
+(define (paradox2 iter)
+  (let ((conta1 0) (conta3 0) (prove 0))
+    (while (< prove iter)
+      ; scelta della scatola (tranne la 1)
+      (while (= (setq box-selected (+ (rand 3) 1)) 2))
+      (cond ((= box-selected 1) ; abbiamo scelto la scatola 1
+              (++ conta1)
+              (++ prove))
+            ((= box-selected 3) ; abbiamo scelto la scatola 3
+              ; estrazione della moneta dalla scatola 3
+              ; 0 = oro, 1 = argento
+              (if (zero? (rand 2))
+                  (++ conta3)
+                  (++ prove)))))
+    (list (div conta1 iter) (div conta3 iter))))
+
+(paradox2 1e7)
+;-> (0.6663978 0.3332409)
 
 ============================================================================
 
