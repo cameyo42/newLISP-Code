@@ -3704,6 +3704,8 @@ NOTE LIBERE 39
   Eventi statisticamente indipendenti
   Non c'è più nessuno
   Paradosso di Bertrand
+  Formiche che passeggiano lungo una linea
+  La formica lungo un elastico
 
 PROBLEMI SUI DADI
 =================

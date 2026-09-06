@@ -1841,13 +1841,395 @@ Anche se simuliamo prima la scelta della scatola e poi l'estrazione della moneta
             ((= box-selected 3) ; abbiamo scelto la scatola 3
               ; estrazione della moneta dalla scatola 3
               ; 0 = oro, 1 = argento
-              (if (zero? (rand 2))
+              (if (zero? (rand 2)) ; la prova vale solo se estraiamo oro (0)
                   (++ conta3)
                   (++ prove)))))
     (list (div conta1 iter) (div conta3 iter))))
 
 (paradox2 1e7)
 ;-> (0.6663978 0.3332409)
+
+
+----------------------------------------
+Formiche che passeggiano lungo una linea
+----------------------------------------
+
+Lungo una linea lunga L centimetri camminano N formiche.
+All'inizio le formiche si trovano tutte in posizioni casuali lungo la linea.
+Ogni formica ha anche una direzione casuale iniziale (destra o sinistra) e si muove di un centimetro ad ogni secondo.
+Quando due formiche si scontrano entrambe invertono la loro direzione.
+Se una formica supera l'inizio (0) o la fine della tavola (L), allora viene eliminata.
+Scrivere una funzione che simula il processo della passeggiata.
+Scrivere una funzione più corta che calcola quanti secondi occorrono per eliminare tutte le formiche.
+
+Esempio:
+  L = 7
+  Formiche = 3
+      <       >           <
+      F1      F2          F3
+  -----------------------------
+  0   1   2   3   4   5   6   7
+
+Scontro tra due formiche
+------------------------
+
+Caso 1: distanza tra formiche = 0
+---------------------------------
+Posizione F1 = 4
+Direzione = > (destra)
+
+Posizione F2 = 5
+Direzione = < (sinistra)
+
+                  >   <
+                  F1  F2
+  -----------------------------
+  0   1   2   3   4   5   6
+
+Le formiche F1 e F2 si scontreranno al prossimo secondo.
+Lo scontro non produce uno spostamento delle due formiche (F1 rimane a 4 e F2 rimane a 5), vengono invertite solo le loro direzioni, cioè al successivo secondo F1 andrà a sinistra e F2 andrà a destra.
+
+Caso 2: distanza tra formiche = 0
+---------------------------------
+Posizione F1 = 3
+Direzione = -> (destra)
+
+Posizione F2 = 5
+Direzione = <- (sinistra)
+
+              >       <
+              F1      F2
+  -----------------------------
+  0   1   2   3   4   5   6
+
+Le formiche F1 e F2 occuperanno la stessa casa al prossimo secondo.
+Questo produce uno spostamento delle due formiche (F1 va a 4 e F2 va a 4) e l'inversione delle loro direzioni, cioè al successivo secondo F1 andrà sinistra (partendo da 4) e F2 va a destra (partendo da 4).
+Lo scontro produce uno spostamento delle due formiche (F1 va a 4 e F2 va a 4) e vengono invertite le loro direzioni, cioè al successivo secondo F1 andrà a sinistra (partendo da 4) e F2 andrà a destra (partendo da 4).
+
+Scriviamo la funzione che simula il processo.
+
+(define (find-from-end value lst)
+"Find an element from the end of a list"
+  (let (idx (find value (reverse lst)))
+    (if idx (- (length lst) 1 idx))))
+
+; stampa la posizione delle formiche
+(define (print-ants)
+  (let ((pos-str (dup " " (+ L 1)))  ; posizione "*"
+        (dir-str (dup " " (+ L 1)))  ; direzione ">" o "<"
+        (dir2-str (dup " " (+ L 1)))) ; direzione per punti doppi
+    (dolist (el ants)
+      (if (= (el 1) 0) ; direzione formica corrente: sinistra
+          (if (= (pos-str (el 0)) " ")
+              (begin
+                (setf (pos-str (el 0)) "*")      ; posizione
+                (setf (dir-str (el 0)) "<"))     ; sinistra
+              (begin
+                (setf (pos-str (el 0)) "*")
+                (setf (dir2-str (el 0)) "<")))   ; sinistra (punti doppi)
+          ;else ; direzione formica corrente: destra
+          (if (= (pos-str (el 0)) " ")
+              (begin
+                (setf (pos-str (el 0)) "*")      ; posizione
+                (setf (dir-str (el 0)) ">"))     ; destra
+              (begin
+                (setf (pos-str (el 0)) "*")
+                (setf (dir2-str (el 0)) ">"))))) ; destra (punti doppi)
+    (println "Passi: " sec)
+    (println dir2-str) ; direzione punti doppi
+    (println dir-str)  ; direzione
+    (println pos-str)  ; posizione
+    (println (dup "-" (+ L 1))) '>))
+
+La funzione 'move-ants' muove tutte le formiche di un passo e non simula gli scontri tra due formiche perchè non è necessario.
+Infatti possiamo considerare ogni scontro (di entrambi i tipi) come uno scambio di direzione tra le due formiche.
+In questo modo possiamo considerare che entrambe le formiche proseguano il loro percorso indisturbate.
+Per capire meglio, immaginiamo che ogni formica ha una maglietta con stampata la propria direzione:
+quando due formiche si scontrano si scambiano le magliette.
+Questo fa in modo che le due magliette proseguono il loro percorso indisturbate.
+I passi che fanno le due magliette sono gli stessi che fanno le due formiche.
+
+; Muove di un passo tutte le formiche
+(define (move-ants)
+  (local (cur-ants cur-pos cur-dir new-pos idx)
+    ; copia della lista delle formiche
+    (setq cur-ants ants)
+    ; scorriamo la copia mentre modifichiamo la lista originale 'ants'
+    (dolist (el cur-ants)
+      ; posizione formica corrente
+      (setq cur-pos (el 0))
+      ; direzione formica corrente
+      (setq cur-dir (el 1))
+      ; calcolo della nuova posizione della formica corrente
+      (if (= cur-dir 0)
+          (setq new-pos (- cur-pos 1)) ; -1 -> va a sinistra
+          (setq new-pos (+ cur-pos 1))); +1 -> va a destra
+      ; controllo se la formica si trova ai bordi (0 o L)
+      (if (or (and (= cur-pos 0) (= cur-dir 0))
+              (and (= cur-pos L) (= cur-dir 1)))
+              ; elimina la formica corrente
+              (pop ants (ref el ants))
+              ;else
+              ; aggiorna la posizione della formica corrente
+              (begin
+                ; Usiamo 'update-from-end' per evitare che
+                ; nel caso di punti coincidenti venga aggiornato il
+                ; punto sbagliato (occorre aggiornare sempre l'ultimo punto)
+                (setq idx (find-from-end el ants))
+                (setf (ants idx) (list new-pos cur-dir)))))))
+
+; Simula il processo di una passeggiata di N formiche su una linea lunga L
+(define (walk L N show formiche)
+  (local (sec line pos dir ants)
+    (if formiche
+        ; la lista delle formiche viene data come parametro (formiche)
+        ; la lunghezza della linea viene data come parametro (L)
+        (begin
+          (setq ants formiche)
+          (setq N (length ants)))
+        ;else
+          (begin
+          ; la lista delle formiche viene costruita in modo casuale
+          ; con una linea lunga L in cui ci sono N formiche
+          ; linea: lista di numeri da 0 a L
+          (setq line (sequence 0 L))
+          ; posizione delle formiche lungo la linea
+          (setq pos (slice (randomize line) 0 N))
+          ; direction: 0 = sx, 1 = dx
+          (setq dir (rand 2 N))
+          ; lista delle formiche ((f1 dir1) (f2 dir2) ... (fN dirN))
+          (setq ants (map list pos dir))))
+    (println "Formiche: " ants)
+    ; numero secondi
+    (setq sec 0)
+    ; stampa posizione iniziale
+    (when show (print-ants) (read-line))
+    ; ciclo finchè esistono formiche nella tavola...
+    (while ants
+      (++ sec)
+      ; muove tutte le formiche di un passo
+      (move-ants)
+      ; stampa posizione corrente delle formiche
+      (when show (print-ants) (read-line)))
+    ; numero di secondi necessario per eliminare tutte le formiche
+    (println "Secondi: " sec) '>))
+
+Proviamo:
+
+; Usare sempre la seguente espressione prima di uilizzare
+; le funzioni casuali: rand, random, amb, ecc.
+(seed (time-of-day) true)
+
+(walk 10 4 true)
+;-> Formiche: ((10 1) (6 0) (4 1) (1 0))
+;-> Passi: 0           Passi: 1           Passi: 3           Passi: 4
+;->                         >
+;->  <  > <   >        <    <                <   >             <     >
+;->  *  * *   *        *    *                *   *             *     *
+;-> -----------        -----------        -----------        -----------
+;->
+;-> Passi: 5           Passi: 6           Passi: 7
+;->
+;->  <       >         <         >
+;->  *       *         *         *
+;-> -----------        -----------        -----------
+;->
+;-> Secondi: 7
+
+(walk 20 6)
+;-> Formiche: ((15 1) (10 1) (5 0) (16 0) (11 1) (12 0))
+;-> Secondi: 17
+
+(walk 40 10 true)
+;-> Formiche: ((2 1) (28 1) (21 0) (8 0) (39 0) (10 1)
+;->            (37 0) (30 0) (18 0) (22 1))
+;-> Passi: 0
+;->
+;->   >     < >       <  <>     > <      < <
+;->   *     * *       *  **     * *      * *
+;-> -----------------------------------------
+;-> ...
+;-> Secondi: 40
+
+(walk 70 20 true)
+;-> Formiche: ((49 1) (41 1) (26 0) (36 1) (9 1) (53 1) (45 0) (46 0) (51 1)
+;->            (58 0) (19 1) (6 1) (63 0) (65 1) (0 0) (55 0) (18 1) (5 1)
+;->            (69 0) (35 1))
+;-> Passi: 0
+;->
+;-> <    >>  >        >>      <        >>    >   <<  > > > <  <    < >   <
+;-> *    **  *        **      *        **    *   **  * * * *  *    * *   *
+;-> -----------------------------------------------------------------------
+;-> ...
+;-> Secondi: 70
+
+Adesso scriviamo una funzione che calcola quanti secondi occorrono per eliminare tutte le formiche.
+La considerazione che ci ha permesso di non simulare gli effetti degli scontri tra formiche ci permette anche di calcolare in tempo di eliminazione in modo semplice.
+Infatti possiamo considerare che ogni formica parte dalla sua posizione iniziale e arriva al termine della linea (inizio o fine) in base alla propria posizione e alla propria direzione.
+Per esempio, se abbiamo una linea lunga 10, una formica in posizione 3 e direzione sinistra (verso lo 0), allora la formica impiega 3 + 1 = 4 secondi per essere terminata.
+Se la direzione fosse stata la destra, allora la formica stessa sarebbe terminata in 10 - 3 + 1 = 8 secondi.
+Quindi il tempo massimo è dato dalla formica che si trova più lontana da uno dei termini (0 o L) della linea.
+In questo caso supponiamo che la lista iniziale delle formiche sia data nel seguente formato:
+((posizione1 direzione1) (posizione2 direzione2) ... (posizioneN direzioneN))
+Dove le direzioni ha uno dei seguenti valori:
+  direzione sinistra = 0
+  direzione destra = 1
+
+(define (total-time L ants)
+  (let ((cur-tempo 0) (max-tempo 0))
+    (dolist (el ants)
+      (if (= (el 1) 0)
+        ; tempo necessario per eliminare la formica corrente
+        ; andando verso sinistra (secondi)
+        (setq cur-tempo (+ (el 0) 1))
+        ;else
+        ; tempo necessario per eliminare la formica corrente
+        ; andando verso destra (secondi)
+        (setq cur-tempo (- L (el 0) (- 1))))
+      ; aggiornamento del tempo massimo (secondi)
+      (if (> cur-tempo max-tempo) (setq max-tempo cur-tempo)))
+      max-tempo))
+
+Proviamo:
+
+(total-time 10 '((10 1) (6 0) (4 1) (1 0)))
+;-> 7
+
+(total-time 20 '((15 1) (10 1) (5 0) (16 0) (11 1) (12 0)))
+;-> 17
+
+(total-time 40 '((2 1) (28 1) (21 0) (8 0) (39 0) (10 1) (37 0) (30 0)
+                (18 0) (22 1)))
+;-> 40
+
+(total-time 70 '((49 1) (41 1) (26 0) (36 1) (9 1) (53 1) (45 0) (46 0) (51 1)
+     (58 0) (19 1) (6 1) (63 0) (65 1) (0 0) (55 0) (18 1) (5 1)
+     (69 0) (35 1)))
+;-> 70
+
+Tutti i tempi di eliminazione calcolati da 'walk' e 'total-time' coincidono.
+All'aumentare delle formiche aumenta la probabilità che una di esse si possa trovare a 0 con direzione destra o a L con direzione sinistra, in questo caso il numero dei secondi vale (L + 1).
+
+Versione code-golf (112 caratteri):
+
+(define(f L a)(let((t 0)(T 0))
+(dolist(x a)(setq t(if(=(x 1)0)(+(x 0)1)(- L(x 0)(- 1))))
+(if(> t T)(setq T t)))T))
+
+(f 10 '((10 1) (6 0) (4 1) (1 0)))
+;-> 7
+
+(f 20 '((15 1) (10 1) (5 0) (16 0) (11 1) (12 0)))
+;-> 17
+
+(f 40 '((2 1) (28 1) (21 0) (8 0) (39 0) (10 1) (37 0) (30 0)
+                (18 0) (22 1)))
+;-> 40
+
+(f 70 '((49 1) (41 1) (26 0) (36 1) (9 1) (53 1) (45 0) (46 0) (51 1)
+     (58 0) (19 1) (6 1) (63 0) (65 1) (0 0) (55 0) (18 1) (5 1)
+     (69 0) (35 1)))
+;-> 70
+
+
+----------------------------
+La formica lungo un elastico
+----------------------------
+
+Una formica si trova a un'estremità di un elastico lungo 100 metri, come mostrato di seguito.
+
+Si muove verso l'altra estremità a una velocità costante di 1 cm al secondo.
+Alla fine di ogni secondo, l'elastico si allunga di 100 metri.
+In altre parole, quando la formica ha percorso 1 cm, l'elastico è lungo 200 m, quando ne ha percorsi 2 cm, è lungo 300 m e così via.
+Tuttavia, allungando l'elastico di un metro, anche la posizione della formica si allunga/sposta.
+Riuscirà la formica a raggiungere l'estremità dell'elastico?
+
+Come si muove la formica
+------------------------
+Dopo un secondo, la formica si è spostata di 1 cm lungo l'elastico, che, allungandosi, sposta la formica a 2 cm, poiché allungare l'elastico da 1 m a 2 m ha l'effetto di raddoppiare la distanza tra due punti qualsiasi.
+Dopo un altro secondo, la formica si trova a 3 cm dall'estremità sinistra, distanza che, quando si allunga l'elastico, diventa di 4.5 cm, poiché allungare l'elastico da 2 m a 3 m ha l'effetto di moltiplicare per 3/2 la distanza tra due punti qualsiasi.
+In altre parole, la formica viene trascinata in avanti dall'allungamento e percorre una distanza crescente ogni secondo, il che forse le permette di arrivare in fondo.
+
+Dal punto di vista matematico.
+Nel primo secondo, la formica percorre 1 cm.
+In altre parole, la formica percorre 1/100 della lunghezza dell'elastico, che è lungo 1 m.
+L'elastico si allunga istantaneamente fino a 2 m.
+Nel secondo successivo, la formica percorre un altro cm, che ora rappresenta 1/200 della lunghezza dell'elastico.
+Dopo il terzo secondo, la lunghezza dell'elastico è di 3 m, quindi il cm percorso dalla formica rappresenta 1/300 della lunghezza dell'elastico.
+E così via.
+Sommando tutte queste frazioni, otteniamo la seguente espressione:
+
+  1/100*(1 + 1/2 + 1/3 + 1/4 + ... + 1/N)
+
+rappresenta la distanza percorsa dalla formica dopo N secondi, espressa come frazione della lunghezza totale dell'elastico.
+
+Quindi quando il termine (1 + 1/2 + 1/3 + 1/4 + ... + 1/N) raggiunge 100, allora la formica ha raggiunto il termine della linea in N secondi.
+Poichè (1 + 1/2 + 1/3 + 1/4 + ... + 1/N) è la 'serie armonica' che cresce indefinitamente, allora possiamo dire che la formica raggiungerà sicuramente la fine dell'elastico.
+
+Per calcolare il valore della serie armonica per un dato N usiamo la seguente formula:
+
+  Sum[k=1,N](1/k) ≈ ln(N) + K + 1/(2*N)
+
+La costante K è la costante di Eulero-Mascheroni che vale:
+
+  K = 0.577215664901532860606512090082402431042159335...
+
+(define (harmonic num)
+  (add (log num) 0.57721566490153286 (div (mul 2 num))))
+
+Possiamo calcolare N utilizzando Newton-Raphson.
+
+Definiamo:
+
+  f(N) = ln(N) + K + 1/2N - X
+  f'(N) = 1/N - (1/N^2) = (2N - 1)/(2N^2)
+
+dove X è il valore della serie armonica per un certo N.
+
+Quindi l'iterazione Newton vale:
+
+            ln(N(i)) + K + 1/2N(i) - X
+  N(i+1) = ----------------------------
+                1/N(i) - 1/2N(i)^2
+
+che per N >= 1 converge rapidamente.
+
+La stima iniziale (exp (- X K)) deriva semplicemente dall'ignorare inizialmente il termine 1/(2*N).
+Questa funzione restituisce il valore reale di N che soddisfa l'approssimazione
+
+  X = log(N) + K + 1/(2*N)
+
+non necessariamente l'intero N della serie armonica esatta.
+
+(define (harmonic-inv X)
+  ; Costante di Eulero-Mascheroni
+  (let ((K 0.5772156649015329)
+        (N (exp (sub X 0.5772156649015329)))
+        (old 0.0)
+        (stop nil))
+    ; Iterazione di Newton-Raphson
+    (for (i 0 20 1 stop)
+      (setq old N)
+      (setq N (sub N
+              (div
+                (sub (add (log N) K (div 1 (mul 2 N))) X)
+                (sub (div 1 N) (div 1 (mul 2 N N))))))
+      ; Se la variazione e' trascurabile, termina
+      (if (< (abs (sub N old)) 1e-12)
+        (setq stop true)))
+    N))
+
+Nel nostro caso X = 100:
+
+(harmonic-inv 100)
+;-> 1.509268862211383e+043
+
+Verifichiamo questo risultato:
+
+(harmonic (harmonic-inv 100))
+;-> 100
+
+Quindi dopo 1.509268862211383e+043 secondi la formica raggiunge la fine dell'elastico.
 
 ============================================================================
 
