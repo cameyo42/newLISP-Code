@@ -2132,9 +2132,9 @@ Versione code-golf (112 caratteri):
 ;-> 70
 
 
-----------------------------
-La formica lungo un elastico
-----------------------------
+---------------------------
+La formica lungo l'elastico
+---------------------------
 
 Una formica si trova a un'estremità di un elastico lungo 100 metri, come mostrato di seguito.
 
@@ -2230,6 +2230,162 @@ Verifichiamo questo risultato:
 ;-> 100
 
 Quindi dopo 1.509268862211383e+043 secondi la formica raggiunge la fine dell'elastico.
+
+
+-------------
+Boys and girl
+-------------
+
+Ipotizzando che ogni bambino nato abbia la stessa probabilità di essere maschio o femmina, e scegliendo a caso un genitore tra tutti quelli che hanno due figli, la probabilità che questo genitore abbia ALMENO una figlia è 3/4, poiché tre dei quattro esiti ugualmente probabili MM, MF, FM, FF includono almeno una figlia.
+
+Invece, se scegliamo a caso un genitore tra tutti quelli che hanno due figli, di cui ALMENO uno maschio, allora i tre esiti ugualmente probabili sono MM, MF, FM, due dei quali hanno una figlia, quindi la probabilità che il genitore scelto abbia una figlia è 2/3. 
+
+Naturalmente, se scegliamo a caso un genitore tra tutti quelli che hanno due figli, di cui il MAGGIORE è maschio, allora le famiglie possibili sono MM e MF, quindi la probabilità che il figlio minore sia una femmina è 1/2.
+
+Analogamente, se selezioniamo a caso un genitore tra tutti i genitori che hanno due figli, il più GIOVANE dei quali è un maschio, allora le famiglie possibili sono MM e FM, quindi la probabilità che il figlio maggiore sia una femmina è 1/2.
+
+
+-----------------------------------------------------
+Principio di riflessione (disuguaglianza triangolare)
+-----------------------------------------------------
+
+Dati due punti A e B in un piano cartesiano, trovare il percorso minimo che congiunge i due punti A e B e passa per un punto qualunque di una linea orizzontale L.
+
+Ipotesi A: la linea L si trova al di sotto di entrambi i punti A e B.
+
+          A
+
+
+                     B
+
+
+  L
+  -------------------------
+
+La soluzione si trova eseguendo i seguenti passi:
+1) Individuare il punto riflesso di B rispetto alla linea L.
+   Chiamiamo questo punto B'.
+2) Congiungere il punto A con il punto B' (segmento AB').
+   Il segmento AB' attraversa la linea L in un punto P.
+3) La distanza minima è data dalla somma dei segmenti AP e PB.
+   Questa distanza è equivalente alla lunghezza del segmento AB'.
+
+          A
+           \
+            \
+             \       B
+              \     /|
+               \   / |
+  L             \ /  |
+  ---------------+---------
+                 P\  |
+                   \ |
+                    \|
+                     B'
+
+Ipotesi B: la linea L si trova al di sopra di entrambi i punti A e B.
+
+La soluzione si trova con gli stessi passi visti sopra per l'ipotesi A.
+
+                     B'
+                    /|
+                   / |
+  L              P/  |
+  ---------------+---------
+                / \  |
+               /   \ |
+              /     \|
+             /       B
+            /
+           /
+          A
+
+Ipotesi C: la linea L si tra i punti A e B.
+
+In questo caso la distanza minima è data dalla lunghezza del segmento AB (che attraversa necessariamente la linea L in un punto P).
+
+          A
+ L         \
+ --------------------------
+             \
+              \
+               \
+                B
+
+Scriviamo la funzione che calcola la distanza minima tra due punti A e B e che attraversa un punto qualunque di una linea orizzontale.
+
+(define (dist2d p1 p2)
+"Calculate 2D Cartesian distance of two points P1 = (x1 y1) and P2 = (x2 y2)"
+  (let ( (x1 (p1 0)) (y1 (p1 1))
+         (x2 (p2 0)) (y2 (p2 1)) )
+    (sqrt (add (mul (sub x1 x2) (sub x1 x2))
+               (mul (sub y1 y2) (sub y1 y2))))))
+
+(define (minima A B L)
+  (let ( (xa (A 0)) (ya (A 1))
+         (xb (B 0)) (yb (B 1)) )
+    (cond 
+      ; la linea si trova tra i punti A e B
+      ((or (apply > (list ya L yb))
+           (apply < (list ya L yb)))
+        (setq out (dist2d (list xa ya) (list xb yb))))
+      ; la linea si trova sotto o sopra entrambi i punti A e B
+      (true
+        ; calcolo del punto riflesso di B rispetto alla linea L (xbr ybr)
+        (setq xbr xb)
+        (setq ybr (- (* 2 L) yb))
+        (setq out (dist2d (list xa ya) (list xbr ybr)))))
+    out))
+
+Proviamo:
+
+(minima '(3 3) '(4 6) 5)
+;-> 3.16227766016838
+
+(minima '(5 5) '(3 8) 12)
+;-> 11.18033988749895
+
+La soluzione usa il 'principio della riflessione' o 'disuguaglianza triangolare'.
+Supponiamo che A e B siano dalla stessa parte della retta orizzontale L, e riflettiamo B ottenendo B'.
+
+Per ogni punto P appartenente a L:
+
+  AP + PB = AP + PB'
+
+perché P appartiene alla retta di riflessione e quindi:
+
+  PB = PB'
+
+Ora A, P e B' formano un triangolo, quindi per la disuguaglianza triangolare:
+
+  AP + PB' >= AB'
+
+L'uguaglianza si verifica esattamente quando A, P e B' sono allineati.
+Quindi:
+
+  min(AP + PB) = AB'
+
+Ed è proprio il metodo implementato dalla funzione 'minima'.
+
+Possiamo calcolare anche le coordinate di P.
+Se la retta L si trova sopra o sotto entrambi i punti A e B, si riflette B ottenendo B' e si calcola P come intersezione della retta AB' con L.
+Il parametro della retta è:
+  t = (L - ya) / (ybr - ya)
+e quindi:
+  xp = xa + t * (xb - xa)
+  yp = L
+Nel caso in cui L sia tra A e B, la distanza minima ♪ la lunghezza del segmanto AB e il punto P del percorso è invece l'intersezione del segmento AB con L, quindi la stessa formula usando yb non riflesso.
+
+Versione code-golf (151 caratteri):
+
+(define(f x y w z L)(if-not(or(apply >(list y L z))(apply <(list y L z)))
+(setq z(-(* 2 L)z)))(sqrt(add(mul(sub x w)(sub x w))(mul(sub y z)(sub y z)))))
+
+(f 3 3 4 6 5)
+;-> 3.16227766016838
+
+(f 5 5 3 8 12)
+;-> 11.18033988749895
 
 ============================================================================
 

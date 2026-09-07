@@ -3705,7 +3705,9 @@ NOTE LIBERE 39
   Non c'è più nessuno
   Paradosso di Bertrand
   Formiche che passeggiano lungo una linea
-  La formica lungo un elastico
+  La formica lungo l'elastico
+  Boys and girl
+  Principio di riflessione (disuguaglianza triangolare)
 
 PROBLEMI SUI DADI
 =================
