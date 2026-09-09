@@ -2794,5 +2794,217 @@ Test di velocità
 
 Per attraversare una stringa di caratteri per usare i caratteri o i codici ASCII il metodo più veloce è quello di utilizzare la primitiva 'unpack'.
 
+
+------------------------------------------------------------------
+Numero minimo e numero massimo di una lista con elementi qualsiasi
+------------------------------------------------------------------
+
+Data una lista di elementi, determinare il numero minimo e il numero massimo.
+Gli elementi della lista possono essere:
+1) numero intero
+2) numero float
+3) stringa
+4) lista di elementi
+L'elemento 4) indica che la lista data può essere annidata.
+
+Esempio:
+  lista = (1 "abc" 1.1 (8 4 "xx" 0.45) (("dot" 6)) (5 ("h" ("ops" (6.15)) 2)))
+  numero minimo = 0.45
+  numero massimo = 8
+
+(define (min-max1 lst)
+  (let ((minimo 1e99)
+        (massimo 0)
+        (lst (flat lst)))
+  (dolist (el lst)
+    (if (or (integer? el) (float? el))
+      (begin
+        (if (< el minimo) (setq minimo el))
+        (if (> el massimo) (setq massimo el)))))
+  (list minimo massimo)))
+
+(define (min-max2 lst)
+  (let (lst (filter (fn(x) (or (integer? x) (float? x))) (flat lst)))
+    (list (apply min lst) (apply max lst))))
+
+; Genera una lista con elementi casuali (interi, float e stringhe)
+; Parametri
+;   nums    -> numero di elementi da generare
+;   min-val -> valore minimo dell'intervallo (numero)
+;   max-val -> valore massimo dell'intervallo (numero)
+;   min-len -> lunghezza minima della stringa
+;   max-len -> lunghezza massima della stringa
+(define (rand-list nums min-val max-val min-len max-len)
+  (let ((out '()) (tipi '("i" "f" "s")))
+    (for (el 1 nums)
+      (setq type (tipi (rand 3)))
+      (cond ((= type "i") ; numeri interi
+              (push (+ min-val (rand (+ (- max-val min-val) 1))) out -1))
+            ((= type "f") ; numeri floating
+              (push (add min-val (random 0 (sub max-val min-val))) out -1))
+            ((= type "s") ; stringhe
+              (setq str "")
+              (setq len (+ min-len (rand (+ (- max-len min-len) 1))))
+              (for (c 1 len)
+                (extend str (char (+ 32 (rand 95)))))
+              (push str out -1))))
+    out))
+
+Proviamo:
+
+(seed (time-of-day true))
+
+(silent 
+(setq L (rand-list 1e4 -1e6 1e6 1 8))
+(for (k 2 4) (setq L (explode L k))))
+
+(min-max1 L)
+;-> (-999817 999572.7408673361)
+(min-max2 L)
+;-> (-999817 999572.7408673361)
+
+(time (min-max1 L) 1e3)
+;-> 2234.493
+(time (min-max2 L) 1e3)
+;-> 2968.909
+
+
+----------------------------------------
+Numero + triangolare(x) = triangolare(y)
+----------------------------------------
+
+Un numero triangolare è un numero che rappresenta la somma dei primi n numeri naturali (da 1 a n).
+Ad esempio, 1 + 2 + 3 + 4 = 10, quindi 10 è un numero triangolare.
+
+Dato un numero intero positivo (0 <= N <= 10000) scrivere una funzione che restituisce il più piccolo numero triangolare che, sommato a N, genera un altro numero triangolare.
+Per N = 0 l'output vale 0.
+Se N è un numero triangolare, l'output vale 0.
+
+Esempio:
+  N = 26
+  Aggiungendo 10 (che è triangolare) otteniamo 36, che è un numero triangolare.
+
+Metodo di soluzione
+-------------------
+
+L'n-esimo numero triangolare vale:
+
+          n*(n + 1)
+  T(n) = -----------
+              2
+
+Per verificare se un numero intero positivo N è un numero triangolare, dobbiamo determinare se esiste un numero naturale n per cui risulta:
+
+       n*(n + 1)
+  N = -----------
+           2
+
+Invertiamo la formula:
+
+       sqrt(8*N + 1) - 1
+  n = -------------------
+              2
+
+Se n è un valore intero, allora N è il triangolare di n.
+
+; Restituisce l'n-esimo numero triangolare.
+; La successione dei numeri triangolari e':
+;   T(0) = 0
+;   T(1) = 1
+;   T(2) = 3
+;   T(3) = 6
+; Formula:
+;              n * (n + 1)
+;   T(n) =  ---------------
+;                   2
+(define (tri n) (/ (* n (+ n 1)) 2))
+
+; Restituisce l'indice n del numero triangolare N.
+; Partendo da:
+;          n * (n + 1)
+;   N =  ---------------
+;               2
+; si ottiene:
+;   n^2 + n - 2*N = 0
+; e quindi, usando la soluzione positiva dell'equazione di secondo grado:
+;         sqrt(8*N + 1) - 1
+;   n = ---------------------
+;                 2
+; Se N e' triangolare, questo valore e' intero.
+(define (inv-tri N) (div (sub (sqrt (add (mul 8 N) 1)) 1) 2))
+
+
+; Verifica se num e' un numero intero.
+; Converte il numero nella sua rappresentazione intera in base 10:
+; (int num 0 10)
+; Se il valore convertito coincide con num, num e' intero.
+(define (intero? num) (= (int num 0 10) num))
+
+; Cerca il piu' piccolo numero triangolare T(k) tale che:
+;                 N + T(k)
+; sia a sua volta un numero triangolare.
+; L'algoritmo procede in ordine crescente di k:
+;   T(0), T(1), T(2), T(3), ...
+; quindi il primo valore trovato e' necessariamente il piu'
+; piccolo numero triangolare che soddisfa la condizione.
+; Ad ogni iterazione:
+;   1. si aggiorna T(k)
+;   2. si verifica se N + T(k) e' triangolare
+;   3. se non lo e', si incrementa k
+; L'aggiornamento:
+;   (++ tri-k k)
+; sfrutta direttamente la relazione:
+;   T(k) = T(k-1) + k
+; Infatti, partendo da T(0) = 0:
+;   prima iterazione:  T(0) = 0 + 0 = 0
+;   seconda:           T(1) = 0 + 1 = 1
+;   terza:             T(2) = 1 + 2 = 3
+;   quarta:            T(3) = 3 + 3 = 6
+;   ...
+; In questo modo non e' necessario ricalcolare ogni volta
+; T(k) mediante moltiplicazione e divisione.
+; Inoltre il test viene scritto come:
+;   (if condizione
+;       (setq found true)
+;       (++ k))
+; evitando un (begin ...) nel ramo else.
+(define (make-tri num)
+  (let ((found nil)
+        (k 0)
+        (tri-k 0))
+    (until found
+      ; Aggiorna T(k) usando:
+      ;   T(k) = T(k-1) + k
+      ; Al primo giro k vale 0, quindi tri-k rimane 0.
+      (++ tri-k k)
+      ; Verifica se: num + T(k) e' un numero triangolare.
+      ; inv-tri restituisce l'indice triangolare corrispondente.
+      ; Se tale indice e' intero, il numero e' triangolare.
+      (if (intero? (inv-tri (+ num tri-k)))
+          ; Trovato il primo risultato.
+          (setq found true)
+          ; Altrimenti passa al triangolare successivo.
+          (++ k)))
+    ; Restituisce: (T(k) (num + T(k)))
+    ; cioe' il piu' piccolo triangolare da aggiungere a num
+    ; e il triangolare risultante.
+    (list tri-k (+ num tri-k))))
+
+Proviamo:
+
+(make-tri 26)
+;-> (10 36)
+(make-tri 0)
+;-> (0 0)
+(make-tri 4)
+;-> (6 10)
+(make-tri 10)
+;-> (0 10)
+(make-tri 10000)
+;-> 153 (10153)
+
+(time (map make-tri (sequence 0 1e4)))
+;-> 1875.058
+
 ============================================================================
 

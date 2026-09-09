@@ -4837,6 +4837,27 @@ Se cambio la base (es. 2 ilog aumenta il tempo, mentre log rimane costante) !!!
 (time (for (i 1 1000000) (ilog i 2)))
 ;-> 4359.772
 
+Versione finale
+---------------
+Il logaritmo intero in base b di n è il massimo intero k tale che (b^k <= n), per (n >= 1) e (b > 1).
+
+Algoritmo
+Ad ogni iterazione esegue la divisione intera
+  (setq n (/ n b))
+Quindi dopo k iterazioni abbiamo fatto:
+  floor(n / b^k)
+Il ciclo termina quando questo valore diventa 0.
+Partendo da out = -1, il numero finale di divisioni meno uno coincide con:
+  floor(log_b(n))
+
+(define (ilog n b)
+  (let (out -1L)
+    (while (!= n 0)
+      (setq n (/ n b)) (++ out))
+    out))
+
+(ilog 1818272126126126 3)
+;-> 31L
 
 --------------------
 NUMERI DI CARMICHAEL
