@@ -3708,6 +3708,9 @@ NOTE LIBERE 39
   La formica lungo l'elastico
   Boys and girl
   Principio di riflessione (disuguaglianza triangolare)
+  Ponte di barche
+  Pandigitali raddoppiando numeri
+  Attraversamento efficiente di stringhe
 
 PROBLEMI SUI DADI
 =================

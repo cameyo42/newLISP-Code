@@ -2035,12 +2035,12 @@ Il DFS prova un cammino (es. tutto a destra), poi torna indietro e prova altre v
 
 Differenze BFS/DFS
 ------------------
-| Aspetto          | BFS                            | DFS                        |
-| ---------------- | ------------------------------ | -------------------------- |
-| Obiettivo tipico | Cammino più corto              | Cammino più lungo          |
-| Strategia        | Ampiezza (livello per livello) | Profondità (fino in fondo) |
-| Struttura        | Coda                           | Stack (o ricorsione)       |
-| Visita celle     | Distanza crescente             | Arbitraria                 |
+| Aspetto          | BFS                    | DFS                        |
+| ---------------- | -----------------------| -------------------------- |
+| Obiettivo tipico | Cammino più corto      | Cammino più lungo          |
+| Strategia        | Ampiezza (per livello) | Profondità (fino in fondo) |
+| Struttura        | Coda                   | Stack (o ricorsione)       |
+| Visita celle     | Distanza crescente     | Arbitraria                 |
 
 Funzione che implementa l'algoritmo DFS:
 

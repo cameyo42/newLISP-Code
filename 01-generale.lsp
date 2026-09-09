@@ -4544,7 +4544,9 @@ Proviamo la velocità dei quattro metodi:
 (time (for (i 0 (- (length lst) 1)) (setq a (char (lst i)))) 10000)
 ;-> 33721.979
 
-Nota: Usare "dostring" oppure "dolist" per attrversare le stringhe.
+Nota: Usare "dostring" oppure "dolist" per attraversare le stringhe.
+
+Vedi anche "Attraversamento efficiente di stringhe" su "Note libere 39"
 
 
 ================================================

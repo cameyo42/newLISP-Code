@@ -2387,5 +2387,412 @@ Versione code-golf (151 caratteri):
 (f 5 5 3 8 12)
 ;-> 11.18033988749895
 
+
+---------------
+Ponte di barche
+---------------
+
+Lungo un fiume si trova un ponte di barche disposte a matrice.
+
+  ======B==B==B==B==B==B==B==B==B====== riva superiore
+        |  |  |  |  |  |  |  |  |
+        B--B--B--B--B--B--B--B--B
+        |  |  |  |  |  |  |  |  |
+        B--B--B--B--B--B--B--B--B
+        |  |  |  |  |  |  |  |  |
+        B--B--B--B--B--B--B--B--B
+        |  |  |  |  |  |  |  |  |
+  ======B==B==B==B==B==B==B==B==B====== riva inferiore
+
+Per attraversare il fiume si usano le barche attraversandole solo in direzione verticale o orizzontale.
+Ogni barca, tranne quelle sulle due rive, ha una probabilità P di rompersi dopo un certo periodo di tempo T.
+Le barche che stanno sulla riva non si rompono mai.
+Quanto tempo in media occorre affinchè il passaggio tra le due rive non sia più possibile?
+
+Rappresentiamo il ponte come una matrice binaria (MxN) in cui ogni cella rappresenta il vertice di un grafo.
+Il valore 1 rappresenta la presenza di un vertice.
+Il valore 0 rappresenta l'assenza di un vertice.
+Ogni vertice (cella) è collegato con la cella adiacente per riga e con la cella adiacente per colonna se entrambe le celle valgono 1 (distanza di manhattan = 1).
+
+Esempi:
+
+                            B--B--B      
+          1 1 1             |  |  |
+matrice = 1 1 1     grafo = B--B--B  
+          1 1 1             |  |  |
+                            B--B--B
+
+
+                 
+                            B     B      
+          1 0 1             |     |
+matrice = 1 1 1     grafo = B--B--B  
+          1 1 1             |  |  |
+                            B--B--B
+        
+                            B     B
+          1 0 1             |
+matrice = 1 1 0     grafo = B--B
+          1 1 1             |  |
+                            B--B--B
+
+                            B     B      
+          1 0 1                
+matrice = 0 0 0     grafo = 
+          1 0 1             
+                            B     B
+
+Un altro modo di vedere la matrice è quella di considerarla un labirinto.
+Il valore 1 è un passaggio, mentre il valore 0 è un muro.
+Gli spostamenti possibili sono solo orizzontale e verticale (manhattan).
+L'obiettivo è quello di verificare se, data una matrice, sia possibile partire da una qualunque cella della prima riga e raggiungere una qualunque cella dell'ultima riga.
+All'inizio la matrice è composta da tutti 1.
+Ad ogni secondo i vertici (celle) hanno una probabilità di scomparire pari a P (tranne quelli della prima e ultima riga).
+Cioè ad ogni secondo, i valori 1 hanno una probabilità P di scomparire (cioè diventare 0).
+Quanto tempo in media occorre affinchè il passaggio tra la prima riga e l'ultima riga della matrice non sia più possibile?
+
+Iniziamo scrivendo la funzione di ricerca di un percorso in una matrice.
+
+Consideriamo un labirinto rappresentato da una matrice binaria MxN in cui 1 è un passaggio e 0 è un muro.
+Poichè ci interessa solo sapere se esiste un percorso qualsiasi, senza doverlo costruire né minimizzare, la scelta più semplice e veloce è una DFS (Depth-First Search) iterativa.
+
+Per una matrice binaria:
+- 1 = cella attraversabile
+- 0 = muro
+- si possono usare i 4 movimenti: sopra, sotto, sinistra, destra
+- si marca ogni cella visitata una sola volta (sulla matrice 'visited')
+- appena si raggiunge B, si restituisce true
+- se si esauriscono le celle raggiungibili, 'nil'
+'visited' viene marcato quando la cella viene inserita nello stack**, non quando viene estratta. Questo evita che la stessa cella venga aggiunta più volte allo stack e rende la DFS più efficiente.
+Complessità temporale: O(M*N)
+Non esiste, in generale, un algoritmo che garantisca di dover esaminare meno di O(M*N) celle: nel caso peggiore bisogna verificare praticamente tutto il labirinto.
+
+Implementazione
+Usiamo una DFS iterativa, usando uno stack(lista) per evitare la ricorsione.
+Inoltre usiamo una matrice separata per le celle visitate.
+
+A e B sono celle (riga colonna).
+
+(define (path? M A B)
+  (letn ( (rows (length M))
+          (cols (length (M 0)))
+          (visited (array-list (array rows cols '(nil))))
+          (stack (list A))
+          ; Direzioni: sopra, sotto, sinistra, destra
+          (dirs '((-1 0) (1 0) (0 -1) (0 1)))
+          (found nil) )
+    ; A e B devono essere celle attraversabili
+    (if (or (= (M (A 0) (A 1)) 0)
+            (= (M (B 0) (B 1)) 0))
+        nil
+        ; DFS
+        (begin
+          ; Marca A come visitata
+          (setf (visited (A 0) (A 1)) true)
+          ; Inserisce A nello stack
+          (while (and stack (not found))
+            ; Estrae una cella dallo stack
+            (let ((p (pop stack)))
+              ; Se abbiamo raggiunto B, il percorso esiste
+              (if (= p B)
+                  (setq found true)
+                  ; Esamina le quattro celle adiacenti
+                  (dolist (d dirs)
+                    (letn (
+                      (r (+ (p 0) (d 0)))
+                      (c (+ (p 1) (d 1)))
+                      )
+                      ; Verifica che la cella sia valida,
+                      ; sia un passaggio e non sia già stata visitata
+                      (if (and (>= r 0) (< r rows) (>= c 0) (< c cols)
+                               (= (M r c) 1)
+                               (not (visited r c)))
+                          (begin
+                            ; Marca la cella prima di inserirla
+                            ; nello stack per evitare duplicati
+                            (setf (visited r c) true)
+                            (push (list r c) stack))))))))
+          found))))
+
+(setq M '(
+  (1 0 1 1 1)
+  (1 1 1 0 1)
+  (0 1 0 0 1)
+  (1 1 1 1 1)
+))
+
+(path? M '(0 0) '(3 4))
+;-> true
+
+(path? M '(0 0) '(2 2))
+;-> nil
+
+Adesso scriviamo la funzione che simula il processo.
+
+(define (simula M P show)
+  (letn ( (rows (length M))
+          (cols (length (M 0)))
+          (secondi 0)
+          (pass true) )
+    ;(while (and (ref 1 (M 0)) (ref 1 (M -1)))
+    (while pass
+      (++ secondi)
+      ; applica la probabilità di scomparire a tutte le celle della matrice
+      ; tranne alla prima e all'ultima riga (che rappresentano le due rive)
+      (for (r 1 (- rows 2))
+        (for (c 0 (- cols 1))
+          (if (and (= (M r c) 1) (< (random) P)) (setf (M r c) 0))))
+      (when show (map println M) (read-line))
+      ; calcola se esiste un passaggio valido tra la prima e l'ultima riga
+      (setq pass nil)
+      (for (c1 0 (- cols 1) 1 pass)
+        (for (c2 0 (- cols 1) 1 pass)
+          (if (path? M (list 0 c1) (list (- rows 1) c2))
+              (setq pass true))))
+    )
+    secondi))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(setq M '((1 1 1 1) (1 1 1 1) (1 1 1 1) (1 1 1 1)))
+(simula M 1 true)
+;-> (1 1 1 1)
+;-> (0 0 0 0)
+;-> (0 0 0 0)
+;-> (1 1 1 1)
+;-> 1
+(simula M 0.2)
+;-> 6
+(simula M 0.1 true)
+;-> (1 1 1 1)
+;-> (1 1 1 1)
+;-> (1 1 1 1)
+;-> (1 1 1 1)
+;-> 
+;-> (1 1 1 1)
+;-> (1 1 1 1)
+;-> (1 1 0 1)
+;-> (1 1 1 1)
+;-> ...
+;-> (1 1 1 1)
+;-> (0 0 0 0)
+;-> (1 0 0 1)
+;-> (1 1 1 1)
+;-> 17
+
+(setq N (array 4 4 '(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
+(simula N 1)
+;-> 1
+(simula N 0.2)
+;-> 4
+(simula N 0.0001)
+;-> 5338
+
+
+-------------------------------
+Pandigitali raddoppiando numeri
+-------------------------------
+
+Dato un numero intero positivo maggiore di 0, eseguire le seguenti operazioni:
+1) Impostare un contatore a 0
+2) se il numero contiene tutte e dieci le cifre (0..9) almeno una volta,
+   allora restituirre il valore del contatore e terminare
+   altrimenti, raddoppiare il numero, aumentare di 1 il contatore e ripetere l'operazione 2).
+
+Il contatore conta il numero di raddoppi necessari per fare in modo che il numero contenga tutte e dieci le cifre (0..9) almeno una volta.
+
+; Verifica se un numero intero contiene almeno una volta tutte le cifre (0..9)
+(define (pandi? num)
+  (= (slice (sort (unique (explode (string num)))) 0 10)
+     '("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))
+
+; Trova un numero pandigitale raddoppiando sempre un dato numero intero
+(define (pandix num)
+  (let (conta 0)
+    (setq num (bigint num))
+    (until (pandi? num)
+      (setq num (* 2L num))
+      (++ conta))
+    conta))
+
+Proviamo:
+
+(pandix 1234567890)
+;-> 0 ; non è necessario nessun raddoppio
+(pandix 617283945)
+;-> 1
+(pandix 2L)
+;-> 67
+(pandix 66833L)
+;-> 44
+(pandix 100L)
+;-> 51
+(pandix 42L)
+;-> 55
+
+(apply max (map pandix (sequence 1 1e3)))
+;-> 68
+
+(time (println (apply max (map pandix (sequence 1 1e4)))))
+;-> 78
+;-> 1955.297
+(find 78 (map pandix (sequence 1 1e4)))
+;-> 1470
+(pandix 1471)
+;-> 78
+
+(time (println (apply max (map pandix (sequence 1 1e5)))))
+;-> 78
+;-> 18599.608
+
+Proviamo con una altro algoritmo che verifica se un numero intero contiene almeno una volta tutte le dieci cifre decimali 0..9.
+
+Algoritmo
+Usiamo un intero di 10 bit come "maschera".
+Ogni bit della maschera corrisponde a una cifra:
+  bit 0 -> cifra 0
+  bit 1 -> cifra 1
+  bit 2 -> cifra 2
+  ...
+  bit 9 -> cifra 9
+Inizialmente tutti i bit sono a 0:
+  0000000000
+Quando incontriamo una cifra, impostiamo a 1 il bit
+corrispondente.
+Per esempio, per la cifra 3:
+  1 << 3
+produce:
+  0000001000
+La maschera viene aggiornata con OR bit-a-bit:
+  mask = mask | (1 << digit)
+Se una cifra compare più volte, il bit corrispondente
+è già a 1 e quindi non cambia nulla.
+Quando tutte le dieci cifre sono state incontrate,
+tutti i 10 bit sono a 1:
+  1111111111
+Il valore decimale di questa maschera è:
+  2^10 - 1 = 1023
+Quindi è sufficiente verificare:
+  (= mask 1023)
+La scansione viene interrotta appena la maschera raggiunge
+1023, senza dover esaminare le eventuali cifre rimanenti.
+
+(define (pandi? num)
+  (let ((s (string num))
+        (mask 0)
+        (digit 0)
+        (stop nil))
+    ; Scorre tutte le cifre del numero.
+    ; Un bigint termina con "L", quindi escludiamo l'ultimo carattere.
+    (for (i 0 (- (length s) 2) 1 stop)
+      ; Converte il carattere ASCII della cifra nel suo valore numerico.
+      (setq digit (int (s i) 0 10))
+      ; Costruisce una maschera con un solo bit a 1.
+      ; Per esempio, se digit = 3:
+      ;   (<< 1 3) -> 0000001000
+      ; Il bit corrispondente alla cifra viene quindi
+      ; impostato nella maschera generale tramite OR.
+      (setq mask (| mask (<< 1 digit)))
+      ; Se tutti i dieci bit sono a 1, tutte le cifre
+      ; 0..9 sono gia' state incontrate.
+      (if (= mask 1023)
+          (setq stop true)))
+    ; true se e solo se tutte le dieci cifre sono presenti.
+    stop))
+
+Proviamo:
+
+(pandix 2L)
+;-> 67
+(pandix 66833L)
+;-> 44
+(pandix 100L)
+;-> 51
+(pandix 42L)
+;-> 55
+
+(apply max (map pandix (sequence 1 1e3)))
+;-> 68
+
+(time (println (apply max (map pandix (sequence 1 1e4)))))
+;-> 78
+;-> 1797.112
+(time (println (apply max (map pandix (sequence 1 1e5)))))
+;-> 78
+;-> 17126.488
+
+
+--------------------------------------
+Attraversamento efficiente di stringhe
+--------------------------------------
+
+newLISP possiede diversi metodi per attraversare le stringhe.
+Vediamo quali sono e la loro efficienza.
+
+; Funzione 'for'
+(define (test-for str)
+  (let (out '())
+    (for (i 0 (- (length str) 1))
+      (push (str i) out -1))))
+
+; Funzione 'dolist'
+(define (test-dolist str)
+  (let (out '())
+    (dolist (el (explode str))
+      (push el out -1))))
+
+; Funzione 'dostring'
+(define (test-dostring str)
+  (let (out '())
+    (dostring (ch str)
+      (push (char ch) out -1))))
+
+; Funzione 'dostring' (codici ASCII)
+(define (test-dostring-int str)
+  (let (out '())
+    (dostring (ch str)
+      (push ch out -1))))
+
+; Funzione 'unpack'
+(define (test-unpack-int str)
+  (unpack (dup "c" (length str)) str))
+
+; Funzione 'unpack' (codici ASCII)
+(define (test-unpack str)
+  (map char (unpack (dup "c" (length str)) str)))
+
+Proviamo:
+
+(setq str "wergeeyrgt348trfehrjf138y438f734hfafseqhjef1238rt12345r74r7efq")
+
+; verifica delle funzioni che producono caratteri
+(= (test-for str) (test-dolist str) (test-dostring str) (test-unpack str))
+;-> true
+; verifica delle funzioni che producono codici ASCII
+(= (test-dostring-int str) (test-unpack-int str))
+;-> true
+
+Test di velocità
+
+; velocità delle funzioni che producono caratteri
+(time (test-for str) 1e5)
+;-> 1828.339
+(time (test-dolist str) 1e5)
+;-> 1937.686
+(time (test-dostring str) 1e5)
+;-> 1687.664
+(time (test-unpack str) 1e5)
+;-> 1046.947
+
+; velocità delle funzioni che producono codici ASCII
+(time (test-dostring-int str) 1e5)
+;-> 265.888
+(time (test-unpack-int str) 1e5)
+;-> 93.72
+
+Per attraversare una stringa di caratteri per usare i caratteri o i codici ASCII il metodo più veloce è quello di utilizzare la primitiva 'unpack'.
+
 ============================================================================
 

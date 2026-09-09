@@ -6188,7 +6188,7 @@ Numeri pandigitali
 ------------------
 
 I numeri pandigitali sono numeri che contengono tutte le dieci (10) cifre 0..9 solo una volta.
-Alcune volte sono consoderati pandigitali anche i numeri che contengono tutte le nove (9) cifre 1..9 solo una volta.
+Alcune volte sono considerati pandigitali anche i numeri che contengono tutte le nove (9) cifre 1..9 solo una volta.
 I numeri con zero all'inizio non vengono considerati.
 
 Nota: I numeri pandigitali sono divisibili per 9.
