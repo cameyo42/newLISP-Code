@@ -3711,8 +3711,9 @@ NOTE LIBERE 39
   Ponte di barche
   Pandigitali raddoppiando numeri
   Attraversamento efficiente di stringhe
-  Numero + triangolare(x) = triangolare(y)
   Numero minimo e numero massimo di una lista con elementi qualsiasi
+  Numero + triangolare(x) = triangolare(y)
+  I lupi e la pecora
 
 PROBLEMI SUI DADI
 =================

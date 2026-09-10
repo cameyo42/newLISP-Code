@@ -3006,5 +3006,52 @@ Proviamo:
 (time (map make-tri (sequence 0 1e4)))
 ;-> 1875.058
 
+
+------------------
+I lupi e la pecora
+------------------
+
+Un dato numero di lupi affamati si trovano in una foresta.
+All'improvviso compare una pecora.
+I lupi sanno però che se un lupo mangia una pecora, poi si addormenta e viene sicuramente mangiato da un altro lupo (se esiste).
+Anche un lupo che mangia un altro lupo si addormenta e viene a sua volta mangiato (se esiste un altro lupo).
+Lo scopo principale di ogni lupo è sopravvivere, quindi ognuno desidera mangiare la pecora, ma lo farà soltanto se avrà la certezza di non finire mangiato a sua volta.
+La pecora non può essere divisa tra i lupi, cioè può essere mangiata da un solo lupo.
+Che fine fa la pecora?
+
+Scriviamo una funzione che prende come parametro il numero di lupi N e restituisce 'true' se la pecora vive, altrimenti restituisce 'nil'.
+
+(define (sheep N) (even? N))
+
+Come funziona?
+--------------
+Per risolvere logicamente il problema partiamo con un solo lupo (N=1) e poi aumentiamo di 1.
+
+Un lupo:
+Il lupo mangia la pecora e non ci sono conseguenze per lui.
+La pecora muore.
+
+Due lupi:
+Nessuno dei due lupi mangerà la pecora, poiché se uno di loro lo facesse, si addormenterebbe e verrebbe poi mangiato dall'altro lupo.
+La pecora vive.
+
+Tre lupi:
+Il più veloce dei lupi mangerà la pecora, perché sa che quando si addormenterà, nessuno degli altri due lupi oserà mangiarlo perchè verrebbe poi mangiato dall'ultimo lupo.
+La pecora muore.
+
+Quattro leoni:
+Se uno dei quattro lupi mangia la pecora, allora si addormenta e la situazione diventa equivalente a quella con tre lupi, solo che al posto della pecora c'è il lupo addormentato.
+Dato che nello scenario con tre lupi e una pecora la pecora muore, nessuno dei nostri quattro lupi mangerà la pecora. o: La pecora vive.
+
+A questo punto abbiamo capito lo schema:
+il fatto che un lupo mangi o meno la pecora dipende dallo scenario in cui è presente un lupo in meno.
+Se nello scenario con un lupo in meno la pecora sopravvive, allora il lupo mangerà la pecora
+Se invece nello scenario con un lupo in meno la pecora non sopravvive, il lupo non la mangerà.
+In altre parole, la sorte della pecora (viva o morta) si inverte ogni volta che si aumenta di uno il numero dei lupi.
+Se il numero di lupi è pari la pecora sopravvive, mentre se è pari la pecora muore.
+
+(map sheep (sequence 1 10))
+;-> (nil true nil true nil true nil true nil true)
+
 ============================================================================
 
