@@ -3039,16 +3039,17 @@ Tre lupi:
 Il più veloce dei lupi mangerà la pecora, perché sa che quando si addormenterà, nessuno degli altri due lupi oserà mangiarlo perchè verrebbe poi mangiato dall'ultimo lupo.
 La pecora muore.
 
-Quattro leoni:
+Quattro lupi:
 Se uno dei quattro lupi mangia la pecora, allora si addormenta e la situazione diventa equivalente a quella con tre lupi, solo che al posto della pecora c'è il lupo addormentato.
-Dato che nello scenario con tre lupi e una pecora la pecora muore, nessuno dei nostri quattro lupi mangerà la pecora. o: La pecora vive.
+Dato che nello scenario con tre lupi e una pecora la pecora muore, nessuno dei nostri quattro lupi mangerà la pecora.
+La pecora vive.
 
 A questo punto abbiamo capito lo schema:
 il fatto che un lupo mangi o meno la pecora dipende dallo scenario in cui è presente un lupo in meno.
 Se nello scenario con un lupo in meno la pecora sopravvive, allora il lupo mangerà la pecora
 Se invece nello scenario con un lupo in meno la pecora non sopravvive, il lupo non la mangerà.
 In altre parole, la sorte della pecora (viva o morta) si inverte ogni volta che si aumenta di uno il numero dei lupi.
-Se il numero di lupi è pari la pecora sopravvive, mentre se è pari la pecora muore.
+Se il numero di lupi è pari la pecora sopravvive, mentre se è dispari la pecora muore.
 
 (map sheep (sequence 1 10))
 ;-> (nil true nil true nil true nil true nil true)
