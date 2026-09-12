@@ -3714,6 +3714,9 @@ NOTE LIBERE 39
   Numero minimo e numero massimo di una lista con elementi qualsiasi
   Numero + triangolare(x) = triangolare(y)
   I lupi e la pecora
+  Tre scatole e una chiave
+  DWIM
+  Quadrati in lattice di punti
 
 PROBLEMI SUI DADI
 =================

@@ -3054,5 +3054,340 @@ Se il numero di lupi è pari la pecora sopravvive, mentre se è dispari la pecor
 (map sheep (sequence 1 10))
 ;-> (nil true nil true nil true nil true nil true)
 
+
+------------------------
+Tre scatole e una chiave
+------------------------
+
+Siamo prigionieri all'interno di una stanza con la porta chiusa a chiave.
+Davanti a noi abbiamo tre scatole di colori diversi con le seguenti scritte:
+
+  +--------------------+    +--------------------+    +--------------------+
+  |        NERA        |    |       BIANCA       |    |       ROSSA        |
+  +--------------------+    +--------------------+    +--------------------+
+  | La chiave è in     |    | La chiave non è    |    | La chiave non è    |
+  | in questa scatola  |    | in questa scatola  |    | nella scatola NERA |
+  +--------------------+    +--------------------+    +--------------------+
+            1                         2                         3
+
+La chiave per aprire la porta della prigione si trova in una delle tre scatole.
+Ci viene data la possibilità di aprire una sola scatola e ci viene detto che una sola delle frasi è vera.
+Quale scatola contiene la chiave?
+
+Le tre frasi formano tre proposizioni:
+
+1) nera = true
+2) bianca = nil
+3) nera = nil
+
+Che possiamo rappresentare come:
+
+(setq frase1 '("black" true))
+(setq frase2 '("white" nil))
+(setq frase3 '("black" nil))
+
+Adeso scriviamo una funzione che verifica la veridicità delle frasi considerando i tre casi possibili:
+
+(define (check-frasi key)
+  (let ((out1 '()) (out2 '()) (out3 '()))
+    (if (= key (frase1 0))
+      (setq out1 (frase1 1))
+      (setq out1 (not (frase1 1))))
+    (if (= key (frase2 0))
+      (setq out2 (frase2 1))
+      (setq out2 (not (frase2 1))))
+    (if (= key (frase3 0))
+      (setq out3 (frase3 1))
+      (setq out3 (not (frase3 1))))
+    (list out1 out2 out3)))
+
+Caso 1: chiave nella scatola NERA
+
+(setq key "black")
+(check-frasi key)
+;-> (true true nil)
+
+In questo caso abbiamo due frasi valide, quindi la chiave non si trova nella scatola NERA.
+
+Caso 2: chiave nella scatola BIANCA
+
+(setq key "white")
+(check-frasi key)
+;-> (nil nil true)
+
+Questo è il caso corretto (due frasi false e una frase vera).
+La frase 1 è falsa e dice che la scatola si trova nella scatola NERA.
+La frase 2 è falsa e dice che la scatola non si trova nella scatola BIANCA.
+La frase 3 è vera e dice che la scatola non si trova nella scatola NERA.
+Questo risultato comporta che la chiave si trova nella scatola BIANCA.
+
+Caso 3: chiave nella scatola ROSSA
+
+(setq key "red")
+(check-frasi key)
+;-> (nil true true)
+In questo caso abbiamo due frasi valide, quindi la chiave non si trova nella scatola ROSSA.
+
+In un'altra stanza si trova un prigioniero con le seguenti scatole:
+
+  +----------------------+    +--------------------+    +--------------------+
+  |         NERA         |    |       BIANCA       |    |       ROSSA        |
+  +----------------------+    +--------------------+    +--------------------+
+  | La chiave non è      |    | La chiave non è    |    | La chiave è in     |
+  | nella scatola BIANCA |    | in questa scatola  |    | questa scatola     |
+  +----------------------+    +--------------------+    +--------------------+
+            1                         2                         3
+Il prigioniero può aprire una sola scatola e gli viene detto che almeno una frase è vera e almeno una frase è falsa.
+
+Proposizioni:
+
+1) white = nil
+2) white = nil
+3) red = true
+
+Rappresentazione:
+
+(setq frase1 '("white" nil))
+(setq frase2 '("white" nil))
+(setq frase3 '("red" true))
+
+Caso 1: chiave nella scatola NERA
+
+(setq key "black")
+(check-frasi key)
+;-> (true true nil)
+
+Caso 3: chiave nella scatola BIANCA
+
+(setq key "white")
+(check-frasi key)
+;-> (nil nil nil)
+
+Caso 3: chiave nella scatola ROSSA
+
+(setq key "red")
+(check-frasi key)
+;-> (true true true)
+
+Il caso 1 è l'unico caso in cui almeno una frase è vera e almeno una frase è falsa.
+Questo vuol dire che la chiave si trova nella scatola NERA.
+
+
+----
+DWIM
+----
+
+Medley Interlisp Project
+https://interlisp.org/
+
+DWIM (Do What I Mean) was an early, highly advanced error-correction and user-intent prediction system.
+It was built by Warren Teitelman in the late 1960s (~1966).
+DWIM was the crowning jewel of Interlisp (developed at BBN and Xerox PARC).
+If you mistyped a function name, forgot a parenthesis, or transposed arguments, DWIM would look at the environment, guess what you actually meant, correct the code on the fly, and keep running.
+It attempt to anticipate what users intend to do, correcting trivial errors automatically rather than blindly executing users' explicit but potentially incorrect input.
+
+Larry Masinter (Medley Interlisp Project):
+"DWIM was the ChatGPT of the day.
+A lot of the problems with this and other analyses are that:
+- DWIM isn't a single feature. It's part of a suite of tools that work together.
+- DWIM (usually) only gets into the picture if otherwise it would signal an error."
+
+
+----------------------------
+Quadrati in lattice di punti
+----------------------------
+
+Abbiamo una griglia di punti (lattice) di dimensioni MxN.
+Quanti e quali quadrati possiamo disegnare sulla griglia?
+I lati dei quadrati possono sovrapporsi ai lati di altri quadrati.
+
+Esempio:
+lattice (3x4) =
+
+    0   1   2   3
+  0 *   *   *   *
+
+  1 *   *   *   *
+
+  2 *   *   *   *
+
+q1 = (0 0) (0 1) (1 1) (1 0)
+q2 = (0 0) (0 2) (2 2) (2 0)
+q3 = (1 0) (0 2) (2 2) (2 0)
+q4 = ...
+
+Abbiamo due tipi di quadrati
+1) quadrati con lati paralleli alla griglia (es. q1 e q2);
+2) quadrati ruotati, purché tutti i vertici siano punti del lattice (es. q3).
+
+Contiamo i quadrati di tipo 1 (quelli allineati alla griglia).
+Nell'esempio sopra abbiamo 6 quadrati di lato 1 e 2 quadrati di lato 2.
+Quindi per un lattice (3x4) -> 8 quadrati.
+
+La formula generale per il numero di quadrati con lati paralleli alla griglia su un lattice di MxN punti, vale:
+
+  Q1(M,N) = Sum[k=1,min(M,N)-1](M-k)*(N-k)
+  dove k è la lunghezza del lato.
+
+Q1(3,4) = (3-1)(4-1) + (3-2)(4-2) = 2*3 + 1*2 = 8
+
+Contiamo i quadrati di tipo 2 (quelli ruotati).
+Nell'esempio sopra abbiamo 2 quadrati ruotati di lato sqrt(2).
+q9  = (0 1) (1 0) (2 1) (1 2)
+q10 = (0 2) (1 1) (2 2) (1 3)
+
+Quindi il lattice 3x4 contiene:
+  6 quadrati di lato 1
+  2 quadrati di lato 2
+  2 quadrati ruotati
+  --------------------
+  10 quadrati totali
+
+La formula generale per il numero di quadrati con lati paralleli alla griglia su un lattice di MxN punti, vale:
+
+  Q2(M,N) = Sum[k=2,min(M,N)-1](k-1)*(M-k)*(N-k)
+  dove k è la dimensione del bounding box del quadrato.
+
+In questo caso k vale:
+  k = a + b
+dove (a,b) è il vettore di un lato del quadrato.
+Per avere un quadrato ruotato, sia a che b devono essere diversi da zero:
+  a >= 1, b >= 1
+Quindi il valore minimo possibile di k vale: k = a + b = 1 + 1 = 2.
+Il motivo del fattore (k-1) è dato dal fatto che per un dato k, esistono k-1 orientamenti distinti di quadrati non allineati alla griglia.
+In generale:
+  2 <= k <= min(M,N) - 1
+e per ogni k ci sono k-1 coppie positive:
+  (1,k-1),(2,k-2),...,(k-1,1)
+Da qui nasce il termine:
+  (k-1)(M-k)(N-k)
+nella formula dei quadrati ruotati.
+
+La formula generale per il numero di TUTTI i quadrati su un lattice di MxN punti, vale:
+
+  Q(M,N) = Q1(M,N) + Q2(M,N) = Sum[k=1,min(M,N)-1]k*(M-k)*(N-k)
+
+(define (count-squares M N)
+  (let (somma 0)
+  (for (k 1 (- (min M N) 1))
+    (++ somma (* k (- M k) (- N k))))))
+
+(count-squares 3 4)
+;-> 10
+
+Adesso scriviamo la funzione 'list-squares' che genera tutti i quadrati (ogni qudrato è una lista con 4 vertici).
+Per generare tutti i quadrati basta considerare un vettore intero (a,b) come lato e il vettore perpendicolare (-b,a).
+Possiamo costruire la soluzione direttamente usando il parametro k e i diversi vettori (a,b) con:
+  a + b = k
+Per ogni k ci sono k orientamenti: uno allineato (a=k, b=0) e k-1 ruotati.
+Il numero di quadrati generati per ogni k è direttamente:
+  k*(M-k)*(N-k)
+per cui la funzione genera esattamente il numero calcolato dalla funzione 'count-squares'.
+
+; Restituisce tutti i quadrati di un lattice MxN (senza duplicati)
+(define (list-squares M N)
+  (if (or (= M 1) (= N 1))
+      '()
+  ;else
+      (let (out '())
+        ; k e' la dimensione del bounding box del quadrato.
+        ; Per ogni k consideriamo tutti i vettori (a,b) tali che a+b=k.
+        (for (k 1 (- (min M N) 1))
+          ; a=k, b=0: quadrati con lati paralleli alla griglia.
+          (let (b 0)
+            ; Ogni posizione possibile del bounding box genera un quadrato.
+            (for (y 0 (- M k 1))
+              (for (x 0 (- N k 1))
+                (push (list
+                        (list x y)
+                        (list (+ x k) y)
+                        (list (+ x k) (+ y k))
+                        (list x (+ y k)))
+                      out -1))))
+          (if (> k 1) ; k deve valere almeno 2
+              ; a=1..k-1: quadrati ruotati.
+              (for (a 1 (- k 1))
+                ; b completa la relazione a+b=k.
+                (let (b (- k a))
+                  ; Il quadrato ha bounding box k x k.
+                  (for (y 0 (- M k 1))
+                    (for (x 0 (- N k 1))
+                      ; I quattro vertici sono ottenuti usando
+                      ; i vettori (a,b) e (-b,a), che sono perpendicolari.
+                      (push (list
+                              (list (+ x b) y)
+                              (list (+ x k) (+ y b))
+                              (list (+ x a) (+ y k))
+                              (list x (+ y a)))
+                            out -1)))))))
+        out)))
+
+Proviamo:
+
+(list-squares 3 4)
+;-> (((0 0) (1 0) (1 1) (0 1)) ((1 0) (2 0) (2 1) (1 1))
+;->  ((2 0) (3 0) (3 1) (2 1)) ((0 1) (1 1) (1 2) (0 2))
+;->  ((1 1) (2 1) (2 2) (1 2)) ((2 1) (3 1) (3 2) (2 2))
+;->  ((0 0) (1 0) (1 1) (0 1)) ((1 0) (2 0) (2 1) (1 1))
+;->  ((2 0) (3 0) (3 1) (2 1)) ((0 1) (1 1) (1 2) (0 2))
+;->  ((1 1) (2 1) (2 2) (1 2)) ((2 1) (3 1) (3 2) (2 2))
+;->  ((1 0) (1 1) (0 1) (0 0)) ((2 0) (2 1) (1 1) (1 0))
+;->  ((3 0) (3 1) (2 1) (2 0)) ((1 1) (1 2) (0 2) (0 1))
+;->  ((2 1) (2 2) (1 2) (1 1)) ((3 1) (3 2) (2 2) (2 1))
+;->  ((0 0) (2 0) (2 2) (0 2)) ((1 0) (3 0) (3 2) (1 2))
+;->  ((1 0) (2 1) (1 2) (0 1)) ((2 0) (3 1) (2 2) (1 1)))
+
+(length (list-squares 3 4))
+;-> 10
+
+(length (list-squares 6 5))
+(count-squares 6 5)
+
+Verifichiamo che il risultato sia corretto, cioè che ogni quadrupla di punti sia un quadrato.
+
+(define (dist2d-2 p q)
+"Calculates the square of 2D Cartesian distance of two points p = (x1 y1) and q = (x2 y2)"
+  (let ((x1 (first p)) (y1 (last p))
+        (x2 (first q)) (y2 (last q)))
+    (add (mul (sub x1 x2) (sub x1 x2))
+        (mul (sub y1 y2) (sub y1 y2)))))
+
+(define (square? p1 p2 p3 p4)
+  (local (d2 d3 d4)
+    (setq d2 (dist2d-2 p1 p2))
+    (setq d3 (dist2d-2 p1 p3))
+    (setq d4 (dist2d-2 p1 p4))
+    (cond ((or (zero? d2) (zero? d3) (zero? d4))
+            nil)
+     ; Se le lunghezze se (p1, p2) e (p1, p3) sono uguali, allora devono
+     ;  essere soddisfatte le seguenti condizioni per formare un quadrato:
+     ; 1) Il quadrato di lunghezza di (p1, p4) è uguale a due volte
+     ;    il quadrato di (p1, p2)
+     ; 2) Il quadrato di lunghezza di (p2, p3) è uguale a due volte
+     ;    il quadrato di (p2, p4)
+          ((and (= d2 d3) (= (mul 2 d2) d4)
+                (= (mul 2 (dist2d-2 p2 p4)) (dist2d-2 p2 p3)))
+          true)
+     ; condizione analoga
+          ((and (= d3 d4) (= (mul 2 d3) d2)
+                (= (mul 2 (dist2d-2 p3 p2)) (dist2d-2 p3 p4)))
+          true)
+     ; condizione analoga
+          ((and (= d2 d4) (= (mul 2 d2) d3)
+                (= (mul 2 (dist2d-2 p2 p3)) (dist2d-2 p2 p4)))
+          true)
+     ; altrimenti restituisce nil
+          (true nil))))
+
+Proviamo:
+
+(setq all (list-squares 3 4))
+(map (fn(x) (apply square? x)) all)
+;-> (true true true true true true true true true true)
+(clean (fn(x) (apply square? x)) all)
+;-> ()
+
+Quindi le quadruple di punti generate da 'list-squares' sono tutti quadrati.
+
 ============================================================================
 
