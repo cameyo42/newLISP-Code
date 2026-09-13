@@ -3389,5 +3389,343 @@ Proviamo:
 
 Quindi le quadruple di punti generate da 'list-squares' sono tutti quadrati.
 
+
+-----------------------------------------------
+Simulazione del problema di Giuseppe (Josephus)
+-----------------------------------------------
+
+Abbiamo N oggetti disposti in cerchio in modo equidistante.
+Dato un numero k > 0 effettuare le seguenti operazioni:
+1) partire dall'inizio e muoversi contare in senso orario di k oggetti
+2) eliminare l'oggetto raggiunto
+3) contare in senso orario di k oggetti
+4) ripetere 2) e 3) fino a che non rimane un solo oggetto.
+
+Quando un oggetto viene eliminato, non viene incluso in alcun conteggio successivo.
+
+Esempio:
+  Oggetti = (1 2 3 4) (lista circolare)
+  k = 2
+  Parto dall'inizio e conto di 2 -> 2 (eliminato)
+  (1 3 4)
+  Parto da 3 e conto 2 -> 4 (eliminato)
+  (1 3)
+  parto da 3 e conto 2 -> 3 (eliminato)
+  (1)
+
+Scriviamo una funzione in newlisp che prende una lista di elementi e un valore k e stampa l'indice e il valore dell'elemento che deve essere eliminato ad ogni conteggio k e la lista corrente.
+
+Per il 'Josephus classico', la posizione da eliminare è (k - 1) rispetto alla posizione di partenza.
+Se k è il numero di persone che si contano, la posizione da eliminare a ogni iterazione vale:
+
+  p(0) = k mod N
+  p(i) = (p(i-1) + k - 1) mod (N - i)
+
+Possiamo modificare direttamente la lista, eliminando ogni volta l'elemento trovato.
+Gli indici stampati sono quelli della lista nel momento dell'eliminazione, quindi dopo ogni 'pop' gli indici degli elementi successivi vengono ricompattati.
+
+(define (giuseppe-elimina lst k)
+  (let ((pos 0)
+        (n (length lst)))
+    ; Continua finché rimane un solo elemento.
+    (while (> n 1)
+      ; Calcola la posizione dell'elemento da eliminare.
+      (setq pos (% (+ pos k -1) n))
+      ; Stampa indice e valore dell'elemento.
+      (println pos " -> " (lst pos))
+      ; Elimina l'elemento dalla lista.
+      (pop lst pos)
+      ; Stampa la lista corrente
+      (println lst)
+      ; Aggiorna il numero di elementi.
+      (-- n)
+      ; Dopo l'eliminazione il conteggio riparte dall'elemento
+      ; che occupava la posizione successiva.
+      (if (= pos n) (setq pos 0))
+      )
+    ; Stampa anche l'ultimo elemento rimasto.
+    (println pos " -> " (lst pos))))
+
+Proviamo:
+
+(giuseppe-elimina '(1 2 3 4) 2)
+;-> 1 -> 2
+;-> (1 3 4)
+;-> 2 -> 4
+;-> (1 3)
+;-> 1 -> 3
+;-> (1)
+;-> 0 -> 1
+;-> 1
+
+(giuseppe-elimina '(a b c d e) 3)
+;-> 2 -> c
+;-> (a b d e)
+;-> 0 -> a
+;-> (b d e)
+;-> 2 -> e
+;-> (b d)
+;-> 0 -> b
+;-> (d)
+;-> 0 -> d
+;-> d
+
+Vedi anche "Il problema di Giuseppe (Josephus problem)" su "Rosetta Code".
+
+
+------------------------------------------------------
+Espansioni di rapporti tra interi in frazioni unitarie
+------------------------------------------------------
+
+Qualsiasi rapporto tra interi m/n può essere espresso come somma finita di frazioni unitarie, ovvero frazioni con numeratore unitario.
+Un metodo per scomporre una data frazione in una somma di frazioni unitarie è l'algoritmo 'greedy' (o algoritmo ingordo), secondo il quale, a ogni passaggio, si sceglie la frazione unitaria più grande possibile (cioè con il denominatore minore) che sia minore o uguale al resto corrente.
+
+Sia data una frazione positiva m/n, 0 < m < n e supponiamo che m e n siano coprimi (frazione ai minimi termini).
+L'algoritmo greedy di 'Fibonacci-Sylvester' costruisce una rappresentazione
+
+   m     1       1            1
+  --- = ---- +  ---- + ... + ----
+   n     d1      d2           dk
+
+con denominatori distinti e strettamente crescenti.
+
+1) Scelta della prima frazione unitaria
+---------------------------------------
+Cerchiamo la frazione unitaria più grande che non superi (m/n).
+Una frazione 1/d soddisfa 1/d <= m/n se e solo se n <= m*d e quindi d >= m/n.
+Il più piccolo intero possibile vale:
+
+  d1 = ceil(n/m)
+
+Pertanto scegliamo:
+
+  1/d1 = 1/ceil(n/m)
+
+Il nuovo resto vale:
+
+  r1= m/n - 1/d1
+
+Se d1=n/m, la frazione originale era già unitaria e l'algoritmo termina.
+
+2) Si ripete sul resto
+----------------------
+Scriviamo il resto nella forma ridotta
+
+  r1 = m1/n1
+
+A questo punto scegliamo nuovamente la più grande frazione unitaria non superiore al resto:
+
+  d2 = ceil(n1/m1)
+
+Quindi
+
+r2 = m1/n1 - 1/d2
+
+In generale, se al passo i abbiamo
+
+  r(i) = m(i)/n(i) > 0,
+
+scegliamo
+
+  d(i) = ceil(n(i)/m(i))
+
+e poniamo
+
+  r(i+1) = m(i)/n(i) - 1/d(i)
+
+Il processo termina quando r(i+1) = 0.
+
+3) Formula del nuovo resto
+--------------------------
+Possiamo esplicitare il resto:
+
+                                 m(i)*d(i) - n(i)
+  r(i+1) = m(i)/n(i) - 1/d(i) = ------------------
+                                    n(i)*d(i)
+
+Quindi:
+
+  m(i+1) = m(i)*d(i) - n(i)
+  n(i+1) = n(i)*d(i)
+
+prima dell'eventuale riduzione ai minimi termini.
+
+La scelta di d(i) garantisce:
+
+  1/d(1) <= m(i)/n(i) < 1/(d(i) - 1)
+
+La seconda disuguaglianza caratterizza la scelta greedy: nessuna frazione unitaria con denominatore più piccolo può essere utilizzata, perché sarebbe troppo grande.
+
+Esempio:
+  frazione = 5/7
+  m = 5, n = 7
+  Il denominatore della prima frazione vale: d1 = ceil(7/5) = 2
+  Quindi: 5/7 = 1/2 + (5/7 - 1/2) = 1/2 + 3/14
+  Ora lavoriamo sul resto: d2 = ceil(14/3) = 5
+  Otteniamo: 3/14 = 1/5 + 1/70 
+  Infatti: 3/14 - 1/5 = 1/70
+  Quindi 5/7 = 1/2 + 1/5 + 1/70
+
+Perché il metodo funziona
+-------------------------
+Il punto fondamentale è che, ad ogni passo, 0 <= r(i+1) < r(i).
+Inoltre, quando r(i) = m(i)/n(i)) è positiva e propria,
+
+  d(i) = ceil(n(i)/m(i))
+
+fa sì che il nuovo numeratore sia m(i)*d(i) - n(i).
+
+Poiché d(i) - 1 < n(i)/m(i) <= d(i)
+abbiamo m(i)*(d(i)-1) < n(i) <= m(i)*d(i),
+da cui 0 <= m(i)*d(i)- n(i) < m(i).
+Pertanto: 0 <= m(i+1) < m(i).
+Il numeratore positivo diminuisce strettamente ad ogni passo.
+Essendo un intero, non può diminuire indefinitamente: prima o poi diventa zero.
+Questo dimostra la 'terminazione dell'algoritmo' e quindi che ogni frazione razionale positiva propria può essere rappresentata come somma finita di frazioni unitarie.
+
+Scriviamo una funzione che dato m e n (con m < n) restituisce i denominatori della somma finita.
+(m e n potrebbero anche non essere coprimi).
+
+(define (egyptian m n)
+  ; Riduce la frazione iniziale ai minimi termini.
+  (let (g (gcd m n)
+        out '())
+    (setq m (/ m g))
+    (setq n (/ n g))
+    ; Continua finche' il resto non e' zero.
+    (while (> m 0)
+      ; Il piu' piccolo denominatore d per cui 1/d <= m/n
+      ; e' ceil(n/m), calcolato con aritmetica intera.
+      (let (d (/ (+ n m -1) m))
+        ; Aggiunge il denominatore alla lista dei risultati.
+        (push d out -1)
+        ; Calcola il nuovo resto:
+        ; m/n - 1/d = (m*d-n)/(n*d).
+        (setq m (- (* m d) n))
+        (setq n (* n d))))
+    out))
+
+(egyptian 5 7)
+(egyptian 4 13)
+(egyptian 6 14)
+
+(egyptian 12 5)
+(egyptian 2 5)
+
+La funzione restituisce risultati corretti anche quando m > n:
+(egyptian 12 5)
+;-> (1 1 3 15)
+
+Questa è una conseguenza naturale dell'algoritmo: non è necessario imporre (m < n).
+Per una frazione impropria, il greedy produce semplicemente una o più frazioni 1/1 all'inizio, finché il resto diventa una frazione propria.
+
+Le frazioni con numeratore uguale a 1 sono chiamate frazioni egiziane.
+Il nome deriva dal fatto che gli antichi Egizi rappresentavano le frazioni principalmente attraverso frazioni unitarie.
+Per esempio, una quantità come 5/7 veniva rappresentata come somma di termini del tipo 1/n, anziché usando direttamente una frazione con numeratore maggiore di 1.
+Il famoso Papiro di Rhind contiene numerose decomposizioni di questo tipo.
+Una caratteristica importante è che il greedy produce, per una frazione propria, denominatori strettamente crescenti:
+
+  d(1) < d(2) < ... < d(k)
+
+Quindi la funzione 'egyptian' calcola la rappresentazione egiziana greedy della frazione data.
+
+Vedi anche "Frazioni egizie" su "Note libere 6".
+
+
+-----------------------------------
+Auto-divisione massima di un numero
+-----------------------------------
+
+https://codegolf.stackexchange.com/questions/151849/how-small-can-it-get
+
+Partendo da un intero positivo N, trova il più piccolo intero M ottenibile dividendo ripetutamente N per una delle sue cifre (in base 10). Ogni cifra selezionata deve essere un divisore di N maggiore di 1.
+
+Esempio 1
+Il risultato atteso per N = 230 è M = 23:
+230/2=115, 115/5=23
+
+Esempio 2
+Il risultato atteso per N = 129528 è M = 257:
+129528/8=16191, 16191/9=1799, 1799/7=257
+
+Attenzione ai percorsi non ottimali!
+Potremmo iniziare con 129528 / 9 = 14392, ma ciò non porterebbe al risultato più piccolo possibile.
+Il risultato migliore ottenibile dividendo inizialmente per 9 è:
+129528/9=14392, 14392/2=7196, 7196/7=1028, 1028/2=514 --> errato!
+
+Un approccio greedy non è sufficiente.
+La scelta della cifra che divide N e produce il quoziente più piccolo nell'immediato può portare a un risultato finale peggiore.
+
+Il problema si può vedere come un 'grafo aciclico di stati':
+- ogni intero raggiungibile è uno stato;
+- da n partono archi verso n/d, dove d è una cifra di n, d > 1 e n % d = 0;
+- ogni divisione riduce strettamente il numero, quindi non ci sono cicli;
+- per ogni stato dobbiamo trovare il minimo risultato terminale raggiungibile.
+
+Per esempio, da 129528:
+129528
+   |
+   +-- /8 --> 16191 --> /9 --> 1799 --> /7 --> 257
+   |
+   +-- /9 --> 14392
+               |
+               +-- /2 --> 7196 --> /7 --> 1028 --> /2 --> 514
+
+Il secondo ramo si ferma a 514, ma il primo arriva a 257, quindi bisogna esplorare entrambi.
+È sufficiente una ricerca ricorsiva in profondità (DFS con memoizzazione) che, per ogni N, prova tutte le divisioni valide e restituisce il minimo tra i risultati ottenuti.
+
+Dato che ogni divisione deve essere esatta, ogni percorso corrisponde a una fattorizzazione di N in cui ciascun fattore utilizzato è una cifra che compare nel numero corrente.
+È questa condizione che rende il problema non greedy e richiede l'esplorazione dei diversi percorsi.
+
+La parte importante è che non scegliamo la cifra migliore localmente.
+Per ogni cifra valida calcoliamo il miglior risultato dell'intero sottoproblema e poi prendiamo il minimo.
+In altre parole, vale la ricorrenza:
+  F(n) = min(F(n/d))
+per tutte le cifre d di n che soddisfano (d > 1) e (n mod d) = 0.
+Se non esiste nessuna cifra valida: F(n) = n
+
+(define (solve n)
+  ; Se il risultato per questo numero è già stato calcolato,
+  ; lo restituiamo immediatamente senza ripetere la ricerca.
+  (if (assoc n memo)
+      (lookup n memo)
+      ; Inizialmente il miglior risultato possibile è il numero stesso.
+      ; Se non esiste alcuna divisione valida, questo sarà infatti
+      ; il risultato terminale.
+      (let ((best n)
+            (digits (map int (explode (string n))))
+            d q r)
+        ; Esamina tutte le cifre del numero corrente.
+        (dolist (d digits)
+          ; Sono utilizzabili soltanto cifre maggiori di 1
+          ; che dividono esattamente il numero corrente.
+          (if (and (> d 1) (= (% n d) 0))
+              (begin
+                ; Effettua la divisione e cerca ricorsivamente
+                ; il minimo risultato ottenibile dal quoziente.
+                (setq q (/ n d))
+                (setq r (solve q))
+                ; Mantiene il più piccolo risultato trovato
+                ; tra tutti i possibili percorsi.
+                (if (< r best)
+                    (setq best r)))))
+        ; Memorizza il risultato associandolo allo stato n.
+        (push (list n best) memo)
+        best)))
+
+(define (min-div n)
+  ; La tabella memo contiene il miglior risultato già trovato
+  ; per ogni numero raggiunto durante la ricerca.
+  (setq memo '())
+  (solve n))
+
+Proviamo:
+
+(min-div 230)
+;-> 23
+
+(min-div 129528)
+;-> 257
+
 ============================================================================
 

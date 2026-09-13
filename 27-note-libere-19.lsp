@@ -6013,7 +6013,8 @@ Proviamo:
 ;->  253 289 307 349 387 399 459 481 529 567 613 649 709 763
 ;->  807 843 927 949)
 
-Vedi anche "Il problema di Giuseppe (Josephus Problem)" in "Rosetta Code".
+Vedi anche "Il problema di Giuseppe (Josephus Problem)" su "Rosetta Code".
+Vedi anche "Simulazione del problema di Giuseppe (Josephus)" su "Note libere 39".
 
 
 ------------------------------

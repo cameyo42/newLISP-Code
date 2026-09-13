@@ -7815,7 +7815,12 @@ IL PROBLEMA DI GIUSEPPE (JOSEPHUS PROBLEM)
 ------------------------------------------
 
 Il problema di Giuseppe (Josephus problem) o la permutazione di Giuseppe è un problema collegato ad un episodio raccontato dallo storico Flavio Giuseppe nella sua opera "Guerra giudaica" (composta tra il 93 e il 94 d.C.).
-Il problema presenta n persone disposte in circolo in attesa di una esecuzione. Scelta una persona iniziale e un senso di rotazione, si saltano k-1 persone, raggiungendo così la k-esima persona, che viene giustiziata ed eliminata dal cerchio. Poi si saltano k-1 persone e si giustizia la k-esima persona. Le esecuzioni proseguono e il cerchio si restringe sempre più, finché non rimane che una sola persona, la quale viene graziata. Dati n e k, determinare la posizione del sopravvissuto all'interno del cerchio iniziale. In altre parole il problema è scegliere il posto nel cerchio iniziale che assicura la sopravvivenza.
+Il problema presenta n persone disposte in circolo in attesa di una esecuzione.
+Scelta una persona iniziale e un senso di rotazione, si saltano k-1 persone, raggiungendo così la k-esima persona, che viene giustiziata ed eliminata dal cerchio.
+Poi si saltano k-1 persone e si giustizia la k-esima persona.
+Le esecuzioni proseguono e il cerchio si restringe sempre più, finché non rimane che una sola persona, la quale viene graziata.
+Dati n e k, determinare la posizione del sopravvissuto all'interno del cerchio iniziale.
+In altre parole il problema è scegliere il posto nel cerchio iniziale che assicura la sopravvivenza.
 
 Per k = 2 otteniamo:
 
@@ -7832,7 +7837,10 @@ Il problema ha la seguente struttura ricorsiva.
    giuseppe (n, k) = (giuseppe (n - 1, k) + k - 1) % n + 1
    giuseppe (1, k) = 1
 
-Dopo che la prima persona (kth dall'inizio) viene uccisa, rimangono n-1 persone. Quindi chiamiamo giuseppe (n - 1, k) per ottenere la posizione con n-1 persone. Ma la posizione restituita da giuseppe (n - 1, k) considererà la posizione a partire da k%n + 1. Quindi dobbiamo apportare modifiche alla posizione restituita da giuseppe (n - 1, k).
+Dopo che la prima persona (kth dall'inizio) viene uccisa, rimangono n-1 persone.
+Quindi chiamiamo giuseppe (n - 1, k) per ottenere la posizione con n-1 persone.
+Ma la posizione restituita da giuseppe (n - 1, k) considererà la posizione a partire da k%n + 1.
+Quindi dobbiamo apportare modifiche alla posizione restituita da giuseppe (n - 1, k).
 
 (define (giuseppe n k)
   (if (= n 1) 1
@@ -7850,7 +7858,8 @@ Dopo che la prima persona (kth dall'inizio) viene uccisa, rimangono n-1 persone.
 ;-> 2
 
 Soluzione iterativa
-Nell'algoritmo, utilizziamo la variabile somma per determinare la persona da rimuovere. La posizione corrente della persona viene calcolata aggiungendo il conteggio della persona K alla posizione precedente, ovvero la somma e il modulo della somma.
+Nell'algoritmo, utilizziamo la variabile somma per determinare la persona da rimuovere.
+La posizione corrente della persona viene calcolata aggiungendo il conteggio della persona k alla posizione precedente, ovvero la somma e il modulo della somma.
 
 (define (giuseppe n k)
   (let (somma 0)
@@ -7887,7 +7896,8 @@ Nel caso k sia sempre uguale a 2, allora possiamo utilizzare un altro metodo:
 ;->  15 17 19 21 23 25 27 29 31 1 3 5 7 9 11 13 15 17 19 21
 ;->  23 25 27 29 31 33 35 37)
 
-Vedi anche "Numeri Giuseppe Flavio (Setaccio di Flavio Giuseppe)" in "Note libere 19".
+Vedi anche "Numeri Flavio Giuseppe (Setaccio di Flavio Giuseppe)" su "Note libere 19".
+Vedi anche "Simulazione del problema di Giuseppe (Josephus)" su "Note libere 39".
 
 
 ------

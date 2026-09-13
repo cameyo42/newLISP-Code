@@ -3717,6 +3717,9 @@ NOTE LIBERE 39
   Tre scatole e una chiave
   DWIM
   Quadrati in lattice di punti
+  Simulazione del problema di Giuseppe (Josephus)
+  Espansioni di rapporti tra interi in frazioni unitarie
+  Auto-divisione massima di un numero
 
 PROBLEMI SUI DADI
 =================

@@ -1158,7 +1158,9 @@ newLISP compiler?
 newLISP è un linguaggio interpretato e non è destinato ad avere un compilatore. Mi chiedo solo se sia (teoricamente) possibile.
 A questa domanda risponde il creatore di newLISP, Lutz Mueller:
 
-"Yes, you could compile newLISP if you take away some of its dynamic nature. Like no other Lisp, newLISP implements the code-equals-data paradigm 100%. E.g. self modifying code like this (created by Kazimir):
+'Yes, you could compile newLISP if you take away some of its dynamic nature.
+Like no other Lisp, newLISP implements the code-equals-data paradigm 100%.
+E.g. self modifying code like this (created by Kazimir):
 
 ; no iteration, no recursion, but runs forever
 (define (f)
@@ -1183,7 +1185,7 @@ When analyzing programs, which do have performance bottle-necks, you will always
 
 Many times programs already exist to efficiently perform a certain complex function. In that case newLISP has functions like 'exec' and 'process' and facilities like pipes and networking, to interact with those programs.
 
-Compilable Lisp and Scheme were created in a time where people still believed, they could create that one programming tool for every purpose. Today we know the optimal way is, to use different specialized tools together to solve complex problems."
+Compilable Lisp and Scheme were created in a time where people still believed, they could create that one programming tool for every purpose. Today we know the optimal way is, to use different specialized tools together to solve complex problems.'
 
 
 ---------------
@@ -1444,6 +1446,8 @@ Le prove suggeriscono invece una combinazione di:
 
 Il metodo greedy è semplice e garantisce sempre una soluzione, ma produce spesso denominatori enormi.
 (proprio per questo molti studiosi ritengono improbabile che fosse il metodo abituale degli scribi egizi).
+
+Vedi anche "Espansioni di rapporti tra interi in frazioni unitarie" su "Note libere 39".
 
 
 ------------------------------------

@@ -4610,7 +4610,9 @@ Esempio 3
 (for (i 5 1 1) (print i { }))
 ;-> 5 4 3 2 1 " "
 
-Notare che il valore del passo vale 1 ed è sempre positivo. Sembra più logico scrivere (for i 5 1 -1), cioè partire dal numero cinque e arrivare al numero 1 utilizzando un passo uguale a -1, ma newLISP "ragiona" in un modo leggermente diverso: quello che è importante è la differenza tra il valore di arrivo e quello di partenza. Se la differenza è negativa, allora utilizza un passo negativo, altrimenti utilizza un passo positivo.
+Notare che il valore del passo vale 1 ed è sempre positivo.
+Sembra più logico scrivere (for i 5 1 -1), cioè partire dal numero cinque e arrivare al numero 1 utilizzando un passo uguale a -1, ma newLISP "ragiona" in un modo leggermente diverso: quello che è importante è la differenza tra il valore di arrivo e quello di partenza.
+Se la differenza è negativa, allora utilizza un passo negativo, altrimenti utilizza un passo positivo.
 Nel nostro esempio abbiamo:
 
 (arrivo - partenza) = (1 - 5) = -4, quindi newLISP utilizza un passo negativo (di valore 1)
@@ -4714,7 +4716,8 @@ Non possiamo modificare i loro valori.
 ;-> to: 200
 
 Nota: il modo in cui si comporta l'espressione "for" di newLISP è diversa da quello di altri linguaggi (C, C++, Java, python, ecc.).
-Infatti questi linguaggi non eseguono il corpo del ciclo "for" se num-from è maggiore di num-to (con passo positivo) oppure se num-from è minore di num-to (con passo negativo). Bisogna fare attenzione quando si vuole convertire codice di altri linguaggi in newLISP.
+Infatti questi linguaggi non eseguono il corpo del ciclo "for" se num-from è maggiore di num-to (con passo positivo) oppure se num-from è minore di num-to (con passo negativo).
+Bisogna fare attenzione quando si vuole convertire codice di altri linguaggi in newLISP.
 
 Vedi anche "I limiti del ciclo for" su "Note libere 10".
 
