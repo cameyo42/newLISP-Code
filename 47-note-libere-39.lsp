@@ -972,7 +972,6 @@ Vediamo la definizione della funzione "seed" dal manuale di riferimento:
 *******************
 >>> funzione SEED
 *******************
-
 sintassi: (seed int-seed)
 sintassi: (seed int-seed true [int-pre-N])
 sintassi: (seed)
@@ -3726,6 +3725,289 @@ Proviamo:
 
 (min-div 129528)
 ;-> 257
+
+
+-------------------
+La funzione "round"
+-------------------
+
+*******************
+>>> funzione ROUND
+*******************
+sintassi: (round number [int-digits])
+Arrotonda il valore specificato in 'number' al numero di cifre indicato in 'int-digits'.
+Se si arrotondano le cifre decimali, 'int-digits' è negativo, mentre è positivo se si arrotonda la parte intera del numero.
+
+Se 'int-digits' viene omesso, la funzione arrotonda a 0 cifre decimali.
+
+(round 123.49 2)    -> 100
+(round 123.49 1)    -> 120
+(round 123.49 0)    -> 123
+(round 123.49)      -> 123
+(round 123.49 -1)   -> 123.5
+(round 123.49 -2)   -> 123.49
+
+Si noti che, per scopi di visualizzazione, è preferibile utilizzare 'format' per l'arrotondamento.
+-------------------
+
+Altri linguaggi usano un metodo diverso per arrotondare un numero.
+Per esempio, python 3 usa il metodo 'round half to even' ('banker's rounding') che oggi è considerato il metodo di arrotondamento standard, sebbene alcune implementazioni di linguaggi non l'abbiano ancora adottata.
+La semplice tecnica che prevede di "arrotondare sempre lo 0.5 per eccesso" comporta una leggera distorsione verso il valore più alto.
+In presenza di un numero elevato di calcoli, tale scostamento può diventare significativo.
+Il metodo 'round half to even' elimina questo problema.
+Infatti i casi esattamente a metà strada vengono ora arrotondati al numero pari più vicino, anziché allontanandosi dallo zero (ad esempio, round(2.5) restituisce 2 invece di 3).
+Per i tipi integrati di python 3 che supportano 'round', i valori vengono arrotondati al multiplo più vicino di 10 elevato alla meno n. Se due multipli sono equidistanti, l'arrotondamento avviene verso il numero pari.
+
+Esempi:
+
+(round-even 1.2))       --> 1
+(round-even 2.2))       --> 2
+(round-even 1.5))       --> 2
+(round-even 2.5))       --> 2
+(round-even 3.5))       --> 4
+(round-even 2.25 1)     --> 2.2
+(round-even 2.35 1)     --> 2.4
+(round-even 2.125 2)    --> 2.12
+(round-even 2.135 2)    --> 2.13
+(round-even 2.225 2)    --> 2.23
+(round-even 2.235 2)    --> 2.23
+(round-even 2.675 2)    --> 2.67
+(round-even 2.685 2)    --> 2.69
+
+Scriviamo una funzione che usa il metodo 'round half to even' ('banker's rounding') per arrotondare i numeri float.
+Con questo metodo i valori vengono arrotondati al multiplo più vicino di 10 elevato alla meno n.
+Se due multipli sono equidistanti, l'arrotondamento avviene verso il numero pari.
+
+Possiamo sfruttare 'round' per ottenere prima il multiplo più vicino e poi gestire esplicitamente il caso di equidistanza.
+
+(define (round-even x (n 0))
+  ; Arrotonda x al multiplo di 10^(-n) più vicino.
+  ; In caso di equidistanza sceglie il multiplo pari.
+  ; Il round di newLISP viene usato per determinare il multiplo
+  ; più vicino, preservando anche gli effetti della rappresentazione
+  ; binaria dei numeri floating-point.
+  (letn ((r (round x (- n)))
+         (p (pow 10 (- n)))
+         (d (sub x r))
+         (other (if (> d 0)
+                    (add r p)
+                    (sub r p))))
+    ; Se le due distanze sono identiche, siamo esattamente a metà.
+    ; In questo caso scegliamo il multiplo pari.
+    (if (= (abs d) (abs (sub x other)))
+        (if (even? (int (div r p)))
+            r
+            other)
+        r)))
+
+Proviamo:
+
+(round-even 1.2)
+;-> 1 (ok)
+(round-even 2.2)
+;-> 2 (ok)
+(round-even 1.5)
+;-> 2 (ok)
+(round-even 2.5)
+;-> 2 (ok)
+(round-even 3.5)
+;-> 4 (ok)
+(round-even 2.25 1)
+;-> 2.3 (error)
+(round-even 2.35 1)
+;-> 2.4 (ok)
+(round-even 2.125 2)
+;-> 2.13  (error)
+(round-even 2.135 2)
+;-> 2.13 (ok)
+(round-even 2.225 2)
+;-> 2.23 (ok)
+(round-even 2.235 2)
+;-> 2.23 (ok)
+(round-even 2.675 2)
+;-> 2.67 (ok)
+(round-even 2.685 2)
+;-> 2.69 (ok)
+
+Non funziona sempre perchè il problema è nel confronto delle due distanze:
+con i float l'uguaglianza (= (abs d) (abs (sub x other))) non è affidabile.
+In particolare 2.125 è rappresentabile esattamente in binario, ma le operazioni intermedie introducono una piccola differenza.
+Quando newLISP usa il valore binario reale del float, il comportamento dipendente dall'approssimazione IEEE.
+
+Un altro metodo è quello di rappresentare e trattare il float come una stringa.
+In questo modo il 'banker's rounding' diventa esattamente quello atteso guardando il numero decimale.
+Comunque diventa complicato gestire i calcoli con i riporti (es. 1.99995 --> 2.0).
+
+Un altro modo è quello di usare 'pack' e 'unpack' per gestire il float in formato IEEE-754
+L'idea è estrarre i 64 bit con pack/unpack "lf"/"Lu", separare segno, esponente e mantissa, e poi eseguire il confronto con 0.5 usando solo aritmetica intera bigint.
+In questo modo non facciamo nessun confronto fra float durante la decisione di arrotondamento.
+La soluzione completa deve distinguere i tipi zero, subnormal, normal, infinito e NaN, e soprattutto non deve usare (pow 10 n) per costruire la scala, perché pow introduce nuovamente un'approssimazione floating-point.
+
+(define (ieee x)
+  (letn ((bites (unpack "Lu" (pack "lf" x)))
+         (sign 0)
+         (expo 0)
+         (frac 0L))
+    ; Mostra il valore restituito direttamente da unpack.
+    (println "bites = " bites)
+    ; Estrae il primo elemento della lista restituita da unpack.
+    (setq bites (bites 0))
+    (println "bites[0] = " bites)
+    ; Estrae il bit di segno.
+    (setq sign (& (>> bites 63) 1))
+    (println "sign = " sign)
+    ; Estrae gli 11 bit dell'esponente.
+    (setq expo (& (>> bites 52) 2047))
+    (println "expo = " expo)
+    ; Estrae i 52 bit della frazione.
+    (setq frac (& bites 4503599627370495L))
+    (println "frac = " frac)
+    ; Restituisce temporaneamente i tre componenti.
+    (list sign expo frac)))
+
+(ieee 1.2)
+;-> bites = (4608083138725491507)
+;-> bites[0] = 4608083138725491507
+;-> sign = 0
+;-> expo = 1023
+;-> frac = 900719925474099
+;-> (0 1023 900719925474099)
+
+dove i tipi hanno i seguenti valori:
+  1) zero         -> expo=0, frac=0
+  2) subnormal    -> expo=0, frac<>0
+  3) normal       -> 1 <= expo <= 2046
+  4) infinito/NaN -> expo=2047
+
+Anche questa soluzione mi sembra abbastanza complicata.
+
+
+------------------
+Numeri digit-small
+------------------
+
+https://codegolf.stackexchange.com/questions/237308/digit-small-numbers
+
+Un numero "digit-small" è un intero positivo N tale che, per qualsiasi coppia di numeri (a, b) il cui prodotto è N, il numero totale delle loro cifre è superiore al numero di cifre di N.
+In altre parole: non esistono due interi positivi a e b tali che:
+1) a x b = N
+2) floor(log10(a)) + floor(log10(b)) < floor(log10(n))
+
+Ad esempio, il numero 363 è "digit-small".
+Può essere espresso come prodotto di due numeri in tre modi:
+  1 x 363 = 363 (sempre valido per qualunque N)
+  3 x 121 = 363 (valido)
+  11 x 33 = 363 (valido)
+In ogni caso, si hanno 4 cifre a sinistra dell'uguale e 3 cifre a destra.
+
+Un altro esempio: il numero 48 non è "digit-small" perché può essere scritto come:
+  1 x 48 = 48  (sempre valido per qualunque N)
+  2 x 24 = 48  (valido)
+  3 x 16 = 48  (valido)
+  4 x 12 = 48  (valido)
+  6 x 8  = 48  (non valido, perchè il prodotto 6 x 8 ha solo 2 cifre).
+
+Sequenza OEIS A122427:
+Numbers m such that in decimal representation m equals the lexicographically greatest divisor of m.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 17, 19, 22, 23, 26, 29, 31, 33, 34,
+  37, 38, 39, 41, 43, 44, 46, 47, 50, 51, 52, 53, 55, 57, 58, 59, 60,
+  61, 62, 65, 66, 67, 68, 69, 70, 71, 73, 74, 75, 76, 77, 78, 79, 80,
+  82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, ...
+
+(define (factorizations num)
+"Calculate all the factorizations of an integer number"
+  (let (afc '())
+    (factorizations-aux num '() num)))
+; funzione ausiliaria
+(define (factorizations-aux num parfac parval)
+  (let ((newval parval) (i (- num 1)))
+    (while (>= i 2)
+      (cond ((zero? (% num i))
+              (if (> newval 1) (setq newval i))
+              (if (and (<= (/ num i) parval) (<= i parval) (>= (/ num i) i))
+                  (begin
+                    (push (append parfac (list i (/ num i))) afc -1)
+                    (setq newval (/ num i))))
+              (if (<= i parval)
+                  (factorizations-aux (/ num i) (append parfac (list i)) newval))))
+      (-- i))
+    (sort (unique (map sort afc)))))
+
+(factorizations 363)
+
+(define (small? num)
+  (let ( (len (length num))
+         (prod2 (filter (fn(x) (= (length x) 2)) (factorizations num))) )
+  (for-all (fn(x) (> (+ (length (x 0)) (length (x 1))) len)) prod2)))
+
+Proviamo:
+
+(small? 363)
+;-> true
+(small? 48)
+;-> nil
+
+(filter small? (sequence 1 100))
+;-> (1 2 3 4 5 6 7 8 9 11 13 17 19 22 23 26 29 31 33 34
+;->  37 38 39 41 43 44 46 47 50 51 52 53 55 57 58 59 60
+;->  61 62 65 66 67 68 69 70 71 73 74 75 76 77 78 79 80
+;->  82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99)
+
+"the decimal representation m equals the lexicographically greatest divisor of m":
+significa che si considera la rappresentazione decimale dei divisori di m e li si confronta 'lessicograficamente come stringhe', cioè nello stesso modo in cui si confrontano le parole in un dizionario.
+Tra tutti i divisori di m, m deve essere quello 'lessicograficamente più grande'.
+
+Per esempio:
+  m = 11: divisori 1, 11.
+  Confronto: "11" > "1", quindi 11 appartiene alla sequenza.
+
+  m = 13: divisori 1, 13
+  "13" > "1", 13 appartiene.
+
+  m = 12: divisori 1, 2, 3, 4, 6, 12.
+  Lessicograficamente il maggiore è "6", perché "6" > "12", 12 non appartiene.
+
+  m = 22: divisori 1, 2, 11, 22.
+  "22" è maggiore di "2" e "11", 22 appartiene.
+
+m = 34: divisori 1, 2, 17, 34
+  "1" < "17" < "2" < "34", "34" appartiene
+
+Non si tratta quindi del 'massimo divisore numerico': quello sarebbe sempre m, rendendo la definizione banale.
+Si tratta del massimo secondo l'ordine delle 'stringhe decimali'.
+Per esempio:
+"9" > "34" in senso lessicografico, perché si confronta dal primo carattere: "9" > "3".
+Mentre numericamente risulta: 9 < 34
+
+(define (seq num)
+  (= (string num) ((sort (map string (filter (fn(x) (zero? (% num x))) (sequence 1 num)))) -1)))
+
+(filter seq (sequence 1 30))
+;-> (1 2 3 4 5 6 7 8 9 11 13 17 19 22 23 26 29)
+
+Versione code-golf (91 caratteri):
+(define(f n)(=(string n)((sort(map string(filter(fn(x)(zero?(% n x)))(sequence 1 n))))-1)))
+
+(filter f (sequence 1 30))
+;-> (1 2 3 4 5 6 7 8 9 11 13 17 19 22 23 26 29)
+
+Test di velocità:
+
+(time (filter small? (sequence 1 100)) 100)
+;-> 718.579
+(time (filter seq (sequence 1 100)) 100)
+;-> 109.376
+
+(time (filter small? (sequence 1 1000)))
+;-> 11563.373
+(time (filter seq (sequence 1 1000)))
+;-> 93.718
+(time (filter seq (sequence 1 10000)))
+;-> 7797.436
+
+(= (filter small? (sequence 1 1000))
+   (filter seq (sequence 1 1000)))
+;-> true
 
 ============================================================================
 

@@ -3720,6 +3720,8 @@ NOTE LIBERE 39
   Simulazione del problema di Giuseppe (Josephus)
   Espansioni di rapporti tra interi in frazioni unitarie
   Auto-divisione massima di un numero
+  La funzione "round"
+  Numeri digit-small
 
 PROBLEMI SUI DADI
 =================
