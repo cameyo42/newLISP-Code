@@ -3722,6 +3722,10 @@ NOTE LIBERE 39
   Auto-divisione massima di un numero
   La funzione "round"
   Numeri digit-small
+  Cambiare lo stato di alcuni bit per ottenere un quadrato
+  Da sequenza binaria a sequenza decimale
+  Numeri root-factor-prime
+  a(n) = p - n!, where p is the k-th smallest prime > n!
 
 PROBLEMI SUI DADI
 =================

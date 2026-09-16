@@ -3934,6 +3934,7 @@ Numbers m such that in decimal representation m equals the lexicographically gre
     (sort (unique (map sort afc)))))
 
 (factorizations 363)
+;-> ((3 11 11) (3 121) (11 33))
 
 (define (small? num)
   (let ( (len (length num))
@@ -3952,6 +3953,19 @@ Proviamo:
 ;->  37 38 39 41 43 44 46 47 50 51 52 53 55 57 58 59 60
 ;->  61 62 65 66 67 68 69 70 71 73 74 75 76 77 78 79 80
 ;->  82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99)
+
+Sequenza OEIS A122426:
+Numbers m such that in decimal representation the lexicographically greatest divisor of m is smaller than m.
+  10, 12, 14, 15, 16, 18, 20, 21, 24, 25, 27, 28, 30, 32, 35, 36, 40, 42,
+  45, 48, 49, 54, 56, 63, 64, 72, 81, 100, 102, 104, 105, 106, 108, 110,
+  111, 112, 114, 115, 116, 117, 118, 119, 120, 122, 123, 124, 125, 126,
+  128, 129, 130, 132, 133, 134, 135, 136, 138, 140, ...
+
+(clean small? (sequence 1 140))
+;-> (10 12 14 15 16 18 20 21 24 25 27 28 30 32 35 36 40 42
+;->  45 48 49 54 56 63 64 72 81 100 102 104 105 106 108 110
+;->  111 112 114 115 116 117 118 119 120 122 123 124 125 126
+;->  128 129 130 132 133 134 135 136 138 140)
 
 "the decimal representation m equals the lexicographically greatest divisor of m":
 significa che si considera la rappresentazione decimale dei divisori di m e li si confronta 'lessicograficamente come stringhe', cioè nello stesso modo in cui si confrontano le parole in un dizionario.
@@ -3990,6 +4004,8 @@ Versione code-golf (91 caratteri):
 
 (filter f (sequence 1 30))
 ;-> (1 2 3 4 5 6 7 8 9 11 13 17 19 22 23 26 29)
+(clean f (sequence 1 30))
+;-> (10 12 14 15 16 18 20 21 24 25 27 28 30)
 
 Test di velocità:
 
@@ -4008,6 +4024,516 @@ Test di velocità:
 (= (filter small? (sequence 1 1000))
    (filter seq (sequence 1 1000)))
 ;-> true
+
+
+--------------------------------------------------------
+Cambiare lo stato di alcuni bit per ottenere un quadrato
+--------------------------------------------------------
+
+https://codegolf.stackexchange.com/questions/170281/toggle-some-bits-and-get-a-square
+
+Dato un intero N > 3, trovare il numero minimo di bit da invertire in N per trasformarlo in un quadrato perfetto.
+È consentito invertire solo i bit meno significativi rispetto a quello più significativo.
+
+Esempi
+N=4, è già un quadrato perfetto (2^2), quindi l'output atteso è 0.
+
+N=24, può essere trasformato in un quadrato perfetto invertendo 1 bit: 11000→11001 (25 = 5^2), quindi l'output atteso è 1.
+
+N=22, non può essere trasformato in un quadrato perfetto invertendo un singolo bit (i risultati possibili sono 23, 20, 18 e 30), ma è possibile farlo invertendo 2 bit: 10110 -> 10000 (16 = 4^2), quindi l'output atteso è 2.
+
+Il programma dovrebbe calcolare tutti i valori per 3 < N < 10000 in meno di un minuto.
+
+Esempi:
+
+      Input | Output
+  ----------+--------
+          4 | 0
+         22 | 2
+         24 | 1
+         30 | 3
+         94 | 4
+        831 | 5
+        832 | 1
+       1055 | 4
+       6495 | 6
+       9999 | 4
+      40063 | 6
+     247614 | 7        (smallest N for which the answer is 7)
+    1049310 | 7        (clear them all!)
+    7361278 | 8        (smallest N for which the answer is 8)
+  100048606 | 8        (a bigger "8")
+
+1) Problema
+Dato un intero positivo N, possiamo cambiare arbitrariamente alcuni dei suoi bit, tranne il bit più significativo, e dobbiamo ottenere un quadrato perfetto.
+Per esempio, se: N = 1100101011111 il primo 1 a sinistra non può essere modificato.
+Possiamo invece modificare liberamente tutti i bit successivi.
+Quindi il quadrato Q che cerchiamo deve avere lo stesso numero di bit di N e, soprattutto, lo stesso bit più significativo.
+
+2) Determinare l'intervallo dei quadrati possibili
+Supponiamo che il bit più significativo di N sia quello in posizione k.
+Allora:
+  2^k <= N < 2^(k+1)
+Poichè il bit più significativo non può essere modificato, anche Q deve appartenere allo stesso intervallo:
+  2^k <= Q < 2^(k+1)
+Essendo Q un quadrato:
+  Q = r^2
+possiamo quindi limitare la ricerca alle radici che soddisfano:
+  2^k <= r^2 < 2^(k+1)
+ovvero:
+  ceil(sqrt(2^k)) <= r <= floor(sqrt(2^(k+1)-1))
+Quindi non dobbiamo provare tutti i quadrati fino a N.
+
+3) Uso di XOR
+Consideriamo N e un quadrato candidato Q.
+Calcoliamo:
+  D = N XOR Q
+XOR ha questa proprietà:
+  0 XOR 0 = 0
+  1 XOR 1 = 0
+  0 XOR 1 = 1
+  1 XOR 0 = 1
+Quindi, posizione per posizione:
+D[i] = 0
+significa che il bit i di N e Q è uguale.
+Mentre:
+D[i] = 1
+significa che il bit i deve essere cambiato.
+Pertanto D è direttamente una maschera dei bit da modificare.
+
+4) Esempio
+Supponiamo N = 1100101011111 e Q = 1100100010111
+Facciamo XOR:
+      1100101011111
+  XOR 1100100010111
+      --------------
+      0000001001000
+La maschera vale: 0000001001000
+Gli 1 indicano i bit differenti.
+Quindi dobbiamo modificare esattamente quei due bit.
+Il numero di modifiche è semplicemente:
+  popcount(D)
+Nel nostro caso:
+  popcount(0000001001000) = 2
+
+5) Minimizzare popcount
+Durante la ricerca basta quindi minimizzare popcount.
+Per ogni radice r nell'intervallo valido:
+  Q = r * r
+poi:
+  D = N XOR Q
+e infine:
+  c = popcount(D)
+c è il numero di bit che dobbiamo modificare per trasformare N in Q.
+Conserviamo il quadrato per cui c è minimo.
+In altre parole, stiamo cercando:
+  min popcount(N XOR r^2)
+nell'intervallo delle radici ammissibili.
+Questa è in realtà una distanza di Hamming: stiamo cercando il quadrato che ha la minima distanza binaria da N.
+
+6) Il bit più significativo non cambia
+Abbiamo limitato Q all'intervallo:
+  2^k <= Q < 2^(k+1)
+e quindi Q ha necessariamente il bit k uguale a 1.
+Anche N ha il bit k uguale a 1.
+Pertanto N XOR Q ha necessariamente 0 in quella posizione.
+Quindi non c'è nessun rischio che l'algoritmo proponga di modificare il bit che il problema vieta di modificare.
+
+7) Calcolo dei i bit da modificare
+Una volta trovato il miglior quadrato, conserviamo la sua maschera:
+  mask = N XOR Q
+Per esempio:
+  mask = 40
+In binario:
+  40 = 101000
+I bit a 1 sono alle posizioni:
+  5 e 3
+contando da destra e partendo da 0.
+Quindi possiamo dire:
+  bit 5 -> modifica
+  bit 3 -> modifica
+e tutti gli altri bit rimangono invariati.
+
+8) Ricostruzione del quadrato
+La maschera permette anche di ricostruire il quadrato
+C'è una proprietà particolarmente elegante:
+  Q = N XOR mask
+perchè:
+  mask = N XOR Q
+e XOR applicato due volte annulla l'operazione:
+N XOR mask = N XOR (N XOR Q) = Q
+Quindi la maschera non è semplicemente un'informazione aggiuntiva: è una descrizione completa delle modifiche necessarie per trasformare N nel quadrato trovato.
+
+Complessità temporale
+----------------------
+La parte più importante dal punto di vista dell'efficienza è la restrizione dell'intervallo.
+Se N ha circa k bit, le radici considerate sono nell'intervallo approssimativo:
+  2^(k/2) ... 2^((k+1)/2)
+Quindi il numero di candidati è dell'ordine di sqrt(2^k) * (sqrt(2) - 1) e non dell'ordine di N.
+Per i limiti del problema questo intervallo è molto piccolo.
+Ad esempio, se:
+  N < 10000
+il caso peggiore riguarda numeri con 14 bit, e le radici possibili sono soltanto poche decine.
+
+Pseudo-algoritmo
+----------------
+L'intero procedimento puo' essere visto come questa sequenza:
+
+  N
+  |
+  +-- trova il bit piu' significativo
+  |
+  +-- determina 2^k
+  |
+  +-- determina le radici r tali che
+  |      2^k <= r^2 < 2^(k+1)
+  |
+  +-- per ogni r:
+  |      |
+  |      +-- Q = r^2
+  |      |
+  |      +-- mask = N XOR Q
+  |      |
+  |      +-- costo = popcount(mask)
+  |      |
+  |      +-- conserva il minimo
+  |
+  +-- dal migliore:
+         |
+         +-- Q     = quadrato ottenuto
+         +-- mask  = bit da modificare
+         +-- popcount(mask) = numero di modifiche
+         +-- posizioni degli 1 = bit da modificare
+
+Notiamo che non serve simulare le modifiche una per una.
+Per ogni quadrato candidato, una singola operazione XOR ci dice contemporaneamente:
+a) quali bit sono diversi
+b) quali bit devono essere modificati
+c) quanti bit devono essere modificati, tramite popcount
+d) come ricostruire il quadrato tramite N XOR mask.
+Quindi il problema si riduce essenzialmente alla ricerca del quadrato Q che minimizza la distanza di Hamming popcount(N XOR Q).
+
+(define (popcount num)
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter))
+    counter))
+
+(define (toggle-square n)
+  ; Trova la più grande potenza di 2 non superiore a n.
+  (let ((p 1)
+        (lo 0)
+        (hi 0)
+        (r 0)
+        (q 0)
+        (mask 0)
+        (best nil)
+        (bites nil))
+    ; p è 2^k, dove k è la posizione del bit più significativo di n.
+    (while (<= (* 2 p) n)
+      (setq p (* 2 p)))
+    ; La radice minima produce il primo quadrato con il bit più significativo corretto.
+    (setq lo (int (sqrt p)))
+    (if (< (* lo lo) p)
+        (++ lo))
+    ; La radice massima produce l'ultimo quadrato che non supera 2^(k+1)-1.
+    (setq hi (int (sqrt (- (* 2 p) 1))))
+    ; Esamina tutti i quadrati possibili.
+    (for (r lo hi)
+      (setq q (* r r))
+      ; XOR: i bit a 1 sono esattamente quelli da modificare.
+      (setq mask (^ n q))
+      ; Conserva il quadrato che richiede meno modifiche.
+      (if (or (nil? best) (< (popcount mask) (best 0)))
+          (setq best (list (popcount mask) q mask))))
+    ; Estrae dalla maschera le posizioni dei bit da modificare.
+    (setq mask (best 2))
+    (setq r 0)
+    (while (> mask 0)
+      (if (& mask 1)
+          (push r bites -1))
+      (setq mask (>> mask 1))
+      (++ r))
+    ; Restituisce: numero modifiche, quadrato, maschera, posizioni.
+    (list (best 0) (best 1) (best 2) bites)))
+
+Proviamo:
+
+(toggle-square 4)
+;-> (0 4 0 nil)
+(toggle-square 24)
+;-> (1 16 8 (0 1 2 3))
+(toggle-square 22)
+;-> (2 16 6 (0 1 2))
+
+(setq L '(4 22 24 30 94 831 832 1055 6495 9999 40063
+          247614 1049310 7361278 100048606))
+
+(setq sol '(0 2 1 3 4 5 1 4 6 4 6 7 7 8 8))
+
+(map first (map toggle-square L))
+;-> (0 2 1 3 4 5 1 4 6 4 6 7 7 8 8)
+
+(time (map toggle-square (sequence 4 1e4)))
+;-> 270.976
+
+Sequenza OEIS A358701:
+a(n) is the least number > 1 that needs n toggles in the trailing bits of its binary representation to become a square.
+  4, 5, 7, 14, 79, 831, 6495, 247614, 7361278, 743300286, 121387475838, ...
+
+(setq oeis '(4 5 7 14 79 831 6495 247614 7361278 743300286 121387475838))
+(map first (map toggle-square oeis))
+;-> (0 1 2 3 4 5 6 7 8 9 10)
+
+(define (seq limite)
+  (let ( (out '()) (current 0) )
+    (for (num 1 limite)
+      (when (= ((toggle-square num) 0) current)
+        (push num out -1)
+        (++ current)))
+    out))
+
+(time (println (seq 1e4)))
+;-> (1 3 7 14 79 831 6495)
+;-> 277.202
+(time (println (seq 1e5)))
+;-> (1 3 7 14 79 831 6495)
+;-> 8864.938
+(time (println (seq 2e5)))
+;-> (1 3 7 14 79 831 6495)
+;-> 25651.506
+
+
+---------------------------------------
+Da sequenza binaria a sequenza decimale
+---------------------------------------
+
+Abbiamo una sequenza di cifre binarie, per esempio (1 1 0 1 0 0 1).
+Queste cifre rappresentano la seguente sequenza di numeri decimali:
+  a(1): decimale(1) = 1
+  a(2): decimale(1 1) = 3
+  a(3): decimale(1 1 0) = 6
+  a(4): decimale(1 1 0 1) = 13
+  a(5): decimale(1 1 0 1 0) = 26
+  a(6): decimale(1 1 0 1 0 0) = 52
+  a(7): decimale(1 1 0 1 0 0 1) = 105
+Quindi, la sequenza binaria dell'esempio corrisponde alla sequenza di numeri decimali:
+(1 3 6 13 26 52 105)
+
+(define (binary-bigint bin)
+"Convert a binary string to big integer"
+  (let (num 0L)
+    ; remove left padded 0
+    (while (= (bin 0) "0") (pop bin))
+    (if (= bin "") 0L
+        ; else, build big integer number
+        (dolist (el (explode bin))
+          (setq num (+ (* num 2) (int el)))))))
+
+; Converte una lista binaria in una lista di interi
+(define (convert binary)
+  (let ( (str "") (out '()) )
+    (dolist (bit binary)
+      (push (binary-bigint (extend str (string bit))) out -1))))
+
+(setq L '(1 1 0 1 0 0 1))
+(convert '(1 1 0 1 0 0 1))
+;-> (1L 3L 6L 13L 26L 52L 105L)
+
+(convert (rand 2 30))
+;-> (1L 2L 4L 8L 16L 32L 65L 131L 263L 527L 1054L 2109L 4218L 8436L 16872L
+;->  33745L 67491L 134983L 269967L 539934L 1079869L 2159739L 4319479L
+;->  8638959L 17277919L 34555838L 69111676L 138223352L 276446705L 552893410L)
+
+Calcoliamo la frequenza delle cifre dei numeri generati da una sequenza binaria.
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(int-list 1230L)
+;-> (1L 2L 3L 0L)
+
+Versione 1:
+
+(define (digit-freq1 lst)
+  (let ((cifre '()) (unici '()))
+    (dolist (el lst)
+      (extend cifre (int-list el)))
+    (setq unici (sort (unique cifre)))
+    (map list unici (count unici cifre))))
+
+Versione 2:
+
+(define (digit-freq2 lst)
+  (let (freq (array 10 '(0)))
+    (dolist (el lst)
+      (if (zero? el)
+        (++ (freq 0))
+        ; else
+        (let ((out '()) (num el))
+          (while (!= num 0)
+            (++ (freq (% num 10)))
+            (setq num (/ num 10))))))
+    freq))
+
+Versione 3:
+
+(define (digit-freq3 lst)
+  (let (freq (array 10 '(0)))
+    (dolist (el lst)
+      (if (zero? el)
+        (++ (freq 0))
+        ; else
+          (dolist (cifra (chop (explode (string el))))
+            (++ (freq (int cifra))))))
+    freq))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(digit-freq1 (convert L))
+;-> ((0L 1) (1L 3) (2L 2) (3L 2) (5L 2) (6L 2))
+(digit-freq2 (convert L))
+;-> (1 3 2 2 0 2 2 0 0 0)
+(digit-freq3 (convert L))
+;-> (1 3 2 2 0 2 2 0 0 0)
+
+(setq B (rand 2 1000))
+((convert B) -1)
+;-> 472871450741411181622016926667273302450719524398034001933942696945938521
+;-> 431570884537771077698696714570695735191693860488849771924243712054143590
+;-> 137389849992177641373003529884583783772606935438032381095414483753078917
+;-> 835848609428967127671823258803680828435697881122930982797315506622430812
+;-> 7874998214164L
+
+(digit-freq1 (convert B))
+;-> ((0L 14896) (1L 15378) (2L 15263) (3L 14970) (4L 15127) (5L 15145)
+;->  (6L 14924) (7L 15057) (8L 15074) (9L 15090))
+(digit-freq2 (convert B))
+;-> (14896 15378 15263 14970 15127 15145 14924 15057 15074 15090)
+(digit-freq3 (convert B))
+;-> (14896 15378 15263 14970 15127 15145 14924 15057 15074 15090)
+
+(time (digit-freq1 (convert B)))
+;-> 517.374
+(time (digit-freq2 (convert B)))
+;-> 417.148
+(time (digit-freq3 (convert B)))
+;-> 304.857
+
+
+------------------------
+Numeri root-factor-prime
+------------------------
+
+Calcolare la sequenza dei numeri in cui la somma ripetuta delle cifre della somma dei suoi fattori primi (con molteplicità) è un numero primo.
+
+Esempi:
+  N = 28
+  fattori = 2 2 7
+  somma dei fattori = 2 + 2 + 7 = 11
+  somma ripetuta della somma dei fattori = 1 + 1 = 2 --> numero primo
+
+N = 21
+  fattori = 3 7
+  somma dei fattori = 3 + 7 = 10
+  somma ripetuta della somma dei fattori = 1 + 0 = 1 --> numero non primo
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (digit-root num)
+"Calculate the repeated sum of the digits of an integer"
+    (+ 1 (% (- (abs num) 1) 9)))
+
+(define (pp? num)
+  (prime? (digit-root (apply + (factor num)))))
+
+(filter pp? (sequence 1 100))
+;-> (2 3 5 6 7 10 11 12 23 28 29 33 35 38 39 40 41 42 43 45 46 47 48 49 50 51
+;->  54 55 59 60 61 64 66 68 70 72 74 76 79 81 82 83 84 87 91 93 97 98 100)
+
+Questa sequenza non esiste in OEIS (settembre 2026).
+
+
+------------------------------------------------------
+a(n) = p - n!, where p is the k-th smallest prime > n!
+------------------------------------------------------
+
+Sequenza OEIS A033932:
+Least positive m such that n! + m is prime.
+a(n) = p - n!, where p is the smallest prime > n!.
+  1, 1, 1, 1, 5, 7, 7, 11, 23, 17, 11, 1, 29, 67, 19, 43, 23, 31, 37, 89,
+  29, 31, 31, 97, 131, 41, 59, 1, 67, 223, 107, 127, 79, 37, 97, 61, 131,
+  1, 43, 97, 53, 1, 97, 71, 47, 239, 101, 233, 53, 83, 61, 271, 53, 71,
+  223, 71, 149, 107, 283, 293, 271, 769, 131, 271, ...
+
+Sequenza OEIS A275272:
+a(n) = p - n!, where p is the second smallest prime > n!.
+  2, 3, 5, 7, 11, 13, 19, 31, 23, 19, 17, 43, 73, 41, 149, 41, 53, 61,
+  109, 37, 37, 71, 109, 193, 97, 173, 47, 101, 229, 163, 241, 83, 139,
+  103, 83, 577, 311, 47, 269, 61, 61, 107, 97, 89, 379, 149, 269, 83,
+  137, 167, 281, 89, 79, 443, 229, 157, 179, 563, 389, ...
+
+Sequenza OEIS A275273:
+a(n) = p - n!, where p is the third smallest prime > n!.
+  4, 5, 7, 13, 17, 19, 37, 37, 31, 41, 19, 59, 109, 71, 179, 73, 59, 73,
+  113, 53, 47, 127, 149, 263, 107, 241, 59, 103, 317, 241, 317, 113, 197,
+  127, 109, 647, 397, 67, 281, 67, 211, 163, 109, 107, 439, 521, 709, 101,
+  383, 337, 397, 223, 337, 601, 281, 311, ...
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+La funzione 'prime?' non gestisce i big-integer, quindi possiamo arrivare al massimo a 20 elementi di ogni sequenza:
+(map fact-i (sequence 1 20))
+;-> (1L 2L 6L 24L 120L 720L 5040L 40320L 362880L 3628800L 39916800L 479001600L
+;->  6227020800L 87178291200L 1307674368000L 20922789888000L 355687428096000L
+;->  6402373705728000L 121645100408832000L 2432902008176640000L)
+
+(define (seq num prime-order)
+  (letn ((num-prime 0) (f (fact-i num)) (p f))
+    (while (< num-prime prime-order)
+      (++ p)
+      (if (prime? p) (++ num-prime)))
+    (- p f)))
+
+A033932
+(time (println (map (fn(x) (seq x 1)) (sequence 0 20))))
+;-> (1L 1L 1L 1L 5L 7L 7L 11L 23L 17L 11L 1L 29L 67L 19L 43L 23L 31L 37L 89L
+;->  29L)
+;-> 12001.011
+
+A275272:
+(time (println (map (fn(x) (seq x 2)) (sequence 1 20))))
+;-> (2L 3L 5L 7L 11L 13L 19L 31L 23L 19L 17L 43L 73L 41L 149L 41L 53L 61L
+;->  109L 37L)
+;-> 20127.149
+
+A275273:
+(time (println (map (fn(x) (seq x 3)) (sequence 1 20))))
+;-> (4L 5L 7L 13L 17L 19L 37L 37L 31L 41L 19L 59L 109L 71L 179L 73L 59L 73L
+;->  113L 53L)
+;-> 28245.642
 
 ============================================================================
 
