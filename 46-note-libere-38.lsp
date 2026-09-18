@@ -8130,7 +8130,7 @@ Pertanto:
 e infatti 10 + 20 + 30 + 40 = 100%
 
 Frappè o granita
-Ogni persona beve 3 delle 4 bevande, quindi **non è possibile che una persona non beva né frappè né granita**, perché in quel caso potrebbe bere soltanto tè e caffè, cioè al massimo 2 bevande.
+Ogni persona beve 3 delle 4 bevande, quindi non è possibile che una persona non beva né frappè né granita, perché in quel caso potrebbe bere soltanto tè e caffè, cioè al massimo 2 bevande.
 Perciò:
   (frappè Unione granita) = 100%
 Quindi il 100% beve granita O frappè e il 30% beve granita E frappè.

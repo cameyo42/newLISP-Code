@@ -653,7 +653,7 @@ Le funzioni che usano "Sweep-line" 'contano' gli eventi.
 Le funzioni che usano "Brute-Force" 'contano' ed 'elencano' gli eventi.
 Qui sta il punto cruciale: 'contare' le intersezioni e 'elencarle' sono due problemi con costi intrinsecamente diversi.
 - Contare puo essere fatto in O(n log n) perché un singolo numero ('active') riassume in O(1) l'informazione "quante coppie si formano ora", indipendentemente da quante siano.
-- Elencare le coppie non può scendere sotto il costo proporzionale al **numero di coppie stesse**: se, nel caso peggiore, tutti gli n intervalli si sovrappongono a vicenda, ci sono O(n^2) coppie da restituire, e nessun algoritmo — per quanto elegante — può enumerarle in meno tempo di quello necessario a scriverle tutte.
+- Elencare le coppie non può scendere sotto il costo proporzionale al numero di coppie stesse: se, nel caso peggiore, tutti gli n intervalli si sovrappongono a vicenda, ci sono O(n^2) coppie da restituire, e nessun algoritmo — per quanto elegante — può enumerarle in meno tempo di quello necessario a scriverle tutte.
 Anche 'coverage-per-point' funziona con il 'diff array' proprio perché non ha mai bisogno di sapere quali intervalli coprono un punto, solo quanti.
 Il trucco diff[L] += 1 / diff[R+1] -= 1 seguito dalla somma prefissa produce un numero aggregato — l'informazione su quale intervallo abbia contribuito a quel numero va persa nel momento stesso in cui si fa +1, perché un +1 è indistinguibile da un altro +1 proveniente da un intervallo diverso.
 È esattamente l'analogo del contatore active nello sweep-line: un numero riassuntivo, non una lista di riferimenti.
@@ -2462,7 +2462,7 @@ Per una matrice binaria:
 - si marca ogni cella visitata una sola volta (sulla matrice 'visited')
 - appena si raggiunge B, si restituisce true
 - se si esauriscono le celle raggiungibili, 'nil'
-'visited' viene marcato quando la cella viene inserita nello stack**, non quando viene estratta. Questo evita che la stessa cella venga aggiunta più volte allo stack e rende la DFS più efficiente.
+'visited' viene marcato quando la cella viene inserita nello stack, non quando viene estratta. Questo evita che la stessa cella venga aggiunta più volte allo stack e rende la DFS più efficiente.
 Complessità temporale: O(M*N)
 Non esiste, in generale, un algoritmo che garantisca di dover esaminare meno di O(M*N) celle: nel caso peggiore bisogna verificare praticamente tutto il labirinto.
 
@@ -4534,6 +4534,777 @@ A275273:
 ;-> (4L 5L 7L 13L 17L 19L 37L 37L 31L 41L 19L 59L 109L 71L 179L 73L 59L 73L
 ;->  113L 53L)
 ;-> 28245.642
+
+
+----------------------------
+Capacità idrica di un numero
+----------------------------
+
+Definiamo la "capacità idrica" di un numero intero positivo nel modo seguente: se N ha la scomposizione in fattori primi p1^e1 * p2^e2 * ... * pk^ek, sia c(i) una colonna di altezza p(i)^e(i) e larghezza 1.
+Affiancando le colonne c(i) si ottiene un istogramma che, figurativamente, può essere riempito d'acqua dall'alto.
+La capacità idrica di un numero è il numero massimo di celle che possono essere riempite d'acqua.
+
+Esempio:
+Il numero 48300 ha la scomposizione in fattori primi 2^2 * 3 * 5^2 * 7 * 23.
+L'istogramma sottostante deve essere ruotato di 90 gradi in senso antiorario.
+
+  2^2   ****
+  3     ***W
+  5^2   *************************
+  7     *******WWWWWWWWWWWWWWWW
+  23    ***********************
+
+Il numero 48300 ha una capacità idrica pari a 17.
+
+Per calcolare l'acqua in una colonna non dobbiamo conoscere tutta la parte interna dell'istogramma.
+Basta sapere quale dei due bordi, sinistro o destro, è più basso.
+
+Prendiamo il nostro esempio:
+altezza:  4   3   25   7   23
+indice:   0   1    2   3    4
+
+1) Due indici
+Usiamo due indici:
+  L ->                 <- R
+  4   3   25   7   23
+L parte da sinistra e R da destra.
+Manteniamo anche:
+  lm = massimo incontrato da sinistra
+  rm = massimo incontrato da destra
+All'inizio: L = 0, R = 4, lm = 0, rm = 0
+
+2) Cerchiamo il lato più basso
+Abbiamo: h[L] = 4, h[R] = 23
+Il lato sinistro è più basso.
+Questo è fondamentale: la quantità d'acqua sopra la colonna L può essere determinata con certezza dal lato sinistro, perché a destra sappiamo già che esiste un muro alto almeno 23, quindi sicuramente superiore a 4.
+In altre parole, per una posizione interna vale:
+  acqua = min(max_sinistro, max_destro) - altezza
+Se il limite sinistro è quello più basso, il limite destro non può essere il fattore limitante.
+Quindi possiamo elaborare L e avanzarlo.
+
+3) Primo passo
+Abbiamo:
+4   3   25   7   23
+^               ^
+L               R
+Poiché 4 < 23: lm = max(lm, 4) = 4
+Sopra la colonna di altezza 4 non c'è acqua: 4 - 4 = 0
+Avanziamo L:
+    L
+    v
+4   3   25   7   23
+                ^
+                R
+
+4) Secondo passo
+Ora: h[L] = 3, h[R] = 23
+Ancora: 3 < 23
+Quindi possiamo determinare definitivamente l'acqua sopra la colonna 3.
+Il massimo sinistro è: lm = 4
+Pertanto: acqua = 4 - 3 = 1
+La situazione è:
+  4   3   25   7   23
+      W
+Abbiamo accumulato water = 1 e incrementiamo L.
+
+5) Terzo passo
+Ora:
+  4   3   25   7   23
+          ^       ^
+          L       R
+Abbiamo: h[L] = 25, h[R] = 23
+Questa volta è il lato destro ad essere più basso: 25 > 23
+Quindi lavoriamo su R.
+Aggiorniamo: rm = max(rm, 23) = 23
+La colonna di altezza 23 non contiene acqua: 23 - 23 = 0 e spostiamo R verso sinistra.
+
+6) Quarto passo
+Ora:
+4   3   25   7   23
+        ^   ^
+        L   R
+Abbiamo: h[L] = 25, h[R] = 7
+Il lato destro è più basso: 7 < 25
+Quindi possiamo determinare definitivamente l'acqua sopra 7.
+Il massimo destro è rm = 23 perciò acqua = 23 - 7 = 16
+Ora abbiamo water = 1 + 16 = 17 e R viene decrementato.
+A questo punto L = R e l'algoritmo termina.
+
+Perché funziona?
+----------------
+La parte più importante è questa regola:
+if h[L] < h[R]
+    possiamo risolvere L
+else
+    possiamo risolvere R
+
+A) Caso sinistro
+Se h[L] < h[R] allora sappiamo che esiste a destra un muro almeno alto quanto h[R], che è maggiore di h[L].
+Quindi, per la posizione L, il limite destro non può essere inferiore a h[L].
+Il limite effettivo sarà quindi determinato dal massimo incontrato a sinistra: lm e possiamo calcolare definitivamente: lm - h[L].
+
+B) Caso destro
+Simmetricamente, se h[R] < h[L] sappiamo che esiste a sinistra un muro più alto di h[R].
+Quindi possiamo risolvere definitivamente R usando: rm - h[R]
+
+Il vantaggio rispetto al metodo che calcola, per ogni colonna, il massimo a sinistra e a destra è che non dobbiamo effettuare due scansioni per ogni posizione.
+Il doppio indice percorre l'istogramma una sola volta, quindi, una volta ottenute le altezze dei fattori primi, il calcolo della capacità è O(k), dove k è il numero di fattori primi distinti.
+
+Per stampare l'istogramma usiamo una lista w parallela a h, che memorizza quanta acqua c'è sopra ogni colonna. Memorizziamo anche le etichette dei fattori per la stampa (labels).
+
+(define (acqua num show)
+  (let ((f (factor num))
+        (h '()) (labels '()) (w '())
+        (i 0) (p 0) (e 0) (v 0) (l 0) (r 0) (lm 0) (rm 0) (water 0))
+    ; Raggruppa i fattori uguali e calcola p^e.
+    ; Contemporaneamente costruisce l'etichetta della colonna.
+    (while (< i (length f))
+      (setq p (f i))
+      (setq e 1)
+      (setq v p)
+      (++ i)
+      (while (and (< i (length f)) (= (f i) p))
+        (setq v (* v p))
+        (++ e)
+        (++ i))
+      (push v h -1)
+      (push (if (= e 1) (string p) (string p "^" e)) labels -1))
+    ; Crea una lista parallela alle altezze per memorizzare
+    ; la quantita' di acqua presente sopra ogni colonna.
+    (setq w (dup 0 (length h)))
+    ; Con meno di tre colonne non si puo' formare una cavita'.
+    (if (>= (length h) 3)
+        (begin
+          ; I due indici partono dalle estremita' dell'istogramma.
+          (setq r (- (length h) 1))
+          (while (< l r)
+            ; Si lavora dal lato con altezza minore.
+            (if (< (h l) (h r))
+                (begin
+                  ; Aggiorna il massimo raggiunto a sinistra.
+                  (setq lm (max lm (h l)))
+                  ; Calcola e memorizza l'acqua sopra la colonna.
+                  (setf (w l) (- lm (h l)))
+                  ; Accumula l'eventuale differenza.
+                  (setq water (+ water (w l)))
+                  (++ l))
+                (begin
+                  ; Aggiorna il massimo raggiunto a destra.
+                  (setq rm (max rm (h r)))
+                  ; Calcola e memorizza l'acqua sopra la colonna.
+                  (setf (w r) (- rm (h r)))
+                  ; Accumula l'eventuale differenza.
+                  (setq water (+ water (w r)))
+                  (-- r))))))
+    ; Stampa l'istogramma in forma compatta.
+    ; Gli asterischi "*" rappresentano la colonna e le "W" l'acqua.
+    (if show
+      (dolist (i (sequence 0 (- (length h) 1)))
+        (println (format "%-5s %s%s"
+                 (labels i) (dup "*" (h i)) (dup "W" (w i))))))
+    ; Capacita' idrica totale.
+    water))
+
+Proviamo:
+
+(acqua 48300 true)
+;-> 2^2   ****
+;-> 3     ***W
+;-> 5^2   *************************
+;-> 7     *******WWWWWWWWWWWWWWWW
+;-> 23    ***********************
+;-> 17
+
+La lista w contiene direttamente la distribuzione dell'acqua:
+  (0 1 0 16 0)
+quindi la funzione calcola la capacità totale e conserva anche dove sono e quante sono le celle d'acqua.
+
+(acqua 243600 true)
+;-> 2^4   ****************
+;-> 3     ***WWWWWWWWWWWWW
+;-> 5^2   *************************
+;-> 7     *******WWWWWWWWWWWWWWWWWW
+;-> 29    *****************************
+;-> 31
+
+(acqua 10 true)
+;-> 2     **
+;-> 5     *****
+;-> 0
+
+Sequenza OEIS A275339:
+a(n) is the smallest number which has a water-capacity of n.
+  60, 120, 440, 168, 264, 840, 2448, 528, 1904, 624, 1360, 2295, 816, 1632,
+  20128, 1824, 48300, 3105, 15392, 2208, 13024, 2400, 10656, 4080, 8288,
+  2784, 5920, 2976, 3552, 9120, 243600, 11840, 28560, 7104, 124352, 13120,
+  115776, 7872, 107200, 8256, 98624, 15040, 685608, ...
+
+(define (seq limite)
+  (let ((out '()) (num 0))
+    (for (i 1 limite)
+      (setq num 1)
+      (until (= (acqua num) i) (++ num))
+      (push num out -1))))
+
+(time (println (seq 50)))
+;-> (60 120 440 168 264 840 2448 528 1904 624 1360 2295 816 1632
+;->  20128 1824 48300 3105 15392 2208 13024 2400 10656 4080 8288
+;->  2784 5920 2976 3552 9120 243600 11840 28560 7104 124352 13120
+;->  115776 7872 107200 8256 98624 15040 685608 9024 81472 9408 72896
+;->  16960 973500 10176)
+;-> 10547.751
+
+(acqua 685608 true)
+;-> 2^3   ********
+;-> 3     ***WWWWW
+;-> 7^2   *************************************************
+;-> 11    ***********WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+;-> 53    *****************************************************
+;-> 43
+
+
+----------------
+Cambio di parità
+----------------
+
+Dato un numero intero positivo N calcolare:
+a) N - 1 se N è pari
+b) N + 1 se N è dispari
+Scrivere la funzione più corta possibile che risolve il problema.
+
+1) Metodo lineare (come da definizione)
+(define (f1 N) (if (odd? N) (+ N 1) (- N 1)))
+(map f1 (sequence 1 10))
+;-> (2 1 4 3 6 5 8 7 10 9)
+
+2) Metodo XOR
+a) Moltiplicare N per -1
+b) Invertire il bit meno significativo del valore (ovvero (XOR (N * -1) 1))
+c) Moltiplicare il risultato per -1
+(define (f2 N) (* (^ (* -1 N) 1) -1))
+(map f2 (sequence 1 10))
+;-> (2 1 4 3 6 5 8 7 10 9)
+
+3) Metodo XOR (abbreviato)
+a) (- N) -> -N
+b) (^ (- N) 1) -> (-N) ^ 1
+c) (- ...) -> negazione del risultato.
+(define (f3 N) (- (^ (- N) 1)))
+(map f3 (sequence 1 10))
+;-> (2 1 4 3 6 5 8 7 10 9)
+
+4) Metodo pow
+|(pow(-1, N) - N)|
+(define (f4 N) (abs (- (pow -1 N) N)))
+(map f4 (sequence 1 10))
+;-> (2 1 4 3 6 5 8 7 10 9)
+
+La funzione più corta è la 3).
+
+Versione code-golf (25 caratteri):
+
+(define(f N)(-(^(- N)1)))
+(map f (sequence 1 10))
+;-> (2 1 4 3 6 5 8 7 10 9)
+
+
+---------
+Fast -1^N
+---------
+
+Una funzione più veloce di 'pow' per il calcolo di (-1^N).
+
+(define (f1 N) (pow -1 N))
+(define (f2 N) (if (even? N) 1 -1))
+
+Test di correttezza
+(= (map f1 (sequence 1 101)) (map f2 (sequence 1 101)))
+;-> true
+
+Test di velocità
+(time (map f1 (sequence 1 1001)) 1e4)
+;-> 1139.936
+(time (map f2 (sequence 1 1001)) 1e4)
+(t2 3)
+;-> 749.423
+(div 749 1139)
+
+La funzione 'f2' è circa 1.5 volte più veloce di 'f1'.
+
+
+-------------------------------------------------
+Interi positivi dispari e pari scambiati di posto
+-------------------------------------------------
+
+Dalla sequenza dei numeri naturali 1,2,3,...,N (con N pari) restituire la sequenza in cui i numeri pari sono scambiati con i numeri dispari.
+Lo scambio avviene tra il primo e il secondo numero, poi tra il terzo e il quarto, poi tra il quinto e il sesto, e così via.
+Esempio:
+  N = 6
+  sequenza numeri naturali = 1 2 3 4 5 6
+  sequenza scambiata = 2 1 4 3 6 5
+
+Sequenza OEIS A103889:
+Odd and even positive integers swapped.
+  2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, 18, 17, 20, 19,
+  22, 21, 24, 23, 26, 25, 28, 27, 30, 29, 32, 31, 34, 33, 36, 35, 38, 37,
+  40, 39, 42, 41, 44, 43, 46, 45, 48, 47, 50, 49, 52, 51, 54, 53, 56, 55,
+  58, 57, 60, 59, 62, 61, 64, 63, 66, 65, 68, 67, 70, 69, 72, 71,...
+
+Formula 1
+---------
+  a(2k) = 2k-1 
+  a(2k-1) = 2k 
+
+(define (f1 N out)
+  (for (num 1 N 2)
+    (extend out (list (+ num 1) num))))
+
+(f1 20)
+
+Formula 2
+---------
+  a(n) = n - 1 + 2*(n mod 2)
+
+(define (f2 N out)
+  (for (num 1 N)
+    (push (+ (- num 1) (* 2 (% num 2))) out -1))
+  out)
+
+(f2 20)
+
+Formula 3
+---------
+a(n) = n - (-1)^n
+
+(define (f3 N out)
+  (for (num 1 N)
+    (push (- num (if (even? num) 1 -1)) out -1))
+  out)
+
+(f3 20)
+
+Test di correttezza:
+(= (f1 100) (f2 100) (f3 100))
+;-> true
+
+Test di velocità:
+(time (f1 100000) 100)
+;-> 504.987
+(time (f2 100000) 100)
+;-> 1244.339
+(time (f3 100000) 100)
+;-> 854.815
+
+
+-----------------------
+Matrici a segni alterni
+-----------------------
+
+Una matrice a segni alterni (alternating sign matrix) è una matrice NxN costituita dai numeri -1, 0 e 1, tale che:
+1) La somma di ciascuna riga e di ciascuna colonna sia pari a 1
+2) Gli elementi non nulli (1 e -1) di ciascuna riga e di ciascuna colonna abbiano segno alterno
+
+Scrivere una funzione che verifica se una matrice è a segni alterni.
+
+; Verifica se una ha lista ha 1 e -1 (o -1 e 1) alternati
+; Il primo termine non nullo può essere 1 o -1
+(define (alterni? lst)
+  (let ((prev 0) (error nil))
+    (dolist (x lst error)
+      ; Gli zeri non partecipano alla sequenza dei segni
+      (if (!= x 0)
+          ; Il primo valore non nullo non ha un precedente da confrontare
+          (if (zero? prev)
+              (setq prev x)
+              ; Ogni valore successivo deve essere l'opposto del precedente
+              (if (= x (- prev))
+                  (setq prev x)
+                  ;else
+                  (setq error true)))))
+    (not error)))
+
+(alterni? '(0 1 0 0 -1 1))
+;-> true
+(alterni? '(0 -1 0 0 1 -1))
+;-> true
+(alterni? '(0 1 1 0 -1 1))
+;-> nil
+
+; Verifica se una ha lista ha 1 e -1 alternati
+; Il primo termine non nullo vale sempre 1.
+(define (alterni1? lst)
+  (let ((prev -1) (error nil))
+     ; 'prev' viene posto a -1 perchè il primo valore non nullo che dobbiamo
+     ; incontrare nella lista vale 1.
+    (dolist (x lst error)
+      ; Gli zeri non partecipano alla sequenza dei segni
+      (if (!= x 0)
+        ; Ogni valore non nullo deve essere l'opposto del precedente
+        (if (= x (- prev))
+            (setq prev x)
+            ;else
+            (setq error true))))
+    (not error)))
+
+(alterni1? '(0 1 -1 0 0 1 0))
+;-> true
+(alterni1? '(0 -1 1 0 0 -1 0))
+;-> nil
+(alterni? '(0 -1 1 0 0 -1 0))
+;-> true
+
+; Verifica se una matrice è a segni alterni
+(define (check matrix)
+  (setq error nil)
+  ; check sum of each row == 1
+  (dolist (row matrix error)
+    (if-not (= (apply + row) 1) (setq error true)))
+  ; check sum of each column == 1
+  (dolist (row (transpose matrix) error)
+    (if-not (= (apply + row) 1) (setq error true)))
+  ; check each row for alternate sign
+  (dolist (row matrix error)
+    (if-not (alterni? row) (setq error true)))
+  ; check each column for alternate sign
+  (dolist (row (transpose matrix) error)
+    (if-not (alterni? row) (setq error true)))
+  (not error))
+
+Proviamo:
+
+(setq m1 '((0  1  0  0) (0  0  1  0) (1  0  0  0) (0  0  0  1)))
+(check m1)
+;-> true
+
+(setq m2 '((1  0  0  0) (0  0  1  0) (0  1 -1  1) (0  0  1  0)))
+(check m2)
+;-> true
+
+(setq m3 '((0  0  1  0) (0  1 -1  1) (1 -1  1  0) (0  1  0  0)))
+(check m3)
+;-> true
+
+(setq m4 '((0  0  1  0) (1  0 -1  1) (0  1  0  0) (0  0  1  0)))
+(check m4)
+;-> true
+
+(setq m5 '((0  1  0  0) (0  0  0  1) (1  0  0  0) (0  0  1 -1)))
+(check m5)
+;-> nil
+
+(setq m6 '((0  0  0  1) (1  0  0  0) (-1  1  1  0) (1  0  0  0)))
+(check m6)
+;-> nil
+
+(setq m7 '((0 -1 0 1 1) (1 -1 1 -1 1) (0 1 1 0 -1) (1 1 -1 1 -1) (-1 1 0 0 1)))
+(check m7)
+;-> nil
+
+(setq m8 '((0 1 0) (1 0 1) (0 1 0)))
+(check m8)
+;-> nil
+
+
+-----------------------------------------
+Massima potenza di 2 che divide un intero
+-----------------------------------------
+
+Dato un intero positivo N, determinare la massima potenza di 2 che divide N.
+
+Sequenza OEIS A006519:
+Highest power of 2 dividing n.
+  1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1, 16, 1, 2, 1, 4, 1, 2, 1, 8,
+  1, 2, 1, 4, 1, 2, 1, 32, 1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1, 16,
+  1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1, 64, 1, 2, 1, 4, 1, 2, 1, 8,
+  1, 2, 1, 4, 1, 2, 1, 16, 1, 2, 1, 4, 1, 2, 1, 8, 1, 2, 1, 4, 1, 2, 1, 32,
+  1, 2, 1, 4, 1, 2, ...
+
+Se N è dispari, il risultato è sempre 1 (2^0).
+
+(define (** num power)
+"Calculate the integer power of an integer"
+  (if (zero? power) 1L
+      (let (out 1L)
+        (dotimes (i power)
+          (setq out (* out num))))))
+
+Metodo 1
+--------
+Calcoliamo la massima potenza di 2 contenuta nella fattorizzazione di N, cioè:
+
+  2^k divide N, 2^(k+1) non divide N
+
+Per fare questo basta moltiplicare tutti i 2 che compaiono nella fattorizzazione di N.
+
+(define (high1a N)
+  (if (odd? N) 1L
+      (** 2 (first (count '(2) (factor N))))))
+
+(define (high1b N)
+  (if (odd? N) 1L
+    (let (res 1)
+      (dolist (el (factor N) (!= el 2))
+          (setq res (* res 2)))
+      res)))
+
+(map high1a (sequence 1 20))
+;-> (1L 2L 1L 4L 1L 2L 1L 8L 1L 2L 1L 4L 1L 2L 1L 16L 1L 2L 1L 4L)
+(map high1b (sequence 1 20))
+;-> (1L 2L 1L 4L 1L 2L 1L 8L 1L 2L 1L 4L 1L 2L 1L 16L 1L 2L 1L 4L)
+
+Metodo 2
+--------
+Dividiamo ripetutamente N per 2 finché diventa dispari.
+Il numero di divisioni effettuate è proprio k, e la potenza cercata è 2^k.
+Questo metodo non richiede la fattorizzazione completa.
+
+(define (high2 N)
+  (if (odd? N) 1L
+    (let (k 1)
+      (until (odd? (setq N (/ N 2))) (++ k))
+    (** 2 k))))
+
+(map high2 (sequence 1 20))
+;-> (1L 2L 1L 4L 1L 2L 1L 8L 1L 2L 1L 4L 1L 2L 1L 16L 1L 2L 1L 4L)
+
+Metodo 3
+--------
+Formula: a(n) = gcd(2^n, n)
+
+Possiamo scrivere:
+  gcd(2^N, N) = 2^v2(N)
+dove v2(N) è l'esponente della massima potenza di 2 che divide N.
+Il motivo è che 2^N contiene almeno N fattori 2, mentre N ne contiene solo v2(N).
+Quindi il massimo fattore comune può contenere esattamente quei v2(N) fattori 2:
+  gcd(2^N, N) = 2^v2(N)
+Per esempio, con N = 48:
+  48 = 2^4 * 3
+e quindi gcd(2^48, 48) = 2^4 = 16
+La formula è semplice, ma dal punto di vista computazionale (** 2 N) può produrre un intero enorme.
+
+(define (high3 N)
+  (if (odd? N) 1L
+      (gcd (** 2 N) N)))
+
+(map high3 (sequence 1 20))
+;-> (1L 2L 1L 4L 1L 2L 1L 8L 1L 2L 1L 4L 1L 2L 1L 16L 1L 2L 1L 4L)
+
+Metodo 4
+--------
+Formula bitwise: a(n) = n & -n
+
+La funzione (N & -N) usa una proprieta' classica della rappresentazione binaria:
+isola il bit meno significativo impostato a 1.
+Quel bit corrisponde esattamente alla massima potenza di 2 che divide N.
+Esempi:
+
+  N = 12:
+  12 = 1100
+ -12 = 0100    ; considerando 4 bit
+ ----------
+       0100
+Il risultato è 4, quindi 12 = 4 * 3
+
+  N = 40:
+  40 = 101000
+ -40 = 011000
+ ------------
+      001000
+Il risultato è 8 che è la massima potenza di 2 che divide 40.
+
+Per un numero dispari, il bit meno significativo è già 1, quindi: N & (-N) = 1
+
+Con questo metodo non servono divisioni, fattorizzazione, gcd o potenze, solo una negazione e un'operazione bitwise.
+Questo esprime direttamente, a livello binario, cio' che stiamo cercando.
+
+(define (high4 N) (& N (- N)))
+
+(map high4 (sequence 1 20))
+;-> (1 2 1 4 1 2 1 8 1 2 1 4 1 2 1 16 1 2 1 4)
+
+Test di correttezza:
+
+(= (map high1a (sequence 1 1000)) (map high1b (sequence 1 1000))
+   (map high2 (sequence 1 1000))  (map high3 (sequence 1 1000))
+   (map high4 (sequence 1 1000)))
+;-> true
+
+Test di velocità:
+
+(time (map high1a (sequence 1 1000)) 100)
+;-> 68.992
+(time (map high1b (sequence 1 1000)) 100)
+;-> 31.263
+(time (map high2 (sequence 1 1000)) 100)
+;-> 62.448
+(time (map high3 (sequence 1 1000)) 100)
+;-> 4203.04
+(time (map high4 (sequence 1 1000)) 100)
+;-> 15.586
+
+(time (map high1b (sequence 1 1000)) 1000)
+;-> 287.492
+(time (map high4 (sequence 1 1000)) 1000)
+;-> 84.598
+
+
+------------------
+The ruler function
+------------------
+
+Dato un intero positivo N, determinare la massima potenza di 2 che divide 2N.
+
+Sequenza OEIS A001511:
+The ruler function: exponent of the highest power of 2 dividing 2n.
+Equivalently, the 2-adic valuation of 2n.
+  1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 3, 1, 2, 1, 4,
+  1, 2, 1, 3, 1, 2, 1, 6, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1, 5,
+  1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1, 7, 1, 2, 1, 3, 1, 2, 1, 4,
+  1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 3, 1, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1, 6,
+  1, 2, 1, 3, 1, 2, 1, 4, 1, ...
+
+Se N è dispari, il risultato è sempre 1 (2^0).
+
+Metodo 1
+--------
+a(n) è l'esponente della più piccola potenza di 2 che non divide N.
+
+(define (ruler1a N)
+  (if (odd? N) 1
+      (+ (first (count '(2) (factor N))) 1)))
+
+(map ruler1a (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+(define (ruler1b N)
+  (if (odd? N) 1
+    (let (res 1)
+      (dolist (el (factor N) (!= el 2))
+          (++ res))
+      res)))
+
+(map ruler1b (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+Metodo 2
+--------
+Dobbiamo calcolare il numero di fattori 2 che dividono 2N.
+Dividiamo ripetutamente 2N per 2 finché diventa dispari.
+Il numero di divisioni effettuate è proprio il valore cercato.
+
+(define (ruler2 N)
+  (if (odd? N) 1
+    (let ((N (* 2 N)) (k 1))
+      (until (odd? (setq N (/ N 2))) (++ k))
+    k)))
+
+(map ruler2 (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+Metodo 3
+--------
+a(n) - 1 è il numero di zeri finali nella rappresentazione binaria di n.
+
+Se N è dispari, il bit meno significativo è 1, quindi il risultato è 0.
+Altrimenti, possiamo contare quante volte è possibile fare uno shift a destra prima di ottenere un numero dispari.
+
+(define (trailing-zeros N)
+  (let (k 0)
+    (while (= (& N 1) 0)
+      (setq N (/ N 2))
+      (++ k))
+    k))
+
+(define (ruler3 N)
+  (+ (trailing-zeros N) 1))
+
+(map ruler3 (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+Metodo 4
+--------
+Contare gli zeri finali nella rappresentazione binaria di N.
+
+(define (ruler4 N)
+  (let ((bin (bits N)) (k 1))
+    (while (= (pop bin -1) "0") (++ k))
+    k))
+
+(map ruler4 (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+Metodo 5
+--------
+Se si conta in binario e al bit meno significativo viene assegnato il numero 1, al bit successivo il 2, e così via, qual è il bit che viene incrementato nel passaggio da N-1 a N?
+Esempio:
+ N - 1 = 12 --> binario = 1100
+     N = 13 --> binario = 1101
+                             ^
+Il bit incrementato passando da N-1 a N è N & -N.
+E questo significa anche che il numero di zeri finali di N è l'esponente della potenza di 2 rappresentata da quel bit.
+Esempio:
+  40 = 101000
+            ^
+  N & -N = 8 = 2^3
+  quindi 40 ha 3 zeri finali.
+
+(define (bit-increment N)
+  ; Il bit meno significativo a 1 di N
+  ; e' quello che viene acceso passando da N-1 a N.
+  (& N (- N)))
+
+In altre parole, il problema degli zeri finali può essere visto come:
+"qual è il valore del bit che viene acceso quando si passa da N-1 a N?".
+
+(define (trail-zeros N)
+  ; N & (- N) estrae la potenza di 2 corrispondente agli zeri finali.
+  (setq N (& N (- N)))
+  ; L'esponente della potenza di 2 e' il numero di zeri finali.
+  (let (k 0)
+    (while (> N 1)
+      (setq N (/ N 2))
+      (++ k))
+    k))
+
+(define (ruler5a N)
+  (+ (trail-zeros N) 1))
+
+(map ruler5a (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+La funzione può essere vista semplicemente come:
+  trail-zeros(N) = log2(N & -N)
+
+(define (ruler5b N)
+  (+ (log (& N (- N)) 2) 1))
+
+(map ruler5b (sequence 1 20))
+;-> (1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 2 1 3)
+
+Test di correttezza:
+
+(= (map ruler1a (sequence 1 1000)) (map ruler1b (sequence 1 1000))
+   (map ruler2 (sequence 1 1000)) (map ruler3 (sequence 1 1000))
+   (map ruler4 (sequence 1 1000)) (map ruler5a (sequence 1 1000))
+   (map ruler5b (sequence 1 1000)))
+;-> true
+
+Test di velocità:
+
+(time (map ruler1a (sequence 1 1000)) 1000)
+;-> 390.96
+(time (map ruler1b (sequence 1 1000)) 1000)
+;-> 234.219
+(time (map ruler2 (sequence 1 1000)) 1000)
+;-> 249.968
+(time (map ruler3 (sequence 1 1000)) 1000)
+;-> 344.087
+(time (map ruler4 (sequence 1 1000)) 1000)
+;-> 625.002
+(time (map ruler5a (sequence 1 1000)) 1000)
+;-> 343.696
+(time (map ruler5b (sequence 1 1000)) 1000)
+;-> 171.833
 
 ============================================================================
 

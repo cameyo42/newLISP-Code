@@ -3726,6 +3726,13 @@ NOTE LIBERE 39
   Da sequenza binaria a sequenza decimale
   Numeri root-factor-prime
   a(n) = p - n!, where p is the k-th smallest prime > n!
+  Capacità idrica di un numero
+  Cambio di parità
+  Fast -1^N
+  Interi positivi dispari e pari scambiati di posto
+  Matrici a segni alterni
+  Massima potenza di 2 che divide un intero
+  The ruler function
 
 PROBLEMI SUI DADI
 =================
