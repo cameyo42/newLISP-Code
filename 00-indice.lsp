@@ -3733,6 +3733,10 @@ NOTE LIBERE 39
   Matrici a segni alterni
   Massima potenza di 2 che divide un intero
   The ruler function
+  Conteggio di bit dei numeri binari
+  Un problema geometrico (5 quadrati)
+  Numeri P-smooth (o P-friable)
+  Indovinare un numero con cifre tutte diverse
 
 PROBLEMI SUI DADI
 =================

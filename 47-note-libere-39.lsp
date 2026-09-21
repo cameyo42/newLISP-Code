@@ -5306,5 +5306,452 @@ Test di velocità:
 (time (map ruler5b (sequence 1 1000)) 1000)
 ;-> 171.833
 
+
+----------------------------------
+Conteggio di bit dei numeri binari
+----------------------------------
+
+(define (pop-count1 num)
+"Calculate the number of 1 in binary value of an integer number"
+  (let (counter 0)
+    (while (> num 0)
+      (setq num (& num (- num 1)))
+      (++ counter))
+    counter))
+
+(define (pop-count0 num)
+"Calculate the number of 0 in binary value of an integer number"
+  (- (length (bits num)) (pop-count1 num)))
+
+1) Numeri in base 2 per cui risulta: (numero di bit 1 > numero di bit 0)
+
+Sequenza OEIS A072600:
+Numbers which in base 2 have fewer 0's than 1's.
+  1, 3, 5, 6, 7, 11, 13, 14, 15, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30,
+  31, 39, 43, 45, 46, 47, 51, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63, 71,
+  75, 77, 78, 79, 83, 85, 86, 87, 89, 90, 91, 92, 93, 94, 95, 99, 101,
+  102, 103, 105, 106, 107, 108, 109, 110, 111, 113, 114, 115, ...
+
+(define (most1? num)
+  (let (ones (pop-count1 num))
+    (< (- (length (bits num)) ones) ones)))
+
+(filter most1? (sequence 1 115))
+;-> (1 3 5 6 7 11 13 14 15 19 21 22 23 25 26 27 28 29 30
+;->  31 39 43 45 46 47 51 53 54 55 57 58 59 60 61 62 63 71
+;->  75 77 78 79 83 85 86 87 89 90 91 92 93 94 95 99 101
+;->  102 103 105 106 107 108 109 110 111 113 114 115)
+
+2) Numeri in base 2 per cui risulta: (numero di bit 1 < numero di bit 0)
+
+Sequenza OEIS A072603:
+Numbers which in base 2 have more 0's than 1's.
+  4, 8, 16, 17, 18, 20, 24, 32, 33, 34, 36, 40, 48, 64, 65, 66, 67, 68, 69,
+  70, 72, 73, 74, 76, 80, 81, 82, 84, 88, 96, 97, 98, 100, 104, 112, 128,
+  129, 130, 131, 132, 133, 134, 136, 137, 138, 140, 144, 145, 146, 148,
+  152, 160, 161, 162, 164, 168, 176, 192, 193, ...
+
+(define (most0? num)
+  (let (ones (pop-count1 num))
+    (> (- (length (bits num)) ones) ones)))
+
+(filter most0? (sequence 1 193))
+;-> (4 8 16 17 18 20 24 32 33 34 36 40 48 64 65 66 67 68 69
+;->  70 72 73 74 76 80 81 82 84 88 96 97 98 100 104 112 128
+;->  129 130 131 132 133 134 136 137 138 140 144 145 146 148
+;->  152 160 161 162 164 168 176 192 193)
+
+3) Numeri in base 2 per cui risulta: (numero di bit 1 = numero di bit 0)
+
+Sequenza OEIS A031443:
+Digitally balanced numbers: positive numbers that in base 2 have the same number of 0's as 1's.
+  2, 9, 10, 12, 35, 37, 38, 41, 42, 44, 49, 50, 52, 56, 135, 139, 141, 142,
+  147, 149, 150, 153, 154, 156, 163, 165, 166, 169, 170, 172, 177, 178, 180,
+  184, 195, 197, 198, 201, 202, 204, 209, 210, 212, 216, 225, 226, 228, 232,
+  240, 527, 535, 539, 541, 542, 551, ...
+
+(define (eq01? num)
+  (let (ones (pop-count1 num))
+    (= (- (length (bits num)) ones) ones)))
+
+(filter eq01? (sequence 1 551))
+;-> (2 9 10 12 35 37 38 41 42 44 49 50 52 56 135 139 141 142
+;->  147 149 150 153 154 156 163 165 166 169 170 172 177 178 180
+;->  184 195 197 198 201 202 204 209 210 212 216 225 226 228 232
+;->  240 527 535 539 541 542 551)
+
+Test di correttezza:
+
+(= (sequence 1 1000)
+   (sort (append (filter most1? (sequence 1 1000))
+                 (filter most0? (sequence 1 1000))
+                 (filter eq01? (sequence 1 1000)))))
+;-> true
+
+; Funzione unica 
+(define (conta-bit num op)
+  (let (conta (count '("0" "1") (explode (bits num))))
+    (op (conta 0) (conta 1))))
+
+(filter (fn(x) (conta-bit x >)) (sequence 1 50))
+;-> (4 8 16 17 18 20 24 32 33 34 36 40 48)
+
+(filter (fn(x) (conta-bit x <)) (sequence 1 50))
+;-> (1 3 5 6 7 11 13 14 15 19 21 22 23 25 26 27 28 29 30 31 39 43 45 46 47)
+
+(filter (fn(x) (conta-bit x =)) (sequence 1 50))
+;-> (2 9 10 12 35 37 38 41 42 44 49 50)
+
+
+-----------------------------------
+Un problema geometrico (5 quadrati)
+-----------------------------------
+
+Nella seguente figura ci sono 5 quadrati.
+Conosciamo solo l'area del quadrato più piccolo, che vale 1.
+Quanto vale l'altezza h?
+
+      +------------+---------------+
+      |            |               |
+      |            |               |
+      |            |               |
+      |            |               |
+      +--------+---+               |
+      |        | 1 |               |
+      |        +---+---------------+
+      |        |                   |
+      +--------+                   |
+      |        |                   |
+      |        |                   |
+    h |        |                   |
+      |        |                   |
+      |        |                   |
+      +        +-------------------+
+  
+  
+           x+1           x+2
+      +------------+---------------+
+      |            |               |
+  x+1 |        x+1 |               |
+      |            |               | x+2
+      |    x+1     |               |
+      +--------+---+               |
+      |        | 1 |     x+2       |
+    x |      x +---+---------------+
+      |   x    |                   |
+      +--------+                   |
+               |                   |
+               | x+3               | x+3
+               |                   |
+               |                   |
+               |                   |
+               +-------------------+
+                     x+3
+
+  h = ((x+2) + (x+3)) - ((x+1) + x) =
+    = (2x + 5) - (2x + 1) = 
+    = 2x + 5 - 2x - 1 = 5 - 1 = 4
+
+
+-----------------------------
+Numeri P-smooth (o P-friable)
+-----------------------------
+
+Un numero P-smooth (o P-friable) è un numero intero il cui fattore primo più grande è minore o uguale a P.
+In altre parole, un intero è P-smooth se non ha fattori primi maggiori di P.
+Dati N e P, dobbiamo scrivere un programma per verificare se N sia P-smooth o meno.
+
+Esempi:
+  N = 24
+  P = 7
+  fattori di 24: 2 2 2 3
+  Quindi 24 è 7-smooth perchè (3 < 7).
+
+N = 22
+P = 5
+fattori di 22: 2 11
+Quindi 2 non è 5-smooth perchè 11 > 5.
+
+(define (psmooth? num p)
+  (if (= num 1) 1
+      ;else
+      (<= (last (factor num)) p)))
+
+Proviamo:
+
+(psmooth? 24 7)
+;-> true
+(psmooth? 22 5)
+;-> nil
+
+Sequenza OEIS A000079:
+2-smooth numbers: positive numbers whose prime divisors are all <= 2.
+  1, 2, 4, 8, 16, 32, 64, 128, 256, 512, ...
+(filter (fn(x) (psmooth? x 2)) (sequence 1 60))
+
+Sequenza OEIS A003586:
+3-smooth numbers: positive numbers whose prime divisors are all <= 3.
+  1, 2, 3, 4, 6, 8, 9, 12, 16, 18, 24, 27, 32, 36, 48, 54, ...
+(filter (fn(x) (psmooth? x 3)) (sequence 1 60))
+
+Sequenza OEIS A051037:
+5-smooth numbers: positive numbers whose prime divisors are all <= 5.
+ 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 27, 30, 32, 36,
+ 40, 45, 48, 50, 54, 60, ...
+(filter (fn(x) (psmooth? x 5)) (sequence 1 60))
+
+Sequenza OEIS A002473: 
+7-smooth numbers: positive numbers whose prime divisors are all <= 7.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 24, 25, 27,
+  28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 50, 54, 56, 60, ...
+(filter (fn(x) (psmooth? x 7)) (sequence 1 60))
+
+Sequenza OEIS A051038:
+11-smooth numbers: positive numbers whose prime divisors are all <= 11.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 18, 20, 21, 22, 24,
+  25, 27, 28, 30, 32, 33, 35, 36, 40, 42, 44, 45, 48, 49, 50, 54, 55,
+  56, 60, ...
+(filter (fn(x) (psmooth? x 11)) (sequence 1 60))
+
+Sequenza OEIS A080197:
+13-smooth numbers: positive numbers whose prime divisors are all <= 13.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 21, 22,
+  24, 25, 26, 27, 28, 30, 32, 33, 35, 36, 39, 40, 42, 44, 45, 48, 49,
+  50, 52, 54, 55, 56, 60, ...
+(filter (fn(x) (psmooth? x 13)) (sequence 1 60))
+
+Sequenza OEIS A080681:
+17-smooth numbers: positive numbers whose prime divisors are all <= 17.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22,
+  24, 25, 26, 27, 28, 30, 32, 33, 34, 35, 36, 39, 40, 42, 44, 45, 48, 49,
+  50, 51, 52, 54, 55, 56, 60, ...
+(filter (fn(x) (psmooth? x 17)) (sequence 1 60))
+
+Sequenza OEIS A080682:
+19-smooth numbers: numbers whose prime divisors are all <= 19.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+  22, 24, 25, 26, 27, 28, 30, 32, 33, 34, 35, 36, 38, 39, 40, 42, 44, 45,
+  48, 49, 50, 51, 52, 54, 55, 56, 57, 60, ...
+(filter (fn(x) (psmooth? x 19)) (sequence 1 60))
+
+Dato un numero intero positivo casuale <= N, qual è la probabilità che sia P-smooth?
+La probabilità che un intero positivo casuale minore o uguale a N sia p-smooth è psi(N,P)/N, dove psi(N,P) è il numero di interi P-smooth minori o uguali a N.
+
+(define (prob-smooth num p)
+  (if (>= p num) 1
+      ;else
+      (div (length (filter (fn(x) (psmooth? x p)) (sequence 1 num))) num))
+
+Proviamo:
+
+(prob-smooth 2 2)
+;-> 1
+(map (fn(x) (prob-smooth 20 x)) '(2 3 5 7 11 13 17 19))
+;-> (0.25 0.5 0.7 0.8 0.85 0.9 0.95 1)
+
+
+--------------------------------------------
+Indovinare un numero con cifre tutte diverse
+--------------------------------------------
+
+Indovinare un numero con 3 cifre tutte diverse dai seguenti indizi:
+(anche gli indizi hanno tutte cifre diverse)
+
++---+---+---+
+| 6 | 8 | 2 |
++---+---+---+
+Una cifra è corretta e nella posizione giusta
+
++---+---+---+
+| 6 | 4 | 5 |
++---+---+---+
+Una cifra è corretta, ma nella posizione sbagliata
+
++---+---+---+
+| 2 | 0 | 6 |
++---+---+---+
+Due cifre sono corrette, ma nelle posizioni sbagliate
+
++---+---+---+
+| 7 | 3 | 8 |
++---+---+---+
+Nessuna cifra è corretto
+
++---+---+---+
+| 7 | 8 | 0 |
++---+---+---+
+Una cifra è corretta, ma nella posizione sbagliata
+
+Regole codificate:
+
+(define (r1 num)
+  (or
+    (and (= (num 0) 6) (not (find 8 num)) (not (find 2 num)))
+    (and (= (num 1) 8) (not (find 6 num)) (not (find 2 num)))
+    (and (= (num 2) 2) (not (find 6 num)) (not (find 8 num)))))
+
+(define (r2 num)
+  (or (and (!= (num 0) 6) (find 6 num) (not (find 4 num)) (not (find 5 num)))
+      (and (!= (num 1) 4) (find 4 num) (not (find 6 num)) (not (find 5 num)))
+      (and (!= (num 2) 5) (find 5 num) (not (find 6 num)) (not (find 4 num)))))
+
+(define (r3 num)
+  (or (and (!= (num 0) 2) (find 2 num) (!= (num 1) 0) (find 0 num)
+           (not (find 6 num)))
+      (and (!= (num 0) 2) (find 2 num) (!= (num 2) 6) (find 6 num)
+           (not (find 0 num)))
+      (and (!= (num 1) 0) (find 0 num) (!= (num 2) 6) (find 6 num)
+           (not (find 2 num)))))
+
+(define (r4 num)
+  (and (not (find 7 num)) (not (find 3 num)) (not (find 8 num))))
+
+(define (r5 num)
+  (or (and (!= (num 0) 7) (find 7 num) (not (find 8 num)) (not (find 0 num)))
+      (and (!= (num 1) 8) (find 8 num) (not (find 7 num)) (not (find 0 num)))
+      (and (!= (num 2) 0) (find 0 num) (not (find 7 num)) (not (find 8 num)))))
+
+; Applica una regola ad una lista di numeri rappresentati come lista di cifre
+; lista = ((0 3 2) (7 5 4) ...)
+(define (applica rule lst)
+  (let (out '())
+    (dolist (el lst)
+      (if (rule el) (push el out -1)))
+  out))
+
+; Crea la lista dei numeri: (0 0 1) (0 0 2) ... (9 9 9)
+(setq nums  (map (fn(x) (map int x))
+                 (map explode
+                      (map (fn(x) (format "%03d" x)) (sequence 1 999)))))
+
+Applichiamo le regole:
+
+(setq sol (applica r1 nums))
+;-> ((0 0 2) (0 1 2) (0 2 2) (0 3 2) (0 4 2) (0 5 2) (0 7 2)
+;->  ...
+;->  (9 8 3) (9 8 4) (9 8 5) (9 8 7) (9 8 8) (9 8 9) (9 9 2))
+
+(setq sol (applica r2 sol))
+
+
+(setq sol (applica r3 sol))
+;-> ((0 5 2))
+
+Le regole r4 e r5 non servono.
+
+(setq sol (applica r4 sol))
+;-> ((0 5 2))
+
+(setq sol (applica r5 sol))
+;-> ((0 5 2))
+
+Applichiamo r3 alla fine:
+
+(setq sol (applica r1 nums))
+;-> ((0 0 2) (0 1 2) (0 2 2) (0 3 2) (0 4 2) (0 5 2) (0 7 2)
+;->  ...
+;->  (9 8 3) (9 8 4) (9 8 5) (9 8 7) (9 8 8) (9 8 9) (9 9 2))
+
+(setq sol (applica r2 sol))
+
+(setq sol (applica r4 sol))
+
+(setq sol (applica r5 sol))
+
+(setq sol (applica r3 sol))
+;-> ((0 5 2))
+
+Possiamo fare una semplificazione concettuale: ogni indizio può essere espresso contando quante cifre sono presenti e quante sono nella posizione corretta.
+In questo modo non servono tutti gli or/and combinatori che abbiamo scritto.
+
+Per esempio, 682 significa semplicemente:
+cifre presenti = 1
+posizioni corrette = 1
+
+mentre 645 significa:
+cifre presenti = 1
+posizioni corrette = 0
+
+e 206:
+cifre presenti = 2
+posizioni corrette = 0
+
+Questo permette di costruire una funzione generica per gli indizi, invece di scrivere una funzione specifica r1, r2, ... r5 per ciascuno.
+
+Possiamo rappresentare ogni indizio come:
+  (indizio cifre-corrette posizioni-corrette)
+e scrivere una sola funzione generica che gestisce numeri con N cifre (purché 'num' e 'clue' abbiano la stessa lunghezza e ognuno abbia cifre tutte diverse).
+
+(define (indizio num clue presenti corrette)
+  ; Conta le cifre dell'indizio presenti nel numero
+  ; e quelle che occupano la posizione corretta.
+  (let (n-presenti 0 n-corrette 0)
+    (for (i 0 (- (length clue) 1))
+      ; Controlla se la cifra dell'indizio compare nel numero.
+      (if (find (clue i) num)
+          (++ n-presenti))
+      ; Controlla se la cifra si trova nella posizione corretta.
+      (if (= (clue i) (num i))
+          (++ n-corrette)))
+    ; Verifica le due condizioni richieste dall'indizio.
+    (and (= n-presenti presenti)
+         (= n-corrette corrette))))
+
+Gli indizi diventano quindi:
+
+  (indizio num '(6 8 2) 1 1)
+  (indizio num '(6 4 5) 1 0)
+  (indizio num '(2 0 6) 2 0)
+  (indizio num '(7 3 8) 0 0)
+  (indizio num '(7 8 0) 1 0)
+
+e possiamo applicarli direttamente:
+
+(setq sol (applica (fn (x) (indizio x '(6 8 2) 1 1)) nums))
+(setq sol (applica (fn (x) (indizio x '(6 4 5) 1 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(2 0 6) 2 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(7 3 8) 0 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(7 8 0) 1 0)) sol))
+;-> ((0 5 2))
+
+Proviamo con un altro numero:
+
+X = 1 0 7
+
+(setq sol (applica (fn (x) (indizio x '(1 2 3) 1 1)) nums))
+(setq sol (applica (fn (x) (indizio x '(9 7 8) 1 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(2 7 0) 2 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(2 3 4) 0 0)) sol))
+
+Proviamo con un numero di 4 cifre:
+
+; Crea la lista dei numeri: (0 0 0 1) (0 0 0 2) ... (9 9 9 9)
+(setq nums  (map (fn(x) (map int x))
+                 (map explode
+                      (map (fn(x) (format "%04d" x)) (sequence 1 9999)))))
+
+X = 1 0 7 4
+
+(setq sol (applica (fn (x) (indizio x '(1 2 3 5) 1 1)) nums))
+(setq sol (applica (fn (x) (indizio x '(9 7 8 6) 1 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(2 7 0 3) 2 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(2 3 4 1) 2 0)) sol))
+(setq sol (applica (fn (x) (indizio x '(3 5 1 4) 2 1)) sol))
+(setq sol (applica (fn (x) (indizio x '(2 3 5 6) 0 0)) sol))
+;-> (1 0 7 4)
+
+Questa versione considera le cifre individualmente e quindi funziona correttamente solo per numeri dove le cifre del numero e degli indizi sono tutte distinte.
+Per una funzione veramente generica che gestisca anche numeri con cifre ripetute, bisognerebbe contare le occorrenze, non semplicemente usare 'find'.
+                              
+; Crea una lista di numeri da 'start' a 'end'
+; Ogni numero è una lista di cifre di lunghezza: length(end) (con leading 0)
+; Es. da 0 a 99: ((0 1) (0 2) (0 3) ... (9 8) (9 9))
+(define (genera-nums start end)
+  (letn ((pad (length end))
+        (fmt (string "%0" pad "d")))
+    (map (fn(x) (map int x))
+                (map explode
+                (map (fn(x) (format fmt x)) (sequence start end))))))
+
 ============================================================================
 
