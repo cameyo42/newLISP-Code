@@ -5632,7 +5632,9 @@ Applichiamo le regole:
 ;->  (9 8 3) (9 8 4) (9 8 5) (9 8 7) (9 8 8) (9 8 9) (9 9 2))
 
 (setq sol (applica r2 sol))
-
+;-> ((0 5 2) (0 8 4) (1 5 2) (1 8 4) (2 5 2) (3 5 2) (3 8 4) (4 0 2)
+;->  ...
+;->  (5 8 8) (5 8 9) (5 9 2) (7 5 2) (7 8 4) (8 8 4) (9 5 2) (9 8 4))
 
 (setq sol (applica r3 sol))
 ;-> ((0 5 2))
@@ -5653,10 +5655,16 @@ Applichiamo r3 alla fine:
 ;->  (9 8 3) (9 8 4) (9 8 5) (9 8 7) (9 8 8) (9 8 9) (9 9 2))
 
 (setq sol (applica r2 sol))
+;-> ((0 5 2) (0 8 4) (1 5 2) (1 8 4) (2 5 2) (3 5 2) (3 8 4) (4 0 2)
+;->  ...
+;->  (5 8 8) (5 8 9) (5 9 2) (7 5 2) (7 8 4) (8 8 4) (9 5 2) (9 8 4))
 
 (setq sol (applica r4 sol))
+;-> ((0 5 2) (1 5 2) (2 5 2) (4 0 2) (4 1 2) (4 2 2) (4 9 2)
+;->  (5 0 2) (5 1 2) (5 2 2) (5 5 2) (5 9 2) (9 5 2))
 
 (setq sol (applica r5 sol))
+;-> ((0 5 2) (4 0 2) (5 0 2))
 
 (setq sol (applica r3 sol))
 ;-> ((0 5 2))
@@ -5722,6 +5730,7 @@ X = 1 0 7
 (setq sol (applica (fn (x) (indizio x '(9 7 8) 1 0)) sol))
 (setq sol (applica (fn (x) (indizio x '(2 7 0) 2 0)) sol))
 (setq sol (applica (fn (x) (indizio x '(2 3 4) 0 0)) sol))
+;-> ((1 0 7))
 
 Proviamo con un numero di 4 cifre:
 
@@ -5752,6 +5761,387 @@ Per una funzione veramente generica che gestisca anche numeri con cifre ripetute
     (map (fn(x) (map int x))
                 (map explode
                 (map (fn(x) (format fmt x)) (sequence start end))))))
+
+
+----------------------
+Prigionieri e cappelli
+----------------------
+
+Due prigionieri vengono chiamati dal direttore che vuole dare loro una possibilità di uscire dal carcere.
+A ciascuno di loro verrà messo in testa un cappello bianco o nero:
+il colore di ogni cappello sarà determinato dal lancio di una moneta.
+Ogni prigioniero potrà vedere il cappello dell'altro, ma non il proprio.
+Una volta visti i cappelli altrui, dovranno indovinare il colore del proprio cappello.
+Se almeno uno dei due risponderà correttamente, allora saranno liberati entrambi.
+I prigionieri possono concordare una strategia prima dell'inizio del test, ma una volta indossati i cappelli non potranno comunicare tra loro in alcun modo.
+Quale strategia garantisce la loro libertà?
+
+Le configurazioni possibili dei cappelli sono 4:
+1) Bianco Bianco
+2) Bianco Nero
+3) Nero Bianco
+4) Nero Nero
+
+Strategia 1
+-----------
+Ogni prigioniero dichiara il colore del cappello dell'altro prigioniero.
+
+Colore P1    Colore P2    Dichiara P1    Dichiara P2    Corretto?
+Bianco       Bianco       Bianco         Bianco         Si
+Bianco       Nero         Nero           Bianco         No
+Nero         Bianco       Bianco         Nero           No
+Nero         Nero         Nero           Nero           Si
+
+Strategia 2  --> 50% di possibilità
+-----------
+Ogni prigioniero dichiara il colore diverso dal cappello dell'altro prigioniero.
+
+Colore P1    Colore P2    Dichiara P1    Dichiara P2    Corretto?
+Bianco       Bianco       Nero           Nero           No
+Bianco       Nero         Bianco         Nero           Si
+Nero         Bianco       Nero           Bianco         Si
+Nero         Nero         Bianco         Bianco         No
+
+Strategia 3  --> 75% di possibilità
+-----------
+Un prigioniero (P1) dichiara il colore del cappello dell'altro prigioniero.
+L'altro prigioniero (P2) dichiara sempre Bianco
+
+Colore P1    Colore P2    Dichiara P1    Dichiara P2    Corretto?
+Bianco       Bianco       Bianco         Bianco         Si
+Bianco       Nero         Nero           Bianco         No
+Nero         Bianco       Bianco         Bianco         Si
+Nero         Nero         Nero           Bianco         Si
+
+Strategia 4  --> 100% di possibilità
+-----------
+Un prigioniero (P1) dichiara il colore del cappello dell'altro prigioniero.
+L'altro prigioniero (P2) dichiara il colore diverso dal cappello dell'altro prigioniero.
+
+Colore P1    Colore P2    Dichiara P1    Dichiara P2    Corretto?
+Bianco       Bianco       Bianco         Nero           Si
+Bianco       Nero         Nero           Nero           Si
+Nero         Bianco       Bianco         Bianco         Si
+Nero         Nero         Nero           Bianco         Si
+
+; Funzione che implementa la strategia 4
+(define (test show)
+  (local (coloreP1 coloreP2 dichiaraP1 dichiaraP2)
+    ; Colore casuale del cappello di P1
+    (setq coloreP1 (rand 2))
+    ; Colore casuale del cappello di P2
+    (setq coloreP2 (rand 2))
+    ; Dichiarazione di P1
+    (if (= coloreP2 0)
+        (setq dichiaraP1 0)
+        (setq dichiaraP1 1))
+    ; Dichiarazione di P2
+    (if (= coloreP1 0)
+        (setq dichiaraP2 1)
+        (setq dichiaraP2 0))
+    (if show (begin
+        (println "Cappello P1: " coloreP1 " - Dichiara P1: " dichiaraP1)
+        (println "Cappello P2: " coloreP2 " - Dichiara P2: " dichiaraP2)))
+    ; Controlla se almeno una dichiarazione è corretta
+    (or (= dichiaraP1 coloreP1) (= dichiaraP2 coloreP2))))
+
+Proviamo:
+
+(test true)
+;-> Cappello P1: 1 - Dichiara P1: 0
+;-> Cappello P2: 0 - Dichiara P2: 0
+;-> true
+(test true)
+;-> Cappello P1: 0 - Dichiara P1: 1
+;-> Cappello P2: 1 - Dichiara P2: 1
+;-> true
+
+(filter nil? (collect (test) 1000))
+;-> ()
+
+
+------------------------
+Da rettangolo a quadrato
+------------------------
+
+Abbiamo un rettangolo di 25 per 16 (la sua area è quindi di 400).
+Vogliamo tagliare il rettangolo in due pezzi che, uniti, formino un quadrato.
+L'obiettivo è ottenere un quadrato di 20 per 20.
+La soluzione consiste nell'effettuare un taglio "a gradini".
+Si taglia il rettangolo seguendo un percorso a zigzag, come se si disegnassero dei gradini alti 4 e larghi 5.
+In questo modo, i due pezzi si incastreranno perfettamente.
+
+  rettangolo: 25 x 16
+  area: 25 * 16 = 400
+  quadrato finale: 20 x 20
+  area: 20 * 20 = 400
+  
+    5
+  +---+-----------+
+  |  4| 5         |
+  |   +---+       |
+  |      4| 5     |
+  |       +---+   |
+  |          4|   |
+  +-----------+---+
+
+Il motivo per cui i gradini hanno dimensioni 5 x 4 è il seguente:
+- la differenza tra i lati lunghi è 25 - 20 = 5
+- la differenza tra i lati corti è 20 - 16 = 4
+
+Quindi il profilo del taglio può essere costruito alternando:
+orizzontale: 5 cm
+verticale:   4 cm
+e il pezzo ottenuto da un lato viene traslato/riposizionato sull'altro in modo da colmare esattamente le eccedenze, trasformando il rettangolo 25 x 16 nel quadrato 20 x 20.
+Il taglio non cambia l'area: redistribuisce semplicemente le parti del rettangolo.
+
+Supponiamo di avere un rettangolo di lati A >= B e vogliamo trasformarlo, con un unico taglio a gradini, in un quadrato di lato S.
+Per il tipo di costruzione che stiamo usando, il numero dei gradini è determinato da una condizione aritmetica precisa.
+La costruzione è nota come 'step dissection' per un rettangolo A x B (A > B), il lato del quadrato è S = sqrt(A*B).
+Dobbiamo verificare se esiste un intero N tale che:
+
+  A/B = N^2/(N-1)^2
+
+Questo significa:
+- ci sono N segmenti orizzontali
+- ci sono N-1 segmenti verticali
+- ogni segmento orizzontale misura A/N
+- ogni segmento verticale misura B/(N-1)
+
+Per un rettangolo arbitrario che non soddisfa questa relazione, la dissezione a gradini uniformi non esiste: bisogna usare un'altra dissezione, eventualmente con più pezzi o con gradini non uniformi.
+
+Per risolvere il problema possiamo evitare completamente la ricerca di N: basta ridurre il rapporto A:B dividendo per gcd(A,B).
+Se
+  A = k*N^2
+  B = k*(N-1)^2
+allora, dopo la riduzione:
+  A/gcd(A,B) = N^2
+  B/gcd(A,B) = (N-1)^2
+Quindi dobbiamo solo verificare che i due valori ridotti siano quadrati perfetti di interi consecutivi.
+
+Descrizione dell'algoritmo
+--------------------------
+1) Condizione del rettangolo
+Indichiamo con:
+  A = lato maggiore
+  B = lato minore
+e supponiamo che esista un intero N tale che:
+  A = k * N^2
+  B = k * (N-1)^2
+per un certo fattore comune k.
+Per esempio:
+  36 = 4 * 3^2
+  16 = 4 * 2^2
+quindi k = 4 e N = 3.
+
+2) Calcolo del GCD
+Calcoliamo:
+  g = gcd(A,B)
+Nel caso 36 x 16:
+  gcd(36,16) = 4
+Dividendo entrambi i lati per g otteniamo:
+  A/g = 36/4 = 9
+  B/g = 16/4 = 4
+Questi devono essere:
+  N^2
+  (N-1)^2
+rispettivamente.
+Quindi:
+  9 = 3^2
+  4 = 2^2
+e le radici devono essere consecutive:
+  3 = 2 + 1
+Se questa condizione non e' verificata, la funzione restituisce nil.
+
+3) Le radici devono essere consecutive
+Il numero dei segmenti orizzontali e verticali differisce di uno.
+Se abbiamo N segmenti orizzontali, abbiamo N-1 segmenti verticali.
+Le loro lunghezze sono:
+  dx = A/N
+  dy = B/(N-1)
+Nel caso 36 x 16:
+  dx = 36/3 = 12
+  dy = 16/2 = 8
+Il percorso e':
+(0,0) (12,0) (12,8) (24,8) (24,16) (36,16)
+Quindi abbiamo 3 segmenti orizzontali e 2 segmenti verticali.
+
+4) Lato del quadrato
+Il lato del quadrato risultante e':
+  S = k * n * (n-1)
+Per 36 x 16:
+  S = 4 * 3 * 2 = 24
+quindi il quadrato e' 24 x 24
+Infatti:
+  36 * 16 = 576
+  24 * 24 = 576
+Quindi il rettangolo deve avere rapporto tra i lati uguale al quadrato del rapporto di due interi consecutivi.
+
+5) Passi dell'algoritmo
+La funzione esegue quindi questi passi:
+1. Ordina i lati in modo che A >= B.
+2. Se A = B:
+   non serve alcun taglio -> nil.
+3. Calcola:
+       g = gcd(A,B)
+4. Riduce il rapporto:
+       a = A/g
+       b = B/g
+5. Calcola le radici intere candidate:
+       n = round(sqrt(a))
+       m = round(sqrt(b))
+6. Verifica:
+       n*n = a
+       m*m = b
+       n = m+1
+7. Se una verifica fallisce:
+       restituisce nil.
+8. Altrimenti:
+       dx = A/n
+       dy = B/m
+9. Genera alternativamente:
+       dx orizzontale
+       dy verticale
+10. Restituisce la lista dei vertici del percorso.
+
+La parte fondamentale e' quindi la riduzione del rapporto tramite gcd.
+In pratica, per sapere se il rettangolo appartiene a questa famiglia, basta controllare se:
+  A/gcd(A,B) = N^2
+  B/gcd(A,B) = (N-1)^2
+per due interi consecutivi N e N-1.
+
+Ad esempio:
+  25 x 16  -> 25,16 -> 5^2,4^2 -> possibile
+  36 x 16  -> 9,4   -> 3^2,2^2 -> possibile
+  50 x 32  -> 25,16 -> 5^2,4^2 -> possibile
+  20 x 16  -> 5,4   -> non sono entrambi quadrati -> impossibile
+
+Questa e' anche la ragione per cui non e' necessario che A e B siano quadrati perfetti: e' sufficiente che lo diventino dopo aver eliminato il loro fattore comune massimo.
+
+(define (staircase A B)
+  ; Porta il lato maggiore in A.
+  (if (< A B) (swap A B))
+  ; Un quadrato non necessita di una dissezione.
+  (if (= A B)
+      nil
+      (letn ((g (gcd A B))
+             ; Riduce il rapporto A:B ai suoi minimi termini.
+             (a (/ A g))
+             (b (/ B g))
+             ; Calcola le radici quadrate dei due numeri ridotti.
+             (n (round (sqrt a)))
+             (m (round (sqrt b))))
+        ; I numeri ridotti devono essere quadrati perfetti
+        ; e le loro radici devono essere consecutive.
+        (if (and (= (* n n) a)
+                 (= (* m m) b)
+                 (= n (+ m 1)))
+            (letn ((dx (/ A n))
+                   (dy (/ B m))
+                   (x 0)
+                   (y 0)
+                   (path '()))
+              ; Inserisce il vertice iniziale del percorso.
+              (push (list x y) path -1)
+              ; Genera n segmenti orizzontali e m segmenti verticali.
+              (for (i 1 n)
+                ; Aggiunge un segmento orizzontale.
+                (setq x (+ x dx))
+                (push (list x y) path -1)
+                ; Aggiunge il segmento verticale successivo.
+                (if (<= i m)
+                    (begin
+                      (setq y (+ y dy))
+                      (push (list x y) path -1))))
+              path)
+            nil))))
+
+Esempi:
+
+lisp
+(staircase 25 16)
+;-> ((0 0) (5 0) (5 4) (10 4) (10 8)
+;    (15 8) (15 12) (20 12) (20 16) (25 16))
+
+(staircase 36 16)
+;-> ((0 0) (12 0) (12 8) (24 8) (24 16) (36 16))
+
+(staircase 50 32)
+;-> ((0 0) (10 0) (10 8) (20 8) (20 16)
+;    (30 16) (30 24) (40 24) (40 32) (50 32))
+
+(staircase 20 16)
+;-> nil
+
+(staircase 36 16)
+;-> ((0 0) (12 0) (12 8) (24 8) (24 16) (36 16))
+  gcd(36,16) = 4
+  36/4 = 9 = 3^2
+  16/4 = 4 = 2^2
+  n = 3, m = 2.
+  dx = 36/3 = 12
+  dy = 16/2 = 8
+  12 * 2 = 24
+  24 x 24.
+
+Il matematico tedesco David Hilbert dimostrò che qualsiasi poligono (una figura dai lati rettilinei) può essere trasformato in un altro poligono di pari area tagliandolo in un numero finito di pezzi e ricomponendoli.
+Invece la trasformazione dei poliedri (solidi tridimensionali dalle facce piane) non è possibile.
+In altre parole, dati due poliedri di pari volume non è possibile tagliare il primo in un numero finito di pezzi poliedrici che possano essere ricomposti per formare il secondo.
+
+
+--------------------------
+Indici dei numeri ordinati
+--------------------------
+
+Data una lista di numeri interi, restiture l'indice che ogni intero occuperebbe dopo l'ordinamento crescente della lista.
+
+Esempio:
+  lista =  (0 7 -2 3 7)
+  indici = (0 1  2 3 4)
+  lista ordinata = -2 0 3 7 7
+  output = (1 3 0 2 4).
+Notare che i due 7 mantengono il loro ordine relativo (l'ordinamento è stabile).
+
+(define (sort-index lst)
+  (let ((out lst)
+        (pair (sort (map (fn(x) (list x $idx)) lst))))
+    (dolist (el pair)
+      (setf (out (el 1)) $idx))
+    out))
+
+Proviamo:
+
+(sort-index '(0 7 -2 3 7))
+;-> (1 3 0 2 4)
+
+(sort-index '(0))
+;-> (0)
+(sort-index '(23))
+;-> (0)
+(sort-index '(2 2))
+;-> (0 1)
+(sort-index '(1 2 3 4 5))
+;-> (0 1 2 3 4)
+(sort-index '(5 4 3 2 1))
+;-> (4 3 2 1 0)
+(sort-index '(4 4 0 1 1 2 0 1))
+;-> (6 7 0 2 3 5 1 4)
+(sort-index '(1 1 1 1 1 1 1 0))
+;-> (1 2 3 4 5 6 7 0)
+
+Versione code-golf (82 caratteri):
+
+(define(f l(o l))
+(dolist(el(sort(map(fn(x)(list x $idx))l)))(setf(o(el 1))$idx))o)
+
+(f '(0))
+;-> (0)
+(f '(2 2))
+;-> (0 1)
+(f '(4 4 0 1 1 2 0 1))
+;-> (6 7 0 2 3 5 1 4)
+(f '(1 1 1 1 1 1 1 0))
+;-> (1 2 3 4 5 6 7 0)
 
 ============================================================================
 

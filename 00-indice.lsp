@@ -3737,6 +3737,9 @@ NOTE LIBERE 39
   Un problema geometrico (5 quadrati)
   Numeri P-smooth (o P-friable)
   Indovinare un numero con cifre tutte diverse
+  Prigionieri e cappelli
+  Da rettangolo a quadrato
+  Indici dei numeri ordinati
 
 PROBLEMI SUI DADI
 =================
