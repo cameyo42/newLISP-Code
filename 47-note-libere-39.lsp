@@ -438,7 +438,7 @@ Questo abbassa la complessità a O(n*log(n)).
 ; O(1) in fase di registrazione, indipendentemente dalla sua lunghezza;
 ; il costo totale e' O(n + max_point).
 ;
-; ESEMPIO INTUITIVO:
+; Esempio intuitivo:
 ; Intervallo (2 5) genera: diff[2] += 1 (si "accende" in 2)
 ;                           diff[6] -= 1 (si "spegne" subito dopo 5)
 ; Sommando progressivamente, il contatore sale a 2 e resta a 2 fino alla
@@ -6142,6 +6142,323 @@ Versione code-golf (82 caratteri):
 ;-> (6 7 0 2 3 5 1 4)
 (f '(1 1 1 1 1 1 1 0))
 ;-> (1 2 3 4 5 6 7 0)
+
+
+---------------------------------------------
+Ordinamento di una lista in base ad un indice
+---------------------------------------------
+
+Abbiamo una lista di sottoliste.
+
+Esempio:
+  Lista = '((2 3 1) (4 8 3) (3 1 2))
+Voglio ordinare la lista in base al valore dell'indice i-esimo.
+Per esempio, ordinare la lista con indice 1 comporta il seguente output:
+  Lista ordinata = ((3 1 2) (2 3 1) (4 8 3))
+Perchè gli elementi da ordinare sono quelli con indice 1: 3, 8 e 1.
+
+Scriviamo una funzione che ordina le sottoliste di una lista in base ai valori dell'indice i-esimo.
+Usiamo una funzione di confronto per il 'sort' in cui (a i) e (b i) accedono direttamente all'elemento di indice i delle due sottoliste confrontate.
+
+(define (sort-index L i)
+  (sort L (fn (a b) (<= (a i) (b i)))))
+
+(setq L '((2 3 1) (4 8 3) (3 1 2)))
+(sort-index L 1)
+;-> ;->((3 1 2) (2 3 1) (4 8 3))
+
+Le sottoliste non devono avere lo stesso numero di elementi, ma l'indice deve essere minore della lunghezza massima delle sottoliste (cioè l'indice deve essere valido per tutte le sottoliste.
+
+(setq L '((2 3 1 4) (3 4 8 3 5) (1 2 3)))
+(sort-index L 2)
+;-> ((2 3 1 4) (1 2 3) (3 4 8 3 5))
+
+
+-------------------------------------------------
+Moltiplicazione di numeri per il loro annidamento
+-------------------------------------------------
+
+https://codegolf.stackexchange.com/questions/250242/multiply-numbers-by-their-depth
+
+Data una lista annidata (o nidificata), possiamo definire la profondità di un elemento come il numero di liste che lo contengono, ovvero il suo livello di annidamento.
+Ad esempio nella lista ((1 2) (3 (4 5))) la profondità del numero 2 è 2 poiché è annidato all'interno di due liste: la lista principale e la lista (1 2).
+La profondità del numero 4 è 3 poiché è annidato all'interno di tre liste.
+
+Scriviamo una funzione che prende una lista annidata di interi positivi e restituisce una lista in cui i nuovi numeri sono dati dalla moltiplicazione del numero originale per la sua profondità.
+
+Esempio: 
+  lista  = ((1 2) (3 (4 5)) 6):
+  La profondità di 1 è 2 quindi si raddoppia -> 2
+  La profondità di 2 è 2 quindi si raddoppia -> 4
+  La profondità di 3 è 2 quindi si raddoppia -> 6
+  La profondità di 4 è 3 quindi si triplica -> 12
+  La profondità di 5 è 3 quindi si triplica -> 15
+  La profondità di 6 è 1 quindi il numero resta invariato -> 6
+  Il risultato è quindi ((2 4) (6 (12 15)) 6).
+
+(define (index-list lst)
+"Create a list of indexes for all the elements of a list"
+  (ref-all nil lst (fn(x) true)))
+
+(setq L '((1 2) (3 (4 5)) 6))
+
+(setq idx (index-list L))
+;-> ((0) (0 0) (0 1) (1) (1 0) (1 1) (1 1 0) (1 1 1) (2))
+
+(dolist (ind idx)
+  (if (atom? (L ind))
+      (println (L ind) { } ind { } (length ind))))
+;-> 1 (0 0) 2
+;-> 2 (0 1) 2
+;-> 3 (1 0) 2
+;-> 4 (1 1 0) 3
+;-> 5 (1 1 1) 3
+;-> 6 (2) 1
+
+(dolist (ind idx)
+  (if (atom? (L ind))
+    (setf (L ind) (* (L ind) (length ind)))))
+L
+;-> ((2 4) (6 (12 15)) 6)
+
+; funzione completa
+(define (mult lst)
+  (let (idx (index-list lst))
+    (dolist (ind idx)
+      (if (atom? (lst ind))
+        (setf (lst ind) (* (lst ind) (length ind)))))
+    lst))
+
+Proviamo:
+
+(setq L '((1 2) (3 (4 5)) 6))
+(mult L)
+;-> ((2 4) (6 (12 15)) 6)
+
+(setq L '(1 2 3))
+(mult L)
+;-> (1 2 3)
+
+(setq L '((((((((9)))))))))
+(mult L)
+;-> ((((((((72))))))))
+
+Versione code-golf (96 caratteri):
+
+(define(f L)(dolist(i(ref-all nil L(fn(x)true)))
+(if(atom?(L i))(setf(L i)(*(L i)(length i)))))L)
+
+(f '((1 2) (3 (4 5)) 6))
+;-> ((2 4) (6 (12 15)) 6)
+
+
+-------------------------------
+Aggiornamento di una classifica
+-------------------------------
+
+Vediamo come aggiornare la classifica dopo un turno di un gioco generico.
+
+Giocatori: A, B, C, D, E
+
+Punteggi: Vittoria  = +1
+          Pareggio  = +0.5
+          Sconfitta = +0
+
+Classifica iniziale:
+  A 0
+  B 0
+  C 0
+  D 0
+  E 0
+
+Turno 1
+  A - B -> patta
+  C - D -> 1-0
+  E -   -> riposa
+
+Classifica dopo il turno 1:
+  A 0.5
+  B 0.5
+  C 1
+  D 0
+  E 0
+
+Scrivere una funzione che prende una classifica e un turno di gioco e restituisce la classifica aggiornata.
+
+Rappresentazione della classifica (lista di liste):
+
+  ((giocatore1 punteggio1) (giocatore2 punteggio2) ...)
+
+(setq classifica '((A 0) (B 0) (C 0) (D 0) (E 0)))
+
+Rappresentazione dei punteggi (lista):
+
+  (valore-vittoria valore-pareggio  valore-sconfitta))
+
+(setq punteggi '(1 0.5 0))
+
+Rappresentazione del risultato di una partita (lista):
+
+  (giocatore1 giocatore2 risultato)
+
+dove 'risultato' puo valere:
+  "1" per la vittoria del giocatore 1
+  "X" per il pareggio
+  "2" per la vittoria del giocatore 2
+
+Per esempio, (A - B -> patta) diventa (A B "X").
+
+Rappresentazione di un turno (lista di liste):
+
+(setq turno '((A B "X") (C D "1")))
+
+; Funzione che aggiorna una classifica
+(define (aggiorna classifica turno punteggi)
+  (dolist (el turno)
+    (cond
+      ((= (el 2) "1")
+        (setf (lookup (el 0) classifica) (add $it (punteggi 0)))
+        (setf (lookup (el 1) classifica) (add $it (punteggi 2))))
+      ((= (el 2) "X")
+        (setf (lookup (el 0) classifica) (add $it (punteggi 1)))
+        (setf (lookup (el 1) classifica) (add $it (punteggi 1))))
+      ((= (el 2) "2")
+        (setf (lookup (el 0) classifica) (add $it (punteggi 2)))
+        (setf (lookup (el 1) classifica) (add $it (punteggi 0))))))
+   classifica)
+
+Proviamo:
+
+(setq classifica '((A 0) (B 0) (C 0) (D 0) (E 0)))
+(setq classifica (aggiorna classifica turno punteggi))
+;-> ((A 0.5) (B 0.5) (C 1) (D 0))
+(setq classifica (aggiorna classifica turno punteggi))
+;-> ((A 1) (B 1) (C 2) (D 0) (E 0))
+
+(setq classifica '((A 0) (B 0) (C 0) (D 0) (E 0)))
+(setq classifica (aggiorna classifica turno '(2 1 -2)))
+;-> ((A 1) (B 1) (C 2) (D -2) (E 0))
+(setq classifica (aggiorna classifica turno '(2 1 -2)))
+;-> ((A 2) (B 2) (C 4) (D -4) (E 0))
+
+
+-------------------------------
+Percentuale di aumento e sconto
+-------------------------------
+
+Un articolo ha un prezzo pari a P.
+Quanto vale il prezzo se lo aumentiamo del X%?
+Quanto vale il prezzo se lo scontiamo del X%?
+
+Un articolo che è stato scontato del X% ha una prezzo pari a P.
+Quanto valeva il prezzo dell'articolo prima dello sconto?
+
+Un articolo che è stato aumentato del X% ha una prezzo pari a P.
+Quanto valeva il prezzo dell'articolo prima dell'aumento?
+
+La percentuale X è un numero maggiore o uguale a 0.
+
+1) Aumento del X%
+Il nuovo prezzo vale: P * (1 + X/100) = P * (100 + X) / 100
+
+2) Sconto del X%
+Il nuovo prezzo vale: P * (1 - X/100) = P * (100 - X) / 100
+
+3) Prezzo iniziale conoscendo il prezzo scontato
+Se P è il prezzo dopo uno sconto del X%, il prezzo iniziale era:
+
+  P * 100 / (100 - X), con (X < 100).
+
+4) Prezzo iniziale conoscendo il prezzo aumentato
+Se P è il prezzo dopo un aumento del X%, il prezzo iniziale era:
+  P * 100 / (100 + X)
+
+Riassunto:
+
+  +-------------------------------- + ----------------------+
+  | Operazione                      | Formula               |
+  +-------------------------------- + ----------------------+
+  | 1) Aumentare P del X%           |  P * (100 + X) / 100  |
+  | 2) Scontare P del X%            |  P * (100 - X) / 100  |
+  | 3) Risalire da prezzo scontato  |  P * 100 / (100 - X)  |
+  | 4) Risalire da prezzo aumentato |  P * 100 / (100 + X)  |
+  +-------------------------------- + ----------------------+
+
+(define (perc P X tipo)
+  (cond 
+    ((= tipo 1) ;Aumentare P del X%
+      (div (mul P (add 100 X)) 100))
+    ((= tipo 2) ; Scontare P del X%
+      (div (mul P (sub 100 X)) 100))
+    ((= tipo 3) ; Risalire da prezzo scontato
+      (if (>= X 100) )
+          (div (mul P 100) (sub 100 X)))
+    ((= tipo 4) ; Risalire da prezzo aumentato
+      (div (mul P 100) (add 100 X)))))
+
+Proviamo:
+
+(perc 200 10 1)
+;-> 220
+(perc 200 10 2)
+;-> 180
+(perc 200 10 3)
+;-> 222.2222222222222
+(perc 222.222222222222222 10 2)
+;-> 200
+(perc 200 10 4)
+;-> 181.8181818181818
+(perc 181.818181818181818 10 1)
+;-> 200
+
+Una particolarità importante: uno sconto/aumento e il successivo aumento/sconto della stessa percentuale non si annullano.
+Per esempio:
+100 scontato del 20% diventa 80, ma 80 aumentato del 20% diventa 96, non 100.
+100 aumentato del 20% diventa 120, ma 120 scontato del 20% diventa 96, non 100.
+(perc (perc 100 20 2) 20 1)
+;-> 96
+(perc (perc 100 20 1) 20 2)
+;-> 96
+
+Questo perchè stiamo parlando della 'differenza in percentuale' di due numeri.
+Infatti bisogna distinguere tra "A è l'X% di B" e "A differisce da B dell'X%".
+
+Dati due numeri positivi A e B:
+1) A è l'X% di B
+2) B è l'Y% di A
+
+1) A è l'X% di B
+Per definizione:
+  A = B * X / 100
+quindi:
+  X = 100 * A / B
+
+2) B è l'Y% di A
+Per definizione:
+  B = A * Y / 100
+quindi:
+  Y = 100 * B / A
+
+Pertanto: X * Y = 10000 e quindi: 
+  Y = 10000 / X
+  X = 10000 / Y
+
+Ad esempio, se A = 80 e B = 100 allora A è l'80% di B e B è il 125% di A.
+
+Il punto interessante è che 80 è il 20% meno di 100, mentre 100 è il 25% piu' di 80.
+Infatti le due percentuali di variazione hanno denominatori diversi:
+  (100 - 80) / 100 = 20%
+  (100 - 80) / 80  = 25%
+Questa è proprio la ragione per cui uno sconto del 20% seguito da un aumento del 20% non riporta al prezzo iniziale.
+
+(define (delta% x y)
+"Calculate the percentage change between two numbers x and y."
+  (div (mul (sub y x) 100) x))
+
+(delta% 100 80)
+;-> -20
+(delta% 80 100)
+;-> 25
 
 ============================================================================
 

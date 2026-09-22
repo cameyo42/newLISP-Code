@@ -4697,6 +4697,7 @@ a(n) = the total number of integers (including n itself) defined.
 Funzione che calcola la sequenza di numeri consecutivi più lunga che somma a N:
 (cioè calcola la fissione di un numero N)
 ;(define (seq-sum-max-length N)
+
 (define (fission N)
   (local (max-length best-seq x seq)
     (setq max-length 0)
@@ -4720,6 +4721,7 @@ Funzione che calcola la sequenza di numeri consecutivi più lunga che somma a N:
 Proviamo:
 
 (fission 0)
+;-> ()
 (fission 23)
 ;-> (11 12)
 (fission 12)

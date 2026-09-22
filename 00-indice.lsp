@@ -3740,6 +3740,10 @@ NOTE LIBERE 39
   Prigionieri e cappelli
   Da rettangolo a quadrato
   Indici dei numeri ordinati
+  Ordinamento di una lista in base ad un indice
+  Moltiplicazione di numeri per il loro annidamento
+  Aggiornamento di una classifica
+  Percentuale di aumento e sconto
 
 PROBLEMI SUI DADI
 =================
