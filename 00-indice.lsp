@@ -3744,6 +3744,13 @@ NOTE LIBERE 39
   Moltiplicazione di numeri per il loro annidamento
   Aggiornamento di una classifica
   Percentuale di aumento e sconto
+  Primi concatenati
+  Bish e Bosh
+  Biglie Rosse e Blu
+  Il Bianco vince
+  Oggetti da estrarre per raggiungere un obiettivo (1)
+  Oggetti da estrarre per raggiungere un obiettivo (2)
+  Oggetti da estrarre per raggiungere un obiettivo (3)
 
 PROBLEMI SUI DADI
 =================

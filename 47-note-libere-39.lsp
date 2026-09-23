@@ -6460,5 +6460,536 @@ Questa è proprio la ragione per cui uno sconto del 20% seguito da un aumento de
 (delta% 80 100)
 ;-> 25
 
+
+-----------------
+Primi concatenati
+-----------------
+
+Sequenza OEIS A375553:
+a(n) is the smallest prime q such that the concatenation (p + q)$q is a prime number, where p = prime(n).
+  3, 7, 3, 3, 19, 3, 31, 3, 3, 7, 11, 17, 3, 3, 3, 3, 13, 3, 29, 3, 23, 3,
+  3, 7, 41, 7, 3, 3, 3, 3, 3, 31, 7, 3, 3, 3, 11, 3, 7, 19, 3, 11, 7, 11,
+  3, 11, 3, 23, 7, 47, 19, 3, 23, 3, 7, 3, 7, 11, 3, 3, 11, 3, 23, 7, 3,
+  3, 3, 29, 7, 11, 7, 3, 11, 23, 3, 3, 3, 3, 13, ...
+
+dove $ rappresenta l'operatore di concatenazione (es. 23$761 = 23761).
+
+Esempio:
+ p   q   (p+q$q)
+ 2   2   42  ->  non primo
+ 2   3   53  ->  primo --> 3
+ 3   2   52  ->  non primo
+ 3   3   63  ->  non primo
+ 3   5   85  ->  non primo
+ 3   7   107 ->  primo --> 7
+ 5   2   72  ->  non primo
+ 5   3   83  ->  primo --> 3
+ 7   2   92  ->  non primo
+ 7   3   103 ->  primo --> 3
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (seq limite)
+  (local (out primi found num)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (dolist (p primi)
+      (setq found nil)
+      (dolist (q primi found)
+        (setq num (int (string (+ p q) q) 0 10))
+        (print p { } q { } num) (read-line)
+        (when (prime? num) 
+          (setq found true)
+          (push q out -1)))
+      (if-not found 
+        (println "Errore: per p = " p " nessun q <= " limite " trovato.")))
+    out))
+
+Proviamo:
+
+(seq 100)
+;-> (3 7 3 3 19 3 31 3 3 7 11 17 3 3 3 3 13 3 29 3 23 3
+;->  3 7 41 7 3 3 3 3 3 31 7 3 3 3 11 3 7 19 3 11 7 11
+;->  3 11 3 23 7 47 19 3 23 3 7 3 7 11 3 3 11 3 23 7 3
+;->  3 3 29 7 11 7 3 11 23 3 3 3 3 13)
+
+(time (println (length (seq 1e5))))
+;-> 9592
+;-> 690.644
+
+(time (println (length (seq 1e6))))
+;-> 78498
+;-> 35857.779
+
+
+-----------
+Bish e Bosh
+-----------
+
+Ci troviamo in una prigione con due persone, Bish e Bosh.
+Uno dei due dice sempre la verità, l'altro dice sempre il falso, ma non sappiamo chi.
+Nella cella ci sono due porte, una conduce alla libertà, mentre l'altra no.
+Possiamo fare una sola domanda ad una sola persona.
+Quale domanda occorre fare per individuare la porta della libertà?
+
+Domanda rivolta ad uno qualunque dei due prigionieri:
+Se domandassi all'altro qual è la porta della libertà, cosa risponderebbe?
+
+Il punto interessante è che la domanda contiene 'due inversioni logiche', che si compensano.
+
+Indichiamo con:
+
+  T = la porta di sinistra conduce alla libertà
+  F = la porta di destra conduce alla libertà
+  V = il prigioniero a cui poniamo la domanda dice la verità
+  M = l'altro prigioniero dice la verità
+
+Naturalmente vale sempre:
+
+V XOR M = 1
+
+cioè uno solo dei due dice la verità.
+
+Cosa risponderebbe l'altro?
+Supponiamo che la porta della libertà sia la sinistra.
+Se l'altro è sincero, risponderebbe:
+sinistra
+Se l'altro è bugiardo, alla domanda "qual è la porta della libertà?" mentirebbe e risponderebbe:
+destra
+Quindi la risposta dell'altro dipende dal fatto che sia sincero o bugiardo.
+
+La domanda è:
+
+"Se domandassi all'altro quale porta conduce alla libertà, cosa risponderebbe?"
+
+Ci sono due casi.
+| Prigioniero interrogato | Altro    | Porta reale | Risposta dell'altro | Risposta dell'interrogato |
+| ----------------------- | -------- | ----------- | ------------------- | ------------------------- |
+| sincero                 | bugiardo | sinistra    | destra              | destra                    |
+| sincero                 | bugiardo | destra      | sinistra            | sinistra                  |
+| bugiardo                | sincero  | sinistra    | sinistra            | destra                    |
+| bugiardo                | sincero  | destra      | destra              | sinistra                  |
+
+In entrambi i casi il risultato finale è:
+la porta indicata è quella sbagliata.
+Quindi basta scegliere l'altra porta.
+
+Possiamo formalizzare la situazione con due operatori:
+
+L(p) = "la risposta di p indica la porta della libertà"
+¬L(p) = "la risposta di p indica la porta sbagliata"
+
+Un bugiardo applica una negazione alla verità:
+  B(x) = ¬x
+Un sincero non modifica la verità:
+  S(x) = x
+
+La domanda introduce però un primo livello:
+"Cosa direbbe l'altro?"
+
+Quindi la risposta che vogliamo ottenere è:
+  R = comportamento(interrogato)(comportamento(altro)(verità))
+
+Poiché uno è sincero e l'altro è bugiardo:
+
+Caso 1:
+  S(B(x)) = S(¬x) = ¬x
+
+ Caso 2
+  B(S(x)) = B(x) = ¬x
+
+In entrambi i casi:
+  R = ¬x
+
+Quindi abbiamo lo schema fondamentale:
+
+verita' sulla porta
+        |
+        v
+   comportamento
+    dell'altro
+        |
+        v
+      NOT
+        |
+        v
+   comportamento
+   dell'interrogato
+        |
+        v
+      NOT
+        |
+        v
+     risposta
+
+Le due negazioni si compensano? No: attenzione.
+In questa domanda le due negazioni non sono entrambe necessariamente applicate alla stessa proposizione: la prima riguarda ciò che 'l'altro direbbe', la seconda riguarda ciò che 'l'interrogato riferisce'.
+Formalmente, però, il risultato complessivo è comunque una negazione:
+  S(B(x)) = ¬x
+  B(S(x)) = ¬x
+perché in entrambi i casi esattamente uno dei due operatori è una negazione.
+Perciò la regola pratica è:
+Chiedi a uno qualunque cosa direbbe l'altro, poi scegli la porta opposta a quella indicata.
+Questo è lo schema generale: comporre due funzioni di risposta, una delle quali è sempre la negazione, produce una risposta necessariamente opposta alla verità.
+
+
+------------------
+Biglie Rosse e Blu
+------------------
+
+Abbiamo 100 biglie, di cui 50 Rosse e 50 Blu.
+Dobbiamo ditribuire le 100 biglie in due scatole uguali.
+Ogni scatola può contenere da 1 a 100 biglie (non importa il loro colore).
+Dopo aver terminato il lavoro dobbiamo scegliere a caso una delle due scatole.
+Poi, dalla scatola scelta dobbiamo scegliere casualmente una biglia.
+
+Come distribuire le 100 biglie nelle scatole per avere la maggiore probabilità di scegliere una biglia Rossa? 
+
+Soluzione
+---------
+Mettere una singola biglia Rossa in una scatola.
+Mettere le restanti 49 biglie Rosse e le 50 biglie Blu nell'altra scatola.
+Con questa disposizione, una scatola ha il 100% di probabilità di avere una biglia Rossa, mentre l'altra ha una probabilità del 49/99 (49.49%).
+Quindi, in media, abbiamo quasi il 75% di probabilità di scegliere una biglia Rossa.
+
+; Probabilità di una Rossa nella scatola 1
+(setq probR1 1)
+;-> 1
+
+; Probabilità di una Rossa nella scatola 2
+(setq probR2 (div 49 99))
+;-> 0.494949494949495
+
+; Probabilità di una Blu nella scatola 1
+(setq probB1 0)
+;-> 0
+
+; Probabilità di una Blu nella scatola 2
+(setq probB2 (div 50 99))
+;-> 0.5050505050505051
+
+; Somma delle probabilità per due scatole:
+(add probR1 probB1)
+;-> 1
+(add probR2 probB2)
+;-> 1
+
+probRossa = (0.5 * probR1) + (0.5 * probR2) =
+          = 0.5 + (0.5 * 0.494949494949495)) =
+          = 0.5 + 0.2474747474747475 = 0.7474747474747475
+
+(add 0.5 (mul 0.5 probR2))
+;-> 0.7474747474747475
+
+; Funzione che simula la strategia
+; 'probR' è la probabilità di trovare una biglia Rossa nella scatola 2
+(define (simula iter probR)
+  (let ((conta 0) (box nil))
+    (for (i 1 iter)
+      ; scelta casuale della scatola: 1 -> box1 (50%), 2 -> box2 (50%)
+      (setq box (+ (rand 2) 1))
+      (if (or (= box 1) ; in box1 -> 100%
+              (and (= box 2) (< (random) probR))) ; in box2 -> probR
+          (++ conta)))
+    (div conta iter)))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(setq probR (div 49 99))
+(simula 1e7 probR)
+;-> 0.7474011
+
+Proviamo a mettere 10 biglie Rosse nella scatola 1.
+In questo caso la probabilità di trovare una biglia Rossa nella scatola 2 vale:
+  probR2 = 40/90 = 0.0.4444444444444444
+
+(setq probR (div 40 90))
+(simula 1e7 probR)
+;-> 0.7221565
+
+In questo caso la probabilità totale di scegliere una biglia Rossa è diminuita.
+Infatti probabilità del 50% si ottiene quando mettiamo tutte le Rosse in una scatola e tutte le Blu nell'altra scatola.
+La probabilità minima si ha quando una scatola contiene una biglia Blu e l'altra contiene tutte le biglie restanti.
+In questo caso la probabilità vale:
+  (1 - 0.7474747474747475) = 0.2525252525252525 (25.3%).
+
+
+---------------
+Il Bianco vince
+---------------
+
+Un sacchetto contiene una pallina Bianca e N-1 palline Rosse.
+Due persone estraggono a turno una pallina in modo casuale (e senza reinserirla nel sacchetto).
+Chi ha le maggiori probabilità di vittoria, chi estrae per primo o per secondo?
+
+Soluzione
+---------
+Se l'urna contiene un numero pari di palline, le probabilità di scegliere la pallina bianca sono uguali per entrambi i giocatori. Giocare per primi non offre alcun vantaggio.
+Infatti se dividiamo le palline in due gruppi di uguale dimensione:
+la pallina bianca ha il 50% di probabilità di trovarsi nell'uno o nell'altro gruppo.
+La probabilità di scegliere la pallina bianca è la stessa in qualsiasi fase del gioco:
+con N palline in totale, abbiamo una probabilità di 1/N di prendere la pallina bianca alla prima estrazione.
+La probabilità di ottenerlo alla seconda estrazione è data dalla probabilità di non ottenerlo alla prima, che vale (N–1)/N), moltiplicata per la probabilità di ottenerlo alla seconda, che vale 1/(N–1).
+Il risultato è una probabilità di 1/N.
+
+Se l'urna contiene un numero dispari di palline, conviene giocare per primi perché si ha a disposizione un tentativo in più (cioè prendiamo una pallina in più dell'avversario).
+Comunque, in questo caso, la convenienza diminuisce con l'aumentare del numero di palline N.
+La probabilità massima si ha per N = 3 e vale 66.67%.
+Infatti con 3 palline il primo giocatore ha 2 tentativi su 3 per scegliere la pallina bianca.
+
+; Simulazione del gioco
+; Pallina Bianca --> 1
+; Pallina Rossa  --> 0
+(define (simula N iter)
+  (let ( (w1 0) (w2 0)
+         (balls '()) )
+  (setq balls (dup 0 N))
+  (setf (balls 0) 1)
+  (for (i 1 iter)
+    (setq balls (randomize balls))
+    (if (even? (find 1 balls))
+        (++ w1)
+        (++ w2)))
+  (list (div w1 iter) (div w2 iter))))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+; N pari (2)
+(simula 2 1e6)
+;-> 0.5 0.5
+
+; N pari (3)
+(simula 3 1e6)
+;-> (0.66652 0.33348)
+
+; N pari (10)
+(simula 10 1e6)
+;-> (0.500211 0.499789)
+
+; N dispari (11)
+(simula 11 1e6)
+;-> (0.545411 0.454589)
+
+; N pari (20)
+(simula 20 1e6)
+;-> (0.500162 0.499838)
+
+; N dispari (21)
+(simula 21 1e6)
+;-> (0.524128 0.475872)
+
+; N dispari (101)
+(time (println (simula 101 1e6)))
+;-> (0.505551 0.494449)
+
+
+----------------------------------------------------
+Oggetti da estrarre per raggiungere un obiettivo (1)
+----------------------------------------------------
+
+In un sacchetto chiuso abbiamo N palline Rosse e M palline Blu.
+Quante palline dobbiamo estrarre dal sacchetto (in modo casuale) per avere la certezza di avere K palline Rosse (con K <= N)?
+
+La soluzione si basa sul principio del caso peggiore (o principio dei cassetti).
+Per essere matematicamente certi del risultato senza guardare nel sacchetto, dobbiamo ipotizzare di avere la maggior sfortuna possibile: quella di pescare prima tutte le palline dell'altro colore.
+Fase 1 (Sfortuna massima):
+Estraiamo di fila tutte le M palline Blu presenti nel sacchetto.
+A questo punto, nel sacchetto sono rimaste soltanto palline Rosse.
+Fase 2 (La certezza): Ogni successiva estrazione sarà obbligatoriamente una pallina Rossa.
+Per ottenerne K, basterà pescare K volte.
+Di conseguenza, la formula è: Palline da estrarre = M + K
+
+
+----------------------------------------------------
+Oggetti da estrarre per raggiungere un obiettivo (2)
+----------------------------------------------------
+
+In un sacchetto abbiamo N monete da X euro e M monete da Y euro.
+Quante monete dobbiamo scegliere a caso per essere sicuri di avere almeno Z euro in totale?
+Vincoli: (Z >= X,Y) e (N,M >= 1).
+
+Il caso peggiore in assoluto è quello di pescare continuamente le monete di valore inferiore (ipotizziamo siano quelle da X).
+Per trovare il numero di monete necessarie:
+Calcolare quante monete di valore inferiore X servono per avvicinarsi il più possibile a Z (o superarlo se non finiscono).
+Se si esauriscono tutte le N monete da X senza raggiungere Z, occorre iniziare a pescare quelle di valore maggiore Y fino a raggiungere o superare la quota Z.
+Il numero totale di monete pescate in questo percorso "sfortunato" è la soluzione.
+
+(define (monete N X M Y Z show)
+  (let ( (valX 0) (valY 0) (moneteX 0) (moneteY 0) (gap 0) )
+    ; Deve risultare X <= Y
+    (when (> X Y)
+      (swap X Y)
+      (swap N M))
+    ; totale valore monete X
+    (setq valX (* N X))
+    ; totale valore monete Y
+    (setq valY (* M Y))
+    ; non ci sono monete sufficienti per raggiunzere Z
+    (if (> Z (+ valX valY)) nil
+        ;else
+        (begin
+          (cond
+            ; le monete X sommano esattamente a Z
+            ((= Z valX) (setq moneteX N))
+            ; le monete di valore X sono sufficienti per raggiungere Z
+            ((< Z valX)
+              ; calcola quante monete di valore X
+              ; occorrono per arrivare o superare Z.      
+              (setq moneteX (/ Z X))
+              (if (> Z (* moneteX X)) (++ moneteX)))
+            ; le monete di valore X non sono sufficienti per raggiungere Z
+            ((> Z valX)
+              ; servono tutte le N monete di valore X
+              (setq moneteX N)
+              ; calcola quante monete di valore Y
+              ; occorrono per arrivare o superare Z.
+              (setq gap (- Z valX))
+              (setq moneteY (/ gap Y))
+              (if (> Z (+ valX (* moneteY Y))) (++ moneteY)))
+          )
+          (when show
+            (println "Z = " Z)
+            (println moneteX " da " X " --> " (* moneteX X))
+            (println moneteY " da " Y " --> " (* moneteY Y))
+            (println "Totale = " (+ (* moneteX X) (* moneteY Y))))
+          (list moneteX X (* moneteX X) moneteY Y (* moneteY Y)
+                (+ (* moneteX X) (* moneteY Y)))))))
+
+Proviamo:
+
+(monete 5 2 5 3 13 true)
+;-> Z = 13
+;-> 5 da 2 --> 10
+;-> 1 da 3 --> 3
+;-> Totale = 13
+;-> (5 2 10 1 3 3 13)
+
+(monete 5 2 5 3 8)
+;-> (4 2 8 0 3 0 8)
+
+(monete 5 2 5 3 7)
+;-> (4 2 8 0 3 0 8)
+
+(monete 5 2 5 3 50)
+;-> nil
+
+(monete 10 2 10 5 50)
+;-> (10 2 20 6 5 30 50)
+
+
+----------------------------------------------------
+Oggetti da estrarre per raggiungere un obiettivo (3)
+----------------------------------------------------
+
+In un sacchetto abbiamo N monete che hanno valori diversi (v1 v2 ... vk).
+Inoltre sappiamo quante sono le monete per ogni valore (n1 n2 ... nk).
+Cioè, n1 monete di valore v1, n2 monete di valore v2, ecc.
+Chiaramente risulta N = n1 + n2 + ... + nk. 
+Inoltre, (n(i) >= 1), per i=1,..,k
+Quante monete dobbiamo scegliere a caso per essere sicuri di avere almeno X euro in totale?
+
+Il caso peggiore è quello in cui vengono estratte prima le monete di minor valore.
+Supponiamo quindi di ordinare i valori v1 < v2 < ... < vk con rispettive quantità n1, n2, ..., nk e definiamo le somme cumulative delle monete ordinate per valore.
+
+Per esempio:
+  valori:     1    2    5    10
+  quantità:   7    4    3     2
+le prime monete che potrebbero uscire nel caso peggiore sono:
+
+  1 1 1 1 1 1 1 2 2 2 2 5 5 5 10 10
+
+Cerchiamo il minimo m tale che la somma delle m monete di valore più basso sia almeno X:
+
+  m = min (i: somma delle i monete più economiche >= X)
+
+Esempio:
+  v = (2 5 10 20)
+  n = (4 3 2 1)
+  X = 30
+Le monete ordinate sono:
+  2 2 2 2 5 5 5 10 10 20
+Le somme cumulative sono:
+  1 moneta   ->  2
+  2          ->  4
+  3          ->  6
+  4          ->  8
+  5          -> 13
+  6          -> 18
+  7          -> 23
+  8          -> 33
+  Pertanto: m = 8
+
+Non è necessario simulare le estrazioni e neppure considerare tutte le combinazioni.
+Basta percorrere i valori dal più piccolo al più grande, tenendo conto delle quantità disponibili.
+
+(define (money nums-vals X)
+  (local (pair total money-values all-values values-selected num-money stop)
+    (setq pair '())
+    (setq total 0)
+    (setq money-values '())
+    (setq all-values '())
+    (setq values-selected '())
+    (setq num-money 0)
+    ; Crea:
+    ; 1) lista dei valori unici delle monete 'money-values'
+    ; 2) lista di tutti i valori di tutte le monete 'all-values'
+    (dolist (el nums-vals)
+      (push (el 1) money-values -1)
+      (extend all-values (dup (el 1) (el 0))))
+    (sort all-values) ; ordina i valori di tutte le monete
+    (sort money-values) ; ordina i valori unici delle monete
+    (setq stop nil)
+    ; Somma i valori delle monete, partendo dai tagli più piccoli,
+    ; fino a raggiungere o superare X e ogni valore sommato viene
+    ; inserito nella lista 'values-selected'
+    (dolist (val all-values stop)
+      (-- X val)
+      (push val values-selected -1)
+      (when (<= X 0) (setq stop true)))
+    ; calcola il totale raggiunto
+    (setq total (apply + values-selected))
+    ; Costruisce la lista delle coppie (monete valore)
+    ; che rappresenta la soluzione
+    (dolist (val money-values)
+      (push (list ((count (list val) values-selected) 0) val) pair -1))
+    ; Conta quante monete sono state selezionate
+    (setq num-money (apply + (map first pair)))
+    ; Restitusce una lista:
+    ; ((numeri valori) totale-valore numero-monete valore-raggiunto?)
+    (list pair total num-money (>= total X))))
+
+Proviamo:
+
+(money '((4 2) (3 5) (2 10) (1 20)) 30)
+;-> (((4 2) (3 5) (1 10) (0 20)) 33 8 true)
+
+(money '((2 10) (3 5) (2 1)) 22)
+;-> (((2 1) (3 5) (1 10)) 27 6 true)
+
+(money '((2 10) (3 5) (2 1)) 2)
+;-> (((2 1) (0 5) (0 10)) 2 2 true)
+
+(money '((2 10) (3 5) (2 1)) 100)
+;-> (((2 1) (3 5) (2 10)) 37 7 nil)
+
 ============================================================================
 
