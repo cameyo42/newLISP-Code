@@ -69,7 +69,7 @@
 
   "Teoria e Progetto di Algoritmi Fondamentali", Ausiello-Marchetti-Spaccamela-Protasi, 1985
   
-  "Hacker’s Delight", 2ed, Henry S. Warren, Jr., 2013
+  "Hacker's Delight", 2ed, Henry S. Warren, Jr., 2013
 
   "Primality Testing in Polynomial Time", Martin Dietzfelbinger, 2004
 
@@ -107,6 +107,12 @@
   "La piccola bottega della curiosità matematiche del professor Steward", Ian Stewart, 2010
 
   "I favolosi numeri di Fibonacci", Posamentier-Lehmann, 2010
+  
+  "Enigmi e giochi matematici", Martin Gardner
+  
+  "Il meraviglioso mondo dei numeri", Alex Bellos, 2011
+  
+  "Enigmi", Alex Bellos, 2019
 
   Siti web:
   ---------
@@ -177,6 +183,11 @@
   The Prime Puzzles and Problem Connection by Carlos Rivera
   Our main purpose is to create an anthology of the most interesting problems & puzzles explicitly related to primes.
   https://www.primepuzzles.net/
+
+  Number Theory, Combinatorics, Geometry, Algebra, Calculus & Diff Eqs,
+  Probability & Statistics, Reflections on Relativity, Set Theory & Foundations,
+  History, Physics, Combined List of Articles, Quotations
+  https://www.mathpages.com/home/
 
 =============================================================================
 

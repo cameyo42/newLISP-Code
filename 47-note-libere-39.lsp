@@ -6991,5 +6991,153 @@ Proviamo:
 (money '((2 10) (3 5) (2 1)) 100)
 ;-> (((2 1) (3 5) (2 10)) 37 7 nil)
 
+
+--------------------
+Uno strano sacchetto
+--------------------
+
+Un sacchetto contiene una sola pallina, o bianca o nera (al 50%).
+Una pallina bianca viene inserita nel sacchetto, che così contiene due palline.
+Il sacchetto viene chiuso e agitato, quindi si estrae una pallina, che risulta essere bianca.
+Qual è la probabilità che anche la pallina rimasta nel sacchetto sia bianca?
+
+Intuitivamente la probabilità cercata sembra essere il 50%, ma per verificarlo scriviamo una funzione che simula esattamente il processo.
+
+; Bianca --> 0
+; Nera   --> 1
+(define (simula iter)
+  ; contatore di prove positive
+  (setq bianco 0)
+  ; contatore delle iterazioni
+  (setq k 0)
+  (while (< k iter)
+    ; Aggiunge una pallina di colore casuale 
+    ; in un sacchetto che contiene una pallina bianca
+    ; e agita il sacchetto
+    (setq bag (randomize (list (rand 2) 0)))
+    ; Estrae casualmente una pallina
+    (setq colore (pop bag (bag (rand 2))))
+    ; Quando la pallina etratta è di colore bianco...
+    (when (= colore 0)
+      ; Se nel sacchetto è rimasta una pallina bianca, 
+      ; allora aumenta di 1 il contatore delle prove positive
+      (if (= (bag 0) 0) (++ bianco))
+      ; Aumenta di 1 il contatore delle iterazioni
+      (++ k)))
+  ; Calcolo della probabilità
+  (div bianco iter))
+
+(simula 1e6)
+;-> 0.666345
+
+La simulazione indica che la probabilità cercata vale 0.666345, cioè circa 2/3.
+Vediamo il perchè considerando tutti i casi possibili.
+
+  Caso   Palline nel sacchetto    Pallina estratta    Pallina rimasta
+  -------------------------------------------------------------------
+   1     Bianco  Nero             Nero                Bianco
+   2     Bianco  Nero             Bianco              Nero
+   3     Bianco1 Bianco2          Bianco1             Bianco2
+   4     Bianco1 Bianco2          Bianco2             Bianco1
+
+Il caso 1 viene scartato nel processo, cioè risulta una prova non valida e non viene considerata.
+Quindi rimangono solo 3 casi (2, 3 e 4) in cui 2 volte su 3 abbiamo Bianco come risultato.
+Quindi la probabiltà vale 2/3.
+
+
+-------------------
+Media e probabilità
+-------------------
+
+Problema 1
+----------
+Abbiamo un dado regolare a sei facce.
+Dopo quanti lanci, in media, otteniamo un determinato numero X?
+
+Per ogni lancio la probabilità di ottenere un numero X vale 1/6.
+Quindi, in media, occorrono 6 lanci per ottenere il numero X.
+
+(define (simula1 X iter)
+  (let ((totale 0) (lanci 0))
+    (for (i 1 iter)
+      (setq lanci 1)
+      (until (= (rand 6) (- X 1))
+        (++ lanci))
+      (++ totale lanci))
+    (div totale iter)))
+
+(simula1 1 1e6)
+;-> 5.998509
+
+Problema 2
+----------
+Abbiamo un dado regolare a sei facce.
+Quali sono le probabilità di ottenere un dato numero X al k-esimo lancio?
+La probabilità cercata vale la probabilità del k-esimo lancio (1/6) moltiplicato per le probabilità che il numero X non sia uscito nei giorni precedenti a k.
+
+Per generalità consideriamo un dado regolare con p facce.
+Vogliamo calcolare la probabilità che un dato numero X esca per la prima volta proprio al k-esimo lancio.
+Devono verificarsi due eventi:
+1) X non deve uscire nei primi k-1 lanci:
+   ((p-1)/p)^(k-1)
+2) X deve uscire al k-esimo lancio:
+   1/p
+Moltiplicando le due probabilità:
+
+  P(k) = (1/p) * ((p-1)/p)^(k-1)
+
+Quindi la formula cercata è:
+
+  P(k) = (1/p) * ((p-1)/p)^(k-1) = (p-1)^(k-1)/p^k
+
+Per esempio, con p = 6:
+  P(1) = 1/6      = 0.1666666666666667...
+  P(2) = 5/36     = 0.1388888888888889...
+  P(3) = 25/216   = 0.1157407407407408...
+  P(4) = 125/1296 = 0.0964506172839506...
+
+(define (prob k p) (mul (div p) (pow (div (sub p 1) p) (- k 1))))
+
+(for (k 1 4) (println (prob k 6)))
+;-> 0.1666666666666667
+;-> 0.1388888888888889
+;-> 0.1157407407407408
+;-> 0.09645061728395063
+
+In generale, ogni termine è (p-1)/p volte il precedente:
+
+  P(k+1) = ((p-1)/p)*P(k)
+
+La distribuzione è una distribuzione geometrica con parametro q = 1/p e quindi:
+
+  P(k) = q*(1-q)^(k-1)
+
+La somma di tutte le probabilità vale:
+
+  sum(P(k), k=1,..,infinity) = 1
+
+perchè:
+
+  Sum((1/p)*((p-1)/p)^(k-1), k=1,..,infinity) = (1/p)/(1 - (p-1)/p) = 1
+
+Quindi, con probabilità 1, prima o poi X uscirà.
+
+; Calcola la probabilità con una simulazione (per un dado a 6 facce)
+(define (simula2 X k iter)
+  (let ((conta 0) (lanci 0))
+    (for (i 1 iter)
+      ; lanciamo il dado fino a che non esce il numero X
+      (setq lanci 1)
+      (until (= (rand 6) (- X 1)) (++ lanci))
+      ; il numero X è uscito esattamente al k-esimo lancio?
+      (if (= k lanci) (++ conta)))
+    (div conta iter)))
+
+(for (k 1 4) (println (simula2 1 k 1e6)))
+;-> 0.166361
+;-> 0.139132
+;-> 0.115529
+;-> 0.096636
+
 ============================================================================
 

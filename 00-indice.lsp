@@ -3751,6 +3751,8 @@ NOTE LIBERE 39
   Oggetti da estrarre per raggiungere un obiettivo (1)
   Oggetti da estrarre per raggiungere un obiettivo (2)
   Oggetti da estrarre per raggiungere un obiettivo (3)
+  Uno strano sacchetto
+  Media e probabilità
 
 PROBLEMI SUI DADI
 =================
