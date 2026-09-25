@@ -4198,7 +4198,9 @@ Quindi in quel posto piove il 62.5% dei giorni.
 Roulette russa
 --------------
 
-Facciamo una partita alla roulette russa. Si tratta di un gioco d'azzardo che consiste nel posizionare un solo proiettile in una pistola, ruotare il tamburo senza guardare, puntarla verso la propria testa e premere il grilletto. Nel caso in cui il primo colpo non sia mortale, puoi decidere se sparare subito un secondo colpo oppure ruotare (rullare) il tamburo una seconda volta prima di sparare.
+Facciamo una partita alla roulette russa.
+Si tratta di un gioco d'azzardo che consiste nel posizionare un solo proiettile in una pistola, ruotare il tamburo senza guardare, puntarla verso la propria testa e premere il grilletto.
+Nel caso in cui il primo colpo non sia mortale, puoi decidere se sparare subito un secondo colpo oppure ruotare (rullare) il tamburo una seconda volta prima di sparare.
 Dal punto di vista delle probabilità di sopravvivenza, cosa conviene scegliere?
 
 Dal punto di vista matematico risulta:
@@ -4265,6 +4267,8 @@ Cerchiamo di verificare questa soluzione con una simulazione.
 
 Quindi conviene scegliere di rullare il tamburo due volte.
 La teoria della probabilità può salvarti la vita.
+
+Vedi anche "Il cacciatore" su "Note libere 39".
 
 
 ---------------------
@@ -4565,11 +4569,14 @@ Il simbolo sym è locale in ambito dinamico rispetto all'espressione for. Assume
 ;-> 5
 ;-> true
 
-Il secondo esempio utilizza un intervallo di numeri dal più alto al più basso. Notare che la dimensione del passo è sempre un numero positivo. Nel terzo esempio, viene verificata una condizione di interruzione.
+Il secondo esempio utilizza un intervallo di numeri dal più alto al più basso.
+Notare che la dimensione del passo è sempre un numero positivo.
+Nel terzo esempio, viene verificata una condizione di interruzione.
 
 Usare la funzione "sequence" per creare una sequenza di numeri.
 
-Sembra che il ciclo "for" di newLISP sia simile a quello di altri linguaggi (ad esempio il C), invece ci sono alcune importanti differenze. Vediamo alcuni esempi:
+Sembra che il ciclo "for" di newLISP sia simile a quello di altri linguaggi (ad esempio il C), invece ci sono alcune importanti differenze.
+Vediamo alcuni esempi:
 
 Esempio 1
 ---------
@@ -4595,7 +4602,8 @@ Esempio 2
 (for (i 1 5 1 (> i 2)) (print i { }))
 ;-> 1 2 true
 
-Quando inseriamo una condizione di uscita (break) dobbiamo specificare anche il passo del ciclo. Inoltre il ciclo "for" restituisce true se la condizione di uscita viene verificata (altrimenti restituisce l'ultima espressione valutata).
+Quando inseriamo una condizione di uscita (break) dobbiamo specificare anche il passo del ciclo.
+Inoltre il ciclo "for" restituisce true se la condizione di uscita viene verificata (altrimenti restituisce l'ultima espressione valutata).
 
 (for (i 1 5 1 (> i 10)) (print i { }))
 ;-> 1 2 3 4 5 " "

@@ -7139,5 +7139,283 @@ Quindi, con probabilità 1, prima o poi X uscirà.
 ;-> 0.115529
 ;-> 0.096636
 
+
+----------------
+Gioco pericoloso
+----------------
+
+Consideriamo il seguente gioco:
+Si puntano X euro su un numero N da 1 a 6.
+Vengono lanciati 3 dadi regolari con 6 facce (da 1 a 6):
+- Se N appare 0 volte nei tre dadi, perdiamo X
+- Se N appare 1 volta nei tre dadi, guadagniamo X
+- Se N appare 2 volte nei tre dadi, guadagniamo 2X
+- Se N appare 3 volte nei tre dadi, guadagniamo 3X
+Il gioco è vantaggioso per il giocatore?
+
+; Simulazione del gioco
+(define (simula N X iter show)
+  (local (totale casi conta)
+    (setq totale X)
+    (setq casi (dup nil 4))
+    (for (i 1 iter)
+      (setq conta 0)
+      (if (= (rand 6) (- N 1)) (++ conta))
+      (if (= (rand 6) (- N 1)) (++ conta))
+      (if (= (rand 6) (- N 1)) (++ conta))
+      (++ (casi conta))
+      (if (zero? conta)
+          (-- totale X)
+          (++ totale (* X conta))))
+    (when show)
+      (println "Capitale iniziale = " X)
+      (println N " appare 0 volte in " (casi 0) " casi -> " (* (- X) (casi 0)))
+      (println N " appare 1 volta in " (casi 1) " casi -> " (* X (casi 1)))
+      (println N " appare 2 volte in " (casi 2) " casi -> " (* 2 X (casi 2)))
+      (println N " appare 3 volte in " (casi 3) " casi -> " (* 3 X (casi 3)))
+      (println "Capitale finale = " (add (* (- X) (casi 0)) (* X (casi 1))
+                                         (* 2 X (casi 2)) (* 3 X (casi 3)) X))
+    (list casi totale)))
+
+Proviamo:
+
+(simula 1 1 1e6 true)
+;-> Capitale iniziale = 1
+;-> 1 appare 0 volte in 578790 casi -> -578790
+;-> 1 appare 1 volta in 347156 casi -> 347156
+;-> 1 appare 2 volte in 69258 casi -> 138516
+;-> 1 appare 3 volte in 4796 casi -> 14388
+;-> Capitale finale = -78729
+;-> ((578790 347156 69258 4796) -78729)
+
+Il gioco non è vantaggioso per il giocatore perchè il valore atteso e' negativo.
+Sia X la puntata e sia K il numero di volte in cui compare N nei 3 dadi.
+
+Calcoliamo le probabilità di tutti gli eventi:
+
+  +---+--------------------------+-----------+
+  | K |             Probabilita' | Risultato |
+  +---+--------------------------+-----------+
+  | 0 |        (5/6)^3 = 125/216 |        -X |
+  | 1 | 3*(1/6)*(5/6)^2 = 75/216 |        +X |
+  | 2 | 3*(1/6)^2*(5/6) = 15/216 |       +2X |
+  | 3 |          (1/6)^3 = 1/216 |       +3X |
+  +---+--------------------------+-----------+
+
+K ha distribuzione binomiale: P(K=k) = C(3,k) * (1/6)^k * (5/6)^(3-k)
+Il guadagno atteso vale:
+
+  E = -X * 125/216 + (X * 75/216) + (2X * 15/216) + (3X * 1/216) =
+    = X * (-125 + 75 + 30 + 3) / 216 = -17X / 216 = -0.0787037*X
+
+In media il giocatore perde circa il 7.87% della puntata per ogni partita.
+In altre parole, il banco ha un vantaggio matematico del 7.87%.
+Il pagamento 3X non è sufficiente a compensare l'enorme probabilita' di non vedere mai N.
+
+
+-------------------
+Le tre buste chiuse
+-------------------
+
+Ci sono tre buste chiuse.
+Ogni busta contiene un biglietto con scritto un numero casuale.
+L'obiettivo è quello di selezionare la busta che contiene il numero più grande.
+Abbiamo la possibilità di aprire qualunque busta per vedere il numero che contiene, ma in questo modo possiamo solo scegliere l'ultima busta aperta o una busta ancora chiusa.
+In altre parole, dopo aver aperto una busta non possiamo scegliere il numero della buste aperte prima.
+Per esempio:
+Apriamo la busta 2 e vediamo il numero che contiene
+A questo punto abbiamo tre possibilità:
+a) selezionare il numero della busta 2 (fine della selezione)
+b) selezionare una delle buste rimaste (1 o 3) (fine della selezione)
+c) aprire la busta 1 o la busta 3
+In quest'ultimo caso rimangono due possibili azioni:
+a) selezionare il numero della busta appena aperta (1 o 3) (fine della selezione)
+b) selezionare il numero della busta ancora chiusa (fine della selezione)
+
+Strategia 1
+Selezioniamo una delle tre buste in modo casuale
+
+(define (choice1 iter)
+  (local (conta lista selected)
+  (setq conta 0)
+  (for (i 1 iter)
+    (setq lista (rand 100 3))
+    (setq selected (lista (rand 3)))
+    (if (= selected (apply max lista)) (++ conta)))
+  (div conta iter)))
+
+(seed (time-of-day) true)
+(choice1 1e7)
+;-> 0.338579
+
+Con questa strategia abbiamo il 33% di selezionare il numero più grande.
+
+Strategia 2
+Apriamo due buste.
+Se il numero della seconda busta aperta è maggiore di quello della prima busta aperta, allora scegliamo il valore della seconda busta aperta, altrimenti scegliamo il numero della busta rimasta chiusa.
+
+(define (choice2 iter)
+  (local (conta lista selected)
+    (setq conta 0)
+    (for (i 1 iter)
+      (setq lista (rand 100 3))
+      ;(println lista)
+      (if (> (lista 1) (lista 0))
+          (setq selected (lista 1))
+          (setq selected (lista 2)))
+      ;(println selected) (read-line)
+      (if (= selected (apply max lista)) (++ conta)))
+    (div conta iter)))
+
+(choice2 1e7)
+;-> 0.5050844
+
+Con questa strategia abbiamo il 50% di selezionare il numero più grande.
+
+Nel caso di N buste, la soluzione consiste nell'aprire il 37% (1/e) delle buste e poi scegliere la prima busta che contiene un numero maggiore di tutti quelli visti precedentemente.
+
+Vedi anche "Problema della segretaria" su "Problemi vari".
+
+
+--------------------------------------------------
+Punti casuali non adiacenti in una lista circolare
+--------------------------------------------------
+
+Abbiamo una lista circolare lunga N (0,...,N-1) con tutti 0.
+Vogliamo selezionare in modo casuale due indici diversi che non siano adiacenti.
+In una lista circolare gli indici 0 e N-1 sono adiacenti.
+
+Gli indici sono disposti su una circonferenza, quindi per un indice i gli adiacenti sono i-1 e i+1 e considerando anche il ritorno circolare 0 <-> N-1.
+Per scegliere i due indici a caso senza rischiare di ottenere una coppia adiacente, possiamo fare così:
+1) scegliamo casualmente il primo indice i;
+2) invece di scegliere direttamente j tra tutti gli indici, scegliamo una distanza casuale tra 2 e N-2;
+3) calcoliamo j con il modulo N.
+Quindi risulta:
+
+  j = (i + distanza) % N
+
+In questo modo j non può essere uguale a i e non può essere uno dei suoi due adiacenti.
+Per esempio, con N = 10 e i = 8, le distanze ammesse sono 2..8:
+  distanza 2 -> j = 0
+  distanza 3 -> j = 1
+  ...
+  distanza 8 -> j = 6
+
+(define (two-random N)
+  ; N deve essere almeno 4 con coppie (0 2) (1 3).
+  ; Con N < 4 non esistono due indici distinti che
+  ; non siano adiacenti sulla circonferenza.
+  (if (>= N 4)
+      (letn ( (i (rand N))
+              ; La distanza viene scelta casualmente tra 2 e N-2.
+              ; In questo modo j non puo' coincidere con i e non puo'
+              ; essere uno dei due indici adiacenti a i.
+              (j (% (+ i 2 (rand (- N 3))) N)) )
+        (list i j))
+      nil))
+
+Proviamo:
+
+(two-random 10)
+;-> (3 8)
+(two-random 10)
+;-> (7 0)
+(two-random 4)
+;-> (1 3)
+
+Per M punti casuali su una circonferenza di N posizioni, con 2M <= N, vogliamo scegliere M indici distinti tali che nessuna coppia sia adiacente, compresa la coppia (0,N-1).
+L'algoritmo si basa sulle distanze circolari tra i punti scelti.
+Supponiamo di avere:
+  N = 12
+  M = 4
+Dobbiamo collocare 4 punti su 12 posizioni, senza che due punti siano adiacenti.
+Ogni coppia di punti consecutivi deve quindi avere una distanza di almeno 2.
+
+1) Partiamo dalla configurazione minima
+Creiamo una lista gaps di M elementi, inizialmente tutti uguali a 2:
+  gaps = (2 2 2 2)
+Ogni valore rappresenta la distanza tra un punto e il punto successivo.
+Con 4 punti abbiamo quindi bisogno di:
+  2 + 2 + 2 + 2 = 8 posizioni.
+
+2) Distribuiamo le posizioni rimanenti
+Abbiamo N - 2*M posizioni aggiuntive:
+  12 - 2*4 = 4
+Queste 4 posizioni vengono distribuite casualmente negli M intervalli.
+Per esempio potremmo ottenere:
+  gaps = (5 2 3 2)
+La somma è 5 + 2 + 3 + 2 = 12 e ogni distanza è almeno 2.
+
+3) Scegliamo casualmente il primo punto
+Supponiamo di ottenere:
+  pos = 10
+Mettiamo un 1 nella posizione 10.
+
+4) Seguiamo le distanze contenute in gaps
+Con gaps = (5 2 3 2) partiamo da 10 e calcoliamo:
+  10 + 5 = 15 -> 3
+   3 + 2 = 5
+   5 + 3 = 8
+   8 + 2 = 10
+Quindi i punti sono 10, 3, 5, 8 e la lista risultante è:
+  (0 0 0 1 0 1 0 0 1 0 1 0)
+
+Perchè non ci sono punti adiacenti?
+Ogni gap è almeno 2.
+Quindi tra due punti consecutivi c'e' sempre almeno una posizione libera.
+La cosa importante è che anche l'ultimo gap viene considerato.
+Nell'esempio:
+  8 -> 10
+  10 -> 3
+Il secondo passaggio è circolare:
+  (10 + 5) % 12 = 3
+quindi anche tra l'ultimo punto e il primo punto ci sono posizioni libere.
+
+In generale abbiamo gap[i] >= 2 per ogni i e sum(gaps) = N.
+
+Per questo motivo tutti gli M punti sono separati da almeno una posizione vuota, compreso il collegamento circolare tra l'ultimo e il primo punto.
+
+(define (random-points N M)
+  ; N deve essere almeno 2*M.
+  (if (and (>= M 2) (<= (* 2 M) N))
+    (letn (
+      ; Creiamo M distanze, inizialmente tutte uguali a 2.
+      ; Ogni distanza di 2 significa: punto, posto libero, punto.
+      (gaps (dup 2 M))
+      ; Posti ancora disponibili da distribuire casualmente.
+      extra (- N (* 2 M))
+      ; Posizione iniziale casuale.
+      pos (rand N)
+      ; Lista finale di N zeri.
+      L (dup 0 N))
+      ; Distribuiamo casualmente i posti extra nei vari intervalli.
+      (while (> extra 0)
+        (let (i (rand M))
+          (setf (gaps i) (+ (gaps i) 1))
+          (setq extra (- extra 1))))
+      ; Inseriamo i punti seguendo le distanze circolari.
+      (for (i 0 (- M 1))
+        ; Il punto corrente vale 1.
+        (setf (L pos) 1)
+        ; Passiamo al punto successivo.
+        (setq pos (% (+ pos (gaps i)) N)))
+      L)))
+
+Proviamo:
+
+(random-points 12 4)
+;-> (0 1 0 1 0 0 1 0 0 0 1 0)
+(random-points 20 4)
+;-> (0 0 1 0 0 1 0 0 0 0 0 0 0 1 0 0 0 1 0 0)
+(random-points 20 7)
+;-> (0 1 0 0 0 1 0 1 0 0 1 0 1 0 1 0 0 1 0 0)
+(random-points 20 11)
+;-> nil
+
+Con 2*M = N il risultato è un'alternanza perfetta:
+(random-points 12 6)
+;-> (1 0 1 0 1 0 1 0 1 0 1 0)
+a meno della posizione iniziale casuale.
+
 ============================================================================
 

@@ -3753,6 +3753,9 @@ NOTE LIBERE 39
   Oggetti da estrarre per raggiungere un obiettivo (3)
   Uno strano sacchetto
   Media e probabilità
+  Gioco pericoloso
+  Le tre buste chiuse
+  Punti casuali non adiacenti in una lista circolare
 
 PROBLEMI SUI DADI
 =================
