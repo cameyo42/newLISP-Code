@@ -3756,6 +3756,8 @@ NOTE LIBERE 39
   Gioco pericoloso
   Le tre buste chiuse
   Punti casuali non adiacenti in una lista circolare
+  Il cacciatore
+  Matrici binarie casuali con K valori a 1 in ogni riga e in ogni colonna
 
 PROBLEMI SUI DADI
 =================

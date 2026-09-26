@@ -10,7 +10,7 @@
 Analisi di lanci di dadi
 ------------------------
 
-Per calcolare tutti i risultati (come liste) del lancio di N dadi con numero di facce non necessariamente uguali M1, M2,...MN occorre generare il 'prodotto cartesiano' degli insiemi dei possibili valori di ciascun dado.
+Per calcolare tutti i risultati (come liste) del lancio di N dadi con numero di facce non necessariamente uguali M1, M2,...MN occorre generare il 'prodotto cartesianò degli insiemi dei possibili valori di ciascun dado.
 
 Se i dadi hanno rispettivamente M1, M2, ..., MN facce, la funzione deve generare tutte le tuple:
   (1 1 ... 1)
@@ -7416,6 +7416,372 @@ Con 2*M = N il risultato è un'alternanza perfetta:
 (random-points 12 6)
 ;-> (1 0 1 0 1 0 1 0 1 0 1 0)
 a meno della posizione iniziale casuale.
+
+
+-------------
+Il cacciatore
+-------------
+
+Una famosa scena del film "Il cacciatore" vede Robert De Niro impegnato in una 'roulette russa'.
+La nostra 'roulette russa' funziona nel modo seguente:
+a) Una pistola a tamburo con sei colpi viene caricata con due proiettili.
+b) Il tamburo viene fatto ruotare in modo casuale.
+c) Viene premuto il grilletto, ma non viene sparato nessun colpo.
+A questo punto, prima di premere di nuovo il grilletto, possiamo scegliere di lasciare il tamburo come si trova oppure ruotarlo di nuovo in modo casuale.
+
+Se i due proiettili inseriti all'inizio sono adiacenti cosa conviene fare?
+
+Se i due proiettili inseriti all'inizio non sono adiacenti cosa conviene fare?
+
+1) Proiettili adiacenti
+
+(define (vicini iter)
+  (local (caso1 caso2 k tamburo colpo1 colpo2)
+    (setq caso1 0)
+    (setq caso2 0)
+    (setq k 0)
+    (while (< k iter)
+      (setq tamburo (dup 0 6))
+      ; colpo 1 casuale
+      (setq colpo1 (rand 6))
+      (setf (tamburo colpo1) 1)
+      ; colpo 2 adiacente
+      (setf colpo2 (% (+ colpo1 1) 6))
+      (setf (tamburo colpo2) 1)
+      ; rotazione casuale del tamburo (1..6 rotazioni)
+      ; (i colpi di indice 0 e 5 sono adiacenti)
+      (setq tamburo (rotate tamburo (+ (rand 6) 1)))
+      ; se il primo colpo è a vuoto...
+      (when (zero? (tamburo 0))
+        ; avanza il tamburo di 1
+        (setq tamburo (rotate tamburo 1))
+        ; Caso 1: non ruotare il tamburo
+        ; siamo salvi?
+        (if (= (tamburo 0) 0) (++ caso1))
+        ; Caso 2: ruotare il tamburo
+        (setq tamburo (rotate tamburo (+ (rand 6) 1)))
+        ; siamo salvi?
+        (if (= (tamburo 0) 0) (++ caso2))
+        ; aumenta il numero delle iterazioni
+        (++ k)))
+    (list (div caso1 iter) (div caso2 iter))))
+
+(seed (time-of-day) true)
+(vicini 1e6)
+;-> (0.749352 0.66671)
+
+Se i due proiettili inseriti all'inizio sono adiacenti conviene non ruotare il tamburo.
+(3/4 contro 2/3).
+
+2) Proiettili non adiacenti
+
+(define (lontani iter)
+  (local (caso1 caso2 k tamburo colpo1 colpo2)
+    (setq caso1 0)
+    (setq caso2 0)
+    (setq k 0)
+    (while (< k iter)
+      (setq tamburo (dup 0 6))
+      ; colpo 1 casuale
+      (setq colpo1 (rand 6))
+      (setf (tamburo colpo1) 1)
+      ; colpo 2 non adiacente
+      ; La distanza viene scelta casualmente tra 2 e N-2 (N=6).
+      ; In questo modo colpo2 non puo' coincidere con colpo1 e non puo'
+      ; essere uno dei due indici adiacenti a colpo1.
+      (setq colpo2 (% (+ colpo1 2 (rand 3)) 6))
+      (setf (tamburo colpo2) 1)
+      ; rotazione casuale del tamburo (1..6 rotazioni)
+      ; (i colpi di indice 0 e 5 sono adiacenti)
+      (setq tamburo (rotate tamburo (+ (rand 6) 1)))
+      ; se il primo colpo è a vuoto...
+      (when (zero? (tamburo 0))
+        ; avanza il tamburo di 1
+        (setq tamburo (rotate tamburo 1))
+        ; Caso 1: non ruotare il tamburo
+        (if (= (tamburo 0) 0) (++ caso1))
+        ; Caso 2: ruotare il tamburo
+        (setq tamburo (rotate tamburo (+ (rand 6) 1)))
+        (if (= (tamburo 0) 0) (++ caso2))
+        ; aumenta il numero delle iterazioni
+        (++ k)))
+    (list (div caso1 iter) (div caso2 iter))))
+
+(seed (time-of-day) true)
+(lontani 1e6)
+;-> (0.49987 0.666591)
+
+Se i due proiettili inseriti all'inizio non sono adiacenti conviene ruotare il tamburo.
+(1/2 contro 2/3).
+
+Vedi anche "Roulette russa" su "Note libere 2".
+
+
+-----------------------------------------------------------------------
+Matrici binarie casuali con K valori a 1 in ogni riga e in ogni colonna
+-----------------------------------------------------------------------
+
+Creare una matrice quadrata binaria NxN casuale con:
+a) K celle a 1 per ogni riga
+b) K celle a 1 per ogni colonna
+
+Per avere contemporaneamente K valori a uno per ogni riga e K valori a uno per ogni colonna, la matrice deve essere quadrata.
+Costruire la matrice come unione di K permutazioni, facendo in modo che le posizioni delle une siano tutte distinte.
+Per garantire matematicamente le condizioni, conviene costruire le K permutazioni in modo che siano necessariamente disgiunte usando traslazioni cicliche.
+
+La costruzione con le traslazioni cicliche ha le seguenti proprietà:
+- ogni permutazione P produce N uni
+- ogni traslazione aggiunge esattamente un 1 a ogni riga
+- due traslazioni diverse non possono mettere l'1 nella stessa cella
+- quindi dopo K traslazioni ogni riga contiene esattamente K uni
+- per la stessa ragione ogni colonna contiene esattamente K uni
+
+La funzione genera una permutazione casuale e prende le prime K traslazioni cicliche di quella permutazione.
+Con: (randomize (sequence 0 (- N 1)))
+newLISP non considera necessariamente tutte le configurazioni possibili,
+mentre con: (randomize (sequence 0 (- N 1)) true)
+viene inclusa anche la configurazione iniziale.
+
+(define (random-matrix N K)
+  ; Crea una matrice NxN con esattamente K uni per ogni riga e colonna.
+  (letn ((M (array N N '(0)))
+         (P (randomize (sequence 0 (- N 1)) true)))
+    ; Le K traslazioni della permutazione P sono necessariamente disgiunte.
+    (for (k 0 (- K 1))
+      ; Per ogni riga inserisce un 1 nella colonna ottenuta
+      ; applicando una diversa traslazione ciclica.
+      (for (i 0 (- N 1))
+        (setf (M i (P (% (+ i k) N))) 1)))
+    M))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(random-matrix 4 2)
+;-> ((0 1 0 1) (1 0 0 1) (1 0 1 0) (0 1 1 0))
+
+(random-matrix 10 5)
+;-> ((1 0 1 1 0 0 0 1 1 0)
+;->  (1 0 1 1 0 0 1 0 1 0)
+;->  (1 0 0 1 0 1 1 0 1 0)
+;->  (1 0 0 1 1 1 1 0 0 0)
+;->  (0 1 0 1 1 1 1 0 0 0)
+;->  (0 1 0 0 1 1 1 0 0 1)
+;->  (0 1 0 0 1 1 0 1 0 1)
+;->  (0 1 1 0 1 0 0 1 0 1)
+;->  (0 1 1 0 0 0 0 1 1 1)
+;->  (1 0 1 0 0 0 0 1 1 1))
+
+; Verifica se una matrice ha K 1 in ogni riga e K 1 in ogni colonna
+(define (check? matrix)
+  (let ((stop nil) (K (apply + (matrix 0))))
+    ; controllo somma delle righe
+    (dolist (row matrix stop)
+      (if-not (= (apply + row) K) (setq stop true)))
+    ; controllo somma delle colonne
+    (dolist (row (transpose matrix) stop)
+      (if-not (= (apply + row) K) (setq stop true)))
+    (if stop nil K)))
+
+; Calcola la distribuzione degli 1 creando 'iter' matrici quadrate NxN con
+; K 1 in ogni riga e K 1 in ogni colonna.
+; Verifica anche la correttezza di ogni matrice generata
+(define (verify N K iter)
+  (local (total M)
+    (setq total (array N N '(0)))
+    (for (i 1 iter)
+      (setq M (random-matrix N K))
+      (cond ((check? M)
+              (for (row 0 (- N 1))
+                (for (col 0 (- N 1))
+                  (++ (total row col) (M row col)))))
+            (true (println "Error: " M))))
+    total))
+
+Proviamo:
+
+(verify 4 3 10000)
+;-> ((7440 7441 7530 7589)
+;->  (7507 7535 7462 7496)
+;->  (7487 7535 7476 7502)
+;->  (7566 7489 7532 7413))
+
+(verify 4 1 10000)
+;-> ((2557 2516 2381 2546)
+;->  (2481 2519 2529 2471)
+;->  (2545 2465 2466 2524)
+;->  (2417 2500 2624 2459))
+
+Un'altra idea:
+Generare una matrice con K uni casuali in ogni riga.
+Spostare gli uni delle righe per fare in modo che ogni colonna abbia K uni.
+Quindi, poichè ogni spostamento conserva esattamente K uni nella riga interessata, il problema viene ridotto esclusivamente al bilanciamento delle colonne.
+
+L'algoritmo costruisce una matrice quadrata NxN con esattamente K uni per ogni riga e, successivamente, sposta gli uni all'interno delle righe fino a ottenere esattamente K uni anche in ogni colonna.
+1) Generazione iniziale
+Per ogni riga vengono scelte casualmente K colonne distinte.
+La riga contiene quindi sempre esattamente K uni.
+Contemporaneamente viene mantenuto il vettore C, dove:
+  C[c] = numero di uni presenti nella colonna c
+Alla fine della fase iniziale:
+  ogni riga ha K uni, ma le colonne possono avere quantità diverse di uni.
+
+2) Individuazione delle colonne sbilanciate
+Vengono costruite due liste:
+  excess  = colonne con C[c] > K
+  deficit = colonne con C[c] < K
+Una colonna in "excess" deve perdere degli uni.
+Una colonna in "deficit" deve ricevere degli uni.
+Poichè il numero totale di uni è N*K, quando esiste una colonna in eccesso deve necessariamente esistere anche una colonna in difetto.
+
+3) Scelta delle colonne
+Viene scelta casualmente:
+A = una colonna in eccesso
+B = una colonna in difetto
+L'obiettivo è spostare un 1 da A a B.
+
+4) Ricerca della riga adatta
+Si crea un ordine casuale delle righe e si cerca una riga r che soddisfi:
+  M[r,A] = 1
+  M[r,B] = 0
+Questa riga permette di effettuare lo spostamento:
+  1 in A  ->  0
+  0 in B  ->  1
+Quindi il numero di uni della riga rimane invariato.
+
+5) Aggiornamento delle colonne
+
+Dopo lo spostamento vengono aggiornati i conteggi:
+  C[A] = C[A] - 1
+  C[B] = C[B] + 1
+Di conseguenza A si avvicina a K e B si avvicina a K.
+
+6) Ripetizione
+Il procedimento viene ripetuto:
+
+  trova colonne in eccesso e in difetto
+            |
+            v
+  scegli A e B casualmente
+            |
+            v
+  trova una riga con 1 in A e 0 in B
+            |
+            v
+  sposta l'1 da A a B
+            |
+            v
+  aggiorna C[A] e C[B]
+            |
+            +----> ripeti
+
+Il ciclo termina quando non esiste piu' alcuna colonna con piu' di K uni.
+A quel punto, poichè il numero totale di uni è esattamente N*K, non può esistere neppure una colonna con meno di K uni.
+Pertanto, ogni riga -> K uni e ogni colonna -> K uni.
+
+La parte fondamentale è questa:
+se A ha piu' di K uni e B ne ha meno di K, esiste necessariamente almeno una riga con 1 in A e 0 in B. Infatti, se ogni 1 presente in A fosse accompagnato da un 1 in B, avremmo C(B) >= C(A), in contraddizione con C(A) > K > C(B).
+Quindi ogni spostamento scelto in questo modo è sempre possibile e riduce di uno la differenza complessiva tra colonne in eccesso e colonne in difetto.
+
+Diagramma di flusso
+-------------------
+
+  matrice iniziale
+        |
+        v
+  calcolo C
+        |
+        v
+    +-------+
+    | until |
+    +-------+
+        |
+        v
+  trova A > K e B < K
+        |
+        v
+  trova una riga con 1 in A e 0 in B
+        |
+        v
+  sposta 1: A -> B
+        |
+        v
+  aggiorna C
+        |
+        +-------> ripeti
+
+(define (random-matrix N K)
+  (letn ((M (array N N '(0)))
+         (C (array N '(0)))
+         (P nil)
+         (excess nil)
+         (deficit nil)
+         (A 0)
+         (B 0)
+         (rows nil)
+         (found nil)
+         (done nil))
+    ; Genera K uni casuali distinti per ogni riga.
+    (for (r 0 (- N 1) 1)
+      ; Genera una permutazione casuale delle colonne.
+      (setq P (randomize (sequence 0 (- N 1)) true))
+      ; Inserisce gli uni nelle prime K posizioni della permutazione.
+      (for (i 0 (- K 1) 1)
+        (setf (M r (P i)) 1)
+        ; Aggiorna il numero di uni della colonna.
+        (++ (C (P i)))))
+    ; Continua finche' tutte le colonne hanno K uni.
+    (until done
+      ; Costruisce le liste delle colonne in eccesso e in difetto.
+      (setq excess '())
+      (setq deficit '())
+      (for (c 0 (- N 1) 1)
+        ; Colonna con piu' di K uni.
+        (if (> (C c) K)
+          (push c excess -1))
+        ; Colonna con meno di K uni.
+        (if (< (C c) K)
+          (push c deficit -1)))
+      ; Se non esistono colonne in eccesso, la matrice e' completa.
+      (if (null? excess)
+        (setq done true)
+        (begin
+          ; Sceglie casualmente una colonna in eccesso.
+          (setq A (nth (rand (length excess)) excess))
+          ; Sceglie casualmente una colonna in difetto.
+          (setq B (nth (rand (length deficit)) deficit))
+          ; Genera un ordine casuale delle righe.
+          (setq rows (randomize (sequence 0 (- N 1)) true))
+          ; Cerca una riga che permetta lo spostamento.
+          (setq found nil)
+          (for (i 0 (- N 1) 1 found)
+            ; La riga deve avere 1 in A e 0 in B.
+            (if (and (= (M (rows i) A) 1)
+                     (= (M (rows i) B) 0))
+              (begin
+                ; Sposta l'uno dalla colonna A alla colonna B.
+                (setf (M (rows i) A) 0)
+                (setf (M (rows i) B) 1)
+                ; Aggiorna i conteggi delle colonne.
+                (-- (C A))
+                (++ (C B))
+                ; Interrompe il for.
+                (setq found true)))))))
+    ; Restituisce la matrice finale.
+    M))
+
+Proviamo:
+
+(random-matrix 4 1)
+;-> ((0 0 1 0) (0 0 0 1) (0 0 1 0) (0 1 0 0))
+
+Per N=4 e K=1, ogni cella si avvicina alle 2500 occorrenze attese.
+(verify 4 1 10000)
+;-> ((2477 2438 2523 2562)
+;->  (2579 2460 2508 2453)
+;->  (2418 2612 2470 2500)
+;->  (2526 2490 2499 2485))
 
 ============================================================================
 
