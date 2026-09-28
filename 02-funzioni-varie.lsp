@@ -2916,11 +2916,8 @@ La funzione finale utilizza la funzione "triple" e tiene conto del numero (indic
           (-- tri)
           ;(println (triple el))
         )
-        out
-      )
-    )
-  )
-)
+        ; rimuove le vocali doppie
+        (replace "oO" out "O")))))
 
 Proviamo:
 
@@ -2937,7 +2934,7 @@ Proviamo:
 (numero "1111111111")
 ;-> "UnMiliardoCentoUndiciMilioniCentoUndiciMilaCentoUndici"
 (numero "888881")
-;-> "OttoCentoOttantOttoMilaOttoCentoOttantUno"
+;-> "OttoCentOttantOttoMilaOttoCentOttantUno"
 
 (for (i 0 100) (println i { - } (numero i)))
 ;-> 0 - zero

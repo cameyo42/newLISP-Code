@@ -7783,5 +7783,934 @@ Per N=4 e K=1, ogni cella si avvicina alle 2500 occorrenze attese.
 ;->  (2418 2612 2470 2500)
 ;->  (2526 2490 2499 2485))
 
+
+------------------------------
++- 1 +- 2 +- 3 +- ... +- N = 0
+------------------------------
+
+Calcolare la sequenza definita nel modo seguente:
+
+  a(n) = Numero di soluzioni di +- 1 +- 2 +- 3 +- ... +- n = 0
+
+Per n = 6 non ci sono soluzioni, quindi la risposta è 0.
+Per n = 4 ci sono due soluzioni, quindi la risposta è 2.
+Le due soluzioni sono 1 - 2 - 3 + 4 = -1 + 2 + 3 - 4 = 0.
+
+Sequenza OEIS A063865:
+Number of solutions to +- 1 +- 2 +- 3 +- ... +- n = 0.
+  1, 0, 0, 2, 2, 0, 0, 8, 14, 0, 0, 70, 124, 0, 0, 722, 1314, 0, 0, 8220,
+  15272, 0, 0, 99820, 187692, 0, 0, 1265204, 2399784, 0, 0, 16547220,
+  31592878, 0, 0, 221653776, 425363952, 0, 0, 3025553180, 5830034720, 0,
+  0, 41931984034, 81072032060, 0, 0, ...
+
+a(n) is the number of subsets of (1..n) whose sum is equal to the sum of their complement.
+
+Algoritmo
+1) Creare la lista (1 2 ... N)
+2) Calcolare l'insieme delle parti di questa lista (powerset)
+3) Sommare gli elementi di ciascuna lista
+4) Raddoppiare ogni elemento
+5) Calcolare la somma di (1 2 ... N)
+6) Contare il numero di occorrenze
+
+(define (powerset lst)
+"Generate all sublists of a list"
+  (if (empty? lst)
+      (list '())
+      (let ((element (first lst))
+            (p (powerset (rest lst))))
+         (extend (map (fn (subset) (cons element subset)) p) p))))
+
+(define (powerset-i lst)
+"Generate all sublists of a list (binary mask)"
+  (if (= lst '()) lst
+  ;else
+      (let ((out '(())) (n (length lst)) (group '()))
+        (for (mask 1 (- (<< 1 n) 1))
+          (setq group '())
+          (for (i 0 (- n 1))
+            (if (!= (& mask (<< 1 i))) (push (lst i) group -1)))
+          (push group out -1))
+        out)))
+
+(define (a n)
+  (if (zero? n) 1
+    (first (count (list (apply + (sequence 1 n)))
+                  (map (fn(x) (* 2 (apply + x))) (powerset (sequence 1 n)))))))
+
+(map a (sequence 0 15))
+;-> (1 0 0 2 2 0 0 8 14 0 0 70 124 0 0 722)
+
+; Usare (reset) per evitare che 'powerset' aumenti il tempo di esecuzione
+; ad ogni chiamata
+(reset) 
+(time (map a (sequence 0 20)))
+;-> 4281.358
+
+(reset)
+(time (println (map a (sequence 0 25))))
+;-> (1 0 0 2 2 0 0 8 14 0 0 70 124 0 0 722 1314
+;->  0 0 8220 15272 0 0 99820 187692 0)
+;-> 186869.138
+
+
+-----------------
+Treni che passano
+-----------------
+
+Problema 1
+----------
+Un treno impiega 7 secondi per passare davanti a un osservatore fermo e 26 secondi per percorrere l'intera lunghezza di una stazione di 380 metri.
+Quali sono la velocità del treno e la sua lunghezza?
+
+Per risolvere il problema è sufficiente la formula:
+
+  spazio = velocità x tempo
+  s = v*t
+
+In 7 secondi il treno passa davanti a un osservatore fermo, ovvero percorre una distanza pari alla propria lunghezza.
+
+  L = v * 7          (1)
+
+Percorrere la stazione significa coprire la lunghezza della stazione stessa più la propria lunghezza.
+Ciò avviene in 26 secondi. 
+
+  380 + L = v * 26   (2)
+
+Sostituiamo la (1) nella (2): 
+
+  380 + v*7 = v*26  -->  v = 380/(26-7) = 380/19 = 20 m/sec
+
+Il treno viaggia ad una velocità pari a 20 m/sec.
+
+La lunghezza del treno vale:
+  
+  L = v*7 = 20*7 = 140 m
+
+Problema 2
+----------
+Un vagone o una carrozza ferroviaria in Europa è lungo in media 26 metri.
+Un treno impiega 13 secondi per passare davanti a un osservatore fermo.
+Inoltre l'osservatore conta le carrozze del treno che sono 12.
+Quali sono la velocità del treno e la sua lunghezza?
+
+La lunghezza del treno vale 12 * 26 = 312 m
+La velocità del treno vale 312 / 13 = 24 m/sec
+
+
+-----------------
+Numeri in lettere
+-----------------
+
+Determinare la sequenza definita nel modo seguente:
+  a(n) è il primo numero il cui numero in lettere usa n caratteri diversi.
+
+Esempio:
+  8 -> "otto" è il primo numero che usa 2 caratteri diversi
+  1 -> "uno"  è il primo numero che usa 3 caratteri diversi
+  9 -> "nove" è il primo numero che usa 4 caratteri diversi
+  ...
+
+; Funzioni per convertire un numero intero in lettere (italiano)
+
+; la cifra 1
+(setq un "Un")
+; le dieci cifre - codeA
+(setq cifre '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+  "Otto" "Nove"))
+; i primi venti numeri - code
+(setq venti '("Zero" "Uno" "Due" "Tre" "Quattro" "Cinque" "Sei" "Sette"
+  "Otto" "Nove" "Dieci" "Undici" "Dodici" "Tredici" "Quattordici"
+  "Quindici" "Sedici" "Diciassette" "Diciotto" "Diciannove"))
+; le decine - codeB
+(setq decine '("" "" "Venti" "Trenta" "Quaranta" "Cinquanta"
+  "Sessanta" "Settanta" "Ottanta" "Novanta"))
+; le decine senza vocali - codeB1
+(setq dcn    '("" "" "Vent" "Trent" "Quarant" "Cinquant"
+  "Sessant" "Settant" "Ottant" "Novant"))
+; il numero 100
+(setq cento "Cento")
+; multipli con la cifra 1 - codeC
+(setq multiplo '("" "Mille" "Milione" "Miliardo" "Bilione" "Biliardo"
+  "Trilione" "Triliardo" "Quadrilione" "Quadriliardo"))
+; multipli con la cifra diversa da 1 - codeC1
+(setq multipli '("" "Mila" "Milioni" "Miliardi" "Bilioni" "Biliardi"
+    "Trilioni" "Triliardi" "Quadrilioni" "Quadriliardi"))
+
+(define (triple num)
+  (local (lst res)
+    (setq res "")
+    ; lista delle cifre
+    (setq lst (map int (explode (string num))))
+    (dolist (el lst)
+      (cond 
+        ((= el 0) nil)
+        (true 
+          (cond 
+            ((= $idx 2) ; cifra unita ?
+              (if (!= 1 (lst 1)) ; ultime 2 cifre > 19 ?
+                  (setq res (append res (cifre el)))))
+            ((= $idx 1) ; cifra decine ?
+              (if (= el 1) ; ultime 2 cifre < 20 ?
+                ; prendo il numero da 11 a 19
+                (setq res (append res (venti (+ 9 el (lst 2)))))
+                ; oppure prendo le decine
+                (if (or (= 1 (lst 2)) (= 8 (lst 2))) ; numero finisce con 1 o 8?
+                  ; prendo le decine senza vocale finale
+                  (setq res (append res (dcn el)))
+                  ; oppure prendo le decine con vocale finale
+                  (setq res (append res (decine el))))))
+            ((= $idx 0) ; cifra centinaia ?
+              (if (= el 1) ; cifra centinaia = 1 ?
+                  ; prendo solo "cento"
+                  (setq res (append res cento))
+                  ; prendo il numero e "cento"
+                  (setq res (append res (venti el) cento))))))))
+    res))
+
+(define (pad num len ch)
+  (let (out (string num))
+    (while (> len (length out))
+      (setq out (string ch out)))
+  out))
+
+(define (numero num)
+  (local (lst tri val out)
+    (setq out "")
+    (if (= (string num) "0")
+      (setq out "Zero")
+      (begin
+        ; calcola il numero di triplette
+        (if (zero? (% (length (string num)) 3))
+            (setq tri (/ (length (string num)) 3))
+            (setq tri (+ (/ (length (string num)) 3) 1)))
+        ; formatta in stringa il numero (padding)
+        ; e crea una lista con tutte le triplette
+        (setq lst (explode (pad (string num) (* 3 tri) "0") 3))
+        ; ciclo per la creazione della stringa finale
+        (dolist (el lst)
+          ; creazione del numero rappresentato dalla tripletta
+          (setq val (triple el))
+          ; controllo se tale numero vale "Uno"
+          (if (= val "Uno")
+            (cond ((= $idx (- (length lst) 1)) ; primo gruppo a destra ?
+                  (setq out (append out val))) ; aggiungo solo "Uno"
+                  ((= $idx (- (length lst) 2)) ; secondo gruppo a destra ?
+                  (setq out (string out (multiplo (- tri 1))))) ;aggiungo solo "Mille"
+                  ;altrimenti aggiungo "Un" e il codice corrispondente
+                  (true (setq out (string out "Un" (multiplo (- tri 1))))))
+            (if (!= val "") ; se la tripletta vale "000" --> val = ""
+              (setq out (string out val (multipli (- tri 1))))))
+          (-- tri))
+        ; rimuove le vocali doppie
+        (replace "oO" out "O")))))
+
+Proviamo:
+
+(numero 1234567890)
+;-> "UnMiliardoDueCentoTrentaQuattroMilioni
+;->  CinqueCentoSessantaSetteMilaOttoCentoNovanta"
+
+(numero 888)
+"OttoCentOttantOtto"
+
+; Calcola la sequenza a(n):
+; il primo numero il cui numero in lettere usa n caratteri diversi.
+(define (cerca-X limite)
+  (let ( (lst (array (+ limite 1) '(0))) (out '()) )
+    (for (i 1 limite)
+      (setq num-str (lower-case (numero i)))
+      (setq different (length (unique (explode num-str))))
+      (if (and (<= different limite) (zero? (lst different)))
+          (setf (lst different) (list num-str i))))
+    ; seleziona solo i valori non nulli
+    (dolist (el lst)
+      (if-not (zero? el) (push (list $idx (el 0) (el 1)) out -1)))
+    out))
+
+(time (println (cerca-X 1e6)))
+;-> ((2 "otto" 8) (3 "uno" 1) (4 "nove" 9) (5 "undici" 11)
+;->  (6 "quattro" 4) (7 "diciassette" 17) (8 "diciannove" 19)
+;->  (9 "quattordici" 14) (10 "ventiquattro" 24)
+;->  (11 "centoquattordici" 114) (12 "duecentoventiquattro" 224)
+;->  (13 "millecentoquattordici" 1114) (14 "milleduecentoventiquattro" 1224)
+;->  (15 "duemilaquattrocentoventisei" 2426))
+;-> 20345.325
+
+Altre funzioni:
+
+; numeri-stringa che hanno tutte le lettere ordinate 
+; op = '<' --> (crescente)
+; op = '>' --> (decrescente)
+(define (sorted? str op)
+  (let (lst (explode str))
+    (= lst (sort (copy lst) op))))
+
+; numeri-stringa che hanno tutte le vocali
+(define (all-vowels? str)
+  (= (difference '("a" "e" "i" "o" "u") (explode str)) '()))
+
+; numeri-stringa che hanno lunghezza pari al valore del numero 
+(define (name-length? str num)
+  (= num (length str)))
+
+I primi numeri che hanno tutte le vocali sono:
+((24 "ventiquattro") (59 "cinquantanove") (85 "ottantacinque"))
+
+Il primo numero con lettere ordinate in modo decrescente è:
+(3 "tre")
+
+
+---------------
+Curve su zucche
+---------------
+
+Date due zucche, è possibile disegnare sulle zucche due curve tridimensionali uguali?
+
+Esistono infinite curve tridimensionali uguali.
+Pensiamo all'INTERSEZIONE tra le due zucche.
+Ogni intersezione genera due curve tridimensionali uguali.
+
+Immaginiamo di dipingere la prima zucca di vernice fresca rossa e la seconda di vernice fresca blu.
+a) Spingiamo le due zucche l'una contro l'altra, facendo penetrare idealmente le loro superfici (come se fossero fatte di fumo o fossero ologrammi).
+b) Nel punto esatto in cui le superfici si incrociano, i due colori si fondono.
+c) Se separiamo le zucche, sulla superficie di ciascuna rimarrà una linea stampata.
+Quelle due linee (una sulla zucca A e una sulla zucca B) sono l'esatta 'impronta digitale' del loro scontro nello spazio.
+Sono due curve tridimensionali perfettamente congruenti (uguali).
+Poiché le zucche sono oggetti reali che possiamo muoverle nello spazio facendole intersecare in infiniti modi diversi (cambiando angolazione, distanza o rotazione).
+Ognuno di questi movimenti genera una nuova, unica curva di intersezione.
+
+
+----------------
+Vincere a tennis
+----------------
+
+Qual è il punteggio più favorevole in una partita di tennis (3 set su 5)?
+Intuitivamente sembra che 6-0, 6-0, 5-0(40-0) sia la soluzione più favorevole, ma non è così.
+Infatti il punteggio 6-0, 6-0, 6-6(6-0) (tie-break) è il migliore in assoluto.
+Nel primo caso abbiamo 3 possibilità di vincere il match con un solo punto.
+Nel secondo caso abbiamo 6 possibilità di vincere il match con un solo punto.
+
+
+------------------
+Funzione di Landau
+------------------
+
+Sequenza OEIS A000793:
+Landau's function g(n): largest order of permutation of n elements.
+Equivalently, largest LCM of partitions of n.
+  1, 1, 2, 3, 4, 6, 6, 12, 15, 20, 30, 30, 60, 60, 84, 105, 140, 210, 210,
+  420, 420, 420, 420, 840, 840, 1260, 1260, 1540, 2310, 2520, 4620, 4620,
+  5460, 5460, 9240, 9240, 13860, 13860, 16380, 16380, 27720, 30030,
+  32760, 60060, 60060, 60060, 60060, 120120, ...
+
+Algoritmo
+1) Calcolare tutte le partizioni intere di n
+2) Calcolare il minimo comune multiplo (mcm) di ogni partizione
+3) Prendere il massimo degli mcm
+
+(define (partition-num num)
+"Generate a list of all the partitions of a positive integer"
+(catch
+  (local (part k temp-value out)
+    (setq out '())
+    (setq part (array num '(0)))
+    (setq k 0)
+    (setf (part k) num)
+    ; Questo ciclo prima aggiunge la partizione corrente alla lista
+    ; poi genera la partizione successiva.
+    ; Il ciclo termina quando la partizione corrente è costituita da tutti 1.
+    (while true
+      ; Aggiunge la partizione corrente alla lista delle soluzioni
+      (push (slice part 0 (+ k 1)) out -1)
+      ; Genera la partizione successiva
+      ; Trova il valore non-uno più a destra di part[]
+      ; Aggiorna anche il valore di temp-value
+      ; (cioè quanti valori possono essere inseriti)
+      (setq temp-value 0)
+      (while (and (>= k 0) (= (part k) 1))
+        (setq temp-value (+ temp-value (part k)))
+        (-- k))
+      ; se k < 0, tutti i valori valgono 1
+      ; quindi non ci sono altre partizioni da generare
+      (if (< k 0) (throw out))
+      ; Decrementa part[k] trovato sopra e calcola il valore di temp-value
+      (setf (part k) (- (part k) 1))
+      (++ temp-value)
+      ; Se rem_val è maggiore, allora l'ordine è violato.
+      ; Divide temp-value in diversi valori di dimensione part[k] e
+      ; copia questi valori in posizioni diverse dopo part[k]
+      (while (> temp-value (part k))
+        (setf (part (+ k 1)) (part k))
+        (setq temp-value (- temp-value (part k)))
+        (++ k))
+      ; Copia rem_val nella posizione successiva e incrementa la posizione
+      (setf (part (+ k 1)) temp-value)
+      (++ k)))))
+
+(partition-num 4)
+;-> ((4) (3 1) (2 2) (2 1 1) (1 1 1 1))
+
+(define (lcm_ a b) (/ (* a b) (gcd a b)))
+(define-macro (lcm)
+"Calculate the lcm of two or more number"
+  (apply lcm_ (map eval (args)) 2))
+
+; Calcola la sequenza di Landau
+(define (landau limite)
+  (let (out '(1))
+    (for (i 2 limite)
+      (push (apply max (map (fn(x) (apply lcm x))
+                            (rest (partition-num i)))) out -1))
+    out))
+
+(time (println (landau 50)))
+;-> (1 1 2 3 6 6 12 15 20 30 30 60 60 84 105 140 210 210
+;->  420 420 420 420 840 840 1260 1260 1540 2310 2520 4620 4620
+;->  5460 5460 9240 9240 13860 13860 16380 16380 27720 30030
+;->  32760 60060 60060 60060 60060 120120 120120 180180 180180)
+;-> 10766.526
+
+
+--------------------------------------------------------------------------
+Generare i numeri binari compresi tra una stringa binaria e il suo inverso
+--------------------------------------------------------------------------
+
+Data una stringa binaria, generare tutti i numeri compresi tra essa e l'inverso della sua rappresentazione come stringa (il valore dell'inverso può essere inferiore o superiore a quello della stringa data).
+
+Esempi
+  str = "1" opure str = "0"
+  Output: Nessuno (la stringa e il suo inverso sono identici)
+  
+  str: (qualsiasi stringa binaria palindroma)
+  Output: Nessuno (come sopra)
+  
+  str = "01"
+  Output: Nessuno (non esistono numeri binari tra 01 e 10, ovvero tra 1 e 2)
+  
+  str = "001"
+  Output: 010, 011 (Numeri tra 001 (1) e 100 (4): 2 e 3)
+  
+  str = "100"
+  Output: 010, 011 (Come sopra)
+  
+  str = "0010"
+  Output: 0011 (Numeri tra 0010 (2) e 0100 (4): 3)
+
+(setq str "010011")
+(setq str "001")
+(setq str "01")
+(setq str "10101")
+
+(define (range str)
+  (let ((n1 (int str 0 2)) (n2 (int (reverse str) 0 2)))
+    (if (> n1 n2) (swap n1 n2))
+    (if (or (= n1 n2) (= (+ n1 1) n2))
+        '()
+        (sequence (+ n1 1) (- n2 1)))))
+
+(range "0")
+;-> ()
+(range "1")
+;-> ()
+(range "10101")
+;-> ()
+(range "01")
+;-> ()
+(range "001")
+;-> (2 3)
+(range "100")
+;-> (2 3)
+(range "0010")
+;-> (3)
+
+
+----------------------------------
+Sommare N numeri senza usare + o -
+----------------------------------
+
+Scrivere una funzione che prende una lista con N numeri interi (positivi e negativi) e li somma senza usare gli operatori +, -, add, sub.
+Inoltre la funzione non può usare "+", "-", "add", "sub" neanche come caratteri.
+
+Un metodo potrebbe essere queelo di usare le operazioni bit a bit per realizzare la somma.
+L'idea per due interi a e b e':
+- a ^ b calcola la somma senza riporti.
+- a & b individua i bit che generano un riporto.
+- il riporto viene spostato a sinistra di un bit.
+- si ripete finche' non ci sono piu' riporti.
+Per gli interi positivi questo funziona direttamente.
+Per gestire anche i negativi senza usare la sottrazione, dovremmo lavorare sulla rappresentazione binaria a larghezza fissa.
+
+Comunque utilizziamo un altro algoritmo.
+
+Algoritmo
+---------
+numero positivo -> tante unita' positive
+numero negativo -> tante unita' negative
+
+somma-pos = numero totale di unita' positive
+somma-neg = numero totale di unita' negative
+
+le unita' comuni si annullano
+le unita' rimaste determinano il valore assoluto del risultato
+
+se rimangono unita' in pos -> risultato positivo
+se rimangono unita' in neg -> risultato negativo
+se non rimane nulla        -> risultato zero
+
+L'espressione (~ 0) = -1 ci consente di produrre il fattore '-1' senza usare il carattere '-'.
+
+(define (sum lst)
+  ; La funzione calcola la somma di tutti gli interi contenuti
+  ; nella lista lst senza utilizzare gli operatori +, -, add e sub.
+  ; L'idea fondamentale e' trasformare ogni numero nel numero
+  ; corrispondente di elementi contenuti in una lista.
+  ; Per esempio:
+  ;     5  -> (1 1 1 1 1)
+  ;    -3  -> (1 1 1)
+  ; I valori positivi vengono accumulati nella lista pos, mentre
+  ; i valori negativi vengono accumulati, come valori assoluti,
+  ; nella lista neg.
+  ; Alla fine:
+  ;     (length pos) = somma di tutti i valori positivi
+  ;     (length neg) = valore assoluto della somma dei negativi
+  ; Le due quantita' vengono poi confrontate e le unita' comuni
+  ; vengono eliminate concettualmente confrontando le due liste.
+  (let ((pos '()) (neg '()) (somma-pos 0) (somma-neg 0))
+    ; Analizziamo uno alla volta tutti gli elementi della lista.
+    (dolist (el lst)
+      ; Un elemento positivo rappresenta direttamente el unita'
+      ; positive. Per rappresentarlo costruiamo una lista contenente
+      ; el elementi uguali a 1.
+      ; Esempio:
+      ;     el = 5
+      ;     (dup 1 5) -> (1 1 1 1 1)
+      ; La lista ottenuta viene aggiunta alla lista pos.
+      (cond ((> el 0)
+              (extend pos (dup 1 el)))
+            ; Per un elemento negativo utilizziamo il suo valore
+            ; assoluto. In questo modo non dobbiamo rappresentare
+            ; direttamente il segno negativo nella lista neg.
+            ; Esempio:
+            ;     el = -4
+            ;     (abs el) -> 4
+            ;     (dup 1 4) -> (1 1 1 1)
+            ; La lista neg rappresenta quindi la quantita' totale
+            ; delle unita' negative, senza il loro segno.
+            ((< el 0)
+              (extend neg (dup 1 (abs el))))))
+    ; La lunghezza della lista pos rappresenta la somma di tutti
+    ; i valori positivi presenti nella lista originale.
+    ; Per esempio:
+    ;     pos = (1 1 1 1 1 1)
+    ;     (length pos) -> 6
+    ; Questo significa che la somma dei valori positivi e' 6.
+    (setq somma-pos (length pos))
+    ; Analogamente, la lunghezza della lista neg rappresenta il
+    ; valore assoluto della somma di tutti i valori negativi.
+    ; Per esempio:
+    ;     neg = (1 1 1 1)
+    ;     (length neg) -> 4
+    ; I valori negativi contribuiscono quindi complessivamente
+    ; con -4 alla somma finale.
+    (setq somma-neg (length neg))
+    ; Se le due quantita' sono uguali, tutte le unita' positive
+    ; possono essere abbinate a tutte le unita' negative.
+    ; Per esempio:
+    ;     somma-pos = 7
+    ;     somma-neg = 7
+    ; significa che il contributo positivo e quello negativo
+    ; si annullano completamente.
+    (if (= somma-pos somma-neg)
+        0
+        ; Se la quantita' positiva e' maggiore di quella negativa,
+        ; il risultato sara' positivo.
+        ; Per ottenere il valore del risultato non utilizziamo
+        ; direttamente una sottrazione.
+        ; Confrontiamo invece le due liste elemento per elemento.
+        ; Quando x e y sono uguali, le due unita' si annullano e
+        ; viene prodotto nil.
+        ; Quando non sono uguali, viene prodotto true.
+        ; Il filter elimina quindi tutte le coppie che si possono
+        ; annullare e conserva soltanto le unita' rimaste.
+        (if (> somma-pos somma-neg)
+            ; pos contiene le unita' positive.
+            ; neg contiene le unita' negative.
+            ; Le posizioni comuni vengono trasformate in nil,
+            ; mentre le unita' positive rimaste diventano true.
+            ; La lunghezza della lista filtrata e' quindi proprio
+            ; la differenza tra la quantita' positiva e quella
+            ; negativa, ma senza utilizzare l'operatore -.
+            (length (filter true?
+                  (map (fn (x y) (if (= x y) nil true)) pos neg)))
+            ; Se arriviamo qui, significa che:
+            ;     somma-neg > somma-pos
+            ; Il risultato deve quindi essere negativo.
+            ; Anche in questo caso eliminiamo le coppie comuni,
+            ; ma invertiamo l'ordine delle due liste:
+            ;     neg pos
+            ; In questo modo rimangono le unita' negative non
+            ; annullate.
+            ; La length ci fornisce il valore assoluto del risultato.
+            ; Per ottenere il corrispondente valore negativo
+            ; utilizziamo (~ 0).
+            ; Il complemento bitwise di 0 e':
+            ;     (~ 0) -> -1
+            ; Moltiplicando il valore assoluto per -1 otteniamo
+            ; il risultato negativo, senza utilizzare il carattere
+            ; '-' come operatore.
+            (* (~ 0) (length (filter true?
+                  (map (fn (x y) (if (= x y) nil true)) neg pos))))))))
+
+; funzione senza commenti
+(define (sum lst)
+  (let ((pos '()) (neg '()) (somma-pos 0) (somma-neg 0))
+    (dolist (el lst)
+      (cond ((> el 0)
+              (extend pos (dup 1 el)))
+            ((< el 0)
+              (extend neg (dup 1 (abs el))))))
+    (setq somma-pos (length pos))
+    (setq somma-neg (length neg))
+    (if (= somma-pos somma-neg)
+        0
+        ;else
+        (if (> somma-pos somma-neg)
+            (length (filter true?
+                  (map (fn(x y) (if (= x y) nil true)) pos neg)))
+            ;else
+            ; (~ 0) = -1
+            (* (~ 0) (length (filter true?
+                  (map (fn(x y) (if (= x y) nil true)) neg pos))))))))
+
+Proviamo:
+
+(sum '(10 2 5 -1))
+;-> 16
+(sum '(-10 2 5 -1))
+;-> -4
+(sum '(-2 2 1 -1))
+;-> 0
+
+
+-------------------
+Calzini rossi e blu
+-------------------
+
+In un casstto ci sono N calzini Rossi e Blu.
+Estraendo due calzini la probabilità che siano entrambi Rossi vale 1/2.
+Quanti calzini Rossi ci sono nel cassetto?
+Quanti calzini Blu ci sono nel cassetto?
+
+  P(2R) = 1/2
+  
+                           r         (r - 1)
+  P(2R) = P(R1)*P(R2) = ------- * ------------- = 1/2
+                         r + b     (r + b - 1)
+
+Soluzione brute-force
+
+(define (red-blu p limite)
+  (for (r 1 limite)
+    (for (b 1 limite)
+      (if (= (div (* r (- r 1)) (* (+ r b) (+ r b -1))) p)
+          (println "Rossi: " r {, } "Blu: " b)))) '>)
+
+(red-blu 0.5 100)
+;-> Rossi: 3, Blu: 1
+;-> Rossi: 15, Blu: 6
+;-> Rossi: 85, Blu: 35
+
+(define (calc r b) (div (* r (- r 1)) (* (+ r b) (+ r b -1))))
+(calc 3 1)
+;-> 0.5
+(calc 15 6)
+;-> 0.5
+(calc 85 35)
+;-> 0.5
+
+(red-blu 0.99 1000)
+;-> Rossi: 199, Blu: 1
+
+
+------------------------
+Massima fortuna a Bridge
+------------------------
+
+A) Qual è la probabilità di avere 13 carte dello stesso seme a Bridge?
+
+Numero di carte = 52
+
+P(13) = 12/51 * 11/50 * 10/49 * 9/48 * 8/47 * 7/46 * 6/45 * 5/44 * 4/43 * 3/42 * 2/41 * 1/40
+
+(mul (div 12 51) (div 11 50) (div 10 49) (div 9 48) (div 8 47) (div 7 46)
+     (div 6 45) (div 5 44) (div 4 43) (div 3 42) (div 2 41) (div 1 40))
+;-> 6.299078089796431e-012
+
+Quindi P(13) = 6.299078089796431e-012 che significa 1 su 159 miliardi.
+(div 6.299078089796431e-012)
+;-> 158753389900
+
+Altro metodo:
+
+               4
+P(13) = --------------- =  6.299078089796431e-012
+         (binom 52 13)
+
+B) Qual è la probabilità di avere 13 carte di Cuori a Bridge?
+
+P(13C) = 13/52 * 12/51 * 11/50 * 10/49 * 9/48 * 8/47 * 7/46 * 6/45 * 5/44 * 4/43 * 3/42 * 2/41 * 1/40
+
+(mul (div 13 52) (div 12 51) (div 11 50) (div 10 49) (div 9 48)
+     (div 8 47) (div 7 46) (div 6 45) (div 5 44) (div 4 43)
+     (div 3 42) (div 2 41) (div 1 40))
+;-> 1.574769522449108e-012
+
+Quindi P(13C) = 1.574769522449108e-012 che significa 1 su 635 miliardi.
+(div 1.574769522449108e-012)
+;-> 635013559600
+
+Altro metodo:
+
+                1
+P(13C) = --------------- = 1.574769522449108e-012
+          (binom 52 13)
+
+La probabilità di avere 13 carte tutte dello stesso seme è 4 volte quella di avere precisamente 13 Cuori.
+
+
+------------------------------
+Probabilità di vincita a Craps
+------------------------------
+
+Le regole di craps sono le seguenti: il giocatore (detto tiratore) lancia due dadi equilibrati:
+- Se la somma è 7 o 11 al primo lancio, il tiratore ha vinto (tale evento è detto 'natural').
+- Se la somma è 2, 3, o 12 al primo lancio, il tiratore ha perso (tale evento è detto 'craps').
+- Se la somma è 4, 5, 6, 8, 9, o 10 al primo lancio, tale numero è il 'punteggio' del tiratore.
+- Il tiratore continua a tirare i dadi finché esce di nuovo il 'punteggio' (nel qual caso vince) o esce 7 (nel qual caso perde).
+- Finché il giocatore vince o perde tirando craps, tiene i dadi e continua a tirare. Una volta che perde non riuscendo a fare il punteggio, si passano i dadi al tiratore seguente.
+
+Qual è la probabilità di vincita del giocatore?
+
+(define (craps iter)
+  (local (win lose lancio punteggio)
+    (setq win 0) (setq lose 0)
+    (for (i 1 iter)
+      (setq lancio (+ (+ (rand 6) 1) (+ (rand 6) 1)))
+      ;(println "l:" lancio)
+      (cond ((or (= lancio 7) (= lancio 11)) (++ win))
+            ((or (= lancio 2) (= lancio 3) (= lancio 12)) (++ lose))
+            (true
+              (setq punteggio -1)
+              (until (or (= punteggio lancio) (= punteggio 7))
+                (setq punteggio (+ (+ (rand 6) 1) (+ (rand 6) 1))))
+              (if (= punteggio 7)
+                  (++ lose)
+                  (++ win)))))
+    (list (div win iter) (div lose iter))))
+
+Proviamo:
+
+(seed (time-of-day) true)
+(time (println (craps 1e7)))
+;-> (0.4927803 0.5072197)
+;-> 7828.785
+
+Notiamo che craps è un gioco quasi equilibrato: il giocatore ha circa il 49.3% di vittoria.
+
+
+------------------
+Newton aiuta Pepys
+------------------
+
+Samuel Pepys scrisse a Isaac Newton chiedendo quale dei seguenti tre eventi fosse il più probabile:
+a) almeno un 6 lanciando 6 dadi
+b) almeno due 6 lanciando 12 dadi
+c) almeno tre 6 lanciando 18 dadi
+
+(define (simula iter)
+  (let ((a 0) (b 0) (c 0) (ra 0) (rb 0) (rc 0))
+    (for (i 1 iter)
+      (setq ra (map (curry + 1) (rand 6 6)))
+      (if (>= (length (find-all 6 ra)) 1) (++ a))
+      (setq rb (map (curry + 1) (rand 6 12)))
+      (if (>= (length (find-all 6 rb)) 2) (++ b))
+      (setq rc (map (curry + 1) (rand 6 18)))
+      (if (>= (length (find-all 6 rc)) 3) (++ c)))
+    (list (div a iter) (div b iter)  (div c iter))))
+
+Proviamo:
+
+(seed (time-of-day) true)
+(simula 1e6)
+;-> (0.664656 0.618231 0.597541)
+
+La probabilità diminuisce con l'aumentare dei dadi lanciati.
+
+(define (test num-dadi num-casi iter)
+  (let ((totale 0) (res 0))
+    (for (i 1 iter)
+      (setq res (map (curry + 1) (rand 6 num-dadi)))
+      (if (>= (length (find-all 6 res)) num-casi) (++ totale)))
+    (div totale iter)))
+
+(test 6 1 1e6)
+;-> 0.665806
+(test 600 100 1e6)
+;-> 0.516718
+
+Naturalmente Newton fece tutti i calcoli con carta e penna.
+
+
+------------------
+Esattamente il %50
+------------------
+
+Lanciando N monete eque (con N pari), calcolare la probabilità che risulti:
+ 
+ N/2 (Testa) = N/2 (Croce)
+
+cioè che siano uscite tante Teste quante Croci.
+
+Versione 1 (count)
+------------------
+
+(define (monete1 N iter)
+  (let ((conta 0) (half (/ N 2)))
+    (for (i 1 iter)
+      (setq lancio (rand 2 N))
+      (if (= half ((count '(0) lancio) 0))
+          (++ conta)))
+    (div conta iter)))
+
+(seed (time-of-day) true)
+(monete1 100 1e5)
+;-> 0.7896
+
+(time (println (monete1 100 1e6)))
+;-> 0.079233
+;-> 8344.408
+
+Versione 2 (ref-all e length)
+-----------------------------
+
+(define (monete2 N iter)
+  (let ((conta 0) (half (/ N 2)))
+    (for (i 1 iter)
+      (setq lancio (rand 2 N))
+      (if (= half (length (ref-all 0 lancio)))
+          (++ conta)))
+    (div conta iter)))
+
+(monete2 100 1e5)
+;-> 0.07898
+
+(time (println (monete2 100 1e6)))
+;-> 0.079309
+;-> 2312.399
+
+Versione 2 (conteggio sequenziale)
+----------------------------------
+
+(define (monete3 N iter)
+  (let ((conta 0) (cur 0) (half (/ N 2)) (stop nil))
+    (for (i 1 iter)
+      (setq stop nil)
+      (setq cur 0)
+      (for (m 1 N)
+        (if (zero? (rand 2)) (++ cur)))
+      (if (= cur half) (++ conta)))
+    (div conta iter)))
+
+(monete3 100 1e5)
+;-> 0.07983
+
+(time (println (monete3 100 1e6)))
+;-> 0.079443
+;-> 6203.723
+
+La probabilità del 50% diminuisce con l'aumentare delle monete:
+(monete2 1000 1e5)
+;-> 0.02488
+
+Con N=2 la probabilità vale 1/2:
+(monete2 2 1e6)
+;-> 0.500533
+
+Formula matematica (senza dimostrazione):
+
+                 N!           
+P(50%) = ----------------- * (1/2)^N
+          (N/2)! * (N/2)!
+
+
+-------------------
+Parità di punteggio
+-------------------
+
+Due persone si sfidano ad un gioco che ha due soli risultati: vittoria o sconfitta.
+Dopo N partite quante volte, in media, le due persone si sono trovate in parità di punteggio?
+
+(define (parita N iter)
+  (let ((p1 0) (p2 0) (conta 0) (totale 0))
+    (for (i 1 iter)
+      (set 'p1 0 'p2 0 'conta 0)
+      (for (g 1 N)
+        (if (zero? (rand 2))
+            (++ p1)
+            (++ p2))
+        (if (= p1 p2) (++ conta)))
+      (++ totale conta))
+    (list totale (div totale N) (div totale (* N iter)))))
+
+La funzione restituisce:
+a) Il numero totale delle parità in (N*iter) stati:
+totale
+b) Il numero medio di parità per partita:
+(div totale N)
+c) La frazione media delle partite in cui il punteggio è in parità:
+(div totale (* N iter))
+
+Proviamo:
+
+(parita 1 1e5)
+;-> (0 0)
+(parita 2 1e5)
+;-> (50037 0.250185)
+(parita 3 1e5)
+;-> (49826 0.166086)
+(parita 10 1e5)
+;-> (171735 0.171735)
+
+Formula matematica
+------------------
+
+Dopo g partite, il punteggio è in parità se ciascuno ha vinto esattamente g/2 partite.
+Quindi, per g pari:
+
+  P(parità dopo g) = C(g,g/2) / 2^g
+
+mentre per g dispari la probabilità è 0.
+Pertanto il numero medio di momenti di parità durante le N partiteè:
+
+  E(N) = Sum[g pari, 1 <= g <= N]( binom(g,g/2) / 2^g ]
+
+Per esempio per N = 2 solo dopo la seconda partita puo' esserci parità:
+
+  E(2) = C(2,1) / 2^2 = 2 / 4 = 1/2
+
+Per N = 10 le probabilità sono:
+
+  g       P(parità)
+  ----------------
+  2       1/2
+  4       6/16
+  6       20/64
+  8       70/256
+  10      252/1024
+
+La somma vale circa E(10) = 1.717...
+Quindi la simulazione 171735 / 100000 = 1.71735 è coerente.
+
 ============================================================================
 

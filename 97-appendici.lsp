@@ -7325,14 +7325,13 @@ Quando incontro un problema o un argomento che mi interessa (leggendo un libro o
 Gli articoli non hanno tutti la stessa profondità o spiegazioni complete, ma i sorgenti sono commentati (quasi sempre).
 Alcuni articoli trattano le tecniche generali di "Risoluzione dei problemi".
 Ogni articolo è autosufficiente, nel senso che in ognuno sono riportate tutte le funzioni necessarie per eseguire le istruzioni riportate.
-Alcuni problemi sono ottimi esercizi di programmazione per principianti.
+Molti problemi sono ottimi esercizi di programmazione per principianti.
 Ci sono tantissime sequenze OEIS (On-line Encyclopedia of Integer Sequences).
 Alcuni articoli hanno anche un risvolto culturale (poca roba comunque).
 In genere i programmi/algoritmi/funzioni sono scritti per essere leggibili/comprensibili e possono essere sicuramente migliorati/ottimizzati.
 Mi sono divertito anche a programmare diversi giochi (carte, dadi, griglie, ecc.).
 Ogni tanto ho preso qualche pausa.
 Ci sono degli errori? Sicuramente si (anche se mi sono impegnato abbastanza).
-Fatemi sapere cosa ne pensate.
 Dal 2025 ho iniziato ad utilizzare l'Intelligenza Artificiale (ChatGPT e Claude) per alcuni degli articoli.
 Se usate nella veste di 'collaboratore' sono una marcia in più per imparare.
 In genere scrivo la soluzione (codice) di un problema e poi la sottopongo all'AI.
@@ -7340,6 +7339,7 @@ Quando non trovo la soluzione di problema, allora inizio a discutere con l'AI su
 Non fatevi scrivere il codice completo dall'AI.
 Invece fate scrivere i commenti delle funzioni finali all'AI (sono fenomenali).
 Ad oggi (2026) le due AI sono molto brave a trovare algoritmi per la soluzione dei problemi, ma hanno difficoltà con la sintassi di newLISP (lo confondono con il LISP).
+Fatemi sapere cosa ne pensate.
 
 
 ============================================================================

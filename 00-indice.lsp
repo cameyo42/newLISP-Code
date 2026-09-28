@@ -3758,6 +3758,20 @@ NOTE LIBERE 39
   Punti casuali non adiacenti in una lista circolare
   Il cacciatore
   Matrici binarie casuali con K valori a 1 in ogni riga e in ogni colonna
+  +- 1 +- 2 +- 3 +- ... +- N = 0
+  Treni che passano
+  Numeri in lettere
+  Curve su zucche
+  Vincere a tennis
+  Funzione di Landau
+  Generare i numeri binari compresi tra una stringa binaria e il suo inverso
+  Sommare N numeri senza usare + o -
+  Calzini rossi e blu
+  Massima fortuna a Bridge
+  Probabilità di vincita a Craps
+  Newton aiuta Pepys
+  Esattamente il %50
+  Parità di punteggio
 
 PROBLEMI SUI DADI
 =================
