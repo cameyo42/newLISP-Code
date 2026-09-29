@@ -4177,11 +4177,11 @@ il caso peggiore riguarda numeri con 14 bit, e le radici possibili sono soltanto
 
 Pseudo-algoritmo
 ----------------
-L'intero procedimento puo' essere visto come questa sequenza:
+L'intero procedimento può essere visto come questa sequenza:
 
   N
   |
-  +-- trova il bit piu' significativo
+  +-- trova il bit più significativo
   |
   +-- determina 2^k
   |
@@ -5093,7 +5093,7 @@ Metodo 4
 --------
 Formula bitwise: a(n) = n & -n
 
-La funzione (N & -N) usa una proprieta' classica della rappresentazione binaria:
+La funzione (N & -N) usa una proprietà classica della rappresentazione binaria:
 isola il bit meno significativo impostato a 1.
 Quel bit corrisponde esattamente alla massima potenza di 2 che divide N.
 Esempi:
@@ -5115,7 +5115,7 @@ Il risultato è 8 che è la massima potenza di 2 che divide 40.
 Per un numero dispari, il bit meno significativo è già 1, quindi: N & (-N) = 1
 
 Con questo metodo non servono divisioni, fattorizzazione, gcd o potenze, solo una negazione e un'operazione bitwise.
-Questo esprime direttamente, a livello binario, cio' che stiamo cercando.
+Questo esprime direttamente, a livello binario, ciò che stiamo cercando.
 
 (define (high4 N) (& N (- N)))
 
@@ -5951,7 +5951,7 @@ Quindi:
   4 = 2^2
 e le radici devono essere consecutive:
   3 = 2 + 1
-Se questa condizione non e' verificata, la funzione restituisce nil.
+Se questa condizione non è verificata, la funzione restituisce nil.
 
 3) Le radici devono essere consecutive
 Il numero dei segmenti orizzontali e verticali differisce di uno.
@@ -5962,16 +5962,16 @@ Le loro lunghezze sono:
 Nel caso 36 x 16:
   dx = 36/3 = 12
   dy = 16/2 = 8
-Il percorso e':
+Il percorso è:
 (0,0) (12,0) (12,8) (24,8) (24,16) (36,16)
 Quindi abbiamo 3 segmenti orizzontali e 2 segmenti verticali.
 
 4) Lato del quadrato
-Il lato del quadrato risultante e':
+Il lato del quadrato risultante è:
   S = k * n * (n-1)
 Per 36 x 16:
   S = 4 * 3 * 2 = 24
-quindi il quadrato e' 24 x 24
+quindi il quadrato è 24 x 24
 Infatti:
   36 * 16 = 576
   24 * 24 = 576
@@ -6004,7 +6004,7 @@ La funzione esegue quindi questi passi:
        dy verticale
 10. Restituisce la lista dei vertici del percorso.
 
-La parte fondamentale e' quindi la riduzione del rapporto tramite gcd.
+La parte fondamentale è quindi la riduzione del rapporto tramite gcd.
 In pratica, per sapere se il rettangolo appartiene a questa famiglia, basta controllare se:
   A/gcd(A,B) = N^2
   B/gcd(A,B) = (N-1)^2
@@ -6016,7 +6016,7 @@ Ad esempio:
   50 x 32  -> 25,16 -> 5^2,4^2 -> possibile
   20 x 16  -> 5,4   -> non sono entrambi quadrati -> impossibile
 
-Questa e' anche la ragione per cui non e' necessario che A e B siano quadrati perfetti: e' sufficiente che lo diventino dopo aver eliminato il loro fattore comune massimo.
+Questa è anche la ragione per cui non è necessario che A e B siano quadrati perfetti: è sufficiente che lo diventino dopo aver eliminato il loro fattore comune massimo.
 
 (define (staircase A B)
   ; Porta il lato maggiore in A.
@@ -6445,7 +6445,7 @@ Pertanto: X * Y = 10000 e quindi:
 
 Ad esempio, se A = 80 e B = 100 allora A è l'80% di B e B è il 125% di A.
 
-Il punto interessante è che 80 è il 20% meno di 100, mentre 100 è il 25% piu' di 80.
+Il punto interessante è che 80 è il 20% meno di 100, mentre 100 è il 25% più di 80.
 Infatti le due percentuali di variazione hanno denominatori diversi:
   (100 - 80) / 100 = 20%
   (100 - 80) / 80  = 25%
@@ -6618,7 +6618,7 @@ In entrambi i casi:
 
 Quindi abbiamo lo schema fondamentale:
 
-verita' sulla porta
+verità sulla porta
         |
         v
    comportamento
@@ -7188,13 +7188,13 @@ Proviamo:
 ;-> Capitale finale = -78729
 ;-> ((578790 347156 69258 4796) -78729)
 
-Il gioco non è vantaggioso per il giocatore perchè il valore atteso e' negativo.
+Il gioco non è vantaggioso per il giocatore perchè il valore atteso è negativo.
 Sia X la puntata e sia K il numero di volte in cui compare N nei 3 dadi.
 
 Calcoliamo le probabilità di tutti gli eventi:
 
   +---+--------------------------+-----------+
-  | K |             Probabilita' | Risultato |
+  | K |              Probabilità | Risultato |
   +---+--------------------------+-----------+
   | 0 |        (5/6)^3 = 125/216 |        -X |
   | 1 | 3*(1/6)*(5/6)^2 = 75/216 |        +X |
@@ -7210,7 +7210,7 @@ Il guadagno atteso vale:
 
 In media il giocatore perde circa il 7.87% della puntata per ogni partita.
 In altre parole, il banco ha un vantaggio matematico del 7.87%.
-Il pagamento 3X non è sufficiente a compensare l'enorme probabilita' di non vedere mai N.
+Il pagamento 3X non è sufficiente a compensare l'enorme probabilità di non vedere mai N.
 
 
 -------------------
@@ -7362,7 +7362,7 @@ Quindi i punti sono 10, 3, 5, 8 e la lista risultante è:
 
 Perchè non ci sono punti adiacenti?
 Ogni gap è almeno 2.
-Quindi tra due punti consecutivi c'e' sempre almeno una posizione libera.
+Quindi tra due punti consecutivi c'è sempre almeno una posizione libera.
 La cosa importante è che anche l'ultimo gap viene considerato.
 Nell'esempio:
   8 -> 10
@@ -7676,12 +7676,12 @@ Il procedimento viene ripetuto:
             |
             +----> ripeti
 
-Il ciclo termina quando non esiste piu' alcuna colonna con piu' di K uni.
+Il ciclo termina quando non esiste più alcuna colonna con più di K uni.
 A quel punto, poichè il numero totale di uni è esattamente N*K, non può esistere neppure una colonna con meno di K uni.
 Pertanto, ogni riga -> K uni e ogni colonna -> K uni.
 
 La parte fondamentale è questa:
-se A ha piu' di K uni e B ne ha meno di K, esiste necessariamente almeno una riga con 1 in A e 0 in B. Infatti, se ogni 1 presente in A fosse accompagnato da un 1 in B, avremmo C(B) >= C(A), in contraddizione con C(A) > K > C(B).
+se A ha più di K uni e B ne ha meno di K, esiste necessariamente almeno una riga con 1 in A e 0 in B. Infatti, se ogni 1 presente in A fosse accompagnato da un 1 in B, avremmo C(B) >= C(A), in contraddizione con C(A) > K > C(B).
 Quindi ogni spostamento scelto in questo modo è sempre possibile e riduce di uno la differenza complessiva tra colonne in eccesso e colonne in difetto.
 
 Diagramma di flusso
@@ -8233,11 +8233,11 @@ Scrivere una funzione che prende una lista con N numeri interi (positivi e negat
 Inoltre la funzione non può usare "+", "-", "add", "sub" neanche come caratteri.
 
 Un metodo potrebbe essere queelo di usare le operazioni bit a bit per realizzare la somma.
-L'idea per due interi a e b e':
+L'idea per due interi a e b è:
 - a ^ b calcola la somma senza riporti.
 - a & b individua i bit che generano un riporto.
 - il riporto viene spostato a sinistra di un bit.
-- si ripete finche' non ci sono piu' riporti.
+- si ripete finchè non ci sono più riporti.
 Per gli interi positivi questo funziona direttamente.
 Per gestire anche i negativi senza usare la sottrazione, dovremmo lavorare sulla rappresentazione binaria a larghezza fissa.
 
@@ -8245,17 +8245,17 @@ Comunque utilizziamo un altro algoritmo.
 
 Algoritmo
 ---------
-numero positivo -> tante unita' positive
-numero negativo -> tante unita' negative
+numero positivo -> tante unità positive
+numero negativo -> tante unità negative
 
-somma-pos = numero totale di unita' positive
-somma-neg = numero totale di unita' negative
+somma-pos = numero totale di unità positive
+somma-neg = numero totale di unità negative
 
-le unita' comuni si annullano
-le unita' rimaste determinano il valore assoluto del risultato
+le unità comuni si annullano
+le unità rimaste determinano il valore assoluto del risultato
 
-se rimangono unita' in pos -> risultato positivo
-se rimangono unita' in neg -> risultato negativo
+se rimangono unità in pos -> risultato positivo
+se rimangono unità in neg -> risultato negativo
 se non rimane nulla        -> risultato zero
 
 L'espressione (~ 0) = -1 ci consente di produrre il fattore '-1' senza usare il carattere '-'.
@@ -8672,15 +8672,15 @@ c) La frazione media delle partite in cui il punteggio è in parità:
 (div totale (* N iter))
 
 Proviamo:
-
+(seed (time-of-day) true)
 (parita 1 1e5)
-;-> (0 0)
+;-> (0 0 0)
 (parita 2 1e5)
-;-> (50037 0.250185)
+;-> (50037 25080 0.2508)
 (parita 3 1e5)
-;-> (49826 0.166086)
+;-> (49892 16630.66666666667 0.1663066666666667)
 (parita 10 1e5)
-;-> (171735 0.171735)
+;-> (171735 17166.9 0.171735)
 
 Formula matematica
 ------------------
@@ -8695,9 +8695,9 @@ Pertanto il numero medio di momenti di parità durante le N partiteè:
 
   E(N) = Sum[g pari, 1 <= g <= N]( binom(g,g/2) / 2^g ]
 
-Per esempio per N = 2 solo dopo la seconda partita puo' esserci parità:
+Per esempio per N = 2 solo dopo la seconda partita può esserci parità:
 
-  E(2) = C(2,1) / 2^2 = 2 / 4 = 1/2
+  E(2) = binom(2,1) / 2^2 = 2 / 4 = 1/2
 
 Per N = 10 le probabilità sono:
 
@@ -8711,6 +8711,251 @@ Per N = 10 le probabilità sono:
 
 La somma vale circa E(10) = 1.717...
 Quindi la simulazione 171735 / 100000 = 1.71735 è coerente.
+
+
+--------------
+Corde e raggio
+--------------
+
+Data una circonferenza, quanto vale la probabilità che una corda selezionata a caso sia più lunga del raggio?
+
+Bisogna prima specificare cosa intendiamo per "corda selezionata a caso".
+
+Consideriamo un cerchio di raggio R e centro in (0,0): x^2 + y^2 = R^2
+Un corda di un cerchio di raggio R può avere una lunghezza che varia da 0 a 2R.
+Infatti, il valore massimo della lunghezza di una corda è il diametro, cioè 2R.
+
+Metodo 1: Distribuzione uniforme della lunghezza della corda tra 0 e 2R
+--------
+; Genera la lunghezza L di una corda casuale.
+; La lunghezza e' uniforme nell'intervallo [0, 2R].
+; Generando u uniformemente in [0,1] e ponendo
+;   L = 2R * u
+; otteniamo una variabile casuale uniforme in [0,2R].
+
+(define (random-chord R)
+  (mul 2 R (random 1.0)))
+
+In questo caso la probabilità vale 1/2, perchè scegliendo un valore uniformemente tra 0 e 2R il 50% delle volte sarà superiore a R e il 50% sarà inferiore a R.
+
+(define (corda1 R iter)
+  (local (conta)
+    (setq conta 0)
+    (for (i 1 iter)
+      (setq len (mul 2 R (random)))
+      (if (> len R) (++ conta)))
+    (div conta iter)))
+
+(corda1 1 1e6)
+;-> 0.499965
+
+Metodo 2: Selezione casuale di due punti sulla circonferenza
+--------
+Scegliendo due punti a caso sulla circonferenza, la lunghezza della corda è data dalla distanza dei due punti.
+Algoritmo
+a) scegliamo a caso un punto P sul bordo del cerchio (es. P = (R,0))
+b) scegliamo a caso un angolo theta tra 0 e 2*pi
+c) calcoliamo il secondo punto Q sul bordo con Q = (R*cos(theta), R*sin(theta))
+d) la corda è il segmento PQ, la cui lunghezza vale: L = 2*R*sin(theta/2)
+
+In questo caso otteniamo una distribuzione uniforme sulle coppie di punti del bordo, ma non una distribuzione uniforme rispetto alla lunghezza della corda.
+
+(define (rand-range-f min-val max-val)
+"Generate a random float in a closed range"
+  (if (> min-val max-val) (swap min-val max-val))
+  (add min-val (random 0 (sub max-val min-val))))
+
+(define (corda2 R iter)
+  (local (conta theta len )
+    (setq conta 0)
+    (for (i 1 iter)
+      (setq theta (rand-range-f 0 (mul 2 3.1415926535897931)))
+      (setq len (abs (mul 2 R (sin (div theta 2)))))
+      (if (> len R) (++ conta)))
+    (div conta iter)))
+
+(corda2 1 1e6)
+;-> 0.667214
+
+Le due procedure sono entrambe corrette, ma generano oggetti casuali diversi:
+
+Metodo 1:
+Lunghezza L uniforme in [0,2R]
+             |
+             +--> P(L > R) = 1/2
+
+Metodo 2:
+Punti uniformi sulla circonferenza
+             |
+             +--> L = 2R sin(theta/2)
+             |
+             +--> P(L > R) = 2/3
+
+
+------------
+Birre al bar
+------------
+
+Ogni giorno due persone si danno appuntamento al bar per bere una birra insieme.
+Ogni persona arriva al bar tra le 6 e le 7 di pomeriggio, aspetta 5 minuti e se l'altra persona non arriva, torna a casa.
+Dopo N giorni quante volte, in media, le due persone hanno bevuto una birra insieme?
+Dopo N giorni, in media, quanti minuti hanno aspettato le due persone?
+
+Gli arrivi sono distribuiti uniformemente tra 0 e 59 minuti, cioè con granularità di un minuto.
+
+(define (simula attesa N iter)
+  (let ((w1 0) (w2 0) (birra 0) (arrivo1 0) (arrivo2 0))
+    (for (i 1 iter)
+      (for (g 1 N)
+        (setq arrivo1 (rand 60))
+        (setq arrivo2 (rand 60))
+        (setq delta (abs (- arrivo1 arrivo2)))
+        (cond ((<= delta attesa)
+                (++ birra)
+                (if (> arrivo1 arrivo2)
+                    (++ w2 delta)
+                    (++ w1 delta)))
+              (true
+                (++ w1 attesa)
+                (++ w2 attesa)))))
+        ;(print arrivo1 { } arrivo2 { } delta { } w1 { } w2) (read-line)))
+    (list (div birra iter) (div w1 iter) (div w2 iter))))
+
+(seed (time-of-day) true)
+(simula 5 30 1e5)
+;-> (5.25488 130.7658 130.80169)
+(simula 5 365 1e5)
+;-> (63.86598 1591.34587 1591.32367)
+
+1) Numero medio di birre
+------------------------
+Con rand 60, ciascun arrivo può assumere uno dei 60 valori: 0, 1, 2, ..., 59.
+Le due persone bevono insieme quando:
+  |arrivo1 - arrivo2| <= 5
+Le coppie ordinate possibili sono 60 * 60 = 3600.
+Per una differenza d:
+  d = 0  -> 60 coppie
+  d = 1  -> 118 coppie
+  d = 2  -> 116 coppie
+  ...
+  d = 5  -> 110 coppie
+Quindi le coppie favorevoli sono: 60 + 2*(59 + 58 + 57 + 56 + 55) = 630
+La probabilità vale:
+  P(birra) = 630 / 3600 = 0.175
+Per N = 30: 30 * 0.175 = 5.25
+Per N = 365: 365 * 0.175 = 63.875
+I risultati della simulazione sono coerenti con i valori teorici.
+
+2) Tempo medio di attesa
+------------------------
+Con rand 60, ciascun arrivo può assumere uno dei 60 valori: 0, 1, 2, ..., 59.
+Sia:
+  a1 = arrivo della persona 1
+  a2 = arrivo della persona 2
+  d  = |a1 - a2|
+La persona 1 aspetta:
+  d, se d <= 5 e a1 < a2
+  0, se d <= 5 e a1 > a2
+  5, se d > 5
+
+a) Casi in cui non si incontrano
+Le coppie totali sono: 60 * 60 = 3600
+Le coppie con d <= 5 sono: 60 + 2*(59 + 58 + 57 + 56 + 55) = 630
+Quindi le coppie con d > 5 sono: 3600 - 630 = 2970
+In tutti questi casi la persona 1 aspetta 5 minuti.
+Contributo totale: 2970 * 5 = 14850
+
+b)Casi in cui si incontrano
+Consideriamo soltanto i casi in cui la persona 1 arriva prima.
+Per una differenza d, con 1 <= d <= 5, ci sono: 60 - d possibilità.
+Quindi: 
+  d = 1 -> 59 casi -> contributo 59 * 1
+  d = 2 -> 58 casi -> contributo 58 * 2
+  d = 3 -> 57 casi -> contributo 57 * 3
+  d = 4 -> 56 casi -> contributo 56 * 4
+  d = 5 -> 55 casi -> contributo 55 * 5
+Il contributo complessivo è: 59*1 + 58*2 + 57*3 + 56*4 + 55*5 = 845
+I casi in cui a1 = a2 non contribuiscono, perché la persona 1 non deve aspettare.
+
+c) Somma totale delle attese di persona 1
+Quindi, sommando tutti i 3600 casi: 14850 + 845 = 15695
+La media è: E[w1] = 15695 / 3600 = 4.359722222...
+Quindi la persona 1 aspetta in media 4.359722 minuti al giorno.
+Per simmetria: E[w2] = 15695 / 3600 = 4.359722222...
+Quindi: E[w1] = E[w2] = 4.359722222... minuti/giorno
+
+d) Dopo N giorni
+Per N giorni: E[w1] = E[w2] = N * 15695/3600
+Per N = 30: 30 * 15695/3600 = 130.791666666...
+Per N = 365: 365 * 15695/3600 = 1591.298611111...
+I risultati della simulazione sono coerenti con i valori teorici.
+
+
+-------------------
+Il tesoriere del Re
+-------------------
+
+Il tesoriere del Re riempie M forzieri con N monete ciascuno.
+Nel fare questo ruba M monete (una moneta per ogni forziere) scambiandola con una moneta falsa.
+Il Re sospetta qualcosa ed estrae una moneta a caso da ogni forziere.
+Qual'è la probabilità che il tesoriere non venga scoperto?
+
+(define (re N M iter)
+  (let ((salvo 0) (trovata nil))
+    (for (i 1 iter)
+      (setq trovata nil)
+      (for (f 1 M 1 trovata) 
+        (if (= (rand N) 1) (setq trovata true)))
+      (if-not trovata (++ salvo)))
+    (div salvo iter)))
+
+Proviamo:
+
+(seed (time-of-day) true)
+(time (println (re 100 100 1e6)))
+;-> 0.366252
+;-> 3519.678
+
+Se aumenta M, allora diminuisce la probabilità.
+(re 100 10 1e5)
+;-> 0.90525
+(re 100 1000 1e5)
+;-> 2e-005
+
+Se aumenta N, allora aumenta la probabilità.
+(re 10 100 1e5)
+;-> 2e-005
+(re 1000 100 1e5)
+;-> 0.90624
+
+Se N = M la probabilità tende a 1/e = 0.3678794411714423... all'aumentare di N,M.
+e = 2.7182818284590451
+(div (exp 1))
+;-> 0.3678794411714423
+
+(re 10 10 1e5)
+;-> 0.34861
+(re 100 100 1e5)
+;-> 0.36641
+(re 1000 1000 1e5)
+;-> 0.36823
+(time (println (re 10000 10000 1e5)))
+0.367517
+;-> 34208.885
+
+Per ogni forziere la probabilità che la moneta estratta sia falsa vale 1/N.
+Quindi la probabilità che la moneta estratta sia vera vale (1- 1/N).
+Poichè ci sono M forzieri:
+  
+  P(nessuna moneta falsa) = (1 - 1/N)^M
+
+(define (prob N M)
+  (pow (sub 1 (div N)) M))
+
+(prob 100 100)
+;-> 0.3660323412732289
+(prob 10000 10000)
+;-> 0.3678610464330241
 
 ============================================================================
 

@@ -3772,6 +3772,12 @@ NOTE LIBERE 39
   Newton aiuta Pepys
   Esattamente il %50
   Parità di punteggio
+  Corde e raggio
+  Birre al bar
+  Il tesoriere del Re
+
+NOTE LIBERE 40
+==============
 
 PROBLEMI SUI DADI
 =================
