@@ -5,6 +5,24 @@ MIT-0 License
 Problem Solving e Matematica ricreativa con newLISP  
 (...lavori in corso...)  
 
+More than 4000 topics:  
+- Tutorial and tricks  
+- Algorithms (basic and advanced)  
+- Project Euler  
+- Rosetta Code  
+- Programming interview questions  
+- Computer Science Programming problems  
+- Math problems  
+- Probability problems  
+- Geometric problems  
+- Logic problems  
+- Historical problems  
+- Lateral thinking problems  
+- OEIS sequences  
+- Games  
+- Puzzles  
+- Library for recreational mathematics (more than 400 functions)  
+
 00) Indice
 01) newLISP in generale (65)
 02) Funzioni varie (111)
@@ -53,7 +71,7 @@ Problem Solving e Matematica ricreativa con newLISP
 45) Note libere 37 (80)
 46) Note libere 38 (80)
 47) Note libere 39 (80)
-48) Note libere 40 (0)
+48) Note libere 40 (5)
 96) Problemi sui dadi (80)
 97) Appendici (34)
 98) Bibliografia

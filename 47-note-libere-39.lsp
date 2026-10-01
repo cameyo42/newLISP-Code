@@ -8739,7 +8739,7 @@ Metodo 1: Distribuzione uniforme della lunghezza della corda tra 0 e 2R
 In questo caso la probabilità vale 1/2, perchè scegliendo un valore uniformemente tra 0 e 2R il 50% delle volte sarà superiore a R e il 50% sarà inferiore a R.
 
 (define (corda1 R iter)
-  (local (conta)
+  (local (conta len)
     (setq conta 0)
     (for (i 1 iter)
       (setq len (mul 2 R (random)))

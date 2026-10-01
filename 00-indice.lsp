@@ -3778,6 +3778,11 @@ NOTE LIBERE 39
 
 NOTE LIBERE 40
 ==============
+  Cassette di mele
+  Il rompicapo logico più difficile
+  Chuck-a-luck
+  Poker con i dadi
+  Messaggio di Arecibo
 
 PROBLEMI SUI DADI
 =================
