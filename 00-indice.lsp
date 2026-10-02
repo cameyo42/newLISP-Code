@@ -3783,6 +3783,9 @@ NOTE LIBERE 40
   Chuck-a-luck
   Poker con i dadi
   Messaggio di Arecibo
+  Sul bordo del burrone
+  Random-walk in una matrice
+  Ritorno a casa in N dimensioni
 
 PROBLEMI SUI DADI
 =================

@@ -794,5 +794,482 @@ Il file dei dati "arecibo.lsp" si trova nella cartella "data".
 ;->        *  * *
 ;->  ****  ***** *  ****
 
+
+---------------------
+Sul bordo del burrone
+---------------------
+
+Un uomo ubriaco si trova sul bordo di un burrone.
+Un solo passo in avanti lo farebbe precipitare.
+L'uomo ha una probabilità 'p' di fare un passo indietro e una probabilità '(1 - p)' di fare un passo in avanti.
+Se l'uomo fa N passi, qual è la sua probabilità di sopravvivenza (cioè la probabilità di non cadere nel burrone)?
+
+Poniamo l'uomo nella posizione 0 della linea dei numeri naturali.
+Finchè la sua posizione è maggiore di 0, l'uomo è sopra il burrone.
+Se la sua posizione diventa minore di 0, allora è caduto nel burrone.
+
+     -1    0    1    2    3    4
+      +----+----+----+----+----+--...
+
+(define (uomo p N iter)
+  (local (morto vivo pos-vivo passi-burrone pos passi burrone)
+    (setq morto 0)
+    (setq vivo 0)
+    (setq pos-vivo 0)
+    (setq passi-burrone 0)
+    (for (i 1 iter)
+      (setq pos 0)
+      (setq passi 0)
+      (setq burrone nil)
+      (while (and (< passi N) (not burrone))
+        (if (> (random) p)
+            (-- pos)
+            (++ pos))
+        (++ passi)
+        (if (= pos -1) (setq burrone true)))
+      (if burrone
+        (begin
+          (++ passi-burrone passi)
+          (++ morto))
+        ;else
+        (begin
+          (++ pos-vivo pos)
+          (++ vivo))))
+    ;(println "passi-burrone: " passi-burrone)
+    (println "media passi-burrone: " (div passi-burrone morto))
+    ;(println "pos-vivo: " pos-vivo)
+    (println "media pos-vivo: " (div pos-vivo vivo))
+    (list (div vivo iter) (div morto iter))))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(uomo 0.45 1 1e5)
+;-> media passi-burrone: 1
+;-> media pos-vivo: 1
+;-> (0.45017 0.54983)
+(uomo 0.45 10 1e5)
+;-> media passi-burrone: 2.251338456495611
+;-> media pos-vivo: 2.626240853139713
+;-> (0.17629 0.8237100000000001)
+(uomo 0.45 100 1e5)
+;-> media passi-burrone: 6.674820261105114
+;-> media pos-vivo: 7.982241953385127
+;-> (0.01802 0.98198)
+(uomo 0.45 1000 1e5)
+;-> media passi-burrone: 9.968619372387447
+;-> media pos-vivo: 16
+;-> (2e-005 0.99998)
+(uomo 0.45 10000 1e5)
+;-> media passi-burrone: 9.87182
+;-> media pos-vivo: -1.#IND
+;-> (0 1)
+(uomo 0.45 100000 1e5)
+;-> media passi-burrone: 10.0058
+;-> media pos-vivo: -1.#IND
+;-> (0 1)
+
+(uomo 0.5 1 1e5)
+;-> media passi-burrone: 1
+;-> media pos-vivo: 1
+;-> (0.50196 0.49804)
+(uomo 0.5 100 1e5)
+;-> media passi-burrone: 7.641195183653085
+;-> media pos-vivo: 11.55096872229961
+;-> (0.07897 0.92103)
+(uomo 0.5 1000 1e5)
+;-> media passi-burrone: 25.29348998182248
+;-> media pos-vivo: 38.76284735439665
+;-> (0.02627 0.97373)
+(uomo 0.5 10000 1e5)
+;-> media passi-burrone: 82.65733229879382
+;-> media pos-vivo: 124.2128777923785
+;-> (0.00761 0.99239)
+(uomo 0.5 100000 1e5)
+;-> media passi-burrone: 247.3373933616032
+;-> media pos-vivo: 390.2672064777328
+;-> (0.00247 0.99753)
+
+(uomo 0.666667 1 1e5)
+;-> media passi-burrone: 1
+;-> media pos-vivo: 1
+;-> (0.66467 0.33533)
+(uomo 0.666667 100 1e5)
+;-> media passi-burrone: 3.019112627986348
+;-> media pos-vivo: 35.29758916118749
+;-> (0.5019 0.4981)
+(uomo 0.666667 1000 1e5)
+;-> media passi-burrone: 3.010033444816054
+;-> media pos-vivo: 335.1264668059798
+;-> (0.49768 0.50232)
+(uomo 0.666667 10000 1e5)
+;-> media passi-burrone: 3.015092061575611
+;-> media pos-vivo: 3335.307862041547
+;-> (0.50305 0.49695)
+
+(uomo 0.75 1 1e5)
+;-> media passi-burrone: 1
+;-> media pos-vivo: 1
+;-> (0.74973 0.25027)
+(uomo 0.75 100 1e5)
+;-> media passi-burrone: 2.000656363744854
+;-> media pos-vivo: 51.02144941487921
+;-> (0.66482 0.33518)
+(uomo 0.75 1000 1e5)
+;-> media passi-burrone: 2.005761267478845
+;-> media pos-vivo: 500.8978012418634
+;-> (0.66674 0.33326)
+(time (println (uomo 0.75 10000 1e5)))
+;-> passi-burrone: 66518
+;-> media passi-burrone: 1.992869554796573
+;-> pos-vivo: 333188126
+;-> media pos-vivo: 5001.172675692714
+;-> (66622 0.66622 33378 0.33378)
+;-> 113021.749
+
+(uomo 0.8 1 1e5)
+;-> media passi-burrone: 1
+;-> media pos-vivo: 1
+;-> (0.79836 0.20164)
+(uomo 0.8 100 1e5)
+;-> media passi-burrone: 1.683722417652702
+;-> media pos-vivo: 60.69812226608343
+;-> (0.74984 0.25016)
+(uomo 0.8 1000 1e5)
+;-> media passi-burrone: 1.672666639881072
+;-> media pos-vivo: 600.590512707859
+;-> (0.7511100000000001 0.24889)
+
+
+--------------------------
+Random-walk in una matrice
+--------------------------
+
+Abbiamo una matrice MxN con tutti 0.
+Dalla cella (r c) parte un punto che si muove casualmente in una delle quattro direzione Nord, Sud, Est o Ovest.
+Il punto si ferma quando è passato almeno una volta su tutte le celle.
+
+Scriviamo una funzione che prende M, N, r, c e restituisce una matrice MxN in cui ogni cella contiene il numero di volte che il punto l'ha occupata (hot-map).
+
+(define (random-walk M N r c)
+  ; Crea la matrice MxN inizializzata a zero.
+  (letn ((matrice (array M N '(0)))
+         (visitati 0)
+         (totale (* M N))
+         (nr r)
+         (nc c)
+         (dir '())
+         (passi 0))
+    ; Conta la cella di partenza.
+    (setf (matrice nr nc) 1)
+    (setq visitati 1)
+    ; Continua finche' tutte le celle sono state visitate almeno una volta.
+    (while (< visitati totale)
+      ; Costruisce l'elenco delle direzioni che restano nella matrice.
+      (setq dir '())
+      (if (> nr 0)
+          (push 'N dir))
+      (if (< nr (- M 1))
+          (push 'S dir))
+      (if (> nc 0)
+          (push 'O dir))
+      (if (< nc (- N 1))
+          (push 'E dir))
+      ; Sceglie casualmente una delle direzioni valide.
+      (setq dir (dir (rand (length dir))))
+      ; Esegue il movimento.
+      (cond
+        ((= dir 'N)
+          (-- nr))
+        ((= dir 'S)
+          (++ nr))
+        ((= dir 'O)
+          (-- nc))
+        ((= dir 'E)
+          (++ nc)))
+      ; Incrementa il numero di passi
+      (++ passi)
+      ; Incrementa il numero di occupazioni della nuova cella.
+      (++ (matrice nr nc))
+      ; Se questa e' la prima visita, incrementa il numero di celle visitate.
+      (if (= (matrice nr nc) 1)
+          (++ visitati)))
+    (list passi matrice)))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(random-walk 3 4 0 0)
+;-> (45 ((5 6 6 2) (6 5 4 2) (2 4 3 1)))
+45 sono i passi, mentre le celle occupate sono 46.
+Esempio:
+A->B->C
+Parto da A, per arrivare a C occorrono 2 passi, ma occupo 3 caselle (A, B e C).
+
+(random-walk 10 10 4 4)
+;-> (781 ((2 2 4 4 4 9 11 12 12 12)
+;->       (3 3 1 2 7 13 17 16 17 15)
+;->       (5 5 2 7 10 8 15 20 17 11)
+;->       (2 2 4 5 8 11 10 14 9 10)
+;->       (9 13 8 8 8 7 4 9 6 5)
+;->       (11 11 10 4 4 6 5 6 6 3)
+;->       (14 14 15 6 4 4 4 5 5 3)
+;->       (19 21 13 8 5 5 3 6 5 4)
+;->       (13 14 10 9 8 10 7 6 12 10)
+;->       (3 4 4 3 4 4 4 2 4 4)))
+
+; Calcola la media dei passi necessari per visitare casualmente
+; una matrice MxN partendo dalla cella (r c).
+(define (media-passi M N r c iter)
+  (let (totale-passi 0)
+    (for (i 1 iter)
+      (++ totale-passi ((random-walk M N r c) 0)))
+    (div totale-passi iter)))
+
+; 3x3 partendo dal centro
+(media-passi 3 3 1 1 1e6)
+;-> 33.354145
+; 3x3 partendo da uno spigolo
+(media-passi 3 3 0 0 1e6)
+;-> 31.173233
+
+; 10x10 partendo dal centro
+(media-passi 10 10 4 4 1e5)
+;-> 1296.96354
+; 10x10 partendo da uno spigolo
+(media-passi 10 10 0 0 1e5)
+;-> 1249.36952
+
+
+------------------------------
+Ritorno a casa in N dimensioni
+------------------------------
+
+Abbiamo un punto posizionato a 0 sulla linea dei numeri interi.
+Il punto si muove casualmente a destra (+1) o a sinistra (-1) per N passi.
+Comunque se il punto ritorna nella posizione 0, si ferma.
+
+Scriviamo una funzione che simula questo random-walk e ritorna il valore dei 'passi' necessari per tornare al punto di partenza (0).
+Se il punto non torna a zero entro N passi, allora restituiamo N.
+Il valore dei 'passi' vale:
+  Numero di passi per tornare a 0
+oppure
+  N (perchè il punto non è ritornato a 0 in N passi)
+
+; random-walk return (1D)
+(define (walk1D N)
+  ; Le due possibili mosse del punto.
+  (letn ((mosse '(-1 1))
+         (pos 0)
+         (passi 0)
+         (fine nil))
+    ; Esegue al massimo N passi.
+    (for (i 1 N 1 fine)
+      ; Aggiorna la posizione con una mossa casuale.
+      (++ pos (mosse (rand 2)))
+      ; Memorizza il numero di passi eseguiti.
+      (setq passi i)
+      ; Interrompe il ciclo quando si torna a 0.
+      (if (= pos 0)
+        (setq fine true)))
+    passi))
+
+Il ritorno a 0 può avvenire solo dopo un numero pari di passi.
+Quindi non potrà mai restituire 3, 5, 7, ecc.
+Sfruttiamo questo fatto per evitare il caso in cui la funzione restituisce N:
+in questo caso non sappiamo se il punto non è ritornato a 0 in N mosse oppure è ritornato a 0 proprio con N mosse.
+Passando un numero N dispari siamo sicuri che se la funzione restituisce N, allora il punto non è ritornato a 0.
+
+(collect (walk1D 1001) 10)
+;-> (2 212 6 6 218 64 4 2 2 2)
+
+Per la versione 2D usiamo esattamente la stessa logica, ma ora la posizione è una coppia (riga colonna).
+Ad ogni passo scegliamo casualmente una delle quattro direzioni: alto, basso, sinistra, destra.
+
+; random-walk return (2D)
+(define (walk2D N)
+  ; Le quattro possibili mosse: su, giu', sinistra, destra.
+  (letn ((mosse '((-1 0) (1 0) (0 -1) (0 1)))
+         (x 0)
+         (y 0)
+         (passi 0)
+         (fine nil))
+    ; Esegue al massimo N passi.
+    (for (i 1 N 1 fine)
+      ; Sceglie casualmente una delle quattro direzioni.
+      (let ((mossa (mosse (rand 4))))
+        ; Aggiorna la posizione nella direzione scelta.
+        (++ x (mossa 0))
+        (++ y (mossa 1)))
+      ; Memorizza il numero di passi eseguiti.
+      (setq passi i)
+      ; Se il punto e' tornato all'origine, termina.
+      (if (and (= x 0) (= y 0))
+        (setq fine true)))
+    passi))
+
+(collect (walk2D 1001) 10)
+;-> (4 2 2 54 1001 2 1001 1001 40 1001)
+
+Anche in 2D un ritorno all'origine può avvenire soltanto dopo un numero pari di passi.
+Quindi possiamo continuare a usare N dispari per eliminare l'ambiguità del risultato N.
+
+La versione 3D segue la stessa struttura: la posizione è (x y z) e ci sono 6 mosse possibili, una per ciascun asse e verso.
+
+(define (walk3D N)
+  ; Le sei possibili mosse: destra, sinistra, avanti, indietro, su, giu'.
+  (letn ((mosse '((1 0 0) (-1 0 0) (0 1 0) (0 -1 0) (0 0 1) (0 0 -1)))
+         (x 0)
+         (y 0)
+         (z 0)
+         (passi 0)
+         (fine nil))
+    ; Esegue al massimo N passi.
+    (for (i 1 N 1 fine)
+      ; Sceglie casualmente una delle sei direzioni.
+      (let ((mossa (mosse (rand 6))))
+        ; Aggiorna la posizione nella direzione scelta.
+        (++ x (mossa 0))
+        (++ y (mossa 1))
+        (++ z (mossa 2)))
+      ; Memorizza il numero di passi eseguiti.
+      (setq passi i)
+      ; Se il punto e' tornato all'origine, termina.
+      (if (and (= x 0) (= y 0) (= z 0))
+        (setq fine true)))
+    passi))
+
+Anche qui, come in 1D e 2D, il ritorno all'origine può avvenire solo dopo un numero pari di passi.
+Quindi usando N dispari, N identifica senza ambiguità il caso in cui il punto non è mai tornato all'origine.
+
+(collect (walk3D 1001) 10)
+;-> (1001 1001 1001 1001 1001 1001 2 8 1001 1001)
+
+Vediamo quante volte torniamo a 0 con N passi.
+
+(define (ritorno func N prove)
+  (let (sim (collect (func N) prove))
+    (- prove (length (find-all N sim)))))
+
+Caso 1D
+-------
+N = 11, prove = 100
+(ritorno walk1D 11 100)
+;-> 73
+N = 101, prove = 100
+(ritorno walk1D 101 100)
+;-> 88
+N = 1001, prove = 100
+(ritorno walk1D 1001 100)
+;-> 99
+N = 10001, prove = 100
+(ritorno walk1D 10001 100)
+;-> 100
+
+In 1D all'aumentare del numero dei passi N si ritorna a 0 il 100% delle volte. 
+
+Caso 2D
+-------
+N = 11, prove = 100
+(ritorno walk2D 11 100)
+;-> 46
+N = 101, prove = 100
+(ritorno walk2D 101 100)
+;-> 56
+N = 1001, prove = 100
+(ritorno walk2D 1001 100)
+;-> 72
+N = 10001, prove = 100
+(ritorno walk2D 10001 100)
+;-> 78
+(ritorno walk2D 100001 100)
+;-> 79
+(ritorno walk2D 1000001 100)
+;-> 80
+(ritorno walk2D 10000001 100)
+;-> 86
+(ritorno walk2D 100000001 100)
+
+In 2D all'aumentare del numero dei passi N si ritorna a 0 intorno all'85% delle volte. 
+
+Caso 3D
+-------
+N = 11, prove = 100
+(ritorno walk3D 11 100)
+;-> 24
+N = 101, prove = 100
+(ritorno walk3D 101 100)
+;-> 30
+N = 1001, prove = 100
+(ritorno walk3D 1001 100)
+;-> 34
+N = 10001, prove = 100
+(ritorno walk3D 10001 100)
+;-> 31
+(ritorno walk3D 100001 100)
+;-> 34
+(ritorno walk3D 1000001 100)
+;-> 33
+(ritorno walk3D 10000001 100)
+;-> 35
+
+In 3D all'aumentare del numero dei passi N si ritorna a 0 intorno al 30-35% delle volte. 
+
+Caso: dimensione arbitraria 
+---------------------------
+Possiamo generalizzare direttamente a una dimensione arbitraria D.
+
+(define (walk D N)
+  ; Crea le 2*D possibili mosse.
+  ; Per ogni dimensione esistono una mossa +1 e una mossa -1.
+  (letn ((mosse '())
+         (pos (dup 0 D))
+         (mossa '())
+         (passi 0)
+         (fine nil))
+    ; Costruisce le mosse per ogni dimensione.
+    (for (d 0 (- D 1))
+      ; Costruisce la mossa positiva.
+      (setq mossa (dup 0 D))
+      (setf (mossa d) 1)
+      (push mossa mosse -1)
+      ; Costruisce la mossa negativa.
+      (setq mossa (dup 0 D))
+      (setf (mossa d) -1)
+      (push mossa mosse -1))
+    ; Esegue al massimo N passi.
+    (for (i 1 N 1 fine)
+      ; Sceglie casualmente una delle 2*D direzioni.
+      (setq mossa (mosse (rand (* 2 D))))
+      ; Aggiorna tutte le coordinate.
+      (for (d 0 (- D 1))
+        (++ (pos d) (mossa d)))
+      ; Memorizza il numero di passi eseguiti.
+      (setq passi i)
+      ; Controlla se il punto e' tornato all'origine.
+      (if (= pos (dup 0 D))
+        (setq fine true)))
+    passi))
+
+Proviamo:
+
+(collect (walk 1 11) 10)
+;-> (8 6 2 11 2 2 11 11 11 11)
+
+(define (return D N prove)
+  (let (sim (collect (walk D N) prove))
+    (- prove (length (find-all N sim)))))
+
+Proviamo:
+
+(return 1 100001 100)
+;-> 100
+(return 2 100001 100)
+;-> 85
+(return 3 100001 100)
+;-> 35
+
 ============================================================================
 
