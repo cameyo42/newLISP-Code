@@ -1271,5 +1271,387 @@ Proviamo:
 (return 3 100001 100)
 ;-> 35
 
+
+--------------------
+Attesa per una carta
+--------------------
+
+Abbiamo un mazzo di N carte.
+Una certa carta X compare K volte nel mazzo.
+Mischiamo il mazzo e poi prendiamo una carta dalla cima.
+Quante carte, in media, dobbiamo prendere prima di ottenere una carta X?
+
+A) Soluzione con simulazione
+
+(define (simula N K iter)
+  (let ((totale 0)
+        (carte (append (dup 0 (- N K)) (dup 1 K))))
+    (for (i 1 iter)
+      (setq carte (randomize carte true))
+      (++ totale (find 1 carte)))
+    (div totale iter)))
+
+(seed (time-of-day) true)
+
+(simula 52 4 1e6)
+;-> 9.597951
+
+B) Soluzione matematica
+
+Le K carte uguali dividono il mazzo in (K+1) blocchi di carte.
+La lunghezza di questi blocchi varia da 0 a (N-K).
+Il principio di simmetria dice che (K+1) blocchi hanno una media pari a:
+
+  media = (N - K)/(K + 1)
+
+(define (media N K)
+  (div (- N K) (+ K 1)))
+
+(media 52 4)
+;-> 9.6
+
+(simula 100 11 1e6)
+;-> 7.407334
+(media 100 11)
+;-> 7.416666666666667
+
+
+---------------------------------------------
+Il gioco del Wari (Awari-Oware-Awele-Mancala)
+---------------------------------------------
+
+"How to play Warri" David Chamberlin
+
+Il Wari (noto anche come Awari o Oware o Awélé) è un antico e diffuso gioco da tavolo astratto della famiglia dei mancala, basato sulla logica e sul calcolo senza alcuna componente di fortuna.
+
+Struttura del Gioco
+-------------------
+a) Il tabellone: È composto da due file di sei piccole cavità chiamate case (o buche) e due grandi cavità alle estremità chiamate granai (o depositi).
+Ciascun giocatore controlla la fila di sei case dal proprio lato e il granaio alla propria destra.
+
+b) I pezzi: Si usano 48 semi (o sassolini), disposti inizialmente in numero di 4 in ciascuna delle 12 case.
+
+c) Obiettivo: Catturare più semi dell'avversario.
+Poiché i semi in totalità sono 48, vince chi per primo ne raccoglie 25 o più nel proprio granaio.
+
+Come si Gioca
+-------------
+1. Il turno: I giocatori si alternano muovendo uno alla volta.
+Nel proprio turno, un giocatore sceglie una qualsiasi delle proprie sei case e prende tutti i semi contenuti all'interno.
+
+2. La semina: Il giocatore distribuisce i semi uno alla volta nelle case successive procedendo in senso antiorario.
+Se il giro è lungo e supera il numero di case, la casa di partenza (da cui sono stati presi i semi) viene saltata e lasciata vuota.
+
+3. La cattura (raccolta): La cattura avviene se l'ultimo seme seminato cade in una casa dell'avversario che, dopo l'inserimento, contiene un totale di 2 o 3 semi. In questo caso, il giocatore raccoglie quei semi e li mette nel proprio granaio.
+
+4. Catena di cattura: Se la casa immediatamente precedente (sempre andando a ritroso in senso orario) contiene anch'essa 2 o 3 semi, anche questi vengono catturati e così via, finché si incontrano case con un numero diverso di semi o case del proprio lato.
+
+Regole Speciali
+---------------
+a) La carestia: Se un giocatore rimane senza semi nelle proprie case, l'avversario ha l'obbligo (se possibile) di effettuare una mossa che gli restituisca almeno un seme.
+Se non è possibile, la partita finisce e i semi rimasti sul tabellone vengono presi dal giocatore che li possiede.
+
+b) Fine della partita:
+Il gioco termina quando:
+a) un giocatore raggiunge i 25 semi.
+b) la posizione si ripete (ciclo). Ciascun giocatore prende i semi rimasti sul proprio lato.
+c) Quando un giocatore non ha più semi. L'altro giocatore prende i semi del proprio lato.
+
+Notazione del Wari
+------------------
+    a   b   c   d   e   f
+  +---+---+---+---+---+---+
+  |   |   |   |   |   |   |
+  +---+---+---+---+---+---+
+  |   |   |   |   |   |   |
+  +---+---+---+---+---+---+
+    F   E   D   C   B   A
+
+Rappresentazione della tavola del Wari
+--------------------------------------
+       a        b        c        d        e        f      --> lettere
+      11       10        9        8        7        6      --> indici
+  +--------+--------+--------+--------+--------+--------+
+  |        |        |        |        |        |        | ---> Case Nord (Y)
+  |        |        |        |        |        |        |   0 --> Granaio Nord
+  |        |        |        |        |        |        |
+  +--------+--------+--------+--------+--------+--------+
+
+  +--------+--------+--------+--------+--------+--------+
+  |        |        |        |        |        |        | ---> Case Sud (X)
+  |        |        |        |        |        |        |   0 --> Granaio Sud
+  |        |        |        |        |        |        |         (X)
+  +--------+--------+--------+--------+--------+--------+
+       0        1        2        3        4        5      --> indici
+       F        E        D        C        B        A      --> lettere
+
+Vediamo alcune funzioni che ci permettono di giocare a Wari in modo interattivo.
+
+; Inizia una nuova partita
+(define (setup lst)
+  ; tavola del gioco
+  (setq board (if lst lst (dup 4 12)))
+  ; Memorizza la tavola corrente (for undo)
+  (setq old-board board)
+  ; granaio del giocatore Sud (0 1 2 3 4 5)
+  (setq granaio1 0)
+  ; Memorizza il granaio 1 (for undo)
+  (setq old-granaio1 granaio1)
+  ; granaio del giocatore Nord (6 7 8 9 7 6)
+  (setq granaio2 0)
+  ; Memorizza il granaio 2 (for undo)
+  (setq old-granaio2 granaio2)
+  ; giocatore corrente
+  (setq player nil)
+  ; stampa della tavola corrente
+  (print-board board granaio1 granaio2))
+
+; Converte la lettera della casa in indice della casa
+(define (lettera-indice lettera)
+  ; 11 10 9 8 7 6
+  ;  a  b c d e f
+  ; 0 1 2 3 4 5
+  ; F E D C B A
+  (lookup lettera '(("A" 5) ("B" 4) ("C" 3) ("D" 2) ("E" 1) ("F" 0)
+                    ("a" 11) ("b" 10) ("c" 9) ("d" 8) ("e" 7) ("f" 6)
+                    (A 5) (B 4) (C 3) (D 2) (E 1) (F 0)
+                    (a 11) (b 10) (c 9) (d 8) (e 7) (f 6))))
+
+; Converte l'indice della casa in lettera della casa
+(define (indice-lettera indice)
+  ; 11 10 9 8 7 6
+  ;  a  b c d e f
+  ; 0 1 2 3 4 5
+  ; F E D C B A
+  (lookup indice '((5 "A") (4 "B") (3 "C") (2 "D") (1 "E") (0 "F")
+                  (11 "a") (10 "b") (9 "c") (8 "d") (7 "e") (6 "f")
+                  (5 A) (4 B) (3 C) (2 D) (1 E) (0 F)
+                  (11 a) (10 b) (9 c) (8 d) (7 e) (6 f))))
+
+; Annulla l'ultima mossa (solo una)
+; (utilizzabile dopo la 'semina' o dopo la 'raccolta')
+(define (undo)
+  (setq granaio1 old-granaio1)
+  (setq granaio2 old-granaio2)
+  (setq board old-board)
+  (print-board board granaio1 granaio2))
+
+; Stampa la posizione corrente della tavola
+(define (print-board board g1 g2)
+  (let ((border "  +---+---+---+---+---+---+")
+        (top    "    a   b   c   d   e   f  ")
+        ;(top    "   11  10   9   8   7   6")
+        ;(bottom "    0   1   2   3   4   5  "))
+        (bottom "    F   E   D   C   B   A  "))
+  (println top) (println border)
+  (println "  "
+           (join (reverse (slice (map (fn(x) (format "|%2d " x)) board) 6)))
+           (format "|%4d" g2))
+  (println border)
+  (println "  "
+           (join (slice (map (fn(x) (format "|%2d " x)) board) 0 6))
+           (format "|%4d" g1))
+  (println border) (println bottom) '>))
+
+; Effettua l'operazione di semina
+(define (semina lettera)
+  (setq idx-casa (lettera-indice lettera))
+  (if (zero? (board idx-casa))
+    (begin
+      (println "Semina impossibile: la casa " lettera " non ha semi.")
+      (print-board board granaio1 granaio2)'>)
+  ;else
+    (let ((semi (board idx-casa)) ; numeri di semi nella casa di partenza
+          (k 1) ; contatore
+          (indice 0)) ; indice corrente
+      ; giocatore corrente (1 o 2)
+      (setq player (if (< idx-casa 6) 1 2))
+      (println "Semina del giocatore: " (if (= player 1) "Sud" "Nord"))
+      (println "Casa: " lettera ", Semi: " semi)
+      ; Memorizza la tavola corrente (for undo)
+      (setq old-board board)
+      ; Azzera il numero di semi della casa di partenza
+      (setf (board idx-casa) 0)
+      ; Spostamento dei semi:
+      ; posiziona i semi nelle case successive (1 per ogni casa)
+      ; in senso antiorario (saltando sempre la casa di partenza)
+      (setq k 1)
+      (until (zero? semi)
+        (setq indice (% (+ idx-casa k) 12))
+        (when (!= indice idx-casa)
+            (++ (board (% (+ idx-casa k) 12)))
+            (-- semi))
+        (++ k))
+      (print-board board granaio1 granaio2)
+      ; 'indice' è l'ultima casa visitata
+      ; (dove è stato posto l'ultimo seme della semina)
+      (check-raccolta (indice-lettera indice)))))
+
+; Controlla se esiste un giocatore che può effettuare la raccolta
+(define (check-raccolta lettera)
+  (let (idx-casa (lettera-indice lettera))
+    (cond ((and (= player 2) (< idx-casa 6)
+                (or (= (board idx-casa) 2) (= (board idx-casa) 3)))
+            (println "Il giocatore Nord può effettuare la raccolta dalla casa: " lettera))
+          ((and (= player 1) (> idx-casa 5)
+                (or (= (board idx-casa) 2) (= (board idx-casa) 3)))
+            (println "Il giocatore Sud può effettuare la raccolta dalla casa: " lettera))
+          (true (println "Nessuna raccolta possibile dalla casa: " lettera "."))) '>))
+
+; Controlla se esiste un giocatore in carestia
+(define (check-carestia)
+  (if (zero? (apply + (slice board 0 6)))
+        (println "Il giocatore Sud è in carestia."))
+  (if (zero? (apply + (slice board 6)))
+        (println "Il giocatore Nord è in carestia.")) '>)
+
+; Controlla se uno dei giocatori ha vinto
+(define (game-over?)
+  (cond ((> granaio1 24)
+          (println "Il giocatore Sud ha vinto: " granaio1 " - "granaio2))
+        ((> granaio2 24)
+          (println "Il giocatore Nord ha vinto: " granaio2 " - "granaio1))) '>)
+
+; Effettua l'operazione di raccolta
+(define (raccolta lettera)
+  (setq idx-casa (lettera-indice lettera))
+  (println "Raccolta del giocatore: " (if (= player 1) "Sud" "Nord"))
+  (setq old-granaio1 granaio1)
+  (setq old-granaio2 granaio2)
+  (cond ((and (= player 2) (< idx-casa 6)
+              (or (= (board idx-casa) 2) (= (board idx-casa) 3)))
+              ; operazione di cattura del giocatore Nord
+              (for (idx idx-casa 0 -1)
+                (when (or (= (board idx) 2) (= (board idx) 3))
+                      (++ granaio2 (board idx))
+                      (setq (board idx) 0))))
+        ((and (= player 1) (> idx-casa 5)
+              (or (= (board idx-casa) 2) (= (board idx-casa) 3)))
+              ; operazione di cattura del giocatore Sud
+              (for (idx idx-casa 6 -1)
+                (when (or (= (board idx) 2) (= (board idx) 3))
+                      (++ granaio1 (board idx))
+                      (setq (board idx) 0))))
+        (true (println "Nessuna raccolta possibile.")))
+  (print-board board granaio1 granaio2)
+  (check-carestia)
+  (game-over?))
+
+Proviamo:
+
+(setup)
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 4 | 4 | 4 | 4 | 4 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->   | 4 | 4 | 4 | 4 | 4 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+
+(semina 'F)
+;-> Semina del giocatore: Sud
+;-> Casa: F, Semi: 4
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 4 | 4 | 4 | 4 | 4 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->   | 0 | 5 | 5 | 5 | 5 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+;-> Nessuna raccolta possibile dalla casa: B.
+
+(semina 'a)
+;-> Semina del giocatore: Nord
+;-> Casa: a, Semi: 4
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 0 | 4 | 4 | 4 | 4 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->   | 1 | 6 | 6 | 6 | 5 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+;-> Nessuna raccolta possibile dalla casa: C.
+
+(undo)
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 4 | 4 | 4 | 4 | 4 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->   | 0 | 5 | 5 | 5 | 5 | 4 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+
+(setup '(1 2 3 4 5 6 2 2 2 2 2 2))
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 2 | 2 | 2 | 2 | 2 | 2 |   0
+;->   +---+---+---+---+---+---+
+;->   | 1 | 2 | 3 | 4 | 5 | 6 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+
+(semina 'A)
+;-> Semina del giocatore: Sud
+;-> Casa: A, Semi: 6
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 3 | 3 | 3 | 3 | 3 | 3 |   0
+;->   +---+---+---+---+---+---+
+;->   | 1 | 2 | 3 | 4 | 5 | 0 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+;-> Il giocatore Sud può effettuare la raccolta dalla casa: a
+
+(raccolta 'a)
+;-> Raccolta del giocatore: Sud
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 0 | 0 | 0 | 0 | 0 | 0 |   0
+;->   +---+---+---+---+---+---+
+;->   | 1 | 2 | 3 | 4 | 5 | 0 |  18
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+;-> Il giocatore Nord è in carestia.
+
+(setup '(1 1 1 1 1 1 1 1 1 1 1 22))
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   |22 | 1 | 1 | 1 | 1 | 1 |   0
+;->   +---+---+---+---+---+---+
+;->   | 1 | 1 | 1 | 1 | 1 | 1 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+
+(semina 'a)
+;-> Semina del giocatore: Nord
+;-> Casa: a, Semi: 22
+;->     a   b   c   d   e   f
+;->   +---+---+---+---+---+---+
+;->   | 0 | 3 | 3 | 3 | 3 | 3 |   0
+;->   +---+---+---+---+---+---+
+;->   | 3 | 3 | 3 | 3 | 3 | 3 |   0
+;->   +---+---+---+---+---+---+
+;->     F   E   D   C   B   A
+;-> Nessuna raccolta possibile dalla casa: b.
+
+; Stampa la posizione corrente della tavola (più grande)
+(define (print-board board g1 g2)
+  (let ((border "  +--------+--------+--------+--------+--------+--------+")
+        (inside "  |        |        |        |        |        |        |")
+        ;(top    "      11       10        9        8        7        6")
+        (top    "       a        b        c        d        e        f")
+        ;(bottom "       0        1        2        3        4        5"))
+        (bottom "       F        E        D        C        B        A")
+        (center "  +=====================================================+"))
+  (println top) (println border) (println inside)
+  (println "  "
+           (join (reverse (slice (map (fn(x) (format "|%5d   " x)) board) 6)))
+           (format "|%4d" g2))
+  (println inside) (println center) (println inside)
+  (println "  "
+           (join (slice (map (fn(x) (format "|%5d   " x)) board) 0 6))
+           (format "|%4d" g1))
+  (println inside) (println border) (println bottom) '>))
+
 ============================================================================
 

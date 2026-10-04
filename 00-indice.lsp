@@ -3786,6 +3786,8 @@ NOTE LIBERE 40
   Sul bordo del burrone
   Random-walk in una matrice
   Ritorno a casa in N dimensioni
+  Attesa per una carta
+  Il gioco del Wari (Awari-Oware-Awele-Mancala)
 
 PROBLEMI SUI DADI
 =================
