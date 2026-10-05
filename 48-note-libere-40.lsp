@@ -1388,22 +1388,29 @@ Rappresentazione della tavola del Wari
 Vediamo alcune funzioni che ci permettono di giocare a Wari in modo interattivo.
 
 ; Inizia una nuova partita
-(define (setup lst)
-  ; tavola del gioco
+(define (setup lst g1 g2)
+  ; Inizializza la tavola del gioco
   (setq board (if lst lst (dup 4 12)))
   ; Memorizza la tavola corrente (for undo)
   (setq old-board board)
-  ; granaio del giocatore Sud (0 1 2 3 4 5)
-  (setq granaio1 0)
+  ; Inizializza i granai
+  (if lst 
+    (begin
+      ; Granaio del giocatore Sud (0 1 2 3 4 5)
+      (setq granaio1 (or g1 0))
+      ; Granaio del giocatore Nord (6 7 8 9 7 6)
+      (setq granaio2 (or g2 0)))
+    ;else
+    (begin
+      (setq granaio1 0)
+      (setq granaio2 0)))
   ; Memorizza il granaio 1 (for undo)
   (setq old-granaio1 granaio1)
-  ; granaio del giocatore Nord (6 7 8 9 7 6)
-  (setq granaio2 0)
   ; Memorizza il granaio 2 (for undo)
   (setq old-granaio2 granaio2)
-  ; giocatore corrente
+  ; Giocatore corrente
   (setq player nil)
-  ; stampa della tavola corrente
+  ; Stampa della tavola iniziale
   (print-board board granaio1 granaio2))
 
 ; Converte la lettera della casa in indice della casa
@@ -1521,17 +1528,25 @@ Vediamo alcune funzioni che ci permettono di giocare a Wari in modo interattivo.
   (cond ((and (= player 2) (< idx-casa 6)
               (or (= (board idx-casa) 2) (= (board idx-casa) 3)))
               ; operazione di cattura del giocatore Nord
-              (for (idx idx-casa 0 -1)
-                (when (or (= (board idx) 2) (= (board idx) 3))
+              (let (stop nil)
+                (for (idx idx-casa 0 -1 stop)
+                  (if (or (= (board idx) 2) (= (board idx) 3))
+                    (begin
                       (++ granaio2 (board idx))
-                      (setq (board idx) 0))))
+                      (setq (board idx) 0))
+                    ;else
+                    (setq stop true)))))
         ((and (= player 1) (> idx-casa 5)
               (or (= (board idx-casa) 2) (= (board idx-casa) 3)))
               ; operazione di cattura del giocatore Sud
-              (for (idx idx-casa 6 -1)
-                (when (or (= (board idx) 2) (= (board idx) 3))
+              (let (stop nil)
+                (for (idx idx-casa 6 -1 stop)
+                  (if (or (= (board idx) 2) (= (board idx) 3))
+                    (begin
                       (++ granaio1 (board idx))
-                      (setq (board idx) 0))))
+                      (setq (board idx) 0))
+                    ;else
+                    (setq stop true)))))
         (true (println "Nessuna raccolta possibile.")))
   (print-board board granaio1 granaio2)
   (check-carestia)
@@ -1633,6 +1648,10 @@ Proviamo:
 ;->   +---+---+---+---+---+---+
 ;->     F   E   D   C   B   A
 ;-> Nessuna raccolta possibile dalla casa: b.
+
+(setup '(1 2 3 4 5 6 2 2 2 2 0 2))
+(semina 'A)
+(raccolta 'a)
 
 ; Stampa la posizione corrente della tavola (più grande)
 (define (print-board board g1 g2)
