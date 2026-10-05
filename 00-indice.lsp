@@ -3788,6 +3788,9 @@ NOTE LIBERE 40
   Ritorno a casa in N dimensioni
   Attesa per una carta
   Il gioco del Wari (Awari-Oware-Awele-Mancala)
+  Numeri che si incontrano
+  Zebra puzzle (Soluzione logica)
+  Zebra puzzle (Soluzione algoritmo)
 
 PROBLEMI SUI DADI
 =================

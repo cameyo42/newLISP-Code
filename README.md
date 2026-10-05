@@ -24,6 +24,7 @@ More than 4200 topics:
 - Library for recreational mathematics (more than 400 functions)  
 
 ----
+Files (Topics)  
 
 00) Indice
 01) newLISP in generale (65)
@@ -73,7 +74,7 @@ More than 4200 topics:
 45) Note libere 37 (80)
 46) Note libere 38 (80)
 47) Note libere 39 (80)
-48) Note libere 40 (10)
+48) Note libere 40 (13)
 96) Problemi sui dadi (80)
 97) Appendici (34)
 98) Bibliografia
