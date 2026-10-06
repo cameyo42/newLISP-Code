@@ -3794,6 +3794,9 @@ NOTE LIBERE 40
   Quadrati il cui inverso è quadrato
   Cubi il cui inverso è cubo
   Snail Sort
+  Sequenze brevi
+  Borse di stoffa e palline
+  Probabilità di incontrarsi in un torneo
 
 PROBLEMI SUI DADI
 =================

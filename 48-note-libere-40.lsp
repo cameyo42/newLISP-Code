@@ -2655,5 +2655,205 @@ Percorso = 1 -> 2 -> 3 -> 4 -> 5
 Quindi l'ordine finale è:
 (1 2 3 4 5 10 15 20 19 18 17 16 11 6 7 8 9 14 13 12)
 
+
+--------------
+Sequenze brevi
+--------------
+
+Determinare le sequenze dei numeri N per cui risulta:
+1) somma delle radici digitali dei divisori di N uguale a N
+2) prodotto delle radici digitali dei divisori di N uguale a N
+
+Esempio 1:
+  N = 15
+  divisori = 1 3 5 15
+  radici digitali = 1 3 5 6
+  somma = 1 + 3 + 5 + 6 = 15 --> Uguale a N
+
+Esempio 2:
+  N = 10
+  divisori = 1 2 5 1
+  radici digitali = 1 2 5 1
+  prodotto = 1 * 2 * 5 * 1 = 10 --> Uguale a N
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (divisors num)
+"Generate all the divisors of an integer number"
+  (local (f out)
+    (cond ((= num 1) '(1))
+          (true
+           (setq f (factor-group num))
+           (setq out '())
+           (divisors-aux 0 1)
+           (sort out)))))
+; auxiliary function
+(define (divisors-aux cur-index cur-divisor)
+  (cond ((= cur-index (length f))
+         (push cur-divisor out -1))
+        (true
+         (for (i 0 (f cur-index 1))
+           (divisors-aux (+ cur-index 1) cur-divisor)
+           (setq cur-divisor (* cur-divisor (f cur-index 0)))))))
+
+(define (digit-root num)
+"Calculate the repeated sum of the digits of an integer"
+    (+ 1 (% (- (abs num) 1) 9)))
+
+(define (check-mul? num)
+  (= num (apply * (map digit-root (divisors num)))))
+
+(define (check-add? num)
+  (= num (apply + (map digit-root (divisors num)))))
+
+(define (seq check limite)
+  (let (out '())
+    (for (num 1 limite)
+      ;(print num { } (check num)) (read-line)
+      (if (check num)
+          (push num out -1)))
+    out))
+
+Proviamo:
+
+(time (println (seq check-add? 1e7)))
+;-> (1 15)
+;-> 156487.876
+
+(time (println (seq check-mul? 1e7)))
+;-> (1 2 3 5 7 10)
+;-> 157089.141
+
+
+-------------------------
+Borse di stoffa e palline
+-------------------------
+
+Abbiamo N borse di stoffa e un numero sufficiente di palline.
+Vogliamo mettere in ogni borsa un numero diverso di palline.
+
+Soluzione 1
+-----------
+Contando lo 0 come numero, mettiamo:
+  0 palline nella borsa 1
+  1 pallina nella borsa 2
+  2 palline nella borsa 3
+  ...
+  N-1 palline nella borsa N
+
+Totale palline = 0 + 1 + 2 + 3 + ... + N-1
+Somma(N) = N*(N + 1)/2
+Somma(N-1) = (N-1)*N/2
+Per N = 10, --> Totale palline = (10 - 1)*10/2 = 45
+
+Soluzione 2
+-----------
+Le borse di stoffa possono essere messe una dentro l'altra.
+Quindi mettiamo 0 palline sulla borsa 1 e una pallina in ognuna delle altre (N-1) borse.
+Poi inseriamo le borse una dentro l'altra (come una matrioska):
+Per N = 10
+Mettiamo 0 palline nella borsa 1.
+Poi mettiamo una pallina in tutte le altre borse ((N - 1) palline in tutto).
+Infine inseriamo le borse una dentro l'altra:
+  la borsa 9 nella 10
+  la borsa 8 nella 9
+  la borsa 7 nella 8
+  ...
+  la borsa 2 nella 3.
+  la borsa 1 nella 2.
+In questo modo ogni borsa contiene un numero diverso di palline e abbiamo usato (N - 1) palline.
+
+(define (bags N)
+  (let (bag '(0))
+    (for (i 1 (- N 1)) (setq bag (cons bag '(1))))
+    bag))
+
+(bags 10)
+;-> ((((((((((0) 1) 1) 1) 1) 1) 1) 1) 1) 1)
+
+
+---------------------------------------
+Probabilità di incontrarsi in un torneo
+---------------------------------------
+
+In un torneo ad eliminazione diretta partecipano N giocatori.
+Supponendo che i giocatori siano tutti più o meno allo stesso livello, qual è la probabilità che due giocatori a caso si incontrino durante il torneo?
+
+Soluzione con simulazione
+-------------------------
+
+(define (torneo N iter)
+  (local (t1 t2 conta plys stop coppie))
+    ; giocatore 1 = 1
+    ; giocatore 1 = 2
+    ; Non ha importanza quale coppia di numeri si sceglie,
+    ; basta che siano diversi tra loro e minori di N (0,..,N-1).
+    ; Tipi di incontri
+    (setq t1 (list 1 2))
+    (setq t2 (list 2 1))
+    ; Contatore degli incontri tra 1 e 2
+    (setq conta 0)
+    ; Ciclo per 'iter' tornei...
+    (for (i 1 iter)
+      ; Generazione dei giocatori
+      (setq plys (randomize (sequence 0 (- N 1)) true))
+      (setq stop nil)
+      ; Simulazione del torneo corrente
+      (until stop
+        ; generazione degli accoppiamenti
+        (setq coppie (explode plys 2))
+        ; Se i giocatori 1 e 2 si incontrano...
+        (if (or (find t1 coppie) (find t2 coppie))
+            ; Allora fermiamo il torneo corrente e aggiorniamo il contatore
+            (setq stop true conta (+ conta 1))
+            ;else
+            ; Altrimenti generiamo la nuova lista di giocatori
+            ; facendo vincere sempre il secondo di ogni coppia.
+            ; Non ha importanza chi vince perchè la lista è casuale.
+            (setq plys (select plys (sequence 1 (length plys) 2))))
+        ; Controllo della fine del torneo corrente
+        ; (plys contiene il vincitore del torneo)
+        (if (= (length plys) 1) (setq stop true))))
+    (div conta iter))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(torneo 8 1e6)
+;-> 0.250504
+(time (println (torneo 64 1e6)))
+;-> 0.031056
+;-> 6379.729
+(time (println (torneo 512 1e6)))
+;-> 0.003985
+;-> 43065.367
+
+Soluzione matematica
+--------------------
+
+Ci sono binom(N,2) coppie di giocatori, di cui (N - 1) si incontreranno (poiché devono essere eliminati (N - 1) giocatori per decretare il vincitore).
+Quindi la probabilità che una specifica coppia si incontri vale:
+
+                  (N - 1)
+  P(incontro) = ------------
+                 binom(N,2)
+
+Poichè: (binom N,2) = N*(N-1)/2 
+
+                  (N - 1)      2  
+  P(incontro) = ----------- = ---
+                 N*(N-1)/2     N 
+
+(define (prob N) (div 2 N))
+
+(map prob '(8 64 512))
+;-> (0.25 0.03125 0.00390625)
+
 ============================================================================
 
