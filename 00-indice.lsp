@@ -3791,6 +3791,9 @@ NOTE LIBERE 40
   Numeri che si incontrano
   Zebra puzzle (Soluzione logica)
   Zebra puzzle (Soluzione algoritmo)
+  Quadrati il cui inverso è quadrato
+  Cubi il cui inverso è cubo
+  Snail Sort
 
 PROBLEMI SUI DADI
 =================

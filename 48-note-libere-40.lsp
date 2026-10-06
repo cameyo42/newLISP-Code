@@ -2363,5 +2363,297 @@ La parte più importante, però, è l'ordine dei filtri.
 Non tutte le regole hanno la stessa capacità di ridurre lo spazio delle possibilità.
 Regole come Giapponese -> Parliament, Spagnolo -> cane, Norvegese -> casa 1 e Latte -> casa 3 sono molto economiche da verificare e restringono rapidamente il problema.
 
+
+----------------------------------
+Quadrati il cui inverso è quadrato
+----------------------------------
+
+Determinare la sequenza dei numeri positivi per cui risulta:
+1) N quadrato perfetto
+2) reverse(N) quadrato perfetto
+
+Sequenza OEIS A061457:
+Squares whose reversal is also a square.
+  0, 1, 4, 9, 100, 121, 144, 169, 400, 441, 484, 676, 900, 961, 1089, 9801,
+  10000, 10201, 10404, 10609, 12100, 12321, 12544, 12769, 14400, 14641,
+  14884, 16900, 40000, 40401, 40804, 44100, 44521, 44944, 48400, 48841,
+  67600, 69696, 90000, 90601, ...
+
+(define (square? num)
+"Check if an integer is a perfect square"
+  (let (isq (int (sqrt num)))
+    (= num (* isq isq))))
+
+(define (seq num)
+  (let ((out '()) (conta 0) (k 0))
+    (while (< conta num)
+      (when (square? (int (reverse (string (* k k))) 0 10))
+        (push (* k k) out -1)
+        (++ conta))
+      (++ k))
+    out))
+
+(seq 40)
+;-> (0 1 4 9 100 121 144 169 400 441 484 676 900 961 1089 9801
+;->  10000 10201 10404 10609 12100 12321 12544 12769 14400 14641
+;->  14884 16900 40000 40401 40804 44100 44521 44944 48400 48841
+;->  67600 69696 90000 90601)
+
+
+--------------------------
+Cubi il cui inverso è cubo
+--------------------------
+
+Determinare la sequenza dei numeri positivi per cui risulta:
+1) N cubo perfetto
+2) reverse(N) cubo perfetto
+
+Sequenza OEIS A061458:
+Cubes whose digit reversal is also a cube.
+  0, 1, 8, 343, 1000, 1331, 8000, 343000, 1000000, 1030301, 1331000, 1367631,
+  8000000, 343000000, 1000000000, 1003003001, 1030301000, 1033364331,
+  1331000000, 1334633301, 1367631000, 8000000000, 10662526601,
+  343000000000, 1000000000000, 1000300030001, 1003003001000, ...
+
+(define (cube? num)
+"Check if an integer is a perfect cube"
+  (let ((cr (int (pow num (div 3)))))
+    (cond ((= (* cr cr cr) num) true)
+          ((= (* (+ cr 1) (+ cr 1) (+ cr 1)) num) true)
+          ((= (* (- cr 1) (- cr 1) (- cr 1)) num) true)
+          (true nil))))
+
+(define (seq num)
+  (let ((out '()) (conta 0) (k 0))
+    (while (< conta num)
+      (when (cube? (int (reverse (string (* k k k))) 0 10))
+        (push (* k k k) out -1)
+        (++ conta))
+      (++ k))
+    out))
+
+(seq 27)
+;-> (0 1 8 343 1000 1331 8000 343000 1000000 1030301 1331000 1367631
+;->  8000000 343000000 1000000000 1003003001 1030301000 1033364331
+;->  1331000000 1334633301 1367631000 8000000000 10662526601
+;->  343000000000 1000000000000 1000300030001 1003003001000)
+
+
+----------
+Snail Sort
+----------
+
+Lo Snail Sort (o ordinamento a chiocciola) è un problema in cui l'obiettivo non è ordinare i numeri dal più piccolo al più grande, bensì attraversare una matrice bidimensionale (MxN) seguendo un percorso a spirale in senso orario, dall'esterno verso l'interno, restituendo gli elementi in una lista unidimensionale.
+
+Esempio:
+           1 2 3
+matrice =  4 5 6
+           7 8 9
+output = (1 2 3 6 9 8 7 4 5)
+
+Vediamo prima la funzione e poi la spiegazione dell'algoritmo usato.
+
+; Ordina una matrice MxN in modo snail
+; Attraversamento a spirale in senso orario partendo da (0 0)
+(define (snail matrix)
+  (local (res top bottom left right)
+    (setq res '())
+    (setq top 0)
+    (setq bottom (- (length matrix) 1))
+    (setq left 0)
+    (setq right (- (length (matrix 0)) 1))
+    (while (and (<= top bottom) (<= left right))
+      ; 1. Traverse from left to right across the top row
+      (setq l left)
+      (while (<= l right)
+        (push (matrix top l) res -1)
+        (++ l))
+      ; Move top boundary down
+      (++ top)
+      ; 2. Traverse down the rightmost column
+      (setq t top)
+      (while (<= t bottom)
+        (push (matrix t right) res -1)
+        (++ t))
+      ; Move right boundary left
+      (-- right)
+      (when (<= top bottom)
+        ; 3. Traverse from right to left across the bottom row
+        (setq r right)
+        (while (>= r left)
+          (push (matrix bottom r) res -1)
+          (-- r))
+        ; Move bottom boundary up
+        (-- bottom))
+      (when (<= left right)
+        ; 4. Traverse up the leftmost column
+        (setq b bottom)
+        (while (>= b top)
+          (push (matrix b left) res -1)
+          (-- b))
+        ; Move left boundary right
+        (++ left)))
+    res))
+
+Proviamo:
+
+(setq m1 '((1 2 3) (4 5 6) (7 8 9)))
+(snail m1)
+;-> (1 2 3 6 9 8 7 4 5)
+
+(setq m2 '((1 2 3 4) (5 6 7 8) (9 10 11 12) (13 14 15 16)))
+(snail m2)
+;-> (1 2 3 4 8 12 16 15 14 13 9 5 6 7 11 10)
+
+1   2   3   4   5
+6   7   8   9  10
+11 12  13  14  15
+16 17  18  19  20
+(setq m3 '((1 2 3 4 5) (6 7 8 9 10) (11 12 13 14 15) (16 17 18 19 20)))
+(snail m3)
+;-> (1 2 3 4 5 10 15 20 19 18 17 16 11 6 7 8 9 14 13 12)
+
+(setq m4 '((1 2 3 4 5)
+           (6 7 8 9 10)
+           (11 12 13 14 15)))
+(snail m4)
+;-> (1 2 3 4 5 10 15 14 13 12 11 6 7 8 9)
+
+(setq m5 '(( 1  2  3)
+           ( 6  7  8)
+           (11 12 13)
+           (16 17 18)))
+(snail m5)
+;-> (1 2 3 8 13 18 17 16 11 6 7 12)
+
+L'algoritmo percorre la matrice a spirale, partendo dall'angolo superiore sinistro e procedendo verso destra.
+Quando raggiunge un bordo, cambia direzione e restringe progressivamente il rettangolo ancora da percorrere.
+L'idea fondamentale è quella di modificare i quattro confini top, bottom, left e right, restringendo progressivamente il rettangolo della matrice ancora da percorrere.
+
+1) Definizione dei quattro limiti
+I quattro indici delimitano la parte di matrice che non è ancora stata visitata:
+  top       = prima riga
+  bottom    = ultima riga
+  left      = prima colonna
+  right     = ultima colonna
+Per esempio, per una matrice 4 x 5:
+          left            right
+            |               |
+            v               v
+  top ->    1   2   3   4   5
+            6   7   8   9  10
+           11  12  13  14  15
+  bottom-> 16  17  18  19  20
+Il ciclo continua finché esiste almeno una riga e una colonna da percorrere:
+  (while (and (<= top bottom) (<= left right))
+
+2) Percorrere la riga superiore
+Si percorre la riga top da left a right:
+  (setq l left)
+  (while (<= l right)
+    (push (matrix top l) res -1)
+    (++ l))
+Per esempio:
+  1 -> 2 -> 3 -> 4 -> 5
+Una volta completata la riga, essa non deve più essere considerata:
+  (++ top)
+Il limite superiore viene quindi spostato verso il basso.
+
+3) Percorrere la colonna destra
+Si percorre la colonna right dall'alto verso il basso:
+  (setq t top)
+  (while (<= t bottom)
+    (push (matrix t right) res -1)
+    (++ t))
+Per esempio:
+  5
+  |
+  10
+  |
+  15
+  |
+  20
+Terminato il percorso, la colonna destra viene esclusa:
+(-- right)
+4) Percorrere la riga inferiore
+Se esiste ancora una riga da percorrere:
+  (when (<= top bottom)
+si percorre la riga bottom da destra verso sinistra:
+  (setq r right)
+  (while (>= r left)
+    (push (matrix bottom r) res -1)
+    (-- r))
+Per esempio:
+  20 -> 19 -> 18 -> 17 -> 16
+Poi si elimina quella riga dal rettangolo ancora disponibile:
+  (-- bottom)
+
+5) Percorrere la colonna sinistra
+Se esiste ancora una colonna:
+  (when (<= left right)
+si percorre la colonna left dal basso verso l'alto:
+  (setq b bottom)
+  (while (>= b top)
+    (push (matrix b left) res -1)
+    (-- b))
+Per esempio:
+  16
+  |
+  11
+  |
+  6
+Infine la colonna viene esclusa:
+  (++ left)
+
+6) Il rettangolo si restringe
+Dopo un giro completo, i quattro limiti sono avanzati:
+         left       right
+           |          |
+           v          v
+  top ->   +----------+
+           |          |
+           |          |
+           |          |
+  bottom-> +----------+
+Il rettangolo residuo è quindi più piccolo.
+L'algoritmo ripete gli stessi quattro passi:
+  destra -> basso
+              |
+              v
+           sinistra
+              |
+              v
+             alto
+              |
+              +----> nuovo giro
+fino a quando:
+  top > bottom
+  left > right
+A quel punto non rimangono più elementi da visitare.
+
+Esempio:
+Matrice = 
+  1   2   3   4   5
+  6   7   8   9  10
+  11 12  13  14  15
+  16 17  18  19  20
+
+Percorso = 1 -> 2 -> 3 -> 4 -> 5
+                               |
+                              10
+                               |
+                              15
+                               |
+      16 <- 17 <- 18 <- 19 <- 20
+      |
+      11
+      |
+      6 -> 7 -> 8 -> 9
+                     |
+                     14 -> 13 -> 12
+
+Quindi l'ordine finale è:
+(1 2 3 4 5 10 15 20 19 18 17 16 11 6 7 8 9 14 13 12)
+
 ============================================================================
 
