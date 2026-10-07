@@ -2855,5 +2855,248 @@ Poichè: (binom N,2) = N*(N-1)/2
 (map prob '(8 64 512))
 ;-> (0.25 0.03125 0.00390625)
 
+
+--------------------------------
+Incontri lungo una circonferenza
+--------------------------------
+
+Abbiamo due punti casuali p1=(x1,y1) e p2=(x2,y2) su una circonferenza di raggio unitario con centro in (0,0).
+Adesso p1 compie N giri in senso orario e p2 compie M giri in senso antiorario.
+Quante volte si incontrano p1 e p2?
+
+Soluzione
+---------
+Il numero di incontri è semplicemente: N+M.
+Indichiamo con alpha1 e alpha2 gli angoli iniziali dei due punti.
+Durante un intervallo di tempo normalizzato (t in [0,1]):
+
+- p1 compie N giri in senso orario:
+  theta1(t) = alpha1 - 2*pi*N*t
+
+- p2 compie M giri in senso antiorario:
+  theta2(t) = alpha2 + 2*pi*M*t
+
+La formula della velocità angolare è:
+
+  vel = Delta(theta)/Delta(t)
+dove:
+  vel = velocità angolare, in rad/s
+  Delta(theta) = angolo percorso, in radianti
+  Delta(t) = intervallo di tempo.
+
+Per un giro completo:
+
+  Delta(theta) = 2*pi
+
+quindi, se un punto compie N giri nel tempo T:
+
+ vel = 2*pi*N/T
+
+Prendendo T=1:
+
+ vel1 = -2*pi*N
+ vel2 = +2*pi*M
+
+dove il segno indica il verso di rotazione.
+
+La formula della velocità relativa angolare è:
+
+  Vrel = v2 - v1
+
+Nel nostro caso:
+- p1 gira in senso orario:     v1 = -2*pi*N
+- p2 gira in senso antiorario: v2 = +2*pi*M
+  
+Quindi:
+
+  Vrel = 2*pi*M - (-2*pi*N) = 2*pi*(M+N)
+
+Se invece i due punti girassero nello stesso senso, avremmo:
+
+  Vrel = 2*pi|N-M|
+
+La velocità angolare relativa vale:
+
+  2*pi*M - (-2*pi*N) = 2*pi*(N+M)
+
+In altre parole, rispetto a p1, p2 compie N+M giri relativi.
+Poichè ogni giro relativo produce esattamente un incontro abbiamo:
+
+  incontri = N + M 
+
+Se i due punti iniziano esattamente nella stessa posizione, il conteggio cambia a seconda che si consideri l'istante iniziale e/o quello finale.
+Con due punti scelti casualmente e indipendentemente, questa situazione ha probabilità zero, quindi il risultato usuale rimane N+M.
+
+
+--------------
+Dadi al casinò
+--------------
+
+Il croupier di un casinò propone il gioco seguente:
+1) lanciare 6 dadi (1..6)
+2) Se escono 4 numeri diversi, allora il giocatore vince 1, altrimenti perde 1.
+Il gioco è equo?
+
+(define (simula iter)
+  (let ((win 0) (lose 0))
+    (for (i 1 iter)
+      (setq dado (rand 6 6)) ; 6 dadi da (0..5)
+      (if (= (length (unique dado)) 4)
+        (++ win)
+        (++ lose)))
+    (list win lose (div win lose))))
+
+Proviamo:
+
+(simula 1e5)
+;-> (50254 49746 1.010211876331765)
+(simula 1e6)
+;-> (501590 498410 1.006380289320038)
+(time (println (simula 1e7)))
+;-> 7902.62
+(time (println (simula 1e8)))
+;-> (50158399 49841601 1.006356095984959)
+;-> 79124.171
+
+Il gioco è leggermente favorevole al giocatore (circa il 50.15% di probabilità di vittoria per ogni lancio).
+
+
+------------------------------
+Dividere una pila di N oggetti
+------------------------------
+
+Abbiamo una pila con N oggetti.
+Ogni volta che dividiamo una pila in due pile, otteniamo tanti punti quanto vale il prodotto del numero di oggetti di ogni pila.
+Per esempio, partendo con una pila di 8 oggetti e dividendola in due pile da 3 e 5 oggetti, otteniamo 3 x 5 = 15 punti. Se invece la dividiamo in due pile da 4 oggetti l'una, allora otteniamo 4 x 4 = 16 punti.
+Continuando la divisione fino ad ottenere N pile con un solo oggetto, qual è il metodo per ottenere il maggior numero di punti?
+
+Esempio
+  N = 5
+  divisione 1 (5) = 2 e 3
+  punteggio = 2 * 3 = 6
+  lista = (2 3)
+  
+  divisione 2 (2) = 1 e 1
+  punteggio = 1 * 1 = 1
+  lista = 1 1 3
+  
+  divisione 3 (3) = 1 e 2
+  punteggio = 1 * 2 = 2
+  lista = 1 1 1 2
+  
+  divisione 4 (2) = 1 e 1
+  punteggio = 1 * 1 = 1
+  lista = 1 1
+  
+  punteggio totale = 6 + 1 + 2 + 1 = 10
+
+Scriviamo una funzione che simula la divisione casuale di una pila di N oggetti fino ad ottenere N pile da 1.
+
+(define (divide N show)
+  (local (p1 p2 pile unos punti stop parte)
+  ; Prima divisione casuale della pila iniziale
+  (setq p1 (+ 1 (rand (- N 1))))
+  (setq p2 (- N p1))
+  ; lista delle pile da dividere
+  (setq pile (list p1 p2))
+  ; lista degli 1
+  (setq unos '())
+  ; punteggio
+  (setq punti (* p1 p2))
+  ; ciclo sulla lista delle pile da dividere
+  (setq stop nil)
+  (until stop 
+    (if show (println "pile: " pile " " unos))
+    (setq parte (pop pile))
+    (if (= parte 1) 
+        (push 1 unos)
+        ;else
+        (begin
+          ; divisione pila corrente
+          (setq p1 (+ 1 (rand (- parte 1))))
+          (setq p2 (- parte p1))
+          (if show (println "parte: " parte " --> (" p1 " " p2 ")"))
+          ; aggiornamento della lista delle pile da dividere
+          ; e della lista degli uno
+          (if (= p1 1)
+            (push p1 unos) 
+            ;else
+            (push p1 pile))
+          (if (= p2 1)
+            (push p2 unos) ; 
+            ;else
+            (push p2 pile))
+          ; aggiornamento punteggio
+          (setq punti (+ punti (* p1 p2)))))
+    ; fine delle divisioni?
+    (if (= (count '(1) unos) (list N)) (setq stop true)))
+    (if show (println unos))
+  punti))
+
+Proviamo:
+
+(seed (time-of-day) true)
+
+(divide 7 true)
+;-> pile: (6 1) ()
+;-> parte: 6 --> (1 5)
+;-> pile: (5 1) (1)
+;-> parte: 5 --> (1 4)
+;-> pile: (4 1) (1 1)
+;-> parte: 4 --> (1 3)
+;-> pile: (3 1) (1 1 1)
+;-> parte: 3 --> (2 1)
+;-> pile: (2 1) (1 1 1 1)
+;-> parte: 2 --> (1 1)
+;-> pile: (1) (1 1 1 1 1 1)
+;-> (1 1 1 1 1 1 1)
+;-> 21
+
+(divide 3)
+;-> 3
+(divide 5)
+;-> 10
+(divide 10)
+;-> 45
+
+Vediamo cosa accade eseguendo 20 volte la funzione con N = 10:
+
+(collect (divide 10) 20)
+;-> (45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45)
+
+Questo vuol dire che qualunque metodo di divisione porta sempre allo stesso risultato.
+Infatti il risultato è sempre binom(N,2) indipendentemente dalle divisioni effettuate.
+Questo perchè ogni coppia (non ordinata) di oggetti guadagna 1.
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+Verifica:
+
+(map (fn(x) (binom x 2)) (sequence 2 10))
+;-> (1L 3L 6L 10L 15L 21L 28L 36L 45L)
+
+(map divide (sequence 2 10))
+(1 3 6 10 15 21 28 36 45)
+
+Inoltre (divide N) è uguale alla somma dei primi (N - 1) numeri naturali:
+
+(define (sum x) (/ (* x (+ x 1)) 2))
+;-> (1 3 6 10 15 21 28 36 45)
+
+Verifica:
+
+(= (divide 10) (sum 9))
+;-> true
+
 ============================================================================
 

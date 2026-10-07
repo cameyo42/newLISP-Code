@@ -3797,6 +3797,9 @@ NOTE LIBERE 40
   Sequenze brevi
   Borse di stoffa e palline
   Probabilità di incontrarsi in un torneo
+  Incontri lungo una circonferenza
+  Dadi al casinò
+  Dividere una pila di N oggetti
 
 PROBLEMI SUI DADI
 =================
