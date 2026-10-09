@@ -652,10 +652,10 @@ Differenza tra 'contare' ed 'elencare'
 Le funzioni che usano "Sweep-line" 'contano' gli eventi.
 Le funzioni che usano "Brute-Force" 'contano' ed 'elencano' gli eventi.
 Qui sta il punto cruciale: 'contare' le intersezioni e 'elencarle' sono due problemi con costi intrinsecamente diversi.
-- Contare puo essere fatto in O(n log n) perché un singolo numero ('active') riassume in O(1) l'informazione "quante coppie si formano ora", indipendentemente da quante siano.
+- Contare puo essere fatto in O(n log n) perchè un singolo numero ('active') riassume in O(1) l'informazione "quante coppie si formano ora", indipendentemente da quante siano.
 - Elencare le coppie non può scendere sotto il costo proporzionale al numero di coppie stesse: se, nel caso peggiore, tutti gli n intervalli si sovrappongono a vicenda, ci sono O(n^2) coppie da restituire, e nessun algoritmo — per quanto elegante — può enumerarle in meno tempo di quello necessario a scriverle tutte.
-Anche 'coverage-per-point' funziona con il 'diff array' proprio perché non ha mai bisogno di sapere quali intervalli coprono un punto, solo quanti.
-Il trucco diff[L] += 1 / diff[R+1] -= 1 seguito dalla somma prefissa produce un numero aggregato — l'informazione su quale intervallo abbia contribuito a quel numero va persa nel momento stesso in cui si fa +1, perché un +1 è indistinguibile da un altro +1 proveniente da un intervallo diverso.
+Anche 'coverage-per-point' funziona con il 'diff array' proprio perchè non ha mai bisogno di sapere quali intervalli coprono un punto, solo quanti.
+Il trucco diff[L] += 1 / diff[R+1] -= 1 seguito dalla somma prefissa produce un numero aggregato — l'informazione su quale intervallo abbia contribuito a quel numero va persa nel momento stesso in cui si fa +1, perchè un +1 è indistinguibile da un altro +1 proveniente da un intervallo diverso.
 È esattamente l'analogo del contatore active nello sweep-line: un numero riassuntivo, non una lista di riferimenti.
 
 Nota: tutte le funzioni calcolano da 1 al valore massimo degli intervalli (max-point).
@@ -1066,7 +1066,7 @@ Microsoft documenta anch'essa RAND_MAX = 32767 per il proprio CRT.
 Ma questo NON spiega direttamente il nostro problema.
 Infatti newLISP fa qualcosa in più quando chiamiamo "rand" con un numero maggiore di RAND_MAX:
 costruisce il risultato usando il generatore C sottostante.
-Non basta quindi guardare RAND_MAX: dobbiamo vedere il codice sorgente di newLISP, precisamente l'implementazione di "rand", perché è lì che probabilmente avviene la trasformazione da rand() del C a (rand n).
+Non basta quindi guardare RAND_MAX: dobbiamo vedere il codice sorgente di newLISP, precisamente l'implementazione di "rand", perchè è lì che probabilmente avviene la trasformazione da rand() del C a (rand n).
 Il problema quindi è nella struttura della sequenza generata dal rand() sottostante e nel modo in cui newLISP combina quei valori.
 
 La morale finale è quella di utilizzare SEMPRE "seed" con il parametro 'true':
@@ -1096,7 +1096,7 @@ Quanti giorni occorrono per essere sicuri di trovare il topo?
 
 Immaginiamo che ci siano solo tre buchi.
 Se controlliamo il buco centrale per due giorni consecutivi, prendiamo sicuramente il topo.
-Questo perché se il topo non si trova nel buco centrale il primo giorno, deve per forza essere dietro una delle buche laterali.
+Questo perchè se il topo non si trova nel buco centrale il primo giorno, deve per forza essere dietro una delle buche laterali.
 E se il primo giorno si trova in un buco laterale, il secondo giorno non avrà altra scelta che spostarsi nel buco centrale.
 
 Adeso immaginiamo che ci siano quattro buchi.
@@ -1120,12 +1120,12 @@ giorno 4  |      | T    |      |      |
 
 Il primo giorno il topo potrebbe trovarsi dietro qualsiasi buco, quindi ci sono T in ogni cella.
 Controlliamo il secondo buco. Se il topo è lì, gioco finito.
-Ma se il topo non c'è, posso eliminare la possibilità che il topo si trovi nel primo buco il secondo giorno, poiché l'unico modo in cui il topo potrebbe trovarsi lì è se si trovava nel secondo buco il primo giorno.
+Ma se il topo non c'è, posso eliminare la possibilità che il topo si trovi nel primo buco il secondo giorno, poichè l'unico modo in cui il topo potrebbe trovarsi lì è se si trovava nel secondo buco il primo giorno.
 Il secondo giorno, quindi, il topo può trovarsi solo in tre possibili buchi.
 
 Il secondo giorno controlliamo il terzo buco. Se il topo è lì, gioco finito.
 Altrimenti, posso eliminare la possibilità che il topo si trovi nel quarto buco il terzo giorno.
-Posso anche eliminare la possibilità che il topo si trovi nel secondo buco il terzo giorno, poiché per arrivarci avrebbe dovuto spostarsi dal buco 1 o dal buco 3, entrambi noti per non nascondere un topo.
+Posso anche eliminare la possibilità che il topo si trovi nel secondo buco il terzo giorno, poichè per arrivarci avrebbe dovuto spostarsi dal buco 1 o dal buco 3, entrambi noti per non nascondere un topo.
 Abbiamo ridotto le possibilità a due.
 
 Il terzo giorno controlliamo il terzo buco. Se il topo è lì, è finita.
@@ -1346,7 +1346,7 @@ Proviamo:
 ;-> 8602834034688L
 ;-> 93.721
 
-Si può anche ottimizzare evitando il ciclo interno, perché la somma degli ultimi M termini può essere mantenuta con una 'sliding window' (finestra scorrevole), portando il calcolo da O(N*M) a O(N).
+Si può anche ottimizzare evitando il ciclo interno, perchè la somma degli ultimi M termini può essere mantenuta con una 'sliding window' (finestra scorrevole), portando il calcolo da O(N*M) a O(N).
 Eliminiamo il ciclo interno mantenendo la somma degli ultimi 'M' valori.
 La differenza è che la versione precedente calcola ogni volta:
   f(i-1) + f(i-2) + ... + f(i-M)
@@ -1442,7 +1442,7 @@ Non c'è più nessuno
 -------------------
 
 Supponiamo di avere N oggetti, ciascuno con una probabilità di 1/m di scomparire ogni secondo.
-1) Qual è la media del numero di secondi necessari affinché tutti gli oggetti siano scomparsi?
+1) Qual è la media del numero di secondi necessari affinchè tutti gli oggetti siano scomparsi?
 2) Qual è la probabilità che dopo k secondi siano scomparsi tutti gli N oggetti?
 
 Nota: "1/m per secondo" deve essere applicato in modo discontinuo su una sequenza di intervalli discreti di 1 secondo.
@@ -2145,8 +2145,8 @@ Riuscirà la formica a raggiungere l'estremità dell'elastico?
 
 Come si muove la formica
 ------------------------
-Dopo un secondo, la formica si è spostata di 1 cm lungo l'elastico, che, allungandosi, sposta la formica a 2 cm, poiché allungare l'elastico da 1 m a 2 m ha l'effetto di raddoppiare la distanza tra due punti qualsiasi.
-Dopo un altro secondo, la formica si trova a 3 cm dall'estremità sinistra, distanza che, quando si allunga l'elastico, diventa di 4.5 cm, poiché allungare l'elastico da 2 m a 3 m ha l'effetto di moltiplicare per 3/2 la distanza tra due punti qualsiasi.
+Dopo un secondo, la formica si è spostata di 1 cm lungo l'elastico, che, allungandosi, sposta la formica a 2 cm, poichè allungare l'elastico da 1 m a 2 m ha l'effetto di raddoppiare la distanza tra due punti qualsiasi.
+Dopo un altro secondo, la formica si trova a 3 cm dall'estremità sinistra, distanza che, quando si allunga l'elastico, diventa di 4.5 cm, poichè allungare l'elastico da 2 m a 3 m ha l'effetto di moltiplicare per 3/2 la distanza tra due punti qualsiasi.
 In altre parole, la formica viene trascinata in avanti dall'allungamento e percorre una distanza crescente ogni secondo, il che forse le permette di arrivare in fondo.
 
 Dal punto di vista matematico.
@@ -2235,7 +2235,7 @@ Quindi dopo 1.509268862211383e+043 secondi la formica raggiunge la fine dell'ela
 Boys and girl
 -------------
 
-Ipotizzando che ogni bambino nato abbia la stessa probabilità di essere maschio o femmina, e scegliendo a caso un genitore tra tutti quelli che hanno due figli, la probabilità che questo genitore abbia ALMENO una figlia è 3/4, poiché tre dei quattro esiti ugualmente probabili MM, MF, FM, FF includono almeno una figlia.
+Ipotizzando che ogni bambino nato abbia la stessa probabilità di essere maschio o femmina, e scegliendo a caso un genitore tra tutti quelli che hanno due figli, la probabilità che questo genitore abbia ALMENO una figlia è 3/4, poichè tre dei quattro esiti ugualmente probabili MM, MF, FM, FF includono almeno una figlia.
 
 Invece, se scegliamo a caso un genitore tra tutti quelli che hanno due figli, di cui ALMENO uno maschio, allora i tre esiti ugualmente probabili sono MM, MF, FM, due dei quali hanno una figlia, quindi la probabilità che il genitore scelto abbia una figlia è 2/3. 
 
@@ -2351,7 +2351,7 @@ Per ogni punto P appartenente a L:
 
   AP + PB = AP + PB'
 
-perché P appartiene alla retta di riflessione e quindi:
+perchè P appartiene alla retta di riflessione e quindi:
 
   PB = PB'
 
@@ -2453,7 +2453,7 @@ Quanto tempo in media occorre affinchè il passaggio tra la prima riga e l'ultim
 Iniziamo scrivendo la funzione di ricerca di un percorso in una matrice.
 
 Consideriamo un labirinto rappresentato da una matrice binaria MxN in cui 1 è un passaggio e 0 è un muro.
-Poichè ci interessa solo sapere se esiste un percorso qualsiasi, senza doverlo costruire né minimizzare, la scelta più semplice e veloce è una DFS (Depth-First Search) iterativa.
+Poichè ci interessa solo sapere se esiste un percorso qualsiasi, senza doverlo costruire nè minimizzare, la scelta più semplice e veloce è una DFS (Depth-First Search) iterativa.
 
 Per una matrice binaria:
 - 1 = cella attraversabile
@@ -3031,11 +3031,11 @@ Il lupo mangia la pecora e non ci sono conseguenze per lui.
 La pecora muore.
 
 Due lupi:
-Nessuno dei due lupi mangerà la pecora, poiché se uno di loro lo facesse, si addormenterebbe e verrebbe poi mangiato dall'altro lupo.
+Nessuno dei due lupi mangerà la pecora, poichè se uno di loro lo facesse, si addormenterebbe e verrebbe poi mangiato dall'altro lupo.
 La pecora vive.
 
 Tre lupi:
-Il più veloce dei lupi mangerà la pecora, perché sa che quando si addormenterà, nessuno degli altri due lupi oserà mangiarlo perchè verrebbe poi mangiato dall'ultimo lupo.
+Il più veloce dei lupi mangerà la pecora, perchè sa che quando si addormenterà, nessuno degli altri due lupi oserà mangiarlo perchè verrebbe poi mangiato dall'ultimo lupo.
 La pecora muore.
 
 Quattro lupi:
@@ -3217,7 +3217,7 @@ q4 = ...
 
 Abbiamo due tipi di quadrati
 1) quadrati con lati paralleli alla griglia (es. q1 e q2);
-2) quadrati ruotati, purché tutti i vertici siano punti del lattice (es. q3).
+2) quadrati ruotati, purchè tutti i vertici siano punti del lattice (es. q3).
 
 Contiamo i quadrati di tipo 1 (quelli allineati alla griglia).
 Nell'esempio sopra abbiamo 6 quadrati di lato 1 e 2 quadrati di lato 2.
@@ -3426,7 +3426,7 @@ Gli indici stampati sono quelli della lista nel momento dell'eliminazione, quind
 (define (giuseppe-elimina lst k)
   (let ((pos 0)
         (n (length lst)))
-    ; Continua finché rimane un solo elemento.
+    ; Continua finchè rimane un solo elemento.
     (while (> n 1)
       ; Calcola la posizione dell'elemento da eliminare.
       (setq pos (% (+ pos k -1) n))
@@ -3553,7 +3553,7 @@ La scelta di d(i) garantisce:
 
   1/d(1) <= m(i)/n(i) < 1/(d(i) - 1)
 
-La seconda disuguaglianza caratterizza la scelta greedy: nessuna frazione unitaria con denominatore più piccolo può essere utilizzata, perché sarebbe troppo grande.
+La seconda disuguaglianza caratterizza la scelta greedy: nessuna frazione unitaria con denominatore più piccolo può essere utilizzata, perchè sarebbe troppo grande.
 
 Esempio:
   frazione = 5/7
@@ -3565,7 +3565,7 @@ Esempio:
   Infatti: 3/14 - 1/5 = 1/70
   Quindi 5/7 = 1/2 + 1/5 + 1/70
 
-Perché il metodo funziona
+Perchè il metodo funziona
 -------------------------
 Il punto fondamentale è che, ad ogni passo, 0 <= r(i+1) < r(i).
 Inoltre, quando r(i) = m(i)/n(i)) è positiva e propria,
@@ -3574,7 +3574,7 @@ Inoltre, quando r(i) = m(i)/n(i)) è positiva e propria,
 
 fa sì che il nuovo numeratore sia m(i)*d(i) - n(i).
 
-Poiché d(i) - 1 < n(i)/m(i) <= d(i)
+Poichè d(i) - 1 < n(i)/m(i) <= d(i)
 abbiamo m(i)*(d(i)-1) < n(i) <= m(i)*d(i),
 da cui 0 <= m(i)*d(i)- n(i) < m(i).
 Pertanto: 0 <= m(i+1) < m(i).
@@ -3616,11 +3616,11 @@ La funzione restituisce risultati corretti anche quando m > n:
 ;-> (1 1 3 15)
 
 Questa è una conseguenza naturale dell'algoritmo: non è necessario imporre (m < n).
-Per una frazione impropria, il greedy produce semplicemente una o più frazioni 1/1 all'inizio, finché il resto diventa una frazione propria.
+Per una frazione impropria, il greedy produce semplicemente una o più frazioni 1/1 all'inizio, finchè il resto diventa una frazione propria.
 
 Le frazioni con numeratore uguale a 1 sono chiamate frazioni egiziane.
 Il nome deriva dal fatto che gli antichi Egizi rappresentavano le frazioni principalmente attraverso frazioni unitarie.
-Per esempio, una quantità come 5/7 veniva rappresentata come somma di termini del tipo 1/n, anziché usando direttamente una frazione con numeratore maggiore di 1.
+Per esempio, una quantità come 5/7 veniva rappresentata come somma di termini del tipo 1/n, anzichè usando direttamente una frazione con numeratore maggiore di 1.
 Il famoso Papiro di Rhind contiene numerose decomposizioni di questo tipo.
 Una caratteristica importante è che il greedy produce, per una frazione propria, denominatori strettamente crescenti:
 
@@ -3755,7 +3755,7 @@ Per esempio, python 3 usa il metodo 'round half to even' ('banker's rounding') c
 La semplice tecnica che prevede di "arrotondare sempre lo 0.5 per eccesso" comporta una leggera distorsione verso il valore più alto.
 In presenza di un numero elevato di calcoli, tale scostamento può diventare significativo.
 Il metodo 'round half to even' elimina questo problema.
-Infatti i casi esattamente a metà strada vengono ora arrotondati al numero pari più vicino, anziché allontanandosi dallo zero (ad esempio, round(2.5) restituisce 2 invece di 3).
+Infatti i casi esattamente a metà strada vengono ora arrotondati al numero pari più vicino, anzichè allontanandosi dallo zero (ad esempio, round(2.5) restituisce 2 invece di 3).
 Per i tipi integrati di python 3 che supportano 'round', i valori vengono arrotondati al multiplo più vicino di 10 elevato alla meno n. Se due multipli sono equidistanti, l'arrotondamento avviene verso il numero pari.
 
 Esempi:
@@ -3841,7 +3841,7 @@ Comunque diventa complicato gestire i calcoli con i riporti (es. 1.99995 --> 2.0
 Un altro modo è quello di usare 'pack' e 'unpack' per gestire il float in formato IEEE-754
 L'idea è estrarre i 64 bit con pack/unpack "lf"/"Lu", separare segno, esponente e mantissa, e poi eseguire il confronto con 0.5 usando solo aritmetica intera bigint.
 In questo modo non facciamo nessun confronto fra float durante la decisione di arrotondamento.
-La soluzione completa deve distinguere i tipi zero, subnormal, normal, infinito e NaN, e soprattutto non deve usare (pow 10 n) per costruire la scala, perché pow introduce nuovamente un'approssimazione floating-point.
+La soluzione completa deve distinguere i tipi zero, subnormal, normal, infinito e NaN, e soprattutto non deve usare (pow 10 n) per costruire la scala, perchè pow introduce nuovamente un'approssimazione floating-point.
 
 (define (ieee x)
   (letn ((bites (unpack "Lu" (pack "lf" x)))
@@ -3900,7 +3900,7 @@ Può essere espresso come prodotto di due numeri in tre modi:
   11 x 33 = 363 (valido)
 In ogni caso, si hanno 4 cifre a sinistra dell'uguale e 3 cifre a destra.
 
-Un altro esempio: il numero 48 non è "digit-small" perché può essere scritto come:
+Un altro esempio: il numero 48 non è "digit-small" perchè può essere scritto come:
   1 x 48 = 48  (sempre valido per qualunque N)
   2 x 24 = 48  (valido)
   3 x 16 = 48  (valido)
@@ -3979,7 +3979,7 @@ Per esempio:
   "13" > "1", 13 appartiene.
 
   m = 12: divisori 1, 2, 3, 4, 6, 12.
-  Lessicograficamente il maggiore è "6", perché "6" > "12", 12 non appartiene.
+  Lessicograficamente il maggiore è "6", perchè "6" > "12", 12 non appartiene.
 
   m = 22: divisori 1, 2, 11, 22.
   "22" è maggiore di "2" e "11", 22 appartiene.
@@ -3990,7 +3990,7 @@ m = 34: divisori 1, 2, 17, 34
 Non si tratta quindi del 'massimo divisore numerico': quello sarebbe sempre m, rendendo la definizione banale.
 Si tratta del massimo secondo l'ordine delle 'stringhe decimali'.
 Per esempio:
-"9" > "34" in senso lessicografico, perché si confronta dal primo carattere: "9" > "3".
+"9" > "34" in senso lessicografico, perchè si confronta dal primo carattere: "9" > "3".
 Mentre numericamente risulta: 9 < 34
 
 (define (seq num)
@@ -4576,7 +4576,7 @@ All'inizio: L = 0, R = 4, lm = 0, rm = 0
 2) Cerchiamo il lato più basso
 Abbiamo: h[L] = 4, h[R] = 23
 Il lato sinistro è più basso.
-Questo è fondamentale: la quantità d'acqua sopra la colonna L può essere determinata con certezza dal lato sinistro, perché a destra sappiamo già che esiste un muro alto almeno 23, quindi sicuramente superiore a 4.
+Questo è fondamentale: la quantità d'acqua sopra la colonna L può essere determinata con certezza dal lato sinistro, perchè a destra sappiamo già che esiste un muro alto almeno 23, quindi sicuramente superiore a 4.
 In altre parole, per una posizione interna vale:
   acqua = min(max_sinistro, max_destro) - altezza
 Se il limite sinistro è quello più basso, il limite destro non può essere il fattore limitante.
@@ -4587,7 +4587,7 @@ Abbiamo:
 4   3   25   7   23
 ^               ^
 L               R
-Poiché 4 < 23: lm = max(lm, 4) = 4
+Poichè 4 < 23: lm = max(lm, 4) = 4
 Sopra la colonna di altezza 4 non c'è acqua: 4 - 4 = 0
 Avanziamo L:
     L
@@ -4630,7 +4630,7 @@ Il massimo destro è rm = 23 perciò acqua = 23 - 7 = 16
 Ora abbiamo water = 1 + 16 = 17 e R viene decrementato.
 A questo punto L = R e l'algoritmo termina.
 
-Perché funziona?
+Perchè funziona?
 ----------------
 La parte più importante è questa regola:
 if h[L] < h[R]
@@ -5054,7 +5054,7 @@ Per fare questo basta moltiplicare tutti i 2 che compaiono nella fattorizzazione
 
 Metodo 2
 --------
-Dividiamo ripetutamente N per 2 finché diventa dispari.
+Dividiamo ripetutamente N per 2 finchè diventa dispari.
 Il numero di divisioni effettuate è proprio k, e la potenza cercata è 2^k.
 Questo metodo non richiede la fattorizzazione completa.
 
@@ -5189,7 +5189,7 @@ a(n) è l'esponente della più piccola potenza di 2 che non divide N.
 Metodo 2
 --------
 Dobbiamo calcolare il numero di fattori 2 che dividono 2N.
-Dividiamo ripetutamente 2N per 2 finché diventa dispari.
+Dividiamo ripetutamente 2N per 2 finchè diventa dispari.
 Il numero di divisioni effettuate è proprio il valore cercato.
 
 (define (ruler2 N)
@@ -5688,7 +5688,7 @@ Questo permette di costruire una funzione generica per gli indizi, invece di scr
 
 Possiamo rappresentare ogni indizio come:
   (indizio cifre-corrette posizioni-corrette)
-e scrivere una sola funzione generica che gestisce numeri con N cifre (purché 'num' e 'clue' abbiano la stessa lunghezza e ognuno abbia cifre tutte diverse).
+e scrivere una sola funzione generica che gestisce numeri con N cifre (purchè 'num' e 'clue' abbiano la stessa lunghezza e ognuno abbia cifre tutte diverse).
 
 (define (indizio num clue presenti corrette)
   ; Conta le cifre dell'indizio presenti nel numero
@@ -6181,8 +6181,8 @@ Moltiplicazione di numeri per il loro annidamento
 https://codegolf.stackexchange.com/questions/250242/multiply-numbers-by-their-depth
 
 Data una lista annidata (o nidificata), possiamo definire la profondità di un elemento come il numero di liste che lo contengono, ovvero il suo livello di annidamento.
-Ad esempio nella lista ((1 2) (3 (4 5))) la profondità del numero 2 è 2 poiché è annidato all'interno di due liste: la lista principale e la lista (1 2).
-La profondità del numero 4 è 3 poiché è annidato all'interno di tre liste.
+Ad esempio nella lista ((1 2) (3 (4 5))) la profondità del numero 2 è 2 poichè è annidato all'interno di due liste: la lista principale e la lista (1 2).
+La profondità del numero 4 è 3 poichè è annidato all'interno di tre liste.
 
 Scriviamo una funzione che prende una lista annidata di interi positivi e restituisce una lista in cui i nuovi numeri sono dati dalla moltiplicazione del numero originale per la sua profondità.
 
@@ -6605,7 +6605,7 @@ La domanda introduce però un primo livello:
 Quindi la risposta che vogliamo ottenere è:
   R = comportamento(interrogato)(comportamento(altro)(verità))
 
-Poiché uno è sincero e l'altro è bugiardo:
+Poichè uno è sincero e l'altro è bugiardo:
 
 Caso 1:
   S(B(x)) = S(¬x) = ¬x
@@ -6642,7 +6642,7 @@ In questa domanda le due negazioni non sono entrambe necessariamente applicate a
 Formalmente, però, il risultato complessivo è comunque una negazione:
   S(B(x)) = ¬x
   B(S(x)) = ¬x
-perché in entrambi i casi esattamente uno dei due operatori è una negazione.
+perchè in entrambi i casi esattamente uno dei due operatori è una negazione.
 Perciò la regola pratica è:
 Chiedi a uno qualunque cosa direbbe l'altro, poi scegli la porta opposta a quella indicata.
 Questo è lo schema generale: comporre due funzioni di risposta, una delle quali è sempre la negazione, produce una risposta necessariamente opposta alla verità.
@@ -6749,7 +6749,7 @@ con N palline in totale, abbiamo una probabilità di 1/N di prendere la pallina 
 La probabilità di ottenerlo alla seconda estrazione è data dalla probabilità di non ottenerlo alla prima, che vale (N–1)/N), moltiplicata per la probabilità di ottenerlo alla seconda, che vale 1/(N–1).
 Il risultato è una probabilità di 1/N.
 
-Se l'urna contiene un numero dispari di palline, conviene giocare per primi perché si ha a disposizione un tentativo in più (cioè prendiamo una pallina in più dell'avversario).
+Se l'urna contiene un numero dispari di palline, conviene giocare per primi perchè si ha a disposizione un tentativo in più (cioè prendiamo una pallina in più dell'avversario).
 Comunque, in questo caso, la convenienza diminuisce con l'aumentare del numero di palline N.
 La probabilità massima si ha per N = 3 e vale 66.67%.
 Infatti con 3 palline il primo giocatore ha 2 tentativi su 3 per scegliere la pallina bianca.
@@ -8077,7 +8077,7 @@ b) Nel punto esatto in cui le superfici si incrociano, i due colori si fondono.
 c) Se separiamo le zucche, sulla superficie di ciascuna rimarrà una linea stampata.
 Quelle due linee (una sulla zucca A e una sulla zucca B) sono l'esatta 'impronta digitale' del loro scontro nello spazio.
 Sono due curve tridimensionali perfettamente congruenti (uguali).
-Poiché le zucche sono oggetti reali che possiamo muoverle nello spazio facendole intersecare in infiniti modi diversi (cambiando angolazione, distanza o rotazione).
+Poichè le zucche sono oggetti reali che possiamo muoverle nello spazio facendole intersecare in infiniti modi diversi (cambiando angolazione, distanza o rotazione).
 Ognuno di questi movimenti genera una nuova, unica curva di intersezione.
 
 
@@ -8487,8 +8487,8 @@ Le regole di craps sono le seguenti: il giocatore (detto tiratore) lancia due da
 - Se la somma è 7 o 11 al primo lancio, il tiratore ha vinto (tale evento è detto 'natural').
 - Se la somma è 2, 3, o 12 al primo lancio, il tiratore ha perso (tale evento è detto 'craps').
 - Se la somma è 4, 5, 6, 8, 9, o 10 al primo lancio, tale numero è il 'punteggio' del tiratore.
-- Il tiratore continua a tirare i dadi finché esce di nuovo il 'punteggio' (nel qual caso vince) o esce 7 (nel qual caso perde).
-- Finché il giocatore vince o perde tirando craps, tiene i dadi e continua a tirare. Una volta che perde non riuscendo a fare il punteggio, si passano i dadi al tiratore seguente.
+- Il tiratore continua a tirare i dadi finchè esce di nuovo il 'punteggio' (nel qual caso vince) o esce 7 (nel qual caso perde).
+- Finchè il giocatore vince o perde tirando craps, tiene i dadi e continua a tirare. Una volta che perde non riuscendo a fare il punteggio, si passano i dadi al tiratore seguente.
 
 Qual è la probabilità di vincita del giocatore?
 
@@ -8875,7 +8875,7 @@ Quindi:
   d = 4 -> 56 casi -> contributo 56 * 4
   d = 5 -> 55 casi -> contributo 55 * 5
 Il contributo complessivo è: 59*1 + 58*2 + 57*3 + 56*4 + 55*5 = 845
-I casi in cui a1 = a2 non contribuiscono, perché la persona 1 non deve aspettare.
+I casi in cui a1 = a2 non contribuiscono, perchè la persona 1 non deve aspettare.
 
 c) Somma totale delle attese di persona 1
 Quindi, sommando tutti i 3600 casi: 14850 + 845 = 15695

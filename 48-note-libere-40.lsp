@@ -88,7 +88,7 @@ Il punto fondamentale del rompicapo è la particolare forma delle domande:
   > "Se ti chiedessi P, risponderesti 'ja'?"
 
 Questa costruzione elimina contemporaneamente il problema della lingua (ja = sì oppure no) e, quando l'oracolo è deterministico, il problema della verità o della menzogna.
-Vediamo esattamente perché.
+Vediamo esattamente perchè.
 
 1) Il principio fondamentale
 ----------------------------
@@ -177,7 +177,7 @@ Gli chiediamo:
   > "Se ti chiedessi 'Sei Verace?', risponderesti ja?"
 Qui:
   P = "Sei Verace?"
-Poiché X è certamente Verace oppure Mendace, possiamo applicare il principio fondamentale.
+Poichè X è certamente Verace oppure Mendace, possiamo applicare il principio fondamentale.
 Otteniamo:
   risposta ja     -> P vera  -> X è Verace
   risposta non-ja -> P falsa -> X è Mendace
@@ -195,7 +195,7 @@ Poniamo nuovamente la domanda allo stesso oracolo X, che sappiamo essere determi
   > "Se ti chiedessi 'A è Imprevedibile?', risponderesti ja?"
 Poniamo:
   P = "A è Imprevedibile"
-Poiché X è Verace oppure Mendace, il principio fondamentale ci garantisce:
+Poichè X è Verace oppure Mendace, il principio fondamentale ci garantisce:
   ja     <=> A è Imprevedibile
   non-ja <=> A non è Imprevedibile
 Quindi:
@@ -249,7 +249,7 @@ Le difficoltà del problema sono tre:
 3) Uno degli oracoli risponde casualmente.
 La domanda
   > "Se ti chiedessi P, risponderesti ja?"
-risolve contemporaneamente i primi due problemi, purché l'oracolo interrogato non sia Imprevedibile.
+risolve contemporaneamente i primi due problemi, purchè l'oracolo interrogato non sia Imprevedibile.
 Infatti per Verace e Mendace vale sempre:
                  P
                  |
@@ -1322,7 +1322,7 @@ Il gioco del Wari (Awari-Oware-Awele-Mancala)
 
 "How to play Warri" David Chamberlin
 
-Il Wari (noto anche come Awari o Oware o Awélé) è un antico e diffuso gioco da tavolo astratto della famiglia dei mancala, basato sulla logica e sul calcolo senza alcuna componente di fortuna.
+Il Wari (noto anche come Awari o Oware o Awèlè) è un antico e diffuso gioco da tavolo astratto della famiglia dei mancala, basato sulla logica e sul calcolo senza alcuna componente di fortuna.
 
 Struttura del Gioco
 -------------------
@@ -1332,7 +1332,7 @@ Ciascun giocatore controlla la fila di sei case dal proprio lato e il granaio al
 b) I pezzi: Si usano 48 semi (o sassolini), disposti inizialmente in numero di 4 in ciascuna delle 12 case.
 
 c) Obiettivo: Catturare più semi dell'avversario.
-Poiché i semi in totalità sono 48, vince chi per primo ne raccoglie 25 o più nel proprio granaio.
+Poichè i semi in totalità sono 48, vince chi per primo ne raccoglie 25 o più nel proprio granaio.
 
 Come si Gioca
 -------------
@@ -1344,7 +1344,7 @@ Se il giro è lungo e supera il numero di case, la casa di partenza (da cui sono
 
 3. La cattura (raccolta): La cattura avviene se l'ultimo seme seminato cade in una casa dell'avversario che, dopo l'inserimento, contiene un totale di 2 o 3 semi. In questo caso, il giocatore raccoglie quei semi e li mette nel proprio granaio.
 
-4. Catena di cattura: Se la casa immediatamente precedente (sempre andando a ritroso in senso orario) contiene anch'essa 2 o 3 semi, anche questi vengono catturati e così via, finché si incontrano case con un numero diverso di semi o case del proprio lato.
+4. Catena di cattura: Se la casa immediatamente precedente (sempre andando a ritroso in senso orario) contiene anch'essa 2 o 3 semi, anche questi vengono catturati e così via, finchè si incontrano case con un numero diverso di semi o case del proprio lato.
 
 Regole Speciali
 ---------------
@@ -2544,7 +2544,7 @@ Per esempio, per una matrice 4 x 5:
             6   7   8   9  10
            11  12  13  14  15
   bottom-> 16  17  18  19  20
-Il ciclo continua finché esiste almeno una riga e una colonna da percorrere:
+Il ciclo continua finchè esiste almeno una riga e una colonna da percorrere:
   (while (and (<= top bottom) (<= left right))
 
 2) Percorrere la riga superiore
@@ -2837,7 +2837,7 @@ Proviamo:
 Soluzione matematica
 --------------------
 
-Ci sono binom(N,2) coppie di giocatori, di cui (N - 1) si incontreranno (poiché devono essere eliminati (N - 1) giocatori per decretare il vincitore).
+Ci sono binom(N,2) coppie di giocatori, di cui (N - 1) si incontreranno (poichè devono essere eliminati (N - 1) giocatori per decretare il vincitore).
 Quindi la probabilità che una specifica coppia si incontri vale:
 
                   (N - 1)
@@ -3097,6 +3097,767 @@ Verifica:
 
 (= (divide 10) (sum 9))
 ;-> true
+
+
+------------------
+Coltura di batteri
+------------------
+
+Abbiamo una coltura che contiene una colonia di batteri (N batteri femmina e M batteri maschi).
+La riproduzione tra due batteri che si incontrano in modo casuale funziona nel modo seguente:
+1) se sono di sesso diverso, allora nasce una femmina e i genitori muoiono.
+2) se sono di sesso uguale, altrimenti nasce un maschio e i genitori muoiono.
+In questo modo il numero di batteri diminuisce ad ogni accoppiamento.
+Qual è la probabilità che l'ultimo batterio rimasto sia femmina?
+
+Soluzione
+---------
+                                | 1, se N è dispari
+  Probabilità(Ultimo=Femmina) = |
+                                | 0, se N è pari
+
+Spiegazione
+-----------
+
+Vediamo cosa accade alla colonia durante ogni riproduzione:
+
+  +-------------+--------------+-----------+----------------------------+
+  | Batterio 1  |  Batterio 2  |  Nascita  |  Risultato totale colonia  |
+  +-------------+--------------+-----------+----------------------------+
+  | Maschio     |  Maschio     |  Maschio  |  -1 Maschio                |
+  | Femmina     |  Femmina     |  Maschio  |  +1 Maschio, -2 Femmine    |
+  | Maschio     |  Femmina     |  Femmina  |  -1 Maschio                |
+  +-------------+--------------+-----------+----------------------------+
+
+Notiamo che le femmine della colonia possono solo diminuire di 2.
+Quindi se sono in numero dispari ne rimarra sempre una, l'ultimo batterio della colonia.
+Mentre se sono in numero pari, allora non potranno mai essere l'ultimo batterio della colonia.
+Infatti ragionando al limite:
+1) Caso Femmine dispari
+l'ultima femmina si riproduce ad ogni ogni accoppiamento fino alla scomparsa di tutti i maschi.
+2) Caso Femmine pari
+le ultime due femmine si riproducono fino alla scomparsa di tutti i maschi e poi si accoppiano generando un maschio.
+
+Simulazione
+-----------
+
+(define (simula N M iter)
+  (local (conta femmine maschi all coppie len)
+    (setq conta 0)
+    ; ciclo di 'iter' simulazioni...
+    (for (i 1 iter)
+      ; lista di batteri femmine
+      (setq femmine (dup 'f N))
+      ; lista di batteri maschi
+      (setq maschi (dup 'm M))
+      ; creazione della lista casuale di tutti i batteri
+      (setq all (randomize (append femmine maschi) true))
+      ; Simulazione di un ciclo di accoppiamenti
+      ; (fino ad 1 solo batterio rimasto)
+      (until (= (length all) 1)
+        ;(println "Femmine: " (length (find-all 'f all)))
+        ; creazione della lista delle coppie
+        (setq coppie (explode all 2))
+        (setq all '())
+        ; Accoppiamento...
+        (dolist (c coppie)
+          (setq len (length c))
+          (if (= len 1) ; caso (N+M dispari)
+              (extend all c)
+              ;else
+              (if (apply = c)
+                  (push 'm all)    ; sesso uguale
+                  (push 'f all)))) ; sesso diverso
+      )
+      ; se al termine di un ciclo di accoppiamenti rimane una femmina,
+      ; allora aggiorna il contatore
+      (if (= 'f (all 0)) (++ conta)))
+    ; Restituisce:
+    ; (Numero di volte che è rimasta una femmina,
+    ;  Probabilità che rimanga una femmina)
+    (list conta (div conta iter))))
+
+Proviamo:
+
+Femmine (N) dispari:
+(simula 3 100 1e4)
+;-> (10000 1)
+(simula 11 101 1e4)
+;-> (10000 1)
+
+Femmine (N) pari:
+(simula 100 2 1e4)
+;-> (0 0)
+(simula 2 101 1e4)
+;-> (0 0)
+
+La simulazione conferma i valori teorici.
+
+
+---------------------
+Colonia di camaleonti
+---------------------
+
+Una colonia di camaleonti consiste in R esemplari rossi, B blu e V verdi.
+Quando due camaleonti di colori diversi si incontrano, ciascuno di essi cambia il proprio colore nel terzo colore.
+È possibile che, dopo un sufficiente numero di incontri, la colonia sia formata solo da camaleonti dello stesso colore?
+
+Soluzione
+---------
+Dopo ogni incontro tra due camaleonti, la differenza tra il numero di individui di due qualsiasi colori rimane invariata modulo 3.
+Tali differenze rimangono invariate modulo 3 indefinitamente.
+Quindi:
+Se la differenza tra due colori (es. R - B) è un multiplo di 3, allora è possibile ottenere una colonia di un solo colore.
+Se la differenza tra due colori (es. R - B) non è un multiplo di 3, allora è non possibile ottenere una colonia di un solo colore.
+
+Notiamo che se due differenze sono multipli di 3 allora lo deve essere anche la terza:
+Quindi possiamo concludere:
+- Se tutte e tre le differenze sono multipli di 3, allora qualsiasi colore può conquistare la colonia (raggiungendo la parità)
+- Se una sola delle differenze è un multiplo di 3, allora il colore rimanente è l'unico in grado di conquistare la colonia
+- Se nessuna delle differenze è un multiplo di 3, la colonia non potrà mai diventare monocromatica.
+
+Esempio:
+  R = 5
+  B = 2
+  V = 1
+  (r r r r r b b v)
+  (R - B) = 3 (multiplo di 3)
+  (R - V) = 1 (non multiplo di 3)
+  (B - V) = 1 (non multiplo di 3)
+  Possono diventare solo tutti Verdi.
+  Incontri:
+  (r b) -> (v v)
+  (r b) -> (v v)
+  Camaleonti:
+  (r r r v v v v v)
+  
+  Incontri:
+  (r v) -> (b b)
+  (r v) -> (b b)
+  (r v) -> (b b)
+  Camaleonti:
+  (b b b b b b v v)
+  
+  Incontri:
+  (b v) -> (r r)
+  (b v) -> (r r)
+  Camaleonti:
+  (b b b b r r r r)
+  
+  Incontri:
+  (b r) -> (v v)
+  (b r) -> (v v)
+  (b r) -> (v v)
+  (b r) -> (v v)
+  Camaleonti:
+  (v v v v v v v v)
+
+Vediamo un algoritmo che, in base a valori dati di R, B e V, genera gli incontri necessari per far diventare i camaleonti dello stesso colore (oppure restituisce che questo non è possibile).
+Non possiamo effettuare gli incontri in modo casuale, ma dobbiamo costruire la sequenza direttamente dalla proprietà matematica modulo 3.
+
+; Restituisce i colori di dua camaleonti che si incontrano
+(define (cambia x y values)
+  (if (= x y)
+    (list x y)
+    (let ((z (first (difference values (list x y)))))
+      (list z z))))
+
+(cambia 'v 'b '(r b v))
+;-> (r r)
+(cambia 'v 'v '(r b v))
+;-> (v v)
+(cambia 'b 'v '(r b v))
+;-> (r r)
+
+; Calcola la sequenza degli incontri per far diventare
+; i camaleonti tutti dello stesso colore (se possibile)
+(define (camaleonti R B V)
+  (local (colori conta diff-rb diff-rv diff-bv target x y z
+          ix iy iz n i)
+    (setq colori '(r b v))
+    (setq conta (list R B V))
+    (setq diff-rb (mod (- R B) 3))
+    (setq diff-rv (mod (- R V) 3))
+    (setq diff-bv (mod (- B V) 3))
+    ; Determina il colore finale.
+    ; Se tutte le differenze sono multiple di 3,
+    ; possiamo scegliere arbitrariamente R.
+    (cond
+      ((and (= diff-rb 0)
+            (= diff-rv 0)
+            (= diff-bv 0))
+        (setq target 'r))
+      ; Se R-B è multipla di 3, il colore finale è V.
+      ((= diff-rb 0)
+        (setq target 'v))
+      ; Se R-V è multipla di 3, il colore finale è B.
+      ((= diff-rv 0)
+        (setq target 'b))
+      ; Se B-V è multipla di 3, il colore finale è R.
+      ((= diff-bv 0)
+        (setq target 'r))
+      ; Nessuna differenza è multipla di 3.
+      (true
+        (println "Impossibile ottenere una colonia monocromatica.")
+        (setq target nil)))
+    (if target
+      (begin
+        ; x e y sono i colori che devono scomparire.
+        (setq x (first (difference colori (list target))))
+        (setq y (first (difference colori (list target x))))
+        (setq z target)
+        (setq ix (find x colori))
+        (setq iy (find y colori))
+        (setq iz (find z colori))
+        ; Prima fase: facciamo incontrare x e y
+        ; fino a esaurire uno dei due colori.
+        (while (and (> (conta ix) 0)
+                    (> (conta iy) 0))
+          (println "(" x " " y ") -> "
+                   (cambia x y colori))
+          (-- (conta ix))
+          (-- (conta iy))
+          (++ (conta iz) 2))
+        ; Seconda fase: eliminiamo x a gruppi di tre.
+        ; Ogni gruppo di tre viene trasformato in tre z.
+        (if (> (conta ix) 0)
+          (begin
+            (setq n (/ (conta ix) 3))
+            (for (i 1 n)
+              ; x z -> y y
+              (println "(" x " " z ") -> "
+                       (cambia x z colori))
+              (-- (conta ix))
+              (-- (conta iz))
+              (++ (conta iy) 2)
+              ; x y -> z z
+              (println "(" x " " y ") -> "
+                       (cambia x y colori))
+              (-- (conta ix))
+              (-- (conta iy))
+              (++ (conta iz) 2)
+              ; x y -> z z
+              (println "(" x " " y ") -> "
+                       (cambia x y colori))
+              (-- (conta ix))
+              (-- (conta iy))
+              (++ (conta iz) 2))))
+        ; Seconda fase: eliminiamo y a gruppi di tre,
+        ; se è y il colore rimasto.
+        (if (> (conta iy) 0)
+          (begin
+            (setq n (/ (conta iy) 3))
+            (for (i 1 n)
+              ; y z -> x x
+              (println "(" y " " z ") -> "
+                       (cambia y z colori))
+              (-- (conta iy))
+              (-- (conta iz))
+              (++ (conta ix) 2)
+              ; y x -> z z
+              (println "(" y " " x ") -> "
+                       (cambia y x colori))
+              (-- (conta iy))
+              (-- (conta ix))
+              (++ (conta iz) 2)
+              ; y x -> z z
+              (println "(" y " " x ") -> "
+                       (cambia y x colori))
+              (-- (conta iy))
+              (-- (conta ix))
+              (++ (conta iz) 2))))
+        (println "Risultato: " conta)
+        conta))))
+
+Proviamo:
+
+(camaleonti 5 2 1)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> (r v) -> (b b)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> Risultato: (0 0 8)
+;-> (0 0 8)
+
+(camaleonti 10 8 6)
+;-> Impossibile ottenere una colonia monocromatica.
+;-> nil
+
+(camaleonti 9 6 3)
+;-> (b v) -> (r r)
+;-> (b v) -> (r r)
+;-> (b v) -> (r r)
+;-> (b r) -> (v v)
+;-> (b v) -> (r r)
+;-> (b v) -> (r r)
+;-> Risultato: (18 0 0)
+;-> (18 0 0)
+
+(camaleonti 9 6 1)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> (r v) -> (b b)
+;-> (r b) -> (v v)
+;-> (r b) -> (v v)
+;-> Risultato: (0 0 16)
+;-> (0 0 16)
+
+L'algoritmo si basa direttamente sull'invariante modulo 3 e costruisce esplicitamente una sequenza di incontri.
+I tre colori sono: (r b v)
+e 'conta' contiene il numero attuale di camaleonti: (R B V)
+La funzione 'cambia' determina il risultato di un incontro:
+  (r b) -> (v v)
+  (r v) -> (b b)
+  (b v) -> (r r)
+Se i due colori sono uguali, non cambia nulla.
+
+1) Determinazione del colore finale
+-----------------------------------
+Calcoliamo:
+  R - B
+  R - V
+  B - V
+modulo 3.
+Ci sono tre possibilità:
+a) Tutte e tre multiple di 3
+Possiamo scegliere arbitrariamente il colore finale. Il programma sceglie 'R'.
+Per esempio:
+  (4 1 1)
+  R-B = 3
+  R-V = 3
+  B-V = 0
+Quindi può diventare tutta rossa, blu oppure verde.
+b) Una sola differenza multipla di 3
+Il colore che non compare nella differenza multipla è il colore finale.
+Per esempio:
+  (5 2 1)
+  R-B = 3
+  R-V = 4
+  B-V = 1
+L'unica differenza multipla di 3 è (R - B).
+Quindi il colore finale è 'V'.
+c) Nessuna differenza multipla di 3
+Non esiste alcun colore che possa conquistare la colonia.
+La funzione termina immediatamente:
+Impossibile ottenere una colonia monocromatica.
+
+2) Prima fase: eliminare due colori a coppie
+--------------------------------------------
+Supponiamo che 'Z' sia il colore finale.
+Gli altri due colori sono 'X' e 'Y'.
+Finchè esistono entrambi, facciamo:
+  (X Y) -> (Z Z)
+Quindi ogni incontro:
+  X -= 1
+  Y -= 1
+  Z += 2
+Per '(5 2 1)' e colore finale 'V':
+  R B V
+  5 2 1
+  (R B) -> (V V)
+  4 1 3
+  (R B) -> (V V)
+  3 0 5
+A questo punto 'B' è esaurito.
+È qui che entra in gioco l'invariante modulo 3.
+Dato che (R - B) era multiplo di 3, anche il numero rimasto di 'R' è multiplo di 3:
+  R = 3
+
+3) Seconda fase: eliminare tre camaleonti del colore rimasto
+------------------------------------------------------------
+Ora abbiamo:
+  X = 3
+  Y = 0
+  Z = 5
+Non possiamo semplicemente far incontrare due 'X', perchè camaleonti dello stesso colore non cambiano.
+Usiamo invece una sequenza di tre incontri:
+  (X Z) -> (Y Y)
+  (X Y) -> (Z Z)
+  (X Y) -> (Z Z)
+Vediamo cosa succede ai conteggi:
+inizio:
+  X = 3
+  Y = 0
+  Z = 5
+Primo incontro:
+  X Z -> Y Y
+  X = 2
+  Y = 2
+  Z = 4
+Secondo:
+  X Y -> Z Z
+  X = 1
+  Y = 1
+  Z = 6
+Terzo:
+  X Y -> Z Z
+  X = 0
+  Y = 0
+  Z = 8
+
+Quindi i tre 'X' sono stati trasformati in tre 'Z', mentre il numero totale di camaleonti è rimasto invariato.
+In forma compatta:
+  3 X + 1 Z  ->  3 Z + 1 Z
+cioè:
+  3 X + Z -> 4 Z
+
+4) Come funziona
+----------------
+Dopo la prima fase, uno dei due colori 'X' o 'Y' è zero.
+Il colore rimasto è necessariamente un multiplo di 3.
+Questo deriva proprio dalla condizione modulo 3 che ci ha permesso di scegliere 'Z' come colore finale.
+Perciò possiamo ripetere il blocco:
+  (X Z) -> (Y Y)
+  (X Y) -> (Z Z)
+  (X Y) -> (Z Z)
+esattamente 'X/3' volte, oppure analogamente con 'Y/3'.
+Alla fine:
+  X = 0
+  Y = 0
+  Z = R+B+V
+e la colonia è monocromatica.
+
+L'algoritmo ha quindi questa struttura:
+             R B V
+              │
+              v
+     Controllo modulo 3
+              │
+       ┌──────┼──────┐
+       │      │      │
+     tutte   una     nessuna
+      mod 3  mod 3    mod 3
+       │      │        │
+       v      v        v
+   scegli    trova   impossibile
+   un colore colore
+       |     finale
+       │      │
+       └──────┘
+              │
+              v
+     Incontri X-Y
+     fino a esaurirne uno
+              │
+              v
+     rimane un multiplo
+          di 3 di X o Y
+              │
+              v
+       blocchi da 3:
+        X-Z -> Y-Y
+        X-Y -> Z-Z
+        X-Y -> Z-Z
+              │
+              v
+          tutti Z
+
+; Simulazione casuale
+; Effettua gli incontri in modo casuale (praticamente inutile)
+(define (simula R B V cicli)
+  (local (conta rossi blu verdi all coppie len)
+    ; camaleonti rossi
+    (setq rossi (dup 'r R))
+    ; camaleonti blu
+    (setq blu (dup 'b B))
+    ; camaleonti verdi
+    (setq verdi (dup 'v V))
+    ; creazione della lista casuale di tutti i batteri
+    (setq all (randomize (append rossi blu verdi) true))
+    ; Simulazione di un ciclo di incontri
+    ; (fino a che tutti i camaleonti sono dello stesso colore)
+    ; (oppure raggiunto limite di massimo numero di cicli di incontri)
+    (setq conta 0)
+    (until (or (apply = all) (> conta cicli))
+      ; creazione della lista degli incontri
+      (setq coppie (explode all 2))
+      (setq all '())
+      ; Incontri...
+      (++ conta)
+      (dolist (c coppie)
+        (setq len (length c))
+        (if (= len 1) ; caso (R+B+V dispari)
+            (extend all c)
+            ;else
+            (extend all (cambia (c 0) (c 1)))))
+    )
+    ; Controllo:
+    ; al termine di un ciclo di incontri sono tutti dello stesso colore?
+    (if (apply = all)
+        ; tutti dello stesso colore
+        (list true (length all) conta all)
+         ; colori diversi
+        (list nil  (length all) conta all))))
+
+
+---------------------------------------
+Rettangoli con area uguale al perimetro
+---------------------------------------
+
+Trovare tutti i rettangoli con lati interi aventi area e perimetro uguali.
+
+Soluzione Brute-Force (non esaustiva)
+
+(define (trova max-h max-w)
+  (let (out '())
+    (for (h 1 max-h)
+      (for (w 1 max-w)
+        (if (= (* w h) (+ w w h h))
+            (push (list h w) out -1))))
+    out))
+
+(trova 1e3 1e3)
+;-> ((3 6) (4 4) (6 3))
+
+(time (println (trova 1e4 1e4)))
+;-> ((3 6) (4 4) (6 3))
+;-> 8610.15
+
+Soluzione algebrica
+ xy = 2x + 2y
+ xy - 2x - 2y = 0
+ (x - 2)(y - 2) = xy - 2x - 2y + 4
+ (x - 2)(y - 2) - 4 = 0
+ (x - 2)(y - 2) = 4
+Due numeri a e b danno come prodotto 4 solo se:
+  1) a = 2, b = 2
+  oppure
+  2) a = 1, b = 4 oppure a = 4 e b = 1
+Quindi (x - 2) può valere 2, 1 o 4 con x = 4, 3 e 6.
+Mentre (y - 2) può valere 2, 1 o 4 con y = 4, 3 e 6.
+Quando x = 4, allora y = 4 (o viceversa).
+Quando x = 3, allora y = 6 (o viceversa).
+Quando x = 6, allora y = 3 (o viceversa).
+Soluzioni: (3 6) (4 4) (6 3)
+
+
+----------------
+Coppia alternata
+----------------
+
+Abbiamo una lista con due elementi, per esempio (x y).
+x, y possono assumere solo tre valori (es. "A" o "B" o "C").
+Adesso:
+1) se x = y allora x rimane x e y rimane y (non cambiano il loro valore)
+2) se x != y allora x e y cambiano entrambi valore e prendono il valore del terzo.
+Esempi:
+  Se x="A" e Y="B", allora x e y diventano "C".
+  Se x="C" e Y="B", allora x e y diventano "A".
+  Se x="A" e Y="A", allora x e y rimangono "A".
+
+Scriviamo una funzione che prende x e y e restituisce i nuovi valori di x e y.
+
+(define (cambia x y values)
+  (if (= x y)
+    (list x y)
+    (let ((z (first (difference values (list x y)))))
+      (list z z))))
+
+Proviamo:
+
+(cambia 'A 'B '(A B C))
+;-> (C C)
+(cambia 'C 'B '(A B C))
+;-> (A A)
+(cambia 'A 'A '(A B C))
+;-> (A A)
+
+(cambia 1 2 '(1 2 3))
+;-> (3 3)
+(cambia 1 1 '(1 2 3))
+;-> (1 1)
+(cambia 3 1 '(1 2 3))
+;-> (2 2)
+
+
+-------------------------------------------------------
+Probabilità di sequenze predefinte nel lancio di monete
+-------------------------------------------------------
+
+Calcolare la probabilità che lanciando ripetutamente una moneta appaia una sequenza predefinita.
+Per esempio, qual è la probabilità che appaia la sequenza 'CCTCCT'?
+
+La probabilità è indipendente dai valori della sequenza.
+Per esempio la probabilità della sequenza 'CCT' è uguale a quella della sequenza 'TTT'.
+Conta solo la lunghezza della sequenza, infatti per ogni carattere la probabilità va moltiplicata per 1/2.
+Per esempio:
+  sequenza = 'CCT'
+  P1 = Probabilità 'C' = 1/2
+  P2 = Probabilità 'C' = 1/2
+  P3 = Probabilità '5' = 1/2
+  Probabilità-Totale = P1*P2*P3 = (1/2)*(1/2)*(1/2) = 1/8 = 0.125
+
+Quindi la formula generale vale:
+
+  Probabilità('sequenza') = (1/2)^(lunghezza-sequenza)
+
+(define (prob seq)
+  (pow 0.5 (length seq)))
+(div 8)
+
+(prob '(1))
+;-> 0.5
+(prob '(1 0))
+;-> 0.25
+(prob '(1 0 1))
+;-> 0.125
+(prob '(0 0 0))
+;-> 0.125
+(prob '(1 0 1 0))
+;-> 0.0625
+
+; Calcolo della probabilità (simulazione)
+; Testa -> 1, Croce -> 0
+(define (simula seq lanci)
+  (let ((conta 0) (len (length seq)))
+    (for (i 1 lanci)
+      (if (= seq (rand 2 len)) (++ conta)))
+    (div conta lanci)))
+
+(seed (time-of-day) true)
+(simula '(1) 1e6)
+;-> 0.499493
+(simula '(1 0) 1e6)
+;-> 0.249974
+(simula '(1 0 1) 1e6)
+;-> 0.124975
+(simula '(0 0 0) 1e6)
+;-> 0.125024
+(simula '(1 0 1 0) 1e6)
+;-> 0.062885
+
+
+-----------------
+Dadi di Sicherman
+-----------------
+
+I dadi di Sicherman sono due dadi a sei facce con i seguenti valori:
+
+ Dado A: 1, 2, 2, 3, 3, 4
+ Dado B: 1, 3, 4, 5, 6, 8
+ 
+La cosa sorprendente è che, pur avendo facce diverse da quelle dei dadi normali, la distribuzione della somma è esattamente la stessa:
+
+  +-------+--------------+--------------+
+  | Somma | Modi con A+B | Dadi normali |
+  +-------+--------------+--------------+
+  |     2 |            1 |            1 |
+  |     3 |            2 |            2 |
+  |     4 |            3 |            3 |
+  |     5 |            4 |            4 |
+  |     6 |            5 |            5 |
+  |     7 |            6 |            6 |
+  |     8 |            5 |            5 |
+  |     9 |            4 |            4 |
+  |    10 |            3 |            3 |
+  |    11 |            2 |            2 |
+  |    12 |            1 |            1 |
+  +-------+--------------+--------------+
+
+Possiamo rappresentare ogni dado con un polinomio, dove l'esponente è il valore della faccia.
+Per i dadi di Sicherman:
+
+  A(x)=x+2x^2+2x^3+x^4
+  B(x)=x+x^3+x^4+x^5+x^6+x^8
+
+Il prodotto è A(x)B(x) e, facendo i conti, si ottiene esattamente:
+
+  A(x)B(x) = (x + x^2 + x^3 + x^4 + x^5 + x^6)^2
+
+che è il polinomio corrispondente a due dadi normali.
+Quindi non è soltanto che hanno la stessa probabilità di ottenere 7: hanno la stessa distribuzione per ogni possibile somma.
+I dadi di Sicherman sono l'unica coppia di dadi con sei facce e numeri interi positivi che riproduce esattamente la distribuzione dei due dadi standard.
+
+Vediamo come sono stati si trovano A(x) e B(x).
+
+Un dado normale e' rappresentato da: x + x^2 + x^3 + x^4 + x^5 + x^6
+Quando sommiamo due dadi, i polinomi si moltiplicano. Quindi:
+  P(x) = (x + x^2 + x^3 + x^4 + x^5 + x^6)^2
+Raccogliendo x:
+  P(x) = x^2 (1 + x + x^2 + x^3 + x^4 + x^5)^2
+Ora usiamo:
+  1 + x + x^2 + x^3 + x^4 + x^5 = (x^6 - 1)/(x - 1)
+e quindi:
+P(x) = x^2 (x^6 - 1)^2 / (x - 1)^2
+Adesso fattorizziamo.
+Abbiamo:
+  x^6 - 1 = (x - 1)(x + 1)(x^2 + x + 1)(x^2 - x + 1)
+Pertanto:
+  P(x) =
+  x^2
+  (x + 1)^2
+  (x^2 + x + 1)^2
+  (x^2 - x + 1)^2
+Questo è il punto fondamentale.
+Per costruire i due nuovi dadi dobbiamo dividere questi fattori tra A(x) e B(x).
+Facciamo una scelta.
+Prendiamo per A(x):
+  A(x) = x (x + 1) (x^2 + x + 1)
+Sviluppiamo:
+  (x + 1)(x^2 + x + 1) = x^3 + 2x^2 + 2x + 1
+quindi:
+  A(x) = x + 2x^2 + 2x^3 + x^4
+I coefficienti ci dicono direttamente le facce:
+  1, 2, 2, 3, 3, 4
+Calcoliamo B(x).
+Poichè deve valere:
+  A(x) B(x) = P(x)
+possiamo semplicemente dividere:
+  B(x) = P(x) / A(x)
+Dalla fattorizzazione:
+  B(x) =
+  x (x + 1)
+  (x^2 + x + 1)
+  (x^2 - x + 1)^2
+Ora sviluppiamo.
+Prima:
+  (x^2 + x + 1)(x^2 - x + 1) = x^4 + x^2 + 1
+Quindi:
+  B(x) =
+  x (x + 1)
+  (x^4 + x^2 + 1)
+  (x^2 - x + 1)
+Facendo il prodotto si ottiene:
+  B(x) = x + x^3 + x^4 + x^5 + x^6 + x^8
+e quindi il secondo dado è:
+  1, 3, 4, 5, 6, 8
+La verifica e' immediata:
+  A(x) B(x) =
+  [x (x + 1)(x^2 + x + 1)]
+  [x (x + 1)(x^2 + x + 1)(x^2 - x + 1)^2]
+Raggruppando:
+  = x^2
+    (x + 1)^2
+    (x^2 + x + 1)^2
+    (x^2 - x + 1)^2
+che è esattamente P(x).
+Quindi abbiamo costruito due dadi la cui somma ha esattamente la stessa distribuzione dei due dadi normali.
+Come scegliere il fattore da assegnare?
+Non basta prendere una fattorizzazione qualsiasi.
+Dobbiamo cercare una suddivisione dei fattori che produca, per entrambi i dadi:
+1) coefficienti interi;
+2) coefficienti non negativi;
+3) somma dei coefficienti uguale a 6, perchè ogni dado ha sei facce;
+4) nessun termine con coefficiente negativo;
+5) esponenti positivi, perchè le facce devono contenere numeri positivi.
+Il fattore
+  x (x + 1)(x^2 + x + 1)
+è particolarmente interessante perchè produce:
+  x + 2x^2 + 2x^3 + x^4
+I coefficienti sono:
+  1 + 2 + 2 + 1 = 6
+quindi rappresentano perfettamente sei facce.
+Il fattore complementare produce invece:
+  x + x^3 + x^4 + x^5 + x^6 + x^8
+con coefficienti:
+  1 + 1 + 1 + 1 + 1 + 1 = 6
+anche questo quindi rappresenta perfettamente un dado.
+In altre parole, la ricerca dei dadi di Sicherman diventa una ricerca tra le possibili distribuzioni dei fattori di P(x): è proprio questo che rende possibile trovare la soluzione senza provare a caso le facce.
 
 ============================================================================
 

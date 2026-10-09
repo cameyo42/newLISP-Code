@@ -74,7 +74,7 @@ Files (Topics)
 45) Note libere 37 (80)
 46) Note libere 38 (80)
 47) Note libere 39 (80)
-48) Note libere 40 (22)
+48) Note libere 40 (28)
 96) Problemi sui dadi (80)
 97) Appendici (34)
 98) Bibliografia

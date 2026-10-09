@@ -3526,7 +3526,7 @@ NOTE LIBERE 36
   Solve "X +- A = B"
   Somma di un intervallo di una somma di un intervallo
   Sottolista con il maggior numero di 1
-  
+
 NOTE LIBERE 37
 ==============
   Sottolista più lunga con elementi di un'altra lista
@@ -3611,7 +3611,7 @@ NOTE LIBERE 37
   Stampa di un percorso espanso e degli ostacoli
 
 NOTE LIBERE 38
-==============  
+==============
   Distanza minima e massima tra due percorsi
   Generazione casuale di percorsi espansi
   Generazione casuale di percorsi minimi espansi tra due punti
@@ -3800,6 +3800,12 @@ NOTE LIBERE 40
   Incontri lungo una circonferenza
   Dadi al casinò
   Dividere una pila di N oggetti
+  Coltura di batteri
+  Colonia di camaleonti
+  Rettangoli con area uguale al perimetro
+  Coppia alternata
+  Probabilità di sequenze predefinte nel lancio di monete
+  Dadi di Sicherman
 
 PROBLEMI SUI DADI
 =================
