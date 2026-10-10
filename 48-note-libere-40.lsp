@@ -3528,7 +3528,7 @@ L'algoritmo ha quindi questa struttura:
               v
      Controllo modulo 3
               │
-       ┌──────┼──────┐
+       +------+------+
        │      │      │
      tutte   una     nessuna
       mod 3  mod 3    mod 3
@@ -3538,7 +3538,7 @@ L'algoritmo ha quindi questa struttura:
    un colore colore
        |     finale
        │      │
-       └──────┘
+       +------+
               │
               v
      Incontri X-Y
@@ -3859,6 +3859,8 @@ con coefficienti:
 anche questo quindi rappresenta perfettamente un dado.
 In altre parole, la ricerca dei dadi di Sicherman diventa una ricerca tra le possibili distribuzioni dei fattori di P(x): è proprio questo che rende possibile trovare la soluzione senza provare a caso le facce.
 
+Vedi anche "Analisi di lanci di dadi" su "Note libere 39".
+
 
 ---------------------------------------------------
 Ricerca di sequenze di elementi uguali in una lista
@@ -4077,6 +4079,359 @@ Biquadratefree numbers: numbers that are not divisible by any 4th power greater 
 ;->  61 62 63 65 66 67 68 69 70 71 72 73 74 75 76)
 
 Vedi anche "Numeri non-square, non-cube, squarefree e cubefree" su "Note libere 34".
+
+
+-----------------
+Il gioco del Wali
+-----------------
+
+Scacchiera del wali:
+
+      Coordinate algebriche                 Coordinate matriciali
+
+                                            0   1   2   3   4   5
+    +---+---+---+---+---+---+             +---+---+---+---+---+---+
+  5 |   |   |   |   |   |   |           0 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+             +---+---+---+---+---+---+
+  4 |   |   |   |   |   |   |           1 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+             +---+---+---+---+---+---+
+  3 |   |   |   |   |   |   |           2 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+             +---+---+---+---+---+---+
+  2 |   |   |   |   |   |   |           3 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+             +---+---+---+---+---+---+
+  1 |   |   |   |   |   |   |           4 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+             +---+---+---+---+---+---+
+      a   b   c   d   e   f
+
+Pedine del Wali:
+
+  12 Bastoncini -> / / / / / / / / / / / /
+  12 Ciottoli   -> O O O O O O O O O O O O
+
+  +---+---+
+  | / | O |
+  +---+---+
+
+Questo gioco viene praticato nel Mali ed è diffuso anche in altre regioni africane con nomi diversi (Dara in Nigeria) e con alcune variazioni nelle regole.
+Si gioca nelle caselle di una scacchiera 5 x 6.
+Ogni giocatore dispone di dodici pedine.
+I pezzi non sono contrapposti per colore (bianco contro nero, secondo l'uso occidentale), ma per forma.
+Bastoncini contro oggetti sferodiali (ciottoli, conchiglie, semi).
+I bastoncini spettano di diritto al più anziano o al vincitore della partita precedente.
+
+A) Fase di Disposizione dei pezzi (Fase strategica)
+---------------------------------------------------
+Si tira a sorte per decidere chi inizia, poi si piazzano le pedine una ad una nelle caselle libere, a turno.
+Il posizionamento termina quando entrambi hanno terminato i propri pezzi, oppure non è più possibile posizionare ulteriori pezzi nella scacchiera.
+È proibito sistemare un tris orizzontale o verticale durante la disposizione.
+Caso particolare:
+Se un giocatore si blocca e non può più posizionare pezzi (perché non ha più spazi liberi che rispettino la regola del tris), entra in gioco la regola del 'Passo' obbligatorio.
+Ecco esattamente come funziona lo svolgimento:
+1) Il giocatore bloccato passa il turno: Chi non ha mosse legali è costretto a dichiarare 'passo'. Non perde la partita e non subisce penalità immediate.
+2) L'altro giocatore continua a posizionare: il giocatore che ha ancora pezzi e mosse legali a disposizione continua a posizionare le proprie pedine, una alla volta, a ogni turno consecutivo.
+3) Fino a quando si va avanti? L'altro giocatore può continuare a piazzare i suoi pezzi rimanenti finché:
+- Non finisce tutti i suoi pezzi della riserva.
+- Oppure non si blocca a sua volta perché finiscono i punti validi sulla griglia.
+4) Cosa succede ai pezzi avanzati? Se la griglia si riempie del tutto e l'altro giocatore ha ancora dei pezzi in mano che non è fisicamente possibile posizionare, quei pezzi rimangono fuori dal tabellone (nella riserva) per tutta la partita. Non possono più essere inseriti.
+Una volta che entrambi i giocatori si trovano nell'impossibilità di posizionare altri pezzi (o perché li hanno finiti o perché sono entrambi bloccati), la Fase di Disposizione è conclusa e si passa alla Fase di Movimento.
+
+B) Fase di Movimento dei pezzi (Fase tattica)
+---------------------------------------------
+Terminata la prima fase, si possono spostare le pedine, ad una ad una, di un solo passo in orizzontale o in verticale (se la casella scelta sia libera).
+Il movimento in diagonale è vietato.
+Il primo giocatore a spostare le pedine è quello che non ha collocato l'ultima pedina nella scacchiera, cioè vale il principio dell'alternanza dei giocatori per ogni azione (posizionamento o movimento).
+I giocatori tentano di realizzare un tris in orizzontale o in verticale (in diagonale non valgono).
+Ogni tris ottenuto, si ha il diritto di togliere dal gioco una pedina avversaria a scelta, quindi si passa la mano all'avversario.
+Comunque, allineando più di tre pezzi contigui lungo una stessa orizzontale o verticale non da diritto di catturare una pedina avversaria.
+Ogni mossa comporta al massimo la presa di un solo pezzo nemico.
+Vince chi mangia tutti i pezzi nemici.
+Se il vincitore non ha perduto neppure una pedina, la vittoria vale il doppio.
+È permesso (e anzi, costituisce quasi l'essenza stessa del gioco) muovere avanti e indietro una pedina per disfare e riformare il tris.
+Una configurazione di questo tipo si chiama 'cavallo'.
+Se il pezzo mosso dal tris ne va a completare un altro, si ha il 'cavallo doppio'.
+
+Esempio di cavallo e cavallo doppio:
+
+    +---+---+---+---+---+---+
+  5 |   | / |   |   |   | O |
+    +---+---+---+---+---+---+
+  4 |   | / |   |   | O |   |
+    +---+---+---+---+---+---+
+  3 |   |   | / | / | / | O |
+    +---+---+---+---+---+---+
+  2 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+
+  1 |   |   |   |   |   |   |
+    +---+---+---+---+---+---+
+      a   b   c   d   e   f
+
+Cavallo: facendo oscillare il ciottolo tra e4 e f4 si cattura un pezzo nemico ogni due mosse.
+Cavallo doppio: facendo oscillare il bastoncino da c3 a b3 si cattura un pezzo nemico ad ogni mossa.
+Questa posizione è vinta dal giocatore con i bastoncini con o senza il tratto.
+
+La fase della collocazione, che in termini scacchistici potremmo chiamare 'apertura', presuppone strategie raffinate.
+Dopo, nella fase del movimento, entriamo nella tattica pura, cioè nello sfruttamento posizionale della situazione
+fissata.
+Ad alti livelli, la partita è (quasi sempre) già decisa dopo la collocazione, basta saper sfruttare il vantaggio.
+I campioni del Wali sono tutti africani, detentori di strategie segrete tramandate di padre in figlio da generazioni e
+generazioni.
+
+Scriviamo alcune funzioni per giocare a Wali in modo interattivo.
+
+; Inizia una nuova partita
+(define (new-game lst g1 g2)
+  ; Inizializza la tavola del gioco
+  (setq board (if lst lst (dup (dup " " 6 true) 5)))
+  ; Inizializza i punteggi dei giocatori (pedine catturate)
+  (if lst
+    (begin
+      ; punteggio 1
+      (setq p1 (or p1 0))
+      ; punteggio 2
+      (setq p2 (or p2 0)))
+    ;else
+    (begin
+      (setq p1 0)
+      (setq p2 0)))
+  ; Giocatore corrente
+  (setq player nil)
+  ; Stampa della tavola iniziale
+  (print-board board p1 p2))
+
+; Stampa la posizione corrente della tavola
+(define (print-board board p1 p2)
+  (let ((border "   +---+---+---+---+---+---+")
+        (chars  "     a   b   c   d   e   f  "))
+    (println " (/ " p1 ") - " "(O " p2 ")")
+    (println chars) (println border)
+    (for (row 0 4)
+      (print " " (- 5 row) " ")
+      (for (col 0 5)
+        (print (format "|%2s " (string (board row col)))))
+      (println "| " (- 5 row))
+      (println border))
+    (println chars) '>))
+
+; Converte da coordinate algebriche a coordinate matriciali
+; Es. "a4" -> (0 1)
+(define (alg-matrix alg)
+  (list
+    ; indice di riga (dal numero algebrico)
+    (lookup (alg 1) '(("1" 4) ("2" 3) ("3" 2) ("4" 1) ("5" 0)))
+    ; indice di colonna (dalla lettera algebrica)
+    (lookup (alg 0) '(("a" 0) ("b" 1) ("c" 2) ("d" 3) ("e" 4) ("f" 5)))))
+
+(alg-matrix "a4")
+;-> (1 0)
+(alg-matrix "d2")
+;-> (3 3)
+(alg-matrix "e4")
+;-> (1 4)
+
+; Converte da coordinate matriciali a coordinate algebriche
+; Es. (3 3) -> "d2"
+(define (matrix-alg matrix)
+  (join (list
+    ; lettera algebrica (da indice di colonna)
+    (lookup (matrix 1) '((0 "a") (1 "b") (2 "c") (3 "d") (4 "e") (5 "f")))
+    ; numero algebrico (da indice di riga)
+    (lookup (matrix 0) '((4 "1") (3 "2") (2 "3") (1 "4") (0 "5"))))))
+
+(matrix-alg '(1 0))
+;-> "a4"
+(matrix-alg '(3 3))
+;-> "d2"
+(matrix-alg '(1 4))
+;-> 'e4
+
+; Verifica se una casa è libera
+(define (free? board idx)
+  (= " " (board idx)))
+
+; Verifica se, mettendo un pezzo su una casa, si forma un tris.
+(define (tris? board idx pezzo)
+  (local (pad r c row col)
+    ; 'pad' serve ad evitare i controlli di inizio e fine lista
+    (setq pad '(" " " "))
+    (setq r (idx 0)) ; indice di riga
+    (setq c (idx 1)) ; indice di colonna
+    (setq row (board r)) ; riga
+    (setq col ((transpose board) c)) ; colonna
+    (setq row (append pad row pad)) ; nuova riga
+    (setq col (append pad col pad)) ;
+    (++ r 2) ; nuovo indice iniziale di riga
+    (++ c 2) ; nuovo indice iniziale di colonna
+    (or ; controllo tris sulle righe
+       (and (= (row (+ c 1)) pezzo) (= (row (+ c 2)) pezzo))
+       (and (= (row (- c 1)) pezzo) (= (row (- c 2)) pezzo))
+       (and (= (row (- c 1)) pezzo) (= (row (+ c 1)) pezzo))
+       ; controllo tris sulle colonne
+       (and (= (col (+ r 1)) pezzo) (= (col (+ r 2)) pezzo))
+       (and (= (col (- r 1)) pezzo) (= (col (- r 2)) pezzo))
+       (and (= (col (- r 1)) pezzo) (= (col (+ r 1)) pezzo)))))
+
+; Posizionamento di un pezzo (con regole)
+; Es. (drop "/" "e2")
+(define (drop pezzo casa)
+  (let (idx (alg-matrix casa))
+    (cond
+      ((not (find pezzo '(/ O)))
+        (println "Errore: pezzo " pezzo " non valido (solo '/ e 'O)."))
+      ((not (free? board idx))
+        (println "Errore: la casa " casa " è già occupata."))
+      ((tris? board idx pezzo)
+        (println "Errore: " pezzo " in " casa " genera un tris (riga o colonna)."))
+      (true
+        (setf (board idx) pezzo)
+        (print-board board p1 p2))) '>))
+
+; Posizionamento di un pezzo (senza regole)
+; Es. (place "/" "e2")
+(define (place pezzo casa)
+  (if (not (find pezzo '(/ O " ")))
+      (println "Errore: pezzo " pezzo " non valido (solo '/ , 'O e \" \").")
+      ;else
+      (setf (board (alg-matrix casa)) pezzo)) '>)
+
+; Verifica se da una casa si forma un tris.
+; 4 o 5 pezzi uguali in sequenza non contano come tris.
+(define (tris-drop? board idx pezzo)
+  (local (pad r c row col)
+    ; 'pad' serve ad evitare i controlli di inizio e fine lista
+    (setq pad '(" " " "))
+    (setq r (idx 0)) ; indice di riga
+    (setq c (idx 1)) ; indice di colonna
+    (setq row (board r)) ; riga
+    (setq col ((transpose board) c)) ; colonna
+    (setq row (append pad row pad)) ; nuova riga
+    (setq col (append pad col pad)) ;
+    (++ r 2) ; nuovo indice iniziale di riga
+    (++ c 2) ; nuovo indice iniziale di colonna
+    (or ; controllo tris sulle righe
+       (and (= (row (+ c 1)) pezzo) (= (row (+ c 2)) pezzo)
+            (!= (row (- c 1)) pezzo) (!= (row (+ c 3)) pezzo))
+       (and (= (row (- c 1)) pezzo) (= (row (- c 2)) pezzo)
+            (!= (row (+ c 1)) pezzo) (!= (row (- c 3)) pezzo))
+       (and (= (row (- c 1)) pezzo) (= (row (+ c 1)) pezzo)
+            (!= (row (- c 2)) pezzo) (!= (row (+ c 2)) pezzo))
+       ; controllo tris sulle colonne
+       (and (= (col (+ r 1)) pezzo) (= (col (+ r 2)) pezzo)
+            (!= (col (- r 1)) pezzo) (!= (col (+ r 3)) pezzo))
+       (and (= (col (- r 1)) pezzo) (= (col (- r 2)) pezzo)
+            (!= (col (+ r 1)) pezzo) (!= (col (- r 3)) pezzo))
+       (and (= (col (- r 1)) pezzo) (= (col (+ r 1)) pezzo)
+            (!= (col (- r 2)) pezzo) (!= (col (+ r 2)) pezzo)))))
+
+; Verifica se due celle sono adiacenti (alto, basso, destra, sinistra)
+(define (adiacenti? idx1 idx2)
+  (let ((x1 (idx1 0)) (y1 (idx1 1))
+        (x2 (idx2 0)) (y2 (idx2 1)))
+    (= (+ (abs (- x1 x2)) (abs (- y1 y2))) 1)))
+
+(adiacenti? '(2 3) '(2 4))
+;-> true (destra/sinistra)
+(adiacenti? '(2 3) '(3 3))
+;-> true (alto/basso)
+(adiacenti? '(2 3) '(3 4))
+;-> nil (diagonale)
+(adiacenti? '(2 3) '(2 3))
+;-> nil (stessa cella)
+(adiacenti? '(1 1) '(4 1))
+;-> nil (distanti)
+
+; Muove un pezzo da una casa ad un altra
+(define (move from to)
+  (let ((idx1 (alg-matrix from)) (idx2 (alg-matrix to)))
+    ; verifica adiacenza
+    (cond ((not (adiacenti? idx1 idx2))
+            (println "Errore: le case from " " e " to " non sono adiacenti."))
+          ((free? board idx1)
+            (println "Errore: la casa " from " è vuota."))
+          ((not (free? board idx2))
+            (println "Errore: la casa " to " è già occupata."))
+          (true
+            (setf (board idx2) (board idx1))
+            (setf (board idx1) " ")
+            (print-board board p1 p2)
+            (when (tris-drop? board idx2 (board idx2))
+              (println "I pezzi " (board idx2) " hanno creato un tris da " to)))) '>))
+
+; Rimuove un pezzo da una casa
+(define (pick casa)
+  (let ((idx (alg-matrix casa)) (pezzo (board (alg-matrix casa))))
+    (if (= pezzo " ")
+        (println "Errore: la casa " casa " è vuota.")
+        ;else
+        (begin
+          (setf (board idx) " ")
+          (if (= pezzo '/) (++ p2) (++ p1)))
+          (print-board board p1 p2)) '>))
+
+Proviamo:
+
+(new-game)
+(drop '/ "b1")
+(drop 'O "b1")
+(drop 'O "c1")
+(drop '/ "b2")
+(drop 'O "d1")
+(drop '/ "b3")
+(drop '/ "c3")
+(drop 'O "e1")
+(drop 'O "e2")
+(drop 'O "e4")
+(move "a1" "b1")
+(move "b1" "c1")
+(move "c3" "b3")
+(pick "a2")
+(pick "e4")
+(move "e2" "e1")
+;->  (/ 1) - (O 0)
+;->      a   b   c   d   e   f
+;->    +---+---+---+---+---+---+
+;->  5 |   |   |   |   |   |   | 5
+;->    +---+---+---+---+---+---+
+;->  4 |   |   |   |   |   |   | 4
+;->    +---+---+---+---+---+---+
+;->  3 |   | / |   |   |   |   | 3
+;->    +---+---+---+---+---+---+
+;->  2 |   | / |   |   |   |   | 2
+;->    +---+---+---+---+---+---+
+;->  1 |   | / | O | O | O |   | 1
+;->    +---+---+---+---+---+---+
+;->      a   b   c   d   e   f
+;-> I pezzi O hanno creato un tris da e1
+
+
+---------
+Shift Sum
+---------
+
+Dato un numero intero positivo calcolare la sua Shift-Sum nel modo seguente:
+
+ Shift       Somma          Moltiplicazione
+ 123         12300 +        123*100 +
+  123         1230 +        123*10  +
+   123         123 =        123*1   =
+ -----      --------       ----------
+ 13653       13653          13653
+
+ 123*100 + 123*10 + 123*1 = 123 * (100 + 10 + 1) = 123 * 111 = 13653
+
+Shift-Sum(num) = num * (numero formato da length(num) cifre 1)
+
+(define (shift-sum num)
+  (* num (int (dup "1" (length num)))))
+
+Proviamo:
+
+(shift-sum 123)
+;-> 13653
+(shift-sum 4815162342)
+;-> 5350180379464981962
+
+(map shift-sum (sequence 1 20))
+;-> (1 2 3 4 5 6 7 8 9 110 121 132 143 154 165 176 187 198 209 220)
 
 ============================================================================
 

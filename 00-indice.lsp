@@ -3808,6 +3808,8 @@ NOTE LIBERE 40
   Dadi di Sicherman
   Ricerca di sequenze di elementi uguali in una lista
   Numeri powKfree
+  Il gioco del Wali
+  Shift Sum
 
 PROBLEMI SUI DADI
 =================
