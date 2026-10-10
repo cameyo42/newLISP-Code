@@ -3859,5 +3859,224 @@ con coefficienti:
 anche questo quindi rappresenta perfettamente un dado.
 In altre parole, la ricerca dei dadi di Sicherman diventa una ricerca tra le possibili distribuzioni dei fattori di P(x): è proprio questo che rende possibile trovare la soluzione senza provare a caso le facce.
 
+
+---------------------------------------------------
+Ricerca di sequenze di elementi uguali in una lista
+---------------------------------------------------
+
+Abbiamo una lista di elementi.
+Vogliamo una funzione che cerca nella lista le sequenze di elementi uguali di una data lunghezza.
+I parametri della funzione sono:
+  lst -> lista di elementi
+  x   -> elemento della sequenza
+  k   -> lunghezza della sequenza
+  idx -> indice di partenza della ricerca
+  all -> flag per la ricerca della prima o di tutte le sequenze
+Le sequenze che hanno lunghezze diverse da k non contano.
+
+Esempio:
+  lst = (2 1 1 1 4 1 1 1 1 3 1 1 1 0)
+  x = 1
+  k = 3
+(setq lst '(2 1 1 1 4 1 1 1 1 3 1 1 1 0))
+; cerca la prima sequenza di esattamente tre 1 (1 1 1)
+; nella lista partendo dall'indice 0
+(func lst 1 3 0 nil)
+;-> (1) ; primo indice della sequenza (1 1 1)
+
+; cerca la prima sequenza di esattamente tre 1 (1 1 1)
+; nella lista partendo dall'indice 9
+(func lst 1 3 9 nil)
+;-> (10)
+
+; cerca tutte le sequenze di esattamente tre 1 (1 1 1)
+; nella lista partendo dall'indice 0
+(func lst 1 3 0 true)
+;-> (1 10) ; la sequenza (1 1 1 1) non è lunga 3
+
+; cerca tutte le sequenze di esattamente tre 1 (1 1 1)
+; nella lista partendo dall'indice 6
+(func lst 1 3 6 true)
+;-> (10) ; la sequenza (1 1 1 1) non è lunga 3 
+
+; Versione con commenti
+(define (first-k lst x k idx all)
+  ; Calcola la lunghezza della lista, inizializza la lista
+  ; dei risultati e imposta l'indice iniziale della ricerca.
+  (letn ((len (length lst)) (res '()) (i idx))
+    ; Continua la ricerca finche' esistono abbastanza elementi
+    ; a partire dall'indice corrente per formare una sequenza di k elementi.
+    (while (<= (+ i k) len)
+      ; Verifica che:
+      ; 1. L'indice corrente non sia negativo.
+      ; 2. L'elemento in posizione i sia uguale a x.
+      ; 3. I successivi k-1 elementi siano tutti uguali a x.
+      ; 4. L'elemento precedente, se esiste, sia diverso da x.
+      ; 5. L'elemento successivo alla sequenza, se esiste,
+      ;    sia diverso da x.
+      ; Queste condizioni garantiscono una sequenza di esattamente k elementi.
+      (if (and (>= i 0)
+               (= (lst i) x)
+               (for-all (fn (j) (= (lst j) x))
+                        (sequence (+ i 1) (+ i k -1)))
+               (or (= i 0) (!= (lst (- i 1)) x))
+               (or (= (+ i k) len)
+                   (!= (lst (+ i k)) x)))
+        (begin
+          ; Aggiunge alla fine della lista res l'indice iniziale
+          ; della sequenza trovata.
+          (push i res -1)
+          ; Se all e' true, prosegue dopo la sequenza trovata,
+          ; evitando che le sequenze restituite abbiano elementi in comune.
+          ; Altrimenti termina la ricerca impostando i a len.
+          (if all
+              (++ i k)
+              (setq i len)))
+        ; Se la sequenza non e' valida, passa all'indice successivo.
+        (++ i)))
+    ; Se all e' true, restituisce tutti gli indici trovati.
+    ; Altrimenti restituisce una lista contenente il primo indice,
+    ; oppure nil se non e' stata trovata alcuna sequenza valida.
+    (if all res (if res (list (res 0)) nil))))
+
+; Versione senza commenti
+(define (first-k lst x k idx all)
+  (letn ((len (length lst)) (res '()) (i idx))
+    (while (<= (+ i k) len)
+      (if (and (>= i 0)
+               (= (lst i) x)
+               (for-all (fn (j) (= (lst j) x))
+                        (sequence (+ i 1) (+ i k -1)))
+               (or (= i 0) (!= (lst (- i 1)) x))
+               (or (= (+ i k) len)
+                   (!= (lst (+ i k)) x)))
+        (begin
+          (push i res -1)
+          (if all
+              (++ i k)
+              (setq i len)))
+        (++ i)))
+    (if all res (if res (list (res 0)) nil))))
+
+Proviamo:
+
+(first-k '(a x x a x x b) 'x 2 0 nil)
+;-> (1)
+(first-k '(a x x a x x b) 'x 2 0 true)
+;-> (1 4)
+(first-k '(x x x x a x x x) 'x 3 0 true)
+;-> (5)
+(first-k '(x x x x a x x x) 'x 3 0 nil)
+;-> (5)
+(first-k '(x x x x a x x x) 'x 3 0 true)
+;-> (5)
+(first-k '(x x x x a x x x) 'x 3 4 nil)
+;-> (5)
+(first-k '(x x x x a x x x) 'x 3 1 true)
+;-> (5)
+
+La seguente funzione verifica se esistono esattamente 3 elementi di fila in una lista.
+(4 o più contigui non valgono come tris).
+
+(define (only-tris? lst x)
+  (letn ((len (length lst)) (trovato nil))
+    (if (< len 3)
+        nil
+        (begin
+          (for (i 0 (- len 3) 1 trovato)
+            (if (and (= (lst i) x)
+                     (= (lst (+ i 1)) x)
+                     (= (lst (+ i 2)) x)
+                     (or (= i 0) (!= (lst (- i 1)) x))
+                     (or (= (+ i 3) len) (!= (lst (+ i 3)) x)))
+              (setq trovato true)))
+          trovato))))
+
+(only-tris? '(a x x x b) 'x)
+;-> true
+(only-tris? '(x x x a x) 'x)
+;-> true
+(only-tris? '(a x x x) 'x)
+;-> true
+(only-tris? '(a x x a x x b) 'x)
+;-> nil
+(only-tris? '(a x x x x b) 'x)
+;-> nil
+(only-tris? '(x x x x x x) 'x)
+;-> nil
+(only-tris? '(x x x x a x x x) 'x)
+;-> true
+
+
+---------------
+Numeri powKfree
+---------------
+
+I numeri 'powKfree' sono definiti come:
+tutti i numeri N non divisibili per una potenza a^k (con a, k interi positivi) maggiore di 1.
+In altre parole, un numero è powKfree se la sua fattorizzazione in primi contiene al massimo (k - 1) copie di ciascun numero primo).
+Per k = 2, abbiamo i numeri 'squarefree'
+Per k = 3, abbiamo i numeri 'cubefree'
+ecc.
+
+(define (factor-group num)
+"Factorize an integer number"
+  (if (= num 1) '((1 1))
+    (letn ( (fattori (factor num))
+            (unici (unique fattori)) )
+      (transpose (list unici (count unici fattori))))))
+
+(define (powkfree k limite)
+  (let (out '(1))
+    (for (num 2 limite)
+      (setq fac (factor-group num))
+      (if (for-all (fn(x) (> k (x 1))) fac)
+          (push num out -1)))
+    out))
+
+Sequenza OEIS A005117
+Squarefree numbers: numbers that are not divisible by a square greater than 1.
+  1, 2, 3, 5, 6, 7, 10, 11, 13, 14, 15, 17, 19, 21, 22, 23, 26, 29, 30, 31,
+  33, 34, 35, 37, 38, 39, 41, 42, 43, 46, 47, 51, 53, 55, 57, 58, 59, 61,
+  62, 65, 66, 67, 69, 70, 71, 73, 74, 77, 78, 79, 82, 83, 85, 86, 87, 89,
+  91, 93, 94, 95, 97, 101, 102, 103, 105, 106, 107, 109, 110, 111, 113, ...
+
+; squarefree
+(powkfree 2 113)
+;-> (1 2 3 5 6 7 10 11 13 14 15 17 19 21 22 23 26 29 30 31
+;->  33 34 35 37 38 39 41 42 43 46 47 51 53 55 57 58 59 61
+;->  62 65 66 67 69 70 71 73 74 77 78 79 82 83 85 86 87 89
+;->  91 93 94 95 97 101 102 103 105 106 107 109 110 111 113)
+
+Sequenza OEIS A004709:
+Cubefree numbers: numbers that are not divisible by any cube > 1.
+  1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23
+  25, 26, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46,
+  47, 49, 50, 51, 52, 53, 55, 57, 58, 59, 60, 61, 62, 63, 65, 66, 67, 68, 69,
+  70, 71, 73, 74, 75, 76, 77, 78, 79, 82, 83, 84, 85, ...
+
+; cubefree
+(powkfree 3 85)
+;-> (1 2 3 4 5 6 7 9 10 11 12 13 14 15 17 18 19 20 21 22 23
+;->  25 26 28 29 30 31 33 34 35 36 37 38 39 41 42 43 44 45 46
+;->  47 49 50 51 52 53 55 57 58 59 60 61 62 63 65 66 67 68 69
+;->  70 71 73 74 75 76 77 78 79 82 83 84 85)
+
+Sequenza OEIS A046100:
+Biquadratefree numbers: numbers that are not divisible by any 4th power greater than 1.
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22,
+  23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+  42, 43, 44, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+  61, 62, 63, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, ...
+
+; biquadratefree
+(powkfree 4 76)
+;-> (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 17 18 19 20 21 22
+;->  23 24 25 26 27 28 29 30 31 33 34 35 36 37 38 39 40 41
+;->  42 43 44 45 46 47 49 50 51 52 53 54 55 56 57 58 59 60
+;->  61 62 63 65 66 67 68 69 70 71 72 73 74 75 76)
+
+Vedi anche "Numeri non-square, non-cube, squarefree e cubefree" su "Note libere 34".
+
 ============================================================================
 

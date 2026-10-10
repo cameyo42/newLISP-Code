@@ -4475,6 +4475,8 @@ Cubefree numbers: numbers that are not divisible by any cube > 1.
 ;->  47 49 50 51 52 53 55 57 58 59 60 61 62 63 65 66 67 68 69
 ;->  70 71 73 74 75 76 77 78 79 82 83 84 85)
 
+Vedi anche "Numeri powKfree" in "Note libere 40".
+
 
 -----------------------------------------
 Somma massima di elementi non consecutivi

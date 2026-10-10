@@ -3806,6 +3806,8 @@ NOTE LIBERE 40
   Coppia alternata
   Probabilità di sequenze predefinte nel lancio di monete
   Dadi di Sicherman
+  Ricerca di sequenze di elementi uguali in una lista
+  Numeri powKfree
 
 PROBLEMI SUI DADI
 =================
