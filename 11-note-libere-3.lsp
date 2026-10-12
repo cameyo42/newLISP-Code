@@ -3228,11 +3228,13 @@ Sum[1..n] (i^2) = (2*n^3 + 3*n^2 + n)/6
 (define (sumpot2 n)
   (/ (+ (* 2 (** n 3)) (* 3 (** n 2)) n) 6))
 
-Assumendo che esista una formula per la somma dei quadrati, la pendenza di quella funzione deve essere quadratica, quindi la funzione che cerchiamo deve essere di terzo grado. Quindi sappiamo che la formula ha la seguente struttura:
+Assumendo che esista una formula per la somma dei quadrati, la pendenza di quella funzione deve essere quadratica, quindi la funzione che cerchiamo deve essere di terzo grado.
+Quindi sappiamo che la formula ha la seguente struttura:
 
    a*n^3 + b*n^2 + c*n + d*n
 
-Con 4 equazioni questo problema è risolto (es. Poniamo n = 0, troviamo che d = 0. Con n = 1, n = 2 e n = 3 otteniamo un sistema lineare di equazioni che risolto produce a = 1/3 , b = 1/2 e c = 1/6).
+Con 4 equazioni questo problema è risolto.
+(es. Poniamo n = 0, troviamo che d = 0. Con n = 1, n = 2 e n = 3 otteniamo un sistema lineare di equazioni che risolto produce a = 1/3 , b = 1/2 e c = 1/6).
 Con lo stesso metodo possiamo calcolare le sommatorie delle potenze successive.
 
 Somma dei primi n cubi

@@ -3711,7 +3711,7 @@ Quindi la formula generale vale:
 (prob '(1 0 1 0))
 ;-> 0.0625
 
-; Calcolo della probabilità (simulazione)
+; Calcolo della probabilità (simulazione a blocchi)
 ; Testa -> 1, Croce -> 0
 (define (simula seq lanci)
   (let ((conta 0) (len (length seq)))
@@ -3729,6 +3729,33 @@ Quindi la formula generale vale:
 (simula '(0 0 0) 1e6)
 ;-> 0.125024
 (simula '(1 0 1 0) 1e6)
+;-> 0.062885
+
+; Calcolo della probabilità (simulazione continua)
+; Testa -> 1, Croce -> 0
+(define (simula1 seq lanci)
+  (let ((conta 0) (len (length seq)))
+    (setq L (rand 2 len))
+    ;(println L)
+    (if (= L seq) (++ conta))
+    (for (i 1 (- lanci 1))
+      (pop L)
+      (push (rand 2) L -1)
+      (if (= L seq) (++ conta)))
+      ;(print L) (read-line))
+    (div conta lanci)))
+
+(simula1 '(1) 1e6)
+;-> 0.499493
+(simula1 '(1 0) 1e6)
+;-> 0.249974
+(simula1 '(1 1) 1e6)
+;-> 0.249409
+(simula1 '(1 0 1) 1e6)
+;-> 0.124975
+(simula1 '(0 0 0) 1e6)
+;-> 0.125024
+(simula1 '(1 0 1 0) 1e6)
 ;-> 0.062885
 
 
@@ -4432,6 +4459,385 @@ Proviamo:
 
 (map shift-sum (sequence 1 20))
 ;-> (1 2 3 4 5 6 7 8 9 110 121 132 143 154 165 176 187 198 209 220)
+
+
+----------------------------
+Somma ciclica dei successori
+----------------------------
+
+Data una lista di interi positivi, sostituire ogni intero X con la somma degli X numeri successori di X (lista ciclica).
+Esempi:
+  lista = (1 2 3 4)
+  output = ((2) (3+4) (4+1+2) (1+2+3+4)) = (2 7 7 10)
+  lista = (4 3 2 1)
+  output = ((3+2+1+4) (2+1+4) (1+4) (4)) = (10 7 5 4)
+
+(define (cyclic-sum lst)
+  (let ((out '()) (len (length lst)))
+    (dolist (el lst)
+      (setq sum 0)
+      (for (i 1 el)
+        (++ sum (lst (% (+ $idx i) len))))
+      (push sum out -1))
+    out))
+
+Proviamo:
+
+(cyclic-sum '(1 2 3 4))
+;-> (2 7 7 10)
+(cyclic-sum '(4 3 2 1))
+;-> (10 7 5 4)
+(cyclic-sum '(1 2))
+;-> (2 3)
+(cyclic-sum '(1 2 3))
+;-> (2 4 6)
+
+(map (fn(x) (apply + (cyclic-sum (sequence 1 x)))) (sequence 1 45))
+;-> (1 5 12 26 45 75 112 164 225 305 396 510 637 791 960 1160
+;->  1377 1629 1900 2210 2541 2915 3312 3756 4225 4745 5292 5894
+;->  6525 7215 7936 8720 9537 10421 11340 12330 13357 14459 15600
+;->  16820 18081 19425 20812 22286 23805)
+
+Sequenza OEIS A199771:
+Row sums of the triangle in A199332.
+  1, 5, 12, 26, 45, 75, 112, 164, 225, 305, 396, 510, 637, 791, 960, 1160,
+  1377, 1629, 1900, 2210, 2541, 2915, 3312, 3756, 4225, 4745, 5292, 5894,
+  6525, 7215, 7936, 8720, 9537, 10421, 11340, 12330, 13357, 14459, 15600,
+  16820, 18081, 19425, 20812, 22286, 23805, ...
+
+
+--------------------------
+Concatenazione di sequenze
+--------------------------
+
+Sequenza OEIS A004738:
+Concatenation of sequences (1,2,...,n-1,n,n-1,...,2) for n >= 2.
+  1, 2, 1, 2, 3, 2, 1, 2, 3, 4, 3, 2, 1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3, 4, 5,
+  6, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 7, 8,
+  7, 6, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1, 2, 3,
+  4, 5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+  11, 10, 9, ...
+
+Pattern: (12)(1232)(123432)(12345432)...
+Formula: a(n) = floor(sqrt(n) + 1/2) + 1 - abs(n - 1 - (floor(sqrt(n) + 1/2))^2)
+
+(define (a n)
+  (add (floor (add (sqrt n) 0.5)) 1 
+       (- (abs (sub n 1 (pow (floor (add (sqrt n) 0.5)) 2))))))
+
+(map a (sequence 1 100))
+;-> (1 2 1 2 3 2 1 2 3 4 3 2 1 2 3 4 5 4 3 2 1 2 3 4 5
+;->  6 5 4 3 2 1 2 3 4 5 6 7 6 5 4 3 2 1 2 3 4 5 6 7 8
+;->  7 6 5 4 3 2 1 2 3 4 5 6 7 8 9 8 7 6 5 4 3 2 1 2 3
+;->  4 5 6 7 8 9 10 9 8 7 6 5 4 3 2 1 2 3 4 5 6 7 8 9 10)
+
+
+------------
+Tabula recta
+------------
+
+In crittografia, la 'tabula recta' è una disposizione cifrata di una serie di righe dell'alfabeto a quadrato, queste righe vengono costruite sfalsandole di una lettera (verso destra o verso sinistra).
+
+Data una stringa costruire la relativa tabula recta.
+Esempio:
+  str = "ABCD"
+  tabula recta = "ABCD"
+                 "BCDA"
+                 "CDAB"
+                 "DABC"
+
+(define (tabula str dir)
+  (let (out '())
+    (for (i 1 (length str))
+      (push str out -1)
+      (rotate str dir))
+    out))
+
+(tabula "ABCD" -1)
+;-> ("ABCD" "BCDA" "CDAB" "DABC")
+
+(tabula "ABCD" 1)
+;-> ("ABCD" "DABC" "CDAB" "BCDA")
+
+
+-----------------------
+N compare (N + 1) volte
+-----------------------
+
+Dato un intero positivo N in input, restituire o stampare il numero massimo di interi positivi distinti la cui somma è pari a N.
+
+Sequenza OEIS A003056:
+n appears n+1 times.
+Also the array A(n,k) = n+k (n >= 0, k >= 0) read by antidiagonals.
+Also inverse of triangular numbers.
+  0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6,
+  6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11,
+  11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12,
+  12, 12, 12, 12, 12, ...
+
+Formula: a(n+1) = a(n-a(n)) + 1, a(0) = 0
+Formula: a(n) = floor((sqrt(1+8*n)-1)/2)
+
+(define (a n)
+  (if (zero? n) 0
+      (floor (div (sub (sqrt (add 1 (mul 8 n))) 1) 2))))
+
+(a 8)
+;-> 3
+(a 1e9)
+;-> 44720
+
+(map a (sequence 1 50))
+;-> (1 1 2 2 2 3 3 3 3 4 4 4 4 4 5 5 5 5 5 5 6 6 6
+;->  6 6 6 6 7 7 7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 9 9
+;->  9 9 9 9)
+
+Scriviamo un algoritmo che non usa formule dirette, ma sfrutta proprio il numero di occorrenze di ciascun intero.
+Procediamo in modo incrementale:
+Generiamo i numeri (1,2,3,...) e, per ciascun numero N, lo inseriamo nella sequenza (N+1) volte.
+Quando abbiamo raggiunto la posizione n, restituiamo l'elemento corrispondente.
+
+(define (aa n)
+  (letn ((v 0) (pos n))
+    (while (>= pos (+ v 1))
+      (setq pos (- pos (+ v 1)))
+      (++ v))
+    v))
+
+Spiegazione:
+La funzione non usa alcuna formula matematica: attraversa i blocchi di occorrenze, sottraendone progressivamente le lunghezze, fino a individuare quello che contiene l'indice richiesto.
+- v è il valore che stiamo considerando, inizialmente 0.
+- pos è l'indice n da raggiungere.
+- Poiché v compare v+1 volte, sottraiamo v+1 da pos.
+- Quando pos è minore del numero di occorrenze del valore corrente, abbiamo trovato il valore cercato.
+
+Per esempio, calcoliamo a(8):
+  +---+------------+-------------------------+
+  | v | Occorrenze | pos dopo la sottrazione |
+  +---+------------+-------------------------+
+  | 0 | 1          | 7                       |
+  | 1 | 2          | 5                       |
+  | 2 | 3          | 2                       |
+  | 3 | 4          | —                       |
+  +---+------------+-------------------------+
+A questo punto pos = 2 è minore di v+1 = 4, quindi restituiamo 3.
+
+(aa 8)
+;-> 3
+
+(map aa (sequence 0 15))
+;-> (0 1 1 2 2 2 3 3 3 3 4 4 4 4 4 5)
+
+(= (map a (sequence 0 50)) (map aa (sequence 0 50)))
+;-> true
+
+(time (println (a 1e9)))
+;-> 44720
+;-> 0
+(time (println (aa 1e9)))
+;-> 44720
+;-> 15.587
+
+
+-----------------------
+Prime embedded in prime
+-----------------------
+
+Generare la seguente sequenza:
+Per ogni numero primo:
+a) generare la lista delle permutazioni delle cifre
+b) calcolare il numero di primi nella lista delle permutazioni
+
+Esempio:
+  primo = 719
+  lista delle permutazioni = (719 179 971 791 197 917))
+  numeri primi = 719 179 971 197
+  output = 4
+
+Sequenza OEIS A039998:
+Primes embedded in prime(n).
+  1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1,
+  2, 2, 3, 4, 2, 3, 2, 3, 3, 2, 4, 1, 3, 3, 3, 3, 4, 2, 2, 2, 4, 3, 1, 1,
+  1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 2, 3, 2, 3, 2, 2, 1, 3,
+  2, 3, 4, 1, 3, 4, 2, 1, 4, 2, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 1, 4, 1, 2,
+  2, 2, 1, 1, 2, 1, 2, 2, 3, ...
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i))))
+    out))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (int-list num)
+"Convert an integer to a list of digits"
+  (if (zero? num) '(0)
+  (let (out '())
+    (while (!= num 0)
+      (push (% num 10) out)
+      (setq num (/ num 10))) out)))
+
+(define (list-int lst)
+"Convert a list of digits to integer"
+  (let (num 0)
+    (dolist (el lst) (setq num (+ el (* num 10))))))
+
+; Restituisce la sottolista che ha il valore minimo all'indice dato
+(define (min-list lst idx)
+  (let ( (min-el (lst 0)) (min-val (lst 0 idx)) )
+    (dolist (el lst)
+      (if (< (el idx) min-val)
+          (setq min-el el min-val (el idx))))
+    min-el))
+
+; Restituisce la sottolista che ha il valore più massimo all'indice dato
+(define (max-list lst idx)
+  (let ( (max-el (lst 0)) (max-val (lst 0 idx)) )
+    (dolist (el lst)
+      (if (> (el idx) max-val)
+          (setq max-el el max-val (el idx))))
+    max-el))
+
+; Genera una lista con elementi del tipo:
+; (numero primo, numero di primi nelle sue permutazioni)
+; (memorizza anche quali sono i primi di ogni permutazione)
+(define (calc limite)
+  (local (all primi lst cur permute num))
+  (setq all '())
+  (setq primi (primes-to limite))
+  (dolist (p primi)
+    (setq lst (int-list p))
+    (setq cur '())
+    (setq permute (perm lst))
+    (dolist (el permute)
+      (setq num (list-int el))
+      (if (prime? num) (push num cur -1)))
+    (push (unique cur) all -1))
+  (map (fn(x) (list (x 0) (length x))) all))
+
+; Genera una lista con elementi del tipo:
+; (numero primo, numero di primi nelle sue permutazioni)
+(define (calc1 limite)
+  (local (out primi lst conta permute num)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (dolist (p primi)
+      (setq lst (int-list p))
+      (setq conta 0)
+      (setq permute (unique (perm lst)))
+      (dolist (el permute)
+        (setq num (list-int el))
+        (if (prime? num) (++ conta)))
+      (push (list p conta) out -1))
+  out))
+
+Proviamo:
+
+(calc1 50)
+;-> ((2 1) (3 1) (5 1) (7 1) (11 1) (13 2) (17 2) (19 1) (23 1)
+;->  (29 1) (31 2) (37 2) (41 1) (43 1) (47 1))
+
+Generiamo la sequenza:
+(map (fn(x) (first (rest x))) (calc1 500))
+;-> (1 1 1 1 1 2 2 1 1 1 2 2 1 1 1 1 1 1 1 2 2 2 1 1
+;->  2 2 3 4 2 3 2 3 3 2 4 1 3 3 3 3 4 2 2 2 4 3 1 1
+;->  1 1 1 2 2 2 1 1 1 2 2 2 2 2 3 3 2 3 2 3 2 2 1 3
+;->  2 3 4 1 3 4 2 1 4 2 1 1 2 1 1 2 2 2 2 2 1 4 1)
+
+Calcoliamo il primo numero primo che ha il maggiore numero di primi nelle sue permutazioni (fino ad un dato limite):
+
+(time (println (max-list (calc1 1e3) 1)))
+;-> (107 4)
+;-> 1.995
+(time (println (max-list (calc1 1e4) 1)))
+;-> (1237 11)
+;-> 40.38
+(time (println (max-list (calc1 1e5) 1)))
+;-> (13789 39)
+;-> 1550.592
+(time (println (max-list (calc1 1e6) 1)))
+;-> (107839 160)
+;-> 100625.861
+
+
+------------------------------------------
+Numero di rotazioni per comporre un numero
+------------------------------------------
+
+Abbiamo una lista composta da cifre.
+Il selettore contiene le cifre da 0 a 9 in ordine ed è circolare (cioè, lo 0 e il 9 sono adiacenti).
+Inizialmente, l'indicatore punta sullo 0.
+Per comporre in ordine ciascuna cifra della lista, si ruota l'indicatore finché non punta alla cifra desiderata.
+Ogni rotazione sposta l'indicatore su una cifra adiacente ed è possibile ruotare in entrambe le direzioni.
+Non è necessaria alcuna rotazione se l'indicatore punta già sulla cifra da comporre.
+Restituire il numero totale minimo di rotazioni necessarie per comporre tutte le cifre della lista.
+
+(define (dist-min a b)
+  (let (d (abs (- b a)))
+    (min d (- 10 d))))
+
+(dist-min 0 4)
+;-> 4
+(dist-min 1 8)
+;-> 3
+(dist-min 0 9)
+;-> 1
+(dist-min 3 3)
+;-> 0
+
+(define (moves lst)
+  (push 0 lst) ; all'inizio l'indicatore punta a 0 
+  (let (L (map dist-min (rest lst) (chop lst)))
+    (list (apply + L) L)))
+
+Proviamo:
+
+(moves '(0 1 9 2 8 3 7 4 6 5))
+;-> (25 (0 1 2 3 4 5 4 3 2 1))
+(moves '(1 2 0 0 2 1 0 2 0 0))
+;-> (12 (1 1 2 0 2 1 1 2 2 0))
+(moves '(4 1 2))
+;-> (8 (4 3 1))
+(moves '(4 9))
+;-> (9 (4 5))
+(moves '(5 0))
+;-> (10 (5 5))
+(moves '(4 9 4 9 4 9 4 9))
+;-> (39 (4 5 5 5 5 5 5 5))
+(moves '(5 0 5 0 5 0 5 0))
+;-> (40 (5 5 5 5 5 5 5 5))
 
 ============================================================================
 

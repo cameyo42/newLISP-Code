@@ -3810,6 +3810,12 @@ NOTE LIBERE 40
   Numeri powKfree
   Il gioco del Wali
   Shift Sum
+  Somma ciclica dei successori
+  Concatenazione di sequenze
+  Tabula recta
+  N compare (N + 1) volte
+  Prime embedded in prime
+  Numero di rotazioni per comporre un numero
 
 PROBLEMI SUI DADI
 =================
