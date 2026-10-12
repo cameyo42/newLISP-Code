@@ -3675,9 +3675,9 @@ Proviamo:
 ;-> (2 2)
 
 
--------------------------------------------------------
-Probabilità di sequenze predefinte nel lancio di monete
--------------------------------------------------------
+--------------------------------------------------------
+Probabilità di sequenze predefinite nel lancio di monete
+--------------------------------------------------------
 
 Calcolare la probabilità che lanciando ripetutamente una moneta appaia una sequenza predefinita.
 Per esempio, qual è la probabilità che appaia la sequenza 'CCTCCT'?
@@ -4152,15 +4152,15 @@ Si tira a sorte per decidere chi inizia, poi si piazzano le pedine una ad una ne
 Il posizionamento termina quando entrambi hanno terminato i propri pezzi, oppure non è più possibile posizionare ulteriori pezzi nella scacchiera.
 È proibito sistemare un tris orizzontale o verticale durante la disposizione.
 Caso particolare:
-Se un giocatore si blocca e non può più posizionare pezzi (perché non ha più spazi liberi che rispettino la regola del tris), entra in gioco la regola del 'Passo' obbligatorio.
+Se un giocatore si blocca e non può più posizionare pezzi (perchè non ha più spazi liberi che rispettino la regola del tris), entra in gioco la regola del 'Passo' obbligatorio.
 Ecco esattamente come funziona lo svolgimento:
 1) Il giocatore bloccato passa il turno: Chi non ha mosse legali è costretto a dichiarare 'passo'. Non perde la partita e non subisce penalità immediate.
 2) L'altro giocatore continua a posizionare: il giocatore che ha ancora pezzi e mosse legali a disposizione continua a posizionare le proprie pedine, una alla volta, a ogni turno consecutivo.
-3) Fino a quando si va avanti? L'altro giocatore può continuare a piazzare i suoi pezzi rimanenti finché:
+3) Fino a quando si va avanti? L'altro giocatore può continuare a piazzare i suoi pezzi rimanenti finchè:
 - Non finisce tutti i suoi pezzi della riserva.
-- Oppure non si blocca a sua volta perché finiscono i punti validi sulla griglia.
+- Oppure non si blocca a sua volta perchè finiscono i punti validi sulla griglia.
 4) Cosa succede ai pezzi avanzati? Se la griglia si riempie del tutto e l'altro giocatore ha ancora dei pezzi in mano che non è fisicamente possibile posizionare, quei pezzi rimangono fuori dal tabellone (nella riserva) per tutta la partita. Non possono più essere inseriti.
-Una volta che entrambi i giocatori si trovano nell'impossibilità di posizionare altri pezzi (o perché li hanno finiti o perché sono entrambi bloccati), la Fase di Disposizione è conclusa e si passa alla Fase di Movimento.
+Una volta che entrambi i giocatori si trovano nell'impossibilità di posizionare altri pezzi (o perchè li hanno finiti o perchè sono entrambi bloccati), la Fase di Disposizione è conclusa e si passa alla Fase di Movimento.
 
 B) Fase di Movimento dei pezzi (Fase tattica)
 ---------------------------------------------
@@ -4609,7 +4609,7 @@ Spiegazione:
 La funzione non usa alcuna formula matematica: attraversa i blocchi di occorrenze, sottraendone progressivamente le lunghezze, fino a individuare quello che contiene l'indice richiesto.
 - v è il valore che stiamo considerando, inizialmente 0.
 - pos è l'indice n da raggiungere.
-- Poiché v compare v+1 volte, sottraiamo v+1 da pos.
+- Poichè v compare v+1 volte, sottraiamo v+1 da pos.
 - Quando pos è minore del numero di occorrenze del valore corrente, abbiamo trovato il valore cercato.
 
 Per esempio, calcoliamo a(8):
@@ -4799,7 +4799,7 @@ Numero di rotazioni per comporre un numero
 Abbiamo una lista composta da cifre.
 Il selettore contiene le cifre da 0 a 9 in ordine ed è circolare (cioè, lo 0 e il 9 sono adiacenti).
 Inizialmente, l'indicatore punta sullo 0.
-Per comporre in ordine ciascuna cifra della lista, si ruota l'indicatore finché non punta alla cifra desiderata.
+Per comporre in ordine ciascuna cifra della lista, si ruota l'indicatore finchè non punta alla cifra desiderata.
 Ogni rotazione sposta l'indicatore su una cifra adiacente ed è possibile ruotare in entrambe le direzioni.
 Non è necessaria alcuna rotazione se l'indicatore punta già sulla cifra da comporre.
 Restituire il numero totale minimo di rotazioni necessarie per comporre tutte le cifre della lista.
@@ -4838,6 +4838,395 @@ Proviamo:
 ;-> (39 (4 5 5 5 5 5 5 5))
 (moves '(5 0 5 0 5 0 5 0))
 ;-> (40 (5 5 5 5 5 5 5 5))
+
+
+-----------------------------------------------
+Cani e gatti lungo una linea e lungo un cerchio
+-----------------------------------------------
+
+Disposizione lungo una linea
+----------------------------
+Ci sono m cani e n gatti seduti su m+n posti lungo una linea.
+Se un cane e un gatto sono seduti l'uno accanto all'altro, possono scambiarsi di posto.
+Data una configurazione iniziale fissata, determinare il numero di configurazioni raggiungibili tramite una sequenza di scambi.
+Nota: le rotazioni e le riflessioni di una configurazione sono considerate distinte.
+
+Se m cani e n gatti sono disposti in fila, vi sono binom(m+n,m) configurazioni possibili, poichè gli m cani occupano posizioni relative fisse tra loro e lo stesso vale per gli n gatti.
+Il problema si riduce quindi a scegliere le m posizioni per i cani tra le m+n posizioni totali.
+(Tutte queste configurazioni sono raggiungibili: spostando ripetutamente le cani verso sinistra tramite scambi, si arriva a una situazione in cui tutte le m cani si trovano alla sinistra di tutti gli n gatti e, dato che gli scambi sono reversibili, ciò dimostra la raggiungibilità).
+
+Perchè non se ne possono ottenere di più.
+Uno scambio avviene sempre tra un cane e un gatto, quindi due cani non si scavalcano mai, e lo stesso vale per due gatti. L'ordine relativo dei cani tra loro e quello dei gatti tra loro resta invariato. Una configurazione è allora determinata solo da quali m posti, tra gli m+n, sono occupati dai cani. Le configurazioni possibili sono al più binom(m+n,m), sia che gli animali dello stesso tipo siano distinguibili sia che non lo siano.
+
+Perchè le raggiungono tutte.
+Gli scambi sono reversibili, quindi basta mostrare che da qualsiasi configurazione si arriva a quella canonica 'tutti i cani a sinistra, tutti i gatti a destra'. Si ottiene con un bubble sort: finchè c'è un gatto immediatamente a sinistra di un cane, li si scambia. Ogni scambio elimina una 'inversione' (coppia gatto-cane con il gatto a sinistra), quindi il processo termina nella configurazione canonica. Da questa, invertendo i passi, si arriva a qualunque altra.
+
+La nota su rotazioni e riflessioni non influisce sul conteggio, perchè la configurazione è già una sequenza ordinata di posti lungo una linea.
+
+
+Disposizione lungo un cerchio
+-----------------------------
+In questo caso gli m cani e gli n gatti si trovano seduti su m+n posti lungo una cerchio.
+Sul cerchio i cani possono ancora non scavalcarsi, ma ora l'ordine ciclico dei cani resta fisso, non quello lineare. Lo stesso vale per i gatti. Una configurazione è quindi descritta da tre dati:
+
+1) l'insieme dei posti occupati dai cani: binom(m+n,m) scelte;
+2) uno sfasamento a in Zm che dice quale cane sta nel primo posto-cane, leggendo da un punto di partenza fissato;
+3) uno sfasamento b in Zn, analogo per i gatti.
+
+Gli scambi che non attraversano il "taglio" tra il posto m+n e il posto 1 cambiano solo l'insieme dei posti. Uno scambio che attraversa il taglio sposta un cane dall'ultimo al primo posto-cane e un gatto in senso opposto. Questo cambia (a, b) in (a−1, b+1) oppure in (a+1, b−1).
+
+Quindi la coppia (a, b) si muove solo lungo il sottogruppo di Z_m * Z_n generato da (1, −1), che ha ordine mcm(m, n).
+Dentro ciascun valore di (a, b) tutti gli insiemi di posti sono raggiungibili con scambi lungo la linea.
+
+  configurazioni raggiungibili = binom(m+n,m) * mcm(m,n)
+
+Esempio:
+Con m=1, n=2.
+Con un cane D e due gatti c1, c2 ci sono 3·2 = 6 disposizioni totali, e la formula dà 3·mcm(1,2) = 6.
+Da D c1 c2 si arriva a c1 D c2, poi a c1 c2 D, poi (scambiando i posti 3 e 1) a D c2 c1.
+Tutte e 6 sono raggiungibili.
+
+Se m = 0 o n = 0 non ci sono scambi possibili e la configurazione è una sola.
+
+
+--------------------------
+Quadrati e cubi geometrici
+--------------------------
+
+Un numero quadrato puo essere disposto come un quadrato:
+
+Es. 4^2 = 16
+
+  * * * *
+  * * * *
+  * * * *
+  * * * *
+
+Possiamo ottenere il quadrato di 4 sommando i pallini di ogni riga:
+
+  4 + 4 + 4 + 4 = 16
+
+Oppure sommando le diagonali:
+
+  1 + 2 + 3 + 4 + 3 + 2 + 1 = 16
+
+Infatti:
+
+  Sum[x=1..n](x) + Sum[x=n-1,..1] = 2*Sum[x=1..n-1](x) + n = 
+  = 2*(n-1)*n/2 + n n^n = (n-1)*n + n =
+  = n^2
+
+(define (quadrato n)
+  (+ (apply + (sequence 1 n)) (apply + (sequence (- n 1) 1))))
+  
+(map quadrato (sequence 1 10))
+;-> (2 4 9 16 25 36 49 64 81 100)
+
+Possiamo scrivere una formula simile anche nel caso del cubo di un numero, considerando la disposizione geometrica di un cubo.
+
+  n^3 = Sum[s=3..3n]C(s)
+
+dove:
+
+  C(s) = binom(s-1,2) - 3*binom(s-n-1,2) + 3*binom(s-2n-1,2) - binom(s-3n-1,2)
+
+(define (binom num k)
+"Calculate the binomial coefficient (n k) = n!/(k!*(n - k)!) (combinations of k elements without repetition from n elements)"
+  (cond ((> k num) 0L)
+        ((zero? k) 1L)
+        ((< k 0) 0L)
+        (true
+          (let (r 1L)
+            (for (d 1 k)
+              (setq r (/ (* r num) d))
+              (-- num))
+          r))))
+
+(define (cubo n show)
+  (let (lst '())
+    (for (s 3 (* 3 n))
+      (push (+ (binom (- s 1) 2) (* -3 (binom (- s n 1) 2))
+               (* 3 (binom (- s (* 2 n) 1) 2)) (* -1 (binom (- s (* 3 n) 1) 2)))
+            lst -1))
+    (if show (println lst))
+    (apply + lst)))
+
+(cubo 3 true)
+;-> (1L 3L 6L 7L 6L 3L 1L)
+;-> 27L
+
+(map cubo (sequence 1 10))
+;-> (1L 8L 27L 64L 125L 216L 343L 512L 729L 1000L)
+
+I coefficienti (1,3,6,10,15,...) rappresentano il numero di pallini contenuti in ciascun piano diagonale del cubo, quando raggruppiamo i pallini in base alla somma delle loro tre coordinate.
+Consideriamo i primi coefficienti di un cubo di lato 4:
+
+Somma delle coordinate = 3
+Un solo pallino: (1,1,1)
+Coefficiente: 1
+
+Somma delle coordinate = 4
+Tre pallini: (2,1,1), (1,2,1), (1,1,2)
+Coefficiente: 3
+
+Somma delle coordinate = 5
+Sei pallini: le permutazioni di (3,1,1) e (2,2,1)
+Coefficiente: 6.
+
+Vicino a un vertice del cubo, i piani diagonali contengono pochi pallini.
+Man mano che ci avviciniamo al centro, i piani intercettano un numero crescente di punti della griglia.
+Prima di incontrare i limiti del cubo, i coefficienti sono i numeri triangolari:
+  1, 3, 6, 10, 15,...
+e il termine k-esimo è:
+  k(k+1)/2
+Nel cubo di lato 4, tuttavia, la sequenza completa è:
+  1,3,6,10,12,12,10,6,3,1
+Perchè nel cubo di lato 4 le coordinate possono assumere soltanto i valori 1,2,3,4.
+Quando la somma delle coordinate è 7, alcune delle 15 combinazioni che conteremmo senza limiti non sono più ammesse.
+Vediamolo concretamente nel caso del 15:
+Cerchiamo le terne di interi positivi tali che:
+  x + y + z = 7
+Senza limiti superiori, abbiamo:
+  binom(6 2) = 15
+Ma alcune terne contengono un valore maggiore di 4.
+Le tre terne da escludere sono quelle che non appartengono al cubo:
+ (5,1,1) (1,5,1) (1,1,5)
+Non ci sono altre terne non ammesse: se una coordinata è almeno 5, le altre due devono essere entrambe 1 per ottenere somma 7.
+Quindi:
+  15 - 3 = 12
+Le 12 terne ammesse sono tutte le permutazioni di queste forme:
+- (1,2,4): 6 permutazioni;
+- (1,3,3): 3 permutazioni;
+- (2,2,3): 3 permutazioni.
+In totale:
+  6 + 3 + 3 = 12
+Ecco perchè il coefficiente è 12 anzichè 15: tre punti del conteggio teorico si trovano fuori dal cubo.
+I coefficienti raggiungono un massimo di 12, poi diminuiscono simmetricamente.
+
+La differenza rispetto al quadrato è che nel quadrato le diagonali sono segmenti e i conteggi crescono di uno alla volta.
+Nel cubo, invece, consideriamo piani diagonali e i conteggi iniziali sono numeri triangolari.
+
+
+--------------------------------
+Affermazioni di verità e falsità
+--------------------------------
+
+In un foglio troviamo le seguenti quattro affermazioni:
+
+1) Almeno una di queste affermazioni è vera.
+2) Almeno due di queste affermazioni sono vere.
+3) Almeno due di queste affermazioni sono false.
+4) Almeno una di queste affermazioni è falsa.
+
+Ogni affermazione è vera oppure falsa.
+Quante affermazioni false ci sono nel foglio?
+
+Spiegazione 1
+-------------
+Notiamo che l'affermazione 4 deve essere vera, poichè risulterebbe contraddittoria se fosse falsa.
+Analogamente, anche l'affermazione 1 deve essere vera: se fosse falsa, infatti, tutte le altre affermazioni dovrebbero essere false, il che creerebbe una contraddizione dato che l'affermazione 4 è vera.
+Poichè sia la 1 che la 4 sono vere, anche l'affermazione 2 deve essere vera.
+Di conseguenza, l'affermazione 3 è l'unica falsa.
+Quindi esiste solo 1 affermazione falsa (la numero 3).
+
+Spiegazione 2
+-------------
+Usiamo una variabile che rappresenta il numero di affermazioni vere.
+Indichiamo con V il numero totale di affermazioni vere.
+Poichè le affermazioni sono quattro, V può assumere soltanto i valori 0,1,2,3,4.
+
+1) Analizziamo le quattro affermazioni
+Affermazione 1: "Almeno una di queste affermazioni è vera".
+Questa affermazione è vera se e solo se (V >= 1). Pertanto, se fosse falsa, avremmo V = 0.
+Ma in tal caso sarebbe falsa anche la stessa affermazione 1, coerentemente con V = 0, mentre l'affermazione 4 sarebbe falsa soltanto se nessuna affermazione fosse falsa, il che è impossibile quando tutte sono false.
+Più direttamente, se tutte fossero false, la 4 sarebbe falsa e direbbe che non esiste alcuna affermazione falsa: contraddizione.
+Quindi l'affermazione 4 è necessariamente vera e, di conseguenza, almeno un'affermazione è vera: la 1 è vera.
+
+Affermazione 2: "Almeno due di queste affermazioni sono vere".
+Dato che le affermazioni 1 e 4 sono entrambe vere, esistono già almeno due affermazioni vere. Quindi anche la 2 è vera.
+
+Affermazione 3: "Almeno due di queste affermazioni sono false".
+Abbiamo stabilito che le affermazioni 1, 2 e 4 sono vere.
+Rimane soltanto la 3, che non può essere vera: se lo fosse, tutte e quattro sarebbero vere, ma la 3 affermerebbe che almeno due sono false.
+Pertanto, la 3 è falsa.
+
+2) Verifica
+  +--------------+--------+------------------------------------------- |
+  | Affermazione | Valore | Motivo                                     |
+  +--------------+--------+------------------------------------------- |
+  | 1            | Vera   | Esistono affermazioni vere                 |
+  | 2            | Vera   | Le affermazioni 1 e 4 sono vere            |
+  | 3            | Falsa  | Non esistono almeno due affermazioni false |
+  | 4            | Vera   | Esiste almeno un'affermazione falsa        |
+  +--------------+--------+------------------------------------------- |
+Il risultato è coerente con tutte e quattro le definizioni: ci sono tre affermazioni vere e una falsa.
+Risposta: esattamente 1 affermazione falsa, la numero 3.
+
+Spiegazione 3
+-------------
+Possiamo scriverei una simulazione che prova tutte le 2^4=16 possibili assegnazioni di vero e falso alle quattro affermazioni, contando quante sono coerenti con il significato delle frasi.
+
+Algoritmo
+- v conta le affermazioni dichiarate vere nell'assegnazione esaminata.
+- a1 ... a4 calcolano i valori che le quattro frasi devono avere in base a quel conteggio.
+- La condizione and verifica che i valori calcolati coincidano con quelli dell'assegnazione esaminata (b1 ... b4).
+- Ogni soluzione valida viene salvata come una lista di coppie (numero-affermazione valore-booleano),
+  per esempio ((1 true) (2 true) (3 nil) (4 true)).
+La funzione restituisce quindi una lista di soluzioni coerenti, ciascuna delle quali specifica quali affermazioni sono vere e quali false.
+
+(define (simula)
+  (local (soluzioni n v a1 a2 a3 a4 b1 b2 b3 b4)
+    (setq soluzioni '())
+    (for (n 0 15)
+      ; Conta le affermazioni assegnate come vere.
+      (setq v 0)
+      (for (i 0 3)
+        (if (!= (& n (<< 1 i)) 0)
+            (++ v)))
+      ; Calcola i valori richiesti dal significato delle frasi.
+      (setq a1 (>= v 1))
+      (setq a2 (>= v 2))
+      (setq a3 (>= (- 4 v) 2))
+      (setq a4 (>= (- 4 v) 1))
+      ; Estrae i valori dell'assegnazione esaminata.
+      (setq b1 (!= (& n 1) 0))
+      (setq b2 (!= (& n 2) 0))
+      (setq b3 (!= (& n 4) 0))
+      (setq b4 (!= (& n 8) 0))
+      ; Accetta soltanto le assegnazioni coerenti.
+      (if (and (= a1 b1)
+               (= a2 b2)
+               (= a3 b3)
+               (= a4 b4))
+          (push (list (list 1 b1)
+                      (list 2 b2)
+                      (list 3 b3)
+                      (list 4 b4))
+                soluzioni -1)))
+    soluzioni))
+
+(simula)
+;-> (((1 true) (2 true) (3 nil) (4 true)))
+
+
+---------------
+Interi solitari
+---------------
+
+Un intero positivo N si dice 'solitario' se, per ogni coppia di interi non negativi a e b tali che a + b = N, almeno uno tra a e b contiene la cifra 1.
+
+Esempi:
+  N = 10
+  1 + 9 --> true
+  2 + 8 --> nil (2 e 8 non contengono la cifra 1)
+  10 -> nil (non è solitario)
+
+  N = 19
+  1 + 18 --> true
+  2 + 17 --> true
+  3 + 16 --> true
+  4 + 15 --> true
+  5 + 14 --> true
+  6 + 13 --> true
+  7 + 12 --> true
+  8 + 11 --> true
+  9 + 10 --> true
+  10 + 9 --> true
+  11 + 8 --> true
+  12 + 7 --> true
+  13 + 6 --> true
+  14 + 5 --> true
+  15 + 4 --> true
+  16 + 3 --> true
+  17 + 2 --> true
+  18 + 1 --> true
+  19 + 0 --> true
+  19 -> true (è solitario)
+
+I numeri pari non possono essere solitari.
+Supponiamo che x sia pari.
+Scegliamo k tale che 2k = x e poniamo k1 = k e k2 = k.
+Per ogni cifra uguale a 1 in k, sostituiamo tale cifra con 0 in k1 e con 2 in k2.
+In tal modo si mantiene la relazione k1 + k2 = x, ma né k1 né k2 contengono più la cifra 1.
+Di conseguenza, x non può essere solitario.
+
+(define (solo? num)
+  (and (odd? num)
+    (let ((stop nil) (a 0) (b 0))
+      (for (i 1 num 1 stop)
+        (setq a i)
+        (setq b (- num i))
+        ;(println a { } b)
+        (if-not (or (find "1" (string a)) (find "1" (string b)))
+            (setq stop true)))
+      ;(println (list a b))
+      (not stop))))
+
+Proviamo:
+
+(solo? 10)
+;-> nil
+(solo? 19)
+;-> true
+
+(setq res3 (filter solo? (sequence 1 1e3)))
+;-> (1 19 21 199 201 219 221)
+(length res3)
+;-> 7
+(setq res4 (filter solo? (sequence 1 1e4)))
+;-> (1 19 21 199 201 219 221 1999 2001 2019 2021 2199 2201 2219 2221)
+(length res4)
+;-> 15
+(time (setq res5 (filter solo? (sequence 0 1e5))))
+;-> 68659.801
+(length res5)
+;-> 31
+
+Il numero di solitari fino a 10^k vale: 2^k - 1
+
+Esiste una relazione tra i numeri della serie?
+Cioè possiamo costruire la serie con un algoritmo piu veloce?
+Vediamo se esiste un pattern nei numeri.
+Prendiamo i solitari a k cifre e sottraiamo il più piccolo:
+1 cifra: 1
+2 cifre: 19 + (0, 2)
+3 cifre: 199 + (0, 2, 20, 22)
+4 cifre: 1999 + (0, 2, 20, 22, 200, 202, 220, 222)
+Gli addendi sono tutte le somme dei sottoinsiemi di (2, 20, 200, ...).
+Quindi ogni solitario ha la forma:
+  N = 2·B − 1, dove B è un numero scritto solo con le cifre 0 e 1 (e B > 0).
+Per esempio:
+  B = 1, 10, 11, 100, 101, 110, 111 dà 1, 19, 21, 199, 201, 219, 221.
+Quindi:
+  "N è solitario se e solo se N è dispari e (N+1)/2 contiene solo cifre 0 e 1"
+Questo spiega anche il conteggio:
+i numeri 0/1 con al massimo k cifre (escluso lo zero) sono 2^k − 1.
+
+(define (solo2? n)
+  (and (odd? n)
+       (not (find "[2-9]" (string (/ (+ n 1) 2)) 0))))
+
+Proviamo:
+
+(solo2? 10)
+;-> nil
+(solo2? 19)
+;-> true
+
+(= (filter solo? (sequence 0 1e4)) (filter solo2? (sequence 0 1e4)))
+;-> true
+
+(time (setq r (filter solo2? (sequence 1 1e5))))
+;-> 60.168
+(length r)
+;-> 31
+
+(filter solo2? (sequence 1 1e5))
+;-> (1 19 21 199 201 219 221 1999 2001 2019 2021 2199 2201 2219 2221 19999
+;->  20001 20019 20021 20199 20201 20219 20221 21999 22001 22019 22021 22199
+;->  22201 22219 22221)
+
+Questa sequenza non esiste in OEIS (ottobre 2026).
 
 ============================================================================
 

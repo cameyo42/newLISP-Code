@@ -3804,7 +3804,7 @@ NOTE LIBERE 40
   Colonia di camaleonti
   Rettangoli con area uguale al perimetro
   Coppia alternata
-  Probabilità di sequenze predefinte nel lancio di monete
+  Probabilità di sequenze predefinite nel lancio di monete
   Dadi di Sicherman
   Ricerca di sequenze di elementi uguali in una lista
   Numeri powKfree
@@ -3816,6 +3816,10 @@ NOTE LIBERE 40
   N compare (N + 1) volte
   Prime embedded in prime
   Numero di rotazioni per comporre un numero
+  Cani e gatti lungo una linea e lungo un cerchio
+  Quadrati e cubi geometrici
+  Affermazioni di verità e falsità
+  Interi solitari
 
 PROBLEMI SUI DADI
 =================
