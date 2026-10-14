@@ -3820,6 +3820,12 @@ NOTE LIBERE 40
   Quadrati e cubi geometrici
   Affermazioni di verità e falsità
   Interi solitari
+  Crittografia a frequenza
+  Forward and backward difference
+  Selezione booleana
+  Sequenze Take/Skip e Skip/Take
+  Numero di primi minori o uguali a N
+  Memoria dei numeri primi
 
 PROBLEMI SUI DADI
 =================

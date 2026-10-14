@@ -5228,5 +5228,399 @@ Proviamo:
 
 Questa sequenza non esiste in OEIS (ottobre 2026).
 
+
+------------------------
+Crittografia a frequenza
+------------------------
+
+Metodo di crittografia basato sulla frequenza delle lettere
+La stringa dda codificare è composta solo da lettere minuscole e spazi.
+
+; CODIFICA
+; stringa da crittografare (codificare)
+(setq str "domani andremo al mare e faremo il bagno")
+; stringa trasformata in lista di caratteri
+(setq lst (explode str))
+; caratteri unici della stringa
+(setq unici (unique lst))
+; numero di caratteri unici
+(setq num-chars (length unici))
+; frequenza dei caratteri unici
+(setq freq (count unici lst))
+; lista con coppie (frequenza carattere)
+; ordinata per frequenza crescente e caratteri crescenti
+(setq table (sort (map list freq unici)))
+; alfabeto delle minuscole + spazio
+(setq lower "abcdefghijklmnopqrstuvwxyz ")
+; estrazione dei caratteri necessari dall'alfabeto 
+; (tanti quanti sono i caratteri unici della stringa) 
+(setq alfa (slice (explode lower) 0 num-chars))
+; creazione tabella di lookup:
+; (carattere-stringa carattere-alfabeto)
+(setq link (map list (map last table) alfa))
+; creazione della stringa di codifica
+; (sostituisce ogni carattere della stringa
+;  con il relativo carattere dell'alfabeto)
+(setq encode "")
+(dolist (ch lst) (extend encode (lookup ch link)))
+;-> "dkjlgemlgdhijkmlfmjlhimimblhijkmefmalcgk"
+
+; DECODIFICA
+; ; creazione tabella di lookup:
+; (carattere-alfabeto carattere-stringa)
+(setq knil (map (fn(x) (list (x 1) (x 0))) link))
+; creazione della stringa di codifica
+; (sostituisce ogni carattere della stringa codificata 'encode'
+;  con il relativo carattere dell'alfabeto)
+(setq decode "")
+(dolist (ch (explode encode))
+ (extend decode (lookup ch knil)))
+;-> "domani andremo al mare e faremo il bagno"
+
+Questo metodo è facilmente decifrabile utilizzando l'analisi delle frequenze.
+
+
+-------------------------------
+Forward and backward difference
+-------------------------------
+
+Forward difference
+------------------
+
+delta_A(n) = A(n+1) - A(n)
+delta(k)_A(n) = delta(k-1)_A(n+1) - delta(k-1)_A(n)
+
+(define (forward-diff lst)
+    (until (or (apply = lst) (= (length lst) 1))
+      (println lst)
+      (setq lst (map - (rest lst) (chop lst))))
+    lst)
+
+(forward-diff (map (fn(x) (* x x)) (sequence 1 10)))
+;-> (1 4 9 16 25 36 49 64 81 100)
+;-> (3 5 7 9 11 13 15 17 19)
+;-> (2 2 2 2 2 2 2 2)
+
+(forward-diff '(10 18 -12 4 8 -3 -5 67 9 14))
+;-> (10 18 -12 4 8 -3 -5 67 9 14)
+;-> (8 -30 16 4 -11 -2 72 -58 5)
+;-> (-38 46 -12 -15 9 74 -130 63)
+;-> (84 -58 -3 24 65 -204 193)
+;-> (-142 55 27 41 -269 397)
+;-> (197 -28 14 -310 666)
+;-> (-225 42 -324 976)
+;-> (267 -366 1300)
+;-> (-633 1666)
+;-> (2299)
+
+Backward difference
+-------------------
+
+delta_A(n) = A(n) - A(n+1)
+delta(k)_A(n) = delta(k-1)_A(n) - delta(k-1)_A(n+1)
+
+(define (backward-diff lst)
+    (until (or (apply = lst) (= (length lst) 1))
+      (println lst)
+      (setq lst (map - (chop lst) (rest lst))))
+    lst)
+
+(backward-diff (map (fn(x) (* x x)) (sequence 1 10)))
+;-> (1 4 9 16 25 36 49 64 81 100)
+;-> (-3 -5 -7 -9 -11 -13 -15 -17 -19)
+;-> (2 2 2 2 2 2 2 2)
+(backward-diff '(10 18 -12 4 8 -3 -5 67 9 14))
+;-> (10 18 -12 4 8 -3 -5 67 9 14)
+;-> (-8 30 -16 -4 11 2 -72 58 -5)
+;-> (-38 46 -12 -15 9 74 -130 63)
+;-> (-84 58 3 -24 -65 204 -193)
+;-> (-142 55 27 41 -269 397)
+;-> (-197 28 -14 310 -666)
+;-> (-225 42 -324 976)
+;-> (-267 366 -1300)
+;-> (-633 1666)
+;-> (-2299)
+
+
+------------------
+Selezione booleana
+------------------
+
+Abbiamo due listedi lunghezza uguale.
+La prima lista è formata da elementi qualsiasi.
+L'altra lista è composta solo da valori 1 e 0.
+Dobbiamo selezionare dalla prima lista tutti gli elementi in cui il relativo indice vale 1 nell'altra lista.
+In altre parole la seconda lista funge da 'maschera' per selezionare gli elementi della prima lista.
+Esempio:
+  L1 = (1 8 5 6 2 5 4)
+  L2 = (0 1 0 1 1 1 0)
+  output = (8 6 2 5)
+
+(define (select-mask lst1 lst2)
+  (select lst1 (index (fn(x) (= x 1)) lst2)))
+
+(select-mask '(1 8 5 6 2 5 4) '(0 1 0 1 1 1 0))
+;-> (8 6 2 5)
+
+
+------------------------------
+Sequenze Take/Skip e Skip/Take
+------------------------------
+
+Costruire le seguenti due sequenze:
+
+1) Take/Skip
+------------
+  Partire da 1,
+  tenere 1,
+  saltare i successivi 2, tenere i successivi 2,
+  saltare i successivi 3, tenere i successivi 3,
+  ... e così via.
+
+Sequenza OEIS A064801:
+Take 1, skip 2, take 2, skip 3, take 3, etc.
+  1, 4, 5, 9, 10, 11, 16, 17, 18, 19, 25, 26, 27, 28, 29, 36, 37, 38, 39, 40,
+  41, 49, 50, 51, 52, 53, 54, 55, 64, 65, 66, 67, 68, 69, 70, 71, 81, 82, 83,
+  84, 85, 86, 87, 88, 89, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+  121, 122, 123, 124, 125, 126, 127, 128, ...
+
+(define (ts limite)
+  (setq out '(1))
+  (setq step 2)
+  (setq num 1)
+  (while (< step (+ limite 1))
+    ; skip step numeri
+    (++ num step)
+    ; take step numeri
+    (extend out (sequence (+ num 1) (++ num step)))
+    ;(++ num step)
+    (++ step))
+  out)
+
+(ts 11)
+;-> (1 4 5 9 10 11 16 17 18 19 25 26 27 28 29 36 37 38 39 40
+;->  41 49 50 51 52 53 54 55 64 65 66 67 68 69 70 71 81 82 83
+;->  84 85 86 87 88 89 100 101 102 103 104 105 106 107 108 109
+;->  121 122 123 124 125 126 127 128 129 130 131)
+
+2) Skip/Take
+------------
+  Partire da 1,
+  saltare 1,
+  tenere i successivi 2, saltare i successivi 2,
+  tenere i successivi 3, saltare i successivi 3,
+  ... e così via.
+
+Sequenza OEIS A004202:
+Skip 1, take 1, skip 2, take 2, skip 3, take 3, etc.
+  2, 5, 6, 10, 11, 12, 17, 18, 19, 20, 26, 27, 28, 29, 30, 37, 38, 39, 40, 41,
+  42, 50, 51, 52, 53, 54, 55, 56, 65, 66, 67, 68, 69, 70, 71, 72, 82, 83, 84,
+  85, 86, 87, 88, 89, 90, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+  122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, ...
+
+(define (st limite)
+  (setq out '(2))
+  (setq step 2)
+  (setq num 2)
+  (while (< step (+ limite 1))
+    ; skip step numeri
+    (++ num step)
+    ; take step numeri
+    (extend out (sequence (+ num 1) (++ num step)))
+    ;(++ num step)
+    (++ step))
+  out)
+
+(st 11)
+;-> (2 5 6 10 11 12 17 18 19 20 26 27 28 29 30 37 38 39 40 41
+;->  42 50 51 52 53 54 55 56 65 66 67 68 69 70 71 72 82 83 84
+;->  85 86 87 88 89 90 101 102 103 104 105 106 107 108 109 110
+;->  122 123 124 125 126 127 128 129 130 131 132)
+
+
+-----------------------------------
+Numero di primi minori o uguali a N
+-----------------------------------
+
+Sequenza OEIS A000720:
+pi(n), the number of primes <= n. Sometimes called PrimePi(n) to distinguish it from the number 3.14159...
+  0, 1, 2, 2, 3, 3, 4, 4, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 8, 9, 9, 9,
+  9, 9, 9, 10, 10, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 14, 14,
+  14, 14, 15, 15, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 17, 17, 18, 18,
+  18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 21, 21, 21, 21, 21, 21, ...
+
+
+Metodo 1
+--------
+Calcoliamo tutti i primi fino a N
+Ciclo per ogni primo
+  Inseriamo in output il valore del numero di primi fino a (p - 1)
+  Aggiorniamo il numero-di primi
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (seq N)
+  (local (out primi prev-primo num-primi)
+    (setq out '())
+    (setq primi (primes-to N))
+    (setq prev-primo 1)
+    (setq num-primi 0)
+    (dolist (p primi)
+      ;(println prev-primo { } p { } num-primi)
+      (for (k prev-primo (- p 1))
+        (push num-primi out -1))
+      (++ num-primi)
+      (setq prev-primo p))
+    out))
+
+Proviamo:
+
+(seq 80)
+;-> (0 1 2 2 3 3 4 4 4 4 5 5 6 6 6 6 7 7 8 8 8 8 9 9 9
+;->  9 9 9 10 10 11 11 11 11 11 11 12 12 12 12 13 13 14 14
+;->  14 14 15 15 15 15 15 15 16 16 16 16 16 16 17 17 18 18
+;->  18 18 18 18 19 19 19 19 20 20 21 21 21 21 21 21)
+
+Metodo 2
+--------
+Il fattoriale di n è divisibile per tutti gli interi da 1 a n (in particolare, per i numeri primi p <= n) e per nessun altro numero primo q > n, dato che non può essere espresso come prodotto di numeri più piccoli.
+Quindi, la scomposizione in fattori primi di n! contiene tutti i primi minori p uguali a n.
+Poi bisogna prendere solo i primi univoci della scomposizione.
+
+In newLISP possiamo arrivare fino a N=20, infatti:
+  (fact-i 21) > Int64 (2^64 - 1)
+e 'factor' non supporta i big integer.
+
+(define (fact-i num)
+"Calculate the factorial of an integer number"
+  (if (zero? num)
+      1
+      (let (out 1L)
+        (for (x 1L num)
+          (setq out (* out x))))))
+
+(define (primi N)
+  (if (= N 1) 0
+    (length (unique (factor (fact-i N))))))
+
+(map primi (sequence 1 20))
+;-> (0 1 2 2 3 3 4 4 4 4 5 5 6 6 6 6 7 7 8 8)
+
+
+------------------------
+Memoria dei numeri primi
+------------------------
+
+La memoria di un numero primo è: il numero di primi distinti (precedenti) contenuti come sottostringhe in prime(n).
+
+Sequenza OEIS A079066:
+"Memory" of prime(n): the number of distinct (previous) primes contained as substrings in prime(n).
+  0, 0, 0, 0, 0, 1, 1, 0, 2, 1, 1, 2, 0, 1, 1, 2, 1, 0, 1, 1, 2, 1, 1, 0, 1,
+  0, 1, 1, 0, 3, 2, 3, 4, 2, 0, 1, 2, 1, 2, 4, 3, 0, 1, 2, 3, 1, 2, 3, 2, 2,
+  3, 3, 2, 2, 3, 2, 1, 3, 2, 1, 3, 3, 2, 3, 3, 4, 2, 3, 3, 1, 3, 3, 3, 4, 4,
+  2, 2, 3, 0, 0, 2, 1, 3, 2, 2, 2, 0, 2, 1, 1, 2, 3, 1, 0, 0, 2, 1, 2, 4, 2,
+  3, 2, 2, 1, 3, ...
+(slice primi 0 30)
+
+(define (primes-to num)
+"Generate all prime numbers less than or equal to a given number"
+  (cond ((= num 1) '())
+        ((= num 2) '(2))
+        (true
+          (let ((lst '(2)) (arr (array (+ num 1))))
+            (for (x 3 num 2)
+              (when (not (arr x))
+                (push x lst -1)
+                (for (y (* x x) num (* 2 x) (> y num))
+                  (setf (arr y) true)))) lst))))
+
+(define (slice-all obj)
+"Generate all the slice of a list or a string"
+  (let ( (out '()) (len (length obj)) )
+    (for (i 0 (- len 1))
+      (for (j 1 (- len i))
+        (push (slice obj i j) out -1)))
+    out))
+
+(define (prime? num)
+"Check if a number is prime"
+   (if (< num 2) nil
+       (= 1 (length (factor num)))))
+
+(define (memory limite)
+  (local (out primi nums conta)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (dolist (p primi)
+      ; crea una lista con tutti i numeri unici delle sottostringhe di p
+      (setq nums (unique (map (fn(x) (int x 0 10)) (slice-all (string p)))))
+      (setq conta -1) ; p non viene contato come primo
+      (dolist (k nums)
+        (if (prime? k) (++ conta)))
+      (push conta out -1))
+    out))
+
+(memory 1e3)
+;-> (0 0 0 0 0 1 1 0 2 1 1 2 0 1 1 2 1 0 1 1 2 1 1 0 1
+;->  0 1 1 0 3 2 3 4 2 0 1 2 1 2 4 3 0 1 2 3 1 2 3 2 2
+;->  3 3 2 2 3 2 1 3 2 1 3 3 2 3 3 4 2 3 3 1 3 3 3 4 4
+;->  2 2 3 0 0 2 1 3 2 2 2 0 2 1 1 2 3 1 0 0 2 1 2 4 2
+;->  3 2 2 1 3 2 2 3 2 0 1 3 3 2 2 1 2 2 3 2 1 4 2 2 0
+;->  1 1 3 2 3 3 3 2 2 2 1 3 1 3 0 1 1 3 2 2 2 3 2 2 1
+;->  1 0 2 1 1 1 1 2 3 1 2 3 2 3 2 2 0 2)
+
+Adesso calcoliamo la sequenza dei numeri primi più piccoli che hanno memoria n.
+Esempio:
+113 è il più piccolo numero primo con memoria = 3.
+I numeri primi più piccoli 3, 11 e 13 sono sottostringhe di 113.
+Pertanto, a(3) = 113.
+
+Sequenza OEIS A079397:
+Smallest prime with memory = n.
+  2, 13, 23, 113, 137, 1237, 1733, 1373, 12373, 11317, 23719, 111317,
+  113171, 211373, 1131379, 1113173, 1317971, 2313797, 11131733, 11373379,
+  23931379, 113193797, 52313797, 129733313, 113733797, 523137971, 1113179719,
+  1317971939, ...
+
+(define (trim-trailing value lst)
+"Removes all final occurrences of an element in a list"
+  (let (rev (reverse lst))
+    (reverse (slice rev (find value rev !=)))))
+
+(define (memory-first limite)
+  (local (out primi mem nums conta)
+    (setq out '())
+    (setq primi (primes-to limite))
+    (setq mem (array 100 '(0)))
+    (dolist (p primi)
+      ; crea una lista con tutti i numeri unici delle sottostringhe di p
+      (setq nums (unique (map (fn(x) (int x 0 10)) (slice-all (string p)))))
+      (setq conta -1) ; p non viene contato come primo
+      (dolist (k nums)
+        (if (prime? k) (++ conta)))
+      (if (zero? (mem conta)) (setf (mem conta) p)))
+    (trim-trailing 0 (array-list mem))))
+
+(time (println (memory-first 1e7)))
+;-> (2 13 23 113 137 1237 1733 1373 12373 11317 23719 111317
+;->  113171 211373 1131379 1113173 1317971 2313797)
+;-> 22111.132
+
+(time (println (memory-first 1e8)))
+;-> (2 13 23 113 137 1237 1733 1373 12373 11317 23719 111317
+;->  113171 211373 1131379 1113173 1317971 2313797 11131733 11373379
+;->  23931379 0 52313797)
+;-> 341408.188
+
 ============================================================================
 
