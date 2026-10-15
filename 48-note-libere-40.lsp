@@ -5622,5 +5622,72 @@ Smallest prime with memory = n.
 ;->  23931379 0 52313797)
 ;-> 341408.188
 
+
+-------------
+Moneta spessa
+-------------
+
+Quanto deve essere spessa una moneta per avere le stesse probabilità di Testa, Croce o Bordo (moneta in verticale) quando viene lanciata?
+
+Murray e Teare, modellando urto e attrito, trovano che per una moneta da 5 centesimi di dollaro americano (rapporto spessore/diametro ~= 0.1) la probabilità del bordo è circa 1/6000.
+
+Se si pensa alla moneta come a un cilindro e si chiede quale frazione della superficie di una sfera circoscritta sia "coperta" dalle direzioni che portano a ciascuna faccia, le tre probabilità sono uguali quando lo spessore vale
+
+  h = d/(sqrt(2) ~= 0.707·d
+
+dove d è il diametro. 
+Il ragionamento: la sfera circoscritta ha raggio R = sqrt(r^2 + h^2/4).
+La fascia equatoriale che corrisponde al bordo ha un'estensione angolare che dipende da h/d.
+Imponendo che occupi 1/3 dell'area totale (cioè altezza della fascia = 2R/3) si ottiene la relazione sopra.
+
+Questa è un'approssimazione, perchè una moneta reale non ha urti perfettamente anelastici né rotazione isotropa, quindi la soglia cambia.
+Infatti con il rimbalzo e la dissipazione di energia reali, il bordo diventa meno probabile del modello puro, quindi serve una moneta ancora un pò più spessa per arrivare a 1/3.
+
+
+-----------------
+Bersaglio colpito
+-----------------
+
+Ci sono due tiratori: A e B
+Il tiratore A colpisce il bersaglio il 75% delle volte.
+Il tiratore B colpisce il bersaglio il 25% delle volte.
+Entrambi sparano simultaneamente al bersaglio.
+Un proiettile va a segno.
+Qual è la probabilità che provenga da A?
+
+Soluzione
+---------
+Si potrebbe pensare che, poiché A è un tiratore tre volte più abile di B, vi sia una probabilità tre volte maggiore che sia stato lui a colpire il bersaglio (con una probabilità del 75%).
+Tuttavia, qui entrano in gioco due eventi: colpire e mancare il bersaglio.
+La probabilità che A colpisca e B manchi il bersaglio vale:
+  P(AB) = 3/4 * 3/4 = 9/16
+La probabilità che B colpisca e A manchi il bersaglio vale:
+  P(BA) = 1/4 * 1/4 = 1/16.
+Quindi la probabilità che il proiettile andato a segno sia quello di A vale:
+  P(A) = 9 / (9+1) = 0.9 = 90%
+Quindi la probabilità che il proiettile andato a segno sia quello di B vale:  
+  P(B) = 1 / (9+1) = 0.1 = 10%
+
+Quando entrambi colpiscono il bersaglio non conta come prova valida.
+
+; Simulazione del processo
+(define (bullet iter)
+  (local (A B k sparoA sparoB)
+    (setq A 0)
+    (setq B 0)
+    (setq k 0)
+    (while (< k iter)
+      (setq sparoA (if (> 0.75 (random)) 1 0)) ; A bullet
+      (setq sparoB (if (> 0.25 (random)) 1 0)) ; B bullet
+      (cond ((and (= sparoA 1) (= sparoB 1)) nil) ; Two bullet hits (nil)
+            ((and (= sparoA 1) (= sparoB 0)) (++ A) (++ k))   ; A hits
+            ((and (= sparoA 0) (= sparoB 1)) (++ B) (++ k)))) ; B hits
+    (list (div A iter) (div B iter))))
+
+(seed (time-of-day) true)
+(time (println (bullet 1e7)))
+;-> (0.9000083 0.0999917)
+;-> 5328.831
+
 ============================================================================
 

@@ -3826,6 +3826,8 @@ NOTE LIBERE 40
   Sequenze Take/Skip e Skip/Take
   Numero di primi minori o uguali a N
   Memoria dei numeri primi
+  Moneta spessa
+  Bersaglio colpito
 
 PROBLEMI SUI DADI
 =================
