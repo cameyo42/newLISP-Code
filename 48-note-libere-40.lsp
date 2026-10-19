@@ -5629,16 +5629,16 @@ Moneta spessa
 
 Quanto deve essere spessa una moneta per avere le stesse probabilità di Testa, Croce o Bordo (moneta in verticale) quando viene lanciata?
 
-Murray e Teare, modellando urto e attrito, trovano che per una moneta da 5 centesimi di dollaro americano (rapporto spessore/diametro ~= 0.1) la probabilità del bordo è circa 1/6000.
+Murray e Teare, modellando urto e attrito, trovano che per una moneta da 5 centesimi di dollaro americano (rapporto spessore/diametro ~= 0.1) la probabilità del Bordo è circa 1/6000.
 
 Se si pensa alla moneta come a un cilindro e si chiede quale frazione della superficie di una sfera circoscritta sia "coperta" dalle direzioni che portano a ciascuna faccia, le tre probabilità sono uguali quando lo spessore vale
 
-  h = d/(sqrt(2) ~= 0.707·d
+  h = d/(sqrt(2) ~= 0.707*d
 
 dove d è il diametro. 
 Il ragionamento: la sfera circoscritta ha raggio R = sqrt(r^2 + h^2/4).
 La fascia equatoriale che corrisponde al bordo ha un'estensione angolare che dipende da h/d.
-Imponendo che occupi 1/3 dell'area totale (cioè altezza della fascia = 2R/3) si ottiene la relazione sopra.
+Imponendo che occupi 1/3 dell'area totale (cioè altezza della fascia = 2*R/3) si ottiene la relazione sopra.
 
 Questa è un'approssimazione, perchè una moneta reale non ha urti perfettamente anelastici né rotazione isotropa, quindi la soglia cambia.
 Infatti con il rimbalzo e la dissipazione di energia reali, il bordo diventa meno probabile del modello puro, quindi serve una moneta ancora un pò più spessa per arrivare a 1/3.
@@ -5688,6 +5688,102 @@ Quando entrambi colpiscono il bersaglio non conta come prova valida.
 (time (println (bullet 1e7)))
 ;-> (0.9000083 0.0999917)
 ;-> 5328.831
+
+
+---------------------------------------------
+Divisioni intere di numeri con tutte le cifre
+---------------------------------------------
+
+Trovare tutte le coppie di numeri N,M che hanno le seguenti proprietà:
+1) N e M hanno 5 cifre ognuno
+2) l'unione delle cifre di N e M danno le 10 cifre (0..9)
+(in altre parole: le cifre di N sono tutte diverse, le cifre di M sono tutte diverse, N e M non hanno cifre in comune)
+3) N / M = numero intero che vale 2 o 3 o 4 o 5 o 6 o 7 o 8 o 9
+
+(define (perm lst)
+"Generate all permutations without repeating from a list of items"
+  (local (i indici out)
+    (setq indici (dup 0 (length lst)))
+    (setq i 0)
+    ; aggiungiamo la lista iniziale alla soluzione
+    (setq out (list lst))
+    (while (< i (length lst))
+      (if (< (indici i) i)
+          (begin
+            (if (zero? (% i 2))
+              (swap (lst 0) (lst i))
+              (swap (lst (indici i)) (lst i)))
+            (push lst out -1)
+            (++ (indici i))
+            (setq i 0))
+          (begin
+            (setf (indici i) 0)
+            (++ i))))
+    out))
+
+(define (findNM)
+  (local (out vec cifre permute N M idx)
+    (setq out '())
+    ; vettore di liste
+    (setq vec (array 10 '(())))
+    ; lista delle cifre
+    (setq cifre '(0 1 2 3 4 5 6 7 8 9))
+    ; calcola tutte le permutazioni delle 10 cifre
+    (setq permute (perm (sequence 0 9)))
+    ; ciclo per ogni permutazione
+    (dolist (el permute)
+      ; primo numero
+      (setq N (int (join (map string (slice el 0 5))) 0 10))
+      ; secondo numero
+      (setq M (int (join (map string (slice el 5))) 0 10))
+      ; controllo delle cifre (5 per ogni numero)
+      (when (and (= (length N) 5) (= (length M) 5))
+        ; Ciclo che controlla se N/M è un intero (2..9)
+        (for (num 9 2 -1)
+          (setq idx (find (div N M) cifre))
+          ; se la divisione N/M produce un intero,
+          ; allora questo intero si trova nella lista delle cifre
+          ; quindi aggiungiamo (N M) alla lista contenuta in 'vec[intero]'
+          (if idx (setf (vec idx) (push (list N M) (vec idx))))
+        )))
+    ; crea la lista di output:
+    ; (num1 (N1 M1) (N2 M2) ...) (num2 (N1 M1) (N2 M2) ...) ...
+    (for (num 9 2 -1)
+      (if (null? (vec num))
+        ; il 'num' corrente non ha alcuna divisione valida
+        (push (list num '()) out -1)
+        ; else
+        (push (list num (unique (sort (vec num)))) out -1)))
+    out))
+
+(findNM)
+;-> ((9 ((95742 10638) (95823 10647) (97524 10836)))
+;->  (8 ((83672 10459) (83752 10469) (84296 10537) (84632 10579) (84736 10592)
+;->      (85392 10674) (85432 10679) (85936 10742) (86352 10794) (87456 10932)
+;->      (87536 10942) (87624 10953) (87632 10954) (96584 12073) (98456 12307)
+;->      (98760 12345)))
+;->  (7 ((98532 14076)))
+;->  (6 ())
+;->  (5 ((67290 13458) (67920 13584) (69270 13854) (72690 14538) (72930 14586)
+;->      (73290 14658) (76920 15384) (79230 15846) (79320 15864) (92670 18534)
+;->      (92730 18546) (93270 18654)))
+;->  (4 ((60948 15237) (68940 17235) (69408 17352) (81576 20394) (81756 20439)
+;->      (86940 21735) (94068 23517) (94860 23715)))
+;->  (3 ((50382 16794) (53082 17694) (61749 20583) (69174 23058) (91746 30582)
+;->      (96174 32058)))
+;->  (2 ((26970 13485) (27096 13548) (27690 13845) (29076 14538) (29370 14685)
+;->      (29670 14835) (29706 14853) (29730 14865) (30972 15486) (32970 16485)
+;->      (37092 18546) (37290 18645) (41358 20679) (41538 20769) (41586 20793)
+;->      (46158 23079) (53418 26709) (53814 26907) (54138 27069) (54186 27093)
+;->      (54618 27309) (58134 29067) (58146 29073) (58614 29307) (61458 30729)
+;->      (61584 30792) (61854 30927) (62970 31485) (64158 32079) (65418 32709)
+;->      (65814 32907) (69702 34851) (70296 35148) (70962 35481) (76290 38145)
+;->      (76902 38451) (90276 45138) (90372 45186) (90762 45381) (92370 46185)
+;->      (93702 46851) (96270 48135) (96702 48351) (97026 48513) (97032 48516)
+;->      (97062 48531) (97230 48615) (97302 48651))))
+ 
+(time (findNM))
+;-> 21736.829
 
 ============================================================================
 

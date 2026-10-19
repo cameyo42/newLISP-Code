@@ -3828,6 +3828,7 @@ NOTE LIBERE 40
   Memoria dei numeri primi
   Moneta spessa
   Bersaglio colpito
+  Divisioni intere di numeri con tutte le cifre
 
 PROBLEMI SUI DADI
 =================
